@@ -115,7 +115,7 @@ PageType {
 
                 text: qsTr("I have the data to connect")
 
-                onClicked: {
+                clickedFunc: function() {
                     connectionTypeSelection.visible = true
                 }
             }
@@ -135,7 +135,9 @@ PageType {
 
                 text: qsTr("I have nothing")
 
-                onClicked: Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
+                clickedFunc: function() {
+                    Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
+                }
             }
         }
 

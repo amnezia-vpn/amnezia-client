@@ -7,6 +7,8 @@ import "TextTypes"
 Item {
     id: root
 
+    signal sig_next()
+
     property string headerText
     property string headerTextDisabledColor: "#494B50"
     property string headerTextColor: "#878b91"
@@ -142,7 +144,7 @@ Item {
                     Layout.preferredWidth: content.implicitHeight
                     squareLeftSide: true
 
-                    onClicked: {
+                    clickedFunc: function() {
                         if (root.clickedFunc && typeof root.clickedFunc === "function") {
                             root.clickedFunc()
                         }
@@ -185,5 +187,17 @@ Item {
 
     function getBackgroundBorderColor(noneFocusedColor) {
         return textField.focus ? root.borderFocusedColor : noneFocusedColor
+    }
+
+    Keys.onEnterPressed: {
+         root.sig_next()
+    }
+
+    Keys.onReturnPressed: {
+         root.sig_next()
+    }
+
+    function setActiveFocus() {
+        textField.forceActiveFocus()
     }
 }

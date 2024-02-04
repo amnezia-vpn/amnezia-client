@@ -71,7 +71,7 @@ DrawerType {
                     text: qsTr("Share")
                     imageSource: "qrc:/images/controls/share-2.svg"
 
-                    onClicked: {
+                    clickedFunc: function() {
                         var fileName = ""
                         if (GC.isMobile()) {
                             fileName = configFileName + configExtension
@@ -104,7 +104,7 @@ DrawerType {
                     text: qsTr("Copy")
                     imageSource: "qrc:/images/controls/copy.svg"
 
-                    onClicked: {
+                    clickedFunc: function() {
                         configText.selectAll()
                         configText.copy()
                         configText.select(0, 0)
@@ -128,7 +128,7 @@ DrawerType {
                     text: qsTr("Copy config string")
                     imageSource: "qrc:/images/controls/copy.svg"
 
-                    onClicked: {
+                    clickedFunc: function() {
                         nativeConfigString.selectAll()
                         nativeConfigString.copy()
                         nativeConfigString.select(0, 0)
@@ -149,7 +149,7 @@ DrawerType {
 
                     text: qsTr("Show connection settings")
 
-                    onClicked: {
+                    clickedFunc: function() {
                         configContentDrawer.visible = true
                     }
                 }

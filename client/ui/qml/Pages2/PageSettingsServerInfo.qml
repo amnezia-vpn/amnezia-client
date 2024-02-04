@@ -103,14 +103,20 @@ PageType {
                             textFieldText: name
                             textField.maximumLength: 30
                             checkEmptyText: true
+
+                            onSig_next: {
+                                saveButton.forceActiveFocus()
+                            }
                         }
 
                         BasicButtonType {
+                            id: saveButton
+
                             Layout.fillWidth: true
 
                             text: qsTr("Save")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 if (serverName.textFieldText === "") {
                                     return
                                 }

@@ -56,11 +56,17 @@ PageType {
                     textField.text = ""
                     textField.paste()
                 }
+
+                onSig_next: {
+                    continueButton.forceActiveFocus()
+                }
             }
         }
     }
 
     BasicButtonType {
+        id: continueButton
+
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -70,7 +76,7 @@ PageType {
 
         text: qsTr("Continue")
 
-        onClicked: function() {
+        clickedFunc: function() {
             ImportController.extractConfigFromCode(textKey.textFieldText)
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }

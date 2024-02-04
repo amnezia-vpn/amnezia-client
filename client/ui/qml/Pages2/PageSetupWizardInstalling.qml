@@ -165,7 +165,7 @@ PageType {
 
                             text: qsTr("Cancel installation")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 InstallController.cancelInstallation()
                                 PageController.showBusyIndicator(true)
                             }

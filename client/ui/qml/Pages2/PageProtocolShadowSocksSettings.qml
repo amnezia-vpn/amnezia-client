@@ -90,6 +90,11 @@ PageType {
                                     port = textFieldText
                                 }
                             }
+
+                            onSig_next: {
+                                saveRestartButton.forceActiveFocus()
+                            }
+
                         }
 
                         DropDownType {
@@ -132,13 +137,15 @@ PageType {
                         }
 
                         BasicButtonType {
+                            id: saveRestartButton
+
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save and Restart Amnezia")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(ShadowSocksConfigModel.getConfig())

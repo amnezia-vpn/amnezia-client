@@ -264,6 +264,10 @@ PageType {
                 textField.maximumLength: 20
 
                 checkEmptyText: true
+
+                onSig_next: {
+                    shareButton.forceActiveFocus()
+                }
             }
 
             DropDownType {
@@ -460,6 +464,8 @@ PageType {
             }
 
             BasicButtonType {
+                id: shareButton
+
                 Layout.fillWidth: true
                 Layout.topMargin: 40
 
@@ -469,7 +475,7 @@ PageType {
                 text: qsTr("Share")
                 imageSource: "qrc:/images/controls/share-2.svg"
 
-                onClicked: {
+                clickedFunc: function(){
                     if (clientNameTextField.textFieldText !== "") {
                         ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
                     }
@@ -597,7 +603,7 @@ PageType {
 
                                     text: qsTr("Rename")
 
-                                    onClicked: function() {
+                                    clickedFunc: function() {
                                         clientNameEditDrawer.open()
                                     }
 
@@ -628,14 +634,20 @@ PageType {
                                                 textFieldText: clientName
                                                 textField.maximumLength: 20
                                                 checkEmptyText: true
+
+                                                onSig_next: {
+                                                    saveButton.forceActiveFocus()
+                                                }
                                             }
 
                                             BasicButtonType {
+                                                id: saveButton
+
                                                 Layout.fillWidth: true
 
                                                 text: qsTr("Save")
 
-                                                onClicked: {
+                                                clickedFunc: function() {
                                                     if (clientNameEditor.textFieldText === "") {
                                                         return
                                                     }
@@ -667,7 +679,7 @@ PageType {
 
                                     text: qsTr("Revoke")
 
-                                    onClicked: function() {
+                                    clickedFunc: function() {
                                         questionDrawer.headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
                                         questionDrawer.descriptionText = qsTr("The user will no longer be able to connect to your server.")
                                         questionDrawer.yesButtonText = qsTr("Continue")
@@ -701,5 +713,5 @@ PageType {
             forceActiveFocus()
             mouse.accepted = false
         }
-    }
+    } 
 }

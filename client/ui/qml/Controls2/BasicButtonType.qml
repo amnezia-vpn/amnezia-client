@@ -16,11 +16,15 @@ Button {
     property string textColor: "#0E0E11"
 
     property string borderColor: "#D7D8DB"
+    property string borderFocusedColor: "#45A6FF"
     property int borderWidth: 0
+    property int borderFocusedWidth: 1
 
     property string imageSource
 
     property bool squareLeftSide: false
+
+    property var clickedFunc
 
     implicitHeight: 56
 
@@ -40,8 +44,8 @@ Button {
                 return disabledColor
             }
         }
-        border.color: borderColor
-        border.width: borderWidth
+        border.color: root.activeFocus ? root.borderFocusedColor : borderColor
+        border.width: root.activeFocus ? root.borderFocusedWidth : borderWidth
 
         Behavior on color {
             PropertyAnimation { duration: 200 }
@@ -85,6 +89,7 @@ Button {
 
         implicitWidth: content.implicitWidth
         implicitHeight: content.implicitHeight
+
         RowLayout {
             id: content
             anchors.centerIn: parent
@@ -112,6 +117,24 @@ Button {
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
             }
+        }
+    }
+
+    Keys.onEnterPressed: {
+        if (root.clickedFunc && typeof root.clickedFunc === "function") {
+            root.clickedFunc()
+        }
+    }
+
+    Keys.onReturnPressed: {
+        if (root.clickedFunc && typeof root.clickedFunc === "function") {
+            root.clickedFunc()
+        }
+    }
+
+    onClicked: {
+        if (root.clickedFunc && typeof root.clickedFunc === "function") {
+            root.clickedFunc()
         }
     }
 }

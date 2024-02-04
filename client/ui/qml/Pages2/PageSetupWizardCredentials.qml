@@ -57,6 +57,10 @@ PageType {
                 onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '');
                 }
+
+                onSig_next: {
+                    username.setActiveFocus()
+                }
             }
 
             TextFieldWithHeaderType {
@@ -65,6 +69,10 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Login to connect via SSH")
                 textFieldPlaceholderText: "root"
+
+                onSig_next: {
+                    secretData.setActiveFocus()
+                }
             }
 
             TextFieldWithHeaderType {
@@ -85,15 +93,21 @@ PageType {
                 onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '');
                 }
+
+                onSig_next: {
+                    continueButton.forceActiveFocus()
+                }
             }
 
             BasicButtonType {
+                id: continueButton
+
                 Layout.fillWidth: true
                 Layout.topMargin: 24
 
                 text: qsTr("Continue")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     forceActiveFocus()
                     if (!isCredentialsFilled()) {
                         return

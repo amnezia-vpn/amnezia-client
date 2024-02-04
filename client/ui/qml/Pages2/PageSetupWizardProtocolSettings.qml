@@ -92,7 +92,7 @@ PageType {
 
                             text: qsTr("More detailed")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 showDetailsDrawer.open()
                             }
                         }
@@ -165,7 +165,7 @@ PageType {
 
                                         text: qsTr("Close")
 
-                                        onClicked: function() {
+                                        clickedFunc: function()  {
                                             showDetailsDrawer.close()
                                         }
                                     }
@@ -197,6 +197,10 @@ PageType {
                             headerText: qsTr("Port")
                             textField.maximumLength: 5
                             textField.validator: IntValidator { bottom: 1; top: 65535 }
+
+                            onSig_next: {
+                                installButton.forceActiveFocus()
+                            }
                         }
 
                         Rectangle {
@@ -212,7 +216,7 @@ PageType {
 
                             text: qsTr("Install")
 
-                            onClicked: function() {
+                            clickedFunc: function() {
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.install(dockerContainer, port.textFieldText, transportProtoSelector.currentIndex)
                             }

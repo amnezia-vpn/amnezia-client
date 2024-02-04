@@ -81,7 +81,7 @@ PageType {
 
                 text: qsTr("Card on Patreon")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     Qt.openUrlExternally(qsTr("https://www.patreon.com/amneziavpn"))
                 }
             }
@@ -101,7 +101,9 @@ PageType {
 
                 text: qsTr("Show other methods on Github")
 
-                onClicked: Qt.openUrlExternally(qsTr("https://github.com/amnezia-vpn/amnezia-client#donate"))
+                clickedFunc: function() {
+                    Qt.openUrlExternally(qsTr("https://github.com/amnezia-vpn/amnezia-client#donate"))
+                }
             }
 
             ParagraphTextType {
@@ -191,7 +193,7 @@ PageType {
 
                 text: qsTr("Check for updates")
 
-                onClicked: {
+                clickedFunc: function() {
                     Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
                 }
             }

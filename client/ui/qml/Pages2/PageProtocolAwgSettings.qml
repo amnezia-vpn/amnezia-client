@@ -93,6 +93,10 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            onSig_next: {
+                                junkPacketCountTextField.setActiveFocus()
+                            }
                         }
 
                         TextFieldWithHeaderType {
@@ -116,6 +120,10 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            onSig_next: {
+                                junkPacketMinSizeTextField.setActiveFocus()
+                            }
                         }
 
                         TextFieldWithHeaderType {
@@ -134,6 +142,10 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            onSig_next: {
+                                junkPacketMaxSizeTextField.setActiveFocus()
+                            }
                         }
 
                         TextFieldWithHeaderType {
@@ -152,6 +164,10 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            onSig_next: {
+                                initPacketJunkSizeTextField.setActiveFocus()
+                            }
                         }
 
                         TextFieldWithHeaderType {
@@ -170,6 +186,10 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            onSig_next: {
+                                responsePacketJunkSizeTextField.setActiveFocus()
+                            }
                         }
 
                         TextFieldWithHeaderType {
@@ -188,6 +208,10 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            onSig_next: {
+                                initPacketMagicHeaderTextField.setActiveFocus()
+                            }
                         }
 
                         TextFieldWithHeaderType {
@@ -206,6 +230,10 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            onSig_next: {
+                                responsePacketMagicHeaderTextField.setActiveFocus()
+                            }
                         }
 
                         TextFieldWithHeaderType {
@@ -224,6 +252,10 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            onSig_next: {
+                                transportPacketMagicHeaderTextField.setActiveFocus()
+                            }
                         }
 
                         TextFieldWithHeaderType {
@@ -242,6 +274,10 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            onSig_next: {
+                                underloadPacketMagicHeaderTextField.setActiveFocus()
+                            }
                         }
 
                         TextFieldWithHeaderType {
@@ -260,6 +296,10 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            onSig_next: {
+                                saveRestartButton.forceActiveFocus()
+                            }
                         }
 
                         BasicButtonType {
@@ -274,7 +314,7 @@ PageType {
 
                             text: qsTr("Remove AmneziaWG")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 questionDrawer.headerText = qsTr("Remove AmneziaWG from server?")
                                 questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
                                 questionDrawer.yesButtonText = qsTr("Continue")
@@ -293,6 +333,8 @@ PageType {
                         }
 
                         BasicButtonType {
+                            id: saveRestartButton
+
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
@@ -310,7 +352,7 @@ PageType {
 
                             text: qsTr("Save and Restart Amnezia")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(AwgConfigModel.getConfig())

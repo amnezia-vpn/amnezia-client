@@ -68,6 +68,10 @@ PageType {
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
+
+                onSig_next: {
+                    secondaryDns.setActiveFocus()
+                }
             }
 
             TextFieldWithHeaderType {
@@ -79,6 +83,10 @@ PageType {
                 textFieldText: SettingsController.secondaryDns
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressRegExp()
+                }
+
+                onSig_next: {
+                    saveButton.forceActiveFocus()
                 }
             }
 
@@ -94,7 +102,7 @@ PageType {
 
                 text: qsTr("Restore default")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     questionDrawer.headerText = qsTr("Restore default DNS settings?")
                     questionDrawer.yesButtonText = qsTr("Continue")
                     questionDrawer.noButtonText = qsTr("Cancel")
@@ -115,11 +123,13 @@ PageType {
             }
 
             BasicButtonType {
+                id: saveButton
+
                 Layout.fillWidth: true
 
                 text: qsTr("Save")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     if (primaryDns.textFieldText !== SettingsController.primaryDns) {
                         SettingsController.primaryDns = primaryDns.textFieldText
                     }

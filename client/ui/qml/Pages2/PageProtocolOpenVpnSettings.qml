@@ -78,6 +78,8 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: vpnAddressSubnetTextField
+
                             Layout.fillWidth: true
                             Layout.topMargin: 32
 
@@ -88,6 +90,10 @@ PageType {
                                 if (textFieldText !== subnetAddress) {
                                     subnetAddress = textFieldText
                                 }
+                            }
+
+                            onSig_next: {
+                                portTextField.setActiveFocus()
                             }
                         }
 
@@ -119,6 +125,9 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: portTextField
+
+
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
@@ -133,6 +142,10 @@ PageType {
                                 if (textFieldText !== port) {
                                     port = textFieldText
                                 }
+                            }
+
+                            onSig_next: {
+                                saveRestartButton.forseActiveFocus()
                             }
                         }
 
@@ -363,7 +376,7 @@ PageType {
 
                             text: qsTr("Remove OpenVPN")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 questionDrawer.headerText = qsTr("Remove OpenVpn from server?")
                                 questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
                                 questionDrawer.yesButtonText = qsTr("Continue")
@@ -382,13 +395,15 @@ PageType {
                         }
 
                         BasicButtonType {
+                            id: saveRestartButton
+
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save and Restart Amnezia")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(OpenVpnConfigModel.getConfig())
