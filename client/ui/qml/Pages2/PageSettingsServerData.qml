@@ -172,7 +172,7 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Do you want to remove the server?")
+                    questionDrawer.headerText = qsTr("Do you want to remove the server from application?")
                     questionDrawer.descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
                     questionDrawer.yesButtonText = qsTr("Continue")
                     questionDrawer.noButtonText = qsTr("Cancel")
