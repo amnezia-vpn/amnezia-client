@@ -141,7 +141,7 @@ PageType {
 
                 clickedFunction: function() {
                     questionDrawer.headerText = qsTr("Do you want to reboot the server?")
-                    questionDrawer.descriptionText = qsTr("??????????????????????????????")
+                    questionDrawer.descriptionText = qsTr("The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?")
                     questionDrawer.yesButtonText = qsTr("Continue")
                     questionDrawer.noButtonText = qsTr("Cancel")
 
