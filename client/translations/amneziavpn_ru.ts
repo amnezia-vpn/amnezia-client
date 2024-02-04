@@ -425,7 +425,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="84"/>
-        <source>VPN Addresses Subnet</source>
+        <source>VPN Address Subnet</source>
         <translation>Подсеть для VPN</translation>
     </message>
     <message>
@@ -841,12 +841,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="94"/>
-        <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this url.</source>
+        <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this URL.</source>
         <translation>Используйте &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; для открытия этой ссылки.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="103"/>
-        <source>After installation it takes several minutes while your onion site will become available in the Tor Network.</source>
+        <source>After creating your onion site, it takes a few minutes for the Tor network to make it available for use.</source>
         <translation>Через несколько минут после установки ваш Onion сайт станет доступен в сети Tor.</translation>
     </message>
     <message>
@@ -921,7 +921,7 @@ Already installed containers were found on the server. All installed containers 
     <name>PageSettingsAbout</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
-        <source>Support the project with a donation</source>
+        <source>Support Amnezia</source>
         <translation>Поддержите проект пожертвованием</translation>
     </message>
     <message>
@@ -1196,7 +1196,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="86"/>
-        <source>If AmneziaDNS is not used or installed</source>
+        <source>When AmneziaDNS is not used or installed</source>
         <translation>Эти адреса будут использоваться, если не включен AmneziaDNS</translation>
     </message>
     <message>
@@ -1540,7 +1540,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="59"/>
-        <source>Addresses from the list should be accessed via VPN</source>
+        <source>Only the sites listed here will be accessed through the VPN</source>
         <translation>Только адреса из списка должны открываться через VPN</translation>
     </message>
     <message>
@@ -1575,13 +1575,13 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="254"/>
-        <source>Site or IP</source>
+        <source>website or IP</source>
         <translation>Сайт или IP</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="298"/>
-        <source>Import/Export Sites</source>
-        <translation>Импорт/экспорт Сайтов</translation>
+        <source>Import / Export Sites</source>
+        <translation>Импорт / Экспорт Сайтов</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="304"/>
@@ -2082,7 +2082,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="584"/>
         <source>Creation date: </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Дата создания:</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="598"/>
@@ -2710,12 +2710,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="101"/>
-        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but is recognised by analysis systems in some highly censored regions.</source>
+        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
         <translation>ShadowSocks - маскирует VPN-трафик под обычный веб-трафик, но распознается системами анализа в некоторых регионах с высоким уровнем цензуры.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="104"/>
-        <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probbing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
+        <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
         <translation>OpenVPN over Cloak - OpenVPN с маскировкой VPN под web-трафик и защитой от обнаружения active-probbing. Подходит для регионов с самым высоким уровнем цензуры.</translation>
     </message>
     <message>
@@ -2745,7 +2745,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="122"/>
-        <source>Creates a file vault on your server to securely store and transfer files.</source>
+        <source>Create a file vault on your server to securely store and transfer files.</source>
         <translation>Создайте на сервере файловое хранилище для безопасного хранения и передачи файлов.</translation>
     </message>
     <message>
