@@ -435,6 +435,15 @@ ErrorCode ServersModel::removeAllContainers()
     return errorCode;
 }
 
+ErrorCode ServersModel::rebootServer()
+{
+    ServerController serverController(m_settings);
+    auto credentials = m_settings->serverCredentials(m_currentlyProcessedServerIndex);
+
+    ErrorCode errorCode = serverController.rebootServer(credentials);
+    return errorCode;
+}
+
 ErrorCode ServersModel::removeContainer(const int containerIndex)
 {
     ServerController serverController(m_settings);
