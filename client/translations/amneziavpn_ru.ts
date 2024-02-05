@@ -27,7 +27,7 @@
 <context>
     <name>ApiController</name>
     <message>
-        <location filename="../ui/controllers/apiController.cpp" line="123"/>
+        <location filename="../ui/controllers/apiController.cpp" line="130"/>
         <source>Error when retrieving configuration from cloud server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -424,9 +424,13 @@ Already installed containers were found on the server. All installed containers 
         <translation>OpenVPN настройки</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="84"/>
         <source>VPN Addresses Subnet</source>
-        <translation>Подсеть для VPN</translation>
+        <translation type="vanished">Подсеть для VPN</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="84"/>
+        <source>VPN address subnet</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="98"/>
@@ -841,13 +845,21 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="94"/>
-        <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this url.</source>
-        <translation>Используйте &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; для открытия этой ссылки.</translation>
+        <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this URL.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="103"/>
+        <source>After creating your onion site, it takes a few minutes for the Tor network to make it available for use.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this url.</source>
+        <translation type="vanished">Используйте &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; для открытия этой ссылки.</translation>
+    </message>
+    <message>
         <source>After installation it takes several minutes while your onion site will become available in the Tor Network.</source>
-        <translation>Через несколько минут после установки ваш Onion сайт станет доступен в сети Tor.</translation>
+        <translation type="vanished">Через несколько минут после установки ваш Onion сайт станет доступен в сети Tor.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="112"/>
@@ -920,9 +932,13 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsAbout</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
         <source>Support the project with a donation</source>
-        <translation>Поддержите проект пожертвованием</translation>
+        <translation type="vanished">Поддержите проект пожертвованием</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
+        <source>Support Amnezia</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
@@ -1196,8 +1212,17 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="86"/>
+        <source>When AmneziaDNS is not used or installed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="120"/>
+        <source>Allows you to use the VPN only for certain Apps</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation>Эти адреса будут использоваться, если не включен AmneziaDNS</translation>
+        <translation type="vanished">Эти адреса будут использоваться, если не включен AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
@@ -1215,9 +1240,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>Раздельное VPN-туннелирование приложений</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="120"/>
         <source>Allows you to use the VPN only for certain applications</source>
-        <translation>Позволяет использовать VPN только для определённых приложений</translation>
+        <translation type="vanished">Позволяет использовать VPN только для определённых приложений</translation>
     </message>
 </context>
 <context>
@@ -1416,12 +1440,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="144"/>
-        <source>??????????????????????????????</source>
+        <source>The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="175"/>
-        <source>Do you want to remove the server?</source>
+        <source>Do you want to remove the server from application?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1539,9 +1563,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="59"/>
         <source>Addresses from the list should be accessed via VPN</source>
-        <translation>Только адреса из списка должны открываться через VPN</translation>
+        <translation type="vanished">Только адреса из списка должны открываться через VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="64"/>
@@ -1574,14 +1597,27 @@ Already installed containers were found on the server. All installed containers 
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="254"/>
         <source>Site or IP</source>
-        <translation>Сайт или IP</translation>
+        <translation type="vanished">Сайт или IP</translation>
+    </message>
+    <message>
+        <source>Import/Export Sites</source>
+        <translation type="vanished">Импорт/экспорт Сайтов</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="59"/>
+        <source>Only the sites listed here will be accessed through the VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="254"/>
+        <source>website or IP</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="298"/>
-        <source>Import/Export Sites</source>
-        <translation>Импорт/экспорт Сайтов</translation>
+        <source>Import / Export Sites</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="304"/>
@@ -1686,14 +1722,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>Server IP address [:port]</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="52"/>
         <source>255.255.255.255:88</source>
-        <translation>255.255.255.255:88</translation>
+        <translation type="vanished">255.255.255.255:88</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="76"/>
         <source>Password / SSH private key</source>
-        <translation>Password / SSH private key</translation>
+        <translation type="vanished">Password / SSH private key</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="94"/>
@@ -1719,6 +1753,16 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="44"/>
         <source>Configure your server</source>
         <translation>Настроить ваш сервер</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="52"/>
+        <source>255.255.255.255:22</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="76"/>
+        <source>Password or SSH private key</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="120"/>
@@ -2448,211 +2492,216 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../core/errorstrings.cpp" line="9"/>
+        <location filename="../core/errorstrings.cpp" line="11"/>
         <source>No error</source>
         <translation>No error</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="10"/>
+        <location filename="../core/errorstrings.cpp" line="12"/>
         <source>Unknown Error</source>
         <translation>Unknown Error</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="11"/>
+        <location filename="../core/errorstrings.cpp" line="13"/>
         <source>Function not implemented</source>
         <translation>Function not implemented</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="14"/>
+        <location filename="../core/errorstrings.cpp" line="16"/>
         <source>Server check failed</source>
         <translation>Server check failed</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="15"/>
+        <location filename="../core/errorstrings.cpp" line="17"/>
         <source>Server port already used. Check for another software</source>
         <translation>Server port already used. Check for another software</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="16"/>
+        <location filename="../core/errorstrings.cpp" line="18"/>
         <source>Server error: Docker container missing</source>
         <translation>Server error: Docker container missing</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="17"/>
+        <location filename="../core/errorstrings.cpp" line="19"/>
         <source>Server error: Docker failed</source>
         <translation>Server error: Docker failed</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="18"/>
+        <location filename="../core/errorstrings.cpp" line="20"/>
         <source>Installation canceled by user</source>
         <translation>Installation canceled by user</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="19"/>
+        <location filename="../core/errorstrings.cpp" line="21"/>
         <source>The user does not have permission to use sudo</source>
         <translation>The user does not have permission to use sudo</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="22"/>
+        <location filename="../core/errorstrings.cpp" line="24"/>
         <source>Ssh request was denied</source>
         <translation>Ssh request was denied</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="23"/>
+        <location filename="../core/errorstrings.cpp" line="25"/>
         <source>Ssh request was interrupted</source>
         <translation>Ssh request was interrupted</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="24"/>
+        <location filename="../core/errorstrings.cpp" line="26"/>
         <source>Ssh internal error</source>
         <translation>Ssh internal error</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="25"/>
+        <location filename="../core/errorstrings.cpp" line="27"/>
         <source>Invalid private key or invalid passphrase entered</source>
         <translation>Invalid private key or invalid passphrase entered</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="26"/>
+        <location filename="../core/errorstrings.cpp" line="28"/>
         <source>The selected private key format is not supported, use openssh ED25519 key types or PEM key types</source>
         <translation>The selected private key format is not supported, use openssh ED25519 key types or PEM key types</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="27"/>
+        <location filename="../core/errorstrings.cpp" line="29"/>
         <source>Timeout connecting to server</source>
         <translation>Timeout connecting to server</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="30"/>
+        <location filename="../core/errorstrings.cpp" line="32"/>
         <source>Sftp error: End-of-file encountered</source>
         <translation>Sftp error: End-of-file encountered</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="31"/>
+        <location filename="../core/errorstrings.cpp" line="33"/>
         <source>Sftp error: File does not exist</source>
         <translation>Sftp error: File does not exist</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="32"/>
+        <location filename="../core/errorstrings.cpp" line="34"/>
         <source>Sftp error: Permission denied</source>
         <translation>Sftp error: Permission denied</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="33"/>
+        <location filename="../core/errorstrings.cpp" line="35"/>
         <source>Sftp error: Generic failure</source>
         <translation>Sftp error: Generic failure</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="34"/>
+        <location filename="../core/errorstrings.cpp" line="36"/>
         <source>Sftp error: Garbage received from server</source>
         <translation>Sftp error: Garbage received from server</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="35"/>
+        <location filename="../core/errorstrings.cpp" line="37"/>
         <source>Sftp error: No connection has been set up</source>
         <translation>Sftp error: No connection has been set up</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="36"/>
+        <location filename="../core/errorstrings.cpp" line="38"/>
         <source>Sftp error: There was a connection, but we lost it</source>
         <translation>Sftp error: There was a connection, but we lost it</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="37"/>
+        <location filename="../core/errorstrings.cpp" line="39"/>
         <source>Sftp error: Operation not supported by libssh yet</source>
         <translation>Sftp error: Operation not supported by libssh yet</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="38"/>
+        <location filename="../core/errorstrings.cpp" line="40"/>
         <source>Sftp error: Invalid file handle</source>
         <translation>Sftp error: Invalid file handle</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="39"/>
+        <location filename="../core/errorstrings.cpp" line="41"/>
         <source>Sftp error: No such file or directory path exists</source>
         <translation>Sftp error: No such file or directory path exists</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="40"/>
+        <location filename="../core/errorstrings.cpp" line="42"/>
         <source>Sftp error: An attempt to create an already existing file or directory has been made</source>
         <translation>Sftp error: An attempt to create an already existing file or directory has been made</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="41"/>
+        <location filename="../core/errorstrings.cpp" line="43"/>
         <source>Sftp error: Write-protected filesystem</source>
         <translation>Sftp error: Write-protected filesystem</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="42"/>
+        <location filename="../core/errorstrings.cpp" line="44"/>
         <source>Sftp error: No media was in remote drive</source>
         <translation>Sftp error: No media was in remote drive</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="60"/>
+        <location filename="../core/errorstrings.cpp" line="62"/>
         <source>The config does not contain any containers and credentials for connecting to the server</source>
         <translation type="unfinished">Конфиг не содержит контейнеров и учетных данных для подключения к серверу</translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="72"/>
+        <source>ErrorCode: %1. </source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Failed to save config to disk</source>
         <translation type="vanished">Failed to save config to disk</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="45"/>
+        <location filename="../core/errorstrings.cpp" line="47"/>
         <source>OpenVPN config missing</source>
         <translation>OpenVPN config missing</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="46"/>
+        <location filename="../core/errorstrings.cpp" line="48"/>
         <source>OpenVPN management server error</source>
         <translation>OpenVPN management server error</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="49"/>
+        <location filename="../core/errorstrings.cpp" line="51"/>
         <source>OpenVPN executable missing</source>
         <translation>OpenVPN executable missing</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="50"/>
+        <location filename="../core/errorstrings.cpp" line="52"/>
         <source>ShadowSocks (ss-local) executable missing</source>
         <translation>ShadowSocks (ss-local) executable missing</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="51"/>
+        <location filename="../core/errorstrings.cpp" line="53"/>
         <source>Cloak (ck-client) executable missing</source>
         <translation>Cloak (ck-client) executable missing</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="52"/>
+        <location filename="../core/errorstrings.cpp" line="54"/>
         <source>Amnezia helper service error</source>
         <translation>Amnezia helper service error</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="53"/>
+        <location filename="../core/errorstrings.cpp" line="55"/>
         <source>OpenSSL failed</source>
         <translation>OpenSSL failed</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="56"/>
+        <location filename="../core/errorstrings.cpp" line="58"/>
         <source>Can&apos;t connect: another VPN connection is active</source>
         <translation>Can&apos;t connect: another VPN connection is active</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="57"/>
+        <location filename="../core/errorstrings.cpp" line="59"/>
         <source>Can&apos;t setup OpenVPN TAP network adapter</source>
         <translation>Can&apos;t setup OpenVPN TAP network adapter</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="58"/>
+        <location filename="../core/errorstrings.cpp" line="60"/>
         <source>VPN pool error: no available addresses</source>
         <translation>VPN pool error: no available addresses</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="63"/>
+        <location filename="../core/errorstrings.cpp" line="65"/>
         <source>VPN connection error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="67"/>
+        <location filename="../core/errorstrings.cpp" line="69"/>
         <source>Internal error</source>
         <translation>Internal error</translation>
     </message>
@@ -2660,6 +2709,56 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <location filename="../containers/containers_defs.cpp" line="88"/>
         <source>IPsec</source>
         <translation>IPsec</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="101"/>
+        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="104"/>
+        <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="122"/>
+        <source>Create a file vault on your server to securely store and transfer files.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="155"/>
+        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for protecting against blocking.
+
+OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client and the server.
+
+Cloak protects OpenVPN from detection and blocking. 
+
+Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
+
+Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
+
+If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
+
+* Available in the AmneziaVPN across all platforms
+* High power consumption on mobile devices
+* Flexible settings
+* Not recognised by DPI analysis systems
+* Works over TCP network protocol, 443 port.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="174"/>
+        <source>A relatively new popular VPN protocol with a simplified architecture.
+WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
+WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
+
+* Available in the AmneziaVPN across all platforms
+* Low power consumption
+* Minimum number of settings
+* Easily recognised by DPI analysis systems, susceptible to blocking
+* Works over UDP network protocol.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="203"/>
@@ -2709,14 +2808,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation>OpenVPN - популярный VPN-протокол, с гибкой настройкой. Имеет собственный протокол безопасности с SSL/TLS для обмена ключами.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="101"/>
         <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but is recognised by analysis systems in some highly censored regions.</source>
-        <translation>ShadowSocks - маскирует VPN-трафик под обычный веб-трафик, но распознается системами анализа в некоторых регионах с высоким уровнем цензуры.</translation>
+        <translation type="vanished">ShadowSocks - маскирует VPN-трафик под обычный веб-трафик, но распознается системами анализа в некоторых регионах с высоким уровнем цензуры.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="104"/>
         <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probbing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
-        <translation>OpenVPN over Cloak - OpenVPN с маскировкой VPN под web-трафик и защитой от обнаружения active-probbing. Подходит для регионов с самым высоким уровнем цензуры.</translation>
+        <translation type="vanished">OpenVPN over Cloak - OpenVPN с маскировкой VPN под web-трафик и защитой от обнаружения active-probbing. Подходит для регионов с самым высоким уровнем цензуры.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="108"/>
@@ -2744,9 +2841,8 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation>Замените DNS-сервер на Amnezia DNS. Это повысит уровень конфиденциальности.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="122"/>
         <source>Creates a file vault on your server to securely store and transfer files.</source>
-        <translation>Создайте на сервере файловое хранилище для безопасного хранения и передачи файлов.</translation>
+        <translation type="vanished">Создайте на сервере файловое хранилище для безопасного хранения и передачи файлов.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="129"/>
@@ -2785,7 +2881,6 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * Работает по сетевому протоколу TCP.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="155"/>
         <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
 
 OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client and the server.
@@ -2804,7 +2899,7 @@ If there is a extreme level of Internet censorship in your region, we advise you
 * Not recognised by DPI analysis systems
 * Works over TCP network protocol, 443 port.
 </source>
-        <translation>OpenVPN over Cloak - это комбинация протокола OpenVPN и плагина Cloak, разработанного специально для защиты от блокировок.
+        <translation type="vanished">OpenVPN over Cloak - это комбинация протокола OpenVPN и плагина Cloak, разработанного специально для защиты от блокировок.
 
 OpenVPN обеспечивает безопасное VPN-соединение за счет шифрования всего интернет-трафика между клиентом и сервером.
 
@@ -2824,7 +2919,6 @@ Cloak может изменять метаданные пакетов. Он по
 </translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="174"/>
         <source>A relatively new popular VPN protocol with a simplified architecture.
 Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
 WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
@@ -2834,7 +2928,7 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
 * Works over UDP network protocol.</source>
-        <translation>WireGuard - относительно новый популярный VPN-протокол с упрощенной архитектурой.
+        <translation type="vanished">WireGuard - относительно новый популярный VPN-протокол с упрощенной архитектурой.
 Обеспечивает стабильное VPN-соединение, высокую производительность на всех устройствах. Использует жестко заданные настройки шифрования. WireGuard по сравнению с OpenVPN имеет меньшую задержку и лучшую пропускную способность при передаче данных.
 WireGuard очень восприимчив к блокированию из-за особенностей сигнатур пакетов. В отличие от некоторых других VPN-протоколов, использующих методы обфускации, последовательные сигнатуры пакетов WireGuard легче выявляются и, соответственно, блокируются современными системами глубокой проверки пакетов (DPI) и другими средствами сетевого мониторинга.
 
@@ -3112,7 +3206,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="438"/>
+        <location filename="../vpnconnection.cpp" line="457"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>
