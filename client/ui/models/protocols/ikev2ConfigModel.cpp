@@ -1,4 +1,4 @@
-#include "ikev2ConfigModel.h".h "
+#include "ikev2ConfigModel.h"
 
 #include "protocols/protocols_defs.h"
 

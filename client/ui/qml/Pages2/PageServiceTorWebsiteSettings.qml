@@ -91,7 +91,7 @@ PageType {
 
                 onLinkActivated: Qt.openUrlExternally(link)
                 textFormat: Text.RichText
-                text: qsTr("Use <a href=\"https://www.torproject.org/download/\" style=\"color: #FBB26A;\">Tor Browser</a> to open this url.")
+                text: qsTr("Use <a href=\"https://www.torproject.org/download/\" style=\"color: #FBB26A;\">Tor Browser</a> to open this URL.")
             }
 
             ParagraphTextType {
@@ -100,7 +100,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("After installation it takes several minutes while your onion site will become available in the Tor Network.")
+                text: qsTr("After creating your onion site, it takes a few minutes for the Tor network to make it available for use.")
             }
 
             ParagraphTextType {

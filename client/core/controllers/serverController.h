@@ -22,6 +22,7 @@ public:
 
     typedef QList<QPair<QString, QString>> Vars;
 
+    ErrorCode rebootServer(const ServerCredentials &credentials);
     ErrorCode removeAllContainers(const ServerCredentials &credentials);
     ErrorCode removeContainer(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config,

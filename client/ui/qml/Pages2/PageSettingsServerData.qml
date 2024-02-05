@@ -38,6 +38,10 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
+        function onRebootCurrentlyProcessedServerFinished(finishedMessage) {
+            PageController.showNotificationMessage(finishedMessage)
+        }
+
         function onRemoveAllContainersFinished(finishedMessage) {
             PageController.closePage() // close deInstalling page
             PageController.showNotificationMessage(finishedMessage)
@@ -128,13 +132,46 @@ PageType {
             }
 
             LabelWithButtonType {
+                visible: content.isServerWithWriteAccess
+                Layout.fillWidth: true
+
+                text: qsTr("Reboot server")
+                textColor: "#EB5757"
+
+                clickedFunction: function() {
+                    questionDrawer.headerText = qsTr("Do you want to reboot the server?")
+                    questionDrawer.descriptionText = qsTr("The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?")
+                    questionDrawer.yesButtonText = qsTr("Continue")
+                    questionDrawer.noButtonText = qsTr("Cancel")
+
+                    questionDrawer.yesButtonFunction = function() {
+                        questionDrawer.visible = false
+                        PageController.showBusyIndicator(true)
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            ConnectionController.closeConnection()
+                        }
+                        InstallController.rebootCurrentlyProcessedServer()
+                        PageController.showBusyIndicator(false)
+                    }
+                    questionDrawer.noButtonFunction = function() {
+                        questionDrawer.visible = false
+                    }
+                    questionDrawer.visible = true
+                }
+            }
+
+            DividerType {
+                visible: content.isServerWithWriteAccess
+            }
+
+            LabelWithButtonType {
                 Layout.fillWidth: true
 
                 text: qsTr("Remove server from application")
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    var headerText = qsTr("Remove server?")
+                    var headerText = qsTr("Do you want to remove the server?")
                     var descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
@@ -164,7 +201,7 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    var headerText = qsTr("Clear server from Amnezia software?")
+                    var headerText = qsTr("Do you want to clear server from Amnezia software?")
                     var descriptionText = qsTr("All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")

@@ -98,11 +98,11 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                QObject::tr("OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its "
                            "own security protocol with SSL/TLS for key exchange.") },
              { DockerContainer::ShadowSocks,
-               QObject::tr("ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but is "
-                           "recognised by analysis systems in some highly censored regions.") },
+               QObject::tr("ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it "
+                           "may be recognized by analysis systems in some highly censored regions.") },
              { DockerContainer::Cloak,
                QObject::tr("OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against "
-                           "active-probbing detection. Ideal for bypassing blocking in regions with the highest levels "
+                           "active-probing detection. Ideal for bypassing blocking in regions with the highest levels "
                            "of censorship.") },
              { DockerContainer::WireGuard,
                QObject::tr("WireGuard - New popular VPN protocol with high performance, high speed and low power "
@@ -119,7 +119,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
              { DockerContainer::Dns,
                QObject::tr("Replace the current DNS server with your own. This will increase your privacy level.") },
              { DockerContainer::Sftp,
-               QObject::tr("Creates a file vault on your server to securely store and transfer files.") } };
+               QObject::tr("Create a file vault on your server to securely store and transfer files.") } };
 }
 
 QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
@@ -153,8 +153,8 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "* Works over TCP network protocol.") },
         { DockerContainer::Cloak,
           QObject::tr("This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for "
-                      "blocking protection.\n\n"
-                      "OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client "
+                      "protecting against blocking.\n\n"
+                      "OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client "
                       "and the server.\n\n"
                       "Cloak protects OpenVPN from detection and blocking. \n\n"
                       "Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, "
@@ -172,7 +172,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "* Works over TCP network protocol, 443 port.\n") },
         { DockerContainer::WireGuard,
           QObject::tr("A relatively new popular VPN protocol with a simplified architecture.\n"
-                      "Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption "
+                      "WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption "
                       "settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.\n"
                       "WireGuard is very susceptible to blocking due to its distinct packet signatures. "
                       "Unlike some other VPN protocols that employ obfuscation techniques, "
