@@ -1,4 +1,4 @@
- @ECHO OFF
+@ECHO OFF
 
 CHCP 1252
 
@@ -35,7 +35,7 @@ echo "TARGET_FILENAME:      %TARGET_FILENAME%"
 
 echo "Cleanup..."
 rmdir /Q /S %WORK_DIR%
-Del %TARGET_FILENAME%
+del %TARGET_FILENAME%
 
 mkdir %WORK_DIR%
 
@@ -44,18 +44,18 @@ call "%QT_BIN_DIR:"=%\qt-cmake" --version
 cmake --version
 
 cd %PROJECT_DIR%
-call "%QT_BIN_DIR:"=%\qt-cmake" . -B %WORK_DIR%
+call cmake . -B %WORK_DIR% "-DCMAKE_GENERATOR:STRING=Ninja"  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%"
 
 cd %WORK_DIR%
-cmake --build . --config release -- /p:UseMultiToolTask=true /m
+cmake --build . --config release
 if %errorlevel% neq 0 exit /b %errorlevel%
-
-cmake --build . --target clean
-rem if not exist "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%" break
 
 echo "Deploying..."
 
-copy "%WORK_DIR:"=%\service\server\release\%APP_NAME:"=%-service.exe"	%OUT_APP_DIR%
+mkdir "%OUT_APP_DIR%"
+copy "%WORK_DIR%\service\server\%APP_NAME%-service.exe" "%OUT_APP_DIR%"
+copy "%WORK_DIR%\client\%APP_FILENAME%" "%OUT_APP_DIR%"
+
 
 echo "Signing exe"
 cd %OUT_APP_DIR%
