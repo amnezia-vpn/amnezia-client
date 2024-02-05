@@ -47,7 +47,7 @@ PageType {
         id: drawer
         anchors.fill: parent
 
-        expandedHeight: 0.9
+        expandedHeight: parent.height * 0.9
 
         collapsedContent:  ColumnLayout {
             DividerType {

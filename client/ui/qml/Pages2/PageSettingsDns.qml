@@ -95,22 +95,21 @@ PageType {
                 text: qsTr("Restore default")
 
                 onClicked: function() {
-                    questionDrawer.headerText = qsTr("Restore default DNS settings?")
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
+                    var headerText = qsTr("Restore default DNS settings?")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var yesButtonFunction = function() {
                         SettingsController.primaryDns = "1.1.1.1"
                         primaryDns.textFieldText = SettingsController.primaryDns
                         SettingsController.secondaryDns = "1.0.0.1"
                         secondaryDns.textFieldText = SettingsController.secondaryDns
                         PageController.showNotificationMessage(qsTr("Settings have been reset"))
                     }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var noButtonFunction = function() {
                     }
-                    questionDrawer.visible = true
+
+                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
@@ -129,9 +128,6 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Settings saved"))
                 }
             }
-        }
-        QuestionDrawer {
-            id: questionDrawer
         }
     }
 }

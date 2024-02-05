@@ -16,19 +16,16 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
-DrawerType {
+DrawerType2 {
     id: root
 
-    property alias headerText: header.headerText
-    property alias configContentHeaderText: configContentHeader.headerText
-    property alias contentVisible: content.visible
+    property string headerText
+    property string configContentHeaderText
+    property string contentVisible
 
     property string configExtension: ".vpn"
     property string configCaption: qsTr("Save AmneziaVPN config")
     property string configFileName: "amnezia_config"
-
-    width: parent.width
-    height: parent.height * 0.9
 
     onClosed: {
         configExtension = ".vpn"
@@ -36,8 +33,14 @@ DrawerType {
         configFileName = "amnezia_config"
     }
 
-    Item {
-        anchors.fill: parent
+    expandedContent: Item {
+        id: container
+
+        implicitHeight: root.height * 0.9
+
+        Component.onCompleted: {
+            root.expandedHeight = container.implicitHeight
+        }
 
         Header2Type {
             id: header
@@ -47,6 +50,8 @@ DrawerType {
             anchors.topMargin: 20
             anchors.leftMargin: 16
             anchors.rightMargin: 16
+
+            headerText: root.headerText
         }
 
         FlickableType {
@@ -63,6 +68,8 @@ DrawerType {
 
                 anchors.leftMargin: 16
                 anchors.rightMargin: 16
+
+                visible: root.contentVisible
 
                 BasicButtonType {
                     Layout.fillWidth: true
@@ -154,84 +161,6 @@ DrawerType {
                     }
                 }
 
-                DrawerType {
-                    id: configContentDrawer
-
-                    width: parent.width
-                    height: parent.height * 0.9
-
-                    BackButtonType {
-                        id: backButton
-
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.topMargin: 16
-
-                        backButtonFunction: function() {
-                            configContentDrawer.visible = false
-                        }
-                    }
-
-                    FlickableType {
-                        anchors.top: backButton.bottom
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        contentHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
-
-                        ColumnLayout {
-                            id: configContent
-
-                            anchors.fill: parent
-                            anchors.rightMargin: 16
-                            anchors.leftMargin: 16
-
-                            Header2Type {
-                                id: configContentHeader
-                                Layout.fillWidth: true
-                                Layout.topMargin: 16
-                            }
-
-                            TextField {
-                                id: nativeConfigString
-                                visible: false
-                                text: ExportController.nativeConfigString
-                            }
-
-                            TextArea {
-                                id: configText
-
-                                Layout.fillWidth: true
-                                Layout.topMargin: 16
-                                Layout.bottomMargin: 16
-
-                                padding: 0
-                                leftPadding: 0
-                                height: 24
-
-                                readOnly: true
-
-                                color: "#D7D8DB"
-                                selectionColor:  "#633303"
-                                selectedTextColor: "#D7D8DB"
-
-                                font.pixelSize: 16
-                                font.weight: Font.Medium
-                                font.family: "PT Root UI VF"
-
-                                text: ExportController.config
-
-                                wrapMode: Text.Wrap
-
-                                background: Rectangle {
-                                    color: "transparent"
-                                }
-                            }
-                        }
-                    }
-                }
-
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: width
@@ -278,6 +207,93 @@ DrawerType {
 
                     horizontalAlignment: Text.AlignHCenter
                     text: qsTr("To read the QR code in the Amnezia app, select \"Add server\" → \"I have data to connect\" → \"QR code, key or settings file\"")
+                }
+            }
+        }
+    }
+
+    DrawerType2 {
+        id: configContentDrawer
+
+        expandedContent: Item {
+            id: configContentContainer
+
+            implicitHeight: root.height * 0.9
+
+            Component.onCompleted: {
+                root.expandedHeight = configContentContainer.implicitHeight
+            }
+
+            BackButtonType {
+                id: backButton
+
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.topMargin: 16
+
+                backButtonFunction: function() {
+                    configContentDrawer.visible = false
+                }
+            }
+
+            FlickableType {
+                anchors.top: backButton.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                contentHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
+
+                ColumnLayout {
+                    id: configContent
+
+                    anchors.fill: parent
+                    anchors.rightMargin: 16
+                    anchors.leftMargin: 16
+
+                    Header2Type {
+                        id: configContentHeader
+                        Layout.fillWidth: true
+                        Layout.topMargin: 16
+
+                        headerText: root.configContentHeaderText
+                    }
+
+                    TextField {
+                        id: nativeConfigString
+                        visible: false
+                        text: ExportController.nativeConfigString
+                    }
+
+                    TextArea {
+                        id: configText
+
+                        Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        Layout.bottomMargin: 16
+
+                        padding: 0
+                        leftPadding: 0
+                        height: 24
+
+                        readOnly: true
+
+                        color: "#D7D8DB"
+                        selectionColor:  "#633303"
+                        selectedTextColor: "#D7D8DB"
+
+                        font.pixelSize: 16
+                        font.weight: Font.Medium
+                        font.family: "PT Root UI VF"
+
+                        text: ExportController.config
+
+                        wrapMode: Text.Wrap
+
+                        background: Rectangle {
+                            color: "transparent"
+                        }
+                    }
                 }
             }
         }

@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import "../Controls2"
 import "../Controls2/TextTypes"
 
-DrawerType {
+DrawerType2 {
     id: root
 
     property string headerText
@@ -16,20 +16,19 @@ DrawerType {
     property var yesButtonFunction
     property var noButtonFunction
 
-    width: parent.width
-    height: content.implicitHeight + 32
-
-    ColumnLayout {
+    expandedContent: ColumnLayout {
         id: content
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.fill: parent
         anchors.topMargin: 16
         anchors.rightMargin: 16
         anchors.leftMargin: 16
 
         spacing: 8
+
+        onImplicitHeightChanged: {
+            root.expandedHeight = content.implicitHeight + 32
+        }
 
         Header2TextType {
             Layout.fillWidth: true

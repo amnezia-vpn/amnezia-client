@@ -63,19 +63,18 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
+                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var yesButtonFunction = function() {
                         PageController.goToPage(PageEnum.PageDeinstalling)
                         InstallController.removeCurrentlyProcessedContainer()
                     }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var noButtonFunction = function() {
                     }
-                    questionDrawer.visible = true
+
+                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
 
                 MouseArea {
@@ -86,10 +85,6 @@ PageType {
             }
 
             DividerType {}
-
-            QuestionDrawer {
-                id: questionDrawer
-            }
         }
     }
 }

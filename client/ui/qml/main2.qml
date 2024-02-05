@@ -8,6 +8,7 @@ import PageEnum 1.0
 
 import "Config"
 import "Controls2"
+import "Components"
 
 Window  {
     id: root
@@ -134,7 +135,7 @@ Window  {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
 
-        implicitHeight: popupErrorMessage.height
+        implicitHeight: privateKeyPassphraseDrawer.height
 
         DrawerType {
             id: privateKeyPassphraseDrawer
@@ -197,6 +198,37 @@ Window  {
                 }
             }
         }
+    }
+
+    Item {
+        anchors.fill: parent
+
+        QuestionDrawer {
+            id: questionDrawer
+
+            anchors.fill: parent
+        }
+    }
+
+    function showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction) {
+        questionDrawer.headerText = headerText
+        questionDrawer.descriptionText = descriptionText
+        questionDrawer.yesButtonText = yesButtonText
+        questionDrawer.noButtonText = noButtonText
+
+        questionDrawer.yesButtonFunction = function() {
+            questionDrawer.close()
+            if (yesButtonFunction && typeof yesButtonFunction === "function") {
+                yesButtonFunction()
+            }
+        }
+        questionDrawer.noButtonFunction = function() {
+            questionDrawer.close()
+            if (noButtonFunction && typeof noButtonFunction === "function") {
+                noButtonFunction()
+            }
+        }
+        questionDrawer.open()
     }
 
     FileDialog {

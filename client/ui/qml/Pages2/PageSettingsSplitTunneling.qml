@@ -202,26 +202,21 @@ PageType {
                             rightImageColor: "#D7D8DB"
 
                             clickedFunction: function() {
-                                questionDrawer.headerText = qsTr("Remove ") + url + "?"
-                                questionDrawer.yesButtonText = qsTr("Continue")
-                                questionDrawer.noButtonText = qsTr("Cancel")
+                                var headerText = qsTr("Remove ") + url + "?"
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
 
-                                questionDrawer.yesButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                var yesButtonFunction = function() {
                                     SitesController.removeSite(index)
                                 }
-                                questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                var noButtonFunction = function() {
                                 }
-                                questionDrawer.visible = true
+
+                                showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
                         }
 
                         DividerType {}
-
-                        QuestionDrawer {
-                            id: questionDrawer
-                        }
                     }
                 }
             }
@@ -421,5 +416,9 @@ PageType {
                 DividerType {}
             }
         }
+    }
+
+    QuestionDrawer {
+        id: questionDrawer
     }
 }

@@ -11,21 +11,20 @@ import "../Config"
 DrawerType2 {
     id: root
 
-//    width: parent.width
-    anchors.fill: parent
-    expandedHeight: 0.4375
-
-    collapsedContent: Item {
-        anchors.fill: parent
-        height: 1
-        visible: false
-    }
+    width: parent.width
+    height: parent.height
 
     expandedContent: ColumnLayout {
+        id: content
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         spacing: 0
+
+        Component.onCompleted: {
+            root.expandedHeight = content.implicitHeight + 32
+        }
 
         Header2Type {
             Layout.fillWidth: true

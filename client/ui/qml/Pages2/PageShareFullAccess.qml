@@ -126,8 +126,6 @@ PageType {
                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
                     shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
 
-                    shareConnectionDrawer.needCloseButton = false
-
                     shareConnectionDrawer.open()
                     shareConnectionDrawer.contentVisible = false
                     PageController.showBusyIndicator(true)
@@ -140,16 +138,15 @@ PageType {
 
                     PageController.showBusyIndicator(false)
 
-                    shareConnectionDrawer.needCloseButton = true
-                    PageController.showTopCloseButton(true)
-
                     shareConnectionDrawer.contentVisible = true
                 }
             }
-
-            ShareConnectionDrawer {
-                id: shareConnectionDrawer
-            }
         }
+    }
+
+    ShareConnectionDrawer {
+        id: shareConnectionDrawer
+
+        anchors.fill: parent
     }
 }

@@ -41,8 +41,6 @@ PageType {
             shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
             shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
 
-            shareConnectionDrawer.needCloseButton = false
-
             shareConnectionDrawer.open()
             shareConnectionDrawer.contentVisible = false
             PageController.showBusyIndicator(true)
@@ -80,11 +78,6 @@ PageType {
             }
 
             PageController.showBusyIndicator(false)
-
-            shareConnectionDrawer.needCloseButton = true
-            PageController.showTopCloseButton(true)
-
-            shareConnectionDrawer.contentVisible = true
         }
 
         function onExportErrorOccurred(errorMessage) {
@@ -455,10 +448,6 @@ PageType {
                 }
             }
 
-            ShareConnectionDrawer {
-                id: shareConnectionDrawer
-            }
-
             BasicButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 40
@@ -668,20 +657,19 @@ PageType {
                                     text: qsTr("Revoke")
 
                                     onClicked: function() {
-                                        questionDrawer.headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
-                                        questionDrawer.descriptionText = qsTr("The user will no longer be able to connect to your server.")
-                                        questionDrawer.yesButtonText = qsTr("Continue")
-                                        questionDrawer.noButtonText = qsTr("Cancel")
+                                        var headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
+                                        var descriptionText = qsTr("The user will no longer be able to connect to your server.")
+                                        var yesButtonText = qsTr("Continue")
+                                        var noButtonText = qsTr("Cancel")
 
-                                        questionDrawer.yesButtonFunction = function() {
-                                            questionDrawer.close()
+                                        var yesButtonFunction = function() {
                                             clientInfoDrawer.close()
                                             root.revokeConfig(index)
                                         }
-                                        questionDrawer.noButtonFunction = function() {
-                                            questionDrawer.close()
+                                        var noButtonFunction = function() {
                                         }
-                                        questionDrawer.open()
+
+                                        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                                     }
                                 }
                             }
@@ -689,12 +677,15 @@ PageType {
                     }
                 }
             }
-
-            QuestionDrawer {
-                id: questionDrawer
-            }
         }
     }
+
+    ShareConnectionDrawer {
+        id: shareConnectionDrawer
+
+        anchors.fill: parent
+    }
+
     MouseArea {
         anchors.fill: parent
         onPressed: function(mouse) {

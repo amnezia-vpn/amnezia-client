@@ -31,6 +31,8 @@ Item {
     signal aboutToHide
     signal close
     signal open
+    signal closed
+    signal opened
 
     Connections {
         target: root
@@ -43,6 +45,7 @@ Item {
             aboutToHide()
 
             drawerContent.state = root.drawerCollapsed
+            closed()
         }
 
         function onOpen() {
@@ -50,7 +53,9 @@ Item {
                 return
             }
 
+
             drawerContent.state = root.drawerExpanded
+            opened()
         }
     }
 
@@ -58,6 +63,17 @@ Item {
     Component.onCompleted: {
         if (root.isCollapsed && drawerContent.collapsedHeight == 0) {
             drawerContent.collapsedHeight = drawerContent.implicitHeight
+        }
+    }
+
+    Rectangle {
+        id: background
+
+        anchors.fill: parent
+        color: root.isCollapsed ? "transparent" : Qt.rgba(14/255, 14/255, 17/255, 0.8)
+
+        Behavior on color {
+            PropertyAnimation { duration: 200 }
         }
     }
 
@@ -73,14 +89,14 @@ Item {
     MouseArea {
         id: dragArea
 
-        anchors.fill: drawerBackground
+        anchors.fill: drawerContentBackground
         cursorShape: root.isCollapsed ? Qt.PointingHandCursor : Qt.ArrowCursor
         hoverEnabled: true
 
         drag.target: drawerContent
         drag.axis: Drag.YAxis
         drag.maximumY: root.height - drawerContent.collapsedHeight
-        drag.minimumY: root.height - root.height * root.expandedHeight
+        drag.minimumY: root.height - root.expandedHeight
 
         /** If drag area is released at any point other than min or max y, transition to the other state */
         onReleased: {
@@ -112,7 +128,7 @@ Item {
     }
 
     Rectangle {
-        id: drawerBackground
+        id: drawerContentBackground
 
         anchors { left: drawerContent.left; right: drawerContent.right; top: drawerContent.top }
         height: root.height
