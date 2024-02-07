@@ -7,7 +7,7 @@ import "TextTypes"
 Item {
     id: root
 
-    signal sig_next()
+    //signal sig_next()
 
     property string headerText
     property string headerTextDisabledColor: "#494B50"
@@ -71,6 +71,7 @@ Item {
 
                     TextField {
                         id: textField
+                        activeFocusOnTab: false
 
                         enabled: root.textFieldEditable
                         color: root.enabled ? root.textFieldTextColor : root.textFieldTextDisabledColor
@@ -190,14 +191,10 @@ Item {
     }
 
     Keys.onEnterPressed: {
-         root.sig_next()
+         KeyNavigation.tab.forceActiveFocus();
     }
 
     Keys.onReturnPressed: {
-         root.sig_next()
-    }
-
-    function setActiveFocus() {
-        textField.forceActiveFocus()
+         KeyNavigation.tab.forceActiveFocus();
     }
 }

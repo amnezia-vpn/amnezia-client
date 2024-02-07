@@ -94,9 +94,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            onSig_next: {
-                                junkPacketCountTextField.setActiveFocus()
-                            }
+                            KeyNavigation.tab: junkPacketCountTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -121,9 +119,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            onSig_next: {
-                                junkPacketMinSizeTextField.setActiveFocus()
-                            }
+                            KeyNavigation.tab: junkPacketMinSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -143,9 +139,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            onSig_next: {
-                                junkPacketMaxSizeTextField.setActiveFocus()
-                            }
+                            KeyNavigation.tab: junkPacketMaxSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -165,9 +159,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            onSig_next: {
-                                initPacketJunkSizeTextField.setActiveFocus()
-                            }
+                            KeyNavigation.tab: initPacketJunkSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -187,9 +179,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            onSig_next: {
-                                responsePacketJunkSizeTextField.setActiveFocus()
-                            }
+                            KeyNavigation.tab: responsePacketJunkSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -209,9 +199,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            onSig_next: {
-                                initPacketMagicHeaderTextField.setActiveFocus()
-                            }
+                            KeyNavigation.tab: initPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -231,9 +219,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            onSig_next: {
-                                responsePacketMagicHeaderTextField.setActiveFocus()
-                            }
+                            KeyNavigation.tab: responsePacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -253,9 +239,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            onSig_next: {
-                                transportPacketMagicHeaderTextField.setActiveFocus()
-                            }
+                            KeyNavigation.tab: transportPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -275,9 +259,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            onSig_next: {
-                                underloadPacketMagicHeaderTextField.setActiveFocus()
-                            }
+                            KeyNavigation.tab: underloadPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -297,9 +279,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            onSig_next: {
-                                saveRestartButton.forceActiveFocus()
-                            }
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         BasicButtonType {

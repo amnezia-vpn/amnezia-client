@@ -104,9 +104,7 @@ PageType {
                             textField.maximumLength: 30
                             checkEmptyText: true
 
-                            onSig_next: {
-                                saveButton.forceActiveFocus()
-                            }
+                            KeyNavigation.tab: saveButton
                         }
 
                         BasicButtonType {

@@ -57,9 +57,7 @@ PageType {
                     textField.paste()
                 }
 
-                onSig_next: {
-                    continueButton.forceActiveFocus()
-                }
+                KeyNavigation.tab: continueButton
             }
         }
     }

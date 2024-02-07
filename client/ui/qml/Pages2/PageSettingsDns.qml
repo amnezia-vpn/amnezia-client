@@ -69,9 +69,7 @@ PageType {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
 
-                onSig_next: {
-                    secondaryDns.setActiveFocus()
-                }
+                KeyNavigation.tab: secondaryDns.textField
             }
 
             TextFieldWithHeaderType {
@@ -85,9 +83,7 @@ PageType {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
 
-                onSig_next: {
-                    saveButton.forceActiveFocus()
-                }
+                KeyNavigation.tab: saveButton
             }
 
             BasicButtonType {

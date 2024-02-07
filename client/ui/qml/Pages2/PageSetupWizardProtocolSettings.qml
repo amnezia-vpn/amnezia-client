@@ -198,9 +198,7 @@ PageType {
                             textField.maximumLength: 5
                             textField.validator: IntValidator { bottom: 1; top: 65535 }
 
-                            onSig_next: {
-                                installButton.forceActiveFocus()
-                            }
+                            KeyNavigation.tab: installButton
                         }
 
                         Rectangle {

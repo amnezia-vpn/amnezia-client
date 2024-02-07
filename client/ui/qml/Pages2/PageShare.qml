@@ -265,9 +265,7 @@ PageType {
 
                 checkEmptyText: true
 
-                onSig_next: {
-                    shareButton.forceActiveFocus()
-                }
+                KeyNavigation.tab: shareButton
             }
 
             DropDownType {
@@ -635,9 +633,7 @@ PageType {
                                                 textField.maximumLength: 20
                                                 checkEmptyText: true
 
-                                                onSig_next: {
-                                                    saveButton.forceActiveFocus()
-                                                }
+                                                KeyNavigation.tab: saveButton
                                             }
 
                                             BasicButtonType {

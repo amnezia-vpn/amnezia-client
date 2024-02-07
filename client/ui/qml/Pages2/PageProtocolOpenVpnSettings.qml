@@ -92,9 +92,7 @@ PageType {
                                 }
                             }
 
-                            onSig_next: {
-                                portTextField.setActiveFocus()
-                            }
+                            KeyNavigation.tab: portTextField.textField
                         }
 
                         ParagraphTextType {
@@ -144,9 +142,7 @@ PageType {
                                 }
                             }
 
-                            onSig_next: {
-                                saveRestartButton.forseActiveFocus()
-                            }
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         SwitcherType {

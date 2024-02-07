@@ -91,10 +91,7 @@ PageType {
                                 }
                             }
 
-                            onSig_next: {
-                                saveRestartButton.forceActiveFocus()
-                            }
-
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         DropDownType {

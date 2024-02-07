@@ -58,9 +58,7 @@ PageType {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '');
                 }
 
-                onSig_next: {
-                    username.setActiveFocus()
-                }
+                KeyNavigation.tab: username.textField
             }
 
             TextFieldWithHeaderType {
@@ -70,9 +68,7 @@ PageType {
                 headerText: qsTr("Login to connect via SSH")
                 textFieldPlaceholderText: "root"
 
-                onSig_next: {
-                    secretData.setActiveFocus()
-                }
+                KeyNavigation.tab: secretData.textField
             }
 
             TextFieldWithHeaderType {
@@ -94,9 +90,7 @@ PageType {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '');
                 }
 
-                onSig_next: {
-                    continueButton.forceActiveFocus()
-                }
+                KeyNavigation.tab: continueButton
             }
 
             BasicButtonType {

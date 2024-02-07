@@ -177,9 +177,7 @@ Window  {
                         hidePassword = !hidePassword
                     }
 
-                    onSig_next: {
-                        saveButton.forceActiveFocus()
-                    }
+                    KeyNavigation.tab: saveButton
                 }
 
                 BasicButtonType {

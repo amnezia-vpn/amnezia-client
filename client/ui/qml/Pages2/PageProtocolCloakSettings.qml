@@ -97,9 +97,7 @@ PageType {
                                 }
                             }
 
-                            onSig_next: {
-                                portTextField.setActiveFocus()
-                            }
+                            KeyNavigation.tab: portTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -119,9 +117,7 @@ PageType {
                                 }
                             }
 
-                            onSig_next: {
-                                saveRestartButton.forceActiveFocus()
-                            }
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         DropDownType {
