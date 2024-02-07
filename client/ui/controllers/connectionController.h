@@ -26,7 +26,7 @@ public:
     QString connectionStateText() const;
 
 public slots:
-    void toggleConnection();
+    void toggleConnection(bool skipConnectionInProgressCheck);
 
     void openConnection();
     void closeConnection();

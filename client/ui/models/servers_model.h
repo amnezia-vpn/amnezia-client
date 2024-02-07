@@ -78,6 +78,7 @@ public slots:
     bool isAmneziaDnsContainerInstalled(const int serverIndex);
 
     QJsonObject getDefaultServerConfig();
+    QJsonObject getCurrentlyProcessedServerConfig();
 
     void reloadContainerConfig();
     void updateContainerConfig(const int containerIndex, const QJsonObject config);
@@ -99,6 +100,7 @@ public slots:
     void toggleAmneziaDns(bool enabled);
 
     bool isDefaultServerFromApi();
+    bool isCurrentlyProcessedServerFromApi();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -109,7 +111,7 @@ signals:
     void defaultServerNameChanged();
     void defaultServerDescriptionChanged();
 
-    void containersUpdated(QJsonArray &containers);
+    void containersUpdated(const QJsonArray &containers);
     void defaultContainerChanged(const int containerIndex);
 
 private:

@@ -18,9 +18,11 @@ public:
 public slots:
     void updateServerConfigFromApi();
 
+    void clearApiConfig();
+
 signals:
     void updateStarted();
-    void updateFinished();
+    void updateFinished(bool isConfigUpdateStarted);
     void errorOccurred(const QString &errorMessage);
 
 private:

@@ -134,9 +134,9 @@ QString ConnectionController::connectionStateText() const
     return m_connectionStateText;
 }
 
-void ConnectionController::toggleConnection()
+void ConnectionController::toggleConnection(bool skipConnectionInProgressCheck)
 {
-    if (isConnectionInProgress()) {
+    if (!skipConnectionInProgressCheck && isConnectionInProgress()) {
         closeConnection();
     } else if (isConnected()) {
         closeConnection();

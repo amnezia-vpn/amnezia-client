@@ -225,7 +225,68 @@ PageType {
 
             DividerType {
                 visible: content.isServerWithWriteAccess
-            }           
+            }
+
+            LabelWithButtonType {
+                visible: content.isServerWithWriteAccess
+                Layout.fillWidth: true
+
+                text: qsTr("Clear server from Amnezia software")
+                textColor: "#EB5757"
+
+                clickedFunction: function() {
+                    questionDrawer.headerText = qsTr("Do you want to clear server from Amnezia software?")
+                    questionDrawer.descriptionText = qsTr("All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.")
+                    questionDrawer.yesButtonText = qsTr("Continue")
+                    questionDrawer.noButtonText = qsTr("Cancel")
+
+                    questionDrawer.yesButtonFunction = function() {
+                        questionDrawer.visible = false
+                        PageController.goToPage(PageEnum.PageDeinstalling)
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            ConnectionController.closeConnection()
+                        }
+                        InstallController.removeAllContainers()
+                    }
+                    questionDrawer.noButtonFunction = function() {
+                        questionDrawer.visible = false
+                    }
+                    questionDrawer.visible = true
+                }
+            }
+
+            DividerType {
+                visible: content.isServerWithWriteAccess
+            }
+
+            LabelWithButtonType {
+                visible: ServersModel.isCurrentlyProcessedServerFromApi()
+                Layout.fillWidth: true
+
+                text: qsTr("Reset API config")
+                textColor: "#EB5757"
+
+                clickedFunction: function() {
+                    questionDrawer.headerText = qsTr("Do you want to download reset API config?")
+                    questionDrawer.yesButtonText = qsTr("Continue")
+                    questionDrawer.noButtonText = qsTr("Cancel")
+
+                    questionDrawer.yesButtonFunction = function() {
+                        questionDrawer.visible = false
+                        PageController.showBusyIndicator(true)
+                        ApiController.clearApiConfig()
+                        PageController.showBusyIndicator(false)
+                    }
+                    questionDrawer.noButtonFunction = function() {
+                        questionDrawer.visible = false
+                    }
+                    questionDrawer.visible = true
+                }
+            }
+
+            DividerType {
+                visible: ServersModel.isCurrentlyProcessedServerFromApi()
+            }
 
             QuestionDrawer {
                 id: questionDrawer

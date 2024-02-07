@@ -71,15 +71,18 @@ void ApiController::updateServerConfigFromApi()
 {
     QtConcurrent::run([this]() {
         auto serverConfig = m_serversModel->getDefaultServerConfig();
-
         auto containerConfig = serverConfig.value(config_key::containers).toArray();
+
+        bool isConfigUpdateStarted = false;
 
         if (serverConfig.value(config_key::configVersion).toInt() && containerConfig.isEmpty()) {
             emit updateStarted();
+            isConfigUpdateStarted = true;
 
             QNetworkAccessManager manager;
 
             QNetworkRequest request;
+            request.setTransferTimeout(7000);
             request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
             request.setRawHeader("Authorization",
                                  "Api-Key " + serverConfig.value(configKey::accessToken).toString().toUtf8());
@@ -117,7 +120,6 @@ void ApiController::updateServerConfigFromApi()
 
                 QJsonObject apiConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
 
-                serverConfig.insert("apiConfig", apiConfig);
                 serverConfig.insert(config_key::dns1, apiConfig.value(config_key::dns1));
                 serverConfig.insert(config_key::dns2, apiConfig.value(config_key::dns2));
                 serverConfig.insert(config_key::containers, apiConfig.value(config_key::containers));
@@ -135,7 +137,21 @@ void ApiController::updateServerConfigFromApi()
             }
         }
 
-        emit updateFinished();
+        emit updateFinished(isConfigUpdateStarted);
         return;
     });
+}
+
+void ApiController::clearApiConfig()
+{
+    auto serverConfig = m_serversModel->getDefaultServerConfig();
+
+    serverConfig.remove(config_key::dns1);
+    serverConfig.remove(config_key::dns2);
+    serverConfig.remove(config_key::containers);
+    serverConfig.remove(config_key::hostName);
+
+    serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
+
+    m_serversModel->editServer(serverConfig);
 }
