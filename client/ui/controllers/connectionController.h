@@ -26,6 +26,8 @@ public:
     QString connectionStateText() const;
 
 public slots:
+    void toggleConnection();
+
     void openConnection();
     void closeConnection();
 
@@ -44,6 +46,8 @@ signals:
 
     void connectionErrorOccurred(const QString &errorMessage);
     void reconnectWithUpdatedContainer(const QString &message);
+
+    void noInstalledContainers();
 
 private:
     Vpn::ConnectionState getCurrentConnectionState();

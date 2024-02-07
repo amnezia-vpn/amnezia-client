@@ -25,6 +25,11 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
+    if (!m_containersModel->isAnyContainerInstalled()) {
+        emit noInstalledContainers();
+        return;
+    }
+
     int serverIndex = m_serversModel->getDefaultServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
@@ -127,6 +132,17 @@ Vpn::ConnectionState ConnectionController::getCurrentConnectionState()
 QString ConnectionController::connectionStateText() const
 {
     return m_connectionStateText;
+}
+
+void ConnectionController::toggleConnection()
+{
+    if (isConnectionInProgress()) {
+        closeConnection();
+    } else if (isConnected()) {
+        closeConnection();
+    } else {
+        openConnection();
+    }
 }
 
 bool ConnectionController::isConnectionInProgress() const

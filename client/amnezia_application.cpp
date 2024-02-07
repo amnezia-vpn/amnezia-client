@@ -390,4 +390,5 @@ void AmneziaApplication::initControllers()
             [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Connecting); });
     connect(m_apiController.get(), &ApiController::errorOccurred, this,
             [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected); });
+    connect(m_apiController.get(), &ApiController::updateFinished, m_connectionController.get(), &ConnectionController::toggleConnection);
 }

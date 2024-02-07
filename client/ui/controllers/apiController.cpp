@@ -3,6 +3,7 @@
 #include <QEventLoop>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QtConcurrent>
 
 #include "configurators/openvpn_configurator.h"
 #include "configurators/wireguard_configurator.h"
@@ -29,7 +30,8 @@ ApiController::ApiController(const QSharedPointer<ServersModel> &serversModel,
 {
 }
 
-void ApiController::processApiConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, QString &config)
+void ApiController::processApiConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData,
+                                     QString &config)
 {
     if (protocol == configKey::cloak) {
         config.replace("<key>", "<key>\n");
@@ -65,70 +67,75 @@ QJsonObject ApiController::fillApiPayload(const QString &protocol, const ApiCont
     return obj;
 }
 
-bool ApiController::updateServerConfigFromApi()
+void ApiController::updateServerConfigFromApi()
 {
-    auto serverConfig = m_serversModel->getDefaultServerConfig();
+    QtConcurrent::run([this]() {
+        auto serverConfig = m_serversModel->getDefaultServerConfig();
 
-    auto containerConfig = serverConfig.value(config_key::containers).toArray();
+        auto containerConfig = serverConfig.value(config_key::containers).toArray();
 
-    if (serverConfig.value(config_key::configVersion).toInt() && containerConfig.isEmpty()) {
-        QNetworkAccessManager manager;
+        if (serverConfig.value(config_key::configVersion).toInt() && containerConfig.isEmpty()) {
+            emit updateStarted();
 
-        QNetworkRequest request;
-        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-        request.setRawHeader("Authorization",
-                             "Api-Key " + serverConfig.value(configKey::accessToken).toString().toUtf8());
-        QString endpoint = serverConfig.value(configKey::apiEdnpoint).toString();
-        request.setUrl(endpoint.replace("https", "http")); // todo remove
+            QNetworkAccessManager manager;
 
-        QString protocol = serverConfig.value(configKey::protocol).toString();
+            QNetworkRequest request;
+            request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+            request.setRawHeader("Authorization",
+                                 "Api-Key " + serverConfig.value(configKey::accessToken).toString().toUtf8());
+            QString endpoint = serverConfig.value(configKey::apiEdnpoint).toString();
+            request.setUrl(endpoint.replace("https", "http")); // todo remove
 
-        auto apiPayloadData = generateApiPayloadData(protocol);
+            QString protocol = serverConfig.value(configKey::protocol).toString();
 
-        QByteArray requestBody = QJsonDocument(fillApiPayload(protocol, apiPayloadData)).toJson();
+            auto apiPayloadData = generateApiPayloadData(protocol);
 
-        QScopedPointer<QNetworkReply> reply;
-        reply.reset(manager.post(request, requestBody));
+            QByteArray requestBody = QJsonDocument(fillApiPayload(protocol, apiPayloadData)).toJson();
 
-        QEventLoop wait;
-        QObject::connect(reply.get(), &QNetworkReply::finished, &wait, &QEventLoop::quit);
-        wait.exec();
+            QScopedPointer<QNetworkReply> reply;
+            reply.reset(manager.post(request, requestBody));
 
-        if (reply->error() == QNetworkReply::NoError) {
-            QString contents = QString::fromUtf8(reply->readAll());
-            auto data = QJsonDocument::fromJson(contents.toUtf8()).object().value(config_key::config).toString();
+            QEventLoop wait;
+            QObject::connect(reply.get(), &QNetworkReply::finished, &wait, &QEventLoop::quit);
+            wait.exec();
 
-            data.replace("vpn://", "");
-            QByteArray ba = QByteArray::fromBase64(data.toUtf8(),
-                                                   QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+            if (reply->error() == QNetworkReply::NoError) {
+                QString contents = QString::fromUtf8(reply->readAll());
+                auto data = QJsonDocument::fromJson(contents.toUtf8()).object().value(config_key::config).toString();
 
-            QByteArray ba_uncompressed = qUncompress(ba);
-            if (!ba_uncompressed.isEmpty()) {
-                ba = ba_uncompressed;
+                data.replace("vpn://", "");
+                QByteArray ba = QByteArray::fromBase64(data.toUtf8(),
+                                                       QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+
+                QByteArray ba_uncompressed = qUncompress(ba);
+                if (!ba_uncompressed.isEmpty()) {
+                    ba = ba_uncompressed;
+                }
+
+                QString configStr = ba;
+                processApiConfig(protocol, apiPayloadData, configStr);
+
+                QJsonObject apiConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
+
+                serverConfig.insert("apiConfig", apiConfig);
+                serverConfig.insert(config_key::dns1, apiConfig.value(config_key::dns1));
+                serverConfig.insert(config_key::dns2, apiConfig.value(config_key::dns2));
+                serverConfig.insert(config_key::containers, apiConfig.value(config_key::containers));
+                serverConfig.insert(config_key::hostName, apiConfig.value(config_key::hostName));
+
+                auto defaultContainer = apiConfig.value(config_key::defaultContainer).toString();
+                serverConfig.insert(config_key::defaultContainer, defaultContainer);
+                m_serversModel->editServer(serverConfig);
+                emit m_serversModel->defaultContainerChanged(ContainerProps::containerFromString(defaultContainer));
+            } else {
+                qDebug() << reply->error();
+                qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+                emit errorOccurred(errorString(ApiConfigDownloadError));
+                return;
             }
-
-            QString configStr = ba;
-            processApiConfig(protocol, apiPayloadData, configStr);
-
-            QJsonObject apiConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
-
-            serverConfig.insert("apiConfig", apiConfig);
-            serverConfig.insert(config_key::dns1, apiConfig.value(config_key::dns1));
-            serverConfig.insert(config_key::dns2, apiConfig.value(config_key::dns2));
-            serverConfig.insert(config_key::containers, apiConfig.value(config_key::containers));
-            serverConfig.insert(config_key::hostName, apiConfig.value(config_key::hostName));
-
-            auto defaultContainer = apiConfig.value(config_key::defaultContainer).toString();
-            serverConfig.insert(config_key::defaultContainer, defaultContainer);
-            m_serversModel->editServer(serverConfig);
-            emit m_serversModel->defaultContainerChanged(ContainerProps::containerFromString(defaultContainer));
-        } else {
-            qDebug() << reply->error();
-            qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-            emit errorOccurred(errorString(ApiConfigDownloadError));
-            return false;
         }
-    }
 
-    return true;
+        emit updateFinished();
+        return;
+    });
 }

@@ -16,10 +16,11 @@ public:
                            const QSharedPointer<ContainersModel> &containersModel, QObject *parent = nullptr);
 
 public slots:
-    bool updateServerConfigFromApi();
+    void updateServerConfigFromApi();
 
 signals:
     void updateStarted();
+    void updateFinished();
     void errorOccurred(const QString &errorMessage);
 
 private:
