@@ -88,7 +88,10 @@ namespace amnezia
         ImportInvalidConfigError = 900,
 
         // Android errors
-        AndroidError = 1000
+        AndroidError = 1000,
+
+        // Api errors
+        ApiConfigDownloadError = 1100
     };
 
 } // namespace amnezia

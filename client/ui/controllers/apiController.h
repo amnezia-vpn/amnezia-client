@@ -19,6 +19,7 @@ public slots:
     bool updateServerConfigFromApi();
 
 signals:
+    void updateStarted();
     void errorOccurred(const QString &errorMessage);
 
 private:
@@ -31,7 +32,7 @@ private:
 
     ApiPayloadData generateApiPayloadData(const QString &protocol);
     QJsonObject fillApiPayload(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData);
-    void processCloudConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, QString &config);
+    void processApiConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, QString &config);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;

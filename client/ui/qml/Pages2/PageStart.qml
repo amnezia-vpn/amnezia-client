@@ -113,6 +113,14 @@ PageType {
         }
     }
 
+    Connections {
+        target: ApiController
+
+        function onErrorOccurred(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
+        }
+    }
+
     StackViewType {
         id: tabBarStackView
 

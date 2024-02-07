@@ -64,6 +64,9 @@ QString errorString(ErrorCode code) {
     // Android errors
     case (AndroidError): errorMessage = QObject::tr("VPN connection error"); break;
 
+    // Api errors
+    case (ApiConfigDownloadError): errorMessage = QObject::tr("Error when retrieving configuration from API"); break;
+
     case(InternalError):
     default:
         errorMessage = QObject::tr("Internal error"); break;

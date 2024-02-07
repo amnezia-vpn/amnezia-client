@@ -91,12 +91,11 @@ void AmneziaApplication::init()
     initControllers();
 
 #ifdef Q_OS_ANDROID
-    if(!AndroidController::initLogging()) {
+    if (!AndroidController::initLogging()) {
         qFatal("Android logging initialization failed");
     }
     AndroidController::instance()->setSaveLogs(m_settings->isSaveLogs());
-    connect(m_settings.get(), &Settings::saveLogsChanged,
-            AndroidController::instance(), &AndroidController::setSaveLogs);
+    connect(m_settings.get(), &Settings::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
 
     connect(AndroidController::instance(), &AndroidController::initConnectionState, this,
             [this](Vpn::ConnectionState state) {
@@ -331,8 +330,8 @@ void AmneziaApplication::initModels()
 
     m_clientManagementModel.reset(new ClientManagementModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
-    connect(m_clientManagementModel.get(), &ClientManagementModel::adminConfigRevoked,
-            m_serversModel.get(), &ServersModel::clearCachedProfile);
+    connect(m_clientManagementModel.get(), &ClientManagementModel::adminConfigRevoked, m_serversModel.get(),
+            &ServersModel::clearCachedProfile);
 
     connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, this,
             [this](const QString &clientId, const QString &clientName, const DockerContainer container,
@@ -370,12 +369,13 @@ void AmneziaApplication::initControllers()
                                                   m_settings, m_configurator));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
-    m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_settings));
+    m_settingsController.reset(
+            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
     if (m_settingsController->isAutoConnectEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
     }
-    connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled , m_serversModel.get(),
+    connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled, m_serversModel.get(),
             &ServersModel::toggleAmneziaDns);
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
@@ -384,6 +384,10 @@ void AmneziaApplication::initControllers()
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
 
-    m_cloudController.reset(new ApiController(m_serversModel, m_containersModel));
-    m_engine->rootContext()->setContextProperty("ApiController", m_cloudController.get());
+    m_apiController.reset(new ApiController(m_serversModel, m_containersModel));
+    m_engine->rootContext()->setContextProperty("ApiController", m_apiController.get());
+    connect(m_apiController.get(), &ApiController::updateStarted, this,
+            [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Connecting); });
+    connect(m_apiController.get(), &ApiController::errorOccurred, this,
+            [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected); });
 }
