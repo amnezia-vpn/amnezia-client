@@ -44,10 +44,10 @@ call "%QT_BIN_DIR:"=%\qt-cmake" --version
 cmake --version
 
 cd %PROJECT_DIR%
-call cmake . -B %WORK_DIR% "-DCMAKE_GENERATOR:STRING=Ninja"  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%"
+call cmake . -B %WORK_DIR%  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%"
 
 cd %WORK_DIR%
-cmake --build . --config release
+cmake --build . --config release -- /p:UseMultiToolTask=true /m
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo "Deploying..."
