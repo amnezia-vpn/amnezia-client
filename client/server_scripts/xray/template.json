@@ -18,7 +18,7 @@
                     "geosite:category-games@cn"
                 ],
                 "outboundTag": "direct"
-            },
+            },     
             {
                 "type": "field",
                 "domain": [
@@ -33,6 +33,13 @@
                     "geosite:private"
                 ],
                 "outboundTag": "direct"
+            },
+            {
+                "type": "field",
+                "ip": [
+                    "172.29.172.254"
+                ],
+                "outboundTag": "proxy"            
             },
             {
                 "type": "field",

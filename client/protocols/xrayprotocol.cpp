@@ -59,7 +59,9 @@ ErrorCode XrayProtocol::start()
     m_xrayProcess.setArguments(args);
 
     connect(&m_xrayProcess, &QProcess::readyReadStandardOutput, this, [this]() {
+#ifdef QT_DEBUG
         qDebug().noquote() << "xray:" << m_xrayProcess.readAllStandardOutput();
+#endif
     });
 
     connect(&m_xrayProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
