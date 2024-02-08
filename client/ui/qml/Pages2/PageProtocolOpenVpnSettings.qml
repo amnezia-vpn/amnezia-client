@@ -53,11 +53,13 @@ PageType {
                 clip: true
                 interactive: false
 
-                model: OpenVpnConfigModel
+                model: OpenVpnConfigModel             
 
                 delegate: Item {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
+
+                    property alias vpnAddressSubnetTextField: vpnAddressSubnetTextField
 
                     ColumnLayout {
                         id: col
@@ -413,5 +415,10 @@ PageType {
         QuestionDrawer {
             id: questionDrawer
         }
+    }
+
+    function init()
+    {
+        listview.currentItem.vpnAddressSubnetTextField.textField.forceActiveFocus()
     }
 }

@@ -51,6 +51,8 @@ PageType {
 
                 Layout.topMargin: 20
 
+                property alias serverName: serverName
+
                 BackButtonType {
                 }
 
@@ -175,5 +177,10 @@ PageType {
                 stackView: root.stackView
             }
         }
+    }
+
+    function init()
+    {
+        header.itemAt(0).serverName.textField.forceActiveFocus()
     }
 }

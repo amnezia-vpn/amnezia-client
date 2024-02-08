@@ -150,4 +150,9 @@ PageType {
         }
         return !hasEmptyField
     }
+
+    function init()
+    {
+        hostname.textField.forceActiveFocus()
+    }
 }

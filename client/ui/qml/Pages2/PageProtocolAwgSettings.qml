@@ -55,8 +55,12 @@ PageType {
                 model: AwgConfigModel
 
                 delegate: Item {
+                    id: _delegate
+
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
+
+                    property alias portTextField:portTextField
 
                     ColumnLayout {
                         id: col
@@ -346,5 +350,10 @@ PageType {
         QuestionDrawer {
             id: questionDrawer
         }
+    }
+
+    function init()
+    {
+        listview.currentItem.portTextField.textField.forceActiveFocus()
     }
 }

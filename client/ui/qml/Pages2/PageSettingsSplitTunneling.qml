@@ -249,6 +249,8 @@ PageType {
         anchors.bottomMargin: 24
 
         TextFieldWithHeaderType {
+            id: website_ip_field
+
             Layout.fillWidth: true
 
             textFieldPlaceholderText: qsTr("website or IP")
@@ -421,5 +423,10 @@ PageType {
                 DividerType {}
             }
         }
+    }
+
+    function init()
+    {
+        website_ip_field.textField.forceActiveFocus()
     }
 }

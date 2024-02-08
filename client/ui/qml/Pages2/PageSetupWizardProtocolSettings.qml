@@ -240,4 +240,9 @@ PageType {
             }
         }
     }
+
+    function init()
+    {
+        port.textField.forceActiveFocus()
+    }
 }

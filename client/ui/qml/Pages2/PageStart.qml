@@ -20,21 +20,21 @@ PageType {
         function onGoToPageHome() {
             tabBar.setCurrentIndex(0)
             tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-
             PageController.updateDrawerRootPage(PageEnum.PageHome)
         }
 
         function onGoToPageSettings() {
             tabBar.setCurrentIndex(2)
             tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
-
             PageController.updateDrawerRootPage(PageEnum.PageSettings)
         }
 
         function onGoToPageViewConfig() {
             var pagePath = PageController.getPagePath(PageEnum.PageSetupWizardViewConfig)
-            tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
-
+            var item = tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
+            if (item.init && typeof item.init === "function") {
+                item.init()
+            }
             PageController.updateDrawerRootPage(PageEnum.PageSetupWizardViewConfig)
         }
 
@@ -61,12 +61,15 @@ PageType {
 
         function onGoToPage(page, slide) {
             var pagePath = PageController.getPagePath(page)
+            var item
             if (slide) {
-                tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
+                item = tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
             } else {
-                tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+                item = tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
-
+            if (item.init && typeof item.init === "function") {
+                item.init()
+            }
             PageController.updateDrawerRootPage(page)
         }
 
@@ -129,15 +132,20 @@ PageType {
 
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
-            tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
-
+            var item = tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+            if (item.init && typeof item.init === "function") {
+                item.init()
+            }
             PageController.updateDrawerRootPage(page)
         }
 
         Component.onCompleted: {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
             ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
-            tabBarStackView.push(pagePath, { "objectName" : pagePath })
+            var item = tabBarStackView.push(pagePath, { "objectName" : pagePath })
+            if (item.init && typeof item.init === "function") {
+                item.init()
+            }
         }
 
 //        onWidthChanged: {

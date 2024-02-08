@@ -58,6 +58,8 @@ PageType {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
+                    property alias trafficFromField: trafficFromField
+
                     ColumnLayout {
                         id: col
 
@@ -77,6 +79,8 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: trafficFromField
+
                             Layout.fillWidth: true
                             Layout.topMargin: 32
 
@@ -178,5 +182,10 @@ PageType {
                 }
             }
         }
+    }
+
+    function init()
+    {
+        listview.currentItem.trafficFromField.textField.forceActiveFocus()
     }
 }

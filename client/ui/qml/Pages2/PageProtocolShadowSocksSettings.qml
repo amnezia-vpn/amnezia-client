@@ -58,6 +58,8 @@ PageType {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
+                    property alias port: port
+
                     ColumnLayout {
                         id: col
 
@@ -77,6 +79,8 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: port
+
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
@@ -152,5 +156,10 @@ PageType {
                 }
             }
         }
+    }
+
+    function init()
+    {
+        listview.currentItem.port.textField.forceActiveFocus()
     }
 }

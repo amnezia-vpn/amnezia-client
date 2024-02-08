@@ -709,5 +709,10 @@ PageType {
             forceActiveFocus()
             mouse.accepted = false
         }
-    } 
+    }
+
+    function init()
+    {
+        clientNameTextField.textField.forceActiveFocus()
+    }
 }

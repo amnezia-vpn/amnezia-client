@@ -140,4 +140,9 @@ PageType {
             id: questionDrawer
         }
     }
+
+    function init()
+    {
+        primaryDns.textField.forceActiveFocus()
+    }
 }

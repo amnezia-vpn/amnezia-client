@@ -79,4 +79,9 @@ PageType {
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
     }
+
+    function init()
+    {
+        textKey.textField.forceActiveFocus()
+    }
 }
