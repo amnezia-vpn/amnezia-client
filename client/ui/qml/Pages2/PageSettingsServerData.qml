@@ -267,7 +267,8 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Do you want to download reset API config?")
+                    questionDrawer.headerText = qsTr("Do you want to reset API config?")
+                    questionDrawer.descriptionText = ""
                     questionDrawer.yesButtonText = qsTr("Continue")
                     questionDrawer.noButtonText = qsTr("Cancel")
 

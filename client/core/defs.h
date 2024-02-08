@@ -91,7 +91,8 @@ namespace amnezia
         AndroidError = 1000,
 
         // Api errors
-        ApiConfigDownloadError = 1100
+        ApiConfigDownloadError = 1100,
+        ApiConfigAlreadyAdded = 1101
     };
 
 } // namespace amnezia

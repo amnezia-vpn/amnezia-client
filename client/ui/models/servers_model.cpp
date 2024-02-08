@@ -554,3 +554,13 @@ bool ServersModel::isCurrentlyProcessedServerFromApi()
     return m_settings->server(m_currentlyProcessedServerIndex).value(config_key::configVersion).toInt();
 }
 
+bool ServersModel::isServerFromApiAlreadyExists(const quint16 crc)
+{
+    for (const auto &server : qAsConst(m_servers)) {
+        if (static_cast<quint16>(server.toObject().value(config_key::crc).toInt()) == crc) {
+            return true;
+        }
+    }
+    return false;
+}
+

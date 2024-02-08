@@ -102,6 +102,8 @@ public slots:
     bool isDefaultServerFromApi();
     bool isCurrentlyProcessedServerFromApi();
 
+    bool isServerFromApiAlreadyExists(const quint16 crc);
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
