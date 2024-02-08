@@ -4,54 +4,123 @@
 
 import Foundation
 import os.log
+import OSLog
 
-public class Logger {
-    static var global: Logger?
-
-    var tag: String
-
-    init(tagged tag: String) {
-        self.tag = tag
+public class IOSLogger : NSObject {
+    struct Constants {
+    #if os(iOS)
+        static let appGroupIdentifier = "com.wireguard.ios.app_group_id"
+    #elseif os(macOS)
+        static let appGroupIdentifier = "com.wireguard.macos.app_group_id"
+    #endif
+        static let networkExtensionLogFileName = "networkextension.log"
+    }
+    
+    private let log: OSLog
+    
+    private lazy var dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy HH:mm:ss"
+        return dateFormatter
+    }()
+    
+    private static let logger = IOSLogger(tag: "IOSLogger")
+    private static var appexLogFileURL: URL? {
+        get {
+            guard let containerURL = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: Constants.appGroupIdentifier
+            ) else {
+                return nil
+            }
+            
+            return containerURL.appendingPathComponent(Constants.networkExtensionLogFileName, isDirectory: false)
+        }
     }
 
-    deinit {}
-
-    func log(message: String) {
-//        let suiteName = "group.org.amnezia.AmneziaVPN"
-//        let logKey = "logMessages"
-//        let sharedDefaults = UserDefaults(suiteName: suiteName)
-//        var logs = sharedDefaults?.array(forKey: logKey) as? [String] ?? []
-//        logs.append(message)
-//        sharedDefaults?.set(logs, forKey: logKey)
+    @objc init(tag: String) {
+        self.log = OSLog(
+            subsystem: Bundle.main.bundleIdentifier!,
+            category: tag
+        )
     }
 
-    private func writeLog(to targetFile: String) -> Bool {
-        return true;
+    @objc func debug(message: String) {
+        log(message, type: .debug)
     }
 
-    static func configureGlobal(tagged tag: String, withFilePath filePath: String?) {
-//        if Logger.global != nil {
-//            return
+    @objc func info(message: String) {
+        log(message, type: .info)
+    }
+
+    @objc func error(message: String) {
+        log(message, type: .error)
+    }
+
+    func log(_ message: String, type: OSLogType) {
+        os_log("%{public}@", log: self.log, type: type, message)
+                
+//        if (Bundle.main.bundlePath.hasSuffix(".appex")) {
+//            let currentDate = Date()
+//            let formattedDateString = dateFormatter.string(from: currentDate)
+//
+//            if let data = "[\(formattedDateString)] \(message)\n".data(using: .utf8) {
+//                let _ = IOSLogger.withAppexLogFile { logFileHandle in
+//                    logFileHandle.seekToEndOfFile()
+//                    logFileHandle.write(data)
+//                }
+//            }
 //        }
-//
-//        Logger.global = Logger(tagged: tag)
-//
-//        var appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown version"
-//
-//        if let appBuild = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-//            appVersion += " (\(appBuild))"
-//        }
-//
-//        Logger.global?.log(message: "App version: \(appVersion)")
+    }
+    
+    @objc static func getAppexLogs(callback: @escaping (String) -> Void) {
+        withAppexLogFile { logFileHandle in
+            if let contents = String(data: logFileHandle.readDataToEndOfFile(), encoding: .utf8) {
+                callback(contents);
+            }
+        }
+    }
+    
+    @objc static func clearAppexLogs() {
+        withAppexLogFile { logFileHandle in
+            logFileHandle.truncateFile(atOffset: 0)
+        }
+    }
+    
+    private static func withAppexLogFile(_ f: (_ handle: FileHandle) throws -> Void) {
+        guard let appexLogFileURL = IOSLogger.appexLogFileURL else {
+            logger.error(message: "IMPOSSIBLE: No known app extension log file.")
+            return
+        }
+
+        
+        do {
+            if !FileManager.default.fileExists(atPath: appexLogFileURL.path) {
+                // Create an empty file
+                if let data = "".data(using: .utf8) {
+                    try data.write(to: appexLogFileURL)
+                } else {
+                    logger.error(message: "Unable to create log file at \(appexLogFileURL)")
+                    return
+                }
+            }
+            
+            let fileHandle = try FileHandle(forUpdating: appexLogFileURL)
+            try f(fileHandle)
+            fileHandle.closeFile()
+        } catch {
+            logger.error(message: "Unable to access log file at \(appexLogFileURL): \(error)")
+        }
     }
 }
 
-func wg_log(_ type: OSLogType, staticMessage msg: StaticString) {
-//    os_log(msg, log: OSLog.default, type: type)
-//    Logger.global?.log(message: "\(msg)")
+// The following functions are used by Wireguard internally for logging.
+
+let wireguardLogger = IOSLogger(tag: "Wireguard")
+
+func wg_log(_ type: OSLogType, staticMessage: StaticString) {
+    wireguardLogger.log("\(staticMessage)", type: type)
 }
 
-func wg_log(_ type: OSLogType, message msg: String) {
-//    os_log("%{AMNEZIA}s", log: OSLog.default, type: type, msg)
-//    Logger.global?.log(message: msg)
+func wg_log(_ type: OSLogType, message: String) {
+    wireguardLogger.log(message, type: type)
 }
