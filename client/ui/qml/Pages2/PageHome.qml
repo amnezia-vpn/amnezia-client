@@ -401,6 +401,13 @@ PageType {
                     model: ServersModel
                     currentIndex: ServersModel.defaultIndex
 
+                    Connections {
+                        target: ServersModel
+                        function onDefaultServerIndexChanged(serverIndex) {
+                            serversMenuContent.currentIndex = serverIndex
+                        }
+                    }
+
                     clip: true
                     interactive: false
 
