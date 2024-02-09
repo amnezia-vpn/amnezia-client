@@ -53,8 +53,8 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 echo "Deploying..."
 
 mkdir "%OUT_APP_DIR%"
-copy "%WORK_DIR%\service\server\%APP_NAME%-service.exe" "%OUT_APP_DIR%"
-copy "%WORK_DIR%\client\%APP_FILENAME%" "%OUT_APP_DIR%"
+copy "%WORK_DIR%\service\server\release\%APP_NAME%-service.exe" "%OUT_APP_DIR%"
+rem copy "%WORK_DIR%\client\%APP_FILENAME%" "%OUT_APP_DIR%"
 
 
 echo "Signing exe"
