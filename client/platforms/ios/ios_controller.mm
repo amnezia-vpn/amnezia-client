@@ -10,12 +10,6 @@
 #include "../protocols/vpnprotocol.h"
 #import "ios_controller_wrapper.h"
 
-#import <NetworkExtension/NetworkExtension.h>
-#import <NetworkExtension/NETunnelProviderManager.h>
-#import <NetworkExtension/NEVPNManager.h>
-#import <NetworkExtension/NETunnelProviderSession.h>
-
-
 const char* Action::start = "start";
 const char* Action::restart = "restart";
 const char* Action::stop = "stop";

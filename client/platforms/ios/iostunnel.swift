@@ -33,9 +33,7 @@ struct Constants {
     static let kMessageKeySplitTunnelSites = "SplitTunnelSites"
 }
 
-class PacketTunnelProvider: NEPacketTunnelProvider {
-    private let logger = IOSLogger(tag: "Tunnel")
-    
+class PacketTunnelProvider: NEPacketTunnelProvider {    
     private lazy var wgAdapter: WireGuardAdapter = {
         return WireGuardAdapter(with: self) { logLevel, message in
             wg_log(logLevel.osLogLevel, message: message)
@@ -70,17 +68,17 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         let tmpStr = String(data: messageData, encoding: .utf8)!
         wg_log(.error, message: tmpStr)
         guard let message = try? JSONSerialization.jsonObject(with: messageData, options: []) as? [String: Any] else {
-            logger.error(message: "Failed to serialize message from app")
+            log(.error, message: "Failed to serialize message from app")
             return
         }
         
         guard let completionHandler = completionHandler else {
-            logger.error(message: "Missing message completion handler")
+            log(.error, message: "Missing message completion handler")
             return
         }
         
         guard let action = message[Constants.kMessageKeyAction] as? String else {
-            logger.error(message: "Missing action key in app message")
+            log(.error, message: "Missing action key in app message")
             completionHandler(nil)
             return
         }
@@ -111,7 +109,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             let activationAttemptId = options?[Constants.kActivationAttemptId] as? String
             let errorNotifier = ErrorNotifier(activationAttemptId: activationAttemptId)
             
-            self.logger.info(message: "PacketTunnelProvider startTunnel")
+            log(.info, message: "PacketTunnelProvider startTunnel")
             
             if let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol {
                 let providerConfiguration = protocolConfiguration.providerConfiguration
@@ -491,10 +489,10 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         wgAdapter.start(tunnelConfiguration: emptyTunnelConfiguration) { error in
             self.dispatchQueue.async {
                 if let error {
-                    self.logger.error(message: "Failed to start an empty tunnel")
+                    log(.error, message: "Failed to start an empty tunnel")
                     completionHandler(error)
                 } else {
-                    self.logger.info(message: "Started an empty tunnel")
+                    log(.info, message: "Started an empty tunnel")
                     self.tunnelAdapterDidStart()
                 }
             }
