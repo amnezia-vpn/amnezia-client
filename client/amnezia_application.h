@@ -121,7 +121,7 @@ private:
     QScopedPointer<SettingsController> m_settingsController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
-    QScopedPointer<ApiController> m_cloudController;
+    QScopedPointer<ApiController> m_apiController;
 };
 
 #endif // AMNEZIA_APPLICATION_H

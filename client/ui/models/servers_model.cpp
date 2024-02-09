@@ -331,6 +331,11 @@ QJsonObject ServersModel::getDefaultServerConfig()
     return m_servers.at(m_defaultServerIndex).toObject();
 }
 
+QJsonObject ServersModel::getCurrentlyProcessedServerConfig()
+{
+    return m_servers.at(m_currentlyProcessedServerIndex).toObject();
+}
+
 void ServersModel::reloadContainerConfig()
 {
     QJsonObject server = m_servers.at(m_currentlyProcessedServerIndex).toObject();
@@ -542,5 +547,20 @@ void ServersModel::toggleAmneziaDns(bool enabled)
 bool ServersModel::isDefaultServerFromApi()
 {
     return m_settings->server(m_defaultServerIndex).value(config_key::configVersion).toInt();
+}
+
+bool ServersModel::isCurrentlyProcessedServerFromApi()
+{
+    return m_settings->server(m_currentlyProcessedServerIndex).value(config_key::configVersion).toInt();
+}
+
+bool ServersModel::isServerFromApiAlreadyExists(const quint16 crc)
+{
+    for (const auto &server : qAsConst(m_servers)) {
+        if (static_cast<quint16>(server.toObject().value(config_key::crc).toInt()) == crc) {
+            return true;
+        }
+    }
+    return false;
 }
 
