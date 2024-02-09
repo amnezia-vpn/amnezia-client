@@ -129,7 +129,7 @@ void ImportController::importConfig()
     } else if (m_config.contains(config_key::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(m_config).toJson());
         if (m_serversModel->isServerFromApiAlreadyExists(crc)) {
-            emit importErrorOccurred(errorString(ErrorCode::ApiConfigAlreadyAdded));
+            emit importErrorOccurred(errorString(ErrorCode::ApiConfigAlreadyAdded), true);
         } else {
             m_config.insert(config_key::crc, crc);
 
