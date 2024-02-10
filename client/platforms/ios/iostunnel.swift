@@ -33,7 +33,7 @@ struct Constants {
     static let kMessageKeySplitTunnelSites = "SplitTunnelSites"
 }
 
-class PacketTunnelProvider: NEPacketTunnelProvider {    
+class PacketTunnelProvider: NEPacketTunnelProvider {
     private lazy var wgAdapter: WireGuardAdapter = {
         return WireGuardAdapter(with: self) { logLevel, message in
             wg_log(logLevel.osLogLevel, message: message)

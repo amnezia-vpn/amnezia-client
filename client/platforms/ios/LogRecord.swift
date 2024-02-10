@@ -6,7 +6,7 @@ extension Log {
     let date: Date
     let level: Level
     let message: String
-    
+
     init?(_ str: String) {
       let dateStr = String(str.prefix(19))
       guard let date = Log.dateFormatter.date(from: dateStr) else { return nil }
@@ -33,14 +33,14 @@ extension Log {
       guard let data = "\n\(description)".data(using: .utf8) else { return }
               
       if !FileManager.default.fileExists(atPath: url.path) {
-        guard let _ = try? "".data(using: .utf8)?.write(to: url) else { return }
+        guard (try? "".data(using: .utf8)?.write(to: url)) != nil else { return }
       }
       
       guard let fileHandle = try? FileHandle(forUpdating: url) else { return }
       
       defer { fileHandle.closeFile() }
       
-      guard let _ = try? fileHandle.seekToEnd() else { return }
+      guard (try? fileHandle.seekToEnd()) != nil else { return }
       try? fileHandle.write(contentsOf: data)
     }
   }
