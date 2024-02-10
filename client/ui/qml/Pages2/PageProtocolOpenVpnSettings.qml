@@ -81,7 +81,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 32
 
-                            headerText: qsTr("VPN Addresses Subnet")
+                            headerText: qsTr("VPN address subnet")
                             textFieldText: subnetAddress
 
                             textField.onEditingFinished: {

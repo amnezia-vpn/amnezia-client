@@ -86,6 +86,8 @@ namespace amnezia
         constexpr char splitTunnelSites[] = "splitTunnelSites";
         constexpr char splitTunnelType[] = "splitTunnelType";
 
+        constexpr char crc[] = "crc";
+
     }
 
     namespace protocols

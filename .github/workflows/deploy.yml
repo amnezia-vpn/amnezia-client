@@ -33,7 +33,7 @@ jobs:
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Get sources'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'true'
         fetch-depth: 10
@@ -78,7 +78,7 @@ jobs:
 
     steps:
     - name: 'Get sources'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'true'
         fetch-depth: 10
@@ -135,6 +135,8 @@ jobs:
 
     env:
       QT_VERSION: 6.5.2
+      CC: cc
+      CXX: c++
 
     steps:
     - name: 'Setup xcode'
@@ -167,7 +169,10 @@ jobs:
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Install go'
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.20'
+        cache: false
 
     - name: 'Setup gomobile'
       run: |
@@ -176,7 +181,7 @@ jobs:
           gomobile init
 
     - name: 'Get sources'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'true'
         fetch-depth: 10
@@ -245,7 +250,7 @@ jobs:
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Get sources'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'true'
         fetch-depth: 10
@@ -346,7 +351,7 @@ jobs:
         chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
 
     - name: 'Get sources'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: 'true'
 
@@ -354,7 +359,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Setup Java'
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'

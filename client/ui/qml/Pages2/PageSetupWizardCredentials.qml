@@ -49,7 +49,7 @@ PageType {
 
                 Layout.fillWidth: true
                 headerText: qsTr("Server IP address [:port]")
-                textFieldPlaceholderText: qsTr("255.255.255.255:88")
+                textFieldPlaceholderText: qsTr("255.255.255.255:22")
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressPortRegExp()
                 }
@@ -73,7 +73,7 @@ PageType {
                 property bool hidePassword: true
 
                 Layout.fillWidth: true
-                headerText: qsTr("Password / SSH private key")
+                headerText: qsTr("Password or SSH private key")
                 textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
                 buttonImageSource: textFieldText !== "" ? (hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg")
                                                         : ""

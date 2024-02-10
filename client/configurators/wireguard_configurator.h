@@ -31,11 +31,11 @@ public:
     QString processConfigWithLocalSettings(QString config);
     QString processConfigWithExportSettings(QString config);
 
+    static ConnectionData genClientKeys();
+
 private:
     ConnectionData prepareWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
                                           const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
-
-    ConnectionData genClientKeys();
     
     bool m_isAwg;
     QString m_serverConfigPath;

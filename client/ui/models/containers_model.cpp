@@ -53,7 +53,7 @@ QVariant ContainersModel::data(const int index, int role) const
     return data(modelIndex, role);
 }
 
-void ContainersModel::updateModel(QJsonArray &containers)
+void ContainersModel::updateModel(const QJsonArray &containers)
 {
     beginResetModel();
     m_containers.clear();

@@ -16,21 +16,29 @@ public:
                            const QSharedPointer<ContainersModel> &containersModel, QObject *parent = nullptr);
 
 public slots:
-    bool updateServerConfigFromApi();
+    void updateServerConfigFromApi();
+
+    void clearApiConfig();
 
 signals:
+    void updateStarted();
+    void updateFinished(bool isConfigUpdateStarted);
     void errorOccurred(const QString &errorMessage);
 
 private:
-    QString genPublicKey(const QString &protocol);
-    QString genCertificateRequest(const QString &protocol);
+    struct ApiPayloadData {
+        OpenVpnConfigurator::ConnectionData certRequest;
 
-    void processCloudConfig(const QString &protocol, QString &config);
+        QString wireGuardClientPrivKey;
+        QString wireGuardClientPubKey;
+    };
+
+    ApiPayloadData generateApiPayloadData(const QString &protocol);
+    QJsonObject fillApiPayload(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData);
+    void processApiConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, QString &config);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
-
-    OpenVpnConfigurator::ConnectionData m_certRequest;
 };
 
 #endif // APICONTROLLER_H

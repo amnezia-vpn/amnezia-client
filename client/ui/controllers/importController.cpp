@@ -131,12 +131,19 @@ void ImportController::importConfig()
     credentials.userName = m_config.value(config_key::userName).toString();
     credentials.secretData = m_config.value(config_key::password).toString();
 
-    if (credentials.isValid()
-        || m_config.contains(config_key::containers)
-        || m_config.contains(config_key::configVersion)) { // todo
+    if (credentials.isValid() || m_config.contains(config_key::containers)) {
         m_serversModel->addServer(m_config);
-
         emit importFinished();
+    } else if (m_config.contains(config_key::configVersion)) {
+        quint16 crc = qChecksum(QJsonDocument(m_config).toJson());
+        if (m_serversModel->isServerFromApiAlreadyExists(crc)) {
+            emit importErrorOccurred(errorString(ErrorCode::ApiConfigAlreadyAdded), true);
+        } else {
+            m_config.insert(config_key::crc, crc);
+
+            m_serversModel->addServer(m_config);
+            emit importFinished();
+        }
     } else {
         qDebug() << "Failed to import profile";
         qDebug().noquote() << QJsonDocument(m_config).toJson();
