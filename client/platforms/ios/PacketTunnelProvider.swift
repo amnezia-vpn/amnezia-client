@@ -115,8 +115,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         let providerConfiguration = protocolConfiguration.providerConfiguration
         if (providerConfiguration?[Constants.ovpnConfigKey] as? Data) != nil {
           self.protoType = .openvpn
-        }
-        else if (providerConfiguration?[Constants.wireGuardConfigKey] as? Data) != nil {
+        } else if (providerConfiguration?[Constants.wireGuardConfigKey] as? Data) != nil {
           self.protoType = .wireguard
         }
       } else {
@@ -198,7 +197,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
           var allowedIPs = [IPAddressRange]()
           let STSdata = Data(splitTunnelSites!.utf8)
           do {
-            let STSArray = try JSONSerialization.jsonObject(with: STSdata) as! [String]
+            guard let STSArray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
             for allowedIPString in STSArray {
               if let allowedIP = IPAddressRange(from: allowedIPString) {
                 allowedIPs.append(allowedIP)
@@ -211,20 +210,19 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
           tunnelConfiguration.peers[index].allowedIPs = allowedIPs
         }
       } else {
-        if (splitTunnelType == "2")
-        {
+        if splitTunnelType == "2" {
           for index in tunnelConfiguration.peers.indices {
             var excludeIPs = [IPAddressRange]()
             let STSdata = Data(splitTunnelSites!.utf8)
             do {
-              let STSarray = try JSONSerialization.jsonObject(with: STSdata) as! [String]
+              guard let STSarray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
               for excludeIPString in STSarray {
                 if let excludeIP = IPAddressRange(from: excludeIPString) {
                   excludeIPs.append(excludeIP)
                 }
               }
             } catch {
-              wg_log(.error,message: "Parse JSONSerialization Error")
+              wg_log(.error, message: "Parse JSONSerialization Error")
             }
             tunnelConfiguration.peers[index].excludeIPs = excludeIPs
           }
@@ -280,7 +278,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
           let providerConfiguration = protocolConfiguration.providerConfiguration,
           let ovpnConfiguration: Data = providerConfiguration[Constants.ovpnConfigKey] as? Data else {
-      // TODO: handle errors properly
+
       wg_log(.error, message: "Can't start startOpenVPN()")
       return
     }
@@ -400,7 +398,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
   }
 
-  // TODO review
   private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data,
                                      withShadowSocks viaSS: Bool = false,
                                      completionHandler: @escaping (Error?) -> Void) {

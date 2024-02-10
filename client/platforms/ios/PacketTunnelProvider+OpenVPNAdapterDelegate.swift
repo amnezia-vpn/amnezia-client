@@ -3,7 +3,6 @@ import NetworkExtension
 import OpenVPNAdapter
 
 extension PacketTunnelProvider: OpenVPNAdapterDelegate {
-
   // OpenVPNAdapter calls this delegate method to configure a VPN tunnel.
   // `completionHandler` callback requires an object conforming to `OpenVPNAdapterPacketFlow`
   // protocol if the tunnel is configured without errors. Otherwise send nil.
@@ -23,16 +22,16 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
       var ipv4IncludedRoutes = [NEIPv4Route]()
       let STSdata = Data(splitTunnelSites!.utf8)
       do {
-        let STSarray = try JSONSerialization.jsonObject(with: STSdata) as! [String]
+        guard let STSarray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
         for allowedIPString in STSarray {
-          if let allowedIP = IPAddressRange(from: allowedIPString){
+          if let allowedIP = IPAddressRange(from: allowedIPString) {
             ipv4IncludedRoutes.append(NEIPv4Route(
               destinationAddress: "\(allowedIP.address)",
               subnetMask: "\(allowedIP.subnetMask())"))
           }
         }
       } catch {
-        wg_log(.error,message: "Parse JSONSerialization Error")
+        wg_log(.error, message: "Parse JSONSerialization Error")
       }
       networkSettings?.ipv4Settings?.includedRoutes = ipv4IncludedRoutes
     } else {
@@ -42,7 +41,7 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
         var ipv6IncludedRoutes = [NEIPv6Route]()
         let STSdata = Data(splitTunnelSites!.utf8)
         do {
-          let STSarray = try JSONSerialization.jsonObject(with: STSdata) as! [String]
+          guard let STSarray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
           for excludeIPString in STSarray {
             if let excludeIP = IPAddressRange(from: excludeIPString) {
               ipv4ExcludedRoutes.append(NEIPv4Route(
@@ -51,7 +50,7 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
             }
           }
         } catch {
-          wg_log(.error,message: "Parse JSONSerialization Error")
+          wg_log(.error, message: "Parse JSONSerialization Error")
         }
         if let allIPv4 = IPAddressRange(from: "0.0.0.0/0") {
           ipv4IncludedRoutes.append(NEIPv4Route(
@@ -67,7 +66,6 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
         networkSettings?.ipv6Settings?.includedRoutes = ipv6IncludedRoutes
         networkSettings?.ipv4Settings?.excludedRoutes = ipv4ExcludedRoutes
       }
-
     }
 
     // Set the network settings for the current tunneling session.
