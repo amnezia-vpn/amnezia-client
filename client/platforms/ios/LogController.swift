@@ -8,7 +8,7 @@
 import Foundation
 
 public func swiftUpdateLogData(_ qtString: std.string) -> std.string {
-  let qtLog = Log(String(qtString))
+  let qtLog = Log(String(describing: qtString))
   var log = qtLog
 
   if let neLog = Log(at: Log.neLogURL) {
