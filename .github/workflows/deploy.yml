@@ -136,7 +136,7 @@ jobs:
     env:
       QT_VERSION: 6.5.2
       CC: cc
-      CXX: c++§
+      CXX: c++
 
     steps:
     - name: 'Setup xcode'
