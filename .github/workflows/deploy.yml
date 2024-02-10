@@ -131,18 +131,18 @@ jobs:
 
   Build-iOS:
     name: 'Build-iOS'
-    runs-on: macos-12
+    runs-on: macos-13
 
     env:
       QT_VERSION: 6.5.2
       CC: cc
-      CXX: c++
+      CXX: c++§
 
     steps:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '14.2'
+        xcode-version: '15.2'
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
