@@ -23,6 +23,7 @@ QJsonObject InterfaceConfig::toJson() const {
   json.insert("serverIpv4AddrIn", QJsonValue(m_serverIpv4AddrIn));
   json.insert("serverIpv6AddrIn", QJsonValue(m_serverIpv6AddrIn));
   json.insert("serverPort", QJsonValue((double)m_serverPort));
+  json.insert("deviceMTU", QJsonValue(m_deviceMTU));
   if ((m_hopType == InterfaceConfig::MultiHopExit) ||
       (m_hopType == InterfaceConfig::SingleHop)) {
     json.insert("serverIpv4Gateway", QJsonValue(m_serverIpv4Gateway));
@@ -85,7 +86,12 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   if (addresses.isEmpty()) {
     return "";
   }
+
   out << "Address = " << addresses.join(", ") << "\n";
+
+  if (!m_deviceMTU) {
+    out << "MTU = " << m_deviceMTU << "\n";
+  }
 
   if (!m_dnsServer.isNull()) {
     QStringList dnsServers(m_dnsServer);

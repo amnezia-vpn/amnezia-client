@@ -19,8 +19,8 @@ bool WireGuardConfigModel::setData(const QModelIndex &index, const QVariant &val
     }
 
     switch (role) {
-    case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
-    case Roles::CipherRole: m_protocolConfig.insert(config_key::cipher, value.toString()); break;
+        case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
+        case Roles::MtuRole: m_protocolConfig.insert(config_key::mtu, value.toString()); break;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -34,9 +34,8 @@ QVariant WireGuardConfigModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
-    case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort);
-    case Roles::CipherRole:
-        return m_protocolConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher);
+        case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString();
+        case Roles::MtuRole: return m_protocolConfig.value(config_key::mtu).toString();
     }
 
     return QVariant();
@@ -49,6 +48,12 @@ void WireGuardConfigModel::updateModel(const QJsonObject &config)
 
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::wireguard).toObject();
+
+    m_protocolConfig[config_key::port] =
+        protocolConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
+
+    m_protocolConfig[config_key::mtu] =
+        protocolConfig.value(config_key::mtu).toString(protocols::wireguard::defaultMtu);
 
     endResetModel();
 }
@@ -64,7 +69,7 @@ QHash<int, QByteArray> WireGuardConfigModel::roleNames() const
     QHash<int, QByteArray> roles;
 
     roles[PortRole] = "port";
-    roles[CipherRole] = "cipher";
+    roles[MtuRole] = "mtu";
 
     return roles;
 }

@@ -251,6 +251,13 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   GETVALUE("serverPskKey", config.m_serverPskKey, String);
   GETVALUE("serverPort", config.m_serverPort, Double);
 
+  if (!obj.contains("deviceMTU") || obj.value("deviceMTU").toString().toInt() == 0)
+  {
+    config.m_deviceMTU = 1420;
+  } else {
+    config.m_deviceMTU = obj.value("deviceMTU").toString().toInt();
+  }
+
   config.m_deviceIpv4Address = obj.value("deviceIpv4Address").toString();
   config.m_deviceIpv6Address = obj.value("deviceIpv6Address").toString();
   if (config.m_deviceIpv4Address.isNull() &&

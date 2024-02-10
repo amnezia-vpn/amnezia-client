@@ -13,7 +13,7 @@ class WireGuardConfigModel : public QAbstractListModel
 public:
     enum Roles {
         PortRole = Qt::UserRole + 1,
-        CipherRole
+        MtuRole
     };
 
     explicit WireGuardConfigModel(QObject *parent = nullptr);

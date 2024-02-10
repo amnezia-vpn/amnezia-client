@@ -225,5 +225,6 @@
         <file>ui/qml/Pages2/PageShareFullAccess.qml</file>
         <file>images/controls/close.svg</file>
         <file>images/controls/search.svg</file>
+        <file>ui/qml/Pages2/PageProtocolWireGuardSettings.qml</file>
     </qresource>
 </RCC>
