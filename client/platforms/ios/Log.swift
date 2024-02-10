@@ -1,3 +1,10 @@
+//
+//  Log.Record.swift
+//  AmneziaVPN
+//
+//  Created by Igor Sorokin on 2/9/24.
+//
+
 import Foundation
 import os.log
 
@@ -44,7 +51,7 @@ struct Log {
   
   init?(at url: URL) {
     if !FileManager.default.fileExists(atPath: url.path) {
-      guard let _ = try? "".data(using: .utf8)!.write(to: url) else { return nil }
+      guard let _ = try? "".data(using: .utf8)?.write(to: url) else { return nil }
     }
     
     guard let fileHandle = try? FileHandle(forUpdating: url) else { return nil }
@@ -66,7 +73,7 @@ struct Log {
       
       defer { fileHandle.closeFile() }
       
-      fileHandle.truncateFile(atOffset: 0)
+      try? fileHandle.truncate(atOffset: 0)
     }
   }
 }

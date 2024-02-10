@@ -1,3 +1,10 @@
+//
+//  LogRecord.swift
+//  AmneziaVPN
+//
+//  Created by Igor Sorokin on 2/9/24.
+//
+
 import Foundation
 import os.log
 
@@ -33,15 +40,15 @@ extension Log {
       guard let data = "\n\(description)".data(using: .utf8) else { return }
               
       if !FileManager.default.fileExists(atPath: url.path) {
-        try! "".data(using: .utf8)!.write(to: url)
+        guard let _ = try? "".data(using: .utf8)?.write(to: url) else { return }
       }
       
       guard let fileHandle = try? FileHandle(forUpdating: url) else { return }
       
       defer { fileHandle.closeFile() }
       
-      try? fileHandle.seekToEnd()
-      fileHandle.write(data)
+      guard let _ = try? fileHandle.seekToEnd() else { return }
+      try? fileHandle.write(contentsOf: data)
     }
   }
 }
