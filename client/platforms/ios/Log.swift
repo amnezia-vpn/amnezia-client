@@ -9,8 +9,16 @@ import Foundation
 import os.log
 
 struct Log {
-  static let IsLoggingEnabledKey = "IsLoggingEnabled"
-  
+  private static let IsLoggingEnabledKey = "IsLoggingEnabled"
+  static var isLoggingEnabled: Bool {
+    get {
+      sharedUserDefaults.bool(forKey: IsLoggingEnabledKey)
+    }
+    set {
+      sharedUserDefaults.setValue(newValue, forKey: IsLoggingEnabledKey)
+    }
+  }
+
   private static let appGroupID = {
 #if os(iOS)
     "group.org.amnezia.AmneziaVPN"
@@ -24,7 +32,7 @@ struct Log {
     return sharedContainerURL.appendingPathComponent("ne.log", isDirectory: false)
   }()
   
-  static var sharedUserDefaults = {
+  private static var sharedUserDefaults = {
     UserDefaults(suiteName: appGroupID)!
   }()
   

@@ -29,5 +29,5 @@ public func swiftDeleteLog() {
 }
 
 public func toggleLogging(_ isEnabled: Bool) {
-  Log.sharedUserDefaults.setValue(isEnabled, forKey: Log.IsLoggingEnabledKey)
+  Log.isLoggingEnabled = isEnabled
 }
