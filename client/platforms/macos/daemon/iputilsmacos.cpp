@@ -56,10 +56,10 @@ bool IPUtilsMacos::setMTUAndUp(const InterfaceConfig& config) {
 
   // MTU
   strncpy(ifr.ifr_name, qPrintable(ifname), IFNAMSIZ);
-  ifr.ifr_mtu = ETH_MTU - WG_MTU_OVERHEAD;
+  ifr.ifr_mtu = config.m_deviceMTU;
   int ret = ioctl(sockfd, SIOCSIFMTU, &ifr);
   if (ret) {
-    logger.error() << "Failed to set MTU:" << strerror(errno);
+    logger.error() << "Failed to set MTU -- " << config.m_deviceMTU << " -- Return code: " << ret;
     return false;
   }
 
