@@ -8,9 +8,7 @@ public func wg_log(_ type: OSLogType, staticMessage: StaticString) {
 }
 
 public func wg_log(_ type: OSLogType, message: String) {
-  guard Log.isLoggingEnabled else { return }
-
-  Log.Record(date: Date(), level: Log.Record.Level(from: type), message: message).save(at: Log.neLogURL)
+  log(type, message: message)
 }
 
 public func log(_ type: OSLogType, message: String) {

@@ -11,9 +11,9 @@ struct Log {
       sharedUserDefaults.setValue(newValue, forKey: IsLoggingEnabledKey)
     }
   }
-
+  
   private static let appGroupID = "group.org.amnezia.AmneziaVPN"
-
+  
   static let neLogURL = {
     let sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)!
     return sharedContainerURL.appendingPathComponent("ne.log", isDirectory: false)
@@ -24,11 +24,11 @@ struct Log {
   }()
   
   static let dateFormatter: DateFormatter = {
-      let dateFormatter = DateFormatter()
-      dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-      return dateFormatter
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+    return dateFormatter
   }()
-
+  
   var records: [Record]
   
   init() {
