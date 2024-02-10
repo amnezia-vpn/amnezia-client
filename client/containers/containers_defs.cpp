@@ -315,7 +315,6 @@ bool ContainerProps::isEasySetupContainer(DockerContainer container)
     case DockerContainer::WireGuard: return true;
     case DockerContainer::Awg: return true;
     case DockerContainer::Cloak: return true;
-    case DockerContainer::Xray: return true;
     default: return false;
     }
 }

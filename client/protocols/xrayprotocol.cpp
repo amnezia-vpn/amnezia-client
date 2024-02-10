@@ -182,6 +182,8 @@ ErrorCode XrayProtocol::startTun2Sock()
         }
     });
 
+
+#if !defined(Q_OS_MACOS)
     connect(m_t2sProcess.data(), &PrivilegedProcess::finished, this,
             [&]() {
                 setConnectionState(Vpn::ConnectionState::Disconnected);
@@ -189,6 +191,7 @@ ErrorCode XrayProtocol::startTun2Sock()
                 IpcClient::Interface()->StartRoutingIpv6();
                 IpcClient::Interface()->clearSavedRoutes();
     });
+#endif
 
     m_t2sProcess->start();
 
