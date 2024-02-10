@@ -86,7 +86,9 @@ bool SettingsController::isLoggingEnabled()
 void SettingsController::toggleLogging(bool enable)
 {
     m_settings->setSaveLogs(enable);
-    AmneziaVPN::toggleLogging(enable);
+#ifdef Q_OS_IOS
+  AmneziaVPN::toggleLogging(enable);
+#endif
     emit loggingStateChanged();
 }
 

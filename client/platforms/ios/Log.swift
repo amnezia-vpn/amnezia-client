@@ -19,13 +19,7 @@ struct Log {
     }
   }
 
-  private static let appGroupID = {
-#if os(iOS)
-    "group.org.amnezia.AmneziaVPN"
-#elseif os(macOS)
-    "group.org.amnezia.AmneziaVPN"
-#endif
-  }()
+  private static let appGroupID = "group.org.amnezia.AmneziaVPN"
   
   static let neLogURL = {
     let sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)!
