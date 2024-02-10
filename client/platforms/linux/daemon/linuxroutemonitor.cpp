@@ -164,7 +164,7 @@ bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
 
     if (rtm->rtm_type == RTN_THROW) {
     struct in_addr ip4;
-    inet_pton(AF_INET, Utils::getgatewayandiface().toUtf8(), &ip4);
+    inet_pton(AF_INET, Utils::getGatewayAndIface().toUtf8(), &ip4);
     nlmsg_append_attr(nlmsg, sizeof(buf), RTA_GATEWAY, &ip4, sizeof(ip4));
     nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 0);
     rtm->rtm_type = RTN_UNICAST;

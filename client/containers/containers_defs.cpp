@@ -87,7 +87,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
              { DockerContainer::Awg, "AmneziaWG" },
-             { DockerContainer::Xray, "Xray" },
+             { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },

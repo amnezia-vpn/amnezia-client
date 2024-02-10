@@ -80,7 +80,7 @@ PageType {
             }
             case PageShare.ConfigType.Xray: {
                 ExportController.generateXrayConfig()
-                shareConnectionDrawer.configCaption = qsTr("Save Xray config")
+                shareConnectionDrawer.configCaption = qsTr("Save XRay config")
                 shareConnectionDrawer.configExtension = ".json"
                 shareConnectionDrawer.configFileName = "amnezia_for_xray"
                 break
@@ -135,7 +135,7 @@ PageType {
     }
     QtObject {
         id: xrayConnectionFormat
-        property string name: qsTr("Xray native format")
+        property string name: qsTr("XRay native format")
         property var type: PageShare.ConfigType.Xray
     }
 

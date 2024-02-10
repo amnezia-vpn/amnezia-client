@@ -142,6 +142,7 @@ namespace amnezia
 
             constexpr char defaultPort[] = "443";
             constexpr char defaultLocalProxyPort[] = "10808";
+            constexpr char defaultLocalAddr[] = "10.33.0.2";
         }
 
         namespace cloak

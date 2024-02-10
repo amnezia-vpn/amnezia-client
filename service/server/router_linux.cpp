@@ -96,7 +96,7 @@ bool RouterLinux::clearSavedRoutes()
 bool RouterLinux::routeDelete(const QString &ipWithSubnet, const QString &gw, const int &sock)
 {
 #ifdef MZ_DEBUG
-    qDebug().noquote() << "RouterMac::routeDelete: " << ipWithSubnet << gw;
+    qDebug().noquote() << "RouterLinux::routeDelete: " << ipWithSubnet << gw;
 #endif
 
     QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
@@ -107,10 +107,10 @@ bool RouterLinux::routeDelete(const QString &ipWithSubnet, const QString &gw, co
         return false;
     }
 
- //   if (ip == "0.0.0.0") {
- //       qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;
- //       return true;
- //   }
+    if (ipWithSubnet == "0.0.0.0/0") {
+        qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;
+        return true;
+    }
 
     struct rtentry route;
     memset(&route, 0, sizeof( route ));
@@ -179,28 +179,42 @@ void RouterLinux::flushDns()
 bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
     qDebug().noquote() << "createTun start";
 
-    char cmd [1000] = {0x0};
-    sprintf(cmd, "ip tuntap add mode tun dev %s", dev.toStdString().c_str());
-    int sys = system(cmd);
-    if(sys < 0)
+
+    QProcess process;
+    QStringList commands;
+
+    commands << "ip" << "tuntap" << "add" << "mode" << "tun" << "dev" << dev;
+    process.start("sudo", commands);
+    if (!process.waitForFinished( -1 ) )
     {
-        qDebug().noquote() << "Could not activate tun device!\n";
+        qDebug().noquote() << "Could not activate tun device!: " << process.errorString();
         return false;
     }
-    memset(&cmd, 0, sizeof(cmd));
-    sprintf(cmd, "ip addr add %s/24 dev %s", subnet.toStdString().c_str(), dev.toStdString().c_str());
-    sys = system(cmd);
-    if(sys < 0)
+
+    commands.clear();
+    commands << "ip" << "tuntap" << "add" << subnet << "dev" << dev;
+    process.start("sudo", commands);
+    if (!process.waitForFinished( -1 ) )
     {
-        qDebug().noquote() << "Could not activate tun device!\n";
+        qDebug().noquote() << "Could not activate tun device!: " << process.errorString();
         return false;
     }
-    memset(&cmd, 0, sizeof(cmd));
-    sprintf(cmd, "ip link set dev %s up", dev.toStdString().c_str());
-    sys = system(cmd);
-    if(sys < 0)
+
+    commands.clear();
+    commands << "ip" << "addr" << "add" << subnet << "dev" << dev;
+    process.start("sudo", commands);
+    if (!process.waitForFinished( -1 ) )
     {
-        qDebug().noquote() << "Could not activate tun device!\n";
+        qDebug().noquote() << "Could not activate tun device!: " << process.errorString();
+        return false;
+    }
+
+    commands.clear();
+    commands << "ip" << "link" << "set" << "dev" << dev << "up";
+    process.start("sudo", commands);
+    if (!process.waitForFinished( -1 ) )
+    {
+        qDebug().noquote() << "Could not activate tun device!: " << process.errorString();
         return false;
     }
 

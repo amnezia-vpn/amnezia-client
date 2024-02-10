@@ -13,18 +13,16 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent):
     VpnProtocol(configuration, parent)
 {
     readXrayConfiguration(configuration);
-    m_routeGateway = Utils::getgatewayandiface();
-    m_vpnGateway = "10.33.0.2";
-    m_vpnLocalAddress = "10.33.0.2";
+    m_routeGateway = Utils::getGatewayAndIface();
+    m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
+    m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
 }
 
 XrayProtocol::~XrayProtocol()
 {
     XrayProtocol::stop();
     QThread::msleep(200);
-#ifndef Q_OS_IOS
     m_xrayProcess.close();
-#endif
 }
 
 ErrorCode XrayProtocol::start()
@@ -36,7 +34,6 @@ ErrorCode XrayProtocol::start()
         return lastError();
     }
 
-#ifndef Q_OS_IOS
     if (Utils::processIsRunning(Utils::executable(xrayExecPath(), true))) {
         Utils::killProcessByName(Utils::executable(xrayExecPath(), true));
     }
@@ -86,9 +83,6 @@ ErrorCode XrayProtocol::start()
         return startTun2Sock();
     }
     else return ErrorCode::XrayExecutableMissing;
-#else
-    return ErrorCode::NotImplementedError;
-#endif
 }
 
 
@@ -99,7 +93,6 @@ ErrorCode XrayProtocol::startTun2Sock()
         return lastError();
     }
 
-#ifndef Q_OS_IOS
     m_t2sProcess = IpcClient::CreatePrivilegedProcess();
 
     if (!m_t2sProcess) {
@@ -119,7 +112,7 @@ ErrorCode XrayProtocol::startTun2Sock()
     m_t2sProcess->setProgram(PermittedProcess::Tun2Socks);
 #ifdef Q_OS_WIN
     QStringList arguments({"-device", "tun://tun2", "-proxy", XrayConStr, "-tun-post-up",
-                           QString("cmd /c netsh interface ip set address name=\"tun2\" static 10.33.0.2 255.255.255.255")});
+                           QString("cmd /c netsh interface ip set address name=\"tun2\" static %1 255.255.255.255").arg(amnezia::protocols::xray::defaultLocalAddr)});
 #endif
 #ifdef Q_OS_LINUX
     QStringList arguments({"-device", "tun://tun2", "-proxy", XrayConStr});
@@ -145,7 +138,7 @@ ErrorCode XrayProtocol::startTun2Sock()
 
 #ifdef Q_OS_MACOS
             QThread::msleep(5000);
-            IpcClient::Interface()->createTun("utun22", "10.33.0.2");
+            IpcClient::Interface()->createTun("utun22", amnezia::protocols::xray::defaultLocalAddr);
             IpcClient::Interface()->updateResolvers("utun22", dnsAddr);
             IpcClient::Interface()->enableKillSwitch(m_configData, 0);
 #endif
@@ -154,7 +147,7 @@ ErrorCode XrayProtocol::startTun2Sock()
 #endif
 #ifdef Q_OS_LINUX
             QThread::msleep(1000);
-            IpcClient::Interface()->createTun("tun2", "10.33.0.2");
+            IpcClient::Interface()->createTun("tun2", amnezia::protocols::xray::defaultLocalAddr);
             IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
             IpcClient::Interface()->enableKillSwitch(m_configData, 0);
 #endif
@@ -197,9 +190,6 @@ ErrorCode XrayProtocol::startTun2Sock()
 
 
     return ErrorCode::NoError;
-#else
-    return ErrorCode::NotImplementedError;
-#endif
 }
 
 void XrayProtocol::stop()
@@ -208,12 +198,10 @@ void XrayProtocol::stop()
     IpcClient::Interface()->disableKillSwitch();
 #endif
     qDebug() << "XrayProtocol::stop()";
-#ifndef Q_OS_IOS
     m_xrayProcess.terminate();
     if (m_t2sProcess) {
         m_t2sProcess->close();
     }
-#endif
 
 #ifdef Q_OS_WIN
     Utils::signalCtrl(m_xrayProcess.processId(), CTRL_C_EVENT);
@@ -233,9 +221,8 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
 {
     m_configData = configuration;
     QJsonObject xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::Xray)).toObject();
-    int localPort = 10808;
     m_xrayConfig = xrayConfiguration;
-    m_localPort = localPort;
+    m_localPort = QString(amnezia::protocols::xray::defaultLocalProxyPort).toInt();
     m_remoteAddress = configuration.value(amnezia::config_key::hostName).toString();
     m_routeMode = configuration.value(amnezia::config_key::splitTunnelType).toInt();
     m_primaryDNS = configuration.value(amnezia::config_key::dns1).toString();

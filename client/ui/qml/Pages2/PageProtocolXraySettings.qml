@@ -73,7 +73,7 @@ PageType {
 
                         HeaderType {
                             Layout.fillWidth: true
-                            headerText: qsTr("Xray settings")
+                            headerText: qsTr("XRay settings")
                         }
 
                         TextFieldWithHeaderType {
@@ -110,10 +110,10 @@ PageType {
                             pressedColor: Qt.rgba(1, 1, 1, 0.12)
                             textColor: "#EB5757"
 
-                            text: qsTr("Remove Xray")
+                            text: qsTr("Remove XRay")
 
                             onClicked: {
-                                questionDrawer.headerText = qsTr("Remove Xray from server?")
+                                questionDrawer.headerText = qsTr("Remove XRay from server?")
                                 questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
                                 questionDrawer.yesButtonText = qsTr("Continue")
                                 questionDrawer.noButtonText = qsTr("Cancel")

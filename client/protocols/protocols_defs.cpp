@@ -71,7 +71,7 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
              { Proto::Awg, "AmneziaWG" },
              { Proto::Ikev2, "IKEv2" },
              { Proto::L2tp, "L2TP" },
-             { Proto::Xray, "Xray" },
+             { Proto::Xray, "XRay" },
 
              { Proto::TorWebSite, "Website in Tor network" },
              { Proto::Dns, "DNS Service" },

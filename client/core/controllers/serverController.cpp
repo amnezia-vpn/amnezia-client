@@ -511,6 +511,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
     const QJsonObject &amneziaWireguarConfig = config.value(ProtocolProps::protoToString(Proto::Awg)).toObject();
+    const QJsonObject &xrayConfig = config.value(ProtocolProps::protoToString(Proto::Xray)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
 
     Vars vars;
@@ -570,7 +571,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
     // Xray vars
     vars.append({ { "$XRAY_SITE_NAME",
-                  cloakConfig.value(config_key::site).toString(protocols::xray::defaultSite) } });
+                  xrayConfig.value(config_key::site).toString(protocols::xray::defaultSite) } });
 
     // Wireguard vars
     vars.append(
