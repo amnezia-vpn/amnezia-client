@@ -12,6 +12,10 @@
     #include <QJniObject>
 #endif
 
+#ifdef Q_OS_IOS
+    #include <AmneziaVPN-Swift.h>
+#endif
+
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                        const QSharedPointer<ContainersModel> &containersModel,
                                        const QSharedPointer<LanguageModel> &languageModel,
@@ -82,6 +86,7 @@ bool SettingsController::isLoggingEnabled()
 void SettingsController::toggleLogging(bool enable)
 {
     m_settings->setSaveLogs(enable);
+    AmneziaVPN::toggleLogging(enable);
     emit loggingStateChanged();
 }
 

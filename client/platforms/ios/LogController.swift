@@ -28,3 +28,6 @@ public func swiftDeleteLog() {
   Log.clear(at: Log.neLogURL)
 }
 
+public func toggleLogging(_ isEnabled: Bool) {
+  Log.sharedUserDefaults.setValue(isEnabled, forKey: Log.IsLoggingEnabledKey)
+}

@@ -9,16 +9,24 @@ import Foundation
 import os.log
 
 struct Log {
-  static var neLogURL: URL {
+  static let IsLoggingEnabledKey = "IsLoggingEnabled"
+  
+  private static let appGroupID = {
 #if os(iOS)
-    let appGroupID = "group.org.amnezia.AmneziaVPN"
+    "group.org.amnezia.AmneziaVPN"
 #elseif os(macOS)
-    let appGroupID = "group.org.amnezia.AmneziaVPN"
+    "group.org.amnezia.AmneziaVPN"
 #endif
-    
+  }()
+  
+  static let neLogURL = {
     let sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)!
     return sharedContainerURL.appendingPathComponent("ne.log", isDirectory: false)
-  }
+  }()
+  
+  static var sharedUserDefaults = {
+    UserDefaults(suiteName: appGroupID)!
+  }()
   
   static let dateFormatter: DateFormatter = {
       let dateFormatter = DateFormatter()
