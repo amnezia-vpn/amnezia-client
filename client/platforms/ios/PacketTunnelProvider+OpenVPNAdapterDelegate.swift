@@ -22,8 +22,8 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
       var ipv4IncludedRoutes = [NEIPv4Route]()
       let STSdata = Data(splitTunnelSites!.utf8)
       do {
-        guard let STSarray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
-        for allowedIPString in STSarray {
+        guard let STSArray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
+        for allowedIPString in STSArray {
           if let allowedIP = IPAddressRange(from: allowedIPString) {
             ipv4IncludedRoutes.append(NEIPv4Route(
               destinationAddress: "\(allowedIP.address)",
@@ -41,8 +41,8 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
         var ipv6IncludedRoutes = [NEIPv6Route]()
         let STSdata = Data(splitTunnelSites!.utf8)
         do {
-          guard let STSarray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
-          for excludeIPString in STSarray {
+          guard let STSArray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
+          for excludeIPString in STSArray {
             if let excludeIP = IPAddressRange(from: excludeIPString) {
               ipv4ExcludedRoutes.append(NEIPv4Route(
                 destinationAddress: "\(excludeIP.address)",
@@ -113,7 +113,7 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
       vpnReachability.stopTracking()
     }
 
-    if let startHandler = startHandler {
+    if let startHandler {
       startHandler(error)
       self.startHandler = nil
     } else {

@@ -64,7 +64,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
   }
 
   override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
-
     let tmpStr = String(data: messageData, encoding: .utf8)!
     wg_log(.error, message: tmpStr)
     guard let message = try? JSONSerialization.jsonObject(with: messageData, options: []) as? [String: Any] else {
@@ -203,29 +202,26 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 allowedIPs.append(allowedIP)
               }
             }
-
           } catch {
             wg_log(.error, message: "Parse JSONSerialization Error")
           }
           tunnelConfiguration.peers[index].allowedIPs = allowedIPs
         }
-      } else {
-        if splitTunnelType == "2" {
-          for index in tunnelConfiguration.peers.indices {
-            var excludeIPs = [IPAddressRange]()
-            let STSdata = Data(splitTunnelSites!.utf8)
-            do {
-              guard let STSarray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
-              for excludeIPString in STSarray {
-                if let excludeIP = IPAddressRange(from: excludeIPString) {
-                  excludeIPs.append(excludeIP)
-                }
+      } else if splitTunnelType == "2" {
+        for index in tunnelConfiguration.peers.indices {
+          var excludeIPs = [IPAddressRange]()
+          let STSdata = Data(splitTunnelSites!.utf8)
+          do {
+            guard let STSArray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
+            for excludeIPString in STSArray {
+              if let excludeIP = IPAddressRange(from: excludeIPString) {
+                excludeIPs.append(excludeIP)
               }
-            } catch {
-              wg_log(.error, message: "Parse JSONSerialization Error")
             }
-            tunnelConfiguration.peers[index].excludeIPs = excludeIPs
+          } catch {
+            wg_log(.error, message: "Parse JSONSerialization Error")
           }
+          tunnelConfiguration.peers[index].excludeIPs = excludeIPs
         }
       }
     }
@@ -235,7 +231,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
     // Start the tunnel
     wgAdapter.start(tunnelConfiguration: tunnelConfiguration) { adapterError in
-      guard let adapterError = adapterError else {
+      guard let adapterError else {
         let interfaceName = self.wgAdapter.interfaceName ?? "unknown"
         wg_log(.info, message: "Tunnel interface is \(interfaceName)")
         completionHandler(nil)
@@ -247,7 +243,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         wg_log(.error, staticMessage: "Starting tunnel failed: could not determine file descriptor")
         errorNotifier.notify(PacketTunnelProviderError.couldNotDetermineFileDescriptor)
         completionHandler(PacketTunnelProviderError.couldNotDetermineFileDescriptor)
-
       case .dnsResolution(let dnsErrors):
         let hostnamesWithDnsResolutionFailure = dnsErrors.map { $0.address }
           .joined(separator: ", ")
@@ -255,20 +250,16 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 "DNS resolution failed for the following hostnames: \(hostnamesWithDnsResolutionFailure)")
         errorNotifier.notify(PacketTunnelProviderError.dnsResolutionFailure)
         completionHandler(PacketTunnelProviderError.dnsResolutionFailure)
-
       case .setNetworkSettings(let error):
         wg_log(.error, message:
                 "Starting tunnel failed with setTunnelNetworkSettings returning \(error.localizedDescription)")
         errorNotifier.notify(PacketTunnelProviderError.couldNotSetNetworkSettings)
         completionHandler(PacketTunnelProviderError.couldNotSetNetworkSettings)
-
       case .startWireGuardBackend(let errorCode):
         wg_log(.error, message: "Starting tunnel failed with wgTurnOn returning \(errorCode)")
         errorNotifier.notify(PacketTunnelProviderError.couldNotStartBackend)
         completionHandler(PacketTunnelProviderError.couldNotStartBackend)
-
       case .invalidState:
-        // Must never happen
         fatalError()
       }
     }
@@ -292,7 +283,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     wgAdapter.stop { error in
       ErrorNotifier.removeLastErrorFile()
 
-      if let error = error {
+      if let error {
         wg_log(.error, message: "Failed to stop WireGuard adapter: \(error.localizedDescription)")
       }
       completionHandler()
@@ -318,7 +309,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     guard let completionHandler = completionHandler else { return }
     wgAdapter.getRuntimeConfiguration { settings in
       var data: Data?
-      if let settings = settings {
+      if let settings {
         data = settings.data(using: .utf8)!
       }
 
@@ -346,7 +337,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     if messageData.count == 1 && messageData[0] == 0 {
       wgAdapter.getRuntimeConfiguration { settings in
         var data: Data?
-        if let settings = settings {
+        if let settings {
           data = settings.data(using: .utf8)!
         }
         completionHandler(data)
@@ -363,7 +354,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       do {
         let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: configString)
         wgAdapter.update(tunnelConfiguration: tunnelConfiguration) { error in
-          if let error = error {
+          if let error {
             wg_log(.error, message: "Failed to switch tunnel configuration: \(error.localizedDescription)")
             completionHandler(nil)
             return
@@ -371,7 +362,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
           self.wgAdapter.getRuntimeConfiguration { settings in
             var data: Data?
-            if let settings = settings {
+            if let settings {
               data = settings.data(using: .utf8)!
             }
             completionHandler(data)
@@ -465,7 +456,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       return
     }
     DispatchQueue.main.async { [weak self] in
-      guard let `self` = self, self.defaultPath != nil else { return }
+      guard let self, self.defaultPath != nil else { return }
       self.handle(networkChange: self.defaultPath!) { _ in }
     }
   }
