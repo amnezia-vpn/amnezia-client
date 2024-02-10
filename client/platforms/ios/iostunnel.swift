@@ -33,8 +33,7 @@ struct Constants {
     static let kMessageKeySplitTunnelSites = "SplitTunnelSites"
 }
 
-class PacketTunnelProvider: NEPacketTunnelProvider {
-    
+class PacketTunnelProvider: NEPacketTunnelProvider {    
     private lazy var wgAdapter: WireGuardAdapter = {
         return WireGuardAdapter(with: self) { logLevel, message in
             wg_log(logLevel.osLogLevel, message: message)
@@ -61,8 +60,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     var protoType: TunnelProtoType = .none
     
     override init() {
-        Logger.configureGlobal(tagged: Constants.loggerTag, withFilePath: FileManager.logFileURL?.path)
-        Logger.global?.log(message: "Init NEPacketTunnelProvider")
         super.init()
     }
     
@@ -71,17 +68,17 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         let tmpStr = String(data: messageData, encoding: .utf8)!
         wg_log(.error, message: tmpStr)
         guard let message = try? JSONSerialization.jsonObject(with: messageData, options: []) as? [String: Any] else {
-            Logger.global?.log(message: "Failed to serialize message from app")
+            log(.error, message: "Failed to serialize message from app")
             return
         }
         
         guard let completionHandler = completionHandler else {
-            Logger.global?.log(message: "Missing message completion handler")
+            log(.error, message: "Missing message completion handler")
             return
         }
         
         guard let action = message[Constants.kMessageKeyAction] as? String else {
-            Logger.global?.log(message: "Missing action key in app message")
+            log(.error, message: "Missing action key in app message")
             completionHandler(nil)
             return
         }
@@ -112,7 +109,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             let activationAttemptId = options?[Constants.kActivationAttemptId] as? String
             let errorNotifier = ErrorNotifier(activationAttemptId: activationAttemptId)
             
-            Logger.global?.log(message: "PacketTunnelProvider startTunnel")
+            log(.info, message: "PacketTunnelProvider startTunnel")
             
             if let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol {
                 let providerConfiguration = protocolConfiguration.providerConfiguration
@@ -492,10 +489,10 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         wgAdapter.start(tunnelConfiguration: emptyTunnelConfiguration) { error in
             self.dispatchQueue.async {
                 if let error {
-                    Logger.global?.log(message: "Failed to start an empty tunnel")
+                    log(.error, message: "Failed to start an empty tunnel")
                     completionHandler(error)
                 } else {
-                    Logger.global?.log(message: "Started an empty tunnel")
+                    log(.info, message: "Started an empty tunnel")
                     self.tunnelAdapterDidStart()
                 }
             }
