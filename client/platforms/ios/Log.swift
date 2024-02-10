@@ -13,7 +13,7 @@ struct Log {
   }
 
   private static let appGroupID = "group.org.amnezia.AmneziaVPN"
-  
+
   static let neLogURL = {
     let sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)!
     return sharedContainerURL.appendingPathComponent("ne.log", isDirectory: false)
@@ -44,7 +44,7 @@ struct Log {
   
   init?(at url: URL) {
     if !FileManager.default.fileExists(atPath: url.path) {
-      guard let _ = try? "".data(using: .utf8)?.write(to: url) else { return nil }
+      guard (try? "".data(using: .utf8)?.write(to: url)) != nil else { return nil }
     }
     
     guard let fileHandle = try? FileHandle(forUpdating: url) else { return nil }
