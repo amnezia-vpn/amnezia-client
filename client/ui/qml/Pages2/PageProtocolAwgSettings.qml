@@ -102,7 +102,7 @@ PageType {
 
                             headerText: qsTr("MTU")
                             textFieldText: mtu
-                            textField.validator: IntValidator { bottom: 0 }
+                            textField.validator: IntValidator { bottom: 576; top: 65535 }
 
                             textField.onEditingFinished: {
                                 if (textFieldText === "") {

@@ -89,7 +89,7 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
 
   out << "Address = " << addresses.join(", ") << "\n";
 
-  if (!m_deviceMTU) {
+  if (m_deviceMTU) {
     out << "MTU = " << m_deviceMTU << "\n";
   }
 
