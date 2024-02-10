@@ -259,6 +259,7 @@ namespace libssh {
             if (fin.open(QIODevice::ReadOnly)) {
                 for (int currentChunkId = 0; currentChunkId < chunksCount; currentChunkId++) {
                     QByteArray chunk = fin.read(bufferSize);
+                    if (chunk.size() != bufferSize) return ErrorCode::SshSftpEofError;
 
                     int bytesWritten = sftp_write(file, chunk.data(), chunk.size());
 
@@ -273,6 +274,7 @@ namespace libssh {
 
                 if (lastChunkSize != 0) {
                     QByteArray lastChunk = fin.read(lastChunkSize);
+                    if (lastChunk.size() != lastChunkSize) return ErrorCode::SshSftpEofError;
 
                     int bytesWritten = sftp_write(file, lastChunk.data(), lastChunkSize);
 
