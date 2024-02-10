@@ -1,10 +1,3 @@
-//
-//  NELogController.swift
-//  networkextension
-//
-//  Created by Igor Sorokin on 2/9/24.
-//
-
 import Foundation
 import os.log
 

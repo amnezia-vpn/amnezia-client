@@ -1,10 +1,3 @@
-//
-//  IOSController+.swift
-//  AmneziaVPN
-//
-//  Created by Igor Sorokin on 2/8/24.
-//
-
 import Foundation
 
 public func swiftUpdateLogData(_ qtString: std.string) -> std.string {
