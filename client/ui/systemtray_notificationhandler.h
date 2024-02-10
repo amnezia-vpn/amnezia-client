@@ -17,7 +17,9 @@ public:
     explicit SystemTrayNotificationHandler(QObject* parent);
     ~SystemTrayNotificationHandler();
 
-    void setConnectionState(VpnProtocol::VpnConnectionState state) override;
+    void setConnectionState(Vpn::ConnectionState state) override;
+
+    void onTranslationsUpdated() override;
 
 protected:
     virtual void notify(Message type, const QString& title,
@@ -26,7 +28,7 @@ protected:
 private:
     void showHideWindow();
 
-    void setTrayState(VpnProtocol::VpnConnectionState state);
+    void setTrayState(Vpn::ConnectionState state);
     void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
 
     void setTrayIcon(const QString &iconPath);
@@ -35,9 +37,11 @@ private:
     QMenu m_menu;
     QSystemTrayIcon m_systemTrayIcon;
 
+    QAction* m_trayActionShow = nullptr;
     QAction* m_trayActionConnect = nullptr;
     QAction* m_trayActionDisconnect = nullptr;
-    QAction* m_preferencesAction = nullptr;
+    QAction* m_trayActionVisitWebSite = nullptr;
+    QAction* m_trayActionQuit = nullptr;
     QAction* m_statusLabel = nullptr;    
     QAction* m_separator = nullptr;
 

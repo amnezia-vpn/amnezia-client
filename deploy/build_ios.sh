@@ -34,7 +34,7 @@ clang -v
 # Generate XCodeProj
 $QT_BIN_DIR/qt-cmake . -B $BUILD_DIR -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 
-KEYCHAIN=amnezia.build.keychain
+KEYCHAIN=amnezia.build.ios.keychain
 KEYCHAIN_FILE=$HOME/Library/Keychains/${KEYCHAIN}-db
 
 # Setup keychain

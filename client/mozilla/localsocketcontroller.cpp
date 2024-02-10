@@ -1,7 +1,6 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 #include "protocols/protocols_defs.h"
 #include "localsocketcontroller.h"
 
@@ -113,52 +112,121 @@ void LocalSocketController::daemonConnected() {
 
 void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
-  qDebug() << rawConfig;
-  QJsonObject wgConfig = rawConfig.value("wireguard_config_data").toObject();
+  QString protocolName = rawConfig.value("protocol").toString();
+
+  int splitTunnelType = rawConfig.value("splitTunnelType").toInt();
+  QJsonArray splitTunnelSites = rawConfig.value("splitTunnelSites").toArray();
+
+  QJsonObject wgConfig = rawConfig.value(protocolName + "_config_data").toObject();
 
   QJsonObject json;
   json.insert("type", "activate");
-//  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
+  //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::config_key::client_priv_key));
   json.insert("deviceIpv4Address", wgConfig.value(amnezia::config_key::client_ip));
   json.insert("deviceIpv6Address", "dead::1");
   json.insert("serverPublicKey", wgConfig.value(amnezia::config_key::server_pub_key));
   json.insert("serverPskKey", wgConfig.value(amnezia::config_key::psk_key));
   json.insert("serverIpv4AddrIn", wgConfig.value(amnezia::config_key::hostName));
-//  json.insert("serverIpv6AddrIn", QJsonValue(hop.m_server.ipv6AddrIn()));
+  //  json.insert("serverIpv6AddrIn", QJsonValue(hop.m_server.ipv6AddrIn()));
   json.insert("serverPort", wgConfig.value(amnezia::config_key::port).toInt());
 
   json.insert("serverIpv4Gateway", wgConfig.value(amnezia::config_key::hostName));
-//  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
+  //  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
   json.insert("dnsServer", rawConfig.value(amnezia::config_key::dns1));
 
   QJsonArray jsAllowedIPAddesses;
 
-  QJsonObject range_ipv4;
-  range_ipv4.insert("address", "0.0.0.0");
-  range_ipv4.insert("range", 0);
-  range_ipv4.insert("isIpv6", false);
-  jsAllowedIPAddesses.append(range_ipv4);
+  QJsonArray plainAllowedIP = wgConfig.value(amnezia::config_key::allowed_ips).toArray();
+  QJsonArray defaultAllowedIP = QJsonArray::fromStringList(QString("0.0.0.0/0, ::/0").split(","));
 
-  QJsonObject range_ipv6;
-  range_ipv6.insert("address", "::");
-  range_ipv6.insert("range", 0);
-  range_ipv6.insert("isIpv6", true);
-  jsAllowedIPAddesses.append(range_ipv6);
+  if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
+    // Use AllowedIP list from WG config because of higher priority
+    for (auto v : plainAllowedIP) {
+      QString ipRange = v.toString();
+      if (ipRange.split('/').size() > 1){
+          QJsonObject range;
+          range.insert("address", ipRange.split('/')[0]);
+          range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
+          range.insert("isIpv6", false);
+          jsAllowedIPAddesses.append(range);
+      } else {
+          QJsonObject range;
+          range.insert("address",ipRange);
+          range.insert("range", 32);
+          range.insert("isIpv6", false);
+          jsAllowedIPAddesses.append(range);
+      }
+    }
+  } else {
+
+    // Use APP split tunnel
+      if (splitTunnelType == 0 || splitTunnelType == 2) {
+          QJsonObject range_ipv4;
+          range_ipv4.insert("address", "0.0.0.0");
+          range_ipv4.insert("range", 0);
+          range_ipv4.insert("isIpv6", false);
+          jsAllowedIPAddesses.append(range_ipv4);
+
+          QJsonObject range_ipv6;
+          range_ipv6.insert("address", "::");
+          range_ipv6.insert("range", 0);
+          range_ipv6.insert("isIpv6", true);
+          jsAllowedIPAddesses.append(range_ipv6);
+      }
+
+      if (splitTunnelType == 1) {
+          for (auto v : splitTunnelSites) {
+              QString ipRange = v.toString();
+              if (ipRange.split('/').size() > 1){
+                  QJsonObject range;
+                  range.insert("address", ipRange.split('/')[0]);
+                  range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
+                  range.insert("isIpv6", false);
+                  jsAllowedIPAddesses.append(range);
+              } else {
+                  QJsonObject range;
+                  range.insert("address",ipRange);
+                  range.insert("range", 32);
+                  range.insert("isIpv6", false);
+                  jsAllowedIPAddesses.append(range);
+              }
+          }
+      }
+  }
 
   json.insert("allowedIPAddressRanges", jsAllowedIPAddesses);
 
 
-    QJsonArray jsExcludedAddresses;
-    jsExcludedAddresses.append(wgConfig.value(amnezia::config_key::hostName));
-    json.insert("excludedAddresses", jsExcludedAddresses);
+  QJsonArray jsExcludedAddresses;
+  jsExcludedAddresses.append(wgConfig.value(amnezia::config_key::hostName));
+  if (splitTunnelType == 2) {
+    for (auto v : splitTunnelSites) {
+          QString ipRange = v.toString();
+          jsExcludedAddresses.append(ipRange);
+      }
+  }
+
+  json.insert("excludedAddresses", jsExcludedAddresses);
 
 
-//  QJsonArray splitTunnelApps;
-//  for (const auto& uri : hop.m_vpnDisabledApps) {
-//    splitTunnelApps.append(QJsonValue(uri));
-//  }
-//  json.insert("vpnDisabledApps", splitTunnelApps);
+  //  QJsonArray splitTunnelApps;
+  //  for (const auto& uri : hop.m_vpnDisabledApps) {
+  //    splitTunnelApps.append(QJsonValue(uri));
+  //  }
+  //  json.insert("vpnDisabledApps", splitTunnelApps);
+  
+  if (protocolName == amnezia::config_key::awg) {
+    json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
+    json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));
+    json.insert(amnezia::config_key::junkPacketMaxSize, wgConfig.value(amnezia::config_key::junkPacketMaxSize));
+    json.insert(amnezia::config_key::initPacketJunkSize, wgConfig.value(amnezia::config_key::initPacketJunkSize));
+    json.insert(amnezia::config_key::responsePacketJunkSize, wgConfig.value(amnezia::config_key::responsePacketJunkSize));
+    json.insert(amnezia::config_key::initPacketMagicHeader, wgConfig.value(amnezia::config_key::initPacketMagicHeader));
+    json.insert(amnezia::config_key::responsePacketMagicHeader, wgConfig.value(amnezia::config_key::responsePacketMagicHeader));
+    json.insert(amnezia::config_key::underloadPacketMagicHeader, wgConfig.value(amnezia::config_key::underloadPacketMagicHeader));
+    json.insert(amnezia::config_key::transportPacketMagicHeader, wgConfig.value(amnezia::config_key::transportPacketMagicHeader));
+  }
 
   write(json);
 }
@@ -175,6 +243,7 @@ void LocalSocketController::deactivate() {
   QJsonObject json;
   json.insert("type", "deactivate");
   write(json);
+  emit disconnected();
 }
 
 void LocalSocketController::checkStatus() {

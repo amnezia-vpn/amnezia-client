@@ -18,50 +18,34 @@ find_library(FW_STOREKIT StoreKit)
 find_library(FW_USERNOTIFICATIONS UserNotifications)
 
 set(LIBS ${LIBS}
-    ${FW_AUTHENTICATIONSERVICES} ${FW_UIKIT}
-    ${FW_AVFOUNDATION} ${FW_FOUNDATION} ${FW_STOREKIT}
+    ${FW_AUTHENTICATIONSERVICES}
+    ${FW_UIKIT}
+    ${FW_AVFOUNDATION}
+    ${FW_FOUNDATION}
+    ${FW_STOREKIT}
     ${FW_USERNOTIFICATIONS}
 )
 
 
 set(HEADERS ${HEADERS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/protocols/ios_vpnprotocol.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.h
-    #${CMAKE_CURRENT_SOURCE_DIR}/mozilla/shared/bigint.h
-    #${CMAKE_CURRENT_SOURCE_DIR}/mozilla/shared/bigintipv6addr.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/mozilla/shared/ipaddress.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ipaddressrange.h   # TODO need refactor
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
 )
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h PROPERTIES OBJECTIVE_CPP_HEADER TRUE)
+
 
 set(SOURCES ${SOURCES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/protocols/ios_vpnprotocol.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/mozilla/shared/ipaddress.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ipaddressrange.cpp # TODO need refactor
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/MobileUtils.mm
 )
-
-#set(SOURCES ${SOURCES}
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Keychain.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/IPAddressRange.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/InterfaceConfiguration.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Model/NETunnelProviderProtocol+Extension.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/TunnelConfiguration.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Model/TunnelConfiguration+WgQuickConfig.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/Endpoint.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Model/String+ArrayConversion.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/PeerConfiguration.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/DNSServer.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardApp/LocalizationHelper.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/FileManager+Extension.swift
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKitC/x25519.c
-#    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/PrivateKey.swift
-#)
 
 
 target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
@@ -112,23 +96,26 @@ target_compile_options(${PROJECT} PRIVATE
     -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\"
     -DVPN_NE_BUNDLEID=\"${BUILD_IOS_APP_IDENTIFIER}.network-extension\"
 )
+
+set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/amneziawg-apple/Sources)
+
 target_sources(${PROJECT} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosvpnprotocol.swift
+#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosvpnprotocol.swift
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ioslogger.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Keychain.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/IPAddressRange.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/InterfaceConfiguration.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Model/NETunnelProviderProtocol+Extension.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/TunnelConfiguration.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Model/TunnelConfiguration+WgQuickConfig.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/Endpoint.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/Model/String+ArrayConversion.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/PeerConfiguration.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/DNSServer.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardApp/LocalizationHelper.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/Shared/FileManager+Extension.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKitC/x25519.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/3rd/wireguard-apple/Sources/WireGuardKit/PrivateKey.swift
+    ${WG_APPLE_SOURCE_DIR}/Shared/Keychain.swift
+    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddressRange.swift
+    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/InterfaceConfiguration.swift
+    ${WG_APPLE_SOURCE_DIR}/Shared/Model/NETunnelProviderProtocol+Extension.swift
+    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/TunnelConfiguration.swift
+    ${WG_APPLE_SOURCE_DIR}/Shared/Model/TunnelConfiguration+WgQuickConfig.swift
+    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/Endpoint.swift
+    ${WG_APPLE_SOURCE_DIR}/Shared/Model/String+ArrayConversion.swift
+    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PeerConfiguration.swift
+    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/DNSServer.swift
+    ${WG_APPLE_SOURCE_DIR}/WireGuardApp/LocalizationHelper.swift
+    ${WG_APPLE_SOURCE_DIR}/Shared/FileManager+Extension.swift
+    ${WG_APPLE_SOURCE_DIR}/WireGuardKitC/x25519.c
+    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PrivateKey.swift
 )
 
 target_sources(${PROJECT} PRIVATE

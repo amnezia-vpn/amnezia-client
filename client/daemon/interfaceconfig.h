@@ -10,22 +10,49 @@
 
 #include "ipaddress.h"
 
-struct InterfaceConfig {
-  int m_hopindex = 0;
+class QJsonObject;
+
+class InterfaceConfig {
+  Q_GADGET
+
+ public:
+  InterfaceConfig() {}
+
+  enum HopType { SingleHop, MultiHopEntry, MultiHopExit };
+  Q_ENUM(HopType)
+
+  HopType m_hopType;
   QString m_privateKey;
   QString m_deviceIpv4Address;
   QString m_deviceIpv6Address;
   QString m_serverIpv4Gateway;
   QString m_serverIpv6Gateway;
   QString m_serverPublicKey;
-  QString m_serverPskKey;
   QString m_serverIpv4AddrIn;
+  QString m_serverPskKey;
   QString m_serverIpv6AddrIn;
   QString m_dnsServer;
   int m_serverPort = 0;
   QList<IPAddress> m_allowedIPAddressRanges;
   QStringList m_excludedAddresses;
   QStringList m_vpnDisabledApps;
+#if defined(MZ_ANDROID) || defined(MZ_IOS)
+  QString m_installationId;
+#endif
+
+  QString m_junkPacketCount;
+  QString m_junkPacketMinSize;
+  QString m_junkPacketMaxSize;
+  QString m_initPacketJunkSize;
+  QString m_responsePacketJunkSize;
+  QString m_initPacketMagicHeader;
+  QString m_responsePacketMagicHeader;
+  QString m_underloadPacketMagicHeader;
+  QString m_transportPacketMagicHeader;
+
+  QJsonObject toJson() const;
+  QString toWgConf(
+      const QMap<QString, QString>& extra = QMap<QString, QString>()) const;
 };
 
 #endif  // INTERFACECONFIG_H

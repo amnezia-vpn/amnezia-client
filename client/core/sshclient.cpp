@@ -10,6 +10,8 @@ const uint32_t S_IRWXU = 0644;
 #endif
 
 namespace libssh {
+    const QString libsshTimeoutError = "Timeout connecting to";
+
     std::function<QString()> Client::m_passphraseCallback;
 
     Client::Client(QObject *parent) : QObject(parent)
@@ -45,20 +47,29 @@ namespace libssh {
             ssh_options_set(m_session, SSH_OPTIONS_USER, hostUsername.c_str());
             ssh_options_set(m_session, SSH_OPTIONS_LOG_VERBOSITY, &logVerbosity);
 
-            int connectionResult = ssh_connect(m_session);
+            QFutureWatcher<int> watcher;
+            QFuture<int> future = QtConcurrent::run([this]() {
+                return ssh_connect(m_session);
+            });
+
+            QEventLoop wait;
+            connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
+            watcher.setFuture(future);
+            wait.exec();
+
+            int connectionResult = watcher.result();
 
             if (connectionResult != SSH_OK) {
-                qDebug() << ssh_get_error(m_session);
-                return fromLibsshErrorCode(ssh_get_error_code(m_session));
+                return fromLibsshErrorCode();
             }
 
             std::string authUsername = credentials.userName.toStdString();
 
             int authResult = SSH_ERROR;
-            if (credentials.password.contains("BEGIN") && credentials.password.contains("PRIVATE KEY")) {
+            if (credentials.secretData.contains("BEGIN") && credentials.secretData.contains("PRIVATE KEY")) {
                 ssh_key privateKey = nullptr;
                 ssh_key publicKey = nullptr;
-                authResult = ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
+                authResult = ssh_pki_import_privkey_base64(credentials.secretData.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
                 if (authResult == SSH_OK) {
                     authResult = ssh_pki_export_privkey_to_pubkey(privateKey, &publicKey);
                 }
@@ -78,18 +89,17 @@ namespace libssh {
                     ssh_key_free(privateKey);
                 }
                 if (authResult != SSH_OK) {
-                    qDebug() << ssh_get_error(m_session);
-                    ErrorCode errorCode = fromLibsshErrorCode(ssh_get_error_code(m_session));
+                    qCritical() << ssh_get_error(m_session);
+                    ErrorCode errorCode = fromLibsshErrorCode();
                     if (errorCode == ErrorCode::NoError) {
                         errorCode = ErrorCode::SshPrivateKeyFormatError;
                     }
                     return errorCode;
                 }
             } else {
-                authResult = ssh_userauth_password(m_session, authUsername.c_str(), credentials.password.toStdString().c_str());
+                authResult = ssh_userauth_password(m_session, authUsername.c_str(), credentials.secretData.toStdString().c_str());
                 if (authResult != SSH_OK) {
-                    qDebug() << ssh_get_error(m_session);
-                    return fromLibsshErrorCode(ssh_get_error_code(m_session));
+                    return fromLibsshErrorCode();
                 }
             }
         }
@@ -186,16 +196,15 @@ namespace libssh {
     ErrorCode Client::writeResponse(const QString &data)
     {
         if (m_channel == nullptr) {
-            qDebug() << "ssh channel not initialized";
-            return fromLibsshErrorCode(ssh_get_error_code(m_session));
+            qCritical() << "ssh channel not initialized";
+            return fromLibsshErrorCode();
         }
 
         int bytesWritten = ssh_channel_write(m_channel, data.toUtf8(), (uint32_t)data.size());
         if (bytesWritten == data.size() && ssh_channel_write(m_channel, "\n", 1)) {
-            return fromLibsshErrorCode(ssh_get_error_code(m_session));
+            return fromLibsshErrorCode();
         }
-        qDebug() << ssh_get_error(m_session);
-        return fromLibsshErrorCode(ssh_get_error_code(m_session));
+        return fromLibsshErrorCode();
     }
 
     ErrorCode Client::closeChannel()
@@ -210,8 +219,7 @@ namespace libssh {
             ssh_channel_free(m_channel);
             m_channel = nullptr;
         }
-        qDebug() << ssh_get_error(m_session);
-        return fromLibsshErrorCode(ssh_get_error_code(m_session));
+        return fromLibsshErrorCode();
     }
 
     ErrorCode Client::sftpFileCopy(const SftpOverwriteMode overwriteMode, const QString& localPath, const QString& remotePath, const QString &fileDesc)
@@ -304,15 +312,24 @@ namespace libssh {
             sftp_free(m_sftpSession);
             m_sftpSession = nullptr;
         }
-        qDebug() << ssh_get_error(m_session);
+        qCritical() << ssh_get_error(m_session);
         return errorCode;
     }
 
-    ErrorCode Client::fromLibsshErrorCode(int errorCode)
+    ErrorCode Client::fromLibsshErrorCode()
     {
+        int errorCode = ssh_get_error_code(m_session);
+        if (errorCode != SSH_NO_ERROR) {
+            QString errorMessage = ssh_get_error(m_session);
+            qCritical() << errorMessage;
+            if (errorMessage.contains(libsshTimeoutError)) {
+                return ErrorCode::SshTimeoutError;
+            }
+        }
+
         switch (errorCode) {
         case(SSH_NO_ERROR): return ErrorCode::NoError;
-        case(SSH_REQUEST_DENIED): return ErrorCode::SshRequsetDeniedError;
+        case(SSH_REQUEST_DENIED): return ErrorCode::SshRequestDeniedError;
         case(SSH_EINTR): return ErrorCode::SshInterruptedError;
         case(SSH_FATAL): return ErrorCode::SshInternalError;
         default: return ErrorCode::SshInternalError;
@@ -346,7 +363,7 @@ namespace libssh {
 
         ssh_key privateKey = nullptr;
         m_passphraseCallback = passphraseCallback;
-        authResult = ssh_pki_import_privkey_base64(credentials.password.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
+        authResult = ssh_pki_import_privkey_base64(credentials.secretData.toStdString().c_str(), nullptr, callback, nullptr, &privateKey);
         if (authResult == SSH_OK) {
             char *b64 = nullptr;
 

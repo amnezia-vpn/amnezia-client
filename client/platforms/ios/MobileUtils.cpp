@@ -1,5 +1,15 @@
 #include "MobileUtils.h"
 
-void MobileUtils::shareText(const QStringList&) {}
+MobileUtils::MobileUtils(QObject *parent) : QObject(parent)
+{
+}
 
+bool MobileUtils::shareText(const QStringList &)
+{
+    return false;
+}
 
+QString MobileUtils::openFile()
+{
+    return QString();
+}

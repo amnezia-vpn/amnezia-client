@@ -11,9 +11,6 @@
 #include "core/defs.h"
 #include "settings.h"
 
-#ifdef Q_OS_IOS
-#include "protocols/ios_vpnprotocol.h"
-#endif
 
 #ifdef AMNEZIA_DESKTOP
 #include "core/ipcclient.h"
@@ -54,7 +51,7 @@ public:
     bool isConnected() const;
     bool isDisconnected() const;
 
-    VpnProtocol::VpnConnectionState connectionState();
+    Vpn::ConnectionState connectionState();
     QSharedPointer<VpnProtocol> vpnProtocol() const;
 
     const QString &remoteAddress() const;
@@ -77,14 +74,14 @@ public slots:
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void connectionStateChanged(VpnProtocol::VpnConnectionState state);
+    void connectionStateChanged(Vpn::ConnectionState state);
     void vpnProtocolError(amnezia::ErrorCode error);
 
     void serviceIsNotReady();
 
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
-    void onConnectionStateChanged(VpnProtocol::VpnConnectionState state);
+    void onConnectionStateChanged(Vpn::ConnectionState state);
 
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
@@ -107,12 +104,13 @@ private:
 #ifdef Q_OS_ANDROID
    AndroidVpnProtocol* androidVpnProtocol = nullptr;
 
-   AndroidVpnProtocol* createDefaultAndroidVpnProtocol(DockerContainer container);
+   AndroidVpnProtocol* createDefaultAndroidVpnProtocol();
    void createAndroidConnections();
-   void createAndroidConnections(DockerContainer container);
 #endif
 
    void createProtocolConnections();
+
+   void appendSplitTunnelingConfig();
 };
 
 #endif // VPNCONNECTION_H

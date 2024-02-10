@@ -10,9 +10,19 @@
 
 #include "ipcserver.h"
 
+#include "../../client/daemon/daemonlocalserver.h"
+
+
+#ifdef Q_OS_WIN
+#include "windows/daemon/windowsdaemon.h"
+#endif
+
+#ifdef Q_OS_LINUX
+#include "linux/daemon/linuxdaemon.h"
+#endif
+
 #ifdef Q_OS_MAC
 #include "macos/daemon/macosdaemon.h"
-#include "../../client/daemon/daemonlocalserver.h"
 #endif
 
 class QLocalServer;
@@ -26,16 +36,21 @@ class LocalServer : public QObject
 public:
     explicit LocalServer(QObject* parent = nullptr);
     ~LocalServer();
-
     QSharedPointer<QLocalServer> m_server;
-
     IpcServer m_ipcServer;
     QRemoteObjectHost m_serverNode;
     bool m_isRemotingEnabled = false;
-
-#ifdef Q_OS_MAC
-    MacOSDaemon daemon;
+#ifdef Q_OS_LINUX
     DaemonLocalServer server{qApp};
+    LinuxDaemon daemon;
+#endif
+#ifdef Q_OS_WIN
+    DaemonLocalServer server{qApp};
+    WindowsDaemon daemon;
+#endif
+#ifdef Q_OS_MAC
+    DaemonLocalServer server{qApp};
+    MacOSDaemon daemon;
 #endif
 };
 

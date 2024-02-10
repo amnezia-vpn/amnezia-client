@@ -1,4 +1,23 @@
 message("Client android ${CMAKE_ANDROID_ARCH_ABI} build")
+
+set(APP_ANDROID_MIN_SDK 24)
+set(ANDROID_PLATFORM "android-${APP_ANDROID_MIN_SDK}" CACHE STRING
+    "The minimum API level supported by the application or library" FORCE)
+
+# set QTP0002 policy: target properties that specify Android-specific paths may contain generator expressions
+qt_policy(SET QTP0002 NEW)
+
+set_target_properties(${PROJECT} PROPERTIES
+    QT_ANDROID_VERSION_NAME ${CMAKE_PROJECT_VERSION}
+    QT_ANDROID_VERSION_CODE ${APP_ANDROID_VERSION_CODE}
+    QT_ANDROID_MIN_SDK_VERSION ${APP_ANDROID_MIN_SDK}
+    QT_ANDROID_TARGET_SDK_VERSION 34
+    QT_ANDROID_SDK_BUILD_TOOLS_REVISION 34.0.0
+    QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android
+)
+
+set(QT_ANDROID_MULTI_ABI_FORWARD_VARS "QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL;CMAKE_BUILD_TYPE")
+
 # We need to include qtprivate api's
 # As QAndroidBinder is not yet implemented with a public api
 set(LIBS ${LIBS} Qt6::CorePrivate)
@@ -8,50 +27,17 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/platforms/android)
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_notificationhandler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/androidutils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/androidvpnactivity.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.h
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.h
 )
 
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_controller.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_notificationhandler.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/androidutils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/androidvpnactivity.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.cpp
-)
-
-add_custom_command(
-    TARGET ${PROJECT} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/AndroidManifest.xml
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/build.gradle
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/gradle/wrapper/gradle-wrapper.jar
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/gradle/wrapper/gradle-wrapper.properties
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/gradlew
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/gradlew.bat
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/gradle.properties
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/res/values/libs.xml
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/res/xml/fileprovider.xml
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/AuthHelper.java
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/IPCContract.kt
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/NotificationUtil.kt
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/OpenVPNThreadv3.kt
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/Prefs.kt
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/VPNLogger.kt
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/VPNService.kt
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/VPNServiceBinder.kt
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/qt/AmneziaApp.kt
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/qt/PackageManagerHelper.java
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/qt/VPNActivity.kt
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/qt/VPNClientBinder.kt
-    ${CMAKE_CURRENT_SOURCE_DIR}/android/src/org/amnezia/vpn/qt/VPNPermissionHelper.kt
-    ${CMAKE_CURRENT_BINARY_DIR}
-)
-
-set_property(TARGET ${PROJECT} PROPERTY
-    QT_ANDROID_PACKAGE_SOURCE_DIR
-    ${CMAKE_CURRENT_SOURCE_DIR}/android
 )
 
 foreach(abi IN ITEMS ${QT_ANDROID_ABIS})

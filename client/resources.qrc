@@ -1,15 +1,10 @@
 <RCC>
     <qresource prefix="/">
-        <file>translations/amneziavpn_ru.qm</file>
         <file>images/close.png</file>
         <file>images/settings.png</file>
         <file>images/favorites_disabled.png</file>
         <file>images/favorites_enabled.png</file>
         <file>images/favorites_hover.png</file>
-        <file>images/controls/check_off.png</file>
-        <file>images/controls/check_on.png</file>
-        <file>images/controls/radio_off.png</file>
-        <file>images/controls/radio_on.png</file>
         <file>images/download.png</file>
         <file>images/upload.png</file>
         <file>images/tray/active.png</file>
@@ -61,75 +56,6 @@
         <file>server_scripts/wireguard/template.conf</file>
         <file>server_scripts/website_tor/configure_container.sh</file>
         <file>server_scripts/website_tor/run_container.sh</file>
-        <file>ui/qml/main.qml</file>
-        <file>ui/qml/Pages/PageBase.qml</file>
-        <file>ui/qml/Pages/PageAppSetting.qml</file>
-        <file>ui/qml/Pages/PageGeneralSettings.qml</file>
-        <file>ui/qml/Pages/PageNetworkSetting.qml</file>
-        <file>ui/qml/Pages/PageNewServer.qml</file>
-        <file>ui/qml/Pages/PageServerConfiguringProgress.qml</file>
-        <file>ui/qml/Pages/PageNewServerProtocols.qml</file>
-        <file>ui/qml/Pages/PageServerList.qml</file>
-        <file>ui/qml/Pages/PageServerContainers.qml</file>
-        <file>ui/qml/Pages/PageServerSettings.qml</file>
-        <file>ui/qml/Pages/PageSetupWizard.qml</file>
-        <file>ui/qml/Pages/PageSetupWizardHighLevel.qml</file>
-        <file>ui/qml/Pages/PageSetupWizardLowLevel.qml</file>
-        <file>ui/qml/Pages/PageSetupWizardMediumLevel.qml</file>
-        <file>ui/qml/Pages/PageSetupWizardVPNMode.qml</file>
-        <file>ui/qml/Pages/PageShareConnection.qml</file>
-        <file>ui/qml/Pages/PageSites.qml</file>
-        <file>ui/qml/Pages/PageStart.qml</file>
-        <file>ui/qml/Pages/PageVPN.qml</file>
-        <file>ui/qml/Pages/PageAbout.qml</file>
-        <file>ui/qml/Pages/PageQrDecoderIos.qml</file>
-        <file>ui/qml/Pages/PageViewConfig.qml</file>
-        <file>ui/qml/Pages/PageClientManagement.qml</file>
-        <file>ui/qml/Pages/ClientInfo/PageClientInfoBase.qml</file>
-        <file>ui/qml/Pages/ClientInfo/PageClientInfoOpenVPN.qml</file>
-        <file>ui/qml/Pages/ClientInfo/PageClientInfoWireGuard.qml</file>
-        <file>ui/qml/Pages/Protocols/PageProtoCloak.qml</file>
-        <file>ui/qml/Pages/Protocols/PageProtoOpenVPN.qml</file>
-        <file>ui/qml/Pages/Protocols/PageProtoShadowSocks.qml</file>
-        <file>ui/qml/Pages/Protocols/PageProtoSftp.qml</file>
-        <file>ui/qml/Pages/Protocols/PageProtoTorWebSite.qml</file>
-        <file>ui/qml/Pages/Protocols/PageProtocolBase.qml</file>
-        <file>ui/qml/Pages/Protocols/PageProtoWireGuard.qml</file>
-        <file>ui/qml/Pages/InstallSettings/InstallSettingsBase.qml</file>
-        <file>ui/qml/Pages/InstallSettings/SelectContainer.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoCloak.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtocolBase.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoOpenVPN.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoSftp.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoShadowSocks.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoTorWebSite.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoAmnezia.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoWireGuard.qml</file>
-        <file>ui/qml/Pages/Share/PageShareProtoIkev2.qml</file>
-        <file>ui/qml/Controls/BasicButtonType.qml</file>
-        <file>ui/qml/Controls/BlueButtonType.qml</file>
-        <file>ui/qml/Controls/CheckBoxType.qml</file>
-        <file>ui/qml/Controls/ComboBoxType.qml</file>
-        <file>ui/qml/Controls/ImageButtonType.qml</file>
-        <file>ui/qml/Controls/LabelType.qml</file>
-        <file>ui/qml/Controls/RadioButtonType.qml</file>
-        <file>ui/qml/Controls/SettingButtonType.qml</file>
-        <file>ui/qml/Controls/ShareConnectionButtonType.qml</file>
-        <file>ui/qml/Controls/ShareConnectionContent.qml</file>
-        <file>ui/qml/Controls/TextFieldType.qml</file>
-        <file>ui/qml/Controls/RichLabelType.qml</file>
-        <file>ui/qml/Controls/SvgImageType.qml</file>
-        <file>ui/qml/Controls/FlickableType.qml</file>
-        <file>ui/qml/Controls/UrlButtonType.qml</file>
-        <file>ui/qml/Controls/TextAreaType.qml</file>
-        <file>ui/qml/Controls/ContextMenu.qml</file>
-        <file>ui/qml/Controls/FadeBehavior.qml</file>
-        <file>ui/qml/Controls/VisibleBehavior.qml</file>
-        <file>ui/qml/Controls/Caption.qml</file>
-        <file>ui/qml/Controls/Logo.qml</file>
-        <file>ui/qml/Controls/BackButton.qml</file>
-        <file>ui/qml/Controls/ShareConnectionButtonCopyType.qml</file>
-        <file>ui/qml/Controls/SvgButtonType.qml</file>
         <file>ui/qml/Config/GlobalConfig.qml</file>
         <file>ui/qml/Config/qmldir</file>
         <file>server_scripts/check_server_is_busy.sh</file>
@@ -166,10 +92,138 @@
         <file>images/svg/control_point_black_24dp.svg</file>
         <file>images/svg/settings_suggest_black_24dp.svg</file>
         <file>server_scripts/website_tor/Dockerfile</file>
-        <file>ui/qml/Controls/PopupWithQuestion.qml</file>
-        <file>ui/qml/Pages/PageAdvancedServerSettings.qml</file>
-        <file>ui/qml/Controls/PopupWarning.qml</file>
-        <file>ui/qml/Controls/PopupWithTextField.qml</file>
         <file>server_scripts/check_user_in_sudo.sh</file>
+        <file>ui/qml/Controls2/BasicButtonType.qml</file>
+        <file>ui/qml/Controls2/TextFieldWithHeaderType.qml</file>
+        <file>fonts/pt-root-ui_vf.ttf</file>
+        <file>ui/qml/Controls2/LabelWithButtonType.qml</file>
+        <file>images/controls/arrow-right.svg</file>
+        <file>images/controls/chevron-right.svg</file>
+        <file>ui/qml/Controls2/ImageButtonType.qml</file>
+        <file>ui/qml/Controls2/CardType.qml</file>
+        <file>ui/qml/Controls2/CheckBoxType.qml</file>
+        <file>images/controls/check.svg</file>
+        <file>ui/qml/Controls2/DropDownType.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardStart.qml</file>
+        <file>ui/qml/main2.qml</file>
+        <file>images/amneziaBigLogo.png</file>
+        <file>images/amneziaBigLogo.svg</file>
+        <file>ui/qml/Controls2/FlickableType.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardCredentials.qml</file>
+        <file>ui/qml/Controls2/HeaderType.qml</file>
+        <file>images/controls/arrow-left.svg</file>
+        <file>ui/qml/Pages2/PageSetupWizardProtocols.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardEasy.qml</file>
+        <file>images/controls/chevron-down.svg</file>
+        <file>images/controls/chevron-up.svg</file>
+        <file>ui/qml/Controls2/TextTypes/ParagraphTextType.qml</file>
+        <file>ui/qml/Controls2/TextTypes/Header2TextType.qml</file>
+        <file>ui/qml/Controls2/HorizontalRadioButton.qml</file>
+        <file>ui/qml/Controls2/VerticalRadioButton.qml</file>
+        <file>ui/qml/Controls2/SwitcherType.qml</file>
+        <file>ui/qml/Controls2/TabButtonType.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardProtocolSettings.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardInstalling.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardConfigSource.qml</file>
+        <file>images/controls/folder-open.svg</file>
+        <file>images/controls/qr-code.svg</file>
+        <file>images/controls/text-cursor.svg</file>
+        <file>ui/qml/Pages2/PageSetupWizardTextKey.qml</file>
+        <file>ui/qml/Pages2/PageStart.qml</file>
+        <file>ui/qml/Controls2/TabImageButtonType.qml</file>
+        <file>images/controls/home.svg</file>
+        <file>images/controls/settings-2.svg</file>
+        <file>images/controls/share-2.svg</file>
+        <file>ui/qml/Pages2/PageHome.qml</file>
+        <file>ui/qml/Pages2/PageSettingsServersList.qml</file>
+        <file>ui/qml/Pages2/PageShare.qml</file>
+        <file>ui/qml/Controls2/TextTypes/Header1TextType.qml</file>
+        <file>ui/qml/Controls2/TextTypes/LabelTextType.qml</file>
+        <file>ui/qml/Controls2/TextTypes/ButtonTextType.qml</file>
+        <file>ui/qml/Controls2/Header2Type.qml</file>
+        <file>images/controls/plus.svg</file>
+        <file>ui/qml/Components/ConnectButton.qml</file>
+        <file>images/connectionProgress.svg</file>
+        <file>images/connectionOff.svg</file>
+        <file>images/connectionOn.svg</file>
+        <file>images/controls/download.svg</file>
+        <file>ui/qml/Controls2/ProgressBarType.qml</file>
+        <file>ui/qml/Components/ConnectionTypeSelectionDrawer.qml</file>
+        <file>ui/qml/Components/HomeContainersListView.qml</file>
+        <file>ui/qml/Controls2/TextTypes/CaptionTextType.qml</file>
+        <file>images/controls/settings.svg</file>
+        <file>ui/qml/Pages2/PageSettingsServerInfo.qml</file>
+        <file>ui/qml/Controls2/PageType.qml</file>
+        <file>ui/qml/Controls2/PopupType.qml</file>
+        <file>images/controls/edit-3.svg</file>
+        <file>ui/qml/Pages2/PageSettingsServerData.qml</file>
+        <file>ui/qml/Components/SettingsContainersListView.qml</file>
+        <file>ui/qml/Controls2/TextTypes/ListItemTitleType.qml</file>
+        <file>ui/qml/Controls2/DividerType.qml</file>
+        <file>ui/qml/Controls2/DrawerType.qml</file>
+        <file>ui/qml/Controls2/StackViewType.qml</file>
+        <file>ui/qml/Pages2/PageSettings.qml</file>
+        <file>images/controls/amnezia.svg</file>
+        <file>images/controls/app.svg</file>
+        <file>images/controls/radio.svg</file>
+        <file>images/controls/save.svg</file>
+        <file>images/controls/server.svg</file>
+        <file>ui/qml/Pages2/PageSettingsServerProtocols.qml</file>
+        <file>ui/qml/Pages2/PageSettingsServerServices.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardViewConfig.qml</file>
+        <file>images/controls/file-cog-2.svg</file>
+        <file>ui/qml/Components/QuestionDrawer.qml</file>
+        <file>ui/qml/Pages2/PageDeinstalling.qml</file>
+        <file>ui/qml/Controls2/BackButtonType.qml</file>
+        <file>ui/qml/Pages2/PageSettingsServerProtocol.qml</file>
+        <file>ui/qml/Components/TransportProtoSelector.qml</file>
+        <file>ui/qml/Controls2/ListViewWithRadioButtonType.qml</file>
+        <file>images/controls/radio-button.svg</file>
+        <file>images/controls/radio-button-inner-circle.png</file>
+        <file>images/controls/radio-button-pressed.svg</file>
+        <file>images/controls/radio-button-inner-circle-pressed.png</file>
+        <file>ui/qml/Components/ShareConnectionDrawer.qml</file>
+        <file>ui/qml/Pages2/PageSettingsConnection.qml</file>
+        <file>ui/qml/Pages2/PageSettingsDns.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApplication.qml</file>
+        <file>ui/qml/Pages2/PageSettingsBackup.qml</file>
+        <file>images/controls/delete.svg</file>
+        <file>ui/qml/Pages2/PageSettingsAbout.qml</file>
+        <file>images/controls/github.svg</file>
+        <file>images/controls/mail.svg</file>
+        <file>images/controls/telegram.svg</file>
+        <file>ui/qml/Controls2/TextTypes/SmallTextType.qml</file>
+        <file>ui/qml/Filters/ContainersModelFilters.qml</file>
+        <file>ui/qml/Components/SelectLanguageDrawer.qml</file>
+        <file>ui/qml/Controls2/BusyIndicatorType.qml</file>
+        <file>ui/qml/Pages2/PageProtocolOpenVpnSettings.qml</file>
+        <file>ui/qml/Pages2/PageProtocolShadowSocksSettings.qml</file>
+        <file>ui/qml/Pages2/PageProtocolCloakSettings.qml</file>
+        <file>ui/qml/Pages2/PageProtocolRaw.qml</file>
+        <file>ui/qml/Pages2/PageSettingsLogging.qml</file>
+        <file>ui/qml/Pages2/PageServiceSftpSettings.qml</file>
+        <file>images/controls/copy.svg</file>
+        <file>ui/qml/Pages2/PageServiceTorWebsiteSettings.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardQrReader.qml</file>
+        <file>images/controls/eye.svg</file>
+        <file>images/controls/eye-off.svg</file>
+        <file>ui/qml/Pages2/PageSettingsSplitTunneling.qml</file>
+        <file>ui/qml/Controls2/ContextMenuType.qml</file>
+        <file>ui/qml/Controls2/TextAreaType.qml</file>
+        <file>images/controls/trash.svg</file>
+        <file>images/controls/more-vertical.svg</file>
+        <file>ui/qml/Controls2/ListViewWithLabelsType.qml</file>
+        <file>ui/qml/Pages2/PageServiceDnsSettings.qml</file>
+        <file>ui/qml/Controls2/TopCloseButtonType.qml</file>
+        <file>images/controls/x-circle.svg</file>
+        <file>ui/qml/Pages2/PageProtocolAwgSettings.qml</file>
+        <file>server_scripts/awg/template.conf</file>
+        <file>server_scripts/awg/start.sh</file>
+        <file>server_scripts/awg/configure_container.sh</file>
+        <file>server_scripts/awg/run_container.sh</file>
+        <file>server_scripts/awg/Dockerfile</file>
+        <file>ui/qml/Pages2/PageShareFullAccess.qml</file>
+        <file>images/controls/close.svg</file>
+        <file>images/controls/search.svg</file>
     </qresource>
 </RCC>

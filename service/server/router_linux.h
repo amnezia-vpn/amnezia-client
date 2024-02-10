@@ -27,6 +27,7 @@ public:
     bool clearSavedRoutes();
     bool routeDelete(const QString &ip, const QString &gw, const int &sock);
     bool routeDeleteList(const QString &gw, const QStringList &ips);
+    QString getgatewayandiface();
     void flushDns();
 
 public slots:

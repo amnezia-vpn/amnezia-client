@@ -1,19 +1,11 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 #ifndef ANDROID_CONTROLLER_H
 #define ANDROID_CONTROLLER_H
 
-#include <QJniEnvironment>
 #include <QJniObject>
-
-#include "ui/pages_logic/StartPageLogic.h"
 
 #include "protocols/vpnprotocol.h"
 
 using namespace amnezia;
-
 
 class AndroidController : public QObject
 {
@@ -21,60 +13,82 @@ class AndroidController : public QObject
 
 public:
     explicit AndroidController();
-    static AndroidController* instance();
+    static AndroidController *instance();
 
-    virtual ~AndroidController() override = default;
+    bool initialize();
 
-    bool initialize(StartPageLogic *startPageLogic);
+    // keep synchronized with org.amnezia.vpn.protocol.ProtocolState
+    enum class ConnectionState
+    {
+        CONNECTED,
+        CONNECTING,
+        DISCONNECTED,
+        DISCONNECTING,
+        RECONNECTING,
+        UNKNOWN
+    };
 
-    ErrorCode start();
+    ErrorCode start(const QJsonObject &vpnConfig);
     void stop();
-    void resumeStart();
-
-    void checkStatus();
-    void setNotificationText(const QString& title, const QString& message, int timerSec);
-    void shareConfig(const QString& data, const QString& suggestedName);
-    void setFallbackConnectedNotification();
-    void getBackendLogs(std::function<void(const QString&)>&& callback);
-    void cleanupBackendLogs();
-    void importConfig(const QString& data);
-
-    const QJsonObject &vpnConfig() const;
-    void setVpnConfig(const QJsonObject &newVpnConfig);
-
+    void setNotificationText(const QString &title, const QString &message, int timerSec);
+    void saveFile(const QString &fileName, const QString &data);
+    QString openFile(const QString &filter);
+    bool isCameraPresent();
     void startQrReaderActivity();
+    void setSaveLogs(bool enabled);
+    void exportLogsFile(const QString &fileName);
+    void clearLogs();
+
+    static bool initLogging();
+    static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
 
 signals:
-    void connectionStateChanged(VpnProtocol::VpnConnectionState state);
-
-    // This signal is emitted when the controller is initialized. Note that the
-    // VPN tunnel can be already active. In this case, "connected" should be set
-    // to true and the "connectionDate" should be set to the activation date if
-    // known.
-    // If "status" is set to false, the backend service is considered unavailable.
-    void initialized(bool status, bool connected, const QDateTime& connectionDate);
-
-    void statusUpdated(QString totalRx, QString totalTx, QString endpoint, QString deviceIPv4);
-    void scheduleStatusCheckSignal();
-
-protected slots:
-    void scheduleStatusCheckSlot();
+    void connectionStateChanged(Vpn::ConnectionState state);
+    void status(ConnectionState state);
+    void serviceDisconnected();
+    void serviceError();
+    void vpnPermissionRejected();
+    void vpnConnected();
+    void vpnDisconnected();
+    void vpnReconnecting();
+    void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
+    void fileOpened(QString uri);
+    void configImported(QString config);
+    void importConfigFromOutside(QString config);
+    void initConnectionState(Vpn::ConnectionState state);
 
 private:
-    bool m_init = false;
+    bool isWaitingStatus = true;
 
-    QJsonObject m_vpnConfig;
+    static jclass log;
+    static jmethodID logDebug;
+    static jmethodID logInfo;
+    static jmethodID logWarning;
+    static jmethodID logError;
+    static jmethodID logFatal;
 
-    StartPageLogic *m_startPageLogic;
+    void qtAndroidControllerInitialized();
 
-    bool m_serviceConnected = false;
-    std::function<void(const QString&)> m_logCallback;
+    static Vpn::ConnectionState convertState(ConnectionState state);
+    static QString textConnectionState(ConnectionState state);
 
-    static void startActivityForResult(JNIEnv* env, jobject /*thiz*/, jobject intent);
+    // JNI functions called by Android
+    static void onStatus(JNIEnv *env, jobject thiz, jint stateCode);
+    static void onServiceDisconnected(JNIEnv *env, jobject thiz);
+    static void onServiceError(JNIEnv *env, jobject thiz);
+    static void onVpnPermissionRejected(JNIEnv *env, jobject thiz);
+    static void onVpnConnected(JNIEnv *env, jobject thiz);
+    static void onVpnDisconnected(JNIEnv *env, jobject thiz);
+    static void onVpnReconnecting(JNIEnv *env, jobject thiz);
+    static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
+    static void onConfigImported(JNIEnv *env, jobject thiz, jstring data);
+    static void onFileOpened(JNIEnv *env, jobject thiz, jstring uri);
+    static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
 
-    bool isConnected = false;
-
-    void scheduleStatusCheck();
+    template <typename Ret, typename ...Args>
+    static auto callActivityMethod(const char *methodName, const char *signature, Args &&...args);
+    template <typename ...Args>
+    static void callActivityMethod(const char *methodName, const char *signature, Args &&...args);
 };
 
 #endif // ANDROID_CONTROLLER_H

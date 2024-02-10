@@ -1,10 +1,10 @@
 #include "containers_model.h"
 
-ContainersModel::ContainersModel(std::shared_ptr<Settings> settings, QObject *parent) :
-    m_settings(settings),
-    QAbstractListModel(parent)
-{
+#include <QJsonArray>
 
+ContainersModel::ContainersModel(QObject *parent)
+    : QAbstractListModel(parent)
+{
 }
 
 int ContainersModel::rowCount(const QModelIndex &parent) const
@@ -13,47 +13,122 @@ int ContainersModel::rowCount(const QModelIndex &parent) const
     return ContainerProps::allContainers().size();
 }
 
-QHash<int, QByteArray> ContainersModel::roleNames() const {
-    QHash<int, QByteArray> roles;
-    roles[NameRole] = "name_role";
-    roles[DescRole] = "desc_role";
-    roles[DefaultRole] = "default_role";
-    roles[ServiceTypeRole] = "service_type_role";
-    roles[IsInstalledRole] = "is_installed_role";
-    return roles;
-}
-
 QVariant ContainersModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() < 0
-            || index.row() >= ContainerProps::allContainers().size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
         return QVariant();
     }
 
-    DockerContainer c = ContainerProps::allContainers().at(index.row());
-    if (role == NameRole) {
-        return ContainerProps::containerHumanNames().value(c);
+    DockerContainer container = ContainerProps::allContainers().at(index.row());
+
+    switch (role) {
+    case NameRole: return ContainerProps::containerHumanNames().value(container);
+    case DescriptionRole: return ContainerProps::containerDescriptions().value(container);
+    case DetailedDescriptionRole: return ContainerProps::containerDetailedDescriptions().value(container);
+    case ConfigRole: {
+        if (container == DockerContainer::None) {
+            return QJsonObject();
+        }
+        return m_containers.value(container);
     }
-    if (role == DescRole) {
-        return ContainerProps::containerDescriptions().value(c);
+    case ServiceTypeRole: return ContainerProps::containerService(container);
+    case DockerContainerRole: return container;
+    case IsEasySetupContainerRole: return ContainerProps::isEasySetupContainer(container);
+    case EasySetupHeaderRole: return ContainerProps::easySetupHeader(container);
+    case EasySetupDescriptionRole: return ContainerProps::easySetupDescription(container);
+    case EasySetupOrderRole: return ContainerProps::easySetupOrder(container);
+    case IsInstalledRole: return m_containers.contains(container);
+    case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_currentlyProcessedContainerIndex);
+    case IsDefaultRole: return container == m_defaultContainerIndex;
+    case IsSupportedRole: return ContainerProps::isSupportedByCurrentPlatform(container);
+    case IsShareableRole: return ContainerProps::isShareable(container);
     }
-    if (role == DefaultRole) {
-        return c == m_settings->defaultContainer(m_selectedServerIndex);
-    }
-    if (role == ServiceTypeRole) {
-        return ContainerProps::containerService(c);
-    }
-    if (role == IsInstalledRole) {
-        return m_settings->containers(m_selectedServerIndex).contains(c);
-    }
+
     return QVariant();
 }
 
-void ContainersModel::setSelectedServerIndex(int index)
+QVariant ContainersModel::data(const int index, int role) const
+{
+    QModelIndex modelIndex = this->index(index);
+    return data(modelIndex, role);
+}
+
+void ContainersModel::updateModel(const QJsonArray &containers)
 {
     beginResetModel();
-    m_selectedServerIndex = index;
+    m_containers.clear();
+    for (const QJsonValue &val : containers) {
+        m_containers.insert(ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()),
+                             val.toObject());
+    }
     endResetModel();
 }
 
+void ContainersModel::setDefaultContainer(const int containerIndex)
+{
+    m_defaultContainerIndex = static_cast<DockerContainer>(containerIndex);
+    emit dataChanged(index(containerIndex, 0), index(containerIndex, 0));
+}
 
+
+DockerContainer ContainersModel::getDefaultContainer()
+{
+    return m_defaultContainerIndex;
+}
+
+void ContainersModel::setCurrentlyProcessedContainerIndex(int index)
+{
+    m_currentlyProcessedContainerIndex = index;
+}
+
+int ContainersModel::getCurrentlyProcessedContainerIndex()
+{
+    return m_currentlyProcessedContainerIndex;
+}
+
+QString ContainersModel::getCurrentlyProcessedContainerName()
+{
+    return ContainerProps::containerHumanNames().value(static_cast<DockerContainer>(m_currentlyProcessedContainerIndex));
+}
+
+QJsonObject ContainersModel::getContainerConfig(const int containerIndex)
+{
+    return qvariant_cast<QJsonObject>(data(index(containerIndex), ConfigRole));
+}
+
+bool ContainersModel::isAnyContainerInstalled()
+{
+    for (int row=0; row < rowCount(); row++) {
+        QModelIndex idx = this->index(row, 0);
+
+        if (this->data(idx, IsInstalledRole).toBool() &&
+            this->data(idx, ServiceTypeRole).toInt() == ServiceType::Vpn) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+QHash<int, QByteArray> ContainersModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[NameRole] = "name";
+    roles[DescriptionRole] = "description";
+    roles[DetailedDescriptionRole] = "detailedDescription";
+    roles[ServiceTypeRole] = "serviceType";
+    roles[DockerContainerRole] = "dockerContainer";
+    roles[ConfigRole] = "config";
+
+    roles[IsEasySetupContainerRole] = "isEasySetupContainer";
+    roles[EasySetupHeaderRole] = "easySetupHeader";
+    roles[EasySetupDescriptionRole] = "easySetupDescription";
+    roles[EasySetupOrderRole] = "easySetupOrder";
+
+    roles[IsInstalledRole] = "isInstalled";
+    roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
+    roles[IsDefaultRole] = "isDefault";
+    roles[IsSupportedRole] = "isSupported";
+    roles[IsShareableRole] = "isShareable";
+    return roles;
+}

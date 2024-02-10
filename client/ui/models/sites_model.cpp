@@ -1,87 +1,140 @@
 #include "sites_model.h"
 
-SitesModel::SitesModel(std::shared_ptr<Settings> settings, Settings::RouteMode mode, QObject *parent)
-    : QAbstractListModel(parent),
-      m_settings(settings),
-      m_mode(mode)
+SitesModel::SitesModel(std::shared_ptr<Settings> settings, QObject *parent)
+    : QAbstractListModel(parent), m_settings(settings)
 {
-}
-
-void SitesModel::resetCache()
-{
-    beginResetModel();
-    m_ipsCache.clear();
-    m_cacheReady = false;
-    endResetModel();
+    auto routeMode = m_settings->routeMode();
+    if (routeMode == Settings::RouteMode::VpnAllSites) {
+        m_isSplitTunnelingEnabled = false;
+        m_currentRouteMode = Settings::RouteMode::VpnOnlyForwardSites;
+    } else {
+        m_isSplitTunnelingEnabled = true;
+        m_currentRouteMode = routeMode;
+    }
+    fillSites();
 }
 
 int SitesModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent)
-    if (!m_cacheReady) genCache();
-    return m_ipsCache.size();
+    return m_sites.size();
 }
-
 
 QVariant SitesModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid() || index.row() < 0 || index.row() >= static_cast<int>(rowCount()))
         return QVariant();
 
-    if (!m_cacheReady) genCache();
-
-    if (role == SitesModel::UrlRole || role == SitesModel::IpRole) {
-        if (m_ipsCache.isEmpty()) return QVariant();
-
-        if (role == SitesModel::UrlRole) {
-            return m_ipsCache.at(index.row()).first;
-        }
-        if (role == SitesModel::IpRole) {
-            return m_ipsCache.at(index.row()).second;
-        }
+    switch (role) {
+    case UrlRole: {
+        return m_sites.at(index.row()).first;
+        break;
     }
-
-    //    if (role == Qt::TextAlignmentRole && index.column() == 1) {
-    //        return Qt::AlignRight;
-    //    }
+    case IpRole: {
+        return m_sites.at(index.row()).second;
+        break;
+    }
+    default: {
+        return true;
+    }
+    }
 
     return QVariant();
 }
 
-QVariant SitesModel::data(int row, int column)
+bool SitesModel::addSite(const QString &hostname, const QString &ip)
 {
-    if (row < 0 || row >= rowCount() || column < 0 || column >= 2) {
-        return QVariant();
+    if (!m_settings->addVpnSite(m_currentRouteMode, hostname, ip)) {
+        return false;
     }
-    if (!m_cacheReady) genCache();
-
-    if (column == 0) {
-        return m_ipsCache.at(row).first;
+    for (int i = 0; i < m_sites.size(); i++) {
+        if (m_sites[i].first == hostname && (m_sites[i].second.isEmpty() && !ip.isEmpty())) {
+            m_sites[i].second = ip;
+            QModelIndex index = createIndex(i, i);
+            emit dataChanged(index, index);
+            return true;
+        } else if (m_sites[i].first == hostname && (m_sites[i].second == ip)) {
+            return false;
+        }
     }
-    if (column == 1) {
-        return m_ipsCache.at(row).second;
-    }
-    return QVariant();
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+    m_sites.append(qMakePair(hostname, ip));
+    endInsertRows();
+    return true;
 }
 
-void SitesModel::genCache() const
+void SitesModel::addSites(const QMap<QString, QString> &sites, bool replaceExisting)
 {
-    qDebug() << "SitesModel::genCache";
-    m_ipsCache.clear();
+    beginResetModel();
 
-    const QVariantMap &sites = m_settings->vpnSites(m_mode);
-    auto i = sites.constBegin();
-    while (i != sites.constEnd()) {
-        m_ipsCache.append(qMakePair(i.key(), i.value().toString()));
-        ++i;
+    if (replaceExisting) {
+        m_settings->removeAllVpnSites(m_currentRouteMode);
     }
+    m_settings->addVpnSites(m_currentRouteMode, sites);
+    fillSites();
 
-    m_cacheReady= true;
+    endResetModel();
 }
 
-QHash<int, QByteArray> SitesModel::roleNames() const {
+void SitesModel::removeSite(QModelIndex index)
+{
+    auto hostname = m_sites.at(index.row()).first;
+    beginRemoveRows(QModelIndex(), index.row(), index.row());
+    m_settings->removeVpnSite(m_currentRouteMode, hostname);
+    m_sites.removeAt(index.row());
+    endRemoveRows();
+}
+
+int SitesModel::getRouteMode()
+{
+    return m_currentRouteMode;
+}
+
+void SitesModel::setRouteMode(int routeMode)
+{
+    beginResetModel();
+    m_settings->setRouteMode(static_cast<Settings::RouteMode>(routeMode));
+    m_currentRouteMode = m_settings->routeMode();
+    fillSites();
+    endResetModel();
+    emit routeModeChanged();
+}
+
+bool SitesModel::isSplitTunnelingEnabled()
+{
+    return m_isSplitTunnelingEnabled;
+}
+
+void SitesModel::toggleSplitTunneling(bool enabled)
+{
+    if (enabled) {
+        setRouteMode(m_currentRouteMode);
+    } else {
+        m_settings->setRouteMode(Settings::RouteMode::VpnAllSites);
+    }
+    m_isSplitTunnelingEnabled = enabled;
+}
+
+QVector<QPair<QString, QString> > SitesModel::getCurrentSites()
+{
+    return m_sites;
+}
+
+QHash<int, QByteArray> SitesModel::roleNames() const
+{
     QHash<int, QByteArray> roles;
-    roles[UrlRole] = "url_path";
+    roles[UrlRole] = "url";
     roles[IpRole] = "ip";
     return roles;
+}
+
+void SitesModel::fillSites()
+{
+    m_sites.clear();
+    const QVariantMap &sites = m_settings->vpnSites(m_currentRouteMode);
+    auto i = sites.constBegin();
+    while (i != sites.constEnd()) {
+        m_sites.append(qMakePair(i.key(), i.value().toString()));
+        ++i;
+    }
 }

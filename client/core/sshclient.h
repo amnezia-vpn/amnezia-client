@@ -40,7 +40,7 @@ namespace libssh {
     private:
         ErrorCode closeChannel();
         ErrorCode closeSftpSession();
-        ErrorCode fromLibsshErrorCode(int errorCode);
+        ErrorCode fromLibsshErrorCode();
         ErrorCode fromLibsshSftpErrorCode(int errorCode);
         static int callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata);
 

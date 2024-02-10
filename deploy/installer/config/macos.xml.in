@@ -8,7 +8,7 @@
     <TargetDir>/Applications/AmneziaVPN.app</TargetDir>
     <WizardDefaultWidth>600</WizardDefaultWidth>
     <WizardDefaultHeight>380</WizardDefaultHeight>
-    <WizardStyle>Modern</WizardStyle>
+    <WizardStyle>Mac</WizardStyle>
     <RemoveTargetDir>true</RemoveTargetDir>
     <AllowSpaceInPath>true</AllowSpaceInPath>
     <AllowNonAsciiCharacters>false</AllowNonAsciiCharacters>

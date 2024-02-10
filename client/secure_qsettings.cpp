@@ -1,30 +1,28 @@
 #include "secure_qsettings.h"
 #include "platforms/ios/MobileUtils.h"
 
+#include "QAead.h"
+#include "QBlockCipher.h"
+#include "utilities.h"
 #include <QDataStream>
 #include <QDebug>
 #include <QEventLoop>
 #include <QIODevice>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QRandomGenerator>
 #include <QSharedPointer>
 #include <QTimer>
-#include "utilities.h"
-#include <QRandomGenerator>
-#include "QAead.h"
-#include "QBlockCipher.h"
 
 using namespace QKeychain;
 
 SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent)
-    : QObject{parent},
-      m_settings(organization, application, parent),
-      encryptedKeys({"Servers/serversList"})
+    : QObject { parent }, m_settings(organization, application, parent), encryptedKeys({ "Servers/serversList" })
 {
     bool encrypted = m_settings.value("Conf/encrypted").toBool();
 
     // convert settings to encrypted for if updated to >= 2.1.0
-    if (encryptionRequired() && ! encrypted) {
+    if (encryptionRequired() && !encrypted) {
         for (const QString &key : m_settings.allKeys()) {
             if (encryptedKeys.contains(key)) {
                 const QVariant &val = value(key);
@@ -44,15 +42,15 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
         return m_cache.value(key);
     }
 
-    if (!m_settings.contains(key)) return defaultValue;
+    if (!m_settings.contains(key))
+        return defaultValue;
 
     QVariant retVal;
 
     // check if value is not encrypted, v. < 2.0.x
     retVal = m_settings.value(key);
     if (retVal.isValid()) {
-        if (retVal.userType() == QVariant::ByteArray &&
-                retVal.toByteArray().mid(0, magicString.size()) == magicString) {
+        if (retVal.userType() == QVariant::ByteArray && retVal.toByteArray().mid(0, magicString.size()) == magicString) {
 
             if (getEncKey().isEmpty() || getEncIv().isEmpty()) {
                 qCritical() << "SecureQSettings::setValue Decryption requested, but key is empty";
@@ -71,8 +69,7 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
                 retVal = QVariant();
             }
         }
-    }
-    else {
+    } else {
         qWarning() << "SecureQSettings::value invalid QVariant value";
         retVal = QVariant();
     }
@@ -95,14 +92,12 @@ void SecureQSettings::setValue(const QString &key, const QVariant &value)
 
             QByteArray encryptedValue = encryptText(decryptedValue);
             m_settings.setValue(key, magicString + encryptedValue);
-        }
-        else {
+        } else {
             qCritical() << "SecureQSettings::setValue Encryption required, but key is empty";
             return;
         }
 
-    }
-    else {
+    } else {
         m_settings.setValue(key, value);
     }
 
@@ -139,7 +134,8 @@ QByteArray SecureQSettings::backupAppConfig() const
 bool SecureQSettings::restoreAppConfig(const QByteArray &json)
 {
     QJsonObject cfg = QJsonDocument::fromJson(json).object();
-    if (cfg.isEmpty()) return false;
+    if (cfg.isEmpty())
+        return false;
 
     for (const QString &key : cfg.keys()) {
         setValue(key, cfg.value(key).toVariant());
@@ -149,14 +145,13 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
     return true;
 }
 
-
-QByteArray SecureQSettings::encryptText(const QByteArray& value) const
+QByteArray SecureQSettings::encryptText(const QByteArray &value) const
 {
     QSimpleCrypto::QBlockCipher cipher;
     return cipher.encryptAesBlockCipher(value, getEncKey(), getEncIv());
 }
 
-QByteArray SecureQSettings::decryptText(const QByteArray& ba) const
+QByteArray SecureQSettings::decryptText(const QByteArray &ba) const
 {
     QSimpleCrypto::QBlockCipher cipher;
     return cipher.decryptAesBlockCipher(ba, getEncKey(), getEncIv());
@@ -228,13 +223,11 @@ QByteArray SecureQSettings::getSecTag(const QString &tag)
     job->setAutoDelete(false);
     job->setKey(tag);
     QEventLoop loop;
-    job->connect(job.data(), &ReadPasswordJob::finished, job.data(), [&loop](){
-        loop.quit();
-    });
+    job->connect(job.data(), &ReadPasswordJob::finished, job.data(), [&loop]() { loop.quit(); });
     job->start();
     loop.exec();
 
-    if ( job->error() ) {
+    if (job->error()) {
         qCritical() << "SecureQSettings::getSecTag Error:" << job->errorString();
     }
 
@@ -249,9 +242,7 @@ void SecureQSettings::setSecTag(const QString &tag, const QByteArray &data)
     job->setBinaryData(data);
     QEventLoop loop;
     QTimer::singleShot(1000, &loop, SLOT(quit()));
-    job->connect(job.data(), &WritePasswordJob::finished, job.data(), [&loop](){
-        loop.quit();
-    });
+    job->connect(job.data(), &WritePasswordJob::finished, job.data(), [&loop]() { loop.quit(); });
     job->start();
     loop.exec();
 
@@ -260,4 +251,10 @@ void SecureQSettings::setSecTag(const QString &tag, const QByteArray &data)
     }
 }
 
-
+void SecureQSettings::clearSettings()
+{
+    QMutexLocker locker(&mutex);
+    m_settings.clear();
+    m_cache.clear();
+    sync();
+}

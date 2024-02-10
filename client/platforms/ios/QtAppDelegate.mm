@@ -1,4 +1,5 @@
 #import "QtAppDelegate.h"
+#import "ios_controller.h"
 
 #include <QFile>
 
@@ -75,11 +76,15 @@
         QString filePath(url.path.UTF8String);
         if (filePath.isEmpty()) return NO;
 
-        QFile file(filePath);
-        bool isOpenFile = file.open(QIODevice::ReadOnly);
-        QByteArray data = file.readAll();
-        
-        [QtAppDelegate sharedQtAppDelegate].startPageLogic->importAnyFile(QString(data));
+        if (filePath.contains("backup")) {
+            IosController::Instance()->importBackupFromOutside(filePath);
+        } else {
+            QFile file(filePath);
+            bool isOpenFile = file.open(QIODevice::ReadOnly);
+            QByteArray data = file.readAll();
+            
+            IosController::Instance()->importConfigFromOutside(QString(data));
+        }
         return YES;
     }
     return NO;
@@ -90,10 +95,6 @@ void QtAppDelegateInitialize()
 {
     [[UIApplication sharedApplication] setDelegate: [QtAppDelegate sharedQtAppDelegate]];
     NSLog(@"Created a new AppDelegate");
-}
-
-void setStartPageLogic(StartPageLogic* startPage) {
-    [QtAppDelegate sharedQtAppDelegate].startPageLogic = startPage;
 }
 
 @end
