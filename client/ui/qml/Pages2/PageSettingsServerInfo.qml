@@ -18,6 +18,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: header.itemAt(0).serverName.textField
+
     Connections {
         target: PageController
 
@@ -179,8 +181,9 @@ PageType {
         }
     }
 
-    function init()
-    {
-        header.itemAt(0).serverName.textField.forceActiveFocus()
+    Component.onCompleted: {
+        if (header.itemAt(0)) {
+            defaultActiveFocusItem = header.itemAt(0).serverName.textField
+        }
     }
 }

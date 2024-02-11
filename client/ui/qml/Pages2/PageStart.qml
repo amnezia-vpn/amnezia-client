@@ -31,10 +31,8 @@ PageType {
 
         function onGoToPageViewConfig() {
             var pagePath = PageController.getPagePath(PageEnum.PageSetupWizardViewConfig)
-            var item = tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
-            if (item.init && typeof item.init === "function") {
-                item.init()
-            }
+            tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
+
             PageController.updateDrawerRootPage(PageEnum.PageSetupWizardViewConfig)
         }
 
@@ -61,15 +59,13 @@ PageType {
 
         function onGoToPage(page, slide) {
             var pagePath = PageController.getPagePath(page)
-            var item
+
             if (slide) {
-                item = tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
+                tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
             } else {
-                item = tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+                tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
-            if (item.init && typeof item.init === "function") {
-                item.init()
-            }
+
             PageController.updateDrawerRootPage(page)
         }
 
@@ -148,20 +144,15 @@ PageType {
 
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
-            var item = tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
-            if (item.init && typeof item.init === "function") {
-                item.init()
-            }
+            tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+
             PageController.updateDrawerRootPage(page)
         }
 
         Component.onCompleted: {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
             ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
-            var item = tabBarStackView.push(pagePath, { "objectName" : pagePath })
-            if (item.init && typeof item.init === "function") {
-                item.init()
-            }
+            tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
 
 //        onWidthChanged: {

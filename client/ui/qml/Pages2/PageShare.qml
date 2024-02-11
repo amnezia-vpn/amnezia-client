@@ -16,6 +16,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: clientNameTextField.textField
+
     enum ConfigType {
         AmneziaConnection,
         OpenVpn,
@@ -709,10 +711,5 @@ PageType {
             forceActiveFocus()
             mouse.accepted = false
         }
-    }
-
-    function init()
-    {
-        clientNameTextField.textField.forceActiveFocus()
     }
 }

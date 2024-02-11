@@ -12,8 +12,11 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
+
 PageType {
     id: root
+
+    defaultActiveFocusItem: listview.currentItem.portTextField.textField
 
     ColumnLayout {
         id: backButton
@@ -44,6 +47,8 @@ PageType {
             enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
 
             ListView {
+
+
                 id: listview
 
                 width: parent.width
@@ -344,16 +349,12 @@ PageType {
                         }
                     }
                 }
+
             }
         }
 
         QuestionDrawer {
             id: questionDrawer
         }
-    }
-
-    function init()
-    {
-        listview.currentItem.portTextField.textField.forceActiveFocus()
     }
 }

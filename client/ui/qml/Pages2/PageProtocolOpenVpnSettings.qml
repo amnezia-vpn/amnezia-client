@@ -16,6 +16,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: listview.currentItem.vpnAddressSubnetTextField.textField
+
     ColumnLayout {
         id: backButton
 
@@ -415,10 +417,5 @@ PageType {
         QuestionDrawer {
             id: questionDrawer
         }
-    }
-
-    function init()
-    {
-        listview.currentItem.vpnAddressSubnetTextField.textField.forceActiveFocus()
     }
 }

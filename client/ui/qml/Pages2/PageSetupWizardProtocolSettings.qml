@@ -52,6 +52,8 @@ PageType {
                     implicitWidth: processedContainerListView.width
                     implicitHeight: (delegateContent.implicitHeight > root.height) ? delegateContent.implicitHeight : root.height
 
+                    property alias port:port
+
                     ColumnLayout {
                         id: delegateContent
 
@@ -234,15 +236,12 @@ PageType {
                             var protocolSelectorVisible = ProtocolProps.defaultTransportProtoChangeable(defaultContainerProto)
                             transportProtoSelector.visible = protocolSelectorVisible
                             transportProtoHeader.visible = protocolSelectorVisible
+
+                            defaultActiveFocusItem = port.textField
                         }
                     }
                 }
             }
         }
-    }
-
-    function init()
-    {
-        port.textField.forceActiveFocus()
     }
 }

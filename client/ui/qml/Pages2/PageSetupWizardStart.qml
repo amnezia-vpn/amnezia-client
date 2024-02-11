@@ -33,14 +33,10 @@ PageType {
 
         function onGoToPage(page, slide) {
             var pagePath = PageController.getPagePath(page)
-            var item
             if (slide) {
-                item = stackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
+                stackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
             } else {
-                item = stackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
-            }
-            if (item.init && typeof item.init === "function") {
-                item.init()
+                stackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
         }
 

@@ -7,8 +7,6 @@ import "TextTypes"
 Item {
     id: root
 
-    //signal sig_next()
-
     property string headerText
     property string headerTextDisabledColor: "#494B50"
     property string headerTextColor: "#878b91"

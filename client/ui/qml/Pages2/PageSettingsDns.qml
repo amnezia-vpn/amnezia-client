@@ -13,6 +13,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: primaryDns.textField
+
     BackButtonType {
         id: backButton
 
@@ -141,8 +143,4 @@ PageType {
         }
     }
 
-    function init()
-    {
-        primaryDns.textField.forceActiveFocus()
-    }
 }

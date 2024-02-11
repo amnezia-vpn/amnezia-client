@@ -20,6 +20,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: website_ip_field.textField
+
     property bool pageEnabled: {
         return !ConnectionController.isConnected && !ServersModel.isDefaultServerFromApi()
     }
@@ -423,10 +425,5 @@ PageType {
                 DividerType {}
             }
         }
-    }
-
-    function init()
-    {
-        website_ip_field.textField.forceActiveFocus()
     }
 }

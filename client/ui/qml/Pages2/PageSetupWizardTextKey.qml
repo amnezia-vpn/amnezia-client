@@ -12,6 +12,8 @@ import "../Config"
 PageType {
     id: root
 
+    defaultActiveFocusItem: textKey.textField
+
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -78,10 +80,5 @@ PageType {
             ImportController.extractConfigFromCode(textKey.textFieldText)
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
-    }
-
-    function init()
-    {
-        textKey.textField.forceActiveFocus()
     }
 }

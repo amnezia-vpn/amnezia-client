@@ -15,6 +15,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: listview.currentItem.portTextField.textField
+
     ColumnLayout {
         id: backButton
 
@@ -58,7 +60,7 @@ PageType {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
-                    property alias port: port
+                    property alias portTextField: portTextField
 
                     ColumnLayout {
                         id: col
@@ -79,7 +81,7 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
-                            id: port
+                            id: portTextField
 
                             Layout.fillWidth: true
                             Layout.topMargin: 40
@@ -156,10 +158,5 @@ PageType {
                 }
             }
         }
-    }
-
-    function init()
-    {
-        listview.currentItem.port.textField.forceActiveFocus()
     }
 }

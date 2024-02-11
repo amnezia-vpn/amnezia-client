@@ -15,6 +15,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: listview.currentItem.trafficFromField.textField
+
     ColumnLayout {
         id: backButton
 
@@ -182,10 +184,5 @@ PageType {
                 }
             }
         }
-    }
-
-    function init()
-    {
-        listview.currentItem.trafficFromField.textField.forceActiveFocus()
     }
 }

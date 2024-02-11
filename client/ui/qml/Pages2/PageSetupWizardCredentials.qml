@@ -12,6 +12,8 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    defaultActiveFocusItem: hostname.textField
+
     BackButtonType {
         id: backButton
 
@@ -149,10 +151,5 @@ PageType {
             hasEmptyField = true
         }
         return !hasEmptyField
-    }
-
-    function init()
-    {
-        hostname.textField.forceActiveFocus()
     }
 }
