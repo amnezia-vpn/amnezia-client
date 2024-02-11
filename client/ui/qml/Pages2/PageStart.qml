@@ -114,6 +114,22 @@ PageType {
             PageController.showNotificationMessage(message)
             PageController.closePage()
         }
+
+        function onNoInstalledContainers() {
+            PageController.setTriggeredBtConnectButton(true)
+
+            ServersModel.currentlyProcessedIndex = ServersModel.getDefaultServerIndex()
+            InstallController.setShouldCreateServer(false)
+            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+        }
+    }
+
+    Connections {
+        target: ApiController
+
+        function onErrorOccurred(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
+        }
     }
 
     StackViewType {

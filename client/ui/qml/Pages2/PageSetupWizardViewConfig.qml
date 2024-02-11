@@ -18,8 +18,12 @@ PageType {
     Connections {
         target: ImportController
 
-        function onImportErrorOccurred(errorMessage) {
-            PageController.closePage()
+        function onImportErrorOccurred(errorMessage, goToPageHome) {
+            if (goToPageHome) {
+                PageController.goToStartPage()
+            } else {
+                PageController.closePage()
+            }
             PageController.showErrorMessage(errorMessage)
         }
 
