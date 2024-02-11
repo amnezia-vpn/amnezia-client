@@ -27,10 +27,6 @@ PageType {
                 containersDropDown.rootButtonClickedFunction()
             }
         }
-
-        function onForceCloseDrawer() {
-            buttonContent.state = "collapsed"
-        }
     }
 
     Item {

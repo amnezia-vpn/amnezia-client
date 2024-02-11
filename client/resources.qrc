@@ -160,7 +160,6 @@
         <file>ui/qml/Components/SettingsContainersListView.qml</file>
         <file>ui/qml/Controls2/TextTypes/ListItemTitleType.qml</file>
         <file>ui/qml/Controls2/DividerType.qml</file>
-        <file>ui/qml/Controls2/DrawerType.qml</file>
         <file>ui/qml/Controls2/StackViewType.qml</file>
         <file>ui/qml/Pages2/PageSettings.qml</file>
         <file>images/controls/amnezia.svg</file>

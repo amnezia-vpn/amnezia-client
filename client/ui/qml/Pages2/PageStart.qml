@@ -20,22 +20,16 @@ PageType {
         function onGoToPageHome() {
             tabBar.setCurrentIndex(0)
             tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-
-            PageController.updateDrawerRootPage(PageEnum.PageHome)
         }
 
         function onGoToPageSettings() {
             tabBar.setCurrentIndex(2)
             tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
-
-            PageController.updateDrawerRootPage(PageEnum.PageSettings)
         }
 
         function onGoToPageViewConfig() {
             var pagePath = PageController.getPagePath(PageEnum.PageSetupWizardViewConfig)
             tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
-
-            PageController.updateDrawerRootPage(PageEnum.PageSetupWizardViewConfig)
         }
 
         function onShowBusyIndicator(visible) {
@@ -43,10 +37,6 @@ PageType {
             tabBarStackView.enabled = !visible
             tabBar.enabled = !visible
         }
-
-//        function onShowTopCloseButton(visible) {
-//            topCloseButton.visible = visible
-//        }
 
         function onEnableTabBar(enabled) {
             tabBar.enabled = enabled
@@ -66,8 +56,6 @@ PageType {
             } else {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
-
-            PageController.updateDrawerRootPage(page)
         }
 
         function onGoToStartPage() {
@@ -130,8 +118,6 @@ PageType {
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
             tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
-
-            PageController.updateDrawerRootPage(page)
         }
 
         Component.onCompleted: {
@@ -139,11 +125,6 @@ PageType {
             ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
-
-//        onWidthChanged: {
-//            topCloseButton.x = tabBarStackView.x + tabBarStackView.width -
-//                    topCloseButton.buttonWidth - topCloseButton.rightPadding
-//        }
     }
 
     TabBar {
@@ -236,13 +217,6 @@ PageType {
         anchors.centerIn: parent
         z: 1
     }
-
-//    TopCloseButtonType {
-//        id: topCloseButton
-
-//        x: tabBarStackView.width - topCloseButton.buttonWidth - topCloseButton.rightPadding
-//        z: 1
-//    }
 
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
