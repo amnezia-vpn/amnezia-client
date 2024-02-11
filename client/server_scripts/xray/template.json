@@ -8,9 +8,31 @@
             {
                 "type": "field",
                 "domain": [
-                    "geosite:all"
+                    "geosite:category-ads-all"
+                ],
+                "outboundTag": "block"
+            },
+            {
+                "type": "field",
+                "domain": [
+                    "geosite:category-games@cn"
+                ],
+                "outboundTag": "direct"
+            },     
+            {
+                "type": "field",
+                "domain": [
+                    "geosite:geolocation-!cn"
                 ],
                 "outboundTag": "proxy"
+            },
+            {
+                "type": "field",
+                "domain": [
+                    "geosite:cn",
+                    "geosite:private"
+                ],
+                "outboundTag": "direct"
             },
             {
                 "type": "field",
@@ -18,6 +40,14 @@
                     "172.29.172.254"
                 ],
                 "outboundTag": "proxy"            
+            },
+            {
+                "type": "field",
+                "ip": [
+                    "geoip:cn",
+                    "geoip:private"
+                ],
+                "outboundTag": "direct"
             }
         ]
     },

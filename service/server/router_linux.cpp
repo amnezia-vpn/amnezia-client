@@ -179,42 +179,28 @@ void RouterLinux::flushDns()
 bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
     qDebug().noquote() << "createTun start";
 
-
-    QProcess process;
-    QStringList commands;
-
-    commands << "ip" << "tuntap" << "add" << "mode" << "tun" << "dev" << dev;
-    process.start("sudo", commands);
-    if (!process.waitForFinished( -1 ) )
+    char cmd [1000] = {0x0};
+    sprintf(cmd, "ip tuntap add mode tun dev %s", dev.toStdString().c_str());
+    int sys = system(cmd);
+    if(sys < 0)
     {
-        qDebug().noquote() << "Could not activate tun device!: " << process.errorString();
+        qDebug().noquote() << "Could not activate tun device!\n";
         return false;
     }
-
-    commands.clear();
-    commands << "ip" << "tuntap" << "add" << subnet << "dev" << dev;
-    process.start("sudo", commands);
-    if (!process.waitForFinished( -1 ) )
+    memset(&cmd, 0, sizeof(cmd));
+    sprintf(cmd, "ip addr add %s/24 dev %s", subnet.toStdString().c_str(), dev.toStdString().c_str());
+    sys = system(cmd);
+    if(sys < 0)
     {
-        qDebug().noquote() << "Could not activate tun device!: " << process.errorString();
+        qDebug().noquote() << "Could not activate tun device!\n";
         return false;
     }
-
-    commands.clear();
-    commands << "ip" << "addr" << "add" << subnet << "dev" << dev;
-    process.start("sudo", commands);
-    if (!process.waitForFinished( -1 ) )
+    memset(&cmd, 0, sizeof(cmd));
+    sprintf(cmd, "ip link set dev %s up", dev.toStdString().c_str());
+    sys = system(cmd);
+    if(sys < 0)
     {
-        qDebug().noquote() << "Could not activate tun device!: " << process.errorString();
-        return false;
-    }
-
-    commands.clear();
-    commands << "ip" << "link" << "set" << "dev" << dev << "up";
-    process.start("sudo", commands);
-    if (!process.waitForFinished( -1 ) )
-    {
-        qDebug().noquote() << "Could not activate tun device!: " << process.errorString();
+        qDebug().noquote() << "Could not activate tun device!\n";
         return false;
     }
 
