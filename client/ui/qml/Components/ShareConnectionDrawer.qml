@@ -27,6 +27,8 @@ DrawerType2 {
     property string configCaption: qsTr("Save AmneziaVPN config")
     property string configFileName: "amnezia_config"
 
+    expandedHeight: parent.height * 0.9
+
     onClosed: {
         configExtension = ".vpn"
         configCaption = qsTr("Save AmneziaVPN config")
@@ -34,13 +36,7 @@ DrawerType2 {
     }
 
     expandedContent: Item {
-        id: container
-
-        implicitHeight: root.height * 0.9
-
-        Component.onCompleted: {
-            root.expandedHeight = container.implicitHeight
-        }
+        implicitHeight: root.expandedHeight
 
         Header2Type {
             id: header
@@ -98,6 +94,7 @@ DrawerType2 {
                 }
 
                 BasicButtonType {
+                    id: copyConfigTextButton
                     Layout.fillWidth: true
                     Layout.topMargin: 8
 
@@ -110,20 +107,14 @@ DrawerType2 {
 
                     text: qsTr("Copy")
                     imageSource: "qrc:/images/controls/copy.svg"
-
-                    onClicked: {
-                        configText.selectAll()
-                        configText.copy()
-                        configText.select(0, 0)
-                        PageController.showNotificationMessage(qsTr("Copied"))
-                    }
                 }
 
                 BasicButtonType {
+                    id: copyNativeConfigStringButton
                     Layout.fillWidth: true
                     Layout.topMargin: 8
 
-                    visible: nativeConfigString.text !== ""
+                    visible: false
 
                     defaultColor: "transparent"
                     hoveredColor: Qt.rgba(1, 1, 1, 0.08)
@@ -134,13 +125,6 @@ DrawerType2 {
 
                     text: qsTr("Copy config string")
                     imageSource: "qrc:/images/controls/copy.svg"
-
-                    onClicked: {
-                        nativeConfigString.selectAll()
-                        nativeConfigString.copy()
-                        nativeConfigString.select(0, 0)
-                        PageController.showNotificationMessage(qsTr("Copied"))
-                    }
                 }
 
                 BasicButtonType {
@@ -157,7 +141,119 @@ DrawerType2 {
                     text: qsTr("Show connection settings")
 
                     onClicked: {
-                        configContentDrawer.visible = true
+                        configContentDrawer.open()
+                    }
+                }
+
+                DrawerType2 {
+                    id: configContentDrawer
+
+                    parent: root.parent
+
+                    anchors.fill: parent
+                    expandedHeight: parent.height * 0.9
+
+                    expandedContent: Item {
+                        id: configContentContainer
+
+                        implicitHeight: configContentDrawer.expandedHeight
+
+                        Connections {
+                            target: copyNativeConfigStringButton
+                            function onClicked() {
+                                nativeConfigString.selectAll()
+                                nativeConfigString.copy()
+                                nativeConfigString.select(0, 0)
+                                PageController.showNotificationMessage(qsTr("Copied"))
+                            }
+                        }
+
+                        Connections {
+                            target: copyConfigTextButton
+                            function onClicked() {
+                                configText.selectAll()
+                                configText.copy()
+                                configText.select(0, 0)
+                                PageController.showNotificationMessage(qsTr("Copied"))
+                            }
+                        }
+
+                        BackButtonType {
+                            id: backButton
+
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.topMargin: 16
+
+                            backButtonFunction: function() {
+                                configContentDrawer.open()
+                            }
+                        }
+
+                        FlickableType {
+                            anchors.top: backButton.bottom
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            contentHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
+
+                            ColumnLayout {
+                                id: configContent
+
+                                anchors.fill: parent
+                                anchors.rightMargin: 16
+                                anchors.leftMargin: 16
+
+                                Header2Type {
+                                    id: configContentHeader
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: 16
+
+                                    headerText: root.configContentHeaderText
+                                }
+
+                                TextField {
+                                    id: nativeConfigString
+                                    visible: false
+                                    text: ExportController.nativeConfigString
+
+                                    onTextChanged: {
+                                        copyNativeConfigStringButton.visible = nativeConfigString.text !== ""
+                                    }
+                                }
+
+                                TextArea {
+                                    id: configText
+
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: 16
+                                    Layout.bottomMargin: 16
+
+                                    padding: 0
+                                    leftPadding: 0
+                                    height: 24
+
+                                    readOnly: true
+
+                                    color: "#D7D8DB"
+                                    selectionColor:  "#633303"
+                                    selectedTextColor: "#D7D8DB"
+
+                                    font.pixelSize: 16
+                                    font.weight: Font.Medium
+                                    font.family: "PT Root UI VF"
+
+                                    text: ExportController.config
+
+                                    wrapMode: Text.Wrap
+
+                                    background: Rectangle {
+                                        color: "transparent"
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -207,93 +303,6 @@ DrawerType2 {
 
                     horizontalAlignment: Text.AlignHCenter
                     text: qsTr("To read the QR code in the Amnezia app, select \"Add server\" → \"I have data to connect\" → \"QR code, key or settings file\"")
-                }
-            }
-        }
-    }
-
-    DrawerType2 {
-        id: configContentDrawer
-
-        expandedContent: Item {
-            id: configContentContainer
-
-            implicitHeight: root.height * 0.9
-
-            Component.onCompleted: {
-                root.expandedHeight = configContentContainer.implicitHeight
-            }
-
-            BackButtonType {
-                id: backButton
-
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 16
-
-                backButtonFunction: function() {
-                    configContentDrawer.visible = false
-                }
-            }
-
-            FlickableType {
-                anchors.top: backButton.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                contentHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
-
-                ColumnLayout {
-                    id: configContent
-
-                    anchors.fill: parent
-                    anchors.rightMargin: 16
-                    anchors.leftMargin: 16
-
-                    Header2Type {
-                        id: configContentHeader
-                        Layout.fillWidth: true
-                        Layout.topMargin: 16
-
-                        headerText: root.configContentHeaderText
-                    }
-
-                    TextField {
-                        id: nativeConfigString
-                        visible: false
-                        text: ExportController.nativeConfigString
-                    }
-
-                    TextArea {
-                        id: configText
-
-                        Layout.fillWidth: true
-                        Layout.topMargin: 16
-                        Layout.bottomMargin: 16
-
-                        padding: 0
-                        leftPadding: 0
-                        height: 24
-
-                        readOnly: true
-
-                        color: "#D7D8DB"
-                        selectionColor:  "#633303"
-                        selectedTextColor: "#D7D8DB"
-
-                        font.pixelSize: 16
-                        font.weight: Font.Medium
-                        font.family: "PT Root UI VF"
-
-                        text: ExportController.config
-
-                        wrapMode: Text.Wrap
-
-                        background: Rectangle {
-                            color: "transparent"
-                        }
-                    }
                 }
             }
         }

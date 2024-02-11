@@ -96,6 +96,8 @@ Item {
         cursorShape: root.isCollapsed ? Qt.PointingHandCursor : Qt.ArrowCursor
         hoverEnabled: true
 
+        enabled: drawerContent.implicitHeight > 0
+
         drag.target: drawerContent
         drag.axis: Drag.YAxis
         drag.maximumY: root.height - root.collapsedHeight

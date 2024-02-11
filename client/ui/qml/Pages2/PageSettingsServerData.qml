@@ -139,13 +139,12 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Do you want to reboot the server?")
-                    questionDrawer.descriptionText = qsTr("The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?")
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
+                    var headerText = qsTr("Do you want to reboot the server?")
+                    var descriptionText = qsTr("The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var yesButtonFunction = function() {
                         PageController.showBusyIndicator(true)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             ConnectionController.closeConnection()
@@ -153,10 +152,10 @@ PageType {
                         InstallController.rebootCurrentlyProcessedServer()
                         PageController.showBusyIndicator(false)
                     }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var noButtonFunction = function() {
                     }
-                    questionDrawer.visible = true
+
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
@@ -224,9 +223,5 @@ PageType {
                 visible: content.isServerWithWriteAccess
             }
         }
-    }
-
-    QuestionDrawer {
-        id: questionDrawer
     }
 }
