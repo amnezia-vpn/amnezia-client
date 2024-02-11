@@ -19,7 +19,7 @@
 <context>
     <name>ApiController</name>
     <message>
-        <location filename="../ui/controllers/apiController.cpp" line="123"/>
+        <location filename="../ui/controllers/apiController.cpp" line="130"/>
         <source>Error when retrieving configuration from cloud server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -451,9 +451,13 @@ Already installed containers were found on the server. All installed containers 
         <translation>OpenVPN 配置</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="84"/>
         <source>VPN Addresses Subnet</source>
-        <translation>VPN子网掩码</translation>
+        <translation type="vanished">VPN子网掩码</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="84"/>
+        <source>VPN address subnet</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="98"/>
@@ -881,13 +885,21 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="94"/>
-        <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this url.</source>
-        <translation>用 &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor 浏览器&lt;/a&gt; 打开上面网址</translation>
+        <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this URL.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="103"/>
+        <source>After creating your onion site, it takes a few minutes for the Tor network to make it available for use.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this url.</source>
+        <translation type="vanished">用 &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor 浏览器&lt;/a&gt; 打开上面网址</translation>
+    </message>
+    <message>
         <source>After installation it takes several minutes while your onion site will become available in the Tor Network.</source>
-        <translation>完成安装几分钟后,洋葱站点才会在 Tor 网络中生效。</translation>
+        <translation type="vanished">完成安装几分钟后,洋葱站点才会在 Tor 网络中生效。</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="112"/>
@@ -960,15 +972,19 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsAbout</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
         <source>Support the project with a donation</source>
-        <translation>捐款</translation>
+        <translation type="vanished">捐款</translation>
     </message>
     <message>
         <source>This is a free and open source application. If you like it, support the developers with a donation.
 And if you don&apos;t like the app, all the more support it - the donation will be used to improve the app.</source>
         <translation type="obsolete">这是一个免费且开源的应用软件。如果您喜欢它，请捐助支持我们继续研发。
 如果您不喜欢，请捐助支持我们改进它。</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
+        <source>Support Amnezia</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
@@ -1243,6 +1259,16 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation>应用开启时连接VPN</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="86"/>
+        <source>When AmneziaDNS is not used or installed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="120"/>
+        <source>Allows you to use the VPN only for certain Apps</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Use AmneziaDNS if installed on the server</source>
         <translation type="obsolete">使用AmneziaDNS，如其已安装在服务器上</translation>
     </message>
@@ -1262,9 +1288,8 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation>DNS服务器</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="86"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation>如果未使用或未安装AmneziaDNS</translation>
+        <translation type="vanished">如果未使用或未安装AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
@@ -1294,9 +1319,8 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation type="obsolete">应用级VPN分流</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="120"/>
         <source>Allows you to use the VPN only for certain applications</source>
-        <translation>仅指定应用使用VPN</translation>
+        <translation type="vanished">仅指定应用使用VPN</translation>
     </message>
 </context>
 <context>
@@ -1458,16 +1482,6 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="144"/>
-        <source>??????????????????????????????</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="175"/>
-        <source>Do you want to remove the server?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="206"/>
         <source>Do you want to clear server from Amnezia software?</source>
         <translation type="unfinished"></translation>
@@ -1509,9 +1523,19 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="144"/>
+        <source>The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="171"/>
         <source>Remove server from application</source>
         <translation>移除本地服务器信息</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="175"/>
+        <source>Do you want to remove the server from application?</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Remove server?</source>
@@ -1638,9 +1662,8 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="59"/>
         <source>Addresses from the list should be accessed via VPN</source>
-        <translation>仅使用VPN访问</translation>
+        <translation type="vanished">仅使用VPN访问</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="64"/>
@@ -1673,14 +1696,27 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="254"/>
         <source>Site or IP</source>
-        <translation>网站或IP地址</translation>
+        <translation type="vanished">网站或IP地址</translation>
+    </message>
+    <message>
+        <source>Import/Export Sites</source>
+        <translation type="vanished">导入/导出网站</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="59"/>
+        <source>Only the sites listed here will be accessed through the VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="254"/>
+        <source>website or IP</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="298"/>
-        <source>Import/Export Sites</source>
-        <translation>导入/导出网站</translation>
+        <source>Import / Export Sites</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="304"/>
@@ -1789,19 +1825,13 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>服务器IP [:端口]</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="52"/>
-        <source>255.255.255.255:88</source>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="66"/>
         <source>Login to connect via SSH</source>
         <translation>用户</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="76"/>
         <source>Password / SSH private key</source>
-        <translation>密码 或 私钥</translation>
+        <translation type="vanished">密码 或 私钥</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="94"/>
@@ -1818,6 +1848,16 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">您输入的所有数据将严格保密
 不会向 Amnezia 或任何第三方分享或披露</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="52"/>
+        <source>255.255.255.255:22</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="76"/>
+        <source>Password or SSH private key</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="129"/>
@@ -2576,148 +2616,153 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Sftp 服务</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="9"/>
+        <location filename="../core/errorstrings.cpp" line="11"/>
         <source>No error</source>
         <translation>没有错误</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="10"/>
+        <location filename="../core/errorstrings.cpp" line="12"/>
         <source>Unknown Error</source>
         <translation>未知错误</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="11"/>
+        <location filename="../core/errorstrings.cpp" line="13"/>
         <source>Function not implemented</source>
         <translation>功能未实现</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="14"/>
+        <location filename="../core/errorstrings.cpp" line="16"/>
         <source>Server check failed</source>
         <translation>服务器检测失败</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="15"/>
+        <location filename="../core/errorstrings.cpp" line="17"/>
         <source>Server port already used. Check for another software</source>
         <translation>检测服务器该端口是否被其他软件被占用</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="16"/>
+        <location filename="../core/errorstrings.cpp" line="18"/>
         <source>Server error: Docker container missing</source>
         <translation>服务器错误: Docker容器丢失</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="17"/>
+        <location filename="../core/errorstrings.cpp" line="19"/>
         <source>Server error: Docker failed</source>
         <translation>服务器错误: Docker失败</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="18"/>
+        <location filename="../core/errorstrings.cpp" line="20"/>
         <source>Installation canceled by user</source>
         <translation>用户取消安装</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="19"/>
+        <location filename="../core/errorstrings.cpp" line="21"/>
         <source>The user does not have permission to use sudo</source>
         <translation>用户没有root权限</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="22"/>
+        <location filename="../core/errorstrings.cpp" line="24"/>
         <source>Ssh request was denied</source>
         <translation>ssh请求被拒绝</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="23"/>
+        <location filename="../core/errorstrings.cpp" line="25"/>
         <source>Ssh request was interrupted</source>
         <translation>ssh请求中断</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="24"/>
+        <location filename="../core/errorstrings.cpp" line="26"/>
         <source>Ssh internal error</source>
         <translation>ssh内部错误</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="25"/>
+        <location filename="../core/errorstrings.cpp" line="27"/>
         <source>Invalid private key or invalid passphrase entered</source>
         <translation>输入的私钥或密码无效</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="26"/>
+        <location filename="../core/errorstrings.cpp" line="28"/>
         <source>The selected private key format is not supported, use openssh ED25519 key types or PEM key types</source>
         <translation>不支持所选私钥格式，请使用 openssh ED25519 密钥类型或 PEM 密钥类型</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="27"/>
+        <location filename="../core/errorstrings.cpp" line="29"/>
         <source>Timeout connecting to server</source>
         <translation>连接服务器超时</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="30"/>
+        <location filename="../core/errorstrings.cpp" line="32"/>
         <source>Sftp error: End-of-file encountered</source>
         <translation>Sftp错误: End-of-file encountered</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="31"/>
+        <location filename="../core/errorstrings.cpp" line="33"/>
         <source>Sftp error: File does not exist</source>
         <translation>Sftp错误: 文件不存在</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="32"/>
+        <location filename="../core/errorstrings.cpp" line="34"/>
         <source>Sftp error: Permission denied</source>
         <translation>Sftp错误: 权限不足</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="33"/>
+        <location filename="../core/errorstrings.cpp" line="35"/>
         <source>Sftp error: Generic failure</source>
         <translation>Sftp错误: 一般失败</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="34"/>
+        <location filename="../core/errorstrings.cpp" line="36"/>
         <source>Sftp error: Garbage received from server</source>
         <translation>Sftp错误: 从服务器收到垃圾信息</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="35"/>
+        <location filename="../core/errorstrings.cpp" line="37"/>
         <source>Sftp error: No connection has been set up</source>
         <translation>Sftp 错误: 未建立连接</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="36"/>
+        <location filename="../core/errorstrings.cpp" line="38"/>
         <source>Sftp error: There was a connection, but we lost it</source>
         <translation>Sftp 错误: 已有连接丢失</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="37"/>
+        <location filename="../core/errorstrings.cpp" line="39"/>
         <source>Sftp error: Operation not supported by libssh yet</source>
         <translation>Sftp error: libssh不支持该操作</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="38"/>
+        <location filename="../core/errorstrings.cpp" line="40"/>
         <source>Sftp error: Invalid file handle</source>
         <translation>Sftp error: 无效的文件句柄</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="39"/>
+        <location filename="../core/errorstrings.cpp" line="41"/>
         <source>Sftp error: No such file or directory path exists</source>
         <translation>Sftp 错误: 文件夹或文件不存在</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="40"/>
+        <location filename="../core/errorstrings.cpp" line="42"/>
         <source>Sftp error: An attempt to create an already existing file or directory has been made</source>
         <translation>Sftp 错误: 文件或目录已存在</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="41"/>
+        <location filename="../core/errorstrings.cpp" line="43"/>
         <source>Sftp error: Write-protected filesystem</source>
         <translation>Sftp 错误: 文件系统写保护</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="42"/>
+        <location filename="../core/errorstrings.cpp" line="44"/>
         <source>Sftp error: No media was in remote drive</source>
         <translation>Sftp 错误: 远程驱动器中没有媒介</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="63"/>
+        <location filename="../core/errorstrings.cpp" line="65"/>
         <source>VPN connection error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="72"/>
+        <source>ErrorCode: %1. </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2725,57 +2770,57 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">配置保存到磁盘失败</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="45"/>
+        <location filename="../core/errorstrings.cpp" line="47"/>
         <source>OpenVPN config missing</source>
         <translation>OpenVPN配置丢失</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="46"/>
+        <location filename="../core/errorstrings.cpp" line="48"/>
         <source>OpenVPN management server error</source>
         <translation>OpenVPN 管理服务器错误</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="49"/>
+        <location filename="../core/errorstrings.cpp" line="51"/>
         <source>OpenVPN executable missing</source>
         <translation>OpenVPN 可执行文件丢失</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="50"/>
+        <location filename="../core/errorstrings.cpp" line="52"/>
         <source>ShadowSocks (ss-local) executable missing</source>
         <translation>ShadowSocks (ss-local) 执行文件丢失</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="51"/>
+        <location filename="../core/errorstrings.cpp" line="53"/>
         <source>Cloak (ck-client) executable missing</source>
         <translation>Cloak (ck-client) 执行文件丢失</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="52"/>
+        <location filename="../core/errorstrings.cpp" line="54"/>
         <source>Amnezia helper service error</source>
         <translation>Amnezia 服务连接失败</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="53"/>
+        <location filename="../core/errorstrings.cpp" line="55"/>
         <source>OpenSSL failed</source>
         <translation>OpenSSL错误</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="56"/>
+        <location filename="../core/errorstrings.cpp" line="58"/>
         <source>Can&apos;t connect: another VPN connection is active</source>
         <translation>无法连接：另一个VPN连接处于活跃状态</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="57"/>
+        <location filename="../core/errorstrings.cpp" line="59"/>
         <source>Can&apos;t setup OpenVPN TAP network adapter</source>
         <translation>无法设置 OpenVPN TAP 网络适配器</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="58"/>
+        <location filename="../core/errorstrings.cpp" line="60"/>
         <source>VPN pool error: no available addresses</source>
         <translation>VPN 池错误：没有可用地址</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="60"/>
+        <location filename="../core/errorstrings.cpp" line="62"/>
         <source>The config does not contain any containers and credentials for connecting to the server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2784,7 +2829,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">该配置不包含任何用于连接到服务器的容器和凭据。</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="67"/>
+        <location filename="../core/errorstrings.cpp" line="69"/>
         <source>Internal error</source>
         <translation>内部错误</translation>
     </message>
@@ -2816,13 +2861,61 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="101"/>
-        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but is recognised by analysis systems in some highly censored regions.</source>
-        <translation>ShadowSocks - 混淆 VPN 流量，使其与正常的 Web 流量相似，但在一些审查力度高的地区可以被分析系统识别。</translation>
+        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="104"/>
+        <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="122"/>
+        <source>Create a file vault on your server to securely store and transfer files.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="155"/>
+        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for protecting against blocking.
+
+OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client and the server.
+
+Cloak protects OpenVPN from detection and blocking. 
+
+Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
+
+Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
+
+If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
+
+* Available in the AmneziaVPN across all platforms
+* High power consumption on mobile devices
+* Flexible settings
+* Not recognised by DPI analysis systems
+* Works over TCP network protocol, 443 port.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="174"/>
+        <source>A relatively new popular VPN protocol with a simplified architecture.
+WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
+WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
+
+* Available in the AmneziaVPN across all platforms
+* Low power consumption
+* Minimum number of settings
+* Easily recognised by DPI analysis systems, susceptible to blocking
+* Works over UDP network protocol.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but is recognised by analysis systems in some highly censored regions.</source>
+        <translation type="vanished">ShadowSocks - 混淆 VPN 流量，使其与正常的 Web 流量相似，但在一些审查力度高的地区可以被分析系统识别。</translation>
+    </message>
+    <message>
         <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probbing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
-        <translation>OpenVPN over Cloak - OpenVPN 与 VPN 具有伪装成网络流量和防止主动探测检测的保护。非常适合绕过审查力度特别强的地区的封锁。</translation>
+        <translation type="vanished">OpenVPN over Cloak - OpenVPN 与 VPN 具有伪装成网络流量和防止主动探测检测的保护。非常适合绕过审查力度特别强的地区的封锁。</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="108"/>
@@ -2850,9 +2943,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>将当前的 DNS 服务器替换为您自己的。这将提高您的隐私保护级别。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="122"/>
         <source>Creates a file vault on your server to securely store and transfer files.</source>
-        <translation>在您的服务器上创建文件仓库，以便安全地存储和传输文件</translation>
+        <translation type="vanished">在您的服务器上创建文件仓库，以便安全地存储和传输文件</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="129"/>
@@ -2893,7 +2985,6 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * 通过 TCP 网络协议工作。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="155"/>
         <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
 
 OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client and the server.
@@ -2912,7 +3003,7 @@ If there is a extreme level of Internet censorship in your region, we advise you
 * Not recognised by DPI analysis systems
 * Works over TCP network protocol, 443 port.
 </source>
-        <translation>这是 OpenVPN 协议和专门用于阻止保护的 Cloak 插件的组合。
+        <translation type="vanished">这是 OpenVPN 协议和专门用于阻止保护的 Cloak 插件的组合。
 
 OpenVPN 通过加密客户端和服务器之间的所有 Internet 流量来提供安全的 VPN 连接。
 
@@ -2931,7 +3022,6 @@ Cloak 可以修改数据包元数据，以便将 VPN 流量完全屏蔽为正常
 * 通过 TCP 网络协议、443 端口工作。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="174"/>
         <source>A relatively new popular VPN protocol with a simplified architecture.
 Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
 WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
@@ -2941,7 +3031,7 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
 * Works over UDP network protocol.</source>
-        <translation>一种相对较新的流行 VPN 协议，具有简化的架构。
+        <translation type="vanished">一种相对较新的流行 VPN 协议，具有简化的架构。
 在所有设备上提供稳定的 VPN 连接和高性能。使用硬编码的加密设置。 WireGuard 与 OpenVPN 相比具有更低的延迟和更好的数据传输吞吐量。
 由于其独特的数据包签名，WireGuard 非常容易受到阻塞。与其他一些采用混淆技术的 VPN 协议不同，WireGuard 数据包的一致签名模式可以更容易地被高级深度数据包检测 (DPI) 系统和其他网络监控工具识别并阻止。
 
@@ -3260,7 +3350,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="438"/>
+        <location filename="../vpnconnection.cpp" line="457"/>
         <source>Mbps</source>
         <translation></translation>
     </message>

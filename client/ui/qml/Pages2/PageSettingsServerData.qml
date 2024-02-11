@@ -170,7 +170,7 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    var headerText = qsTr("Do you want to remove the server?")
+                    var headerText = qsTr("Do you want to remove the server from application?")
                     var descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
@@ -221,6 +221,35 @@ PageType {
 
             DividerType {
                 visible: content.isServerWithWriteAccess
+            }
+
+                        LabelWithButtonType {
+                visible: ServersModel.isCurrentlyProcessedServerFromApi()
+                Layout.fillWidth: true
+
+                text: qsTr("Reset API config")
+                textColor: "#EB5757"
+
+                clickedFunction: function() {
+                    var headerText = qsTr("Do you want to reset API config?")
+                    var descriptionText = ""
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        PageController.showBusyIndicator(true)
+                        ApiController.clearApiConfig()
+                        PageController.showBusyIndicator(false)
+                    }
+                    var noButtonFunction = function() {
+                    }
+                    
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+            }
+
+            DividerType {
+                visible: ServersModel.isCurrentlyProcessedServerFromApi()
             }
         }
     }
