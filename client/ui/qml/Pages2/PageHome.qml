@@ -35,7 +35,7 @@ PageType {
 
     Item {
         anchors.fill: parent
-//        anchors.bottomMargin: drawer.collapsedHeight
+        anchors.bottomMargin: drawer.collapsedHeight
 
         ConnectButton {
             anchors.centerIn: parent
@@ -46,8 +46,6 @@ PageType {
     DrawerType2 {
         id: drawer
         anchors.fill: parent
-
-        expandedHeight: parent.height * 0.9
 
         collapsedContent:  ColumnLayout {
             DividerType {
@@ -131,12 +129,22 @@ PageType {
             }
 
         }
-        expandedContent:  ColumnLayout {
+        expandedContent:  Item {
+            id: serverMenuContainer
+
+            implicitHeight: root.height * 0.9
+
+            Component.onCompleted: {
+                drawer.expandedHeight = serverMenuContainer.implicitHeight
+            }
+
             ColumnLayout {
                 id: serversMenuHeader
 
-                Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-                Layout.fillWidth: true
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.left: parent.left
+
 
                 Header1TextType {
                     Layout.fillWidth: true
@@ -182,8 +190,10 @@ PageType {
 
                         rootButtonClickedFunction: function() {
                             ServersModel.currentlyProcessedIndex = serversMenuContent.currentIndex
-                            containersDropDown.menuVisible = true
+                            containersDropDown.open()
                         }
+
+                        drawerParent: root
 
                         listView: HomeContainersListView {
                             rootWidth: root.width
@@ -226,11 +236,14 @@ PageType {
 
             Flickable {
                 id: serversContainer
-                Layout.alignment: Qt.AlignTop | Qt.AlignHCenter
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                contentHeight: col.implicitHeight
-                implicitHeight: root.height - (root.height * 0.1) - serversMenuHeader.implicitHeight - 52 //todo 52 is tabbar height
+
+                anchors.top: serversMenuHeader.bottom
+                anchors.right: parent.right
+                anchors.left: parent.left
+                anchors.topMargin: 16
+
+                contentHeight: col.height + col.anchors.bottomMargin
+                implicitHeight: parent.height - serversMenuHeader.implicitHeight
                 clip: true
 
                 ScrollBar.vertical: ScrollBar {
@@ -246,6 +259,7 @@ PageType {
                     anchors.top: parent.top
                     anchors.left: parent.left
                     anchors.right: parent.right
+                    anchors.bottomMargin: 32
 
                     spacing: 16
 

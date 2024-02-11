@@ -131,38 +131,39 @@ Window  {
     }
 
     Item {
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        anchors.fill: parent
 
-        implicitHeight: privateKeyPassphraseDrawer.height
-
-        DrawerType {
+        DrawerType2 {
             id: privateKeyPassphraseDrawer
 
-            width: root.width
-            height: root.height * 0.35
+            anchors.fill: parent
+            expandedHeight: root.height * 0.35
 
-            onVisibleChanged: {
-                if (privateKeyPassphraseDrawer.visible) {
-                    passphrase.textFieldText = ""
-                    passphrase.textField.forceActiveFocus()
-                }
-            }
-            onAboutToHide: {
-                PageController.showBusyIndicator(true)
-            }
-            onAboutToShow: {
-                PageController.showBusyIndicator(false)
-            }
-
-            ColumnLayout {
+            expandedContent: ColumnLayout {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.topMargin: 16
                 anchors.leftMargin: 16
                 anchors.rightMargin: 16
+
+                Connections {
+                    target: privateKeyPassphraseDrawer
+                    function onOpened() {
+                        passphrase.textFieldText = ""
+                        passphrase.textField.forceActiveFocus()
+                    }
+
+                    function onAboutToHide() {
+                        if (passphrase.textFieldText !== "") {
+                            PageController.showBusyIndicator(true)
+                        }
+                    }
+
+                    function onAboutToShow() {
+                        PageController.showBusyIndicator(false)
+                    }
+                }
 
                 TextFieldWithHeaderType {
                     id: passphrase

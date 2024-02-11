@@ -22,13 +22,15 @@ Item {
     property string defaultColor: "#1C1D21"
     property string borderColor: "#2C2D30"
 
-    property var expandedHeight
+    property real expandedHeight
+    property real collapsedHeight: 0
 
     signal entered
     signal exited
     signal pressed(bool pressed, bool entered)
 
     signal aboutToHide
+    signal aboutToShow
     signal close
     signal open
     signal closed
@@ -53,6 +55,7 @@ Item {
                 return
             }
 
+            aboutToShow()
 
             drawerContent.state = root.drawerExpanded
             opened()
@@ -61,8 +64,8 @@ Item {
 
     /** Set once based on first implicit height change once all children are layed out */
     Component.onCompleted: {
-        if (root.isCollapsed && drawerContent.collapsedHeight == 0) {
-            drawerContent.collapsedHeight = drawerContent.implicitHeight
+        if (root.isCollapsed && root.collapsedHeight == 0) {
+            root.collapsedHeight = drawerContent.implicitHeight
         }
     }
 
@@ -95,7 +98,7 @@ Item {
 
         drag.target: drawerContent
         drag.axis: Drag.YAxis
-        drag.maximumY: root.height - drawerContent.collapsedHeight
+        drag.maximumY: root.height - root.collapsedHeight
         drag.minimumY: root.height - root.expandedHeight
 
         /** If drag area is released at any point other than min or max y, transition to the other state */
@@ -147,19 +150,16 @@ Item {
         }
     }
 
-    Loader {
+    Item {
         id: drawerContent
-
-        sourceComponent: root.isCollapsed ? root.collapsedContent : root.expandedContent
-
-        /** Initial height of button content */
-        property int collapsedHeight: 0
 
         Drag.active: dragArea.drag.active
         anchors.right: root.right
         anchors.left: root.left
         y: root.height - drawerContent.height
         state: root.drawerCollapsed
+
+        implicitHeight: root.isCollapsed ? collapsedLoader.implicitHeight : expandedLoader.implicitHeight
 
         onStateChanged: {
             if (root.isCollapsed) {
@@ -182,7 +182,7 @@ Item {
                 name: root.drawerCollapsed
                 PropertyChanges {
                     target: drawerContent
-                    y: root.height - collapsedHeight
+                    y: root.height - root.collapsedHeight
                 }
             },
             State {
@@ -215,5 +215,25 @@ Item {
                 }
             }
         ]
+
+        Loader {
+            id: collapsedLoader
+
+            visible: root.isCollapsed
+            sourceComponent: root.collapsedContent
+
+            anchors.right: parent.right
+            anchors.left: parent.left
+        }
+
+        Loader {
+            id: expandedLoader
+
+            visible: root.isExpanded
+            sourceComponent: root.expandedContent
+
+            anchors.right: parent.right
+            anchors.left: parent.left
+        }
     }
 }

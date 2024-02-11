@@ -147,14 +147,15 @@ PageType {
                     shareFullAccessDrawer.open()
                 }
 
-                DrawerType {
+                DrawerType2 {
                     id: shareFullAccessDrawer
 
-                    width: root.width
-                    height: root.height * 0.45
+                    parent: root
 
+                    anchors.fill: parent
+                    expandedHeight: root.height * 0.45
 
-                    ColumnLayout {
+                    expandedContent: ColumnLayout {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -269,6 +270,7 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
+                drawerParent: root
 
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
@@ -298,7 +300,7 @@ PageType {
                             serverSelector.severSelectorIndexChanged()
                         }
 
-                        serverSelector.menuVisible = false
+                        serverSelector.close()
                     }
 
                     Component.onCompleted: {
@@ -321,6 +323,7 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.5
+                drawerParent: root
 
                 descriptionText: qsTr("Protocol")
                 headerText: qsTr("Protocol")
@@ -351,7 +354,7 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        protocolSelector.menuVisible = false
+                        protocolSelector.close()
                     }
 
                     Connections {
@@ -415,6 +418,7 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
+                drawerParent: root
 
                 visible: accessTypeSelector.currentIndex === 0
                 enabled: root.connectionTypesModel.length > 1
@@ -438,7 +442,7 @@ PageType {
                     clickedFunction: function() {
                         exportTypeSelector.text = selectedText
                         exportTypeSelector.currentIndex = currentIndex
-                        exportTypeSelector.menuVisible = false
+                        exportTypeSelector.close()
                     }
 
                     Component.onCompleted: {
@@ -549,13 +553,15 @@ PageType {
 
                         DividerType {}
 
-                        DrawerType {
+                        DrawerType2 {
                             id: clientInfoDrawer
 
-                            width: root.width
-                            height: root.height * 0.5
+                            parent: root
 
-                            ColumnLayout {
+                            anchors.fill: parent
+                            expandedHeight: root.height * 0.5
+
+                            expandedContent: ColumnLayout {
                                 anchors.top: parent.top
                                 anchors.left: parent.left
                                 anchors.right: parent.right
@@ -590,25 +596,28 @@ PageType {
                                         clientNameEditDrawer.open()
                                     }
 
-                                    DrawerType {
+                                    DrawerType2 {
                                         id: clientNameEditDrawer
 
-                                        width: root.width
-                                        height: root.height * 0.35
+                                        parent: root
 
-                                        onVisibleChanged: {
-                                            if (clientNameEditDrawer.visible) {
-                                                clientNameEditor.textField.forceActiveFocus()
-                                            }
-                                        }
+                                        anchors.fill: parent
+                                        expandedHeight: root.height * 0.35
 
-                                        ColumnLayout {
+                                        expandedContent: ColumnLayout {
                                             anchors.top: parent.top
                                             anchors.left: parent.left
                                             anchors.right: parent.right
                                             anchors.topMargin: 16
                                             anchors.leftMargin: 16
                                             anchors.rightMargin: 16
+
+                                            Connections {
+                                                target: clientNameEditDrawer
+                                                function onOpened() {
+                                                    clientNameEditor.textField.forceActiveFocus()
+                                                }
+                                            }
 
                                             TextFieldWithHeaderType {
                                                 id: clientNameEditor

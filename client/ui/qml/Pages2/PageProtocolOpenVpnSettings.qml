@@ -162,6 +162,8 @@ PageType {
                             descriptionText: qsTr("Hash")
                             headerText: qsTr("Hash")
 
+                            drawerParent: root
+
                             listView: ListViewWithRadioButtonType {
                                 id: hashListView
 
@@ -183,7 +185,7 @@ PageType {
                                 clickedFunction: function() {
                                     hashDropDown.text = selectedText
                                     hash = hashDropDown.text
-                                    hashDropDown.menuVisible = false
+                                    hashDropDown.close()
                                 }
 
                                 Component.onCompleted: {
@@ -208,6 +210,8 @@ PageType {
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")
 
+                            drawerParent: root
+
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView
 
@@ -229,7 +233,7 @@ PageType {
                                 clickedFunction: function() {
                                     cipherDropDown.text = selectedText
                                     cipher = cipherDropDown.text
-                                    cipherDropDown.menuVisible = false
+                                    cipherDropDown.close()
                                 }
 
                                 Component.onCompleted: {

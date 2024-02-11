@@ -78,7 +78,7 @@ ListView {
                     }
 
                     if (checked) {
-                        containersDropDown.menuVisible = false
+                        containersDropDown.close()
                         ServersModel.setDefaultContainer(proxyContainersModel.mapToSource(index))
                     } else {
                         if (!isSupported && isInstalled) {
@@ -89,7 +89,7 @@ ListView {
                         ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
-                        containersDropDown.menuVisible = false
+                        containersDropDown.close()
                     }
                 }
 

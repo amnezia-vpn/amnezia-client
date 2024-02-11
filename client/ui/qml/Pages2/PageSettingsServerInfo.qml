@@ -71,29 +71,30 @@ PageType {
                     }
 
                     actionButtonFunction: function() {
-                        serverNameEditDrawer.visible = true
+                        serverNameEditDrawer.open()
                     }
                 }
 
-                DrawerType {
+                DrawerType2 {
                     id: serverNameEditDrawer
 
-                    width: root.width
-                    height: root.height * 0.35
+                    parent: root
 
-                    onVisibleChanged: {
-                        if (serverNameEditDrawer.visible) {
-                            serverName.textField.forceActiveFocus()
-                        }
-                    }
+                    anchors.fill: parent
+                    expandedHeight: root.height * 0.35
 
-                    ColumnLayout {
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                    expandedContent: ColumnLayout {
+                        anchors.fill: parent
                         anchors.topMargin: 16
                         anchors.leftMargin: 16
                         anchors.rightMargin: 16
+
+                        Connections {
+                            target: serverNameEditDrawer
+                            function onOpened() {
+                                serverName.textField.forceActiveFocus()
+                            }
+                        }
 
                         TextFieldWithHeaderType {
                             id: serverName
@@ -118,7 +119,7 @@ PageType {
                                 if (serverName.textFieldText !== name) {
                                     name = serverName.textFieldText
                                 }
-                                serverNameEditDrawer.visible = false
+                                serverNameEditDrawer.close()
                             }
                         }
                     }
