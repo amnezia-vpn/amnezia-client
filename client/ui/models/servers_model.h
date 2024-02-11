@@ -91,8 +91,8 @@ public slots:
     ErrorCode removeAllContainers();
     ErrorCode rebootServer();
 
-    void setDefaultContainer(const int containerIndex);
-    DockerContainer getDefaultContainer();
+    void setDefaultContainer(const int serverIndex, const int containerIndex);
+    DockerContainer getDefaultContainer(const int serverIndex);
     const QString getDefaultContainerName();
 
     QStringList getAllInstalledServicesName(const int serverIndex);
