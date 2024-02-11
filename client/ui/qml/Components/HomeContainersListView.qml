@@ -26,15 +26,15 @@ ListView {
         id: containersRadioButtonGroup
     }
 
-    Connections {
-        target: ServersModel
+//    Connections {
+//        target: ServersModel
 
-        function onCurrentlyProcessedServerIndexChanged() {
-            if (ContainersModel.getDefaultContainer()) {
-                menuContent.checkCurrentItem()
-            }
-        }
-    }
+//        function onCurrentlyProcessedServerIndexChanged() {
+//            if (ContainersModel.getDefaultContainer()) {
+//                menuContent.checkCurrentItem()
+//            }
+//        }
+//    }
 
     function checkCurrentItem() {
         var item = menuContent.itemAtIndex(currentIndex)
@@ -69,7 +69,7 @@ ListView {
                 showImage: !isInstalled
 
                 checkable: isInstalled && !ConnectionController.isConnected && isSupported
-                checked: isDefault
+                checked: proxyContainersModel.mapToSource(index) === ServersModel.getDefaultContainer()
 
                 onClicked: {
                     if (ConnectionController.isConnected && isInstalled) {
