@@ -46,6 +46,7 @@ namespace amnezia
         constexpr char psk_key[] = "psk_key";
         constexpr char mtu[] = "mtu";
         constexpr char allowed_ips[] = "allowed_ips";
+        constexpr char persistent_keep_alive[] = "persistent_keep_alive";
 
         constexpr char client_ip[] = "client_ip"; // internal ip address
 

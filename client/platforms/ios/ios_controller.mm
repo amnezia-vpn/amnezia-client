@@ -357,7 +357,16 @@ bool IosController::setupOpenVPN()
     QJsonObject ovpn = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::OpenVpn)].toObject();
     QString ovpnConfig = ovpn[config_key::config].toString();
 
-    return startOpenVPN(ovpnConfig);
+    QJsonObject openVPNConfig {};
+    openVPNConfig.insert(config_key::config, ovpnConfig);
+    openVPNConfig.insert(config_key::mtu, m_rawConfig[config_key::mtu]);
+    openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+    openVPNConfig.insert(config_key::splitTunnelSites, m_rawConfig[config_key::splitTunnelSites]);
+
+    QJsonDocument openVPNConfigDoc(openVPNConfig);
+    QString openVPNConfigStr(openVPNConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startOpenVPN(openVPNConfigStr);
 }
 
 bool IosController::setupCloak()
@@ -394,27 +403,100 @@ bool IosController::setupCloak()
     ovpnConfig.append(cloakBase64);
     ovpnConfig.append("\n</cloak>\n");
 
-    return startOpenVPN(ovpnConfig);
+    QJsonObject openVPNConfig {};
+    openVPNConfig.insert(config_key::config, ovpnConfig);
+    openVPNConfig.insert(config_key::mtu, m_rawConfig[config_key::mtu]);
+    openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+    openVPNConfig.insert(config_key::splitTunnelSites, m_rawConfig[config_key::splitTunnelSites]);
+
+    QJsonDocument openVPNConfigDoc(openVPNConfig);
+    QString openVPNConfigStr(openVPNConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startOpenVPN(openVPNConfigStr);
 }
 
 bool IosController::setupWireGuard()
 {
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
-    
-    QJsonDocument doc(m_rawConfig);
-    QString wgConfig(doc.toJson(QJsonDocument::Compact));
 
-    return startWireGuard(wgConfig);
+    QJsonObject wgConfig {};
+    wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
+    wgConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2]);
+    wgConfig.insert(config_key::mtu, config[config_key::mtu]);
+    wgConfig.insert(config_key::hostName, config[config_key::hostName]);
+    wgConfig.insert(config_key::port, config[config_key::port]);
+    wgConfig.insert(config_key::client_ip, config[config_key::client_ip]);
+    wgConfig.insert(config_key::client_priv_key, config[config_key::client_priv_key]);
+    wgConfig.insert(config_key::server_pub_key, config[config_key::server_pub_key]);
+    wgConfig.insert(config_key::psk_key, config[config_key::psk_key]);
+    wgConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+    wgConfig.insert(config_key::splitTunnelSites, m_rawConfig[config_key::splitTunnelSites]);
+
+    if (config.contains(config_key::allowed_ips)) {
+        wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
+    } else {
+        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
+        wgConfig.insert(config_key::allowed_ips, allowed_ips);
+    }
+
+    if (config.contains(config_key::persistent_keep_alive)) {
+        wgConfig.insert(config_key::persistent_keep_alive, config[config_key::persistent_keep_alive]);
+    } else {
+        wgConfig.insert(config_key::persistent_keep_alive, "25");
+    }
+
+    QJsonDocument wgConfigDoc(wgConfig);
+    QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startWireGuard(wgConfigDocStr);
 }
 
 bool IosController::setupAwg()
 {
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Awg)].toObject();
 
-    QJsonDocument doc(m_rawConfig);
-    QString wgConfig(doc.toJson(QJsonDocument::Compact));
+    QJsonObject wgConfig {};
+    wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
+    wgConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2]);
+    wgConfig.insert(config_key::mtu, config[config_key::mtu]);
+    wgConfig.insert(config_key::hostName, config[config_key::hostName]);
+    wgConfig.insert(config_key::port, config[config_key::port]);
+    wgConfig.insert(config_key::client_ip, config[config_key::client_ip]);
+    wgConfig.insert(config_key::client_priv_key, config[config_key::client_priv_key]);
+    wgConfig.insert(config_key::server_pub_key, config[config_key::server_pub_key]);
+    wgConfig.insert(config_key::psk_key, config[config_key::psk_key]);
+    wgConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+    wgConfig.insert(config_key::splitTunnelSites, m_rawConfig[config_key::splitTunnelSites]);
 
-    return startWireGuard(wgConfig);
+    if (config.contains(config_key::allowed_ips)) {
+        wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
+    } else {
+        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
+        wgConfig.insert(config_key::allowed_ips, allowed_ips);
+    }
+
+    if (config.contains(config_key::persistent_keep_alive)) {
+        wgConfig.insert(config_key::persistent_keep_alive, config[config_key::persistent_keep_alive]);
+    } else {
+        wgConfig.insert(config_key::persistent_keep_alive, "25");
+    }
+
+    wgConfig.insert(config_key::initPacketMagicHeader, config[config_key::initPacketMagicHeader]);
+    wgConfig.insert(config_key::responsePacketMagicHeader, config[config_key::responsePacketMagicHeader]);
+    wgConfig.insert(config_key::underloadPacketMagicHeader, config[config_key::underloadPacketMagicHeader]);
+    wgConfig.insert(config_key::transportPacketMagicHeader, config[config_key::transportPacketMagicHeader]);
+
+    wgConfig.insert(config_key::initPacketJunkSize, config[config_key::initPacketJunkSize]);
+    wgConfig.insert(config_key::responsePacketJunkSize, config[config_key::responsePacketJunkSize]);
+
+    wgConfig.insert(config_key::junkPacketCount, config[config_key::junkPacketCount]);
+    wgConfig.insert(config_key::junkPacketMinSize, config[config_key::junkPacketMinSize]);
+    wgConfig.insert(config_key::junkPacketMaxSize, config[config_key::junkPacketMaxSize]);
+
+    QJsonDocument wgConfigDoc(wgConfig);
+    QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startWireGuard(wgConfigDocStr);
 }
 
 bool IosController::startOpenVPN(const QString &config)
@@ -499,7 +581,7 @@ void IosController::startTunnel()
                     NSDictionary* message = @{actionKey: actionValue, tunnelIdKey: tunnelIdValue,
                     SplitTunnelTypeKey: SplitTunnelTypeValue, SplitTunnelSitesKey: SplitTunnelSitesValue};
                 
-                    sendVpnExtensionMessage(message);
+//                    sendVpnExtensionMessage(message);
 
 
                     BOOL started = [m_currentTunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
