@@ -18,40 +18,32 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
     // send empty string to NEDNSSettings.matchDomains
     networkSettings?.dnsSettings?.matchDomains = [""]
 
-    if splitTunnelType == "1" {
+    if splitTunnelType == 1 {
       var ipv4IncludedRoutes = [NEIPv4Route]()
-      let STSdata = Data(splitTunnelSites!.utf8)
-      do {
-        guard let STSArray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
-        for allowedIPString in STSArray {
-          if let allowedIP = IPAddressRange(from: allowedIPString) {
-            ipv4IncludedRoutes.append(NEIPv4Route(
-              destinationAddress: "\(allowedIP.address)",
-              subnetMask: "\(allowedIP.subnetMask())"))
-          }
+
+      for allowedIPString in splitTunnelSites {
+        if let allowedIP = IPAddressRange(from: allowedIPString) {
+          ipv4IncludedRoutes.append(NEIPv4Route(
+            destinationAddress: "\(allowedIP.address)",
+            subnetMask: "\(allowedIP.subnetMask())"))
         }
-      } catch {
-        wg_log(.error, message: "Parse JSONSerialization Error")
       }
+
       networkSettings?.ipv4Settings?.includedRoutes = ipv4IncludedRoutes
     } else {
-      if splitTunnelType == "2" {
+      if splitTunnelType == 2 {
         var ipv4ExcludedRoutes = [NEIPv4Route]()
         var ipv4IncludedRoutes = [NEIPv4Route]()
         var ipv6IncludedRoutes = [NEIPv6Route]()
-        let STSdata = Data(splitTunnelSites!.utf8)
-        do {
-          guard let STSArray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
-          for excludeIPString in STSArray {
-            if let excludeIP = IPAddressRange(from: excludeIPString) {
-              ipv4ExcludedRoutes.append(NEIPv4Route(
-                destinationAddress: "\(excludeIP.address)",
-                subnetMask: "\(excludeIP.subnetMask())"))
-            }
+
+        for excludeIPString in splitTunnelSites {
+          if let excludeIP = IPAddressRange(from: excludeIPString) {
+            ipv4ExcludedRoutes.append(NEIPv4Route(
+              destinationAddress: "\(excludeIP.address)",
+              subnetMask: "\(excludeIP.subnetMask())"))
           }
-        } catch {
-          wg_log(.error, message: "Parse JSONSerialization Error")
         }
+
         if let allIPv4 = IPAddressRange(from: "0.0.0.0/0") {
           ipv4IncludedRoutes.append(NEIPv4Route(
             destinationAddress: "\(allIPv4.address)",

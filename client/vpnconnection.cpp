@@ -305,6 +305,11 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex, const ServerC
     // TODO: try to get hostName, port, description for 3rd party configs
     // vpnConfiguration[config_key::port] = ...;
 
+#if defined Q_OS_IOS
+    QJsonObject awg = server[config_key::containers].toArray().first().toObject()[config_key::awg].toObject();
+    QString mtu = awg[config_key::mtu].toString(protocols::awg::defaultMtu);
+    vpnConfiguration[config_key::mtu] = mtu;
+#endif
     return vpnConfiguration;
 }
 
