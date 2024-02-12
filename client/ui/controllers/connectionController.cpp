@@ -44,6 +44,11 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
+    if (!m_containersModel->isAnyContainerInstalled()) {
+        emit noInstalledContainers();
+        return;
+    }
+
     int serverIndex = m_serversModel->getDefaultServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
@@ -173,6 +178,17 @@ QVector<quint64> ConnectionController::getTxView() const
 QVector<quint64> ConnectionController::getTimes() const
 {
     return m_times;
+}
+
+void ConnectionController::toggleConnection(bool skipConnectionInProgressCheck)
+{
+    if (!skipConnectionInProgressCheck && isConnectionInProgress()) {
+        closeConnection();
+    } else if (isConnected()) {
+        closeConnection();
+    } else {
+        openConnection();
+    }
 }
 
 bool ConnectionController::isConnectionInProgress() const

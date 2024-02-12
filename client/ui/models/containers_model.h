@@ -40,7 +40,7 @@ public:
     QVariant data(const int index, int role) const;
 
 public slots:
-    void updateModel(QJsonArray &containers);
+    void updateModel(const QJsonArray &containers);
 
     DockerContainer getDefaultContainer();
     void setDefaultContainer(const int containerIndex);

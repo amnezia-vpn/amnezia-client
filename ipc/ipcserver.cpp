@@ -307,14 +307,12 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
     if (splitTunnelType == 1) {
         for (auto v : splitTunnelSites) {
             QString ipRange = v.toString();
-            qDebug() << "ipRange " << ipRange;
             if (ipRange.split('/').size() > 1){
                 config.m_allowedIPAddressRanges.append(
                     IPAddress(QHostAddress(ipRange.split('/')[0]), atoi(ipRange.split('/')[1].toLocal8Bit())));
             } else {
                  config.m_allowedIPAddressRanges.append(
                     IPAddress(QHostAddress(ipRange), 32));
-
             }
         }
     }
