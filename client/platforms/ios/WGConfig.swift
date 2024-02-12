@@ -1,10 +1,3 @@
-//
-//  Config.swift
-//  networkextension
-//
-//  Created by Igor Sorokin on 2/11/24.
-//
-
 import Foundation
 
 struct WGConfigData: Decodable {
