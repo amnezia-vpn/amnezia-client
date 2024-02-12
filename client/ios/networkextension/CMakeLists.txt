@@ -80,9 +80,13 @@ target_sources(networkextension PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/Array+ConcurrentMap.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddress+AddrInfo.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PrivateKey.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/iostunnel.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/NELogController.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPNAdapterDelegate.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/WGConfig.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
-    ${CLIENT_ROOT_DIR}/platforms/ios/ioslogger.swift
 )
 
 ## Build wireguard-go-version.h

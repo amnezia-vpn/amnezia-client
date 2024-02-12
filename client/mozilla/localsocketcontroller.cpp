@@ -13,14 +13,10 @@
 #include <QJsonValue>
 #include <QStandardPaths>
 
-//#include "errorhandler.h"
 #include "ipaddress.h"
 #include "leakdetector.h"
 #include "logger.h"
-//#include "models/device.h"
-//#include "models/keys.h"
 #include "models/server.h"
-//#include "settingsholder.h"
 
 // How many times do we try to reconnect.
 constexpr int MAX_CONNECTION_RETRY = 10;
@@ -146,11 +142,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   QJsonArray defaultAllowedIP = QJsonArray::fromStringList(QString("0.0.0.0/0, ::/0").split(","));
 
   if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
-    // Use AllowedIP list from WG config bacouse of higer priority
-
+    // Use AllowedIP list from WG config because of higher priority
     for (auto v : plainAllowedIP) {
       QString ipRange = v.toString();
-      qDebug() << "ipRange " << ipRange;
       if (ipRange.split('/').size() > 1){
           QJsonObject range;
           range.insert("address", ipRange.split('/')[0]);
@@ -185,7 +179,6 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
       if (splitTunnelType == 1) {
           for (auto v : splitTunnelSites) {
               QString ipRange = v.toString();
-              qDebug() << "ipRange " << ipRange;
               if (ipRange.split('/').size() > 1){
                   QJsonObject range;
                   range.insert("address", ipRange.split('/')[0]);
