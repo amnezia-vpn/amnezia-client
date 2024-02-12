@@ -1,7 +1,5 @@
-package com.wireguard.android.backend
+package org.amnezia.vpn.protocol.wireguard
 
-// TODO: Refactor Amnezia wireguard project by changing the JNI method names
-//  to move this object to 'org.amnezia.vpn.protocol.wireguard.backend' package
 object GoBackend {
     external fun wgGetConfig(handle: Int): String?
     external fun wgGetSocketV4(handle: Int): Int
