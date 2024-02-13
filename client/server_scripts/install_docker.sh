@@ -5,6 +5,18 @@ elif which pacman > /dev/null 2>&1; then pm=$(which pacman); silent_inst="-S --n
 else echo "Packet manager not found"; exit 1; fi;\
 echo "Dist: $dist, Packet manager: $pm, Install command: $silent_inst, Check pkgs command: $check_pkgs, Docker pkg: $docker_pkg";\
 if [ "$dist" = "debian" ]; then export DEBIAN_FRONTEND=noninteractive; fi;\
+CHECK_LOCALE=$(locale | grep -c 'LANG=en_US.UTF-8');\
+if [ "$CHECK_LOCALE" = "0" ]; then \
+  CHECK_LOCALE=$(locale | grep -c 'LANG=C.UTF-8');\
+  if [ "$CHECK_LOCALE" = "0" ]; then \
+    CHECK_LOCALE=$(locale -a | grep -c 'en_US.utf8');\
+    if [ "$CHECK_LOCALE" != "0" ]; then export LC_ALL=en_US.UTF-8;\
+    else \
+      CHECK_LOCALE=$(locale -a | grep 'C.utf8');\
+      if [ "$CHECK_LOCALE" != "0" ]; then export LC_ALL=C.UTF-8; fi;\
+    fi;\
+  fi;\
+fi;\
 if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst sudo; fi;\
 if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc; fi;\
 if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof; fi;\
