@@ -11,9 +11,11 @@ if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $sile
 if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs;\
   check_podman=$(sudo $pm $what_pkg $docker_pkg 2>&1 | grep -c podman-docker);\
   check_moby=$(sudo $pm $what_pkg $docker_pkg 2>&1 | grep -c moby-engine);\
-  if [ "$check_podman" != "0" ] | [ "$check_moby" != "0" ]; then echo "Container is not supported"; exit 1;\
-  else sudo $pm $silent_inst $docker_pkg; fi;\
-  sleep 5; sudo systemctl enable --now docker; sleep 5;\
+  if [ "$check_podman" != "0" ] || [ "$check_moby" != "0" ]; then echo "Container is not supported"; exit 1;\
+  else sudo $pm $silent_inst $docker_pkg;\
+    if ! command -v docker > /dev/null 2>&1; then docker; exit 1;\
+    else sleep 5; sudo systemctl enable --now docker; sleep 5; fi;\
+  fi;\
 fi;\
 if [ "$(systemctl is-active docker)" != "active" ]; then \
   sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
