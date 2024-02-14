@@ -331,6 +331,11 @@ QJsonObject ServersModel::getDefaultServerConfig()
     return m_servers.at(m_defaultServerIndex).toObject();
 }
 
+QJsonObject ServersModel::getCurrentlyProcessedServerConfig()
+{
+    return m_servers.at(m_currentlyProcessedServerIndex).toObject();
+}
+
 void ServersModel::reloadContainerConfig()
 {
     QJsonObject server = m_servers.at(m_currentlyProcessedServerIndex).toObject();
@@ -398,23 +403,23 @@ void ServersModel::addContainerConfig(const int containerIndex, const QJsonObjec
     }
 }
 
-void ServersModel::setDefaultContainer(const int containerIndex)
+void ServersModel::setDefaultContainer(const int serverIndex, const int containerIndex)
 {
     auto container = static_cast<DockerContainer>(containerIndex);
-    QJsonObject s = m_servers.at(m_currentlyProcessedServerIndex).toObject();
+    QJsonObject s = m_servers.at(serverIndex).toObject();
     s.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
     editServer(s); //check
     emit defaultContainerChanged(container);
 }
 
-DockerContainer ServersModel::getDefaultContainer()
+DockerContainer ServersModel::getDefaultContainer(const int serverIndex)
 {
-    return qvariant_cast<DockerContainer>(data(m_currentlyProcessedServerIndex, DefaultContainerRole));
+    return qvariant_cast<DockerContainer>(data(serverIndex, DefaultContainerRole));
 }
 
 const QString ServersModel::getDefaultContainerName()
 {
-    auto defaultContainer = getDefaultContainer();
+    auto defaultContainer = getDefaultContainer(m_defaultServerIndex);
     return ContainerProps::containerHumanNames().value(defaultContainer);
 }
 
@@ -542,5 +547,20 @@ void ServersModel::toggleAmneziaDns(bool enabled)
 bool ServersModel::isDefaultServerFromApi()
 {
     return m_settings->server(m_defaultServerIndex).value(config_key::configVersion).toInt();
+}
+
+bool ServersModel::isCurrentlyProcessedServerFromApi()
+{
+    return m_settings->server(m_currentlyProcessedServerIndex).value(config_key::configVersion).toInt();
+}
+
+bool ServersModel::isServerFromApiAlreadyExists(const quint16 crc)
+{
+    for (const auto &server : qAsConst(m_servers)) {
+        if (static_cast<quint16>(server.toObject().value(config_key::crc).toInt()) == crc) {
+            return true;
+        }
+    }
+    return false;
 }
 

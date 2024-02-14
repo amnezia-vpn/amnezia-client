@@ -225,7 +225,37 @@ PageType {
 
             DividerType {
                 visible: content.isServerWithWriteAccess
-            }           
+            }
+
+            LabelWithButtonType {
+                visible: ServersModel.isCurrentlyProcessedServerFromApi()
+                Layout.fillWidth: true
+
+                text: qsTr("Reset API config")
+                textColor: "#EB5757"
+
+                clickedFunction: function() {
+                    questionDrawer.headerText = qsTr("Do you want to reset API config?")
+                    questionDrawer.descriptionText = ""
+                    questionDrawer.yesButtonText = qsTr("Continue")
+                    questionDrawer.noButtonText = qsTr("Cancel")
+
+                    questionDrawer.yesButtonFunction = function() {
+                        questionDrawer.visible = false
+                        PageController.showBusyIndicator(true)
+                        ApiController.clearApiConfig()
+                        PageController.showBusyIndicator(false)
+                    }
+                    questionDrawer.noButtonFunction = function() {
+                        questionDrawer.visible = false
+                    }
+                    questionDrawer.visible = true
+                }
+            }
+
+            DividerType {
+                visible: ServersModel.isCurrentlyProcessedServerFromApi()
+            }
 
             QuestionDrawer {
                 id: questionDrawer

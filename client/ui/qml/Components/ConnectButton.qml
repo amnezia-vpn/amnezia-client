@@ -138,26 +138,9 @@ Button {
     }
 
     onClicked: {
-        if (!ApiController.updateServerConfigFromApi()) {
-            return
-        }
-
-        if (!ContainersModel.isAnyContainerInstalled()) {
-            PageController.setTriggeredBtConnectButton(true)
-
-            ServersModel.currentlyProcessedIndex = ServersModel.getDefaultServerIndex()
-            InstallController.setShouldCreateServer(false)
-            PageController.goToPage(PageEnum.PageSetupWizardEasy)
-
-            return
-        }
-
-        if (ConnectionController.isConnectionInProgress) {
-            ConnectionController.closeConnection()
-        } else if (ConnectionController.isConnected) {
-            ConnectionController.closeConnection()
-        } else {
-            ConnectionController.openConnection()
+        if (!ConnectionController.isConnectionInProgress) {
+            ServersModel.setCurrentlyProcessedServerIndex(ServersModel.defaultIndex)
+            ApiController.updateServerConfigFromApi()
         }
     }
 }
