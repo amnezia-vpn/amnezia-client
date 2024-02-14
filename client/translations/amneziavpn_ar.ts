@@ -86,7 +86,7 @@
     </message>
     <message>
         <source>Server IP, login and password</source>
-        <translation type="vanished">服务器IP，用户名和密码</translation>
+        <translation type="vanished">خادم IP, تسجيل و كلمة مرور</translation>
     </message>
     <message>
         <source>QR code, key or configuration file</source>
@@ -201,7 +201,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/controllers/installController.cpp" line="324"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
-        <translation type="unfinished">الخادم &apos;%1&apos; جميع الحاويات من الخادم</translation>
+        <translation type="unfinished">قد تم حذفها &apos;%1&apos; جميع الحاويات من الخادم</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="341"/>
