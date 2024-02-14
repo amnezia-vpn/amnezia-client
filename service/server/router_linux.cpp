@@ -180,11 +180,10 @@ bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
 
     QProcess process;
     QStringList commands;
-    int exit_code;
 
     commands << "ip" << "tuntap" << "add" << "mode" << "tun" << "dev" << dev;
-    exit_code = QProcess::execute("sudo", commands);
-    if (exit_code < 0)
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not add tun device!\n";
         return false;
@@ -192,8 +191,8 @@ bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
     commands.clear();
 
     commands << "ip" << "addr" << "add" << QString("%1/24").arg(subnet) << "dev" << dev;
-    exit_code = QProcess::execute("sudo", commands);
-    if(exit_code < 0)
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not add a subnet for tun device!\n";
         return false;
@@ -201,8 +200,8 @@ bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
     commands.clear();
 
     commands << "ip" << "link" << "set" << "dev" << dev << "up";
-    exit_code = QProcess::execute("sudo", commands);
-    if(exit_code < 0)
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not link set for tun device!\n";
         return false;
@@ -259,11 +258,10 @@ void RouterLinux::StartRoutingIpv6()
 {
     QProcess process;
     QStringList commands;
-    int exit_code;
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.all.disable_ipv6=0";
-    exit_code = QProcess::execute("sudo", commands);
-    if(exit_code < 0)
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not activate ipv6\n";
         return;
@@ -271,8 +269,8 @@ void RouterLinux::StartRoutingIpv6()
     commands.clear();
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.default.disable_ipv6=0";
-    exit_code = QProcess::execute("sudo", commands);
-    if(exit_code < 0)
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not activate ipv6\n";
         return;
@@ -286,11 +284,10 @@ void RouterLinux::StopRoutingIpv6()
 {
     QProcess process;
     QStringList commands;
-    int exit_code;
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.all.disable_ipv6=1";
-    exit_code = QProcess::execute("sudo", commands);
-    if(exit_code < 0)
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not disable ipv6\n";
         return;
@@ -298,8 +295,8 @@ void RouterLinux::StopRoutingIpv6()
     commands.clear();
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.default.disable_ipv6=1";
-    exit_code = QProcess::execute("sudo", commands);
-    if(exit_code < 0)
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not disable ipv6\n";
         return;
