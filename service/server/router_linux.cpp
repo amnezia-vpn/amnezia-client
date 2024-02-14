@@ -183,7 +183,12 @@ bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
 
     commands << "ip" << "tuntap" << "add" << "mode" << "tun" << "dev" << dev;
     process.start("sudo", commands);
-    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not start adding tun device!\n";
+        return false;
+    }
+    else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not add tun device!\n";
         return false;
@@ -192,7 +197,12 @@ bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
 
     commands << "ip" << "addr" << "add" << QString("%1/24").arg(subnet) << "dev" << dev;
     process.start("sudo", commands);
-    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not start adding a subnet for tun device!\n";
+        return false;
+    }
+    else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not add a subnet for tun device!\n";
         return false;
@@ -201,7 +211,12 @@ bool RouterLinux::createTun(const QString &dev, const QString &subnet) {
 
     commands << "ip" << "link" << "set" << "dev" << dev << "up";
     process.start("sudo", commands);
-    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not start link set for tun device!\n";
+        return false;
+    }
+    else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not link set for tun device!\n";
         return false;
@@ -261,7 +276,12 @@ void RouterLinux::StartRoutingIpv6()
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.all.disable_ipv6=0";
     process.start("sudo", commands);
-    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not start activate ipv6\n";
+        return;
+    }
+    else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not activate ipv6\n";
         return;
@@ -270,7 +290,12 @@ void RouterLinux::StartRoutingIpv6()
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.default.disable_ipv6=0";
     process.start("sudo", commands);
-    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not start activate ipv6\n";
+        return;
+    }
+    else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not activate ipv6\n";
         return;
@@ -287,7 +312,12 @@ void RouterLinux::StopRoutingIpv6()
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.all.disable_ipv6=1";
     process.start("sudo", commands);
-    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not start disable ipv6\n";
+        return;
+    }
+    else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not disable ipv6\n";
         return;
@@ -296,7 +326,12 @@ void RouterLinux::StopRoutingIpv6()
 
     commands << "sysctl" << "-w" << "net.ipv6.conf.default.disable_ipv6=1";
     process.start("sudo", commands);
-    if (!process.waitForStarted(1000) && !process.waitForFinished(2000))
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not start disable ipv6\n";
+        return;
+    }
+    else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not disable ipv6\n";
         return;
