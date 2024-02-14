@@ -34,6 +34,8 @@ public:
     Q_INVOKABLE QVector<quint64> getTimes() const;
 
 public slots:
+    void toggleConnection(bool skipConnectionInProgressCheck);
+
     void openConnection();
     void closeConnection();
 
@@ -53,6 +55,8 @@ signals:
     void connectionErrorOccurred(const QString &errorMessage);
     void reconnectWithUpdatedContainer(const QString &message);
     void bytesChanged();
+
+    void noInstalledContainers();
 
 private:
     Vpn::ConnectionState getCurrentConnectionState();

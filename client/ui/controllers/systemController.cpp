@@ -24,18 +24,18 @@ SystemController::SystemController(const std::shared_ptr<Settings> &settings, QO
 {
 }
 
-void SystemController::setHasFocus(bool hasFocus)
+void SystemController::setAppHasFocus(bool appHasFocus)
 {
-    if (m_hasFocus != hasFocus)
+    if (m_appHasFocus != appHasFocus)
     {
-        m_hasFocus = hasFocus;
-        emit hasFocusChanged();
+        m_appHasFocus = appHasFocus;
+        emit appHasFocusChanged();
     }
 }
 
-bool SystemController::hasFocus() const
+bool SystemController::appHasFocus() const
 {
-    return m_hasFocus;
+    return m_appHasFocus;
 }
 
 void SystemController::saveFile(QString fileName, const QString &data)

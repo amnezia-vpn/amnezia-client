@@ -365,7 +365,8 @@ PageType {
                         target: serverSelector
 
                         function onSeverSelectorIndexChanged() {
-                            protocolSelectorListView.currentIndex = proxyContainersModel.mapFromSource(ServersModel.getDefaultContainer())
+                            var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getDefaultContainer(ServersModel.currentlyProcessedIndex))
+                            protocolSelectorListView.currentIndex = defaultContainer
                             protocolSelectorListView.triggerCurrentItem()
                         }
                     }

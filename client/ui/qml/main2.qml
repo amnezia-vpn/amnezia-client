@@ -28,7 +28,7 @@ Window  {
     }
 
     onActiveChanged: {
-        SystemController.hasFocus = active
+        SystemController.appHasFocus = active
     }
 
     title: "AmneziaVPN"

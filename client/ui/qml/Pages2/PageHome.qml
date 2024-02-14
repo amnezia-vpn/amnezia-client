@@ -415,6 +415,13 @@ PageType {
                     model: ServersModel
                     currentIndex: ServersModel.defaultIndex
 
+                    Connections {
+                        target: ServersModel
+                        function onDefaultServerIndexChanged(serverIndex) {
+                            serversMenuContent.currentIndex = serverIndex
+                        }
+                    }
+
                     clip: true
                     interactive: false
 
@@ -443,19 +450,19 @@ PageType {
 
                                     text: name
                                     descriptionText: {
-                                        var description = ""
+                                        var fullDescription = ""
                                         if (hasWriteAccess) {
                                             if (SettingsController.isAmneziaDnsEnabled()
                                                     && ServersModel.isAmneziaDnsContainerInstalled(index)) {
-                                                description += "Amnezia DNS | "
+                                                fullDescription += "Amnezia DNS | "
                                             }
                                         } else {
                                             if (containsAmneziaDns) {
-                                                description += "Amnezia DNS | "
+                                                fullDescription += "Amnezia DNS | "
                                             }
                                         }
 
-                                        return description += hostName
+                                        return fullDescription += serverDescription
                                     }
 
                                     checked: index === serversMenuContent.currentIndex

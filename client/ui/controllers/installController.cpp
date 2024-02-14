@@ -284,7 +284,7 @@ void InstallController::updateContainer(QJsonObject config)
         m_protocolModel->updateModel(config);
 
         if ((serverIndex == m_serversModel->getDefaultServerIndex())
-            && (container == m_containersModel->getDefaultContainer())) {
+            && (container == m_serversModel->getDefaultContainer(serverIndex))) {
             emit currentContainerUpdated();
         } else {
             emit updateContainerFinished(tr("Settings updated successfully"));
@@ -294,6 +294,15 @@ void InstallController::updateContainer(QJsonObject config)
     }
 
     emit installationErrorOccurred(errorString(errorCode));
+}
+
+void InstallController::rebootCurrentlyProcessedServer()
+{
+    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
+
+    m_serversModel->rebootServer();
+    emit rebootCurrentlyProcessedServerFinished(tr("Server '%1' was rebooted").arg(serverName));
 }
 
 void InstallController::removeCurrentlyProcessedServer()
