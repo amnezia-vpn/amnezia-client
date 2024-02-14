@@ -19,10 +19,9 @@ DrawerType2 {
     expandedContent: ColumnLayout {
         id: content
 
-        anchors.fill: parent
-        anchors.topMargin: 16
-        anchors.rightMargin: 16
-        anchors.leftMargin: 16
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
 
         spacing: 8
 
@@ -32,6 +31,9 @@ DrawerType2 {
 
         Header2TextType {
             Layout.fillWidth: true
+            Layout.topMargin: 16
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
 
             text: headerText
         }
@@ -39,6 +41,8 @@ DrawerType2 {
         ParagraphTextType {
             Layout.fillWidth: true
             Layout.topMargin: 8
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
 
             text: descriptionText
         }
@@ -46,6 +50,8 @@ DrawerType2 {
         BasicButtonType {
             Layout.fillWidth: true
             Layout.topMargin: 16
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
 
             text: yesButtonText
 
@@ -58,6 +64,8 @@ DrawerType2 {
 
         BasicButtonType {
             Layout.fillWidth: true
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
 
             defaultColor: "transparent"
             hoveredColor: Qt.rgba(1, 1, 1, 0.08)
