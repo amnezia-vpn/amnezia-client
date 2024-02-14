@@ -1,15 +1,15 @@
 mkdir -p /opt/amnezia/awg
 cd /opt/amnezia/awg
-WIREGUARD_SERVER_PRIVATE_KEY=$(wg genkey)
+WIREGUARD_SERVER_PRIVATE_KEY=$(awg genkey)
 echo $WIREGUARD_SERVER_PRIVATE_KEY > /opt/amnezia/awg/wireguard_server_private_key.key
 
-WIREGUARD_SERVER_PUBLIC_KEY=$(echo $WIREGUARD_SERVER_PRIVATE_KEY | wg pubkey)
+WIREGUARD_SERVER_PUBLIC_KEY=$(echo $WIREGUARD_SERVER_PRIVATE_KEY | awg pubkey)
 echo $WIREGUARD_SERVER_PUBLIC_KEY > /opt/amnezia/awg/wireguard_server_public_key.key
 
-WIREGUARD_PSK=$(wg genpsk)
+WIREGUARD_PSK=$(awg genpsk)
 echo $WIREGUARD_PSK > /opt/amnezia/awg/wireguard_psk.key
 
-cat > /opt/amnezia/awg/wg0.conf <<EOF
+cat > /opt/amnezia/awg/awg0.conf <<EOF
 [Interface]
 PrivateKey = $WIREGUARD_SERVER_PRIVATE_KEY
 Address = $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR
