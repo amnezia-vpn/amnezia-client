@@ -4,6 +4,8 @@ import QtQuick.Layouts
 
 import SortFilterProxyModel 0.2
 
+import PageEnum 1.0
+
 import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
@@ -138,9 +140,8 @@ PageType {
 
                             onClicked: {
                                 forceActiveFocus()
-                                PageController.showBusyIndicator(true)
+                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(ShadowSocksConfigModel.getConfig())
-                                PageController.showBusyIndicator(false)
                             }
                         }
                     }

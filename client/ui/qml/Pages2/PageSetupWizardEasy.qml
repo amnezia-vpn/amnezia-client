@@ -112,17 +112,19 @@ PageType {
                                 var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
                                 containers.dockerContainer = dockerContainer
-                                containers.containerDefaultPort = ProtocolProps.defaultPort(defaultContainerProto)
+                                containers.containerDefaultPort = ProtocolProps.getPortForInstall(defaultContainerProto)
                                 containers.containerDefaultTransportProto = ProtocolProps.defaultTransportProto(defaultContainerProto)
                             }
                         }
                     }
+                }
 
-                    Component.onCompleted: {
-                        if (index === containers.currentIndex) {
-                            card.checked = true
-                            card.clicked()
-                        }
+                Component.onCompleted: {
+                    var item = containers.itemAtIndex(containers.currentIndex)
+                    if (item !== null) {
+                        var button = item.children[0].children[0]
+                        button.checked = true
+                        button.clicked()
                     }
                 }
             }

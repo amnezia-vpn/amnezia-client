@@ -49,12 +49,12 @@ PageType {
 
                 Layout.fillWidth: true
                 headerText: qsTr("Server IP address [:port]")
-                textFieldPlaceholderText: qsTr("255.255.255.255:88")
+                textFieldPlaceholderText: qsTr("255.255.255.255:22")
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressPortRegExp()
                 }
 
-                onTextFieldTextChanged: {
+                onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '');
                 }
             }
@@ -73,13 +73,17 @@ PageType {
                 property bool hidePassword: true
 
                 Layout.fillWidth: true
-                headerText: qsTr("Password / SSH private key")
+                headerText: qsTr("Password or SSH private key")
                 textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
                 buttonImageSource: textFieldText !== "" ? (hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg")
                                                         : ""
 
                 clickedFunc: function() {
                     hidePassword = !hidePassword
+                }
+
+                onFocusChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '');
                 }
             }
 
@@ -90,6 +94,7 @@ PageType {
                 text: qsTr("Continue")
 
                 onClicked: function() {
+                    forceActiveFocus()
                     if (!isCredentialsFilled()) {
                         return
                     }
@@ -112,8 +117,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 12
 
-                text: qsTr("All data you enter will remain strictly confidential
-and will not be shared or disclosed to the Amnezia or any third parties")
+                text: qsTr("All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties")
             }
         }
     }

@@ -10,12 +10,6 @@
 #include "../protocols/vpnprotocol.h"
 #import "ios_controller_wrapper.h"
 
-#import <NetworkExtension/NetworkExtension.h>
-#import <NetworkExtension/NETunnelProviderManager.h>
-#import <NetworkExtension/NEVPNManager.h>
-#import <NetworkExtension/NETunnelProviderSession.h>
-
-
 const char* Action::start = "start";
 const char* Action::restart = "restart";
 const char* Action::stop = "stop";
@@ -249,8 +243,107 @@ void IosController::vpnStatusDidChange(void *pNotification)
     NETunnelProviderSession *session = (NETunnelProviderSession *)pNotification;
 
     if (session /* && session == TunnelManager.session */ ) {
-       qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
-       emit connectionStateChanged(iosStatusToState(session.status));
+        qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
+       
+        if (session.status == NEVPNStatusDisconnected) {
+            if (@available(iOS 16.0, *)) {
+                [session fetchLastDisconnectErrorWithCompletionHandler:^(NSError * _Nullable error) {
+                    if (error != nil) {
+                        qDebug() << "Disconnect error" << error.domain << error.code << error.localizedDescription;
+                        
+                        if ([error.domain isEqualToString:NEVPNConnectionErrorDomain]) {
+                            switch (error.code) {
+                                case NEVPNConnectionErrorOverslept:
+                                    qDebug() << "Disconnect error info" << "The VPN connection was terminated because the system slept for an extended period of time.";
+                                    break;
+                                case NEVPNConnectionErrorNoNetworkAvailable:
+                                    qDebug() << "Disconnect error info" << "The VPN connection could not be established because the system is not connected to a network.";
+                                    break;
+                                case NEVPNConnectionErrorUnrecoverableNetworkChange:
+                                    qDebug() << "Disconnect error info" << "The VPN connection was terminated because the network conditions changed in such a way that the VPN connection could not be maintained.";
+                                    break;
+                                case NEVPNConnectionErrorConfigurationFailed:
+                                    qDebug() << "Disconnect error info" << "The VPN connection could not be established because the configuration is invalid. ";
+                                    break;
+                                case NEVPNConnectionErrorServerAddressResolutionFailed:
+                                    qDebug() << "Disconnect error info" << "The address of the VPN server could not be determined.";
+                                    break;
+                                case NEVPNConnectionErrorServerNotResponding:
+                                    qDebug() << "Disconnect error info" << "Network communication with the VPN server has failed.";
+                                    break;
+                                case NEVPNConnectionErrorServerDead:
+                                    qDebug() << "Disconnect error info" << "The VPN server is no longer functioning.";
+                                    break;
+                                case NEVPNConnectionErrorAuthenticationFailed:
+                                    qDebug() << "Disconnect error info" << "The user credentials were rejected by the VPN server.";
+                                    break;
+                                case NEVPNConnectionErrorClientCertificateInvalid:
+                                    qDebug() << "Disconnect error info" << "The client certificate is invalid.";
+                                    break;
+                                case NEVPNConnectionErrorClientCertificateNotYetValid:
+                                    qDebug() << "Disconnect error info" << "The client certificate will not be valid until some future point in time.";
+                                    break;
+                                case NEVPNConnectionErrorClientCertificateExpired:
+                                    qDebug() << "Disconnect error info" << "The validity period of the client certificate has passed.";
+                                    break;
+                                case NEVPNConnectionErrorPluginFailed:
+                                    qDebug() << "Disconnect error info" << "The VPN plugin died unexpectedly.";
+                                    break;
+                                case NEVPNConnectionErrorConfigurationNotFound:
+                                    qDebug() << "Disconnect error info" << "The VPN configuration could not be found.";
+                                    break;
+                                case NEVPNConnectionErrorPluginDisabled:
+                                    qDebug() << "Disconnect error info" << "The VPN plugin could not be found or needed to be updated.";
+                                    break;
+                                case NEVPNConnectionErrorNegotiationFailed:
+                                    qDebug() << "Disconnect error info" << "The VPN protocol negotiation failed.";
+                                    break;
+                                case NEVPNConnectionErrorServerDisconnected:
+                                    qDebug() << "Disconnect error info" << "The VPN server terminated the connection.";
+                                    break;
+                                case NEVPNConnectionErrorServerCertificateInvalid:
+                                    qDebug() << "Disconnect error info" << "The server certificate is invalid.";
+                                    break;
+                                case NEVPNConnectionErrorServerCertificateNotYetValid:
+                                    qDebug() << "Disconnect error info" << "The server certificate will not be valid until some future point in time.";
+                                    break;
+                                case NEVPNConnectionErrorServerCertificateExpired:
+                                    qDebug() << "Disconnect error info" << "The validity period of the server certificate has passed.";
+                                    break;
+                                default:
+                                    qDebug() << "Disconnect error info" << "Unknown code.";
+                                    break;
+                            }
+                        }
+                        
+                        NSError *underlyingError = error.userInfo[@"NSUnderlyingError"];
+                        if (underlyingError != nil) {
+                            qDebug() << "Disconnect underlying error" << underlyingError.domain << underlyingError.code << underlyingError.localizedDescription;
+                            
+                            if ([underlyingError.domain isEqualToString:@"NEAgentErrorDomain"]) {
+                                switch (underlyingError.code) {
+                                    case 1:
+                                        qDebug() << "Disconnect underlying error" << "General. Use sysdiagnose.";
+                                        break;
+                                    case 2:
+                                        qDebug() << "Disconnect underlying error" << "Plug-in unavailable. Use sysdiagnose.";
+                                        break;
+                                    default:
+                                        qDebug() << "Disconnect underlying error" << "Unknown code. Use sysdiagnose.";
+                                        break;
+                                }
+                            }
+                        }
+                    } else {
+                        qDebug() << "Disconnect error is absent";
+                    }
+                }];
+            } else {
+                qDebug() << "Disconnect error is unavailable on iOS < 16.0";
+            }
+        }
+        
+        emit connectionStateChanged(iosStatusToState(session.status));
     }
 }
 
@@ -352,6 +445,15 @@ bool IosController::startWireGuard(const QString &config)
 
 void IosController::startTunnel()
 {
+    NSString *protocolName = @"Unknown";
+    
+    NETunnelProviderProtocol *tunnelProtocol = (NETunnelProviderProtocol *)m_currentTunnel.protocolConfiguration;
+    if (tunnelProtocol.providerConfiguration[@"wireguard"] != nil) {
+        protocolName = @"WireGuard";
+    } else if (tunnelProtocol.providerConfiguration[@"ovpn"] != nil) {
+        protocolName = @"OpenVPN";
+    }
+    
     m_rxBytes = 0;
     m_txBytes = 0;
     
@@ -373,7 +475,7 @@ void IosController::startTunnel()
 
             [m_currentTunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
                     if (loadError) {
-                        qDebug() << "IosController::startOpenVPN : Connect OpenVPN Tunnel Load Error" << loadError.localizedDescription.UTF8String;
+                        qDebug().nospace() << "IosController::start" << protocolName << ": Connect " << protocolName << " Tunnel Load Error" << loadError.localizedDescription.UTF8String;
                         emit connectionStateChanged(Vpn::ConnectionState::Error);
                         return;
                     }
@@ -401,11 +503,11 @@ void IosController::startTunnel()
                     BOOL started = [m_currentTunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
 
                     if (!started || startError) {
-                        qDebug() << "IosController::startOpenVPN : Connect OpenVPN Tunnel Start Error"
+                        qDebug().nospace() << "IosController::start" << protocolName << " : Connect " << protocolName << " Tunnel Start Error"
                             << (startError ? startError.localizedDescription.UTF8String : "");
                         emit connectionStateChanged(Vpn::ConnectionState::Error);
                     } else {
-                        qDebug() << "IosController::startOpenVPN : Starting the tunnel succeeded";
+                        qDebug().nospace() << "IosController::start" << protocolName << " : Starting the tunnel succeeded";
                     }
             }];
         });

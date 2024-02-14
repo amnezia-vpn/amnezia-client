@@ -21,6 +21,7 @@ namespace amnezia
         constexpr char dns2[] = "dns2";
 
         constexpr char description[] = "description";
+        constexpr char name[] = "name";
         constexpr char cert[] = "cert";
         constexpr char config[] = "config";
 
@@ -79,8 +80,12 @@ namespace amnezia
         constexpr char sftp[] = "sftp";
         constexpr char awg[] = "awg";
 
+        constexpr char configVersion[] = "config_version";
+
         constexpr char splitTunnelSites[] = "splitTunnelSites";
         constexpr char splitTunnelType[] = "splitTunnelType";
+
+        constexpr char crc[] = "crc";
 
     }
 

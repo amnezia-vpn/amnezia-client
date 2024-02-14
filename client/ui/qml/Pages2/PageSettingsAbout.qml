@@ -53,7 +53,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Support the project with a donation")
+                text: qsTr("Support Amnezia")
                 horizontalAlignment: Text.AlignHCenter
             }
 
@@ -101,7 +101,7 @@ PageType {
 
                 text: qsTr("Show other methods on Github")
 
-                onClicked: Qt.openUrlExternally("https://github.com/amnezia-vpn/amnezia-client#donate")
+                onClicked: Qt.openUrlExternally(qsTr("https://github.com/amnezia-vpn/amnezia-client#donate"))
             }
 
             ParagraphTextType {

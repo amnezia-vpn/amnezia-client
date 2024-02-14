@@ -16,6 +16,7 @@ find_library(FW_AVFOUNDATION AVFoundation)
 find_library(FW_FOUNDATION Foundation)
 find_library(FW_STOREKIT StoreKit)
 find_library(FW_USERNOTIFICATIONS UserNotifications)
+find_library(FW_NETWORKEXTENSION NetworkExtension)
 
 set(LIBS ${LIBS}
     ${FW_AUTHENTICATIONSERVICES}
@@ -24,6 +25,7 @@ set(LIBS ${LIBS}
     ${FW_FOUNDATION}
     ${FW_STOREKIT}
     ${FW_USERNOTIFICATIONS}
+    ${FW_NETWORKEXTENSION}
 )
 
 
@@ -84,9 +86,9 @@ set_target_properties(${PROJECT} PROPERTIES
 set_target_properties(${PROJECT} PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
     XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
-    XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/WireGuard-Bridging-Header.h"
     XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
     XCODE_ATTRIBUTE_SWIFT_OBJC_INTERFACE_HEADER_NAME "AmneziaVPN-Swift.h"
+    XCODE_ATTRIBUTE_SWIFT_OBJC_INTEROP_MODE "objcxx"
 )
 set_target_properties(${PROJECT} PROPERTIES
     XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
@@ -97,25 +99,14 @@ target_compile_options(${PROJECT} PRIVATE
     -DVPN_NE_BUNDLEID=\"${BUILD_IOS_APP_IDENTIFIER}.network-extension\"
 )
 
-set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/awg-apple/Sources)
+set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/amneziawg-apple/Sources)
 
 target_sources(${PROJECT} PRIVATE
 #    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosvpnprotocol.swift
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ioslogger.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/Keychain.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddressRange.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/InterfaceConfiguration.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/Model/NETunnelProviderProtocol+Extension.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/TunnelConfiguration.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/Model/TunnelConfiguration+WgQuickConfig.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/Endpoint.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/Model/String+ArrayConversion.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PeerConfiguration.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/DNSServer.swift
-    ${WG_APPLE_SOURCE_DIR}/WireGuardApp/LocalizationHelper.swift
-    ${WG_APPLE_SOURCE_DIR}/Shared/FileManager+Extension.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKitC/x25519.c
-    ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PrivateKey.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/LogController.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
 )
 
 target_sources(${PROJECT} PRIVATE

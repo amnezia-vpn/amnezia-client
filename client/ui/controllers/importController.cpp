@@ -7,9 +7,7 @@
 
 #include "core/errorstrings.h"
 #ifdef Q_OS_ANDROID
-    #include "../../platforms/android/android_controller.h"
-    #include "../../platforms/android/androidutils.h"
-    #include <QJniObject>
+    #include "platforms/android/android_controller.h"
 #endif
 #ifdef Q_OS_IOS
     #include <CoreFoundation/CoreFoundation.h>
@@ -48,10 +46,6 @@ namespace
 #if defined Q_OS_ANDROID
     ImportController *mInstance = nullptr;
 #endif
-
-#ifdef Q_OS_ANDROID
-    constexpr auto AndroidCameraActivity = "org.amnezia.vpn.qt.CameraActivity";
-#endif
 } // namespace
 
 ImportController::ImportController(const QSharedPointer<ServersModel> &serversModel,
@@ -61,18 +55,6 @@ ImportController::ImportController(const QSharedPointer<ServersModel> &serversMo
 {
 #ifdef Q_OS_ANDROID
     mInstance = this;
-
-    AndroidUtils::runOnAndroidThreadAsync([]() {
-        JNINativeMethod methods[] {
-            { "passDataToDecoder", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onNewQrCodeDataChunk) },
-        };
-
-        QJniObject javaClass(AndroidCameraActivity);
-        QJniEnvironment env;
-        jclass objectClass = env->GetObjectClass(javaClass.object<jobject>());
-        env->RegisterNatives(objectClass, methods, sizeof(methods) / sizeof(methods[0]));
-        env->DeleteLocalRef(objectClass);
-    });
 #endif
 }
 
@@ -143,8 +125,17 @@ void ImportController::importConfig()
 
     if (credentials.isValid() || m_config.contains(config_key::containers)) {
         m_serversModel->addServer(m_config);
-
         emit importFinished();
+    } else if (m_config.contains(config_key::configVersion)) {
+        quint16 crc = qChecksum(QJsonDocument(m_config).toJson());
+        if (m_serversModel->isServerFromApiAlreadyExists(crc)) {
+            emit importErrorOccurred(errorString(ErrorCode::ApiConfigAlreadyAdded), true);
+        } else {
+            m_config.insert(config_key::crc, crc);
+
+            m_serversModel->addServer(m_config);
+            emit importFinished();
+        }
     } else {
         qDebug() << "Failed to import profile";
         qDebug().noquote() << QJsonDocument(m_config).toJson();
@@ -165,7 +156,9 @@ QJsonObject ImportController::extractAmneziaConfig(QString &data)
         ba = ba_uncompressed;
     }
 
-    return QJsonDocument::fromJson(ba).object();
+    QJsonObject config = QJsonDocument::fromJson(ba).object();
+
+    return config;
 }
 
 QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
@@ -253,7 +246,12 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
 //        && !configMap.value("PresharedKey").isEmpty() && !configMap.value("PublicKey").isEmpty()) {
         lastConfig[config_key::client_priv_key] = configMap.value("PrivateKey");
         lastConfig[config_key::client_ip] = configMap.value("Address");
-        lastConfig[config_key::psk_key] = configMap.value("PresharedKey");
+        if (!configMap.value("PresharedKey").isEmpty()) {
+            lastConfig[config_key::psk_key] = configMap.value("PresharedKey");
+        } else if (!configMap.value("PreSharedKey").isEmpty()) {
+            lastConfig[config_key::psk_key] = configMap.value("PreSharedKey");
+        }
+
         lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
 //    } else {
 //        qDebug() << "Failed to import profile";
@@ -320,26 +318,20 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
 }
 
 #ifdef Q_OS_ANDROID
-void ImportController::onNewQrCodeDataChunk(JNIEnv *env, jobject thiz, jstring data)
+static QMutex qrDecodeMutex;
+
+// static
+bool ImportController::decodeQrCode(const QString &code)
 {
-    Q_UNUSED(thiz);
-    const char *buffer = env->GetStringUTFChars(data, nullptr);
-    if (!buffer) {
-        return;
-    }
+    QMutexLocker lock(&qrDecodeMutex);
 
-    QString parcelBody(buffer);
-    env->ReleaseStringUTFChars(data, buffer);
-
-    if (mInstance != nullptr) {
-        if (!mInstance->m_isQrCodeProcessed) {
-            mInstance->m_qrCodeChunks.clear();
-            mInstance->m_isQrCodeProcessed = true;
-            mInstance->m_totalQrCodeChunksCount = 0;
-            mInstance->m_receivedQrCodeChunksCount = 0;
-        }
-        mInstance->parseQrCodeChunk(parcelBody);
+    if (!mInstance->m_isQrCodeProcessed) {
+        mInstance->m_qrCodeChunks.clear();
+        mInstance->m_isQrCodeProcessed = true;
+        mInstance->m_totalQrCodeChunksCount = 0;
+        mInstance->m_receivedQrCodeChunksCount = 0;
     }
+    return mInstance->parseQrCodeChunk(code);
 }
 #endif
 
@@ -360,17 +352,14 @@ void ImportController::startDecodingQr()
 
 void ImportController::stopDecodingQr()
 {
-    #if defined Q_OS_ANDROID
-    QJniObject::callStaticMethod<void>(AndroidCameraActivity, "stopQrCodeReader", "()V");
-    #endif
     emit qrDecodingFinished();
 }
 
-void ImportController::parseQrCodeChunk(const QString &code)
+bool ImportController::parseQrCodeChunk(const QString &code)
 {
     // qDebug() << code;
     if (!m_isQrCodeProcessed)
-        return;
+        return false;
 
     // check if chunk received
     QByteArray ba = QByteArray::fromBase64(code.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
@@ -404,6 +393,7 @@ void ImportController::parseQrCodeChunk(const QString &code)
                 m_isQrCodeProcessed = false;
                 qDebug() << "stopDecodingQr";
                 stopDecodingQr();
+                return true;
             } else {
                 qDebug() << "error while extracting data from qr";
                 m_qrCodeChunks.clear();
@@ -417,8 +407,10 @@ void ImportController::parseQrCodeChunk(const QString &code)
             m_isQrCodeProcessed = false;
             qDebug() << "stopDecodingQr";
             stopDecodingQr();
+            return true;
         }
     }
+    return false;
 }
 
 double ImportController::getQrCodeScanProgressBarValue()

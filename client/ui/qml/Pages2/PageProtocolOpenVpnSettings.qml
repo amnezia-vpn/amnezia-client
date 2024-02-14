@@ -81,7 +81,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 32
 
-                            headerText: qsTr("VPN Addresses Subnet")
+                            headerText: qsTr("VPN address subnet")
                             textFieldText: subnetAddress
 
                             textField.onEditingFinished: {
@@ -390,9 +390,8 @@ PageType {
 
                             onClicked: {
                                 forceActiveFocus()
-                                PageController.showBusyIndicator(true)
+                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(OpenVpnConfigModel.getConfig())
-                                PageController.showBusyIndicator(false)
                             }
                         }
                     }

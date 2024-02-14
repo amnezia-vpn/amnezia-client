@@ -90,7 +90,7 @@ It's okay as long as it's from someone you trust.")
 
             LabelWithButtonType {
                 Layout.fillWidth: true
-                visible: GC.isMobile()
+                visible: SettingsController.isCameraPresent()
 
                 text: qsTr("QR-code")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
@@ -105,7 +105,7 @@ It's okay as long as it's from someone you trust.")
             }
 
             DividerType {
-                visible: GC.isMobile()
+                visible: SettingsController.isCameraPresent()
             }
 
             LabelWithButtonType {

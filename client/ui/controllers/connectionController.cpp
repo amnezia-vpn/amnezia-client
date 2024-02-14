@@ -25,14 +25,16 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
-    int serverIndex = m_serversModel->getDefaultServerIndex();
-    ServerCredentials credentials =
-            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    if (!m_containersModel->isAnyContainerInstalled()) {
+        emit noInstalledContainers();
+        return;
+    }
 
-    DockerContainer container = m_containersModel->getDefaultContainer();
-    QModelIndex containerModelIndex = m_containersModel->index(container);
-    const QJsonObject &containerConfig =
-            qvariant_cast<QJsonObject>(m_containersModel->data(containerModelIndex, ContainersModel::Roles::ConfigRole));
+    int serverIndex = m_serversModel->getDefaultServerIndex();
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+
+    DockerContainer container = m_serversModel->getDefaultContainer(serverIndex);
+    const QJsonObject &containerConfig = m_containersModel->getContainerConfig(container);
 
     if (container == DockerContainer::None) {
         emit connectionErrorOccurred(tr("VPN Protocols is not installed.\n Please install VPN container at first"));
@@ -40,6 +42,7 @@ void ConnectionController::openConnection()
     }
 
     qApp->processEvents();
+
     emit connectToVpn(serverIndex, credentials, container, containerConfig);
 }
 
@@ -110,6 +113,8 @@ void ConnectionController::onCurrentContainerUpdated()
     if (m_isConnected || m_isConnectionInProgress) {
         emit reconnectWithUpdatedContainer(tr("Settings updated successfully, Reconnnection..."));
         openConnection();
+    } else {
+        emit reconnectWithUpdatedContainer(tr("Settings updated successfully"));
     }
 }
 
@@ -127,6 +132,17 @@ Vpn::ConnectionState ConnectionController::getCurrentConnectionState()
 QString ConnectionController::connectionStateText() const
 {
     return m_connectionStateText;
+}
+
+void ConnectionController::toggleConnection(bool skipConnectionInProgressCheck)
+{
+    if (!skipConnectionInProgressCheck && isConnectionInProgress()) {
+        closeConnection();
+    } else if (isConnected()) {
+        closeConnection();
+    } else {
+        openConnection();
+    }
 }
 
 bool ConnectionController::isConnectionInProgress() const

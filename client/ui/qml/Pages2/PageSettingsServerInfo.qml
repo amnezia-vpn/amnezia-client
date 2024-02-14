@@ -102,6 +102,7 @@ PageType {
                             headerText: qsTr("Server name")
                             textFieldText: name
                             textField.maximumLength: 30
+                            checkEmptyText: true
                         }
 
                         BasicButtonType {
@@ -110,10 +111,14 @@ PageType {
                             text: qsTr("Save")
 
                             onClicked: {
+                                if (serverName.textFieldText === "") {
+                                    return
+                                }
+
                                 if (serverName.textFieldText !== name) {
                                     name = serverName.textFieldText
-                                    serverNameEditDrawer.visible = false
                                 }
+                                serverNameEditDrawer.visible = false
                             }
                         }
                     }

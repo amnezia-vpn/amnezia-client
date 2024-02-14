@@ -51,7 +51,7 @@ ListView {
                 showImage: !isInstalled
 
                 checkable: isInstalled && !ConnectionController.isConnected && isSupported
-                checked: isDefault
+                checked: proxyContainersModel.mapToSource(index) === ServersModel.getDefaultContainer(ServersModel.defaultIndex)
 
                 onClicked: {
                     if (ConnectionController.isConnected && isInstalled) {
@@ -60,10 +60,8 @@ ListView {
                     }
 
                     if (checked) {
-                        isDefault = true
-
-                        menuContent.currentIndex = index
                         containersDropDown.menuVisible = false
+                        ServersModel.setDefaultContainer(ServersModel.defaultIndex, proxyContainersModel.mapToSource(index))
                     } else {
                         if (!isSupported && isInstalled) {
                             PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))

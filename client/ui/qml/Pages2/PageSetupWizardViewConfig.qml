@@ -18,14 +18,19 @@ PageType {
     Connections {
         target: ImportController
 
-        function onImportErrorOccurred(errorMessage) {
-            PageController.closePage()
+        function onImportErrorOccurred(errorMessage, goToPageHome) {
+            if (goToPageHome) {
+                PageController.goToStartPage()
+            } else {
+                PageController.closePage()
+            }
             PageController.showErrorMessage(errorMessage)
         }
 
         function onImportFinished() {
-            if (ConnectionController.isConnected) {
+            if (!ConnectionController.isConnected) {
                 ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
             }
 
             PageController.goToStartPage()

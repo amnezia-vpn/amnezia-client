@@ -91,19 +91,20 @@ void AmneziaApplication::init()
     initControllers();
 
 #ifdef Q_OS_ANDROID
-    connect(AndroidController::instance(), &AndroidController::initialized, this,
-            [this](bool status, bool connected, const QDateTime &connectionDate) {
-                if (connected) {
-                    m_connectionController->onConnectionStateChanged(Vpn::ConnectionState::Connected);
-                    if (m_vpnConnection)
-                        m_vpnConnection->restoreConnection();
-                }
+    if (!AndroidController::initLogging()) {
+        qFatal("Android logging initialization failed");
+    }
+    AndroidController::instance()->setSaveLogs(m_settings->isSaveLogs());
+    connect(m_settings.get(), &Settings::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
+
+    connect(AndroidController::instance(), &AndroidController::initConnectionState, this,
+            [this](Vpn::ConnectionState state) {
+                m_connectionController->onConnectionStateChanged(state);
+                if (m_vpnConnection)
+                    m_vpnConnection->restoreConnection();
             });
     if (!AndroidController::instance()->initialize()) {
-        qCritical() << QString("Init failed");
-        if (m_vpnConnection)
-            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error);
-        return;
+        qFatal("Android controller initialization failed");
     }
 
     connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, [this](QString data) {
@@ -145,11 +146,13 @@ void AmneziaApplication::init()
     m_engine->load(url);
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
 
+#ifndef Q_OS_ANDROID
     if (m_settings->isSaveLogs()) {
         if (!Logger::init()) {
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
+#endif
 
 #ifdef Q_OS_WIN
     if (m_parser.isSet("a"))
@@ -170,16 +173,19 @@ void AmneziaApplication::init()
     }
 #endif
 
-// Android TextField clipboard workaround
-// https://bugreports.qt.io/browse/QTBUG-113461
+// Android TextArea clipboard workaround
+// Text from TextArea always has "text/html" mime-type:
+// /qt/6.6.1/Src/qtdeclarative/src/quick/items/qquicktextcontrol.cpp:1865
+// Next, html is created for this mime-type:
+// /qt/6.6.1/Src/qtdeclarative/src/quick/items/qquicktextcontrol.cpp:1885
+// And this html goes to the Androids clipboard, i.e. text from TextArea is always copied as richText:
+// /qt/6.6.1/Src/qtbase/src/plugins/platforms/android/androidjniclipboard.cpp:46
+// So we catch all the copies to the clipboard and clear them from "text/html"
 #ifdef Q_OS_ANDROID
-    QObject::connect(qApp, &QGuiApplication::applicationStateChanged, [](Qt::ApplicationState state) {
-        if (state == Qt::ApplicationActive) {
-            if (qApp->clipboard()->mimeData()->formats().contains("text/html")) {
-                QTextDocument doc;
-                doc.setHtml(qApp->clipboard()->mimeData()->html());
-                qApp->clipboard()->setText(doc.toPlainText());
-            }
+    connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, []() {
+        auto clipboard = QGuiApplication::clipboard();
+        if (clipboard->mimeData()->hasHtml()) {
+            clipboard->setText(clipboard->text());
         }
     });
 #endif
@@ -277,19 +283,13 @@ QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
 
 void AmneziaApplication::initModels()
 {
-    m_containersModel.reset(new ContainersModel(m_settings, this));
+    m_containersModel.reset(new ContainersModel(this));
     m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
-    connect(m_vpnConnection.get(), &VpnConnection::newVpnConfigurationCreated, m_containersModel.get(),
-            &ContainersModel::updateContainersConfig);
 
     m_serversModel.reset(new ServersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
-    connect(m_serversModel.get(), &ServersModel::currentlyProcessedServerIndexChanged, m_containersModel.get(),
-            &ContainersModel::setCurrentlyProcessedServerIndex);
-    connect(m_serversModel.get(), &ServersModel::defaultServerIndexChanged, m_containersModel.get(),
-            &ContainersModel::setCurrentlyProcessedServerIndex);
-    connect(m_containersModel.get(), &ContainersModel::containersModelUpdated, m_serversModel.get(),
-            &ServersModel::updateContainersConfig);
+    connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(),
+            &ContainersModel::updateModel);
 
     m_languageModel.reset(new LanguageModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
@@ -298,7 +298,7 @@ void AmneziaApplication::initModels()
 
     m_sitesModel.reset(new SitesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
-    
+
     m_protocolsModel.reset(new ProtocolsModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
 
@@ -324,6 +324,19 @@ void AmneziaApplication::initModels()
 
     m_sftpConfigModel.reset(new SftpConfigModel(this));
     m_engine->rootContext()->setContextProperty("SftpConfigModel", m_sftpConfigModel.get());
+
+    m_clientManagementModel.reset(new ClientManagementModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
+    connect(m_clientManagementModel.get(), &ClientManagementModel::adminConfigRevoked, m_serversModel.get(),
+            &ServersModel::clearCachedProfile);
+
+    connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, this,
+            [this](const QString &clientId, const QString &clientName, const DockerContainer container,
+                   ServerCredentials credentials) {
+                m_serversModel->reloadContainerConfig();
+                m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
+                emit m_configurator->clientModelUpdated();
+            });
 }
 
 void AmneziaApplication::initControllers()
@@ -349,18 +362,30 @@ void AmneziaApplication::initControllers()
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_settings, m_configurator));
+    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_clientManagementModel,
+                                                  m_settings, m_configurator));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
-    m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_settings));
+    m_settingsController.reset(
+            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
-    if (m_settingsController->isAutoStartEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
+    if (m_settingsController->isAutoConnectEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
     }
+    connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled, m_serversModel.get(),
+            &ServersModel::toggleAmneziaDns);
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
 
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
+
+    m_apiController.reset(new ApiController(m_serversModel, m_containersModel));
+    m_engine->rootContext()->setContextProperty("ApiController", m_apiController.get());
+    connect(m_apiController.get(), &ApiController::updateStarted, this,
+            [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Connecting); });
+    connect(m_apiController.get(), &ApiController::errorOccurred, this,
+            [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected); });
+    connect(m_apiController.get(), &ApiController::updateFinished, m_connectionController.get(), &ConnectionController::toggleConnection);
 }

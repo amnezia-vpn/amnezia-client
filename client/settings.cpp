@@ -1,4 +1,8 @@
 #include "settings.h"
+
+#include "QThread"
+#include "QCoreApplication"
+
 #include "utilities.h"
 #include "version.h"
 
@@ -12,10 +16,10 @@ Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_N
 {
     // Import old settings
     if (serversCount() == 0) {
-        QString user = m_settings.value("Server/userName").toString();
-        QString password = m_settings.value("Server/password").toString();
-        QString serverName = m_settings.value("Server/serverName").toString();
-        int port = m_settings.value("Server/serverPort").toInt();
+        QString user = value("Server/userName").toString();
+        QString password = value("Server/password").toString();
+        QString serverName = value("Server/serverName").toString();
+        int port = value("Server/serverPort").toInt();
 
         if (!user.isEmpty() && !password.isEmpty() && !serverName.isEmpty()) {
             QJsonObject server;
@@ -211,7 +215,8 @@ QString Settings::nextAvailableServerName() const
 
 void Settings::setSaveLogs(bool enabled)
 {
-    m_settings.setValue("Conf/saveLogs", enabled);
+    setValue("Conf/saveLogs", enabled);
+#ifndef Q_OS_ANDROID
     if (!isSaveLogs()) {
         Logger::deInit();
     } else {
@@ -219,7 +224,8 @@ void Settings::setSaveLogs(bool enabled)
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
-    emit saveLogsChanged();
+#endif
+    emit saveLogsChanged(enabled);
 }
 
 QString Settings::routeModeString(RouteMode mode) const
@@ -233,7 +239,7 @@ QString Settings::routeModeString(RouteMode mode) const
 
 Settings::RouteMode Settings::routeMode() const
 {
-    return static_cast<RouteMode>(m_settings.value("Conf/routeMode", 0).toInt());
+    return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt());
 }
 
 bool Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
@@ -321,12 +327,12 @@ void Settings::removeAllVpnSites(RouteMode mode)
 
 QString Settings::primaryDns() const
 {
-    return m_settings.value("Conf/primaryDns", cloudFlareNs1).toString();
+    return value("Conf/primaryDns", cloudFlareNs1).toString();
 }
 
 QString Settings::secondaryDns() const
 {
-    return m_settings.value("Conf/secondaryDns", cloudFlareNs2).toString();
+    return value("Conf/secondaryDns", cloudFlareNs2).toString();
 }
 
 void Settings::clearSettings()
@@ -350,4 +356,31 @@ ServerCredentials Settings::serverCredentials(int index) const
     credentials.port = s.value(config_key::port).toInt();
 
     return credentials;
+}
+
+QVariant Settings::value(const QString &key, const QVariant &defaultValue) const
+{
+    QVariant returnValue;
+    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
+        returnValue = m_settings.value(key, defaultValue);
+    } else {
+        QMetaObject::invokeMethod(&m_settings, "value",
+                                  Qt::BlockingQueuedConnection,
+                                  Q_RETURN_ARG(QVariant, returnValue),
+                                  Q_ARG(const QString&, key),
+                                  Q_ARG(const QVariant&, defaultValue));
+    }
+    return returnValue;
+}
+
+void Settings::setValue(const QString &key, const QVariant &value)
+{
+    if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
+        m_settings.setValue(key, value);
+    } else {
+        QMetaObject::invokeMethod(&m_settings, "setValue",
+                                  Qt::BlockingQueuedConnection,
+                                  Q_ARG(const QString&, key),
+                                  Q_ARG(const QVariant&, value));
+    }
 }

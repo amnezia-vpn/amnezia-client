@@ -7,9 +7,6 @@
 #include "core/defs.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
-#ifdef Q_OS_ANDROID
-    #include "jni.h"
-#endif
 
 class ImportController : public QObject
 {
@@ -30,15 +27,19 @@ public slots:
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void startDecodingQr();
-    void parseQrCodeChunk(const QString &code);
+    bool parseQrCodeChunk(const QString &code);
 
     double getQrCodeScanProgressBarValue();
     QString getQrCodeScanProgressString();
 #endif
 
+#if defined Q_OS_ANDROID
+    static bool decodeQrCode(const QString &code);
+#endif
+
 signals:
     void importFinished();
-    void importErrorOccurred(const QString &errorMessage);
+    void importErrorOccurred(const QString &errorMessage, bool goToPageHome = false);
 
     void qrDecodingFinished();
 
@@ -49,9 +50,6 @@ private:
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void stopDecodingQr();
-#endif
-#if defined Q_OS_ANDROID
-    static void onNewQrCodeDataChunk(JNIEnv *env, jobject thiz, jstring data);
 #endif
 
     QSharedPointer<ServersModel> m_serversModel;

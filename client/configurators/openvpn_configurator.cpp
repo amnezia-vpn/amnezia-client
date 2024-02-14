@@ -16,7 +16,7 @@
 #include "containers/containers_defs.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
-#include "core/servercontroller.h"
+#include "core/controllers/serverController.h"
 #include "settings.h"
 #include "utilities.h"
 
@@ -83,7 +83,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
 }
 
 QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
-                                              const QJsonObject &containerConfig, ErrorCode *errorCode)
+                                              const QJsonObject &containerConfig, QString &clientId, ErrorCode *errorCode)
 {
     ServerController serverController(m_settings);
     QString config =
@@ -113,34 +113,38 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     QJsonObject jConfig;
     jConfig[config_key::config] = config;
 
+    clientId = connData.clientId;
+
     return QJsonDocument(jConfig).toJson();
 }
 
-QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig)
+QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig, const int serverIndex)
 {
     QJsonObject json = QJsonDocument::fromJson(jsonConfig.toUtf8()).object();
     QString config = json[config_key::config].toString();
 
-    QRegularExpression regex("redirect-gateway.*");
-    config.replace(regex, "");
+    if (!m_settings->server(serverIndex).value(config_key::configVersion).toInt()) {
+        QRegularExpression regex("redirect-gateway.*");
+        config.replace(regex, "");
 
-    if (m_settings->routeMode() == Settings::VpnAllSites) {
-        config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
-        // Prevent ipv6 leak
-        config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
-        config.append("block-ipv6\n");
-    }
-    if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
-        
-        // no redirect-gateway
-    }
-    if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
-#ifndef Q_OS_ANDROID    
-        config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
-#endif       
-        // Prevent ipv6 leak
-        config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
-        config.append("block-ipv6\n");
+        if (m_settings->routeMode() == Settings::VpnAllSites) {
+            config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
+            // Prevent ipv6 leak
+            config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
+            config.append("block-ipv6\n");
+        }
+        if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+
+            // no redirect-gateway
+        }
+        if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
+    #ifndef Q_OS_ANDROID
+            config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
+    #endif
+            // Prevent ipv6 leak
+            config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
+            config.append("block-ipv6\n");
+        }
     }
 
 #ifndef MZ_WINDOWS

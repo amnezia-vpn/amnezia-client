@@ -58,7 +58,7 @@ target_link_libraries(networkextension PRIVATE ${FW_UI_KIT})
 target_compile_options(networkextension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
 target_compile_options(networkextension PRIVATE -DNETWORK_EXTENSION=1)
 
-set(WG_APPLE_SOURCE_DIR ${CLIENT_ROOT_DIR}/3rd/awg-apple/Sources)
+set(WG_APPLE_SOURCE_DIR ${CLIENT_ROOT_DIR}/3rd/amneziawg-apple/Sources)
 
 target_sources(networkextension PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/WireGuardAdapter.swift
@@ -80,9 +80,12 @@ target_sources(networkextension PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/Array+ConcurrentMap.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddress+AddrInfo.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PrivateKey.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/iostunnel.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/NELogController.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPNAdapterDelegate.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
-    ${CLIENT_ROOT_DIR}/platforms/ios/ioslogger.swift
 )
 
 ## Build wireguard-go-version.h

@@ -26,15 +26,6 @@ public:
     ErrorCode stopMzImpl();
 
 private:
-    QString configPath() const;
-    void writeWireguardConfiguration(const QJsonObject &configuration);
-    QString serviceName() const;
-
-private:
-    QString m_configFileName;
-    QFile m_configFile;
-
-    bool m_isConfigLoaded = false;
 
     QScopedPointer<ControllerImpl> m_impl;
 };
