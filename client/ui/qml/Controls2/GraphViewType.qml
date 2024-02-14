@@ -16,7 +16,7 @@ ChartView {
     antialiasing: true
 
 
-    property bool shouldUpdate: SystemController.hasFocus
+    property bool shouldUpdate: SystemController.appHasFocus
 
     function getUTCSeconds() {
         return new Date().setMilliseconds(0) / 1000
@@ -78,7 +78,7 @@ ChartView {
 
     Connections {
         target: SystemController
-        function onHasFocusChanged() {
+        function onAppHasFocusChanged() {
             if (shouldUpdate) { printAll() }
         }
     }
