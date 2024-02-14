@@ -84,8 +84,10 @@ PageType {
                     expandedHeight: root.height * 0.35
 
                     expandedContent: ColumnLayout {
-                        anchors.fill: parent
-                        anchors.topMargin: 16
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.topMargin: 32
                         anchors.leftMargin: 16
                         anchors.rightMargin: 16
 

@@ -609,7 +609,7 @@ PageType {
                                             anchors.top: parent.top
                                             anchors.left: parent.left
                                             anchors.right: parent.right
-                                            anchors.topMargin: 16
+                                            anchors.topMargin: 32
                                             anchors.leftMargin: 16
                                             anchors.rightMargin: 16
 

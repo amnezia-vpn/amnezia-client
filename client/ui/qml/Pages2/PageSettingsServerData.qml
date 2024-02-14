@@ -223,7 +223,7 @@ PageType {
                 visible: content.isServerWithWriteAccess
             }
 
-                        LabelWithButtonType {
+            LabelWithButtonType {
                 visible: ServersModel.isCurrentlyProcessedServerFromApi()
                 Layout.fillWidth: true
 
