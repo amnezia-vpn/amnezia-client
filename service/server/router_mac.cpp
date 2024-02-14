@@ -132,16 +132,22 @@ bool RouterMac::routeDeleteList(const QString &gw, const QStringList &ips)
 bool RouterMac::createTun(const QString &dev, const QString &subnet) {
     qDebug().noquote() << "createTun start";
 
-    char cmd [1000] = {0x0};
-    sprintf(cmd, "ifconfig %s inet %s %s up", dev.toStdString().c_str(), subnet.toStdString().c_str(), subnet.toStdString().c_str());
+    QProcess process;
+    QStringList commands;
 
-    qDebug().noquote() << cmd;
-    int sys = system(cmd);
-    if(sys < 0)
+    commands << "ifconfig" << dev << "inet" << subnet << subnet << "up";
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not start activate tun device!\n";
+        return false;
+    }
+    else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not activate tun device!\n";
         return false;
     }
+    commands.clear();
 
     return true;
 }
