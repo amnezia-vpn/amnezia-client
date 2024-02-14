@@ -17,9 +17,15 @@ if [ "$CHECK_LOCALE" = "0" ]; then \
     fi;\
   fi;\
 fi;\
-if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst sudo; fi;\
-if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc; fi;\
-if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof; fi;\
+if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst sudo;\
+  if ! command -v sudo > /dev/null 2>&1; then sudo; exit 1; fi;\
+fi;\
+if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc;\
+  if ! command -v fuser > /dev/null 2>&1; then fuser; exit 1; fi;\
+fi;\
+if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof;\
+  if ! command -v lsof > /dev/null 2>&1; then lsof; exit 1; fi;\
+fi;\
 if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs;\
   check_podman=$(sudo $pm $what_pkg $docker_pkg 2>&1 | grep -c podman-docker);\
   check_moby=$(sudo $pm $what_pkg $docker_pkg 2>&1 | grep -c moby-engine);\
