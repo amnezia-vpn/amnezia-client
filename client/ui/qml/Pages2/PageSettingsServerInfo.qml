@@ -63,7 +63,7 @@ PageType {
 
                     headerText: name
                     descriptionText: {
-                        if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
+                        if (ServersModel.isProcessedServerHasWriteAccess()) {
                             return credentialsLogin + " · " + hostName
                         } else {
                             return hostName

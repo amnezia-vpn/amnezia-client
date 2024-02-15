@@ -30,7 +30,7 @@ PageType {
         function onImportFinished() {
             if (!ConnectionController.isConnected) {
                 ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+                ServersModel.processedIndex = ServersModel.defaultIndex
             }
 
             PageController.goToStartPage()
