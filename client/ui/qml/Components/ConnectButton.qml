@@ -138,16 +138,7 @@ Button {
     }
 
     onClicked: {
-        if (!ConnectionController.isConnectionInProgress) {
-            ServersModel.setCurrentlyProcessedServerIndex(ServersModel.defaultIndex)
-            ApiController.updateServerConfigFromApi()
-        }
-
-        // TODO: Checking isConnectionInProgress in Disconnecting state
-        if (ConnectionController.isConnectionInProgress) {
-            ConnectionController.closeConnection();
-        } else if (ConnectionController.isConnected) {
-            ConnectionController.closeConnection();
-        }
+        ServersModel.setCurrentlyProcessedServerIndex(ServersModel.defaultIndex)
+        ApiController.updateServerConfigFromApi()
     }
 }
