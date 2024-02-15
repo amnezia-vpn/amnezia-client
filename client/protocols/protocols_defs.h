@@ -46,6 +46,7 @@ namespace amnezia
         constexpr char psk_key[] = "psk_key";
         constexpr char mtu[] = "mtu";
         constexpr char allowed_ips[] = "allowed_ips";
+        constexpr char persistent_keep_alive[] = "persistent_keep_alive";
 
         constexpr char client_ip[] = "client_ip"; // internal ip address
 
@@ -103,6 +104,7 @@ namespace amnezia
             constexpr char defaultSubnetAddress[] = "10.8.0.0";
             constexpr char defaultSubnetMask[] = "255.255.255.0";
             constexpr char defaultSubnetCidr[] = "24";
+            constexpr char defaultMtu[] = "1500";
 
             constexpr char serverConfigPath[] = "/opt/amnezia/openvpn/server.conf";
             constexpr char caCertPath[] = "/opt/amnezia/openvpn/pki/ca.crt";
