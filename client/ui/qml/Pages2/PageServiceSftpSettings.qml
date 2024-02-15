@@ -49,7 +49,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+            enabled: ServersModel.isProcessedServerHasWriteAccess()
 
             ListView {
                 id: listview
@@ -88,7 +88,7 @@ PageType {
                             Layout.topMargin: 32
 
                             text: qsTr("Host")
-                            descriptionText: ServersModel.getCurrentlyProcessedServerHostName()
+                            descriptionText: ServersModel.getProcessedServerData("HostName")
 
                             descriptionOnTop: true
 

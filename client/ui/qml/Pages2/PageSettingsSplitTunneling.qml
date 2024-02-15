@@ -20,12 +20,13 @@ import "../Components"
 PageType {
     id: root
 
+    property var isServerFromApi: ServersModel.getDefaultServerData("isServerFromApi")
     property bool pageEnabled: {
-        return !ConnectionController.isConnected && !ServersModel.isDefaultServerFromApi()
+        return !ConnectionController.isConnected && !isServerFromApi
     }
 
     Component.onCompleted: {
-        if (ServersModel.isDefaultServerFromApi()) {
+        if (isServerFromApi) {
             PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
         }
     }

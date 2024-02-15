@@ -115,7 +115,7 @@ PageType {
         function onNoInstalledContainers() {
             PageController.setTriggeredBtConnectButton(true)
 
-            ServersModel.currentlyProcessedIndex = ServersModel.getDefaultServerIndex()
+            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
             InstallController.setShouldCreateServer(false)
             PageController.goToPage(PageEnum.PageSetupWizardEasy)
         }
@@ -152,7 +152,7 @@ PageType {
 
         Component.onCompleted: {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
-            ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+            ServersModel.processedIndex = ServersModel.defaultIndex
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
 
@@ -200,7 +200,7 @@ PageType {
             image: "qrc:/images/controls/home.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+                ServersModel.processedIndex = ServersModel.defaultIndex
                 tabBar.previousIndex = 0
             }
         }

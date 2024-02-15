@@ -45,7 +45,7 @@ void ExportController::generateFullAccessConfig()
 {
     clearPreviousConfig();
 
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     QJsonObject config = m_settings->server(serverIndex);
 
     QJsonArray containers = config.value(config_key::containers).toArray();
@@ -99,7 +99,7 @@ void ExportController::generateConnectionConfig(const QString &clientName)
 {
     clearPreviousConfig();
 
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
@@ -155,7 +155,7 @@ void ExportController::generateOpenVpnConfig(const QString &clientName)
 {
     clearPreviousConfig();
 
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
@@ -193,7 +193,7 @@ void ExportController::generateWireGuardConfig(const QString &clientName)
 {
     clearPreviousConfig();
 
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
@@ -232,7 +232,7 @@ void ExportController::generateShadowSocksConfig()
 {
     clearPreviousConfig();
 
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
@@ -268,7 +268,7 @@ void ExportController::generateCloakConfig()
 {
     clearPreviousConfig();
 
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
@@ -328,7 +328,7 @@ void ExportController::updateClientManagementModel(const DockerContainer contain
 void ExportController::revokeConfig(const int row, const DockerContainer container, ServerCredentials credentials)
 {
     ErrorCode errorCode = m_clientManagementModel->revokeClient(row, container, credentials,
-                                                                m_serversModel->getCurrentlyProcessedServerIndex());
+                                                                m_serversModel->getProcessedServerIndex());
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorString(errorCode));
     }
