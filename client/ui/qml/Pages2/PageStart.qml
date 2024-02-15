@@ -57,6 +57,7 @@ PageType {
                 return
             }
             tabBarStackView.pop()
+            tabBar.isServerInfoShow = false
         }
 
         function onGoToPage(page, slide) {
@@ -66,6 +67,7 @@ PageType {
             } else {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
+            tabBar.isServerInfoShow = page === PageEnum.PageSettingsServerInfo
 
             PageController.updateDrawerRootPage(page)
         }
@@ -146,6 +148,7 @@ PageType {
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
             tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+            tabBar.isServerInfoShow = false
 
             PageController.updateDrawerRootPage(page)
         }
@@ -166,6 +169,7 @@ PageType {
         id: tabBar
 
         property int previousIndex: 0
+        property bool isServerInfoShow: false
 
         anchors.right: parent.right
         anchors.left: parent.left
@@ -196,7 +200,7 @@ PageType {
         }
 
         TabImageButtonType {
-            isSelected: tabBar.currentIndex === 0
+            isSelected: tabBar.isServerInfoShow ? false : tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
@@ -230,7 +234,7 @@ PageType {
         }
 
         TabImageButtonType {
-            isSelected: tabBar.currentIndex === 2
+            isSelected: tabBar.isServerInfoShow ? true : tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)

@@ -143,6 +143,7 @@ PageType {
 
                 text: qsTr("Reset settings and remove all data from the application")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                textColor: "#EB5757"
 
                 clickedFunction: function() {
                     questionDrawer.headerText = qsTr("Reset settings and remove all data from the application?")
