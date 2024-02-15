@@ -363,7 +363,7 @@ bool IosController::setupOpenVPN()
     if (ovpn.contains(config_key::mtu)) {
         openVPNConfig.insert(config_key::mtu, ovpn[config_key::mtu]);
     } else {
-        openVPNConfig.insert(config_key::mtu, "1420");
+        openVPNConfig.insert(config_key::mtu, protocols::openvpn::defaultMtu);
     }
 
     openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
@@ -415,7 +415,7 @@ bool IosController::setupCloak()
     if (ovpn.contains(config_key::mtu)) {
         openVPNConfig.insert(config_key::mtu, ovpn[config_key::mtu]);
     } else {
-        openVPNConfig.insert(config_key::mtu, "1420");
+        openVPNConfig.insert(config_key::mtu, protocols::openvpn::defaultMtu);
     }
 
     openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
