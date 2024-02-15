@@ -359,7 +359,13 @@ bool IosController::setupOpenVPN()
 
     QJsonObject openVPNConfig {};
     openVPNConfig.insert(config_key::config, ovpnConfig);
-    openVPNConfig.insert(config_key::mtu, m_rawConfig[config_key::mtu]);
+
+    if (ovpn.contains(config_key::mtu)) {
+        openVPNConfig.insert(config_key::mtu, ovpn[config_key::mtu]);
+    } else {
+        openVPNConfig.insert(config_key::mtu, "1420");
+    }
+
     openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
     openVPNConfig.insert(config_key::splitTunnelSites, m_rawConfig[config_key::splitTunnelSites]);
 
@@ -405,7 +411,13 @@ bool IosController::setupCloak()
 
     QJsonObject openVPNConfig {};
     openVPNConfig.insert(config_key::config, ovpnConfig);
-    openVPNConfig.insert(config_key::mtu, m_rawConfig[config_key::mtu]);
+
+    if (ovpn.contains(config_key::mtu)) {
+        openVPNConfig.insert(config_key::mtu, ovpn[config_key::mtu]);
+    } else {
+        openVPNConfig.insert(config_key::mtu, "1420");
+    }
+
     openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
     openVPNConfig.insert(config_key::splitTunnelSites, m_rawConfig[config_key::splitTunnelSites]);
 
@@ -422,7 +434,13 @@ bool IosController::setupWireGuard()
     QJsonObject wgConfig {};
     wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
     wgConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2]);
-    wgConfig.insert(config_key::mtu, config[config_key::mtu]);
+
+    if (config.contains(config_key::mtu)) {
+        wgConfig.insert(config_key::mtu, config[config_key::mtu]);
+    } else {
+        wgConfig.insert(config_key::mtu, protocols::wireguard::defaultMtu);
+    }
+
     wgConfig.insert(config_key::hostName, config[config_key::hostName]);
     wgConfig.insert(config_key::port, config[config_key::port]);
     wgConfig.insert(config_key::client_ip, config[config_key::client_ip]);
@@ -458,6 +476,13 @@ bool IosController::setupAwg()
     QJsonObject wgConfig {};
     wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
     wgConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2]);
+
+    if (config.contains(config_key::mtu)) {
+        wgConfig.insert(config_key::mtu, config[config_key::mtu]);
+    } else {
+        wgConfig.insert(config_key::mtu, protocols::awg::defaultMtu);
+    }
+
     wgConfig.insert(config_key::mtu, config[config_key::mtu]);
     wgConfig.insert(config_key::hostName, config[config_key::hostName]);
     wgConfig.insert(config_key::port, config[config_key::port]);
