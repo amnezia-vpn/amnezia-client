@@ -96,7 +96,7 @@ PageType {
                                 }
                             }
 
-                            KeyNavigation.tab: portTextField.textField
+                            KeyNavigation.tab: portTextField.enabled ? portTextField.textField : saveRestartButton
                         }
 
                         ParagraphTextType {

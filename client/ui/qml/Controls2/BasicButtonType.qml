@@ -93,13 +93,13 @@ Button {
     }
 
     MouseArea {
-        anchors.fill: background
+        anchors.fill: background_border
         enabled: false
         cursorShape: Qt.PointingHandCursor
     }
 
     contentItem: Item {
-        anchors.fill: background
+        anchors.fill: background_border
 
         implicitWidth: content.implicitWidth
         implicitHeight: content.implicitHeight

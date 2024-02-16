@@ -124,7 +124,7 @@ PageType {
     FlickableType {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        contentHeight: content.height + 10
 
         ColumnLayout {
             id: content
