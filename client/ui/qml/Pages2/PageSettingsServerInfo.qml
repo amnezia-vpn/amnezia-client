@@ -18,8 +18,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: header.itemAt(0).serverName.textField
-
     Connections {
         target: PageController
 
@@ -52,8 +50,6 @@ PageType {
                 id: content
 
                 Layout.topMargin: 20
-
-                property alias serverName: serverName
 
                 BackButtonType {
                 }
@@ -132,6 +128,12 @@ PageType {
                                 serverNameEditDrawer.close()
                             }
                         }
+
+                        Component.onCompleted: {
+                            if (header.itemAt(0)) {
+                                defaultActiveFocusItem = serverName.textField
+                            }
+                        }
                     }
                 }
             }
@@ -181,12 +183,6 @@ PageType {
             PageSettingsServerData {
                 stackView: root.stackView
             }
-        }
-    }
-
-    Component.onCompleted: {
-        if (header.itemAt(0)) {
-            defaultActiveFocusItem = header.itemAt(0).serverName.textField
         }
     }
 }
