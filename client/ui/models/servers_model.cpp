@@ -403,23 +403,23 @@ void ServersModel::addContainerConfig(const int containerIndex, const QJsonObjec
     }
 }
 
-void ServersModel::setDefaultContainer(const int containerIndex)
+void ServersModel::setDefaultContainer(const int serverIndex, const int containerIndex)
 {
     auto container = static_cast<DockerContainer>(containerIndex);
-    QJsonObject s = m_servers.at(m_currentlyProcessedServerIndex).toObject();
+    QJsonObject s = m_servers.at(serverIndex).toObject();
     s.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
     editServer(s); //check
     emit defaultContainerChanged(container);
 }
 
-DockerContainer ServersModel::getDefaultContainer()
+DockerContainer ServersModel::getDefaultContainer(const int serverIndex)
 {
-    return qvariant_cast<DockerContainer>(data(m_currentlyProcessedServerIndex, DefaultContainerRole));
+    return qvariant_cast<DockerContainer>(data(serverIndex, DefaultContainerRole));
 }
 
 const QString ServersModel::getDefaultContainerName()
 {
-    auto defaultContainer = getDefaultContainer();
+    auto defaultContainer = getDefaultContainer(m_defaultServerIndex);
     return ContainerProps::containerHumanNames().value(defaultContainer);
 }
 

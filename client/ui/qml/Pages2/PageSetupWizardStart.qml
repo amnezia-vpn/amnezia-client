@@ -116,7 +116,7 @@ PageType {
                 text: qsTr("I have the data to connect")
 
                 clickedFunc: function() {
-                    connectionTypeSelection.visible = true
+                    connectionTypeSelection.open()
                 }
             }
 
@@ -140,10 +140,10 @@ PageType {
                 }
             }
         }
+    }
 
-        ConnectionTypeSelectionDrawer {
-            id: connectionTypeSelection
-        }
+    ConnectionTypeSelectionDrawer {
+        id: connectionTypeSelection
     }
 
     BusyIndicatorType {

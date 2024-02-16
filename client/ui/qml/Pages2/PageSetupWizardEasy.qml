@@ -192,7 +192,6 @@ PageType {
                         return ContainersModel.isAnyContainerInstalled()
                     }
 
-
                     return  true
                 }
 

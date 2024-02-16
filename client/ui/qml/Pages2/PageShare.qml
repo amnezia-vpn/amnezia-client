@@ -43,8 +43,6 @@ PageType {
             shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
             shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
 
-            shareConnectionDrawer.needCloseButton = false
-
             shareConnectionDrawer.open()
             shareConnectionDrawer.contentVisible = false
             PageController.showBusyIndicator(true)
@@ -82,11 +80,6 @@ PageType {
             }
 
             PageController.showBusyIndicator(false)
-
-            shareConnectionDrawer.needCloseButton = true
-            PageController.showTopCloseButton(true)
-
-            shareConnectionDrawer.contentVisible = true
         }
 
         function onExportErrorOccurred(errorMessage) {
@@ -156,14 +149,15 @@ PageType {
                     shareFullAccessDrawer.open()
                 }
 
-                DrawerType {
+                DrawerType2 {
                     id: shareFullAccessDrawer
 
-                    width: root.width
-                    height: root.height * 0.45
+                    parent: root
 
+                    anchors.fill: parent
+                    expandedHeight: root.height * 0.45
 
-                    ColumnLayout {
+                    expandedContent: ColumnLayout {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -280,6 +274,7 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
+                drawerParent: root
 
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
@@ -309,7 +304,7 @@ PageType {
                             serverSelector.severSelectorIndexChanged()
                         }
 
-                        serverSelector.menuVisible = false
+                        serverSelector.close()
                     }
 
                     Component.onCompleted: {
@@ -332,6 +327,7 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.5
+                drawerParent: root
 
                 descriptionText: qsTr("Protocol")
                 headerText: qsTr("Protocol")
@@ -362,14 +358,15 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        protocolSelector.menuVisible = false
+                        protocolSelector.close()
                     }
 
                     Connections {
                         target: serverSelector
 
                         function onSeverSelectorIndexChanged() {
-                            protocolSelectorListView.currentIndex = proxyContainersModel.mapFromSource(ServersModel.getDefaultContainer())
+                            var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getDefaultContainer(ServersModel.currentlyProcessedIndex))
+                            protocolSelectorListView.currentIndex = defaultContainer
                             protocolSelectorListView.triggerCurrentItem()
                         }
                     }
@@ -426,6 +423,7 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
+                drawerParent: root
 
                 visible: accessTypeSelector.currentIndex === 0
                 enabled: root.connectionTypesModel.length > 1
@@ -449,7 +447,7 @@ PageType {
                     clickedFunction: function() {
                         exportTypeSelector.text = selectedText
                         exportTypeSelector.currentIndex = currentIndex
-                        exportTypeSelector.menuVisible = false
+                        exportTypeSelector.close()
                     }
 
                     Component.onCompleted: {
@@ -457,10 +455,6 @@ PageType {
                         exportTypeSelector.currentIndex = currentIndex
                     }
                 }
-            }
-
-            ShareConnectionDrawer {
-                id: shareConnectionDrawer
             }
 
             BasicButtonType {
@@ -566,13 +560,15 @@ PageType {
 
                         DividerType {}
 
-                        DrawerType {
+                        DrawerType2 {
                             id: clientInfoDrawer
 
-                            width: root.width
-                            height: root.height * 0.5
+                            parent: root
 
-                            ColumnLayout {
+                            anchors.fill: parent
+                            expandedHeight: root.height * 0.5
+
+                            expandedContent: ColumnLayout {
                                 anchors.top: parent.top
                                 anchors.left: parent.left
                                 anchors.right: parent.right
@@ -607,25 +603,28 @@ PageType {
                                         clientNameEditDrawer.open()
                                     }
 
-                                    DrawerType {
+                                    DrawerType2 {
                                         id: clientNameEditDrawer
 
-                                        width: root.width
-                                        height: root.height * 0.35
+                                        parent: root
 
-                                        onVisibleChanged: {
-                                            if (clientNameEditDrawer.visible) {
-                                                clientNameEditor.textField.forceActiveFocus()
-                                            }
-                                        }
+                                        anchors.fill: parent
+                                        expandedHeight: root.height * 0.35
 
-                                        ColumnLayout {
+                                        expandedContent: ColumnLayout {
                                             anchors.top: parent.top
                                             anchors.left: parent.left
                                             anchors.right: parent.right
-                                            anchors.topMargin: 16
+                                            anchors.topMargin: 32
                                             anchors.leftMargin: 16
                                             anchors.rightMargin: 16
+
+                                            Connections {
+                                                target: clientNameEditDrawer
+                                                function onOpened() {
+                                                    clientNameEditor.textField.forceActiveFocus()
+                                                }
+                                            }
 
                                             TextFieldWithHeaderType {
                                                 id: clientNameEditor
@@ -678,20 +677,19 @@ PageType {
                                     text: qsTr("Revoke")
 
                                     clickedFunc: function() {
-                                        questionDrawer.headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
-                                        questionDrawer.descriptionText = qsTr("The user will no longer be able to connect to your server.")
-                                        questionDrawer.yesButtonText = qsTr("Continue")
-                                        questionDrawer.noButtonText = qsTr("Cancel")
+                                        var headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
+                                        var descriptionText = qsTr("The user will no longer be able to connect to your server.")
+                                        var yesButtonText = qsTr("Continue")
+                                        var noButtonText = qsTr("Cancel")
 
-                                        questionDrawer.yesButtonFunction = function() {
-                                            questionDrawer.close()
+                                        var yesButtonFunction = function() {
                                             clientInfoDrawer.close()
                                             root.revokeConfig(index)
                                         }
-                                        questionDrawer.noButtonFunction = function() {
-                                            questionDrawer.close()
+                                        var noButtonFunction = function() {
                                         }
-                                        questionDrawer.open()
+
+                                        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                                     }
                                 }
                             }
@@ -699,12 +697,15 @@ PageType {
                     }
                 }
             }
-
-            QuestionDrawer {
-                id: questionDrawer
-            }
         }
     }
+
+    ShareConnectionDrawer {
+        id: shareConnectionDrawer
+
+        anchors.fill: parent
+    }
+
     MouseArea {
         anchors.fill: parent
         onPressed: function(mouse) {

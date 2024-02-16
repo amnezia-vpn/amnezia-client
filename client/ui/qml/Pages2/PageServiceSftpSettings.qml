@@ -248,28 +248,23 @@ PageType {
                             text: qsTr("Remove SFTP and all data stored there")
 
                             clickedFunc: function() {
-                                questionDrawer.headerText = qsTr("Remove SFTP and all data stored there?")
-                                questionDrawer.yesButtonText = qsTr("Continue")
-                                questionDrawer.noButtonText = qsTr("Cancel")
+                                var headerText = qsTr("Remove SFTP and all data stored there?")
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
 
-                                questionDrawer.yesButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                var yesButtonFunction = function() {
                                     PageController.goToPage(PageEnum.PageDeinstalling)
                                     InstallController.removeCurrentlyProcessedContainer()
                                 }
-                                questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                var noButtonFunction = function() {
                                 }
-                                questionDrawer.visible = true
+
+                                showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
                         }
                     }
                 }
             }
-        }
-
-        QuestionDrawer {
-            id: questionDrawer
         }
     }
 }
