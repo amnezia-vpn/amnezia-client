@@ -288,6 +288,10 @@ PageType {
                             ValueFilter {
                                 roleName: "hasWriteAccess"
                                 value: true
+                            },
+                            ValueFilter {
+                                roleName: "hasInstalledContainers"
+                                value: true
                             }
                         ]
                     }
@@ -456,6 +460,7 @@ PageType {
             BasicButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 40
+                Layout.bottomMargin: 32
 
                 enabled: shareButtonEnabled
                 visible: accessTypeSelector.currentIndex === 0

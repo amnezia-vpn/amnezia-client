@@ -83,7 +83,7 @@ public slots:
     void showOnStartup();
 
     bool isTriggeredByConnectButton();
-    void setTriggeredBtConnectButton(bool trigger);
+    void setTriggeredByConnectButton(bool trigger);
 
     void closeApplication();
 

@@ -95,6 +95,9 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     case DefaultContainerRole: {
         return ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
     }
+    case HasInstalledContainers: {
+        return serverHasInstalledContainers(index.row());
+    }
     }
 
     return QVariant();
@@ -304,6 +307,7 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[ContainsAmneziaDnsRole] = "containsAmneziaDns";
 
     roles[DefaultContainerRole] = "defaultContainer";
+    roles[HasInstalledContainers] = "hasInstalledContainers";
     return roles;
 }
 
@@ -558,6 +562,19 @@ bool ServersModel::isServerFromApiAlreadyExists(const quint16 crc)
 {
     for (const auto &server : qAsConst(m_servers)) {
         if (static_cast<quint16>(server.toObject().value(config_key::crc).toInt()) == crc) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ServersModel::serverHasInstalledContainers(const int serverIndex) const
+{
+    QJsonObject server = m_servers.at(serverIndex).toObject();
+    const auto containers = server.value(config_key::containers).toArray();
+    for (auto it = containers.begin(); it != containers.end(); it++) {
+        auto container = ContainerProps::containerFromString(it->toObject().value(config_key::container).toString());
+        if (ContainerProps::containerService(container) == ServiceType::Vpn) {
             return true;
         }
     }

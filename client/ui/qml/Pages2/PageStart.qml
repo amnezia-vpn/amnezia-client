@@ -101,7 +101,7 @@ PageType {
         }
 
         function onNoInstalledContainers() {
-            PageController.setTriggeredBtConnectButton(true)
+            PageController.setTriggeredByConnectButton(true)
 
             ServersModel.currentlyProcessedIndex = ServersModel.getDefaultServerIndex()
             InstallController.setShouldCreateServer(false)

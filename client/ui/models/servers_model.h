@@ -25,7 +25,9 @@ public:
 
         ContainsAmneziaDnsRole,
 
-        DefaultContainerRole
+        DefaultContainerRole,
+
+        HasInstalledContainers
     };
 
     ServersModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -118,9 +120,12 @@ signals:
 
 private:
     ServerCredentials serverCredentials(int index) const;
+
     void updateContainersModel();
 
     QString getDefaultServerDescription(const QJsonObject &server);
+
+    bool serverHasInstalledContainers(const int serverIndex) const;
 
     QJsonArray m_servers;
 
