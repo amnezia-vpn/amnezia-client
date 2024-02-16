@@ -27,28 +27,8 @@ cat > /opt/amnezia/xray/server.json <<EOF
     "log": {
         "loglevel": "error"
     },
-    "routing": {
-        "domainStrategy": "IPIfNonMatch",
-        "rules": [
-            {
-                "type": "field",
-                "domain": [
-                    "geosite:category-ads-all"
-                ],
-                "outboundTag": "block"
-            },
-            {
-                "type": "field",
-                "ip": [
-                    "geoip:cn"
-                ],
-                "outboundTag": "block"
-            }
-        ]
-    },
     "inbounds": [
         {
-            "listen": "0.0.0.0",
             "port": 443,
             "protocol": "vless",
             "settings": {
@@ -64,48 +44,23 @@ cat > /opt/amnezia/xray/server.json <<EOF
                 "network": "tcp",
                 "security": "reality",
                 "realitySettings": {
-                    "show": false,
                     "dest": "$XRAY_SITE_NAME:443",
-                    "xver": 0,
                     "serverNames": [
                         "$XRAY_SITE_NAME"
                     ],
                     "privateKey": "$XRAY_PRIVATE_KEY",
-                    "minClientVer": "",
-                    "maxClientVer": "",
-                    "maxTimeDiff": 0,
                     "shortIds": [
                         "$XRAY_SHORT_ID"
                     ]
                 }
-            },
-            "sniffing": {
-                "enabled": true,
-                "destOverride": [
-                    "http",
-                    "tls"
-                ]
             }
         }
     ],
     "outbounds": [
         {
-            "protocol": "freedom",
-            "tag": "direct"
-        },
-        {
-            "protocol": "blackhole",
-            "tag": "block"
+            "protocol": "freedom"
         }
-    ],
-    "policy": {
-        "levels": {
-            "0": {
-                "handshake": 3,
-                "connIdle": 180
-            }
-        }
-    }
+    ]
 }
 EOF
 
