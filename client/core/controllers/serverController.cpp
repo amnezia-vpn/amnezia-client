@@ -212,10 +212,10 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     localFile.close();
 
 #ifdef Q_OS_WINDOWS
-    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toLocal8Bit().toStdString(), remotePath.toStdString(),
+    error = m_sshClient.scpFileCopy(overwriteMode, localFile.fileName().toLocal8Bit().toStdString(), remotePath.toStdString(),
                                      "non_desc");
 #else
-    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(),
+    error = m_sshClient.scpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(),
                                      "non_desc");
 #endif
 
