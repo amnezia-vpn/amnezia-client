@@ -97,76 +97,80 @@ PageType {
                             }
                         }
 
-                        DrawerType {
+                        DrawerType2 {
                             id: showDetailsDrawer
+                            parent: root
 
-                            width: parent.width
-                            height: parent.height * 0.9
+                            anchors.fill: parent
+                            expandedHeight: parent.height * 0.9
+                            expandedContent: Item {
+                                implicitHeight: showDetailsDrawer.expandedHeight
 
-                            BackButtonType {
-                                id: showDetailsBackButton
-
-                                anchors.top: parent.top
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.topMargin: 16
-
-                                backButtonFunction: function() {
-                                    showDetailsDrawer.close()
-                                }
-                            }
-
-                            FlickableType {
-                                anchors.top: showDetailsBackButton.bottom
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.bottom: parent.bottom
-                                contentHeight: {
-                                    var emptySpaceHeight = parent.height - showDetailsBackButton.implicitHeight - showDetailsBackButton.anchors.topMargin
-                                    return (showDetailsDrawerContent.height > emptySpaceHeight) ?
-                                                showDetailsDrawerContent.height : emptySpaceHeight
-                                }
-
-                                ColumnLayout {
-                                    id: showDetailsDrawerContent
+                                BackButtonType {
+                                    id: showDetailsBackButton
 
                                     anchors.top: parent.top
                                     anchors.left: parent.left
                                     anchors.right: parent.right
-                                    anchors.rightMargin: 16
-                                    anchors.leftMargin: 16
+                                    anchors.topMargin: 16
 
-                                    Header2Type {
-                                        id: showDetailsDrawerHeader
-                                        Layout.fillWidth: true
-                                        Layout.topMargin: 16
+                                    backButtonFunction: function() {
+                                        showDetailsDrawer.close()
+                                    }
+                                }
 
-                                        headerText: name
+                                FlickableType {
+                                    anchors.top: showDetailsBackButton.bottom
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
+                                    contentHeight: {
+                                        var emptySpaceHeight = parent.height - showDetailsBackButton.implicitHeight - showDetailsBackButton.anchors.topMargin
+                                        return (showDetailsDrawerContent.height > emptySpaceHeight) ?
+                                                    showDetailsDrawerContent.height : emptySpaceHeight
                                     }
 
-                                    ParagraphTextType {
-                                        Layout.fillWidth: true
-                                        Layout.topMargin: 16
-                                        Layout.bottomMargin: 16
+                                    ColumnLayout {
+                                        id: showDetailsDrawerContent
 
-                                        text: detailedDescription
-                                        textFormat: Text.MarkdownText
-                                    }
+                                        anchors.top: parent.top
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: 16
+                                        anchors.leftMargin: 16
+
+                                        Header2Type {
+                                            id: showDetailsDrawerHeader
+                                            Layout.fillWidth: true
+                                            Layout.topMargin: 16
+
+                                            headerText: name
+                                        }
+
+                                        ParagraphTextType {
+                                            Layout.fillWidth: true
+                                            Layout.topMargin: 16
+                                            Layout.bottomMargin: 16
+
+                                            text: detailedDescription
+                                            textFormat: Text.MarkdownText
+                                        }
 
 
-                                    Rectangle {
-                                        Layout.fillHeight: true
-                                        color: "transparent"
-                                    }
+                                        Rectangle {
+                                            Layout.fillHeight: true
+                                            color: "transparent"
+                                        }
 
-                                    BasicButtonType {
-                                        Layout.fillWidth: true
-                                        Layout.bottomMargin: 32
+                                        BasicButtonType {
+                                            Layout.fillWidth: true
+                                            Layout.bottomMargin: 32
 
-                                        text: qsTr("Close")
+                                            text: qsTr("Close")
 
-                                        onClicked: function() {
-                                            showDetailsDrawer.close()
+                                            onClicked: function() {
+                                                showDetailsDrawer.close()
+                                            }
                                         }
                                     }
                                 }

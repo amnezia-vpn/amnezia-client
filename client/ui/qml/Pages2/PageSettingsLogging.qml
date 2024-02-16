@@ -143,21 +143,20 @@ PageType {
                         image: "qrc:/images/controls/delete.svg"
 
                         onClicked: function() {
-                            questionDrawer.headerText = qsTr("Clear logs?")
-                            questionDrawer.yesButtonText = qsTr("Continue")
-                            questionDrawer.noButtonText = qsTr("Cancel")
+                            var headerText = qsTr("Clear logs?")
+                            var yesButtonText = qsTr("Continue")
+                            var noButtonText = qsTr("Cancel")
 
-                            questionDrawer.yesButtonFunction = function() {
-                                questionDrawer.visible = false
+                            var yesButtonFunction = function() {
                                 PageController.showBusyIndicator(true)
                                 SettingsController.clearLogs()
                                 PageController.showBusyIndicator(false)
                                 PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
                             }
-                            questionDrawer.noButtonFunction = function() {
-                                questionDrawer.visible = false
+                            var noButtonFunction = function() {
                             }
-                            questionDrawer.visible = true
+
+                            showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                         }
                     }
 
@@ -169,10 +168,6 @@ PageType {
                         color: "#D7D8DB"
                     }
                 }
-            }
-
-            QuestionDrawer {
-                id: questionDrawer
             }
         }
     }
