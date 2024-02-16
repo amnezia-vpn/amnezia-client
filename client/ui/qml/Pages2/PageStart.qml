@@ -53,11 +53,12 @@ PageType {
         }
 
         function onClosePage() {
+            tabBar.isServerInfoShow = tabBarStackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageSettingsServerInfo)
+
             if (tabBarStackView.depth <= 1) {
                 return
             }
             tabBarStackView.pop()
-            tabBar.isServerInfoShow = false
         }
 
         function onGoToPage(page, slide) {
@@ -67,7 +68,7 @@ PageType {
             } else {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
-            tabBar.isServerInfoShow = page === PageEnum.PageSettingsServerInfo
+            tabBar.isServerInfoShow = page === PageEnum.PageSettingsServerInfo || tabBar.isServerInfoShow
 
             PageController.updateDrawerRootPage(page)
         }
