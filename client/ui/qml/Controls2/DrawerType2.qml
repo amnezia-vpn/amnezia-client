@@ -25,6 +25,8 @@ Item {
     property real expandedHeight
     property real collapsedHeight: 0
 
+    property int depthIndex: 0
+
     signal entered
     signal exited
     signal pressed(bool pressed, bool entered)
@@ -37,6 +39,24 @@ Item {
     signal opened
 
     Connections {
+        target: PageController
+
+        function onCloseTopDrawer() {
+            if (depthIndex === PageController.getDrawerDepth()) {
+                if (isCollapsed) {
+                    return
+                }
+
+                aboutToHide()
+
+                drawerContent.state = root.drawerCollapsed
+                depthIndex = 0
+                closed()
+            }
+        }
+    }
+
+    Connections {
         target: root
 
         function onClose() {
@@ -47,6 +67,8 @@ Item {
             aboutToHide()
 
             drawerContent.state = root.drawerCollapsed
+            depthIndex = 0
+            PageController.setDrawerDepth(PageController.getDrawerDepth() - 1)
             closed()
         }
 
@@ -58,6 +80,8 @@ Item {
             aboutToShow()
 
             drawerContent.state = root.drawerExpanded
+            depthIndex = PageController.getDrawerDepth() + 1
+            PageController.setDrawerDepth(depthIndex)
             opened()
         }
     }

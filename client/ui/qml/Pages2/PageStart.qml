@@ -64,6 +64,17 @@ PageType {
                 tabBarStackView.pop()
             }
         }
+
+        function onEscapePressed() {
+            var pageName = tabBarStackView.currentItem.objectName
+            if ((pageName === PageController.getPagePath(PageEnum.PageShare)) ||
+                    (pageName === PageController.getPagePath(PageEnum.PageSettings))) {
+                PageController.goToPageHome()
+                tabBar.previousIndex = 0
+            } else {
+                PageController.closePage()
+            }
+        }
     }
 
     Connections {
