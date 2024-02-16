@@ -13,6 +13,7 @@ class AwgConfigModel : public QAbstractListModel
 public:
     enum Roles {
         PortRole = Qt::UserRole + 1,
+        MtuRole,
         JunkPacketCountRole,
         JunkPacketMinSizeRole,
         JunkPacketMaxSizeRole,

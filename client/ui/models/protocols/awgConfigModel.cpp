@@ -22,6 +22,7 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
 
     switch (role) {
     case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
+    case Roles::MtuRole: m_protocolConfig.insert(config_key::mtu, value.toString()); break;
     case Roles::JunkPacketCountRole: m_protocolConfig.insert(config_key::junkPacketCount, value.toString()); break;
     case Roles::JunkPacketMinSizeRole: m_protocolConfig.insert(config_key::junkPacketMinSize, value.toString()); break;
     case Roles::JunkPacketMaxSizeRole: m_protocolConfig.insert(config_key::junkPacketMaxSize, value.toString()); break;
@@ -57,6 +58,7 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString();
+    case Roles::MtuRole: return m_protocolConfig.value(config_key::mtu).toString();
     case Roles::JunkPacketCountRole: return m_protocolConfig.value(config_key::junkPacketCount);
     case Roles::JunkPacketMinSizeRole: return m_protocolConfig.value(config_key::junkPacketMinSize);
     case Roles::JunkPacketMaxSizeRole: return m_protocolConfig.value(config_key::junkPacketMaxSize);
@@ -82,6 +84,8 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
 
     m_protocolConfig[config_key::port] =
             protocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
+    m_protocolConfig[config_key::mtu] =
+            protocolConfig.value(config_key::mtu).toString(protocols::awg::defaultMtu);
     m_protocolConfig[config_key::junkPacketCount] =
             protocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
     m_protocolConfig[config_key::junkPacketMinSize] =
@@ -123,6 +127,7 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     QHash<int, QByteArray> roles;
 
     roles[PortRole] = "port";
+    roles[MtuRole] = "mtu";
     roles[JunkPacketCountRole] = "junkPacketCount";
     roles[JunkPacketMinSizeRole] = "junkPacketMinSize";
     roles[JunkPacketMaxSizeRole] = "junkPacketMaxSize";

@@ -38,7 +38,7 @@ struct Log {
   init(_ str: String) {
     self.records = str.split(whereSeparator: \.isNewline)
       .compactMap {
-        Record(String($0))!
+        Record(String($0))
       }
   }
 
