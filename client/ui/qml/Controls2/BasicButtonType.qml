@@ -16,7 +16,7 @@ Button {
     property string textColor: "#0E0E11"
 
     property string borderColor: "#D7D8DB"
-    property string borderFocusedColor: "#45A6FF"
+    property string borderFocusedColor: "#D7D8DB"
     property int borderWidth: 0
     property int borderFocusedWidth: 1
 
@@ -31,36 +31,22 @@ Button {
     hoverEnabled: true
 
     background: Rectangle {
-        id: background
+        id: background_border
+
+        color: "transparent"
+        border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
+        border.width: root.activeFocus ? root.borderFocusedWidth : "transparent"
+
         anchors.fill: parent
         radius: 16
-        color: {
-            if (root.enabled) {
-                if (root.pressed) {
-                    return pressedColor
-                }
-                return root.hovered ? hoveredColor : defaultColor
-            } else {
-                return disabledColor
-            }
-        }
-        border.color: root.activeFocus ? root.borderFocusedColor : borderColor
-        border.width: root.activeFocus ? root.borderFocusedWidth : borderWidth
-
-        Behavior on color {
-            PropertyAnimation { duration: 200 }
-        }
 
         Rectangle {
-            visible: root.squareLeftSide
+            id: background
 
-            z: 1
+            anchors.fill: background_border
+            anchors.margins: root.activeFocus ? 3: 0
 
-            width: parent.radius
-            height: parent.radius
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
+            radius: 16
             color: {
                 if (root.enabled) {
                     if (root.pressed) {
@@ -71,9 +57,37 @@ Button {
                     return disabledColor
                 }
             }
+            border.color: root.activeFocus ? "transparent" : borderColor
+            border.width: root.activeFocus ? 0 : borderWidth
 
             Behavior on color {
                 PropertyAnimation { duration: 200 }
+            }
+
+            Rectangle {
+                visible: root.squareLeftSide
+
+                z: 1
+
+                width: parent.radius
+                height: parent.radius
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                color: {
+                    if (root.enabled) {
+                        if (root.pressed) {
+                            return pressedColor
+                        }
+                        return root.hovered ? hoveredColor : defaultColor
+                    } else {
+                        return disabledColor
+                    }
+                }
+
+                Behavior on color {
+                    PropertyAnimation { duration: 200 }
+                }
             }
         }
     }
