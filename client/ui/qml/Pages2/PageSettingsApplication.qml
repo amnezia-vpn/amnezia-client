@@ -117,10 +117,6 @@ PageType {
                 }
             }
 
-            SelectLanguageDrawer {
-                id: selectLanguageDrawer
-            }
-
 
             DividerType {}
 
@@ -145,28 +141,30 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Reset settings and remove all data from the application?")
-                    questionDrawer.descriptionText = qsTr("All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.")
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
+                    var headerText = qsTr("Reset settings and remove all data from the application?")
+                    var descriptionText = qsTr("All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var yesButtonFunction = function() {
                         SettingsController.clearSettings()
                         PageController.replaceStartPage()
                     }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var noButtonFunction = function() {
                     }
-                    questionDrawer.visible = true
+
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
             DividerType {}
-
-            QuestionDrawer {
-                id: questionDrawer
-            }
         }
+    }
+
+    SelectLanguageDrawer {
+        id: selectLanguageDrawer
+
+        width: root.width
+        height: root.height
     }
 }

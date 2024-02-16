@@ -82,11 +82,6 @@ public slots:
 
     void showOnStartup();
 
-    void updateDrawerRootPage(PageLoader::PageEnum page);
-    void goToDrawerRootPage();
-    void drawerOpen();
-    void drawerClose();
-
     bool isTriggeredByConnectButton();
     void setTriggeredBtConnectButton(bool trigger);
 
@@ -118,16 +113,10 @@ signals:
     void showPassphraseRequestDrawer();
     void passphraseRequestDrawerClosed(QString passphrase);
 
-    void showTopCloseButton(bool visible);
-    void forceCloseDrawer();
-
 private:
     QSharedPointer<ServersModel> m_serversModel;
 
     std::shared_ptr<Settings> m_settings;
-
-    PageLoader::PageEnum m_currentRootPage;
-    int m_drawerLayer;
 
     bool m_isTriggeredByConnectButton;
 };
