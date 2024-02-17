@@ -43,6 +43,8 @@ PageType {
         }
 
         function onClosePage() {
+            tabBar.isServerInfoShow = tabBarStackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageSettingsServerInfo)
+
             if (tabBarStackView.depth <= 1) {
                 return
             }
@@ -57,6 +59,8 @@ PageType {
             } else {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
+            
+            tabBar.isServerInfoShow = page === PageEnum.PageSettingsServerInfo || tabBar.isServerInfoShow
         }
 
         function onGoToStartPage() {
@@ -110,14 +114,6 @@ PageType {
         }
     }
 
-    Connections {
-        target: ApiController
-
-        function onErrorOccurred(errorMessage) {
-            PageController.showErrorMessage(errorMessage)
-        }
-    }
-
     StackViewType {
         id: tabBarStackView
 
@@ -135,6 +131,7 @@ PageType {
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
             tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+            tabBar.isServerInfoShow = false
         }
 
         Component.onCompleted: {
@@ -148,6 +145,7 @@ PageType {
         id: tabBar
 
         property int previousIndex: 0
+        property bool isServerInfoShow: false
 
         anchors.right: parent.right
         anchors.left: parent.left
@@ -178,7 +176,7 @@ PageType {
         }
 
         TabImageButtonType {
-            isSelected: tabBar.currentIndex === 0
+            isSelected: tabBar.isServerInfoShow ? false : tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
@@ -212,7 +210,7 @@ PageType {
         }
 
         TabImageButtonType {
-            isSelected: tabBar.currentIndex === 2
+            isSelected: tabBar.isServerInfoShow ? true : tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)

@@ -793,6 +793,14 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this URL.</source>
+        <translation type="vanished">Используйте &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; для открытия этой ссылки.</translation>
+    </message>
+    <message>
+        <source>After creating your onion site, it takes a few minutes for the Tor network to make it available for use.</source>
+        <translation type="vanished">Через несколько минут после установки ваш Onion сайт станет доступен в сети Tor.</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="112"/>
         <source>When configuring WordPress set the this onion address as domain.</source>
         <translation type="unfinished"></translation>
@@ -1125,8 +1133,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="70"/>
-        <source>If AmneziaDNS is installed on the server</source>
-        <translation type="unfinished"></translation>
+        <source>When AmneziaDNS is installed on the server</source>
+        <translation>Если он уставновлен на сервере</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="85"/>
@@ -1137,6 +1145,15 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="86"/>
         <source>When AmneziaDNS is not used or installed</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="120"/>
+        <source>Allows you to use the VPN only for certain Apps</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>When AmneziaDNS is not used or installed</source>
+        <translation type="vanished">Эти адреса будут использоваться, если не включен AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
@@ -1172,9 +1189,9 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="60"/>
-        <source>If AmneziaDNS is not used or installed</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="58"/>
+        <source>When AmneziaDNS is not used or installed</source>
+        <translation>Эти адреса будут использоваться, если не включен или не установлен AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="67"/>
@@ -1348,27 +1365,27 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="138"/>
         <source>Reboot server</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Перезагрузить сервер</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="142"/>
         <source>Do you want to reboot the server?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вы уверены, что хотите перезагрузить сервер?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="143"/>
         <source>The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Процесс перезагрузки может занять около 30 секунд. Вы уверены, что хотите продолжить?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="169"/>
-        <source>Remove server from application</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="173"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="175"/>
         <source>Do you want to remove the server from application?</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Вы уверена что хотите удалить сервер из приложения?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="206"/>
+        <source>Do you want to clear server from Amnezia software?</source>
+        <translation type="unfinished">Вы хотите очистить сервер от всех сервисов Amnezia?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="174"/>
@@ -1478,9 +1495,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="61"/>
-        <source>Only the sites listed here will be accessed through the VPN</source>
-        <translation type="unfinished"></translation>
+        <source>Only the sites listed here will be accesed via VPN</source>
+        <translation type="vanished">Только адреса из списка должны открываться через VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="66"/>
@@ -1510,6 +1526,19 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="210"/>
         <source>Cancel</source>
+        <translation>Отменить</translation>
+    </message>
+    <message>
+        <source>Website or IP</source>
+        <translation type="vanished">Сайт или IP</translation>
+    </message>
+    <message>
+        <source>Import / Export Sites</source>
+        <translation type="vanished">Импорт/экспорт Сайтов</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="59"/>
+        <source>Only the sites listed here will be accessed through the VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2009,7 +2038,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="586"/>
         <source>Creation date: </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Дата создания</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="600"/>
@@ -2599,14 +2628,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="101"/>
-        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
-        <translation type="unfinished"></translation>
+        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognised by analysis systems in some highly censored regions.</source>
+        <translation type="vanished">ShadowSocks - маскирует VPN-трафик под обычный веб-трафик, но распознается системами анализа в некоторых регионах с высоким уровнем цензуры.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="104"/>
         <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">OpenVPN over Cloak - OpenVPN с маскировкой VPN под web-трафик и защитой от обнаружения active-probbing. Подходит для регионов с самым высоким уровнем цензуры.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="108"/>
@@ -2634,9 +2661,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="122"/>
         <source>Create a file vault on your server to securely store and transfer files.</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">Создайте на сервере файловое хранилище для безопасного хранения и передачи файлов.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="129"/>

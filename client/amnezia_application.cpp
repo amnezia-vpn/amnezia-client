@@ -385,7 +385,13 @@ void AmneziaApplication::initControllers()
     m_engine->rootContext()->setContextProperty("ApiController", m_apiController.get());
     connect(m_apiController.get(), &ApiController::updateStarted, this,
             [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Connecting); });
-    connect(m_apiController.get(), &ApiController::errorOccurred, this,
-            [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected); });
-    connect(m_apiController.get(), &ApiController::updateFinished, m_connectionController.get(), &ConnectionController::toggleConnection);
+    connect(m_apiController.get(), &ApiController::errorOccurred, this, [this](const QString &errorMessage) {
+        if (m_connectionController->isConnectionInProgress()) {
+            emit m_pageController->showErrorMessage(errorMessage);
+        }
+
+        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+    });
+    connect(m_apiController.get(), &ApiController::updateFinished, m_connectionController.get(),
+            &ConnectionController::toggleConnection);
 }
