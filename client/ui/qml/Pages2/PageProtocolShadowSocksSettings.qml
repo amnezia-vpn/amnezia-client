@@ -15,6 +15,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: listview.currentItem.portTextField.textField
+
     ColumnLayout {
         id: backButton
 
@@ -58,6 +60,8 @@ PageType {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
+                    property alias portTextField: portTextField
+
                     ColumnLayout {
                         id: col
 
@@ -77,6 +81,8 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: portTextField
+
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
@@ -90,6 +96,8 @@ PageType {
                                     port = textFieldText
                                 }
                             }
+
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         DropDownType {
@@ -134,13 +142,15 @@ PageType {
                         }
 
                         BasicButtonType {
+                            id: saveRestartButton
+
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save and Restart Amnezia")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(ShadowSocksConfigModel.getConfig())

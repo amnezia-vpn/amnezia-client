@@ -123,7 +123,7 @@ PageType {
                 text: qsTr("Share")
                 imageSource: "qrc:/images/controls/share-2.svg"
 
-                onClicked: function() {
+                clickedFunc: function() {
                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
                     shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
 
