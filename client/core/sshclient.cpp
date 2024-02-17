@@ -222,7 +222,7 @@ namespace libssh {
         return fromLibsshErrorCode();
     }
 
-    ErrorCode Client::scpFileCopy(const SftpOverwriteMode overwriteMode, const QString& localPath, const QString& remotePath, const QString &fileDesc)
+    ErrorCode Client::scpFileCopy(const ScpOverwriteMode overwriteMode, const QString& localPath, const QString& remotePath, const QString &fileDesc)
     {
         m_scpSession = ssh_scp_new(m_session, SSH_SCP_WRITE, remotePath.toStdString().c_str());
 

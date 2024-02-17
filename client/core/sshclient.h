@@ -13,11 +13,11 @@
 using namespace amnezia;
 
 namespace libssh {
-    enum SftpOverwriteMode {
+    enum ScpOverwriteMode {
         /*! Overwrite any existing files */
-        SftpOverwriteExisting = O_TRUNC,
+        ScpOverwriteExisting = O_TRUNC,
         /*! Append new content if the file already exists */
-        SftpAppendToExisting = O_APPEND
+        ScpAppendToExisting = O_APPEND
     };
     class Client : public QObject
     {
@@ -32,7 +32,7 @@ namespace libssh {
                                  const std::function<ErrorCode (const QString &, Client &)> &cbReadStdOut,
                                  const std::function<ErrorCode (const QString &, Client &)> &cbReadStdErr);
         ErrorCode writeResponse(const QString &data);
-        ErrorCode scpFileCopy(const SftpOverwriteMode overwriteMode,
+        ErrorCode scpFileCopy(const ScpOverwriteMode overwriteMode,
                                const QString &localPath,
                                const QString &remotePath,
                                const QString& fileDesc);

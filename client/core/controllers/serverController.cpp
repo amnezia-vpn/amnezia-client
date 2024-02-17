@@ -118,7 +118,7 @@ ServerController::runContainerScript(const ServerCredentials &credentials, Docke
 
 ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container, const ServerCredentials &credentials,
                                                       const QString &file, const QString &path,
-                                                      libssh::SftpOverwriteMode overwriteMode)
+                                                      libssh::ScpOverwriteMode overwriteMode)
 {
     ErrorCode e = ErrorCode::NoError;
     QString tmpFileName = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
@@ -139,7 +139,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     if (e)
         return e;
 
-    if (overwriteMode == libssh::SftpOverwriteMode::SftpOverwriteExisting) {
+    if (overwriteMode == libssh::ScpOverwriteMode::ScpOverwriteExisting) {
         e = runScript(credentials,
                       replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(path),
                                   genVarsForScript(credentials, container)),
@@ -147,7 +147,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 
         if (e)
             return e;
-    } else if (overwriteMode == libssh::SftpOverwriteMode::SftpAppendToExisting) {
+    } else if (overwriteMode == libssh::ScpOverwriteMode::ScpAppendToExisting) {
         e = runScript(credentials,
                       replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(tmpFileName),
                                   genVarsForScript(credentials, container)),
@@ -199,7 +199,7 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
 }
 
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data,
-                                             const QString &remotePath, libssh::SftpOverwriteMode overwriteMode)
+                                             const QString &remotePath, libssh::ScpOverwriteMode overwriteMode)
 {
     auto error = m_sshClient.connectToHost(credentials);
     if (error != ErrorCode::NoError) {
