@@ -53,6 +53,7 @@ PageType {
 
         function onGoToPage(page, slide) {
             var pagePath = PageController.getPagePath(page)
+
             if (slide) {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
             } else {

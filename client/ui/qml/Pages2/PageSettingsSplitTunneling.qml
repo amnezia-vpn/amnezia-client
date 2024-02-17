@@ -20,6 +20,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: website_ip_field.textField
+
     property bool pageEnabled: {
         return !ConnectionController.isConnected && !ServersModel.isDefaultServerFromApi()
     }
@@ -245,6 +247,8 @@ PageType {
         anchors.bottomMargin: 24
 
         TextFieldWithHeaderType {
+            id: website_ip_field
+
             Layout.fillWidth: true
 
             textFieldPlaceholderText: qsTr("website or IP")

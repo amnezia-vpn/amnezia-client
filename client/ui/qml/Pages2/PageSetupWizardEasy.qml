@@ -158,7 +158,7 @@ PageType {
 
                 text: qsTr("Continue")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     if (root.isEasySetup) {
                         ContainersModel.setCurrentlyProcessedContainerIndex(containers.dockerContainer)
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
@@ -197,7 +197,7 @@ PageType {
 
                 text: qsTr("Set up later")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                     InstallController.addEmptyServer()
                 }

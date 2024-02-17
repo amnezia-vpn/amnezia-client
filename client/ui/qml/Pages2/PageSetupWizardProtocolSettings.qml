@@ -52,6 +52,8 @@ PageType {
                     implicitWidth: processedContainerListView.width
                     implicitHeight: (delegateContent.implicitHeight > root.height) ? delegateContent.implicitHeight : root.height
 
+                    property alias port:port
+
                     ColumnLayout {
                         id: delegateContent
 
@@ -92,7 +94,7 @@ PageType {
 
                             text: qsTr("More detailed")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 showDetailsDrawer.open()
                             }
                         }
@@ -168,7 +170,7 @@ PageType {
 
                                             text: qsTr("Close")
 
-                                            onClicked: function() {
+											clickedFunc: function()  {
                                                 showDetailsDrawer.close()
                                             }
                                         }
@@ -201,6 +203,8 @@ PageType {
                             headerText: qsTr("Port")
                             textField.maximumLength: 5
                             textField.validator: IntValidator { bottom: 1; top: 65535 }
+
+                            KeyNavigation.tab: installButton
                         }
 
                         Rectangle {
@@ -216,7 +220,7 @@ PageType {
 
                             text: qsTr("Install")
 
-                            onClicked: function() {
+                            clickedFunc: function() {
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.install(dockerContainer, port.textFieldText, transportProtoSelector.currentIndex)
                             }
@@ -236,6 +240,8 @@ PageType {
                             var protocolSelectorVisible = ProtocolProps.defaultTransportProtoChangeable(defaultContainerProto)
                             transportProtoSelector.visible = protocolSelectorVisible
                             transportProtoHeader.visible = protocolSelectorVisible
+
+                            defaultActiveFocusItem = port.textField
                         }
                     }
                 }
