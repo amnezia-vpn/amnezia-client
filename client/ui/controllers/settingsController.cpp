@@ -212,6 +212,10 @@ void SettingsController::toggleScreenshotsEnabled(bool enable)
         }
     });
 #endif
+
+#ifdef Q_OS_IOS
+    AmneziaVPN::toggleScreenshots(enable);
+#endif
 }
 
 bool SettingsController::isCameraPresent()

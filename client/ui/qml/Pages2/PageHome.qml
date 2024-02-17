@@ -124,6 +124,9 @@ PageType {
                 text: ServersModel.defaultServerDescriptionCollapsed
             }
 
+            Component.onCompleted: {
+                SettingsController.toggleScreenshotsEnabled(SettingsController.isScreenshotsEnabled())
+            }
         }
         expandedContent:  Item {
             id: serverMenuContainer
