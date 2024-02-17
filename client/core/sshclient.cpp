@@ -241,7 +241,6 @@ namespace libssh {
         QFuture<ErrorCode> future = QtConcurrent::run([this, overwriteMode, &localPath, &remotePath, &fileDesc]() {
             int accessType = O_WRONLY | O_CREAT | overwriteMode;
             const size_t bufferSize = 16384;
-            char buffer[bufferSize];
             int localFileSize = QFileInfo(localPath).size();
 
             int rc = ssh_scp_push_file(m_scpSession, remotePath.toStdString().c_str(), localFileSize, accessType);
@@ -249,15 +248,18 @@ namespace libssh {
                 return closeScpSession();
             }
 
-            int chunksCount = localFileSize / (bufferSize);
+            int chunksCount = localFileSize / bufferSize;
             QFile fin(localPath);
 
             if (fin.open(QIODevice::ReadOnly)) {
                 for (int currentChunkId = 0; currentChunkId < chunksCount; currentChunkId++) {
                     QByteArray chunk = fin.read(bufferSize);
-                    if (chunk.size() != bufferSize) return ErrorCode::SshSftpEofError;
+                    if (chunk.size() != bufferSize) {
+                        fin.close();
+                        return ErrorCode::SshSftpEofError;
+                    }
 
-                    rc = ssh_scp_write(m_scpSession, buffer, bufferSize);
+                    rc = ssh_scp_write(m_scpSession, chunk.data(), chunk.size());
                     if (rc != SSH_OK) {
                         fin.close();
                         return closeScpSession();
@@ -268,9 +270,12 @@ namespace libssh {
 
                 if (lastChunkSize != 0) {
                     QByteArray lastChunk = fin.read(lastChunkSize);
-                    if (lastChunk.size() != lastChunkSize) return ErrorCode::SshSftpEofError;
+                    if (lastChunk.size() != lastChunkSize) {
+                        fin.close();
+                        return ErrorCode::SshSftpEofError;
+                    }
 
-                    rc = ssh_scp_write(m_scpSession, buffer, lastChunkSize);
+                    rc = ssh_scp_write(m_scpSession, lastChunk.data(), lastChunkSize);
                     if (rc != SSH_OK) {
                         fin.close();
                         return closeScpSession();
