@@ -224,9 +224,20 @@ void Settings::setSaveLogs(bool enabled)
         if (!Logger::init()) {
             qWarning() << "Initialization of debug subsystem failed";
         }
+        setLogEnableDate(QDateTime::currentDateTime());
     }
 #endif
     emit saveLogsChanged(enabled);
+}
+
+QDateTime Settings::getLogEnableDate()
+{
+    return value("Conf/logEnableDate").toDateTime();
+}
+
+void Settings::setLogEnableDate(QDateTime date)
+{
+    setValue("Conf/logEnableDate", date);
 }
 
 QString Settings::routeModeString(RouteMode mode) const

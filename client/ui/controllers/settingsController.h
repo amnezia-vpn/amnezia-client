@@ -77,6 +77,8 @@ signals:
 
     void amneziaDnsToggled(bool enable);
 
+    void loggingDisableByWathcer();
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
@@ -85,6 +87,10 @@ private:
     std::shared_ptr<Settings> m_settings;
 
     QString m_appVersion;
+
+    QDateTime m_loggingDisableDate;
+
+    void startLoggingWather();
 };
 
 #endif // SETTINGSCONTROLLER_H

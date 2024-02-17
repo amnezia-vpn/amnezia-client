@@ -129,6 +129,14 @@ PageType {
         }
     }
 
+    Connections {
+        target: SettingsController
+
+        function onLoggingDisableByWathcer() {
+            PageController.showNotificationMessage(qsTr("Logging was disabled after 14 days, log files were deleted"))
+        }
+    }
+
     StackViewType {
         id: tabBarStackView
 
