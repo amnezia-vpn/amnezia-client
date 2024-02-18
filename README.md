@@ -55,6 +55,7 @@ Look deploy folder for build scripts.
    - Qt 5 Compatibility Module
    - Qt Shader Tools
    - Additional Libraries:
+     - Qt Charts
      - Qt Image Formats
      - Qt Multimedia
      - Qt Remote Objects 
