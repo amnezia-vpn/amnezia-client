@@ -175,7 +175,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       return
     }
 
-    guard let wgConfigStr = try? JSONDecoder().decode(WGConfig.self, from: wgConfig).wg,
+    guard let wgConfigStr = try? JSONDecoder().decode(WGConfig.self, from: wgConfig).str,
           let tunnelConfiguration = try? TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
     else {
       wg_log(.error, message: "Can't parse WireGuard config")

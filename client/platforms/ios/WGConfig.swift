@@ -117,7 +117,7 @@ struct WGConfig: Decodable {
     self.splitTunnelType = try container.decode(Int.self, forKey: .splitTunnelType)
   }
 
-  var wg: String {
+  var str: String {
     """
     [Interface]
     Address = \(data.clientIP)/32
