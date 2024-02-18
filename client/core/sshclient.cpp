@@ -256,7 +256,7 @@ namespace libssh {
                     QByteArray chunk = fin.read(bufferSize);
                     if (chunk.size() != bufferSize) {
                         fin.close();
-                        return ErrorCode::SshSftpEofError;
+                        return ErrorCode::InternalError;
                     }
 
                     rc = ssh_scp_write(m_scpSession, chunk.data(), chunk.size());
@@ -272,7 +272,7 @@ namespace libssh {
                     QByteArray lastChunk = fin.read(lastChunkSize);
                     if (lastChunk.size() != lastChunkSize) {
                         fin.close();
-                        return ErrorCode::SshSftpEofError;
+                        return ErrorCode::InternalError;
                     }
 
                     rc = ssh_scp_write(m_scpSession, lastChunk.data(), lastChunk.size());
