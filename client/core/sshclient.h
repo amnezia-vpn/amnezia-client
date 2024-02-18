@@ -6,7 +6,6 @@
 #include <fcntl.h>
 
 #include <libssh/libssh.h>
-#include <libssh/sftp.h>
 
 #include "defs.h"
 
@@ -41,7 +40,6 @@ namespace libssh {
         ErrorCode closeChannel();
         ErrorCode closeScpSession();
         ErrorCode fromLibsshErrorCode();
-        ErrorCode fromLibsshSftpErrorCode(int errorCode);
         static int callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata);
 
         ssh_session m_session = nullptr;

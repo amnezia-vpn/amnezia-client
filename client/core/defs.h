@@ -46,21 +46,6 @@ namespace amnezia
         SshPrivateKeyFormatError = 304,
         SshTimeoutError = 305,
 
-        // Ssh sftp errors
-        SshSftpEofError = 400,
-        SshSftpNoSuchFileError = 401,
-        SshSftpPermissionDeniedError = 402,
-        SshSftpFailureError = 403,
-        SshSftpBadMessageError = 404,
-        SshSftpNoConnectionError = 405,
-        SshSftpConnectionLostError = 406,
-        SshSftpOpUnsupportedError = 407,
-        SshSftpInvalidHandleError = 408,
-        SshSftpNoSuchPathError = 409,
-        SshSftpFileAlreadyExistsError = 410,
-        SshSftpWriteProtectError = 411,
-        SshSftpNoMediaError = 412,
-
         // Local errors
         OpenVpnConfigMissing = 500,
         OpenVpnManagementServerError = 501,

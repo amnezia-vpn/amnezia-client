@@ -275,7 +275,7 @@ namespace libssh {
                         return ErrorCode::SshSftpEofError;
                     }
 
-                    rc = ssh_scp_write(m_scpSession, lastChunk.data(), lastChunkSize);
+                    rc = ssh_scp_write(m_scpSession, lastChunk.data(), lastChunk.size());
                     if (rc != SSH_OK) {
                         fin.close();
                         return closeScpSession();
@@ -300,12 +300,11 @@ namespace libssh {
 
     ErrorCode Client::closeScpSession()
     {
-        auto errorCode = fromLibsshSftpErrorCode(ssh_get_error_code(m_scpSession));
+        auto errorCode = fromLibsshErrorCode();
         if (m_scpSession != nullptr) {
             ssh_scp_free(m_scpSession);
             m_scpSession = nullptr;
         }
-        qCritical() << ssh_get_error(m_session);
         return errorCode;
     }
 
@@ -326,27 +325,6 @@ namespace libssh {
         case(SSH_EINTR): return ErrorCode::SshInterruptedError;
         case(SSH_FATAL): return ErrorCode::SshInternalError;
         default: return ErrorCode::SshInternalError;
-        }
-    }
-
-    ErrorCode Client::fromLibsshSftpErrorCode(int errorCode)
-    {
-        switch (errorCode) {
-        case(SSH_FX_OK): return ErrorCode::NoError;
-        case(SSH_FX_EOF): return ErrorCode::SshSftpEofError;
-        case(SSH_FX_NO_SUCH_FILE): return ErrorCode::SshSftpNoSuchFileError;
-        case(SSH_FX_PERMISSION_DENIED): return ErrorCode::SshSftpPermissionDeniedError;
-        case(SSH_FX_FAILURE): return ErrorCode::SshSftpFailureError;
-        case(SSH_FX_BAD_MESSAGE): return ErrorCode::SshSftpBadMessageError;
-        case(SSH_FX_NO_CONNECTION): return ErrorCode::SshSftpNoConnectionError;
-        case(SSH_FX_CONNECTION_LOST): return ErrorCode::SshSftpConnectionLostError;
-        case(SSH_FX_OP_UNSUPPORTED): return ErrorCode::SshSftpOpUnsupportedError;
-        case(SSH_FX_INVALID_HANDLE): return ErrorCode::SshSftpInvalidHandleError;
-        case(SSH_FX_NO_SUCH_PATH): return ErrorCode::SshSftpNoSuchPathError;
-        case(SSH_FX_FILE_ALREADY_EXISTS): return ErrorCode::SshSftpFileAlreadyExistsError;
-        case(SSH_FX_WRITE_PROTECT): return ErrorCode::SshSftpWriteProtectError;
-        case(SSH_FX_NO_MEDIA): return ErrorCode::SshSftpNoMediaError;
-        default: return ErrorCode::SshSftpFailureError;
         }
     }
 
