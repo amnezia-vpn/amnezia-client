@@ -13,6 +13,7 @@ set(PACKAGES
     Core Gui Network Xml
     RemoteObjects Quick Svg QuickControls2
     Core5Compat Concurrent LinguistTools
+    Charts
 )
 
 if(IOS)
