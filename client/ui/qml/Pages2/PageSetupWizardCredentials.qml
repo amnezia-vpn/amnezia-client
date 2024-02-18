@@ -69,6 +69,7 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Login to connect via SSH")
                 textFieldPlaceholderText: "root"
+                isAutoCapitalization: false
 
                 KeyNavigation.tab: secretData.textField
             }

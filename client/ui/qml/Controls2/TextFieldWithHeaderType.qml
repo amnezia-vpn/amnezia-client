@@ -25,6 +25,7 @@ Item {
 
     property string textFieldPlaceholderText
     property bool textFieldEditable: true
+    property bool isAutoCapitalization: true
 
     property string borderColor: "#2C2D30"
     property string borderFocusedColor: "#d7d8db"
@@ -83,6 +84,7 @@ Item {
                         font.pixelSize: 16
                         font.weight: 400
                         font.family: "PT Root UI VF"
+                        inputMethodHints: root.isAutoCapitalization ? Qt.ImhNone : Qt.ImhNoAutoUppercase
 
                         height: 24
                         Layout.fillWidth: true
