@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="fa_IR">
+<TS version="2.1" language="ar_EG">
 <context>
     <name>ConnectionController</name>
     <message>
