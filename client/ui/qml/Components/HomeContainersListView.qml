@@ -26,24 +26,6 @@ ListView {
         id: containersRadioButtonGroup
     }
 
-    Connections {
-        target: ServersModel
-
-        function onCurrentlyProcessedServerIndexChanged() {
-            if (ContainersModel.getDefaultContainer()) {
-                menuContent.checkCurrentItem()
-            }
-        }
-    }
-
-    function checkCurrentItem() {
-        var item = menuContent.itemAtIndex(currentIndex)
-        if (item !== null) {
-            var radioButton = item.children[0].children[0]
-            radioButton.checked = true
-        }
-    }
-
     delegate: Item {
         implicitWidth: rootWidth
         implicitHeight: content.implicitHeight
@@ -69,7 +51,7 @@ ListView {
                 showImage: !isInstalled
 
                 checkable: isInstalled && !ConnectionController.isConnected && isSupported
-                checked: isDefault
+                checked: proxyContainersModel.mapToSource(index) === ServersModel.getDefaultContainer(ServersModel.defaultIndex)
 
                 onClicked: {
                     if (ConnectionController.isConnected && isInstalled) {
@@ -78,8 +60,8 @@ ListView {
                     }
 
                     if (checked) {
-                        containersDropDown.menuVisible = false
-                        ServersModel.setDefaultContainer(proxyContainersModel.mapToSource(index))
+                        containersDropDown.close()
+                        ServersModel.setDefaultContainer(ServersModel.defaultIndex, proxyContainersModel.mapToSource(index))
                     } else {
                         if (!isSupported && isInstalled) {
                             PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))
@@ -89,7 +71,7 @@ ListView {
                         ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
-                        containersDropDown.menuVisible = false
+                        containersDropDown.close()
                     }
                 }
 

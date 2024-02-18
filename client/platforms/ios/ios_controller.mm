@@ -10,12 +10,6 @@
 #include "../protocols/vpnprotocol.h"
 #import "ios_controller_wrapper.h"
 
-#import <NetworkExtension/NetworkExtension.h>
-#import <NetworkExtension/NETunnelProviderManager.h>
-#import <NetworkExtension/NEVPNManager.h>
-#import <NetworkExtension/NETunnelProviderSession.h>
-
-
 const char* Action::start = "start";
 const char* Action::restart = "restart";
 const char* Action::stop = "stop";
@@ -406,9 +400,10 @@ bool IosController::setupCloak()
 bool IosController::setupWireGuard()
 {
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
-
-    QString wgConfig = config[config_key::config].toString();
     
+    QJsonDocument doc(m_rawConfig);
+    QString wgConfig(doc.toJson(QJsonDocument::Compact));
+
     return startWireGuard(wgConfig);
 }
 
@@ -416,8 +411,9 @@ bool IosController::setupAwg()
 {
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Awg)].toObject();
 
-    QString wgConfig = config[config_key::config].toString();
-    
+    QJsonDocument doc(m_rawConfig);
+    QString wgConfig(doc.toJson(QJsonDocument::Compact));
+
     return startWireGuard(wgConfig);
 }
 

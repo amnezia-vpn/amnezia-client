@@ -284,7 +284,7 @@ void InstallController::updateContainer(QJsonObject config)
         m_protocolModel->updateModel(config);
 
         if ((serverIndex == m_serversModel->getDefaultServerIndex())
-            && (container == m_containersModel->getDefaultContainer())) {
+            && (container == m_serversModel->getDefaultContainer(serverIndex))) {
             emit currentContainerUpdated();
         } else {
             emit updateContainerFinished(tr("Settings updated successfully"));

@@ -39,7 +39,6 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case EasySetupOrderRole: return ContainerProps::easySetupOrder(container);
     case IsInstalledRole: return m_containers.contains(container);
     case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_currentlyProcessedContainerIndex);
-    case IsDefaultRole: return container == m_defaultContainerIndex;
     case IsSupportedRole: return ContainerProps::isSupportedByCurrentPlatform(container);
     case IsShareableRole: return ContainerProps::isShareable(container);
     }
@@ -62,18 +61,6 @@ void ContainersModel::updateModel(const QJsonArray &containers)
                              val.toObject());
     }
     endResetModel();
-}
-
-void ContainersModel::setDefaultContainer(const int containerIndex)
-{
-    m_defaultContainerIndex = static_cast<DockerContainer>(containerIndex);
-    emit dataChanged(index(containerIndex, 0), index(containerIndex, 0));
-}
-
-
-DockerContainer ContainersModel::getDefaultContainer()
-{
-    return m_defaultContainerIndex;
 }
 
 void ContainersModel::setCurrentlyProcessedContainerIndex(int index)
@@ -127,7 +114,6 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
 
     roles[IsInstalledRole] = "isInstalled";
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
-    roles[IsDefaultRole] = "isDefault";
     roles[IsSupportedRole] = "isSupported";
     roles[IsShareableRole] = "isShareable";
     return roles;
