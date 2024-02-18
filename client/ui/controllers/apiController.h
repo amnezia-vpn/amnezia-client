@@ -39,6 +39,8 @@ private:
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
+
+    bool m_isConfigUpdateStarted = false;
 };
 
 #endif // APICONTROLLER_H

@@ -16,6 +16,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: listview.currentItem.vpnAddressSubnetTextField.textField
+
     ColumnLayout {
         id: backButton
 
@@ -53,11 +55,13 @@ PageType {
                 clip: true
                 interactive: false
 
-                model: OpenVpnConfigModel
+                model: OpenVpnConfigModel             
 
                 delegate: Item {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
+
+                    property alias vpnAddressSubnetTextField: vpnAddressSubnetTextField
 
                     ColumnLayout {
                         id: col
@@ -78,6 +82,8 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: vpnAddressSubnetTextField
+
                             Layout.fillWidth: true
                             Layout.topMargin: 32
 
@@ -89,6 +95,8 @@ PageType {
                                     subnetAddress = textFieldText
                                 }
                             }
+
+                            KeyNavigation.tab: portTextField.enabled ? portTextField.textField : saveRestartButton
                         }
 
                         ParagraphTextType {
@@ -119,6 +127,9 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: portTextField
+
+
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
@@ -134,6 +145,8 @@ PageType {
                                     port = textFieldText
                                 }
                             }
+
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         SwitcherType {
@@ -367,7 +380,7 @@ PageType {
 
                             text: qsTr("Remove OpenVPN")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 var headerText = qsTr("Remove OpenVpn from server?")
                                 var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
                                 var yesButtonText = qsTr("Continue")
@@ -385,13 +398,15 @@ PageType {
                         }
 
                         BasicButtonType {
+                            id: saveRestartButton
+
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save and Restart Amnezia")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(OpenVpnConfigModel.getConfig())

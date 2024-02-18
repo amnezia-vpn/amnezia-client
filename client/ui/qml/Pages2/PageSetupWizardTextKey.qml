@@ -12,6 +12,8 @@ import "../Config"
 PageType {
     id: root
 
+    defaultActiveFocusItem: textKey.textField
+
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -56,11 +58,15 @@ PageType {
                     textField.text = ""
                     textField.paste()
                 }
+
+                KeyNavigation.tab: continueButton
             }
         }
     }
 
     BasicButtonType {
+        id: continueButton
+
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -70,7 +76,7 @@ PageType {
 
         text: qsTr("Continue")
 
-        onClicked: function() {
+        clickedFunc: function() {
             ImportController.extractConfigFromCode(textKey.textFieldText)
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }

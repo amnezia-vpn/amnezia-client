@@ -69,6 +69,7 @@ Item {
 
                     TextField {
                         id: textField
+                        activeFocusOnTab: false
 
                         enabled: root.textFieldEditable
                         color: root.enabled ? root.textFieldTextColor : root.textFieldTextDisabledColor
@@ -142,7 +143,7 @@ Item {
                     Layout.preferredWidth: content.implicitHeight
                     squareLeftSide: true
 
-                    onClicked: {
+                    clickedFunc: function() {
                         if (root.clickedFunc && typeof root.clickedFunc === "function") {
                             root.clickedFunc()
                         }
@@ -185,5 +186,13 @@ Item {
 
     function getBackgroundBorderColor(noneFocusedColor) {
         return textField.focus ? root.borderFocusedColor : noneFocusedColor
+    }
+
+    Keys.onEnterPressed: {
+         KeyNavigation.tab.forceActiveFocus();
+    }
+
+    Keys.onReturnPressed: {
+         KeyNavigation.tab.forceActiveFocus();
     }
 }
