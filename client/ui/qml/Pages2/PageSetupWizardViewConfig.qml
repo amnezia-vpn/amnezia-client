@@ -109,7 +109,7 @@ PageType {
 
                 text: showContent ? qsTr("Collapse content") : qsTr("Show content")
 
-                onClicked: {
+                clickedFunc: function() {
                     showContent = !showContent
                 }
             }
@@ -151,7 +151,7 @@ PageType {
             Layout.bottomMargin: 32
 
             text: qsTr("Connect")
-            onClicked: {
+            clickedFunc: function() {
                 ImportController.importConfig()
             }
         }

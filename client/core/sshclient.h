@@ -33,9 +33,9 @@ namespace libssh {
                                  const std::function<ErrorCode (const QString &, Client &)> &cbReadStdErr);
         ErrorCode writeResponse(const QString &data);
         ErrorCode sftpFileCopy(const SftpOverwriteMode overwriteMode,
-                               const std::string& localPath,
-                               const std::string& remotePath,
-                               const std::string& fileDesc);
+                               const QString &localPath,
+                               const QString &remotePath,
+                               const QString& fileDesc);
         ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &passphraseCallback);
     private:
         ErrorCode closeChannel();

@@ -8,6 +8,7 @@ import PageEnum 1.0
 
 import "Config"
 import "Controls2"
+import "Components"
 
 Window  {
     id: root
@@ -130,38 +131,39 @@ Window  {
     }
 
     Item {
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        anchors.fill: parent
 
-        implicitHeight: popupErrorMessage.height
-
-        DrawerType {
+        DrawerType2 {
             id: privateKeyPassphraseDrawer
 
-            width: root.width
-            height: root.height * 0.35
+            anchors.fill: parent
+            expandedHeight: root.height * 0.35
 
-            onVisibleChanged: {
-                if (privateKeyPassphraseDrawer.visible) {
-                    passphrase.textFieldText = ""
-                    passphrase.textField.forceActiveFocus()
-                }
-            }
-            onAboutToHide: {
-                PageController.showBusyIndicator(true)
-            }
-            onAboutToShow: {
-                PageController.showBusyIndicator(false)
-            }
-
-            ColumnLayout {
+            expandedContent: ColumnLayout {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.topMargin: 16
                 anchors.leftMargin: 16
                 anchors.rightMargin: 16
+
+                Connections {
+                    target: privateKeyPassphraseDrawer
+                    function onOpened() {
+                        passphrase.textFieldText = ""
+                        passphrase.textField.forceActiveFocus()
+                    }
+
+                    function onAboutToHide() {
+                        if (passphrase.textFieldText !== "") {
+                            PageController.showBusyIndicator(true)
+                        }
+                    }
+
+                    function onAboutToShow() {
+                        PageController.showBusyIndicator(false)
+                    }
+                }
 
                 TextFieldWithHeaderType {
                     id: passphrase
@@ -176,9 +178,13 @@ Window  {
                     clickedFunc: function() {
                         hidePassword = !hidePassword
                     }
+
+                    KeyNavigation.tab: saveButton
                 }
 
                 BasicButtonType {
+                    id: saveButton
+
                     Layout.fillWidth: true
 
                     defaultColor: "transparent"
@@ -190,13 +196,44 @@ Window  {
 
                     text: qsTr("Save")
 
-                    onClicked: {
+                    clickedFunc: function() {
                         privateKeyPassphraseDrawer.close()
                         PageController.passphraseRequestDrawerClosed(passphrase.textFieldText)
                     }
                 }
             }
         }
+    }
+
+    Item {
+        anchors.fill: parent
+
+        QuestionDrawer {
+            id: questionDrawer
+
+            anchors.fill: parent
+        }
+    }
+
+    function showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction) {
+        questionDrawer.headerText = headerText
+        questionDrawer.descriptionText = descriptionText
+        questionDrawer.yesButtonText = yesButtonText
+        questionDrawer.noButtonText = noButtonText
+
+        questionDrawer.yesButtonFunction = function() {
+            questionDrawer.close()
+            if (yesButtonFunction && typeof yesButtonFunction === "function") {
+                yesButtonFunction()
+            }
+        }
+        questionDrawer.noButtonFunction = function() {
+            questionDrawer.close()
+            if (noButtonFunction && typeof noButtonFunction === "function") {
+                noButtonFunction()
+            }
+        }
+        questionDrawer.open()
     }
 
     FileDialog {

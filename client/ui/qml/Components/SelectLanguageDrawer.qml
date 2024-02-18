@@ -5,129 +5,136 @@ import QtQuick.Layouts
 import "../Controls2"
 import "../Controls2/TextTypes"
 
-DrawerType {
+DrawerType2 {
     id: root
 
-    width: parent.width
-    height: parent.height * 0.9
+    expandedContent: Item {
+        id: container
 
-    ColumnLayout {
-        id: backButton
+        implicitHeight: root.height * 0.9
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 16
-
-        BackButtonType {
-            backButtonImage: "qrc:/images/controls/arrow-left.svg"
-            backButtonFunction: function() {
-                root.close()
-            }
+        Component.onCompleted: {
+            root.expandedHeight = container.implicitHeight
         }
-    }
-
-    FlickableType {
-        anchors.top: backButton.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight
 
         ColumnLayout {
-            id: content
+            id: backButton
 
-            anchors.fill: parent
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 16
 
-            Header2Type {
-                id: header
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                headerText: qsTr("Choose language")
+            BackButtonType {
+                backButtonImage: "qrc:/images/controls/arrow-left.svg"
+                backButtonFunction: function() {
+                    root.close()
+                }
             }
+        }
 
-            ListView {
-                id: listView
+        FlickableType {
+            anchors.top: backButton.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            contentHeight: content.implicitHeight
 
-                Layout.fillWidth: true
-                height: listView.contentItem.height
+            ColumnLayout {
+                id: content
 
-                clip: true
-                interactive: false
+                anchors.fill: parent
 
-                model: LanguageModel
-                currentIndex: LanguageModel.currentLanguageIndex
+                Header2Type {
+                    id: header
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.leftMargin: 16
 
-                ButtonGroup {
-                    id: buttonGroup
+                    headerText: qsTr("Choose language")
                 }
 
-                delegate: Item {
-                    implicitWidth: root.width
-                    implicitHeight: delegateContent.implicitHeight
+                ListView {
+                    id: listView
 
-                    ColumnLayout {
-                        id: delegateContent
+                    Layout.fillWidth: true
+                    height: listView.contentItem.height
 
-                        anchors.fill: parent
+                    clip: true
+                    interactive: false
 
-                        RadioButton {
-                            id: radioButton
+                    model: LanguageModel
+                    currentIndex: LanguageModel.currentLanguageIndex
 
-                            implicitWidth: parent.width
-                            implicitHeight: radioButtonContent.implicitHeight
+                    ButtonGroup {
+                        id: buttonGroup
+                    }
 
-                            hoverEnabled: true
+                    delegate: Item {
+                        implicitWidth: root.width
+                        implicitHeight: delegateContent.implicitHeight
 
-                            indicator: Rectangle {
-                                anchors.fill: parent
-                                color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
+                        ColumnLayout {
+                            id: delegateContent
 
-                                Behavior on color {
-                                    PropertyAnimation { duration: 200 }
-                                }
-                            }
+                            anchors.fill: parent
 
-                            RowLayout {
-                                id: radioButtonContent
-                                anchors.fill: parent
+                            RadioButton {
+                                id: radioButton
 
-                                anchors.rightMargin: 16
-                                anchors.leftMargin: 16
+                                implicitWidth: parent.width
+                                implicitHeight: radioButtonContent.implicitHeight
 
-                                spacing: 0
+                                hoverEnabled: true
 
-                                z: 1
+                                indicator: Rectangle {
+                                    anchors.fill: parent
+                                    color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
 
-                                ParagraphTextType {
-                                    Layout.fillWidth: true
-                                    Layout.topMargin: 20
-                                    Layout.bottomMargin: 20
-
-                                    text: languageName
+                                    Behavior on color {
+                                        PropertyAnimation { duration: 200 }
+                                    }
                                 }
 
-                                Image {
-                                    source: "qrc:/images/controls/check.svg"
-                                    visible: radioButton.checked
+                                RowLayout {
+                                    id: radioButtonContent
+                                    anchors.fill: parent
 
-                                    width: 24
-                                    height: 24
+                                    anchors.rightMargin: 16
+                                    anchors.leftMargin: 16
 
-                                    Layout.rightMargin: 8
+                                    spacing: 0
+
+                                    z: 1
+
+                                    ParagraphTextType {
+                                        Layout.fillWidth: true
+                                        Layout.topMargin: 20
+                                        Layout.bottomMargin: 20
+
+                                        text: languageName
+                                    }
+
+                                    Image {
+                                        source: "qrc:/images/controls/check.svg"
+                                        visible: radioButton.checked
+
+                                        width: 24
+                                        height: 24
+
+                                        Layout.rightMargin: 8
+                                    }
                                 }
-                            }
 
-                            ButtonGroup.group: buttonGroup
-                            checked: listView.currentIndex === index
+                                ButtonGroup.group: buttonGroup
+                                checked: listView.currentIndex === index
 
-                            onClicked: {
-                                listView.currentIndex = index
-                                LanguageModel.changeLanguage(languageIndex)
-                                root.close()
+                                onClicked: {
+                                    listView.currentIndex = index
+                                    LanguageModel.changeLanguage(languageIndex)
+                                    root.close()
+                                }
                             }
                         }
                     }
