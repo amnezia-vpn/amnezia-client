@@ -1023,6 +1023,11 @@ Already installed containers were found on the server. All installed containers 
         <translation>https://amnezia.org</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="176"/>
+        <source>Software version: %1</source>
+        <translation>%1 :نسخه نرم‎افزار</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="192"/>
         <source>Check for updates</source>
         <translation>بررسی بروز‎رسانی</translation>
@@ -3091,11 +3096,6 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 </context>
 <context>
     <name>SettingsController</name>
-    <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="27"/>
-        <source>Software version</source>
-        <translation>نسخه نرم‎افزار</translation>
-    </message>
     <message>
         <location filename="../ui/controllers/settingsController.cpp" line="148"/>
         <source>All settings have been reset to default values</source>
