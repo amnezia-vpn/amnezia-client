@@ -18,6 +18,7 @@ import "../Components"
 PageType {
     id: root
 
+    property var selectedServerIndex: ServersModel.getDefaultServerIndex()
     Connections {
         target: PageController
 
@@ -244,6 +245,13 @@ PageType {
                 contentHeight: col.height + col.anchors.bottomMargin
                 implicitHeight: parent.height - serversMenuHeader.implicitHeight
                 clip: true
+
+                function autoScroll() {
+                    const itemHeight = serversMenuContent.contentHeight / serversMenuContent.count
+                    const totalItemsHeight = selectedServerIndex * itemHeight
+                    contentY = Math.max(0, totalItemsHeight - (implicitHeight / 2))
+                }
+                Component.onCompleted: autoScroll()
 
                 ScrollBar.vertical: ScrollBar {
                     id: scrollBar
