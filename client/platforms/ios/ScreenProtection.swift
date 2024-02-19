@@ -63,7 +63,6 @@ struct ProtectionPair {
     view.insertSubview(secureTextField, at: 0)
     secureTextField.isUserInteractionEnabled = false
 
-//#if os(iOS)
     view.layer.superlayer?.addSublayer(secureTextField.layer)
     secureTextField.layer.sublayers?.last?.addSublayer(view.layer)
 
@@ -71,12 +70,6 @@ struct ProtectionPair {
     secureTextField.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 0).isActive = true
     secureTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0).isActive = true
     secureTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0).isActive = true
-//#else
-//    secureTextField.frame = bounds
-//    secureTextField.wantsLayer = true
-//    secureTextField.layer?.addSublayer(layer!)
-//    addSubview(secureTextField)
-//#endif
 
     self.init(textField: secureTextField, layer: view.layer)
   }
