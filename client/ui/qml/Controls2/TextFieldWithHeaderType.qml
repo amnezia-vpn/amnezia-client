@@ -74,6 +74,8 @@ Item {
                         enabled: root.textFieldEditable
                         color: root.enabled ? root.textFieldTextColor : root.textFieldTextDisabledColor
 
+                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
+
                         placeholderText: root.textFieldPlaceholderText
                         placeholderTextColor: "#494B50"
 
