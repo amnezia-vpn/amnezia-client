@@ -1021,6 +1021,11 @@ Already installed containers were found on the server. All installed containers 
         <translation>https://amnezia.org</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="176"/>
+        <source>Software version: %1</source>
+        <translation>Версия ПО: %1</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="192"/>
         <source>Check for updates</source>
         <translation>Проверить обновления</translation>
