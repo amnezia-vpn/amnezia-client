@@ -211,13 +211,7 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     localFile.write(data);
     localFile.close();
 
-#ifdef Q_OS_WINDOWS
-    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toLocal8Bit().toStdString(), remotePath.toStdString(),
-                                     "non_desc");
-#else
-    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(),
-                                     "non_desc");
-#endif
+    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName(), remotePath, "non_desc");
 
     if (error != ErrorCode::NoError) {
         return error;

@@ -170,7 +170,7 @@ PageType {
 
                             text: qsTr("Mount folder on device")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 PageController.showBusyIndicator(true)
                                 InstallController.mountSftpDrive(port, password, username)
                                 PageController.showBusyIndicator(false)
@@ -229,7 +229,7 @@ PageType {
 
                             text: qsTr("Detailed instructions")
 
-                            onClicked: {
+                            clickedFunc: function() {
 //                                Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
                             }
                         }
@@ -247,7 +247,7 @@ PageType {
 
                             text: qsTr("Remove SFTP and all data stored there")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 var headerText = qsTr("Remove SFTP and all data stored there?")
                                 var yesButtonText = qsTr("Continue")
                                 var noButtonText = qsTr("Cancel")

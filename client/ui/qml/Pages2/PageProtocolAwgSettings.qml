@@ -12,8 +12,11 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
+
 PageType {
     id: root
+
+    defaultActiveFocusItem: listview.currentItem.portTextField.textField
 
     ColumnLayout {
         id: backButton
@@ -44,6 +47,8 @@ PageType {
             enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
 
             ListView {
+
+
                 id: listview
 
                 width: parent.width
@@ -55,8 +60,12 @@ PageType {
                 model: AwgConfigModel
 
                 delegate: Item {
+                    id: _delegate
+
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
+
+                    property alias portTextField:portTextField
 
                     ColumnLayout {
                         id: col
@@ -93,6 +102,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: junkPacketCountTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -136,6 +147,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: junkPacketMinSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -154,6 +167,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: junkPacketMaxSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -172,6 +187,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: initPacketJunkSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -190,6 +207,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: responsePacketJunkSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -208,6 +227,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: initPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -226,6 +247,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: responsePacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -244,6 +267,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: transportPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -262,6 +287,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: underloadPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -280,6 +307,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         BasicButtonType {
@@ -311,6 +340,8 @@ PageType {
                         }
 
                         BasicButtonType {
+                            id: saveRestartButton
+
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
@@ -328,7 +359,7 @@ PageType {
 
                             text: qsTr("Save and Restart Amnezia")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(AwgConfigModel.getConfig())
@@ -336,6 +367,7 @@ PageType {
                         }
                     }
                 }
+
             }
         }
     }

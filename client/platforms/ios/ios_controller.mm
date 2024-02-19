@@ -483,7 +483,6 @@ bool IosController::setupAwg()
         wgConfig.insert(config_key::mtu, protocols::awg::defaultMtu);
     }
 
-    wgConfig.insert(config_key::mtu, config[config_key::mtu]);
     wgConfig.insert(config_key::hostName, config[config_key::hostName]);
     wgConfig.insert(config_key::port, config[config_key::port]);
     wgConfig.insert(config_key::client_ip, config[config_key::client_ip]);

@@ -1,9 +1,10 @@
 import Foundation
 
 struct WGConfig: Decodable {
-  let h1, h2, h3, h4: String?
-  let jc, jmax, jmin: String?
-  let s1, s2: String?
+  let initPacketMagicHeader, responsePacketMagicHeader: String?
+  let underloadPacketMagicHeader, transportPacketMagicHeader: String?
+  let junkPacketCount, junkPacketMinSize, junkPacketMaxSize: String?
+  let initPacketJunkSize, responsePacketJunkSize: String?
   let dns1: String
   let dns2: String
   let mtu: String
@@ -19,9 +20,10 @@ struct WGConfig: Decodable {
   let splitTunnelSites: [String]
 
   enum CodingKeys: String, CodingKey {
-    case h1 = "H1", h2 = "H2", h3 = "H3", h4 = "H4"
-    case jc = "Jc", jmax = "Jmax", jmin = "Jmin"
-    case s1 = "S1", s2 = "S2"
+    case initPacketMagicHeader = "H1", responsePacketMagicHeader = "H2"
+    case underloadPacketMagicHeader = "H3", transportPacketMagicHeader = "H4"
+    case junkPacketCount = "Jc", junkPacketMinSize = "Jmin", junkPacketMaxSize = "Jmax"
+    case initPacketJunkSize = "S1", responsePacketJunkSize = "S2"
     case dns1
     case dns2
     case mtu
@@ -38,17 +40,17 @@ struct WGConfig: Decodable {
   }
 
   var settings: String {
-    jc == nil ? "" :
+    junkPacketCount == nil ? "" :
     """
-    Jc = \(jc!)
-    Jmin = \(jmin!)
-    Jmax = \(jmax!)
-    S1 = \(s1!)
-    S2 = \(s2!)
-    H1 = \(h1!)
-    H2 = \(h2!)
-    H3 = \(h3!)
-    H4 = \(h4!)
+    Jc = \(junkPacketCount!)
+    Jmin = \(junkPacketMinSize!)
+    Jmax = \(junkPacketMaxSize!)
+    S1 = \(initPacketJunkSize!)
+    S2 = \(responsePacketJunkSize!)
+    H1 = \(initPacketMagicHeader!)
+    H2 = \(responsePacketMagicHeader!)
+    H3 = \(underloadPacketMagicHeader!)
+    H4 = \(transportPacketMagicHeader!)
 
     """
   }

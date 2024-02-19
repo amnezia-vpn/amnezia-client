@@ -106,14 +106,18 @@ PageType {
                             textFieldText: name
                             textField.maximumLength: 30
                             checkEmptyText: true
+
+                            KeyNavigation.tab: saveButton
                         }
 
                         BasicButtonType {
+                            id: saveButton
+
                             Layout.fillWidth: true
 
                             text: qsTr("Save")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 if (serverName.textFieldText === "") {
                                     return
                                 }
@@ -122,6 +126,12 @@ PageType {
                                     name = serverName.textFieldText
                                 }
                                 serverNameEditDrawer.close()
+                            }
+                        }
+
+                        Component.onCompleted: {
+                            if (header.itemAt(0)) {
+                                defaultActiveFocusItem = serverName.textField
                             }
                         }
                     }
