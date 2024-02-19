@@ -192,13 +192,12 @@ PageType {
                         rootButtonTextTopMargin: 8
                         rootButtonTextBottomMargin: 8
 
-                        text: ServersModel.defaultContainerName
+                        text: ServersModel.defaultServerDefaultContainerName
                         textColor: "#0E0E11"
                         headerText: qsTr("VPN protocol")
                         headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                         rootButtonClickedFunction: function() {
-                            ServersModel.currentlyProcessedIndex = serversMenuContent.currentIndex
                             containersDropDown.open()
                         }
 
@@ -210,22 +209,26 @@ PageType {
                             Connections {
                                 target: ServersModel
 
-                                function onCurrentlyProcessedServerIndexChanged() {
+                                function onDefaultServerIndexChanged() {
                                     updateContainersModelFilters()
                                 }
                             }
 
                             function updateContainersModelFilters() {
-                                if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
-                                    proxyContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
+                                if (ServersModel.isDefaultServerHasWriteAccess()) {
+                                    proxyDefaultServerContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
                                 } else {
-                                    proxyContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
+                                    proxyDefaultServerContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
                                 }
                             }
 
                             model: SortFilterProxyModel {
-                                id: proxyContainersModel
-                                sourceModel: ContainersModel
+                                id: proxyDefaultServerContainersModel
+                                sourceModel: DefaultServerContainersModel
+                                
+                                sorters: [
+                                    RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
+                                ]
                             }
 
                             Component.onCompleted: updateContainersModelFilters()
@@ -318,21 +321,7 @@ PageType {
                                         Layout.fillWidth: true
 
                                         text: name
-                                        descriptionText: {
-                                            var fullDescription = ""
-                                            if (hasWriteAccess) {
-                                                if (SettingsController.isAmneziaDnsEnabled()
-                                                        && ServersModel.isAmneziaDnsContainerInstalled(index)) {
-                                                    fullDescription += "Amnezia DNS | "
-                                                }
-                                            } else {
-                                                if (containsAmneziaDns) {
-                                                    fullDescription += "Amnezia DNS | "
-                                                }
-                                            }
-
-                                            return fullDescription += serverDescription
-                                        }
+                                        descriptionText: serverDescription
 
                                         checked: index === serversMenuContent.currentIndex
                                         checkable: !ConnectionController.isConnected
@@ -347,7 +336,6 @@ PageType {
 
                                             serversMenuContent.currentIndex = index
 
-                                            ServersModel.currentlyProcessedIndex = index
                                             ServersModel.defaultIndex = index
                                         }
 
@@ -368,7 +356,7 @@ PageType {
                                         z: 1
 
                                         onClicked: function() {
-                                            ServersModel.currentlyProcessedIndex = index
+                                            ServersModel.processedIndex = index
                                             PageController.goToPage(PageEnum.PageSettingsServerInfo)
                                             drawer.close()
                                         }

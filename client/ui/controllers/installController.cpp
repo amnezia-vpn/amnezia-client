@@ -176,7 +176,7 @@ void InstallController::installServer(DockerContainer container, QJsonObject &co
 
 void InstallController::installContainer(DockerContainer container, QJsonObject &config)
 {
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials serverCredentials =
             qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
 
@@ -238,7 +238,7 @@ bool InstallController::isServerAlreadyExists()
 
 void InstallController::scanServerForInstalledContainers()
 {
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials serverCredentials =
             qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
 
@@ -267,7 +267,7 @@ void InstallController::scanServerForInstalledContainers()
 
 void InstallController::updateContainer(QJsonObject config)
 {
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials serverCredentials =
             qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
 
@@ -283,8 +283,8 @@ void InstallController::updateContainer(QJsonObject config)
         m_serversModel->updateContainerConfig(container, config);
         m_protocolModel->updateModel(config);
 
-        if ((serverIndex == m_serversModel->getDefaultServerIndex())
-            && (container == m_serversModel->getDefaultContainer(serverIndex))) {
+        auto defaultContainer = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
+        if ((serverIndex == m_serversModel->getDefaultServerIndex()) && (container == defaultContainer)) {
             emit currentContainerUpdated();
         } else {
             emit updateContainerFinished(tr("Settings updated successfully"));
@@ -296,27 +296,27 @@ void InstallController::updateContainer(QJsonObject config)
     emit installationErrorOccurred(errorString(errorCode));
 }
 
-void InstallController::rebootCurrentlyProcessedServer()
+void InstallController::rebootProcessedServer()
 {
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
     m_serversModel->rebootServer();
-    emit rebootCurrentlyProcessedServerFinished(tr("Server '%1' was rebooted").arg(serverName));
+    emit rebootProcessedServerFinished(tr("Server '%1' was rebooted").arg(serverName));
 }
 
-void InstallController::removeCurrentlyProcessedServer()
+void InstallController::removeProcessedServer()
 {
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
     m_serversModel->removeServer();
-    emit removeCurrentlyProcessedServerFinished(tr("Server '%1' was removed").arg(serverName));
+    emit removeProcessedServerFinished(tr("Server '%1' was removed").arg(serverName));
 }
 
 void InstallController::removeAllContainers()
 {
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
     ErrorCode errorCode = m_serversModel->removeAllContainers();
@@ -329,7 +329,7 @@ void InstallController::removeAllContainers()
 
 void InstallController::removeCurrentlyProcessedContainer()
 {
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
     int container = m_containersModel->getCurrentlyProcessedContainerIndex();
@@ -377,7 +377,7 @@ void InstallController::mountSftpDrive(const QString &port, const QString &passw
     QString mountPath;
     QString cmd;
 
-    int serverIndex = m_serversModel->getCurrentlyProcessedServerIndex();
+    int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials serverCredentials =
             qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
     QString hostname = serverCredentials.hostName;
