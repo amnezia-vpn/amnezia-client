@@ -938,7 +938,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
         <source>Support Amnezia</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Поддержите Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
@@ -1202,7 +1202,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="70"/>
-        <source>When AmneziaDNS is installed on the server</source>
+        <source>If AmneziaDNS is installed on the server</source>
         <translation>Если он уставновлен на сервере</translation>
     </message>
     <message>
@@ -2808,7 +2808,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation>OpenVPN - популярный VPN-протокол, с гибкой настройкой. Имеет собственный протокол безопасности с SSL/TLS для обмена ключами.</translation>
     </message>
     <message>
-        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognised by analysis systems in some highly censored regions.</source>
+        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
         <translation type="vanished">ShadowSocks - маскирует VPN-трафик под обычный веб-трафик, но распознается системами анализа в некоторых регионах с высоким уровнем цензуры.</translation>
     </message>
     <message>
