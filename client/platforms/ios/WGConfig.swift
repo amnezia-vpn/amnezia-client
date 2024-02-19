@@ -1,22 +1,23 @@
 import Foundation
 
 struct WGConfigData: Decodable {
-  let h1, h2, h3, h4: String?
-  let jc, jmax, jmin: String?
-  let s1, s2: String?
+  let initPacketMagicHeader, responsePacketMagicHeader: String?
+  let underloadPacketMagicHeader, transportPacketMagicHeader: String?
+  let junkPacketCount, junkPacketMinSize, junkPacketMaxSize: String?
+  let initPacketJunkSize, responsePacketJunkSize: String?
 
   var settings: String {
-    jc == nil ? "" :
+    junkPacketCount == nil ? "" :
     """
-    Jc = \(jc!)
-    Jmin = \(jmin!)
-    Jmax = \(jmax!)
-    S1 = \(s1!)
-    S2 = \(s2!)
-    H1 = \(h1!)
-    H2 = \(h2!)
-    H3 = \(h3!)
-    H4 = \(h4!)
+    Jc = \(junkPacketCount!)
+    Jmin = \(junkPacketMinSize!)
+    Jmax = \(junkPacketMaxSize!)
+    S1 = \(initPacketJunkSize!)
+    S2 = \(responsePacketJunkSize!)
+    H1 = \(initPacketMagicHeader!)
+    H2 = \(responsePacketMagicHeader!)
+    H3 = \(underloadPacketMagicHeader!)
+    H4 = \(transportPacketMagicHeader!)
 
     """
   }
@@ -33,9 +34,10 @@ struct WGConfigData: Decodable {
   var persistentKeepAlive: String
 
   enum CodingKeys: String, CodingKey {
-    case h1 = "H1", h2 = "H2", h3 = "H3", h4 = "H4"
-    case jc = "Jc", jmax = "Jmax", jmin = "Jmin"
-    case s1 = "S1", s2 = "S2"
+    case initPacketMagicHeader = "H1", responsePacketMagicHeader = "H2"
+    case underloadPacketMagicHeader = "H3", transportPacketMagicHeader = "H4"
+    case junkPacketCount = "Jc", junkPacketMinSize = "Jmin", junkPacketMaxSize = "Jmax"
+    case initPacketJunkSize = "S1", responsePacketJunkSize = "S2"
 
     case clientIP = "client_ip" // "10.8.1.16"
     case clientPrivateKey = "client_priv_key"
@@ -51,15 +53,15 @@ struct WGConfigData: Decodable {
 
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    self.h1 = try container.decodeIfPresent(String.self, forKey: .h1)
-    self.h2 = try container.decodeIfPresent(String.self, forKey: .h2)
-    self.h3 = try container.decodeIfPresent(String.self, forKey: .h3)
-    self.h4 = try container.decodeIfPresent(String.self, forKey: .h4)
-    self.jc = try container.decodeIfPresent(String.self, forKey: .jc)
-    self.jmax = try container.decodeIfPresent(String.self, forKey: .jmax)
-    self.jmin = try container.decodeIfPresent(String.self, forKey: .jmin)
-    self.s1 = try container.decodeIfPresent(String.self, forKey: .s1)
-    self.s2 = try container.decodeIfPresent(String.self, forKey: .s2)
+    self.initPacketMagicHeader = try container.decodeIfPresent(String.self, forKey: .initPacketMagicHeader)
+    self.responsePacketMagicHeader = try container.decodeIfPresent(String.self, forKey: .responsePacketMagicHeader)
+    self.underloadPacketMagicHeader = try container.decodeIfPresent(String.self, forKey: .underloadPacketMagicHeader)
+    self.transportPacketMagicHeader = try container.decodeIfPresent(String.self, forKey: .transportPacketMagicHeader)
+    self.junkPacketCount = try container.decodeIfPresent(String.self, forKey: .junkPacketCount)
+    self.junkPacketMinSize = try container.decodeIfPresent(String.self, forKey: .junkPacketMinSize)
+    self.junkPacketMaxSize = try container.decodeIfPresent(String.self, forKey: .junkPacketMaxSize)
+    self.initPacketJunkSize = try container.decodeIfPresent(String.self, forKey: .initPacketJunkSize)
+    self.responsePacketJunkSize = try container.decodeIfPresent(String.self, forKey: .responsePacketJunkSize)
     self.clientIP = try container.decode(String.self, forKey: .clientIP)
     self.clientPrivateKey = try container.decode(String.self, forKey: .clientPrivateKey)
     self.clientPublicKey = try container.decode(String.self, forKey: .clientPublicKey)
@@ -115,7 +117,7 @@ struct WGConfig: Decodable {
     self.splitTunnelType = try container.decode(Int.self, forKey: .splitTunnelType)
   }
 
-  var wg: String {
+  var str: String {
     """
     [Interface]
     Address = \(data.clientIP)/32

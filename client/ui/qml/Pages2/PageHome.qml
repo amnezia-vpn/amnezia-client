@@ -212,6 +212,10 @@ PageType {
                             model: SortFilterProxyModel {
                                 id: proxyDefaultServerContainersModel
                                 sourceModel: DefaultServerContainersModel
+                                
+                                sorters: [
+                                    RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
+                                ]
                             }
 
                             Component.onCompleted: updateContainersModelFilters()
