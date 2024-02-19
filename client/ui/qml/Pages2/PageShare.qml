@@ -31,7 +31,7 @@ PageType {
         PageController.showBusyIndicator(true)
         ExportController.revokeConfig(index,
                                       ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                      ServersModel.getCurrentlyProcessedServerCredentials())
+                                      ServersModel.getProcessedServerCredentials())
         PageController.showBusyIndicator(false)
         PageController.showNotificationMessage(qsTr("Config revoked"))
     }
@@ -230,7 +230,7 @@ PageType {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                                                         ServersModel.getCurrentlyProcessedServerCredentials())
+                                                                         ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -315,7 +315,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.currentlyProcessedIndex = proxyServersModel.mapToSource(currentIndex)
+                        ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
                     }
                 }
             }
@@ -365,7 +365,7 @@ PageType {
                         target: serverSelector
 
                         function onSeverSelectorIndexChanged() {
-                            var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getDefaultContainer(ServersModel.currentlyProcessedIndex))
+                            var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
                             protocolSelectorListView.currentIndex = defaultContainer
                             protocolSelectorListView.triggerCurrentItem()
                         }
@@ -388,7 +388,7 @@ PageType {
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                                                         ServersModel.getCurrentlyProcessedServerCredentials())
+                                                                         ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -654,7 +654,7 @@ PageType {
                                                         ExportController.renameClient(index,
                                                                                       clientNameEditor.textFieldText,
                                                                                       ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                                                                      ServersModel.getCurrentlyProcessedServerCredentials())
+                                                                                      ServersModel.getProcessedServerCredentials())
                                                         PageController.showBusyIndicator(false)
                                                         clientNameEditDrawer.close()
                                                     }
