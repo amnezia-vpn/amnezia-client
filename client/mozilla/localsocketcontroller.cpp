@@ -125,7 +125,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("privateKey", wgConfig.value(amnezia::config_key::client_priv_key));
   json.insert("deviceIpv4Address", wgConfig.value(amnezia::config_key::client_ip));
   // todo review wg ipv6
-  // json.insert("deviceIpv6Address", "dead::1");
+#ifndef Q_OS_WINDOWS
+  json.insert("deviceIpv6Address", "dead::1");
+#endif
   json.insert("serverPublicKey", wgConfig.value(amnezia::config_key::server_pub_key));
   json.insert("serverPskKey", wgConfig.value(amnezia::config_key::psk_key));
   json.insert("serverIpv4AddrIn", wgConfig.value(amnezia::config_key::hostName));
