@@ -222,7 +222,7 @@ namespace libssh {
         return fromLibsshErrorCode();
     }
 
-    ErrorCode Client::sftpFileCopy(const SftpOverwriteMode overwriteMode, const std::string& localPath, const std::string& remotePath, const std::string& fileDesc)
+    ErrorCode Client::sftpFileCopy(const SftpOverwriteMode overwriteMode, const QString& localPath, const QString& remotePath, const QString &fileDesc)
     {
         m_sftpSession = sftp_new(m_session);
 
@@ -245,40 +245,38 @@ namespace libssh {
             const size_t bufferSize = 16384;
             char buffer[bufferSize];
 
-            file = sftp_open(m_sftpSession, remotePath.c_str(), accessType, S_IRWXU);
+            file = sftp_open(m_sftpSession, remotePath.toStdString().c_str(), accessType, S_IRWXU);
 
             if (file == nullptr) {
                 return closeSftpSession();
             }
 
-            int localFileSize = std::filesystem::file_size(localPath);
+            int localFileSize = QFileInfo(localPath).size();
             int chunksCount = localFileSize / (bufferSize);
 
-            std::ifstream fin(localPath, std::ios::binary | std::ios::in);
+            QFile fin(localPath);
 
-            if (fin.is_open()) {
+            if (fin.open(QIODevice::ReadOnly)) {
                 for (int currentChunkId = 0; currentChunkId < chunksCount; currentChunkId++) {
-                    fin.read(buffer, bufferSize);
+                    QByteArray chunk = fin.read(bufferSize);
+                    if (chunk.size() != bufferSize) return ErrorCode::SshSftpEofError;
 
-                    int bytesWritten = sftp_write(file, buffer, bufferSize);
+                    int bytesWritten = sftp_write(file, chunk.data(), chunk.size());
 
-                    std::string chunk(buffer, bufferSize);
-
-                    if (bytesWritten != bufferSize) {
+                    if (bytesWritten != chunk.size()) {
                         fin.close();
                         sftp_close(file);
                         return closeSftpSession();
                     }
                 }
 
-                int lastChunkSize = localFileSize % (bufferSize);
+                int lastChunkSize = localFileSize % bufferSize;
 
                 if (lastChunkSize != 0) {
-                    fin.read(buffer, lastChunkSize);
+                    QByteArray lastChunk = fin.read(lastChunkSize);
+                    if (lastChunk.size() != lastChunkSize) return ErrorCode::SshSftpEofError;
 
-                    std::string chunk(buffer, lastChunkSize);
-
-                    int bytesWritten = sftp_write(file, buffer, lastChunkSize);
+                    int bytesWritten = sftp_write(file, lastChunk.data(), lastChunkSize);
 
                     if (bytesWritten != lastChunkSize) {
                         fin.close();

@@ -92,6 +92,7 @@ private:
     QCommandLineParser m_parser;
 
     QSharedPointer<ContainersModel> m_containersModel;
+    QSharedPointer<ContainersModel> m_defaultServerContainersModel;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<ProtocolsModel> m_protocolsModel;
@@ -121,7 +122,7 @@ private:
     QScopedPointer<SettingsController> m_settingsController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
-    QScopedPointer<ApiController> m_cloudController;
+    QScopedPointer<ApiController> m_apiController;
 };
 
 #endif // AMNEZIA_APPLICATION_H

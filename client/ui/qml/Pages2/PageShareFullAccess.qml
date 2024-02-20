@@ -69,6 +69,7 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
+                drawerParent: root
 
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
@@ -99,7 +100,7 @@ PageType {
 
                         shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
                         shareConnectionDrawer.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
-                        serverSelector.menuVisible = false
+                        serverSelector.close()
                     }
 
                     Component.onCompleted: {
@@ -110,7 +111,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.currentlyProcessedIndex = proxyServersModel.mapToSource(currentIndex)
+                        ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
                     }
                 }
             }
@@ -122,11 +123,9 @@ PageType {
                 text: qsTr("Share")
                 imageSource: "qrc:/images/controls/share-2.svg"
 
-                onClicked: function() {
+                clickedFunc: function() {
                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
                     shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
-
-                    shareConnectionDrawer.needCloseButton = false
 
                     shareConnectionDrawer.open()
                     shareConnectionDrawer.contentVisible = false
@@ -140,16 +139,15 @@ PageType {
 
                     PageController.showBusyIndicator(false)
 
-                    shareConnectionDrawer.needCloseButton = true
-                    PageController.showTopCloseButton(true)
-
                     shareConnectionDrawer.contentVisible = true
                 }
             }
-
-            ShareConnectionDrawer {
-                id: shareConnectionDrawer
-            }
         }
+    }
+
+    ShareConnectionDrawer {
+        id: shareConnectionDrawer
+
+        anchors.fill: parent
     }
 }

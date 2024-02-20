@@ -12,6 +12,8 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    defaultActiveFocusItem: hostname.textField
+
     BackButtonType {
         id: backButton
 
@@ -49,7 +51,7 @@ PageType {
 
                 Layout.fillWidth: true
                 headerText: qsTr("Server IP address [:port]")
-                textFieldPlaceholderText: qsTr("255.255.255.255:88")
+                textFieldPlaceholderText: qsTr("255.255.255.255:22")
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressPortRegExp()
                 }
@@ -57,6 +59,8 @@ PageType {
                 onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '');
                 }
+
+                KeyNavigation.tab: username.textField
             }
 
             TextFieldWithHeaderType {
@@ -65,6 +69,8 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Login to connect via SSH")
                 textFieldPlaceholderText: "root"
+
+                KeyNavigation.tab: secretData.textField
             }
 
             TextFieldWithHeaderType {
@@ -85,15 +91,19 @@ PageType {
                 onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '');
                 }
+
+                KeyNavigation.tab: continueButton
             }
 
             BasicButtonType {
+                id: continueButton
+
                 Layout.fillWidth: true
                 Layout.topMargin: 24
 
                 text: qsTr("Continue")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     forceActiveFocus()
                     if (!isCredentialsFilled()) {
                         return

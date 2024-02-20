@@ -38,13 +38,13 @@ PageType {
                 Connections {
                     target: ServersModel
 
-                    function onCurrentlyProcessedServerIndexChanged() {
+                    function onProcessedServerIndexChanged() {
                         settingsContainersListView.updateContainersModelFilters()
                     }
                 }
 
                 function updateContainersModelFilters() {
-                    if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
+                    if (ServersModel.isProcessedServerHasWriteAccess()) {
                         proxyContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
                     } else {
                         proxyContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()

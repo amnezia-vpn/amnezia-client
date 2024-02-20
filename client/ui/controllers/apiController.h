@@ -16,9 +16,13 @@ public:
                            const QSharedPointer<ContainersModel> &containersModel, QObject *parent = nullptr);
 
 public slots:
-    bool updateServerConfigFromApi();
+    void updateServerConfigFromApi();
+
+    void clearApiConfig();
 
 signals:
+    void updateStarted();
+    void updateFinished(bool isConfigUpdateStarted);
     void errorOccurred(const QString &errorMessage);
 
 private:
@@ -31,10 +35,12 @@ private:
 
     ApiPayloadData generateApiPayloadData(const QString &protocol);
     QJsonObject fillApiPayload(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData);
-    void processCloudConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, QString &config);
+    void processApiConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, QString &config);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
+
+    bool m_isConfigUpdateStarted = false;
 };
 
 #endif // APICONTROLLER_H

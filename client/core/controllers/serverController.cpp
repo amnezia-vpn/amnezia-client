@@ -211,18 +211,30 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     localFile.write(data);
     localFile.close();
 
-#ifdef Q_OS_WINDOWS
-    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toLocal8Bit().toStdString(), remotePath.toStdString(),
-                                     "non_desc");
-#else
-    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName().toStdString(), remotePath.toStdString(),
-                                     "non_desc");
-#endif
+    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName(), remotePath, "non_desc");
 
     if (error != ErrorCode::NoError) {
         return error;
     }
     return ErrorCode::NoError;
+}
+
+ErrorCode ServerController::rebootServer(const ServerCredentials &credentials)
+{
+    QString script = QString("sudo reboot");
+
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data;
+        return ErrorCode::NoError;
+    };
+
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+
+    return runScript(credentials, script, cbReadStdOut, cbReadStdErr);
 }
 
 ErrorCode ServerController::removeAllContainers(const ServerCredentials &credentials)

@@ -42,10 +42,7 @@ public:
     Q_PROPERTY(bool isDefaultContainerHasGlobalSiteSplitTunneling READ isDefaultContainerHasGlobalSiteSplitTunneling NOTIFY defaultContainerChanged)
 
 public slots:
-    void updateModel(QJsonArray &containers);
-
-    DockerContainer getDefaultContainer();
-    void setDefaultContainer(const int containerIndex);
+    void updateModel(const QJsonArray &containers);
 
     void setCurrentlyProcessedContainerIndex(int containerIndex);
     int getCurrentlyProcessedContainerIndex();
@@ -61,14 +58,12 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 signals:
-    void defaultContainerChanged();
     void containersModelUpdated();
 
 private:
     QMap<DockerContainer, QJsonObject> m_containers;
 
     int m_currentlyProcessedContainerIndex;
-    DockerContainer m_defaultContainerIndex;
 };
 
 #endif // CONTAINERS_MODEL_H

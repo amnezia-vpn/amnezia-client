@@ -20,22 +20,16 @@ PageType {
         function onGoToPageHome() {
             tabBar.setCurrentIndex(0)
             tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-
-            PageController.updateDrawerRootPage(PageEnum.PageHome)
         }
 
         function onGoToPageSettings() {
             tabBar.setCurrentIndex(2)
             tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
-
-            PageController.updateDrawerRootPage(PageEnum.PageSettings)
         }
 
         function onGoToPageViewConfig() {
             var pagePath = PageController.getPagePath(PageEnum.PageSetupWizardViewConfig)
             tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
-
-            PageController.updateDrawerRootPage(PageEnum.PageSetupWizardViewConfig)
         }
 
         function onShowBusyIndicator(visible) {
@@ -44,15 +38,13 @@ PageType {
             tabBar.enabled = !visible
         }
 
-//        function onShowTopCloseButton(visible) {
-//            topCloseButton.visible = visible
-//        }
-
         function onEnableTabBar(enabled) {
             tabBar.enabled = enabled
         }
 
         function onClosePage() {
+            tabBar.isServerInfoShow = tabBarStackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageSettingsServerInfo)
+
             if (tabBarStackView.depth <= 1) {
                 return
             }
@@ -61,13 +53,14 @@ PageType {
 
         function onGoToPage(page, slide) {
             var pagePath = PageController.getPagePath(page)
+
             if (slide) {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
             } else {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
-
-            PageController.updateDrawerRootPage(page)
+            
+            tabBar.isServerInfoShow = page === PageEnum.PageSettingsServerInfo || tabBar.isServerInfoShow
         }
 
         function onGoToStartPage() {
@@ -111,6 +104,14 @@ PageType {
             PageController.showNotificationMessage(message)
             PageController.closePage()
         }
+
+        function onNoInstalledContainers() {
+            PageController.setTriggeredBtConnectButton(true)
+
+            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
+            InstallController.setShouldCreateServer(false)
+            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+        }
     }
 
     StackViewType {
@@ -130,26 +131,21 @@ PageType {
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
             tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
-
-            PageController.updateDrawerRootPage(page)
+            tabBar.isServerInfoShow = false
         }
 
         Component.onCompleted: {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
-            ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+            ServersModel.processedIndex = ServersModel.defaultIndex
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
-
-//        onWidthChanged: {
-//            topCloseButton.x = tabBarStackView.x + tabBarStackView.width -
-//                    topCloseButton.buttonWidth - topCloseButton.rightPadding
-//        }
     }
 
     TabBar {
         id: tabBar
 
         property int previousIndex: 0
+        property bool isServerInfoShow: false
 
         anchors.right: parent.right
         anchors.left: parent.left
@@ -180,11 +176,11 @@ PageType {
         }
 
         TabImageButtonType {
-            isSelected: tabBar.currentIndex === 0
+            isSelected: tabBar.isServerInfoShow ? false : tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+                ServersModel.processedIndex = ServersModel.defaultIndex
                 tabBar.previousIndex = 0
             }
         }
@@ -214,7 +210,7 @@ PageType {
         }
 
         TabImageButtonType {
-            isSelected: tabBar.currentIndex === 2
+            isSelected: tabBar.isServerInfoShow ? true : tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
@@ -236,13 +232,6 @@ PageType {
         anchors.centerIn: parent
         z: 1
     }
-
-//    TopCloseButtonType {
-//        id: topCloseButton
-
-//        x: tabBarStackView.width - topCloseButton.buttonWidth - topCloseButton.rightPadding
-//        z: 1
-//    }
 
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection

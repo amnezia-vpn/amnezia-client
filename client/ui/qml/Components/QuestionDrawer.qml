@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import "../Controls2"
 import "../Controls2/TextTypes"
 
-DrawerType {
+DrawerType2 {
     id: root
 
     property string headerText
@@ -16,23 +16,24 @@ DrawerType {
     property var yesButtonFunction
     property var noButtonFunction
 
-    width: parent.width
-    height: content.implicitHeight + 32
-
-    ColumnLayout {
+    expandedContent: ColumnLayout {
         id: content
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 16
-        anchors.rightMargin: 16
-        anchors.leftMargin: 16
 
         spacing: 8
 
+        onImplicitHeightChanged: {
+            root.expandedHeight = content.implicitHeight + 32
+        }
+
         Header2TextType {
             Layout.fillWidth: true
+            Layout.topMargin: 16
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
 
             text: headerText
         }
@@ -40,6 +41,8 @@ DrawerType {
         ParagraphTextType {
             Layout.fillWidth: true
             Layout.topMargin: 8
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
 
             text: descriptionText
         }
@@ -47,10 +50,12 @@ DrawerType {
         BasicButtonType {
             Layout.fillWidth: true
             Layout.topMargin: 16
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
 
             text: yesButtonText
 
-            onClicked: {
+            clickedFunc: function() {
                 if (yesButtonFunction && typeof yesButtonFunction === "function") {
                     yesButtonFunction()
                 }
@@ -59,6 +64,8 @@ DrawerType {
 
         BasicButtonType {
             Layout.fillWidth: true
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
 
             defaultColor: "transparent"
             hoveredColor: Qt.rgba(1, 1, 1, 0.08)
@@ -69,7 +76,7 @@ DrawerType {
 
             text: noButtonText
 
-            onClicked: {
+            clickedFunc: function() {
                 if (noButtonFunction && typeof noButtonFunction === "function") {
                     noButtonFunction()
                 }
