@@ -10,7 +10,7 @@ const uint32_t S_IRWXU = 0644;
 #endif
 
 namespace libssh {
-    const QString libsshTimeoutError = "Timeout connecting to";
+    constexpr auto libsshTimeoutError{"Timeout connecting to"};
 
     std::function<QString()> Client::m_passphraseCallback;
 
