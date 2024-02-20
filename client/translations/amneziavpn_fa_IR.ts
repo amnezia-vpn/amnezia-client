@@ -848,7 +848,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="94"/>
         <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this URL. </source>
-        <translation">استفاده &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; برای باز کردن این نشانی.</translation>
+        <translation>استفاده &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; برای باز کردن این نشانی.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="103"/>
@@ -2157,7 +2157,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="671"/>
         <source>Revoke the config for a user - %1?</source>
-        <translation type="unfinished"> لغو پیکربندی برای یک کاربر %1؟</translation>
+        <translation> لغو پیکربندی برای یک کاربر %1؟</translation>
     </message>
     <message>
         <source>Revoke the config for a user - </source>
