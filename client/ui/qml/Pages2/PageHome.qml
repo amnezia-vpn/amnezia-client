@@ -55,7 +55,7 @@ PageType {
             borderWidth: 0
 
             property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled ||
-                                                   (ContainersModel.isDefaultContainerHasGlobalSiteSplitTunneling && ServersModel.isDefaultServerFromApi())
+                                                   (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
 
             text: isSplitTunnelingEnabled ? qsTr("Tunneling enabled") : qsTr("Tunneling disabled")
 
@@ -68,6 +68,8 @@ PageType {
 
             HomeSplitTunnelingDrawer {
                 id: homeSplitTunnelingDrawer
+
+                parent: root
             }
         }
     }

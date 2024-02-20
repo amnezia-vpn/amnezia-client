@@ -118,18 +118,3 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsShareableRole] = "isShareable";
     return roles;
 }
-
-bool ContainersModel::isDefaultContainerHasGlobalSiteSplitTunneling()
-{
-    auto defaultContainer = getDefaultContainer();
-    auto containerConfig = getContainerConfig(defaultContainer);
-    auto protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
-
-    if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
-        return !(protocolConfig.value(config_key::last_config).toString().contains("AllowedIPs = 0.0.0.0/0, ::/0"));
-    } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn || defaultContainer == DockerContainer::ShadowSocks) {
-        return !(protocolConfig.value(config_key::last_config).toString().contains("redirect-gateway"));
-    }
-
-    return false;
-}

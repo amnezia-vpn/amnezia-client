@@ -8,13 +8,13 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-DrawerType {
+DrawerType2 {
     id: root
 
-    width: parent.width
-    height: content.implicitHeight + 32
+    anchors.fill: parent
+    expandedHeight: parent.height * 0.7
 
-    ColumnLayout {
+    expandedContent: ColumnLayout {
         id: content
 
         anchors.top: parent.top
@@ -37,7 +37,7 @@ DrawerType {
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            visible: ContainersModel.isDefaultContainerHasGlobalSiteSplitTunneling && ServersModel.isDefaultServerFromApi()
+            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi")
 
             text: qsTr("Tunneling on the server")
             descriptionText: qsTr("Enabled. You are connected to a server that already uses split tunneling, it is prioritized")
@@ -45,12 +45,12 @@ DrawerType {
 
             clickedFunction: function() {
 //                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-//                root.visible = false
+//                root.close()
             }
         }
 
         DividerType {
-            visible: ContainersModel.isDefaultContainerHasGlobalSiteSplitTunneling && ServersModel.isDefaultServerFromApi()
+            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi")
         }
 
         LabelWithButtonType {
@@ -63,11 +63,12 @@ DrawerType {
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-                root.visible = false
+                root.close()
             }
         }
 
-        DividerType {}
+        DividerType {
+        }
 
         LabelWithButtonType {
             Layout.fillWidth: true
@@ -78,7 +79,7 @@ DrawerType {
 
             clickedFunction: function() {
 //                PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
-                root.visible = false
+                root.close()
             }
         }
 

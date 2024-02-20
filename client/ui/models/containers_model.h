@@ -39,8 +39,6 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant data(const int index, int role) const;
 
-    Q_PROPERTY(bool isDefaultContainerHasGlobalSiteSplitTunneling READ isDefaultContainerHasGlobalSiteSplitTunneling NOTIFY defaultContainerChanged)
-
 public slots:
     void updateModel(const QJsonArray &containers);
 
@@ -53,7 +51,6 @@ public slots:
 
     bool isAnyContainerInstalled();
 
-    bool isDefaultContainerHasGlobalSiteSplitTunneling();
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
