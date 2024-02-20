@@ -30,7 +30,7 @@ DrawerType2 {
             Layout.bottomMargin: 16
 
             headerText: qsTr("Split tunneling")
-            descriptionText:  qsTr("Allows you to connect to some sites or applications through a secure connection and bypass others")
+            descriptionText:  qsTr("Allows you to connect to some sites or applications through a VPN connection and bypass others")
         }
 
         LabelWithButtonType {
@@ -39,8 +39,8 @@ DrawerType2 {
 
             visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi")
 
-            text: qsTr("Tunneling on the server")
-            descriptionText: qsTr("Enabled. You are connected to a server that already uses split tunneling, it is prioritized")
+            text: qsTr("Split tunneling on the server")
+            descriptionText: qsTr("Enabled \nCan't be disabled for current server")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
@@ -57,8 +57,10 @@ DrawerType2 {
             Layout.fillWidth: true
             Layout.topMargin: 16
 
+            enabled: ! ServersModel.isDefaultServerDefaultContainerHasSplitTunneling || !ServersModel.getDefaultServerData("isServerFromApi")
+
             text: qsTr("Site-based split tunneling")
-            descriptionText: SitesModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+            descriptionText: enabled && SitesModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {

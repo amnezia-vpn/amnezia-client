@@ -116,12 +116,12 @@ Button {
                 source: root.imageSource
                 visible: root.imageSource === "" ? false : true
 
-//                layer {
-//                    enabled: true
-//                    effect: ColorOverlay {
-//                        color: textColor
-//                    }
-//                }
+                layer {
+                    enabled: true
+                    effect: ColorOverlay {
+                        color: textColor
+                    }
+                }
             }
 
             ButtonTextType {

@@ -57,7 +57,7 @@ PageType {
             property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled ||
                                                    (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
 
-            text: isSplitTunnelingEnabled ? qsTr("Tunneling enabled") : qsTr("Tunneling disabled")
+            text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
 
             imageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
             rightImageSource: "qrc:/images/controls/chevron-down.svg"
