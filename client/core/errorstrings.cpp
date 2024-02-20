@@ -28,6 +28,13 @@ QString errorString(ErrorCode code) {
     case(SshPrivateKeyFormatError): errorMessage = QObject::tr("The selected private key format is not supported, use openssh ED25519 key types or PEM key types"); break;
     case(SshTimeoutError): errorMessage = QObject::tr("Timeout connecting to server"); break;
 
+    // Ssh scp errors
+    case(SshScpFailureError): errorMessage = QObject::tr("Scp error: Generic failure"); break;
+    case(SshScpOpenError): errorMessage = QObject::tr("Scp error: The file could not be opened"); break;
+    case(SshScpReadError): errorMessage = QObject::tr("Scp error: An error occurred when reading from the file"); break;
+    case(SshScpPermissionsError): errorMessage = QObject::tr("Scp error: The file could not be accessed"); break;
+    case(SshScpUnspecifiedError): errorMessage =  QObject::tr("Scp error: An unspecified error occurred"); break;
+
     // Local errors
     case (OpenVpnConfigMissing): errorMessage = QObject::tr("OpenVPN config missing"); break;
     case (OpenVpnManagementServerError): errorMessage = QObject::tr("OpenVPN management server error"); break;

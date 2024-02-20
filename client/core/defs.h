@@ -46,6 +46,13 @@ namespace amnezia
         SshPrivateKeyFormatError = 304,
         SshTimeoutError = 305,
 
+        // Ssh scp errors
+        SshScpFailureError = 400,
+        SshScpOpenError = 401,
+        SshScpReadError = 402,
+        SshScpPermissionsError = 403,
+        SshScpUnspecifiedError = 404,
+
         // Local errors
         OpenVpnConfigMissing = 500,
         OpenVpnManagementServerError = 501,
