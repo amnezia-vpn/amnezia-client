@@ -1139,7 +1139,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="122"/>
         <source>Restore from backup</source>
-        <translation>استرجاع من ملف احتياطي</translation>
+        <translation>استرجاع من ملف يحتوي علي نسخة احتياطية</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="125"/>
@@ -1339,7 +1339,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="128"/>
         <source>Save logs to file</source>
-        <translation>احفظ السجلات لملف</translation>
+        <translation>احفظ السجلات في ملف</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="146"/>
@@ -1942,7 +1942,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="40"/>
         <source>A line that starts with vpn://...</source>
-        <translation>سطر يبدأ ب vpn://...</translation>
+        <translatorcomment>يجب ان تٌكتب بهذه الطريقة حتي بوجود الخطأ كي تظهر بشكل صحيح داخل التطبيق</translatorcomment>
+        <translation>سطر يبدأ ب ...//:vpn</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="51"/>
