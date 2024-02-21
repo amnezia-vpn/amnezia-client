@@ -998,6 +998,11 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="176"/>
+        <source>Software version: %1</source>
+        <translation>%1 :إصدار البرنامج</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="192"/>
         <source>Check for updates</source>
         <translation>تحقق من وجود تحديثات</translation>
@@ -2999,11 +3004,6 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 </context>
 <context>
     <name>SettingsController</name>
-    <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="31"/>
-        <source>Software version</source>
-        <translation>إصدار البرنامج</translation>
-    </message>
     <message>
         <location filename="../ui/controllers/settingsController.cpp" line="139"/>
         <source>Backup file is corrupted</source>
