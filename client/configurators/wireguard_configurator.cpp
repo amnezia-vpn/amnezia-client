@@ -33,6 +33,10 @@ WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings,
 
     m_protocolName = m_isAwg ? config_key::awg : config_key::wireguard;
     m_defaultPort = m_isAwg ? protocols::wireguard::defaultPort : protocols::awg::defaultPort;
+
+    m_interfaceName = m_isAwg ? protocols::awg::interfaceName : protocols::wireguard::interfaceName;
+    m_wgBinaryName = m_isAwg ? protocols::awg::wgBinaryName : protocols::wireguard::wgBinaryName;
+    m_wgQuickBinaryName = m_isAwg ? protocols::awg::wgQuickBinaryName : protocols::wireguard::wgQuickBinaryName;
 }
 
 WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
@@ -167,8 +171,8 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         return connData;
     }
 
-    QString script = QString("sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip %1)'")
-                             .arg(m_serverConfigPath);
+    QString script = QString("sudo docker exec -i $CONTAINER_NAME bash -c '%4 syncconf %2 <(%3 strip %1)'")
+                             .arg(m_serverConfigPath, m_interfaceName, m_wgQuickBinaryName, m_wgBinaryName);
 
     e = serverController.runScript(
             credentials, serverController.replaceVars(script, serverController.genVarsForScript(credentials, container)));

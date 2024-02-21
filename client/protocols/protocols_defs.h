@@ -152,6 +152,9 @@ namespace amnezia
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/wireguard/wireguard_server_public_key.key";
             constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
 
+            constexpr char interfaceName[] = "wg0";
+            constexpr char wgBinaryName[] = "wg";
+            constexpr char wgQuickBinaryName[] = "wg-quick";
         }
 
         namespace sftp
@@ -164,7 +167,7 @@ namespace amnezia
         {
             constexpr char defaultPort[] = "55424";
 
-            constexpr char serverConfigPath[] = "/opt/amnezia/awg/wg0.conf";
+            constexpr char serverConfigPath[] = "/opt/amnezia/awg/awg0.conf";
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/awg/wireguard_server_public_key.key";
             constexpr char serverPskKeyPath[] = "/opt/amnezia/awg/wireguard_psk.key";
 
@@ -177,6 +180,10 @@ namespace amnezia
             constexpr char defaultResponsePacketMagicHeader[] = "3288052141";
             constexpr char defaultTransportPacketMagicHeader[] = "2528465083";
             constexpr char defaultUnderloadPacketMagicHeader[] = "1766607858";
+
+            constexpr char interfaceName[] = "awg0";
+            constexpr char wgBinaryName[] = "awg";
+            constexpr char wgQuickBinaryName[] = "awg-quick";
         }
 
     } // namespace protocols
