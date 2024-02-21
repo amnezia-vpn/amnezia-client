@@ -88,7 +88,7 @@ PageType {
 
                 text: qsTr("Make a backup")
 
-                onClicked: {
+                clickedFunc: function() {
                     var fileName = ""
                     if (GC.isMobile()) {
                         fileName = "AmneziaVPN.backup"
@@ -121,7 +121,7 @@ PageType {
 
                 text: qsTr("Restore from backup")
 
-                onClicked: {
+                clickedFunc: function() {
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                                 qsTr("Backup files (*.backup)"))
                     if (filePath !== "") {
@@ -133,24 +133,19 @@ PageType {
     }
 
     function restoreBackup(filePath) {
-        questionDrawer.headerText = qsTr("Import settings from a backup file?")
-        questionDrawer.descriptionText = qsTr("All current settings will be reset");
-        questionDrawer.yesButtonText = qsTr("Continue")
-        questionDrawer.noButtonText = qsTr("Cancel")
+        var headerText = qsTr("Import settings from a backup file?")
+        var descriptionText = qsTr("All current settings will be reset");
+        var yesButtonText = qsTr("Continue")
+        var noButtonText = qsTr("Cancel")
 
-        questionDrawer.yesButtonFunction = function() {
-            questionDrawer.visible = false
+        var yesButtonFunction = function() {
             PageController.showBusyIndicator(true)
             SettingsController.restoreAppConfig(filePath)
             PageController.showBusyIndicator(false)
         }
-        questionDrawer.noButtonFunction = function() {
-            questionDrawer.visible = false
+        var noButtonFunction = function() {
         }
-        questionDrawer.visible = true
-    }
 
-    QuestionDrawer {
-        id: questionDrawer
+        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }
 }

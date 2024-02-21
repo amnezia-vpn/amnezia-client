@@ -59,10 +59,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
   var stopHandler: (() -> Void)?
   var protoType: TunnelProtoType = .none
 
-  override init() {
-    super.init()
-  }
-
   override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
     let tmpStr = String(data: messageData, encoding: .utf8)!
     wg_log(.error, message: tmpStr)
@@ -71,7 +67,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       return
     }
 
-    guard let completionHandler = completionHandler else {
+    guard let completionHandler else {
       log(.error, message: "Missing message completion handler")
       return
     }
@@ -179,13 +175,15 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       return
     }
 
-    let wgConfigStr = String(data: wgConfig, encoding: .utf8)!
-
-    guard let tunnelConfiguration = try? TunnelConfiguration(fromWgQuickConfig: wgConfigStr) else {
+    guard let wgConfigStr = try? JSONDecoder().decode(WGConfig.self, from: wgConfig).str,
+          let tunnelConfiguration = try? TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
+    else {
       wg_log(.error, message: "Can't parse WireGuard config")
       completionHandler(nil)
       return
     }
+
+    log(.info, message: "wgConfig: \(wgConfigStr.replacingOccurrences(of: "\n", with: " "))")
 
     if tunnelConfiguration.peers.first!.allowedIPs
       .map({ $0.stringRepresentation })

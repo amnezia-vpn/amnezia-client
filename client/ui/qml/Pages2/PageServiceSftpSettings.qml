@@ -49,7 +49,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+            enabled: ServersModel.isProcessedServerHasWriteAccess()
 
             ListView {
                 id: listview
@@ -88,7 +88,7 @@ PageType {
                             Layout.topMargin: 32
 
                             text: qsTr("Host")
-                            descriptionText: ServersModel.getCurrentlyProcessedServerHostName()
+                            descriptionText: ServersModel.getProcessedServerData("HostName")
 
                             descriptionOnTop: true
 
@@ -170,7 +170,7 @@ PageType {
 
                             text: qsTr("Mount folder on device")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 PageController.showBusyIndicator(true)
                                 InstallController.mountSftpDrive(port, password, username)
                                 PageController.showBusyIndicator(false)
@@ -229,7 +229,7 @@ PageType {
 
                             text: qsTr("Detailed instructions")
 
-                            onClicked: {
+                            clickedFunc: function() {
 //                                Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
                             }
                         }
@@ -247,29 +247,24 @@ PageType {
 
                             text: qsTr("Remove SFTP and all data stored there")
 
-                            onClicked: {
-                                questionDrawer.headerText = qsTr("Remove SFTP and all data stored there?")
-                                questionDrawer.yesButtonText = qsTr("Continue")
-                                questionDrawer.noButtonText = qsTr("Cancel")
+                            clickedFunc: function() {
+                                var headerText = qsTr("Remove SFTP and all data stored there?")
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
 
-                                questionDrawer.yesButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                var yesButtonFunction = function() {
                                     PageController.goToPage(PageEnum.PageDeinstalling)
                                     InstallController.removeCurrentlyProcessedContainer()
                                 }
-                                questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                var noButtonFunction = function() {
                                 }
-                                questionDrawer.visible = true
+
+                                showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
                         }
                     }
                 }
             }
-        }
-
-        QuestionDrawer {
-            id: questionDrawer
         }
     }
 }

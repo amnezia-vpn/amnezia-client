@@ -12,8 +12,11 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
+
 PageType {
     id: root
+
+    defaultActiveFocusItem: listview.currentItem.portTextField.textField
 
     ColumnLayout {
         id: backButton
@@ -41,9 +44,11 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+            enabled: ServersModel.isProcessedServerHasWriteAccess()
 
             ListView {
+
+
                 id: listview
 
                 width: parent.width
@@ -55,8 +60,12 @@ PageType {
                 model: AwgConfigModel
 
                 delegate: Item {
+                    id: _delegate
+
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
+
+                    property alias portTextField:portTextField
 
                     ColumnLayout {
                         id: col
@@ -93,6 +102,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: junkPacketCountTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -116,6 +127,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: junkPacketMinSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -134,6 +147,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: junkPacketMaxSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -152,6 +167,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: initPacketJunkSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -170,6 +187,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: responsePacketJunkSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -188,6 +207,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: initPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -206,6 +227,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: responsePacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -224,6 +247,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: transportPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -242,6 +267,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: underloadPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -260,6 +287,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         BasicButtonType {
@@ -275,24 +304,24 @@ PageType {
                             text: qsTr("Remove AmneziaWG")
 
                             onClicked: {
-                                questionDrawer.headerText = qsTr("Remove AmneziaWG from server?")
-                                questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
-                                questionDrawer.yesButtonText = qsTr("Continue")
-                                questionDrawer.noButtonText = qsTr("Cancel")
+                                var headerText = qsTr("Remove AmneziaWG from server?")
+                                var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
 
-                                questionDrawer.yesButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                var yesButtonFunction = function() {
                                     PageController.goToPage(PageEnum.PageDeinstalling)
                                     InstallController.removeCurrentlyProcessedContainer()
                                 }
-                                questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                var noButtonFunction = function() {
                                 }
-                                questionDrawer.visible = true
+                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
                         }
 
                         BasicButtonType {
+                            id: saveRestartButton
+
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
@@ -310,7 +339,7 @@ PageType {
 
                             text: qsTr("Save and Restart Amnezia")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(AwgConfigModel.getConfig())
@@ -318,11 +347,8 @@ PageType {
                         }
                     }
                 }
-            }
-        }
 
-        QuestionDrawer {
-            id: questionDrawer
+            }
         }
     }
 }

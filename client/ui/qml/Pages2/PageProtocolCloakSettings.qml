@@ -15,6 +15,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: listview.currentItem.trafficFromField.textField
+
     ColumnLayout {
         id: backButton
 
@@ -41,7 +43,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+            enabled: ServersModel.isProcessedServerHasWriteAccess()
 
             ListView {
                 id: listview
@@ -57,6 +59,8 @@ PageType {
                 delegate: Item {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
+
+                    property alias trafficFromField: trafficFromField
 
                     ColumnLayout {
                         id: col
@@ -77,6 +81,8 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: trafficFromField
+
                             Layout.fillWidth: true
                             Layout.topMargin: 32
 
@@ -96,9 +102,13 @@ PageType {
                                     }
                                 }
                             }
+
+                            KeyNavigation.tab: portTextField.textField
                         }
 
                         TextFieldWithHeaderType {
+                            id: portTextField
+
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
@@ -112,6 +122,8 @@ PageType {
                                     port = textFieldText
                                 }
                             }
+
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         DropDownType {
@@ -121,6 +133,8 @@ PageType {
 
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")
+
+                            drawerParent: root
 
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView
@@ -138,7 +152,7 @@ PageType {
                                 clickedFunction: function() {
                                     cipherDropDown.text = selectedText
                                     cipher = cipherDropDown.text
-                                    cipherDropDown.menuVisible = false
+                                    cipherDropDown.close()
                                 }
 
                                 Component.onCompleted: {
@@ -154,13 +168,15 @@ PageType {
                         }
 
                         BasicButtonType {
+                            id: saveRestartButton
+
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save and Restart Amnezia")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(CloakConfigModel.getConfig())

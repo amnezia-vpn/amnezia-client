@@ -131,3 +131,6 @@ client/3rd/ShadowSocks/ss_ios.xcconfig
 
 # UML generated pics
 out/
+
+# CMake files
+CMakeFiles/

@@ -3,7 +3,6 @@ package org.amnezia.vpn.protocol.wireguard
 import android.content.Context
 import android.net.VpnService.Builder
 import java.util.TreeMap
-import com.wireguard.android.backend.GoBackend
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.ProtocolState
