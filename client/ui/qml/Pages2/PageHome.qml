@@ -264,7 +264,7 @@ PageType {
 
                       model: ServersModel
 
-                      Component.onCompleted: currentIndex = selectedServerIndex //auto-scroll to the selected server
+                      Component.onCompleted: currentIndex = selectedServerIndex //auto-scroll to the selected server when opening the application
 
                       ScrollBar.vertical: ScrollBar {
                           id: scrollBar
