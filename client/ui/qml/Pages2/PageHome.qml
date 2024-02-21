@@ -52,6 +52,7 @@ PageType {
             pressedColor: Qt.rgba(1, 1, 1, 0.12)
             disabledColor: "#878B91"
             textColor: "#878B91"
+            leftImageColor: "transparent"
             borderWidth: 0
 
             property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled ||

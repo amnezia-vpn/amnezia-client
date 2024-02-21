@@ -22,6 +22,7 @@ Button {
 
     property string imageSource
     property string rightImageSource
+    property string leftImageColor: textColor
 
     property bool squareLeftSide: false
 
@@ -119,7 +120,7 @@ Button {
                 layer {
                     enabled: true
                     effect: ColorOverlay {
-                        color: textColor
+                        color: leftImageColor
                     }
                 }
             }
