@@ -577,3 +577,18 @@ void ServersModel::setProcessedServerData(const QString roleString, const QVaria
 
 }
 
+bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
+{
+    auto server = m_servers.at(m_defaultServerIndex).toObject();
+    auto defaultContainer = ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
+    auto containerConfig = server.value(config_key::containers).toArray().at(defaultContainer).toObject();
+    auto protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
+
+    if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
+        return !(protocolConfig.value(config_key::last_config).toString().contains("AllowedIPs = 0.0.0.0/0, ::/0"));
+    } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn || defaultContainer == DockerContainer::ShadowSocks) {
+        return !(protocolConfig.value(config_key::last_config).toString().contains("redirect-gateway"));
+    }
+
+    return false;
+}

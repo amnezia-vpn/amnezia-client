@@ -48,6 +48,8 @@ public:
     Q_PROPERTY(QString defaultServerDefaultContainerName READ getDefaultServerDefaultContainerName NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerDescriptionCollapsed READ getDefaultServerDescriptionCollapsed NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerDescriptionExpanded READ getDefaultServerDescriptionExpanded NOTIFY defaultServerDefaultContainerChanged)
+    Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ isDefaultServerDefaultContainerHasSplitTunneling NOTIFY defaultServerDefaultContainerChanged)
+
 
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
 
@@ -102,6 +104,8 @@ public slots:
 
     QVariant getProcessedServerData(const QString roleString);
     void setProcessedServerData(const QString roleString, const QVariant &value);
+
+    bool isDefaultServerDefaultContainerHasSplitTunneling();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
