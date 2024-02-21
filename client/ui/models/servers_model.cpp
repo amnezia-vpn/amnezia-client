@@ -249,7 +249,7 @@ void ServersModel::editServer(const QJsonObject &server, const int serverIndex)
     }
     updateContainersModel();
 
-    if (isDefaultServerCurrentlyProcessed()) {
+    if (serverIndex == m_defaultServerIndex) {
         auto defaultContainer = qvariant_cast<DockerContainer>(getDefaultServerData("defaultContainer"));
         emit defaultServerDefaultContainerChanged(defaultContainer);
     }
