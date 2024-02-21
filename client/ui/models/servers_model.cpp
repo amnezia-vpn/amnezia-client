@@ -220,6 +220,11 @@ bool ServersModel::isDefaultServerCurrentlyProcessed()
     return m_defaultServerIndex == m_processedServerIndex;
 }
 
+bool ServersModel::isDefaultServerFromApi()
+{
+    return qvariant_cast<bool>(data(m_defaultServerIndex, IsServerFromApiRole));
+}
+
 bool ServersModel::isProcessedServerHasWriteAccess()
 {
     return qvariant_cast<bool>(data(m_processedServerIndex, HasWriteAccessRole));
