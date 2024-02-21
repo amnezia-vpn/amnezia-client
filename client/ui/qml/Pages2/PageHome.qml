@@ -193,7 +193,7 @@ PageType {
 
                 LabelTextType {
                     id: expandedServersMenuDescription
-                    Layout.bottomMargin: 24
+                    Layout.bottomMargin: ServersModel.isDefaultServerFromApi ? 69 : 24
                     Layout.fillWidth: true
                     horizontalAlignment: Qt.AlignHCenter
                     verticalAlignment: Qt.AlignVCenter
@@ -203,6 +203,9 @@ PageType {
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     spacing: 8
+
+                    visible: !ServersModel.isDefaultServerFromApi
+                    onVisibleChanged: expandedServersMenuDescription.Layout
 
                     DropDownType {
                         id: containersDropDown
