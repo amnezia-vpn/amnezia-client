@@ -29,8 +29,14 @@ PageType {
     }
 
     Component.onCompleted: {
-        if (isServerFromApi) {
+        if (ConnectionController.isConnected) {
+            PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
+            root.pageEnabled = false
+        } else if (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && isServerFromApi) {
             PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
+            root.pageEnabled = false
+        } else {
+            root.pageEnabled = true
         }
     }
 
@@ -108,7 +114,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
 
-                checked: SitesModel.isSplitTunnelingEnabled()
+                checked: SitesModel.isTunnelingEnabled
                 onToggled: {                    
                     SitesModel.toggleSplitTunneling(checked)
                     selector.text = root.routeModesModel[getRouteModesModelIndex()].name

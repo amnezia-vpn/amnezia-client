@@ -1068,6 +1068,11 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="176"/>
+        <source>Software version: %1</source>
+        <translation>软件版本: %1</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="192"/>
         <source>Check for updates</source>
         <translation>检查更新</translation>
@@ -3206,11 +3211,6 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 </context>
 <context>
     <name>SettingsController</name>
-    <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="27"/>
-        <source>Software version</source>
-        <translation>软件版本</translation>
-    </message>
     <message>
         <location filename="../ui/controllers/settingsController.cpp" line="132"/>
         <source>Backup file is corrupted</source>

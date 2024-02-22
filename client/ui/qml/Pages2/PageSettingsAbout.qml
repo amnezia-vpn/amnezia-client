@@ -175,7 +175,7 @@ PageType {
 
                 horizontalAlignment: Text.AlignHCenter
 
-                text: SettingsController.getAppVersion()
+                text: qsTr("Software version: %1").arg(SettingsController.getAppVersion())
                 color: "#878B91"
             }
 
