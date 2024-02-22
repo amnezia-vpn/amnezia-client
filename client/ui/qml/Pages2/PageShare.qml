@@ -22,6 +22,7 @@ PageType {
         AmneziaConnection,
         OpenVpn,
         WireGuard,
+        Awg,
         ShadowSocks,
         Cloak
     }
@@ -48,7 +49,10 @@ PageType {
             PageController.showBusyIndicator(true)
 
             switch (type) {
-            case PageShare.ConfigType.AmneziaConnection: ExportController.generateConnectionConfig(clientNameTextField.textFieldText); break;
+            case PageShare.ConfigType.AmneziaConnection: {
+                ExportController.generateConnectionConfig(clientNameTextField.textFieldText);
+                break;
+            }
             case PageShare.ConfigType.OpenVpn: {
                 ExportController.generateOpenVpnConfig(clientNameTextField.textFieldText)
                 shareConnectionDrawer.configCaption = qsTr("Save OpenVPN config")
@@ -61,6 +65,13 @@ PageType {
                 shareConnectionDrawer.configCaption = qsTr("Save WireGuard config")
                 shareConnectionDrawer.configExtension = ".conf"
                 shareConnectionDrawer.configFileName = "amnezia_for_wireguard"
+                break
+            }
+            case PageShare.ConfigType.Awg: {
+                ExportController.generateAwgConfig(clientNameTextField.textFieldText)
+                shareConnectionDrawer.configCaption = qsTr("Save Awg config")
+                shareConnectionDrawer.configExtension = ".conf"
+                shareConnectionDrawer.configFileName = "amnezia_for_awg"
                 break
             }
             case PageShare.ConfigType.ShadowSocks: {
@@ -109,6 +120,11 @@ PageType {
         id: wireGuardConnectionFormat
         property string name: qsTr("WireGuard native format")
         property var type: PageShare.ConfigType.WireGuard
+    }
+    QtObject {
+        id: awgConnectionFormat
+        property string name: qsTr("Awg native format")
+        property var type: PageShare.ConfigType.Awg
     }
     QtObject {
         id: shadowSocksConnectionFormat
@@ -402,6 +418,8 @@ PageType {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
                             root.connectionTypesModel.push(wireGuardConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-awg")) {
+                            root.connectionTypesModel.push(awgConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                             root.connectionTypesModel.push(shadowSocksConnectionFormat)

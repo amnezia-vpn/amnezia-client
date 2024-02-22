@@ -92,7 +92,7 @@ QString SystemController::getFileName(const QString &acceptLabel, const QString 
 
     mainFileDialog->setProperty("acceptLabel", QVariant::fromValue(acceptLabel));
     mainFileDialog->setProperty("nameFilters", QVariant::fromValue(QStringList(nameFilter)));
-    if (!selectedFile.isEmpty()) {
+    if (QFileInfo::exists(selectedFile)) {
         mainFileDialog->setProperty("selectedFile", QVariant::fromValue(selectedFile));
     }
     mainFileDialog->setProperty("isSaveMode", QVariant::fromValue(isSaveMode));
