@@ -8,6 +8,7 @@
 #include <QImage>
 #include <QStandardPaths>
 
+#include "configurators/awg_configurator.h"
 #include "configurators/cloak_configurator.h"
 #include "configurators/openvpn_configurator.h"
 #include "configurators/shadowsocks_configurator.h"
@@ -209,6 +210,45 @@ void ExportController::generateWireGuardConfig(const QString &clientName)
         return;
     }
     config = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::WireGuard, config);
+
+    auto configJson = QJsonDocument::fromJson(config.toUtf8()).object();
+    QStringList lines = configJson.value(config_key::config).toString().replace("\r", "").split("\n");
+    for (const QString &line : lines) {
+        m_config.append(line + "\n");
+    }
+
+    qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(m_config.toUtf8(), qrcodegen::QrCode::Ecc::LOW);
+    m_qrCodes << svgToBase64(QString::fromStdString(toSvgString(qr, 1)));
+
+    errorCode = m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
+    if (errorCode) {
+        emit exportErrorOccurred(errorString(errorCode));
+        return;
+    }
+
+    emit exportConfigChanged();
+}
+
+void ExportController::generateAwgConfig(const QString &clientName)
+{
+    clearPreviousConfig();
+
+    int serverIndex = m_serversModel->getProcessedServerIndex();
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+
+    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
+    containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
+
+    QString clientId;
+    ErrorCode errorCode = ErrorCode::NoError;
+    QString config = m_configurator->awgConfigurator->genAwgConfig(credentials, container, containerConfig,
+                                                                               clientId, &errorCode);
+    if (errorCode) {
+        emit exportErrorOccurred(errorString(errorCode));
+        return;
+    }
+    config = m_configurator->processConfigWithExportSettings(serverIndex, container, Proto::Awg, config);
 
     auto configJson = QJsonDocument::fromJson(config.toUtf8()).object();
     QStringList lines = configJson.value(config_key::config).toString().replace("\r", "").split("\n");
