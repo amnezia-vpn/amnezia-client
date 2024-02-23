@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     env:
-      QT_VERSION: 6.5.1
-      QIF_VERSION: 4.6
+      QT_VERSION: 6.6.2
+      QIF_VERSION: 4.7
 
     steps:
     - name: 'Install Qt'
@@ -72,8 +72,8 @@ jobs:
     runs-on: windows-latest
 
     env:
-      QT_VERSION: 6.5.1
-      QIF_VERSION: 4.6
+      QT_VERSION: 6.6.2
+      QIF_VERSION: 4.7
       BUILD_ARCH: 64
 
     steps:
@@ -134,7 +134,7 @@ jobs:
     runs-on: macos-13
 
     env:
-      QT_VERSION: 6.5.2
+      QT_VERSION: 6.6.2
       CC: cc
       CXX: c++
 
@@ -227,7 +227,7 @@ jobs:
     env:
       # Keep compat with MacOS 10.15 aka Catalina by Qt 6.4
       QT_VERSION: 6.4.3
-      QIF_VERSION: 4.6
+      QIF_VERSION: 4.7
 
     steps:
     - name: 'Setup xcode'
@@ -286,7 +286,7 @@ jobs:
 
     env:
       ANDROID_BUILD_PLATFORM: android-34
-      QT_VERSION: 6.6.1
+      QT_VERSION: 6.6.2
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools qtcharts'
 
     steps:

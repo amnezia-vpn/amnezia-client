@@ -44,6 +44,7 @@ PageType {
 
         function onClosePage() {
             tabBar.isServerInfoShow = tabBarStackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageSettingsServerInfo)
+                                        && tabBarStackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageSettingsSplitTunneling)
 
             if (tabBarStackView.depth <= 1) {
                 return
@@ -60,7 +61,7 @@ PageType {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
             
-            tabBar.isServerInfoShow = page === PageEnum.PageSettingsServerInfo || tabBar.isServerInfoShow
+            tabBar.isServerInfoShow = page === PageEnum.PageSettingsServerInfo || PageEnum.PageSettingsSplitTunneling || tabBar.isServerInfoShow
         }
 
         function onGoToStartPage() {

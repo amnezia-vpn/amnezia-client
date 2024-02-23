@@ -28,7 +28,7 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
       m_sitesModel(sitesModel),
       m_settings(settings)
 {
-    m_appVersion = QString("%1: %2 (%3)").arg(tr("Software version"), QString(APP_VERSION), __DATE__);
+    m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
 
 #ifdef Q_OS_ANDROID
     if (!m_settings->isScreenshotsEnabled()) {
