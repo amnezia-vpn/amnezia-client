@@ -2,6 +2,7 @@
 #define SSHCLIENT_H
 
 #include <QObject>
+#include <QFile>
 
 #include <fcntl.h>
 
@@ -40,6 +41,7 @@ namespace libssh {
         ErrorCode closeChannel();
         ErrorCode closeScpSession();
         ErrorCode fromLibsshErrorCode();
+        ErrorCode fromFileErrorCode(QFileDevice::FileError fileError);
         static int callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata);
 
         ssh_session m_session = nullptr;

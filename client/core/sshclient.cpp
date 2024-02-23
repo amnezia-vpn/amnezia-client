@@ -328,6 +328,17 @@ namespace libssh {
         }
     }
 
+    ErrorCode Client::fromFileErrorCode(QFileDevice::FileError fileError)
+    {
+        switch (fileError) {
+        case QFileDevice::NoError: return ErrorCode::NoError;
+        case QFileDevice::ReadError: return ErrorCode::SshScpReadError;
+        case QFileDevice::OpenError: return ErrorCode::SshScpOpenError;
+        case QFileDevice::PermissionsError: return ErrorCode::SshScpPermissionsError;
+        default: return ErrorCode::SshScpUnspecifiedError;
+        }
+    }
+
     ErrorCode Client::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &passphraseCallback)
     {
         int authResult = SSH_ERROR;
