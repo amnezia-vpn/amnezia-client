@@ -35,11 +35,11 @@ namespace libssh {
         ErrorCode scpFileCopy(const ScpOverwriteMode overwriteMode,
                                const QString &localPath,
                                const QString &remotePath,
-                               const QString& fileDesc);
+                               const QString &fileDesc);
         ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &passphraseCallback);
     private:
         ErrorCode closeChannel();
-        ErrorCode closeScpSession();
+        void closeScpSession();
         ErrorCode fromLibsshErrorCode();
         ErrorCode fromFileErrorCode(QFileDevice::FileError fileError);
         static int callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata);

@@ -227,67 +227,57 @@ namespace libssh {
         m_scpSession = ssh_scp_new(m_session, SSH_SCP_WRITE, remotePath.toStdString().c_str());
 
         if (m_scpSession == nullptr) {
-            return closeScpSession();
+            return fromLibsshErrorCode();
         }
 
-        int result = ssh_scp_init(m_scpSession);
-
-        if (result != SSH_OK) {
-            return closeScpSession();
+        if (ssh_scp_init(m_scpSession) != SSH_OK) {
+            auto re = fromLibsshErrorCode();
+            closeScpSession();
+            return re;
         }
 
         QFutureWatcher<ErrorCode> watcher;
         connect(&watcher, &QFutureWatcher<ErrorCode>::finished, this, &Client::scpFileCopyFinished);
         QFuture<ErrorCode> future = QtConcurrent::run([this, overwriteMode, &localPath, &remotePath, &fileDesc]() {
-            int accessType = O_WRONLY | O_CREAT | overwriteMode;
-            const size_t bufferSize = 16384;
-            int localFileSize = QFileInfo(localPath).size();
+            const int accessType = O_WRONLY | O_CREAT | overwriteMode;
+            const int localFileSize = QFileInfo(localPath).size();
 
             int rc = ssh_scp_push_file(m_scpSession, remotePath.toStdString().c_str(), localFileSize, accessType);
             if (rc != SSH_OK) {
-                return closeScpSession();
+                return fromLibsshErrorCode();
             }
 
-            int chunksCount = localFileSize / bufferSize;
             QFile fin(localPath);
 
             if (fin.open(QIODevice::ReadOnly)) {
-                for (int currentChunkId = 0; currentChunkId < chunksCount; currentChunkId++) {
-                    QByteArray chunk = fin.read(bufferSize);
-                    if (chunk.size() != bufferSize) {
-                        fin.close();
-                        return ErrorCode::InternalError;
+                constexpr size_t bufferSize = 16384;
+                int transferred = 0;
+                int currentChunkSize = bufferSize;
+
+                while (transferred < localFileSize) {
+
+                    // Last Chunk
+                    if ((localFileSize - transferred) < bufferSize) {
+                        currentChunkSize = localFileSize % bufferSize;
+                    }
+
+                    QByteArray chunk = fin.read(currentChunkSize);
+                    if (chunk.size() != currentChunkSize) {
+                        return fromFileErrorCode(fin.error());
                     }
 
                     rc = ssh_scp_write(m_scpSession, chunk.data(), chunk.size());
                     if (rc != SSH_OK) {
-                        fin.close();
-                        return closeScpSession();
-                    }
-                }
-
-                int lastChunkSize = localFileSize % bufferSize;
-
-                if (lastChunkSize != 0) {
-                    QByteArray lastChunk = fin.read(lastChunkSize);
-                    if (lastChunk.size() != lastChunkSize) {
-                        fin.close();
-                        return ErrorCode::InternalError;
+                        return fromLibsshErrorCode();
                     }
 
-                    rc = ssh_scp_write(m_scpSession, lastChunk.data(), lastChunk.size());
-                    if (rc != SSH_OK) {
-                        fin.close();
-                        return closeScpSession();
-                    }
+                    transferred += currentChunkSize;
                 }
             } else {
-                return closeScpSession();
+                return fromFileErrorCode(fin.error());
             }
 
-            fin.close();
-
-            return closeScpSession();
+            return ErrorCode::NoError;
         });
         watcher.setFuture(future);
 
@@ -295,17 +285,16 @@ namespace libssh {
         QObject::connect(this, &Client::scpFileCopyFinished, &wait, &QEventLoop::quit);
         wait.exec();
 
+        closeScpSession();
         return watcher.result();
     }
 
-    ErrorCode Client::closeScpSession()
+    void Client::closeScpSession()
     {
-        auto errorCode = fromLibsshErrorCode();
         if (m_scpSession != nullptr) {
             ssh_scp_free(m_scpSession);
             m_scpSession = nullptr;
         }
-        return errorCode;
     }
 
     ErrorCode Client::fromLibsshErrorCode()
