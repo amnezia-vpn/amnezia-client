@@ -69,7 +69,7 @@ PageType {
             }
             case PageShare.ConfigType.Awg: {
                 ExportController.generateAwgConfig(clientNameTextField.textFieldText)
-                shareConnectionDrawer.configCaption = qsTr("Save Awg config")
+                shareConnectionDrawer.configCaption = qsTr("Save AmneziaWG config")
                 shareConnectionDrawer.configExtension = ".conf"
                 shareConnectionDrawer.configFileName = "amnezia_for_awg"
                 break
@@ -123,7 +123,7 @@ PageType {
     }
     QtObject {
         id: awgConnectionFormat
-        property string name: qsTr("Awg native format")
+        property string name: qsTr("AmneziaWG native format")
         property var type: PageShare.ConfigType.Awg
     }
     QtObject {
