@@ -34,7 +34,44 @@ PageType {
         anchors.bottomMargin: drawer.collapsedHeight
 
         ConnectButton {
+            id: connectButton
             anchors.centerIn: parent
+        }
+
+        BasicButtonType {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 34
+            leftPadding: 16
+            rightPadding: 16
+
+            implicitHeight: 36
+
+            defaultColor: "transparent"
+            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+            pressedColor: Qt.rgba(1, 1, 1, 0.12)
+            disabledColor: "#878B91"
+            textColor: "#878B91"
+            leftImageColor: "transparent"
+            borderWidth: 0
+
+            property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled ||
+                                                   (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
+
+            text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
+
+            imageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
+            rightImageSource: "qrc:/images/controls/chevron-down.svg"
+
+            onClicked: {
+                homeSplitTunnelingDrawer.open()
+            }
+
+            HomeSplitTunnelingDrawer {
+                id: homeSplitTunnelingDrawer
+
+                parent: root
+            }
         }
     }
 
@@ -156,7 +193,7 @@ PageType {
 
                 LabelTextType {
                     id: expandedServersMenuDescription
-                    Layout.bottomMargin: 24
+                    Layout.bottomMargin: ServersModel.isDefaultServerFromApi ? 69 : 24
                     Layout.fillWidth: true
                     horizontalAlignment: Qt.AlignHCenter
                     verticalAlignment: Qt.AlignVCenter
@@ -166,6 +203,9 @@ PageType {
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     spacing: 8
+
+                    visible: !ServersModel.isDefaultServerFromApi
+                    onVisibleChanged: expandedServersMenuDescription.Layout
 
                     DropDownType {
                         id: containersDropDown
