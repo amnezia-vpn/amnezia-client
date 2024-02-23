@@ -76,7 +76,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
 
     if (connData.caCert.isEmpty() || connData.clientCert.isEmpty() || connData.taKey.isEmpty()) {
         if (errorCode)
-            *errorCode = ErrorCode::OpenVpnUnknownError;
+            *errorCode = ErrorCode::SshScpFailureError;
     }
 
     return connData;
