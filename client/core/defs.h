@@ -56,7 +56,6 @@ namespace amnezia
         // Local errors
         OpenVpnConfigMissing = 500,
         OpenVpnManagementServerError = 501,
-        ConfigMissing = 502,
 
         // Distro errors
         OpenVpnExecutableMissing = 600,
