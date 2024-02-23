@@ -46,8 +46,6 @@ DaemonLocalServerConnection::~DaemonLocalServerConnection() {
 }
 
 void DaemonLocalServerConnection::readData() {
-  logger.debug() << "Read Data";
-
   Q_ASSERT(m_socket);
 
   while (true) {
@@ -89,8 +87,6 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
     return;
   }
   QString type = typeValue.toString();
-
-  logger.debug() << "Command received:" << type;
 
   if (type == "activate") {
     InterfaceConfig config;

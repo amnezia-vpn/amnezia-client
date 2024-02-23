@@ -250,8 +250,6 @@ void LocalSocketController::deactivate() {
 }
 
 void LocalSocketController::checkStatus() {
-  logger.debug() << "Check status";
-
   if (m_daemonState == eReady || m_daemonState == eInitializing) {
     Q_ASSERT(m_socket);
 
@@ -301,7 +299,6 @@ void LocalSocketController::cleanupBackendLogs() {
 }
 
 void LocalSocketController::readData() {
-  logger.debug() << "Reading";
 
   Q_ASSERT(m_socket);
   Q_ASSERT(m_daemonState == eInitializing || m_daemonState == eReady);
@@ -343,8 +340,6 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
   }
   QString type = typeValue.toString();
 
-  logger.debug() << "Parse command:" << type;
-
   if (m_daemonState == eInitializing && type == "status") {
     m_daemonState = eReady;
 
@@ -370,6 +365,7 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
     }
 
     emit initialized(true, connected.toBool(), datetime);
+    checkStatus();
     return;
   }
 
