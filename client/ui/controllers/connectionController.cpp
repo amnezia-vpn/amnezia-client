@@ -61,7 +61,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     m_state = state;
 
     m_isConnected = false;
-    m_connectionStateText = tr("Connection...");
+    m_connectionStateText = tr("Connecting...");
     switch (state) {
     case Vpn::ConnectionState::Connected: {
         m_isConnectionInProgress = false;
