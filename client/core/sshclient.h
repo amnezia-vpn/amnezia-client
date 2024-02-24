@@ -23,8 +23,8 @@ namespace libssh {
     {
         Q_OBJECT
     public:
-        Client(QObject *parent = nullptr);
-        ~Client();
+        Client() = default;
+        ~Client() = default;
 
         ErrorCode connectToHost(const ServerCredentials &credentials);
         void disconnectFromHost();

@@ -14,12 +14,6 @@ namespace libssh {
 
     std::function<QString()> Client::m_passphraseCallback;
 
-    Client::Client(QObject *parent) : QObject(parent)
-    { }
-
-    Client::~Client()
-    { }
-
     int Client::callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata)
     {
         auto passphrase = m_passphraseCallback();
