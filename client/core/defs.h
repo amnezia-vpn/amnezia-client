@@ -48,10 +48,6 @@ namespace amnezia
 
         // Ssh scp errors
         SshScpFailureError = 400,
-        SshScpOpenError = 401,
-        SshScpReadError = 402,
-        SshScpPermissionsError = 403,
-        SshScpUnspecifiedError = 404,
 
         // Local errors
         OpenVpnConfigMissing = 500,
@@ -83,7 +79,13 @@ namespace amnezia
 
         // Api errors
         ApiConfigDownloadError = 1100,
-        ApiConfigAlreadyAdded = 1101
+        ApiConfigAlreadyAdded = 1101,
+
+        // QFile errors
+        OpenError = 1200,
+        ReadError = 1201,
+        PermissionsError = 1202,
+        UnspecifiedError = 1203,
     };
 
 } // namespace amnezia

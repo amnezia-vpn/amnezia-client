@@ -30,10 +30,6 @@ QString errorString(ErrorCode code) {
 
     // Ssh scp errors
     case(SshScpFailureError): errorMessage = QObject::tr("Scp error: Generic failure"); break;
-    case(SshScpOpenError): errorMessage = QObject::tr("Scp error: The file could not be opened"); break;
-    case(SshScpReadError): errorMessage = QObject::tr("Scp error: An error occurred when reading from the file"); break;
-    case(SshScpPermissionsError): errorMessage = QObject::tr("Scp error: The file could not be accessed"); break;
-    case(SshScpUnspecifiedError): errorMessage =  QObject::tr("Scp error: An unspecified error occurred"); break;
 
     // Local errors
     case (OpenVpnConfigMissing): errorMessage = QObject::tr("OpenVPN config missing"); break;
@@ -59,6 +55,12 @@ QString errorString(ErrorCode code) {
     // Api errors
     case (ApiConfigDownloadError): errorMessage = QObject::tr("Error when retrieving configuration from API"); break;
     case (ApiConfigAlreadyAdded): errorMessage = QObject::tr("This config has already been added to the application"); break;
+
+    // QFile errors
+    case(OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;
+    case(ReadError): errorMessage = QObject::tr("QFile error: An error occurred when reading from the file"); break;
+    case(PermissionsError): errorMessage = QObject::tr("QFile error: The file could not be accessed"); break;
+    case(UnspecifiedError): errorMessage =  QObject::tr("QFile error: An unspecified error occurred"); break;
 
     case(InternalError):
     default:

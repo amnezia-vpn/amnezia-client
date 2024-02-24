@@ -315,10 +315,10 @@ namespace libssh {
     {
         switch (fileError) {
         case QFileDevice::NoError: return ErrorCode::NoError;
-        case QFileDevice::ReadError: return ErrorCode::SshScpReadError;
-        case QFileDevice::OpenError: return ErrorCode::SshScpOpenError;
-        case QFileDevice::PermissionsError: return ErrorCode::SshScpPermissionsError;
-        default: return ErrorCode::SshScpUnspecifiedError;
+        case QFileDevice::ReadError: return ErrorCode::ReadError;
+        case QFileDevice::OpenError: return ErrorCode::OpenError;
+        case QFileDevice::PermissionsError: return ErrorCode::PermissionsError;
+        default: return ErrorCode::UnspecifiedError;
         }
     }
 
