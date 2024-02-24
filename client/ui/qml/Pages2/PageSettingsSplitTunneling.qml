@@ -20,13 +20,23 @@ import "../Components"
 PageType {
     id: root
 
+    property var isServerFromApi: ServersModel.getDefaultServerData("isServerFromApi")
+    
+    defaultActiveFocusItem: website_ip_field.textField
+
     property bool pageEnabled: {
-        return !ConnectionController.isConnected && !ServersModel.isDefaultServerFromApi()
+        return !ConnectionController.isConnected && !isServerFromApi
     }
 
     Component.onCompleted: {
-        if (ServersModel.isDefaultServerFromApi()) {
+        if (ConnectionController.isConnected) {
+            PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
+            root.pageEnabled = false
+        } else if (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && isServerFromApi) {
             PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
+            root.pageEnabled = false
+        } else {
+            root.pageEnabled = true
         }
     }
 
@@ -104,7 +114,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
 
-                checked: SitesModel.isSplitTunnelingEnabled()
+                checked: SitesModel.isTunnelingEnabled
                 onToggled: {                    
                     SitesModel.toggleSplitTunneling(checked)
                     selector.text = root.routeModesModel[getRouteModesModelIndex()].name
@@ -121,6 +131,7 @@ PageType {
             Layout.rightMargin: 16
 
             drawerHeight: 0.4375
+            drawerParent: root
 
             enabled: root.pageEnabled
 
@@ -135,7 +146,7 @@ PageType {
 
                 clickedFunction: function() {
                     selector.text = selectedText
-                    selector.menuVisible = false
+                    selector.close()
                     if (SitesModel.routeMode !== root.routeModesModel[currentIndex].type) {
                         SitesModel.routeMode = root.routeModesModel[currentIndex].type
                     }
@@ -202,26 +213,21 @@ PageType {
                             rightImageColor: "#D7D8DB"
 
                             clickedFunction: function() {
-                                questionDrawer.headerText = qsTr("Remove ") + url + "?"
-                                questionDrawer.yesButtonText = qsTr("Continue")
-                                questionDrawer.noButtonText = qsTr("Cancel")
+                                var headerText = qsTr("Remove ") + url + "?"
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
 
-                                questionDrawer.yesButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                var yesButtonFunction = function() {
                                     SitesController.removeSite(index)
                                 }
-                                questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.visible = false
+                                var noButtonFunction = function() {
                                 }
-                                questionDrawer.visible = true
+
+                                showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
                         }
 
                         DividerType {}
-
-                        QuestionDrawer {
-                            id: questionDrawer
-                        }
                     }
                 }
             }
@@ -249,6 +255,8 @@ PageType {
         anchors.bottomMargin: 24
 
         TextFieldWithHeaderType {
+            id: website_ip_field
+
             Layout.fillWidth: true
 
             textFieldPlaceholderText: qsTr("website or IP")
@@ -275,151 +283,155 @@ PageType {
         }
     }
 
-    DrawerType {
+    DrawerType2 {
         id: moreActionsDrawer
 
-        width: parent.width
-        height: parent.height * 0.4375
+        anchors.fill: parent
+        expandedHeight: parent.height * 0.4375
 
-        FlickableType {
-            anchors.fill: parent
-            contentHeight: moreActionsDrawerContent.height
-            ColumnLayout {
-                id: moreActionsDrawerContent
-
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                Header2Type {
-                    Layout.fillWidth: true
-                    Layout.margins: 16
-
-                    headerText: qsTr("Import / Export Sites")
-                }
-
-                LabelWithButtonType {
-                    Layout.fillWidth: true
-
-                    text: qsTr("Import")
-                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                    clickedFunction: function() {
-                        importSitesDrawer.open()
-                    }
-                }
-
-                DividerType {}
-
-                LabelWithButtonType {
-                    Layout.fillWidth: true
-                    text: qsTr("Save site list")
-
-                    clickedFunction: function() {
-                        var fileName = ""
-                        if (GC.isMobile()) {
-                            fileName = "amnezia_sites.json"
-                        } else {
-                            fileName = SystemController.getFileName(qsTr("Save sites"),
-                                                                    qsTr("Sites files (*.json)"),
-                                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/amnezia_sites",
-                                                                    true,
-                                                                    ".json")
-                        }
-                        if (fileName !== "") {
-                            PageController.showBusyIndicator(true)
-                            SitesController.exportSites(fileName)
-                            moreActionsDrawer.close()
-                            PageController.showBusyIndicator(false)
-                        }
-                    }
-                }
-
-                DividerType {}
-            }
-        }
-    }
-
-    DrawerType {
-        id: importSitesDrawer
-
-        width: parent.width
-        height: parent.height * 0.4375
-
-        BackButtonType {
-            id: importSitesDrawerBackButton
+        expandedContent: ColumnLayout {
+            id: moreActionsDrawerContent
 
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 16
 
-            backButtonFunction: function() {
-                importSitesDrawer.close()
+            Header2Type {
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                headerText: qsTr("Import / Export Sites")
             }
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+
+                text: qsTr("Import")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    importSitesDrawer.open()
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                text: qsTr("Save site list")
+
+                clickedFunction: function() {
+                    var fileName = ""
+                    if (GC.isMobile()) {
+                        fileName = "amnezia_sites.json"
+                    } else {
+                        fileName = SystemController.getFileName(qsTr("Save sites"),
+                                                                qsTr("Sites files (*.json)"),
+                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/amnezia_sites",
+                                                                true,
+                                                                ".json")
+                    }
+                    if (fileName !== "") {
+                        PageController.showBusyIndicator(true)
+                        SitesController.exportSites(fileName)
+                        moreActionsDrawer.close()
+                        PageController.showBusyIndicator(false)
+                    }
+                }
+            }
+
+            DividerType {}
         }
+    }
 
-        FlickableType {
-            anchors.top: importSitesDrawerBackButton.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
+    DrawerType2 {
+        id: importSitesDrawer
 
-            contentHeight: importSitesDrawerContent.height
+        anchors.fill: parent
+        expandedHeight: parent.height * 0.4375
 
-            ColumnLayout {
-                id: importSitesDrawerContent
+        expandedContent: Item {
+            implicitHeight: importSitesDrawer.expandedHeight
+
+            BackButtonType {
+                id: importSitesDrawerBackButton
 
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
+                anchors.topMargin: 16
 
-                Header2Type {
-                    Layout.fillWidth: true
-                    Layout.margins: 16
-
-                    headerText: qsTr("Import a list of sites")
-                }
-
-                LabelWithButtonType {
-                    Layout.fillWidth: true
-
-                    text: qsTr("Replace site list")
-
-                    clickedFunction: function() {
-                        var fileName = SystemController.getFileName(qsTr("Open sites file"),
-                                                                    qsTr("Sites files (*.json)"))
-                        if (fileName !== "") {
-                            importSitesDrawerContent.importSites(fileName, true)
-                        }
-                    }
-                }
-
-                DividerType {}
-
-                LabelWithButtonType {
-                    Layout.fillWidth: true
-                    text: qsTr("Add imported sites to existing ones")
-
-                    clickedFunction: function() {
-                        var fileName = SystemController.getFileName(qsTr("Open sites file"),
-                                                                    qsTr("Sites files (*.json)"))
-                        if (fileName !== "") {
-                            importSitesDrawerContent.importSites(fileName, false)
-                        }
-                    }
-                }
-
-                function importSites(fileName, replaceExistingSites) {
-                    PageController.showBusyIndicator(true)
-                    SitesController.importSites(fileName, replaceExistingSites)
-                    PageController.showBusyIndicator(false)
+                backButtonFunction: function() {
                     importSitesDrawer.close()
-                    moreActionsDrawer.close()
                 }
+            }
 
-                DividerType {}
+            FlickableType {
+                anchors.top: importSitesDrawerBackButton.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+
+                contentHeight: importSitesDrawerContent.height
+
+                ColumnLayout {
+                    id: importSitesDrawerContent
+
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+
+                    Header2Type {
+                        Layout.fillWidth: true
+                        Layout.margins: 16
+
+                        headerText: qsTr("Import a list of sites")
+                    }
+
+                    LabelWithButtonType {
+                        Layout.fillWidth: true
+
+                        text: qsTr("Replace site list")
+
+                        clickedFunction: function() {
+                            var fileName = SystemController.getFileName(qsTr("Open sites file"),
+                                                                        qsTr("Sites files (*.json)"))
+                            if (fileName !== "") {
+                                importSitesDrawerContent.importSites(fileName, true)
+                            }
+                        }
+                    }
+
+                    DividerType {}
+
+                    LabelWithButtonType {
+                        Layout.fillWidth: true
+                        text: qsTr("Add imported sites to existing ones")
+
+                        clickedFunction: function() {
+                            var fileName = SystemController.getFileName(qsTr("Open sites file"),
+                                                                        qsTr("Sites files (*.json)"))
+                            if (fileName !== "") {
+                                importSitesDrawerContent.importSites(fileName, false)
+                            }
+                        }
+                    }
+
+                    function importSites(fileName, replaceExistingSites) {
+                        PageController.showBusyIndicator(true)
+                        SitesController.importSites(fileName, replaceExistingSites)
+                        PageController.showBusyIndicator(false)
+                        importSitesDrawer.close()
+                        moreActionsDrawer.close()
+                    }
+
+                    DividerType {}
+                }
             }
         }
+    }
+
+    QuestionDrawer {
+        id: questionDrawer
     }
 }
