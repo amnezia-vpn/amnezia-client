@@ -61,6 +61,8 @@ QString errorString(ErrorCode code) {
     case(ReadError): errorMessage = QObject::tr("QFile error: An error occurred when reading from the file"); break;
     case(PermissionsError): errorMessage = QObject::tr("QFile error: The file could not be accessed"); break;
     case(UnspecifiedError): errorMessage =  QObject::tr("QFile error: An unspecified error occurred"); break;
+    case(FatalError): errorMessage =  QObject::tr("QFile error: A fatal error occurred"); break;
+    case(AbortError): errorMessage =  QObject::tr("QFile error: The operation was aborted"); break;
 
     case(InternalError):
     default:

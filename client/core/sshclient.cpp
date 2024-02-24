@@ -318,6 +318,8 @@ namespace libssh {
         case QFileDevice::ReadError: return ErrorCode::ReadError;
         case QFileDevice::OpenError: return ErrorCode::OpenError;
         case QFileDevice::PermissionsError: return ErrorCode::PermissionsError;
+        case QFileDevice::FatalError: return ErrorCode::FatalError;
+        case QFileDevice::AbortError: return ErrorCode::AbortError;
         default: return ErrorCode::UnspecifiedError;
         }
     }

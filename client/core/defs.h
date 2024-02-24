@@ -86,6 +86,8 @@ namespace amnezia
         ReadError = 1201,
         PermissionsError = 1202,
         UnspecifiedError = 1203,
+        FatalError = 1204,
+        AbortError = 1205
     };
 
 } // namespace amnezia
