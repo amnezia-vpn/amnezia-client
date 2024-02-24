@@ -151,7 +151,7 @@
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="33"/>
         <source>Allows you to connect to some sites or applications through a VPN connection and bypass others</source>
-        <translation type="unfinished"></translation>
+        <translation>允许您通过 VPN 连接连接到某些站点或应用程序，并绕过其他站点或应用程序</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="42"/>
@@ -345,12 +345,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
         <source>Split tunneling enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>用户分隔隧道已启用</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
         <source>Split tunneling disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>分隔隧道已禁用</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="224"/>
