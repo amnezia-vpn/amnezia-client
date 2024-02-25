@@ -13,6 +13,8 @@ import "../Components"
 PageType {
     id: root
 
+    property bool isControlsDisabled: false
+
     Connections {
         target: PageController
 
@@ -44,6 +46,18 @@ PageType {
             while (stackView.depth > 1) {
                 stackView.pop()
             }
+        }
+
+        function onDisableControls(disabled) {
+            isControlsDisabled = disabled
+        }
+
+        function onEscapePressed() {
+            if (isControlsDisabled || busyIndicator.visible) {
+                return
+            }
+
+            PageController.closePage()
         }
     }
 

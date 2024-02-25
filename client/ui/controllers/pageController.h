@@ -108,7 +108,7 @@ signals:
     void showNotificationMessage(const QString &message);
 
     void showBusyIndicator(bool visible);
-    void enableTabBar(bool enabled);
+    void disableControls(bool disabled);
 
     void hideMainWindow();
     void raiseMainWindow();
