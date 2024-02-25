@@ -108,6 +108,7 @@ Item {
         id: emptyArea
         anchors.fill: parent
         enabled: root.isExpanded
+        visible: enabled
         onClicked: {
             root.close()
         }

@@ -22,6 +22,7 @@ PageType {
         AmneziaConnection,
         OpenVpn,
         WireGuard,
+        Awg,
         ShadowSocks,
         Cloak
     }
@@ -31,7 +32,7 @@ PageType {
         PageController.showBusyIndicator(true)
         ExportController.revokeConfig(index,
                                       ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                      ServersModel.getCurrentlyProcessedServerCredentials())
+                                      ServersModel.getProcessedServerCredentials())
         PageController.showBusyIndicator(false)
         PageController.showNotificationMessage(qsTr("Config revoked"))
     }
@@ -48,7 +49,10 @@ PageType {
             PageController.showBusyIndicator(true)
 
             switch (type) {
-            case PageShare.ConfigType.AmneziaConnection: ExportController.generateConnectionConfig(clientNameTextField.textFieldText); break;
+            case PageShare.ConfigType.AmneziaConnection: {
+                ExportController.generateConnectionConfig(clientNameTextField.textFieldText);
+                break;
+            }
             case PageShare.ConfigType.OpenVpn: {
                 ExportController.generateOpenVpnConfig(clientNameTextField.textFieldText)
                 shareConnectionDrawer.configCaption = qsTr("Save OpenVPN config")
@@ -61,6 +65,13 @@ PageType {
                 shareConnectionDrawer.configCaption = qsTr("Save WireGuard config")
                 shareConnectionDrawer.configExtension = ".conf"
                 shareConnectionDrawer.configFileName = "amnezia_for_wireguard"
+                break
+            }
+            case PageShare.ConfigType.Awg: {
+                ExportController.generateAwgConfig(clientNameTextField.textFieldText)
+                shareConnectionDrawer.configCaption = qsTr("Save AmneziaWG config")
+                shareConnectionDrawer.configExtension = ".conf"
+                shareConnectionDrawer.configFileName = "amnezia_for_awg"
                 break
             }
             case PageShare.ConfigType.ShadowSocks: {
@@ -109,6 +120,11 @@ PageType {
         id: wireGuardConnectionFormat
         property string name: qsTr("WireGuard native format")
         property var type: PageShare.ConfigType.WireGuard
+    }
+    QtObject {
+        id: awgConnectionFormat
+        property string name: qsTr("AmneziaWG native format")
+        property var type: PageShare.ConfigType.Awg
     }
     QtObject {
         id: shadowSocksConnectionFormat
@@ -230,7 +246,7 @@ PageType {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                                                         ServersModel.getCurrentlyProcessedServerCredentials())
+                                                                         ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -315,7 +331,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.currentlyProcessedIndex = proxyServersModel.mapToSource(currentIndex)
+                        ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
                     }
                 }
             }
@@ -365,7 +381,7 @@ PageType {
                         target: serverSelector
 
                         function onSeverSelectorIndexChanged() {
-                            var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getDefaultContainer(ServersModel.currentlyProcessedIndex))
+                            var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
                             protocolSelectorListView.currentIndex = defaultContainer
                             protocolSelectorListView.triggerCurrentItem()
                         }
@@ -388,7 +404,7 @@ PageType {
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                                                         ServersModel.getCurrentlyProcessedServerCredentials())
+                                                                         ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -402,6 +418,8 @@ PageType {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
                             root.connectionTypesModel.push(wireGuardConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-awg")) {
+                            root.connectionTypesModel.push(awgConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                             root.connectionTypesModel.push(shadowSocksConnectionFormat)
@@ -654,7 +672,7 @@ PageType {
                                                         ExportController.renameClient(index,
                                                                                       clientNameEditor.textFieldText,
                                                                                       ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                                                                      ServersModel.getCurrentlyProcessedServerCredentials())
+                                                                                      ServersModel.getProcessedServerCredentials())
                                                         PageController.showBusyIndicator(false)
                                                         clientNameEditDrawer.close()
                                                     }
