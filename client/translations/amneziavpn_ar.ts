@@ -353,47 +353,47 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="114"/>
-        <source>Junk packet count</source>
+        <source>Jc - Junk packet count</source>
         <translation>عدد الحزم الغير مرغوب فيها</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="139"/>
-        <source>Junk packet minimum size</source>
+        <source>Jmin - Junk packet minimum size</source>
         <translation>الحد الادني لحجم الحزمة الغير مرغوب فيها</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="159"/>
-        <source>Junk packet maximum size</source>
+        <source>Jmax - Junk packet maximum size</source>
         <translation>الحجم الاقصي للحزمة الغير مرغوب فيها</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="179"/>
-        <source>Init packet junk size</source>
-        <translation>Init packet junk size</translation>
+        <source>S1 - Init packet junk size</source>
+        <translation>S1 - Init packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="199"/>
-        <source>Response packet junk size</source>
+        <source>S2 - Response packet junk size</source>
         <translation>حجم حزمة الاستجابة الغير مرغوب فيها</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="219"/>
-        <source>Init packet magic header</source>
+        <source>H1 - Init packet magic header</source>
         <translation>إطلاق حزمة magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="239"/>
-        <source>Response packet magic header</source>
+        <source>H2 - Response packet magic header</source>
         <translation>حزمة الرد magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="259"/>
-        <source>Transport packet magic header</source>
+        <source>H4 - Transport packet magic header</source>
         <translation>نقل حزمة magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="279"/>
-        <source>Underload packet magic header</source>
+        <source>H3 - Underload packet magic header</source>
         <translation>تحميل حزمة magic header</translation>
     </message>
     <message>

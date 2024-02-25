@@ -382,47 +382,47 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="114"/>
-        <source>Junk packet count</source>
+        <source>Jc - Junk packet count</source>
         <translation>垃圾包数量</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="139"/>
-        <source>Junk packet minimum size</source>
+        <source>Jmin - Junk packet minimum size</source>
         <translation>垃圾包最小值</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="159"/>
-        <source>Junk packet maximum size</source>
+        <source>Jmax - Junk packet maximum size</source>
         <translation>垃圾包最大值</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="179"/>
-        <source>Init packet junk size</source>
+        <source>S1 - Init packet junk size</source>
         <translation>初始化垃圾包大小</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="199"/>
-        <source>Response packet junk size</source>
+        <source>S2 - Response packet junk size</source>
         <translation>响应垃圾包大小</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="219"/>
-        <source>Init packet magic header</source>
+        <source>H1 - Init packet magic header</source>
         <translation>初始化数据包魔数头</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="239"/>
-        <source>Response packet magic header</source>
+        <source>H2 - Response packet magic header</source>
         <translation>响应包魔数头</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="259"/>
-        <source>Transport packet magic header</source>
+        <source>H4 - Transport packet magic header</source>
         <translation>传输包魔数头</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="279"/>
-        <source>Underload packet magic header</source>
+        <source>H3 - Underload packet magic header</source>
         <translation>低负载数据包魔数头</translation>
     </message>
     <message>
