@@ -136,8 +136,7 @@ void ApiController::updateServerConfigFromApi()
 
                 auto defaultContainer = apiConfig.value(config_key::defaultContainer).toString();
                 serverConfig.insert(config_key::defaultContainer, defaultContainer);
-                m_serversModel->editServer(serverConfig);
-                emit m_serversModel->defaultContainerChanged(ContainerProps::containerFromString(defaultContainer));
+                m_serversModel->editServer(serverConfig, m_serversModel->getDefaultServerIndex());
             } else {
                 qDebug() << reply->error();
                 qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
@@ -164,5 +163,5 @@ void ApiController::clearApiConfig()
 
     serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
 
-    m_serversModel->editServer(serverConfig);
+    m_serversModel->editServer(serverConfig, m_serversModel->getDefaultServerIndex());
 }

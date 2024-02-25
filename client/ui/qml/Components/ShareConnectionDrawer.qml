@@ -208,7 +208,7 @@ DrawerType2 {
                             anchors.topMargin: 16
 
                             backButtonFunction: function() {
-                                configContentDrawer.open()
+                                configContentDrawer.close()
                             }
                         }
 

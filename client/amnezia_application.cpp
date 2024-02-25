@@ -286,10 +286,16 @@ void AmneziaApplication::initModels()
     m_containersModel.reset(new ContainersModel(this));
     m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
 
+    m_defaultServerContainersModel.reset(new ContainersModel(this));
+    m_engine->rootContext()->setContextProperty("DefaultServerContainersModel", m_defaultServerContainersModel.get());
+
     m_serversModel.reset(new ServersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
     connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(),
             &ContainersModel::updateModel);
+    connect(m_serversModel.get(), &ServersModel::defaultServerContainersUpdated, m_defaultServerContainersModel.get(),
+            &ContainersModel::updateModel);
+    m_serversModel->resetModel();
 
     m_languageModel.reset(new LanguageModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
@@ -333,7 +339,7 @@ void AmneziaApplication::initModels()
     connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, this,
             [this](const QString &clientId, const QString &clientName, const DockerContainer container,
                    ServerCredentials credentials) {
-                m_serversModel->reloadContainerConfig();
+                m_serversModel->reloadDefaultServerContainerConfig();
                 m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
                 emit m_configurator->clientModelUpdated();
             });
