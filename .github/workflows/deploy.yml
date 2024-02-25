@@ -227,7 +227,7 @@ jobs:
     env:
       # Keep compat with MacOS 10.15 aka Catalina by Qt 6.4
       QT_VERSION: 6.4.3
-      QIF_VERSION: 4.7
+      QIF_VERSION: 4.6
 
     steps:
     - name: 'Setup xcode'
