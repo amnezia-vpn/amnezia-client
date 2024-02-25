@@ -89,6 +89,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     }
     case HasInstalledContainers: {
         return serverHasInstalledContainers(index.row());
+    }
     case IsServerFromApiRole: {
         return server.value(config_key::configVersion).toInt();
     }
@@ -576,11 +577,6 @@ QVariant ServersModel::getDefaultServerData(const QString roleString)
     return {};
 }
 
-void ServersModel::setDefaultServerData(const QString roleString, const QVariant &value)
-{
-
-}
-
 QVariant ServersModel::getProcessedServerData(const QString roleString)
 {
     auto roles = roleNames();
@@ -591,11 +587,6 @@ QVariant ServersModel::getProcessedServerData(const QString roleString)
     }
 
     return {};
-}
-
-void ServersModel::setProcessedServerData(const QString roleString, const QVariant &value)
-{
-
 }
 
 bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()

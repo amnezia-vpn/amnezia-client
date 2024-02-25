@@ -28,7 +28,7 @@ public:
 
         DefaultContainerRole,
 
-        HasInstalledContainers
+        HasInstalledContainers,
         IsServerFromApiRole,
 
         HasAmneziaDns
@@ -102,10 +102,8 @@ public slots:
     bool isServerFromApiAlreadyExists(const quint16 crc);
 
     QVariant getDefaultServerData(const QString roleString);
-    void setDefaultServerData(const QString roleString, const QVariant &value);
 
     QVariant getProcessedServerData(const QString roleString);
-    void setProcessedServerData(const QString roleString, const QVariant &value);
 
     bool isDefaultServerDefaultContainerHasSplitTunneling();
 

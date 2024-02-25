@@ -328,8 +328,12 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        serverSelectorListView.currentIndex = ServersModel.isDefaultServerHasWriteAccess() ?
-                                    proxyServersModel.mapFromSource(ServersModel.defaultIndex) : 0
+                        if (ServersModel.isDefaultServerHasWriteAccess() && ServersModel.getDefaultServerData("hasInstalledContainers")) {
+                            serverSelectorListView.currentIndex = proxyServersModel.mapFromSource(ServersModel.defaultIndex)
+                        } else {
+                            serverSelectorListView.currentIndex = 0
+                        }
+
                         serverSelectorListView.triggerCurrentItem()
                     }
 
