@@ -111,7 +111,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Junk packet count")
+                            headerText: "Jc - Junk packet count"
                             textFieldText: junkPacketCount
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -136,7 +136,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Junk packet minimum size")
+                            headerText: "Jmin - Junk packet minimum size"
                             textFieldText: junkPacketMinSize
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -156,7 +156,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Junk packet maximum size")
+                            headerText: "Jmax - Junk packet maximum size"
                             textFieldText: junkPacketMaxSize
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -176,7 +176,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Init packet junk size")
+                            headerText: "S1 - Init packet junk size"
                             textFieldText: initPacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -196,7 +196,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Response packet junk size")
+                            headerText: "S2 - Response packet junk size"
                             textFieldText: responsePacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -216,7 +216,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Init packet magic header")
+                            headerText: "H1 - Init packet magic header"
                             textFieldText: initPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -236,7 +236,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Response packet magic header")
+                            headerText: "H2 - Response packet magic header"
                             textFieldText: responsePacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -256,7 +256,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Transport packet magic header")
+                            headerText: "H4 - Transport packet magic header"
                             textFieldText: transportPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -276,7 +276,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Underload packet magic header")
+                            headerText: "H3 - Underload packet magic header"
                             textFieldText: underloadPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 

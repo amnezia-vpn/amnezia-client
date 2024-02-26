@@ -37,7 +37,7 @@ DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
 # Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
-QT_VERSION=6.5.1;
+QT_VERSION=6.4.3;
 QIF_VERSION=4.6
 QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
 QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
@@ -146,7 +146,8 @@ if [ "${MAC_CERT_PW+x}" ]; then
 fi
 
 echo "Building DMG installer..."
-hdiutil create -size 120mb -volname AmneziaVPN -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
+# Allow Terminal to make changes in Privacy & Security > App Management
+hdiutil create -size 256mb -volname AmneziaVPN -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
 
 if [ "${MAC_CERT_PW+x}" ]; then
   echo "Signing DMG installer..."

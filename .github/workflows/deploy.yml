@@ -14,8 +14,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     env:
-      QT_VERSION: 6.5.1
-      QIF_VERSION: 4.6
+      QT_VERSION: 6.6.2
+      QIF_VERSION: 4.7
 
     steps:
     - name: 'Install Qt'
@@ -72,8 +72,8 @@ jobs:
     runs-on: windows-latest
 
     env:
-      QT_VERSION: 6.5.1
-      QIF_VERSION: 4.6
+      QT_VERSION: 6.6.2
+      QIF_VERSION: 4.7
       BUILD_ARCH: 64
 
     steps:
@@ -134,7 +134,7 @@ jobs:
     runs-on: macos-13
 
     env:
-      QT_VERSION: 6.5.2
+      QT_VERSION: 6.6.2
       CC: cc
       CXX: c++
 
@@ -245,9 +245,14 @@ jobs:
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
-        tools: 'tools_ifw'
         set-env: 'true'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install Qt Installer Framework ${{ env.QIF_VERSION }}'
+      run: |
+        mkdir -pv ${{ runner.temp }}/Qt/Tools/QtInstallerFramework
+        wget https://qt.amzsvc.com/tools/ifw/${{ env.QIF_VERSION }}.zip
+        unzip ${{ env.QIF_VERSION }}.zip -d ${{ runner.temp }}/Qt/Tools/QtInstallerFramework/
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -286,7 +291,7 @@ jobs:
 
     env:
       ANDROID_BUILD_PLATFORM: android-34
-      QT_VERSION: 6.6.1
+      QT_VERSION: 6.6.2
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
 
     steps:

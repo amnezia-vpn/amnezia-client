@@ -224,6 +224,8 @@
         <file>ui/qml/Pages2/PageShareFullAccess.qml</file>
         <file>images/controls/close.svg</file>
         <file>images/controls/search.svg</file>
+        <file>ui/qml/Components/HomeSplitTunnelingDrawer.qml</file>
+        <file>images/controls/split-tunneling.svg</file>
         <file>ui/qml/Controls2/DrawerType2.qml</file>
     </qresource>
 </RCC>

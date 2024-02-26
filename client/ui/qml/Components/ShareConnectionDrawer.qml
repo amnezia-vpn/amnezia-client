@@ -107,13 +107,6 @@ DrawerType2 {
 
                     text: qsTr("Copy")
                     imageSource: "qrc:/images/controls/copy.svg"
-
-                    clickedFunc: function() {
-                        configText.selectAll()
-                        configText.copy()
-                        configText.select(0, 0)
-                        PageController.showNotificationMessage(qsTr("Copied"))
-                    }
                 }
 
                 BasicButtonType {
@@ -132,13 +125,6 @@ DrawerType2 {
 
                     text: qsTr("Copy config string")
                     imageSource: "qrc:/images/controls/copy.svg"
-
-                    clickedFunc: function() {
-                        nativeConfigString.selectAll()
-                        nativeConfigString.copy()
-                        nativeConfigString.select(0, 0)
-                        PageController.showNotificationMessage(qsTr("Copied"))
-                    }
                 }
 
                 BasicButtonType {
@@ -201,7 +187,7 @@ DrawerType2 {
                             anchors.topMargin: 16
 
                             backButtonFunction: function() {
-                                configContentDrawer.open()
+                                configContentDrawer.close()
                             }
                         }
 
