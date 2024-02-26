@@ -354,51 +354,6 @@ Already installed containers were found on the server. All installed containers 
         <translation>Порт</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="114"/>
-        <source>Junk packet count</source>
-        <translation>Junk packet count</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="139"/>
-        <source>Junk packet minimum size</source>
-        <translation>Junk packet minimum size</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="159"/>
-        <source>Junk packet maximum size</source>
-        <translation>Junk packet maximum size</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="179"/>
-        <source>Init packet junk size</source>
-        <translation>Init packet junk size</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="199"/>
-        <source>Response packet junk size</source>
-        <translation>Response packet junk size</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="219"/>
-        <source>Init packet magic header</source>
-        <translation>Init packet magic header</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="239"/>
-        <source>Response packet magic header</source>
-        <translation>Response packet magic header</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="259"/>
-        <source>Transport packet magic header</source>
-        <translation>Transport packet magic header</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="279"/>
-        <source>Underload packet magic header</source>
-        <translation>Underload packet magic header</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="304"/>
         <source>Remove AmneziaWG</source>
         <translation>Удалить AmneziaWG</translation>
