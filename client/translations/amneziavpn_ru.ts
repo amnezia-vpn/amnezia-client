@@ -318,7 +318,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
         <source>Split tunneling enabled</source>
-        <translation type="unfinished">Раздельное туннелирование включено<</translation>
+        <translation type="unfinished">Раздельное туннелирование включено</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
