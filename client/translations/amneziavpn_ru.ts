@@ -148,7 +148,7 @@
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="33"/>
         <source>Allows you to connect to some sites or applications through a VPN connection and bypass others</source>
-        <translation type="unfinished"></translation>
+        <translation>Позволяет подключаться к одним сайтам или приложениям через защищенное соединение, а к другим в обход него</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="42"/>
@@ -318,12 +318,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
         <source>Split tunneling enabled</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Раздельное туннелирование включено<</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
         <source>Split tunneling disabled</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Раздельное туннелирование выключено</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="224"/>
@@ -1509,7 +1509,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="230"/>
         <source>Reset API config</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="234"/>
@@ -1626,7 +1626,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Only the sites listed here will be accesed via VPN</source>
+        <source>Only the sites listed here will be accessed via VPN</source>
         <translation type="vanished">Только адреса из списка должны открываться через VPN</translation>
     </message>
     <message>
@@ -1666,17 +1666,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="303"/>
         <source>Import / Export Sites</source>
-        <translation>Импорт/экспорт Сайтов</translation>
+        <translation>Импорт/экспорт сайтов</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="69"/>
         <source>Only the sites listed here will be accessed through the VPN</source>
-        <translation type="unfinished"></translation>
+        <translation>Только адреса из списка должны открываться через VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="33"/>
         <source>Cannot change split tunneling settings during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Невозможно изменить настройки раздельного туннелирования при включенном VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="262"/>
