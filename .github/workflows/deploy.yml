@@ -227,7 +227,7 @@ jobs:
     env:
       # Keep compat with MacOS 10.15 aka Catalina by Qt 6.4
       QT_VERSION: 6.4.3
-      QIF_VERSION: 4.7
+      QIF_VERSION: 4.6
 
     steps:
     - name: 'Setup xcode'
@@ -245,9 +245,14 @@ jobs:
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
-        tools: 'tools_ifw'
         set-env: 'true'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install Qt Installer Framework ${{ env.QIF_VERSION }}'
+      run: |
+        mkdir -pv ${{ runner.temp }}/Qt/Tools/QtInstallerFramework
+        wget https://qt.amzsvc.com/tools/ifw/${{ env.QIF_VERSION }}.zip
+        unzip ${{ env.QIF_VERSION }}.zip -d ${{ runner.temp }}/Qt/Tools/QtInstallerFramework/
 
     - name: 'Get sources'
       uses: actions/checkout@v4
