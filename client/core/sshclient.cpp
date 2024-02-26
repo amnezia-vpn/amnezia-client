@@ -165,13 +165,13 @@ namespace libssh {
                     return ErrorCode::NoError;
                 };
 
-                auto error = readOutput(false);
-                if (error != ErrorCode::NoError) {
-                    return error;
+                auto errorCode = readOutput(false);
+                if (errorCode != ErrorCode::NoError) {
+                    return errorCode;
                 }
-                error = readOutput(true);
-                if (error != ErrorCode::NoError) {
-                    return error;
+                errorCode = readOutput(true);
+                if (errorCode != ErrorCode::NoError) {
+                    return errorCode;
                 }
             } else {
                 return closeChannel();
@@ -225,9 +225,9 @@ namespace libssh {
         }
 
         if (ssh_scp_init(m_scpSession) != SSH_OK) {
-            auto re = fromLibsshErrorCode();
+            auto errorCode = fromLibsshErrorCode();
             closeScpSession();
-            return re;
+            return errorCode;
         }
 
         QFutureWatcher<ErrorCode> watcher;
@@ -236,8 +236,8 @@ namespace libssh {
             const int accessType = O_WRONLY | O_CREAT | overwriteMode;
             const int localFileSize = QFileInfo(localPath).size();
 
-            int rc = ssh_scp_push_file(m_scpSession, remotePath.toStdString().c_str(), localFileSize, accessType);
-            if (rc != SSH_OK) {
+            int result = ssh_scp_push_file(m_scpSession, remotePath.toStdString().c_str(), localFileSize, accessType);
+            if (result != SSH_OK) {
                 return fromLibsshErrorCode();
             }
 
@@ -260,8 +260,8 @@ namespace libssh {
                         return fromFileErrorCode(fin.error());
                     }
 
-                    rc = ssh_scp_write(m_scpSession, chunk.data(), chunk.size());
-                    if (rc != SSH_OK) {
+                    result = ssh_scp_write(m_scpSession, chunk.data(), chunk.size());
+                    if (result != SSH_OK) {
                         return fromLibsshErrorCode();
                     }
 
