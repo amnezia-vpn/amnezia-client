@@ -381,51 +381,6 @@ Already installed containers were found on the server. All installed containers 
         <translation>端口</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="114"/>
-        <source>Jc - Junk packet count</source>
-        <translation>垃圾包数量</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="139"/>
-        <source>Jmin - Junk packet minimum size</source>
-        <translation>垃圾包最小值</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="159"/>
-        <source>Jmax - Junk packet maximum size</source>
-        <translation>垃圾包最大值</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="179"/>
-        <source>S1 - Init packet junk size</source>
-        <translation>初始化垃圾包大小</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="199"/>
-        <source>S2 - Response packet junk size</source>
-        <translation>响应垃圾包大小</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="219"/>
-        <source>H1 - Init packet magic header</source>
-        <translation>初始化数据包魔数头</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="239"/>
-        <source>H2 - Response packet magic header</source>
-        <translation>响应包魔数头</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="259"/>
-        <source>H4 - Transport packet magic header</source>
-        <translation>传输包魔数头</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="279"/>
-        <source>H3 - Underload packet magic header</source>
-        <translation>低负载数据包魔数头</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="304"/>
         <source>Remove AmneziaWG</source>
         <translation>移除AmneziaWG</translation>

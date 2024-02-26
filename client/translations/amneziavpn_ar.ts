@@ -352,51 +352,6 @@ Already installed containers were found on the server. All installed containers 
         <translation>منفذ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="114"/>
-        <source>Jc - Junk packet count</source>
-        <translation>عدد الحزم الغير مرغوب فيها</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="139"/>
-        <source>Jmin - Junk packet minimum size</source>
-        <translation>الحد الادني لحجم الحزمة الغير مرغوب فيها</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="159"/>
-        <source>Jmax - Junk packet maximum size</source>
-        <translation>الحجم الاقصي للحزمة الغير مرغوب فيها</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="179"/>
-        <source>S1 - Init packet junk size</source>
-        <translation>S1 - Init packet junk size</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="199"/>
-        <source>S2 - Response packet junk size</source>
-        <translation>حجم حزمة الاستجابة الغير مرغوب فيها</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="219"/>
-        <source>H1 - Init packet magic header</source>
-        <translation>إطلاق حزمة magic header</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="239"/>
-        <source>H2 - Response packet magic header</source>
-        <translation>حزمة الرد magic header</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="259"/>
-        <source>H4 - Transport packet magic header</source>
-        <translation>نقل حزمة magic header</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="279"/>
-        <source>H3 - Underload packet magic header</source>
-        <translation>تحميل حزمة magic header</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="304"/>
         <source>Remove AmneziaWG</source>
         <translation>قم بحذف AmneziaWG</translation>
