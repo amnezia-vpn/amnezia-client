@@ -20,7 +20,7 @@ PLIST_NAME=$APP_NAME.plist
 
 # Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
-  QT_VERSION=6.5.2;
+  QT_VERSION=6.6.2;
   QT_BIN_DIR=$HOME/Qt/$QT_VERSION/ios/bin
 fi
 

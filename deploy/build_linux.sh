@@ -36,7 +36,7 @@ QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 
 # Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
-  QT_VERSION=5.15.2
+  QT_VERSION=6.6.2
   if [ -f /opt/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then
     QT_BIN_DIR=/opt/Qt/$QT_VERSION/gcc_64/bin
   elif [ -f $HOME/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then
