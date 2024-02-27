@@ -115,8 +115,8 @@ PageType {
 
                 text: qsTr("I have the data to connect")
 
-                onClicked: {
-                    connectionTypeSelection.visible = true
+                clickedFunc: function() {
+                    connectionTypeSelection.open()
                 }
             }
 
@@ -135,13 +135,15 @@ PageType {
 
                 text: qsTr("I have nothing")
 
-                onClicked: Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
+                clickedFunc: function() {
+                    Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
+                }
             }
         }
+    }
 
-        ConnectionTypeSelectionDrawer {
-            id: connectionTypeSelection
-        }
+    ConnectionTypeSelectionDrawer {
+        id: connectionTypeSelection
     }
 
     BusyIndicatorType {

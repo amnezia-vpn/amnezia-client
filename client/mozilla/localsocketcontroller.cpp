@@ -124,7 +124,10 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::config_key::client_priv_key));
   json.insert("deviceIpv4Address", wgConfig.value(amnezia::config_key::client_ip));
+  // todo review wg ipv6
+#ifndef Q_OS_WINDOWS
   json.insert("deviceIpv6Address", "dead::1");
+#endif
   json.insert("serverPublicKey", wgConfig.value(amnezia::config_key::server_pub_key));
   json.insert("serverPskKey", wgConfig.value(amnezia::config_key::psk_key));
   json.insert("serverIpv4AddrIn", wgConfig.value(amnezia::config_key::hostName));
@@ -247,8 +250,6 @@ void LocalSocketController::deactivate() {
 }
 
 void LocalSocketController::checkStatus() {
-  logger.debug() << "Check status";
-
   if (m_daemonState == eReady || m_daemonState == eInitializing) {
     Q_ASSERT(m_socket);
 
@@ -298,7 +299,6 @@ void LocalSocketController::cleanupBackendLogs() {
 }
 
 void LocalSocketController::readData() {
-  logger.debug() << "Reading";
 
   Q_ASSERT(m_socket);
   Q_ASSERT(m_daemonState == eInitializing || m_daemonState == eReady);
@@ -340,8 +340,6 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
   }
   QString type = typeValue.toString();
 
-  logger.debug() << "Parse command:" << type;
-
   if (m_daemonState == eInitializing && type == "status") {
     m_daemonState = eReady;
 
@@ -367,6 +365,7 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
     }
 
     emit initialized(true, connected.toBool(), datetime);
+    checkStatus();
     return;
   }
 

@@ -22,6 +22,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     Q_PROPERTY(int routeMode READ getRouteMode WRITE setRouteMode NOTIFY routeModeChanged)
+    Q_PROPERTY(bool isTunnelingEnabled READ isSplitTunnelingEnabled NOTIFY splitTunnelingToggled)
 
 public slots:
     bool addSite(const QString &hostname, const QString &ip);
@@ -38,6 +39,7 @@ public slots:
 
 signals:
     void routeModeChanged();
+    void splitTunnelingToggled();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

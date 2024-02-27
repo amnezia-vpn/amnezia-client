@@ -36,19 +36,23 @@ Item {
     property int rootButtonTextBottomMargin: 16
 
     property real drawerHeight: 0.9
+    property Item drawerParent
     property Component listView
 
-    property alias menuVisible: menu.visible
+    signal open
+    signal close
 
     implicitWidth: rootButtonContent.implicitWidth
     implicitHeight: rootButtonContent.implicitHeight
 
-    onMenuVisibleChanged: {
-        if (menuVisible) {
-            rootButtonBackground.border.color = rootButtonPressedBorderColor
-        } else {
-            rootButtonBackground.border.color = rootButtonDefaultBorderColor
-        }
+    onOpen: {
+        menu.open()
+        rootButtonBackground.border.color = rootButtonPressedBorderColor
+    }
+
+    onClose: {
+        menu.close()
+        rootButtonBackground.border.color = rootButtonDefaultBorderColor
     }
 
     onEnabledChanged: {
@@ -133,21 +137,21 @@ Item {
         hoverEnabled: root.enabled ? true : false
 
         onEntered: {
-            if (menu.visible === false) {
+            if (menu.isClosed) {
                 rootButtonBackground.border.color = rootButtonHoveredBorderColor
                 rootButtonBackground.color = rootButtonBackgroundHoveredColor
             }
         }
 
         onExited: {
-            if (menu.visible === false) {
+            if (menu.isClosed) {
                 rootButtonBackground.border.color = rootButtonDefaultBorderColor
                 rootButtonBackground.color = rootButtonBackgroundColor
             }
         }
 
         onPressed: {
-            if (menu.visible === false) {
+            if (menu.isClosed) {
                 rootButtonBackground.color = pressed ? rootButtonBackgroundPressedColor : entered ? rootButtonHoveredBorderColor : rootButtonDefaultBorderColor
             }
         }
@@ -156,60 +160,68 @@ Item {
             if (rootButtonClickedFunction && typeof rootButtonClickedFunction === "function") {
                 rootButtonClickedFunction()
             } else {
-                menu.visible = true
+                menu.open()
             }
         }
     }
 
-    DrawerType {
+    DrawerType2 {
         id: menu
 
-        width: parent.width
-        height: parent.height * drawerHeight
+        parent: drawerParent
 
-        ColumnLayout {
-            id: header
+        anchors.fill: parent
+        expandedHeight: drawerParent.height * drawerHeight
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.topMargin: 16
+        expandedContent: Item {
+            id: container
 
-            BackButtonType {
-                backButtonImage: root.headerBackButtonImage
-                backButtonFunction: function() {
-                    root.menuVisible = false
-                }
-            }
-        }
+            implicitHeight: menu.expandedHeight
 
-        FlickableType {
-            anchors.top: header.bottom
-            anchors.topMargin: 16
-            contentHeight: col.implicitHeight
+            ColumnLayout {
+                id: header
 
-            Column {
-                id: col
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
+                anchors.topMargin: 16
 
-                spacing: 16
+                BackButtonType {
+                    backButtonImage: root.headerBackButtonImage
+                    backButtonFunction: function() {
+                        menu.close()
+                    }
+                }
+            }
 
-                Header2Type {
+            FlickableType {
+                anchors.top: header.bottom
+                anchors.topMargin: 16
+                contentHeight: col.implicitHeight
+
+                Column {
+                    id: col
+                    anchors.top: parent.top
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.leftMargin: 16
-                    anchors.rightMargin: 16
 
-                    headerText: root.headerText
+                    spacing: 16
 
-                    width: parent.width
-                }
+                    Header2Type {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
 
-                Loader {
-                    id: listViewLoader
-                    sourceComponent: root.listView
+                        headerText: root.headerText
+
+                        width: parent.width
+                    }
+
+                    Loader {
+                        id: listViewLoader
+                        sourceComponent: root.listView
+                    }
                 }
             }
         }

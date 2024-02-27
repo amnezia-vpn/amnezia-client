@@ -138,9 +138,7 @@ Button {
     }
 
     onClicked: {
-        if (!ConnectionController.isConnectionInProgress) {
-            ServersModel.setCurrentlyProcessedServerIndex(ServersModel.defaultIndex)
-            ApiController.updateServerConfigFromApi()
-        }
+        ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
+        ApiController.updateServerConfigFromApi()
     }
 }

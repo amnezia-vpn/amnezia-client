@@ -38,13 +38,13 @@ PageType {
                 Connections {
                     target: ServersModel
 
-                    function onCurrentlyProcessedServerIndexChanged() {
+                    function onProcessedServerIndexChanged() {
                         settingsContainersListView.updateContainersModelFilters()
                     }
                 }
 
                 function updateContainersModelFilters() {
-                    if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
+                    if (ServersModel.isProcessedServerHasWriteAccess()) {
                         proxyContainersModel.filters = ContainersModelFilters.getWriteAccessServicesListFilters()
                     } else {
                         proxyContainersModel.filters = ContainersModelFilters.getReadAccessServicesListFilters()
@@ -55,6 +55,9 @@ PageType {
                 model: SortFilterProxyModel {
                     id: proxyContainersModel
                     sourceModel: ContainersModel
+                    sorters: [
+                        RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
+                    ]
                 }
 
                 Component.onCompleted: updateContainersModelFilters()
