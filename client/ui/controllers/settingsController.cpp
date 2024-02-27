@@ -229,7 +229,7 @@ bool SettingsController::isCameraPresent()
 void SettingsController::startLoggingWather()
 {
     if (isLoggingEnabled()) {
-        m_loggingDisableDate = m_settings->getLogEnableDate().addDays(14);
+        m_loggingDisableDate = m_settings->getLogEnableDate().addSecs(60 * 10);//addDays(14);
         QFuture<void> future = QtConcurrent::run([this]() {
             while (m_loggingDisableDate > QDateTime::currentDateTime()) {
                 QThread::currentThread()->msleep(1000 * 60);
