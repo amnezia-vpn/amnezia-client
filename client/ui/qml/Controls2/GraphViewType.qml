@@ -105,7 +105,6 @@ ChartView {
         //width: 2
         axisX: xAxis
         axisY: yAxis
-        style: Qt.RoundCap
         capStyle: Qt.RoundCap
         useOpenGL: true
         color: "#70553c"
@@ -118,7 +117,6 @@ ChartView {
         //width: 2
         axisX: xAxis
         axisY: yAxis
-        style: Qt.RoundCap
         capStyle: Qt.RoundCap
         useOpenGL: true
         color: "#737274"
