@@ -5,7 +5,7 @@
     <name>AmneziaApplication</name>
     <message>
         <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
-        <translation type="vanished">Раздельное туннелирование для &quot;Wireguard&quot; не реализовано,опция отключена</translation>
+        <translation type="vanished">Раздельное туннелирование для &quot;Wireguard&quot; не реализовано, опция отключена</translation>
     </message>
     <message>
         <source>Split tunneling for %1 is not implemented, the option was disabled</source>
@@ -46,12 +46,12 @@
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="114"/>
         <source>Settings updated successfully, Reconnnection...</source>
-        <translation>Настройки успешно обновлены. Подключение...</translation>
+        <translation>Настройки успешно обновлены, Подключение...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="117"/>
         <source>Settings updated successfully</source>
-        <translation type="unfinished">Настройки успешно обновлены</translation>
+        <translation type="unfinished">Настройки успешно обновлены.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="78"/>
@@ -87,7 +87,7 @@
     <message>
         <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="58"/>
         <source>Open config file, key or QR code</source>
-        <translation>Открыть файл конфига, ключ или QR код</translation>
+        <translation>Открыть файл конфигурации, ключ или QR код</translation>
     </message>
 </context>
 <context>
@@ -110,7 +110,7 @@
     <message>
         <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="28"/>
         <source>&amp;SelectAll</source>
-        <translation>&amp;ВыбратьВсе</translation>
+        <translation>&amp;Выбрать всё</translation>
     </message>
 </context>
 <context>
@@ -346,7 +346,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="85"/>
         <source>AmneziaWG settings</source>
-        <translation>AmneziaWG настройки</translation>
+        <translation>настройки AmneziaWG</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="93"/>
@@ -422,7 +422,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="81"/>
         <source>OpenVPN settings</source>
-        <translation>OpenVPN настройки</translation>
+        <translation>настройки OpenVPN</translation>
     </message>
     <message>
         <source>VPN Addresses Subnet</source>
@@ -857,11 +857,11 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="112"/>
         <source>When configuring WordPress set the this onion address as domain.</source>
-        <translation>При настройке WordPress укажите этот onion адрес в качестве домена.</translation>
+        <translation>При настройке WordPress укажите этот Onion адрес в качестве домена.</translation>
     </message>
     <message>
         <source>When configuring WordPress set the this address as domain.</source>
-        <translation type="vanished">При настройке WordPress укажите этот onion адрес в качестве домена.</translation>
+        <translation type="vanished">При настройке WordPress укажите этот Onion адрес в качестве домена.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="126"/>
@@ -936,12 +936,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
         <source>This is a free and open source application. If you like it, support the developers with a donation. </source>
-        <translation>Это бесплатное приложение с открытым исходным кодом. Если, оно вам нравится - поддержите разработчиков пожертвованием. </translation>
+        <translation>Это бесплатное приложение с открытым исходным кодом. Если оно вам нравится - поддержите разработчиков пожертвованием. </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="72"/>
         <source>And if you don’t like the application, all the more reason to support it - the donation will be used for the improving the application.</source>
-        <translation>А, если оно вам не нравится, тем более поддержите-пожертвование пойдет на улучшение приложения.</translation>
+        <translation>А, если оно вам не нравится, тем более поддержите - пожертвование пойдет на улучшение приложения.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="82"/>
@@ -1209,7 +1209,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="49"/>
         <source>If AmneziaDNS is installed on the server</source>
-        <translation>Если он уставновлен на сервере</translation>
+        <translation>Если он установлен на сервере</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="64"/>
@@ -1251,7 +1251,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="39"/>
         <source>Default server does not support custom dns</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Сервер по умолчанию не поддерживает пользовательские dns</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="57"/>
@@ -1454,7 +1454,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="173"/>
         <source>Do you want to remove the server from application?</source>
-        <translation type="unfinished">Вы уверена что хотите удалить сервер из приложения?</translation>
+        <translation type="unfinished">Вы уверены, что хотите удалить сервер из приложения?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="203"/>
@@ -1668,7 +1668,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="394"/>
         <source>Replace site list</source>
-        <translation>Заменить список сайтов</translation>
+        <translation>Заменить список с сайтами</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="397"/>
@@ -1694,14 +1694,14 @@ Already installed containers were found on the server. All installed containers 
         <source>Do not use connection code from public sources. It may have been created to intercept your data.
 
 It&apos;s okay as long as it&apos;s from someone you trust.</source>
-        <translation>Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватывать ваши данные..
+        <translation>Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватить ваши данные.
 
 Всё в порядке, если кодом поделился пользователь, которому вы доверяете.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="61"/>
         <source>What do you have?</source>
-        <translation>Выберете что у вас есть</translation>
+        <translation>Выберите что у вас есть</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
@@ -1756,7 +1756,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <source>All data you enter will remain strictly confidential
 and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation type="vanished">Все данные, которые вы вводите, останутся строго конфиденциальными и не будут переданы или раскрыты Amnezia или каким-либо третьим сторонам</translation>
+        <translation type="vanished">Все данные, которые вы вводите, останутся строго конфиденциальными и не будут переданы или раскрыты Amnezia или каким-либо третьим лицам</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="142"/>
@@ -1786,12 +1786,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="130"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation type="unfinished">Все введенные вами данные останутся строго конфиденциальными и не будут переданы или раскрыты Amnezia или третьим лицам</translation>
+        <translation type="unfinished">Все данные, которые вы вводите, останутся строго конфиденциальными и не будут переданы или раскрыты Amnezia или каким-либо третьим лицам</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="139"/>
         <source>Ip address cannot be empty</source>
-        <translation>Поле Ip address не может быть пустым</translation>
+        <translation>Поле IP address не может быть пустым</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="146"/>
@@ -1801,7 +1801,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="150"/>
         <source>Password/private key cannot be empty</source>
-        <translation>Поле Password/private key не может быть пустым</translation>
+        <translation>Поле Password/Private key не может быть пустым</translation>
     </message>
 </context>
 <context>
@@ -1809,7 +1809,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="67"/>
         <source>What is the level of internet control in your region?</source>
-        <translation>Какой уровень контроля интернета в вашем регионе?</translation>
+        <translation>Какой уровень контроля над интернетом в вашем регионе?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="139"/>
@@ -2004,7 +2004,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="95"/>
         <source>Do not use connection code from public sources. It could be created to intercept your data.</source>
-        <translation>Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватывать ваши данные.</translation>
+        <translation>Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватить ваши данные.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="110"/>
@@ -2027,7 +2027,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="116"/>
         <source>OpenVpn native format</source>
-        <translation>OpenVpn нативный формат</translation>
+        <translation>OpenVPN нативный формат</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="121"/>
@@ -2288,28 +2288,28 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="104"/>
         <source>Password entry not found</source>
-        <translation>Password entry not found</translation>
+        <translation>Пароль не найден</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="108"/>
         <source>Could not decrypt data</source>
-        <translation>Could not decrypt data</translation>
+        <translation>Не удалось расшифровать данные</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="585"/>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="593"/>
         <source>Unknown error</source>
-        <translation>Unknown error</translation>
+        <translation>Неизвестная ошибка</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="614"/>
         <source>Could not open wallet: %1; %2</source>
-        <translation>Could not open wallet: %1; %2</translation>
+        <translation>Не удалось открыть связку ключей: %1; %2</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_haiku.cpp" line="177"/>
         <source>Password not found</source>
-        <translation>Password not found</translation>
+        <translation>Пароль не найден</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="173"/>
