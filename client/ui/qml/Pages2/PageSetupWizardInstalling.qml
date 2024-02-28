@@ -14,8 +14,8 @@ import "../Config"
 PageType {
     id: root
 
-    Component.onCompleted: PageController.enableTabBar(false)
-    Component.onDestruction: PageController.enableTabBar(true)
+    Component.onCompleted: PageController.disableControls(true)
+    Component.onDestruction: PageController.disableControls(false)
 
     property bool isTimerRunning: true
     property string progressBarText: qsTr("Usually it takes no more than 5 minutes")

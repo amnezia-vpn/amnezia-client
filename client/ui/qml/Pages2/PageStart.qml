@@ -38,8 +38,8 @@ PageType {
             tabBar.enabled = !visible
         }
 
-        function onEnableTabBar(enabled) {
-            tabBar.enabled = enabled
+        function onDisableControls(disabled) {
+            tabBar.enabled = !disabled
         }
 
         function onClosePage() {
@@ -68,6 +68,21 @@ PageType {
             connectionTypeSelection.close()
             while (tabBarStackView.depth > 1) {
                 tabBarStackView.pop()
+            }
+        }
+
+        function onEscapePressed() {
+            if (!tabBar.enabled || busyIndicator.visible) {
+                return
+            }
+
+            var pageName = tabBarStackView.currentItem.objectName
+            if ((pageName === PageController.getPagePath(PageEnum.PageShare)) ||
+                    (pageName === PageController.getPagePath(PageEnum.PageSettings))) {
+                PageController.goToPageHome()
+                tabBar.previousIndex = 0
+            } else {
+                PageController.closePage()
             }
         }
     }
