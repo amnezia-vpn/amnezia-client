@@ -126,7 +126,7 @@ private:
 
     bool m_isTriggeredByConnectButton;
 
-    int m_drawerDepth;
+    int m_drawerDepth = 0;
 };
 
 #endif // PAGECONTROLLER_H
