@@ -138,7 +138,7 @@ Button {
     }
 
     onClicked: {
-        ServersModel.setCurrentlyProcessedServerIndex(ServersModel.defaultIndex)
+        ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
         ApiController.updateServerConfigFromApi()
     }
 }

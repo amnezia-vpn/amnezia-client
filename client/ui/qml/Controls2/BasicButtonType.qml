@@ -21,6 +21,8 @@ Button {
     property int borderFocusedWidth: 1
 
     property string imageSource
+    property string rightImageSource
+    property string leftImageColor: textColor
 
     property bool squareLeftSide: false
 
@@ -118,7 +120,7 @@ Button {
                 layer {
                     enabled: true
                     effect: ColorOverlay {
-                        color: textColor
+                        color: leftImageColor
                     }
                 }
             }
@@ -130,6 +132,21 @@ Button {
 
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignVCenter
+            }
+
+            Image {
+                Layout.preferredHeight: 20
+                Layout.preferredWidth: 20
+
+                source: root.rightImageSource
+                visible: root.rightImageSource === "" ? false : true
+
+                layer {
+                    enabled: true
+                    effect: ColorOverlay {
+                        color: textColor
+                    }
+                }
             }
         }
     }

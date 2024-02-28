@@ -92,6 +92,7 @@ private:
     QCommandLineParser m_parser;
 
     QSharedPointer<ContainersModel> m_containersModel;
+    QSharedPointer<ContainersModel> m_defaultServerContainersModel;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<ProtocolsModel> m_protocolsModel;

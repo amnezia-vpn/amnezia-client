@@ -33,7 +33,7 @@ void ConnectionController::openConnection()
     int serverIndex = m_serversModel->getDefaultServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
-    DockerContainer container = m_serversModel->getDefaultContainer(serverIndex);
+    DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
     const QJsonObject &containerConfig = m_containersModel->getContainerConfig(container);
 
     if (container == DockerContainer::None) {

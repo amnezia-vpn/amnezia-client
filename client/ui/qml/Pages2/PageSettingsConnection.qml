@@ -42,27 +42,6 @@ PageType {
             }
 
             SwitcherType {
-                visible: !GC.isMobile()
-
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                text: qsTr("Auto connect")
-                descriptionText: qsTr("Connect to VPN on app start")
-
-                checked: SettingsController.isAutoConnectEnabled()
-                onCheckedChanged: {
-                    if (checked !== SettingsController.isAutoConnectEnabled()) {
-                        SettingsController.toggleAutoConnect(checked)
-                    }
-                }
-            }
-
-            DividerType {
-                visible: !GC.isMobile()
-            }
-
-            SwitcherType {
                 Layout.fillWidth: true
                 Layout.margins: 16
 
