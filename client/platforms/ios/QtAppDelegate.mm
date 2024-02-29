@@ -3,25 +3,15 @@
 
 #include <QFile>
 
-@implementation QtAppDelegate {
-    UIView *_screen;
-}
+UIView *_screen;
 
-+(QtAppDelegate *)sharedQtAppDelegate {
-    static dispatch_once_t pred;
-    static QtAppDelegate *shared = nil;
-    dispatch_once(&pred, ^{
-        shared = [[super alloc] init];
-    });
-    return shared;
-}
-
+@implementation QIOSApplicationDelegate (AmneziaVPNDelegate)
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     [application setMinimumBackgroundFetchInterval: UIApplicationBackgroundFetchIntervalMinimum];
     // Override point for customization after application launch.
-    NSLog(@"Did this launch option happen");
+    NSLog(@"Application didFinishLaunchingWithOptions");
     return YES;
 }
 
@@ -70,31 +60,27 @@
 - (BOOL)application:(UIApplication *)app
             openURL:(NSURL *)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
-    
-    NSLog(@"Application openURL: %@", url);
     if (url.fileURL) {
         QString filePath(url.path.UTF8String);
         if (filePath.isEmpty()) return NO;
 
-        if (filePath.contains("backup")) {
-            IosController::Instance()->importBackupFromOutside(filePath);
-        } else {
-            QFile file(filePath);
-            bool isOpenFile = file.open(QIODevice::ReadOnly);
-            QByteArray data = file.readAll();
-            
-            IosController::Instance()->importConfigFromOutside(QString(data));
-        }
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            NSLog(@"Application openURL: %@", url);
+
+            if (filePath.contains("backup")) {
+                IosController::Instance()->importBackupFromOutside(filePath);
+            } else {
+                QFile file(filePath);
+                bool isOpenFile = file.open(QIODevice::ReadOnly);
+                QByteArray data = file.readAll();
+
+                IosController::Instance()->importConfigFromOutside(QString(data));
+            }
+        });
+
         return YES;
     }
     return NO;
-}
-
-
-void QtAppDelegateInitialize()
-{
-    [[UIApplication sharedApplication] setDelegate: [QtAppDelegate sharedQtAppDelegate]];
-    NSLog(@"Created a new AppDelegate");
 }
 
 @end
