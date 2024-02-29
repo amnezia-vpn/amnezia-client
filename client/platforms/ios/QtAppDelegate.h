@@ -1,4 +1,7 @@
 #import <UIKit/UIKit.h>
 
-@interface QtAppDelegate : UIResponder <UIApplicationDelegate>
+@interface QIOSApplicationDelegate
+@end
+
+@interface QIOSApplicationDelegate (AmneziaVPNDelegate)
 @end
