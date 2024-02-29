@@ -50,8 +50,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
   private let dispatchQueue = DispatchQueue(label: "PacketTunnel", qos: .utility)
 
   private var openVPNConfig: Data?
-  var splitTunnelType: String?
-  var splitTunnelSites: String?
+  var splitTunnelType: Int!
+  var splitTunnelSites: [String]!
 
   let vpnReachability = OpenVPNReachability()
 
@@ -80,22 +80,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
     if action == Constants.kActionStatus {
       handleStatusAppMessage(messageData, completionHandler: completionHandler)
-    }
-
-    if action == Constants.kActionStart {
-      splitTunnelType = message[Constants.kMessageKeySplitTunnelType] as? String
-      splitTunnelSites = message[Constants.kMessageKeySplitTunnelSites] as? String
-    }
-
-    let callbackWrapper: (NSNumber?) -> Void = { errorCode in
-      // let tunnelId = self.tunnelConfig?.id ?? ""
-      let response: [String: Any] = [
-        Constants.kMessageKeyAction: action,
-        Constants.kMessageKeyErrorCode: errorCode ?? NSNull(),
-        Constants.kMessageKeyTunnelId: 0
-      ]
-
-      completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
     }
   }
 
@@ -169,110 +153,118 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                               completionHandler: @escaping (Error?) -> Void) {
     guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
           let providerConfiguration = protocolConfiguration.providerConfiguration,
-          let wgConfig: Data = providerConfiguration[Constants.wireGuardConfigKey] as? Data else {
+          let wgConfigData: Data = providerConfiguration[Constants.wireGuardConfigKey] as? Data else {
       wg_log(.error, message: "Can't start WireGuard config missing")
       completionHandler(nil)
       return
     }
 
-    guard let wgConfigStr = try? JSONDecoder().decode(WGConfig.self, from: wgConfig).str,
-          let tunnelConfiguration = try? TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
-    else {
-      wg_log(.error, message: "Can't parse WireGuard config")
-      completionHandler(nil)
-      return
-    }
+    do {
+      let wgConfig = try JSONDecoder().decode(WGConfig.self, from: wgConfigData)
+      let wgConfigStr = wgConfig.str
+      log(.info, message: "wgConfig: \(wgConfig.redux.replacingOccurrences(of: "\n", with: " "))")
 
-    log(.info, message: "wgConfig: \(wgConfigStr.replacingOccurrences(of: "\n", with: " "))")
+      let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
 
-    if tunnelConfiguration.peers.first!.allowedIPs
-      .map({ $0.stringRepresentation })
-      .joined(separator: ", ") == "0.0.0.0/0, ::/0" {
-      if splitTunnelType == "1" {
-        for index in tunnelConfiguration.peers.indices {
-          tunnelConfiguration.peers[index].allowedIPs.removeAll()
-          var allowedIPs = [IPAddressRange]()
-          let STSdata = Data(splitTunnelSites!.utf8)
-          do {
-            guard let STSArray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
-            for allowedIPString in STSArray {
+      if tunnelConfiguration.peers.first!.allowedIPs
+        .map({ $0.stringRepresentation })
+        .joined(separator: ", ") == "0.0.0.0/0, ::/0" {
+        if wgConfig.splitTunnelType == 1 {
+          for index in tunnelConfiguration.peers.indices {
+            tunnelConfiguration.peers[index].allowedIPs.removeAll()
+            var allowedIPs = [IPAddressRange]()
+
+            for allowedIPString in wgConfig.splitTunnelSites {
               if let allowedIP = IPAddressRange(from: allowedIPString) {
                 allowedIPs.append(allowedIP)
               }
             }
-          } catch {
-            wg_log(.error, message: "Parse JSONSerialization Error")
+
+            tunnelConfiguration.peers[index].allowedIPs = allowedIPs
           }
-          tunnelConfiguration.peers[index].allowedIPs = allowedIPs
-        }
-      } else if splitTunnelType == "2" {
-        for index in tunnelConfiguration.peers.indices {
-          var excludeIPs = [IPAddressRange]()
-          let STSdata = Data(splitTunnelSites!.utf8)
-          do {
-            guard let STSArray = try JSONSerialization.jsonObject(with: STSdata) as? [String] else { return }
-            for excludeIPString in STSArray {
+        } else if wgConfig.splitTunnelType == 2 {
+          for index in tunnelConfiguration.peers.indices {
+            var excludeIPs = [IPAddressRange]()
+
+            for excludeIPString in wgConfig.splitTunnelSites {
               if let excludeIP = IPAddressRange(from: excludeIPString) {
                 excludeIPs.append(excludeIP)
               }
             }
-          } catch {
-            wg_log(.error, message: "Parse JSONSerialization Error")
+
+            tunnelConfiguration.peers[index].excludeIPs = excludeIPs
           }
-          tunnelConfiguration.peers[index].excludeIPs = excludeIPs
         }
       }
-    }
 
-    wg_log(.info, message: "Starting wireguard tunnel from the " +
-           (activationAttemptId == nil ? "OS directly, rather than the app" : "app"))
+      wg_log(.info, message: "Starting wireguard tunnel from the " +
+             (activationAttemptId == nil ? "OS directly, rather than the app" : "app"))
 
-    // Start the tunnel
-    wgAdapter.start(tunnelConfiguration: tunnelConfiguration) { adapterError in
-      guard let adapterError else {
-        let interfaceName = self.wgAdapter.interfaceName ?? "unknown"
-        wg_log(.info, message: "Tunnel interface is \(interfaceName)")
-        completionHandler(nil)
-        return
+      // Start the tunnel
+      wgAdapter.start(tunnelConfiguration: tunnelConfiguration) { adapterError in
+        guard let adapterError else {
+          let interfaceName = self.wgAdapter.interfaceName ?? "unknown"
+          wg_log(.info, message: "Tunnel interface is \(interfaceName)")
+          completionHandler(nil)
+          return
+        }
+
+        switch adapterError {
+        case .cannotLocateTunnelFileDescriptor:
+          wg_log(.error, staticMessage: "Starting tunnel failed: could not determine file descriptor")
+          errorNotifier.notify(PacketTunnelProviderError.couldNotDetermineFileDescriptor)
+          completionHandler(PacketTunnelProviderError.couldNotDetermineFileDescriptor)
+        case .dnsResolution(let dnsErrors):
+          let hostnamesWithDnsResolutionFailure = dnsErrors.map { $0.address }
+            .joined(separator: ", ")
+          wg_log(.error, message:
+                  "DNS resolution failed for the following hostnames: \(hostnamesWithDnsResolutionFailure)")
+          errorNotifier.notify(PacketTunnelProviderError.dnsResolutionFailure)
+          completionHandler(PacketTunnelProviderError.dnsResolutionFailure)
+        case .setNetworkSettings(let error):
+          wg_log(.error, message:
+                  "Starting tunnel failed with setTunnelNetworkSettings returning \(error.localizedDescription)")
+          errorNotifier.notify(PacketTunnelProviderError.couldNotSetNetworkSettings)
+          completionHandler(PacketTunnelProviderError.couldNotSetNetworkSettings)
+        case .startWireGuardBackend(let errorCode):
+          wg_log(.error, message: "Starting tunnel failed with wgTurnOn returning \(errorCode)")
+          errorNotifier.notify(PacketTunnelProviderError.couldNotStartBackend)
+          completionHandler(PacketTunnelProviderError.couldNotStartBackend)
+        case .invalidState:
+          fatalError()
+        }
       }
-
-      switch adapterError {
-      case .cannotLocateTunnelFileDescriptor:
-        wg_log(.error, staticMessage: "Starting tunnel failed: could not determine file descriptor")
-        errorNotifier.notify(PacketTunnelProviderError.couldNotDetermineFileDescriptor)
-        completionHandler(PacketTunnelProviderError.couldNotDetermineFileDescriptor)
-      case .dnsResolution(let dnsErrors):
-        let hostnamesWithDnsResolutionFailure = dnsErrors.map { $0.address }
-          .joined(separator: ", ")
-        wg_log(.error, message:
-                "DNS resolution failed for the following hostnames: \(hostnamesWithDnsResolutionFailure)")
-        errorNotifier.notify(PacketTunnelProviderError.dnsResolutionFailure)
-        completionHandler(PacketTunnelProviderError.dnsResolutionFailure)
-      case .setNetworkSettings(let error):
-        wg_log(.error, message:
-                "Starting tunnel failed with setTunnelNetworkSettings returning \(error.localizedDescription)")
-        errorNotifier.notify(PacketTunnelProviderError.couldNotSetNetworkSettings)
-        completionHandler(PacketTunnelProviderError.couldNotSetNetworkSettings)
-      case .startWireGuardBackend(let errorCode):
-        wg_log(.error, message: "Starting tunnel failed with wgTurnOn returning \(errorCode)")
-        errorNotifier.notify(PacketTunnelProviderError.couldNotStartBackend)
-        completionHandler(PacketTunnelProviderError.couldNotStartBackend)
-      case .invalidState:
-        fatalError()
-      }
+    } catch {
+      log(.error, message: "Can't parse WG config: \(error.localizedDescription)")
+      completionHandler(nil)
+      return
     }
   }
 
   private func startOpenVPN(completionHandler: @escaping (Error?) -> Void) {
     guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
           let providerConfiguration = protocolConfiguration.providerConfiguration,
-          let ovpnConfiguration: Data = providerConfiguration[Constants.ovpnConfigKey] as? Data else {
-
+          let openVPNConfigData = providerConfiguration[Constants.ovpnConfigKey] as? Data else {
       wg_log(.error, message: "Can't start startOpenVPN()")
       return
     }
 
-    setupAndlaunchOpenVPN(withConfig: ovpnConfiguration, completionHandler: completionHandler)
+    do {
+      log(.info, message: "providerConfiguration: \(String(decoding: openVPNConfigData, as: UTF8.self).replacingOccurrences(of: "\n", with: " "))")
+
+      let openVPNConfig = try JSONDecoder().decode(OpenVPNConfig.self, from: openVPNConfigData)
+      log(.info, message: "openVPNConfig: \(openVPNConfig.str.replacingOccurrences(of: "\n", with: " "))")
+      let ovpnConfiguration = Data(openVPNConfig.config.utf8)
+      setupAndlaunchOpenVPN(withConfig: ovpnConfiguration, completionHandler: completionHandler)
+    } catch {
+      log(.error, message: "Can't parse OpenVPN config: \(error.localizedDescription)")
+
+      if let underlyingError = (error as NSError).userInfo[NSUnderlyingErrorKey] as? NSError {
+        log(.error, message: "Can't parse OpenVPN config: \(underlyingError.localizedDescription)")
+      }
+
+      return
+    }
   }
 
   private func stopWireguard(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
