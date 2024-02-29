@@ -18,6 +18,7 @@ class AmneziaApplication : QtApplication(), CameraXConfig.Provider {
         super.onCreate()
         Prefs.init(this)
         Log.init(this)
+        VpnStateStore.init(this)
         Log.d(TAG, "Create Amnezia application")
         createNotificationChannel()
     }

@@ -20,9 +20,9 @@ public:
     // keep synchronized with org.amnezia.vpn.protocol.ProtocolState
     enum class ConnectionState
     {
+        DISCONNECTED,
         CONNECTED,
         CONNECTING,
-        DISCONNECTED,
         DISCONNECTING,
         RECONNECTING,
         UNKNOWN
@@ -48,9 +48,7 @@ signals:
     void serviceDisconnected();
     void serviceError();
     void vpnPermissionRejected();
-    void vpnConnected();
-    void vpnDisconnected();
-    void vpnReconnecting();
+    void vpnStateChanged(ConnectionState state);
     void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void fileOpened(QString uri);
     void configImported(QString config);
@@ -77,9 +75,7 @@ private:
     static void onServiceDisconnected(JNIEnv *env, jobject thiz);
     static void onServiceError(JNIEnv *env, jobject thiz);
     static void onVpnPermissionRejected(JNIEnv *env, jobject thiz);
-    static void onVpnConnected(JNIEnv *env, jobject thiz);
-    static void onVpnDisconnected(JNIEnv *env, jobject thiz);
-    static void onVpnReconnecting(JNIEnv *env, jobject thiz);
+    static void onVpnStateChanged(JNIEnv *env, jobject thiz, jint stateCode);
     static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz, jstring data);
     static void onFileOpened(JNIEnv *env, jobject thiz, jstring uri);

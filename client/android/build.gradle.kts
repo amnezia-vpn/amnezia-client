@@ -111,4 +111,5 @@ dependencies {
     implementation(libs.kotlinx.coroutines)
     implementation(libs.bundles.androidx.camera)
     implementation(libs.google.mlkit)
+    implementation(libs.androidx.datastore)
 }
