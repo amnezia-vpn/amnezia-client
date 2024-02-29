@@ -33,22 +33,23 @@ Button {
     hoverEnabled: true
 
     background: Rectangle {
-        id: background_border
+        id: focusBorder
 
         color: "transparent"
         border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
         border.width: root.activeFocus ? root.borderFocusedWidth : "transparent"
 
         anchors.fill: parent
+
         radius: 16
 
         Rectangle {
             id: background
 
-            anchors.fill: background_border
-            anchors.margins: root.activeFocus ? 2: 0
+            anchors.fill: focusBorder
+            anchors.margins: root.activeFocus ? 2 : 0
 
-            radius: 16
+            radius: root.activeFocus ? 14 : 16
             color: {
                 if (root.enabled) {
                     if (root.pressed) {
@@ -59,8 +60,8 @@ Button {
                     return disabledColor
                 }
             }
-            border.color: root.activeFocus ? "transparent" : borderColor
-            border.width: root.activeFocus ? 0 : borderWidth
+            border.color: borderColor
+            border.width: borderWidth
 
             Behavior on color {
                 PropertyAnimation { duration: 200 }
@@ -95,13 +96,13 @@ Button {
     }
 
     MouseArea {
-        anchors.fill: background_border
+        anchors.fill: focusBorder
         enabled: false
         cursorShape: Qt.PointingHandCursor
     }
 
     contentItem: Item {
-        anchors.fill: background_border
+        anchors.fill: focusBorder
 
         implicitWidth: content.implicitWidth
         implicitHeight: content.implicitHeight

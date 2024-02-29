@@ -187,9 +187,8 @@ PageType {
 
                 visible: {
                     if (PageController.isTriggeredByConnectButton()) {
-                        PageController.setTriggeredBtConnectButton(false)
-
-                        return ContainersModel.isAnyContainerInstalled()
+                        PageController.setTriggeredByConnectButton(false)
+                        return false
                     }
 
                     return  true

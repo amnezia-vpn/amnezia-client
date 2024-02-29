@@ -162,7 +162,7 @@ PageType {
             }
 
         }
-        expandedContent:  Item {
+        expandedContent: Item {
             id: serverMenuContainer
 
             implicitHeight: root.height * 0.9
