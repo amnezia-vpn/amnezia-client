@@ -3,7 +3,6 @@ LABEL maintainer="AmneziaVPN"
 
 ARG SS_RELEASE="v1.13.1"
 ARG CLOAK_RELEASE="v2.5.5"
-ARG SERVER_ARCH
 
 #Install required packages
 RUN apk add --no-cache curl openvpn easy-rsa bash netcat-openbsd dumb-init rng-tools
@@ -16,12 +15,13 @@ RUN mkdir -p /opt/amnezia
 RUN echo -e "#!/bin/bash\ntail -f /dev/null" > /opt/amnezia/start.sh
 RUN chmod a+x /opt/amnezia/start.sh
 
-RUN if [ $SERVER_ARCH="x86_64" ]; then CK_ARCH="amd64"; \
-    elif [ $SERVER_ARCH="i686" ]; then CK_ARCH="386"; \
-    elif [ $SERVER_ARCH="aarch64" ]; then CK_ARCH="arm64"; \
-    elif [ $SERVER_ARCH="arm" ]; then CK_ARCH="arm"; \
-    else exit -1; fi && \
-    curl -L https://github.com/cbeuw/Cloak/releases/download/${CLOAK_RELEASE}/ck-server-linux-${CK_ARCH}-${CLOAK_RELEASE} > /usr/bin/ck-server
+RUN SERVER_ARCH=$(uname -m); \
+  if [ $SERVER_ARCH="x86_64" ]; then CK_ARCH="amd64"; \
+  elif [ $SERVER_ARCH="i686" ]; then CK_ARCH="386"; \
+  elif [ $SERVER_ARCH="aarch64" ]; then CK_ARCH="arm64"; \
+  elif [ $SERVER_ARCH="arm" ]; then CK_ARCH="arm"; \
+  else exit -1; fi && \
+  curl -L https://github.com/cbeuw/Cloak/releases/download/${CLOAK_RELEASE}/ck-server-linux-${CK_ARCH}-${CLOAK_RELEASE} > /usr/bin/ck-server
 RUN chmod a+x /usr/bin/ck-server
 
 RUN curl -L https://github.com/shadowsocks/shadowsocks-rust/releases/download/${SS_RELEASE}/shadowsocks-${SS_RELEASE}.${SERVER_ARCH}-unknown-linux-musl.tar.xz  > /usr/bin/ss.tar.xz

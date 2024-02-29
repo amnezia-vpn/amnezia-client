@@ -2,7 +2,6 @@ FROM alpine:3.15
 LABEL maintainer="AmneziaVPN"
 
 ARG SS_RELEASE="v1.13.1"
-ARG SERVER_ARCH
 
 #Install required packages
 RUN apk add --no-cache curl openvpn easy-rsa bash netcat-openbsd dumb-init rng-tools xz
@@ -15,8 +14,9 @@ RUN mkdir -p /opt/amnezia
 RUN echo -e "#!/bin/bash\ntail -f /dev/null" > /opt/amnezia/start.sh
 RUN chmod a+x /opt/amnezia/start.sh
 
-RUN SUFFIX=""; \
-  if [ "${SERVER_ARCH}" = "arm" ]; then \
+RUN SERVER_ARCH=$(uname -m); \
+  SUFFIX=""; \
+  if [ ! -z "$(echo ${SERVER_ARCH} | grep -i arm)" ]; then \
     if [ ! -z "$(cat /proc/cpuinfo | grep -i vfp)" ]; then \
       SUFFIX="eabihf"; \
     else \
