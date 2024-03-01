@@ -1,7 +1,7 @@
 FROM alpine:3.15
 LABEL maintainer="AmneziaVPN"
 
-ARG SS_RELEASE="v1.13.1"
+ARG SS_RELEASE="v1.18.1"
 
 #Install required packages
 RUN apk add --no-cache curl openvpn easy-rsa bash netcat-openbsd dumb-init rng-tools xz
