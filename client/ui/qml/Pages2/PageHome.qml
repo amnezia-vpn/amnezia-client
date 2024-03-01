@@ -165,7 +165,7 @@ PageType {
         expandedContent: Item {
             id: serverMenuContainer
 
-            implicitHeight: root.height * 0.9
+            implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
 
             Component.onCompleted: {
                 drawer.expandedHeight = serverMenuContainer.implicitHeight
@@ -252,7 +252,7 @@ PageType {
                             model: SortFilterProxyModel {
                                 id: proxyDefaultServerContainersModel
                                 sourceModel: DefaultServerContainersModel
-                                
+
                                 sorters: [
                                     RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
                                 ]

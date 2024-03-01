@@ -130,7 +130,7 @@ PageType {
                         }
 
                         Component.onCompleted: {
-                            if (header.itemAt(0)) {
+                            if (header.itemAt(0) && Qt.platform.os !== "ios") {
                                 defaultActiveFocusItem = serverName.textField
                             }
                         }
