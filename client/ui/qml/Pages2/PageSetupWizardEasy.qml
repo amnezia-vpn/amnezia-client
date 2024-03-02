@@ -158,7 +158,7 @@ PageType {
 
                 text: qsTr("Continue")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     if (root.isEasySetup) {
                         ContainersModel.setCurrentlyProcessedContainerIndex(containers.dockerContainer)
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
@@ -187,18 +187,16 @@ PageType {
 
                 visible: {
                     if (PageController.isTriggeredByConnectButton()) {
-                        PageController.setTriggeredBtConnectButton(false)
-
-                        return ContainersModel.isAnyContainerInstalled()
+                        PageController.setTriggeredByConnectButton(false)
+                        return false
                     }
-
 
                     return  true
                 }
 
                 text: qsTr("Set up later")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                     InstallController.addEmptyServer()
                 }

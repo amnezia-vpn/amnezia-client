@@ -90,71 +90,77 @@ PageType {
 
                         DividerType {}
 
-                        DrawerType {
+                        DrawerType2 {
                             id: configContentDrawer
 
-                            width: parent.width
-                            height: parent.height * 0.9
+                            expandedHeight: root.height * 0.9
 
-                            BackButtonType {
-                                id: backButton
+                            parent: root
+                            anchors.fill: parent
 
-                                anchors.top: parent.top
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.topMargin: 16
+                            expandedContent: Item {
+                                implicitHeight: configContentDrawer.expandedHeight
 
-                                backButtonFunction: function() {
-                                    configContentDrawer.visible = false
-                                }
-                            }
+                                BackButtonType {
+                                    id: backButton
 
-                            FlickableType {
-                                anchors.top: backButton.bottom
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.bottom: parent.bottom
-                                contentHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
+                                    anchors.top: parent.top
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.topMargin: 16
 
-                                ColumnLayout {
-                                    id: configContent
-
-                                    anchors.fill: parent
-                                    anchors.rightMargin: 16
-                                    anchors.leftMargin: 16
-
-                                    Header2Type {
-                                        Layout.fillWidth: true
-                                        Layout.topMargin: 16
-
-                                        headerText: qsTr("Connection options %1").arg(protocolName)
+                                    backButtonFunction: function() {
+                                        configContentDrawer.close()
                                     }
+                                }
 
-                                    TextArea {
-                                        id: configText
+                                FlickableType {
+                                    anchors.top: backButton.bottom
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
+                                    contentHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
 
-                                        Layout.fillWidth: true
-                                        Layout.topMargin: 16
-                                        Layout.bottomMargin: 16
+                                    ColumnLayout {
+                                        id: configContent
 
-                                        padding: 0
-                                        leftPadding: 0
-                                        height: 24
+                                        anchors.fill: parent
+                                        anchors.rightMargin: 16
+                                        anchors.leftMargin: 16
 
-                                        color: "#D7D8DB"
-                                        selectionColor:  "#633303"
-                                        selectedTextColor: "#D7D8DB"
+                                        Header2Type {
+                                            Layout.fillWidth: true
+                                            Layout.topMargin: 16
 
-                                        font.pixelSize: 16
-                                        font.weight: Font.Medium
-                                        font.family: "PT Root UI VF"
+                                            headerText: qsTr("Connection options %1").arg(protocolName)
+                                        }
 
-                                        text: rawConfig
+                                        TextArea {
+                                            id: configText
 
-                                        wrapMode: Text.Wrap
+                                            Layout.fillWidth: true
+                                            Layout.topMargin: 16
+                                            Layout.bottomMargin: 16
 
-                                        background: Rectangle {
-                                            color: "transparent"
+                                            padding: 0
+                                            leftPadding: 0
+                                            height: 24
+
+                                            color: "#D7D8DB"
+                                            selectionColor:  "#633303"
+                                            selectedTextColor: "#D7D8DB"
+
+                                            font.pixelSize: 16
+                                            font.weight: Font.Medium
+                                            font.family: "PT Root UI VF"
+
+                                            text: rawConfig
+
+                                            wrapMode: Text.Wrap
+
+                                            background: Rectangle {
+                                                color: "transparent"
+                                            }
                                         }
                                     }
                                 }
@@ -169,26 +175,25 @@ PageType {
 
                 width: parent.width
 
-                visible: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+                visible: ServersModel.isProcessedServerHasWriteAccess()
 
                 text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
-                    questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
+                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
+                    var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var yesButtonFunction = function() {
                         PageController.goToPage(PageEnum.PageDeinstalling)
                         InstallController.removeCurrentlyProcessedContainer()
                     }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var noButtonFunction = function() {
                     }
-                    questionDrawer.visible = true
+
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
 
                 MouseArea {
@@ -199,10 +204,6 @@ PageType {
             }
 
             DividerType {}
-        }
-
-        QuestionDrawer {
-            id: questionDrawer
         }
     }
 }
