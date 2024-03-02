@@ -160,10 +160,6 @@ PageType {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 text: ServersModel.defaultServerDescriptionCollapsed
             }
-
-            Component.onCompleted: {
-                SettingsController.toggleScreenshotsEnabled(SettingsController.isScreenshotsEnabled())
-            }
         }
         expandedContent: Item {
             id: serverMenuContainer

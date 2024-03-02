@@ -163,6 +163,10 @@ void AmneziaApplication::init()
     m_pageController->showOnStartup();
 #endif
 
+#ifdef Q_OS_IOS
+    m_settingsController->toggleScreenshotsEnabled(m_settingsController->isScreenshotsEnabled());
+#endif
+
         // TODO - fix
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     if (isPrimary()) {
