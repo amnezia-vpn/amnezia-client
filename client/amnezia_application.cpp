@@ -97,6 +97,10 @@ void AmneziaApplication::init()
     AndroidController::instance()->setSaveLogs(m_settings->isSaveLogs());
     connect(m_settings.get(), &Settings::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
 
+    if (!m_settings->isScreenshotsEnabled()) {
+        AndroidController::instance()->toggleScreenshots(false);
+    }
+
     connect(AndroidController::instance(), &AndroidController::initConnectionState, this,
             [this](Vpn::ConnectionState state) {
                 m_connectionController->onConnectionStateChanged(state);
