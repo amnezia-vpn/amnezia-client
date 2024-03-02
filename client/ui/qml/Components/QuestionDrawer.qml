@@ -55,7 +55,7 @@ DrawerType2 {
 
             text: yesButtonText
 
-            onClicked: {
+            clickedFunc: function() {
                 if (yesButtonFunction && typeof yesButtonFunction === "function") {
                     yesButtonFunction()
                 }
@@ -76,7 +76,7 @@ DrawerType2 {
 
             text: noButtonText
 
-            onClicked: {
+            clickedFunc: function() {
                 if (noButtonFunction && typeof noButtonFunction === "function") {
                     noButtonFunction()
                 }

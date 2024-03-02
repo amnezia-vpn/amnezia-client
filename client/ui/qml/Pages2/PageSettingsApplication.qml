@@ -90,6 +90,27 @@ PageType {
                 Layout.fillWidth: true
                 Layout.margins: 16
 
+                text: qsTr("Auto connect")
+                descriptionText: qsTr("Connect to VPN on app start")
+
+                checked: SettingsController.isAutoConnectEnabled()
+                onCheckedChanged: {
+                    if (checked !== SettingsController.isAutoConnectEnabled()) {
+                        SettingsController.toggleAutoConnect(checked)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: !GC.isMobile()
+            }
+
+            SwitcherType {
+                visible: !GC.isMobile()
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
                 text: qsTr("Start minimized")
                 descriptionText: qsTr("Launch application minimized")
 
@@ -139,6 +160,7 @@ PageType {
 
                 text: qsTr("Reset settings and remove all data from the application")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                textColor: "#EB5757"
 
                 clickedFunction: function() {
                     var headerText = qsTr("Reset settings and remove all data from the application?")

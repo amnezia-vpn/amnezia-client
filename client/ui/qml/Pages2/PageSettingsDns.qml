@@ -13,6 +13,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: primaryDns.textField
+
     BackButtonType {
         id: backButton
 
@@ -28,10 +30,12 @@ PageType {
         anchors.bottom: parent.bottom
         contentHeight: content.height
 
-        enabled: !ServersModel.isDefaultServerFromApi()
+        property var isServerFromApi: ServersModel.getDefaultServerData("isServerFromApi")
+
+        enabled: !isServerFromApi
 
         Component.onCompleted: {
-            if (ServersModel.isDefaultServerFromApi()) {
+            if (isServerFromApi) {
                 PageController.showNotificationMessage(qsTr("Default server does not support custom dns"))
             }
         }
@@ -68,6 +72,8 @@ PageType {
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
+
+                KeyNavigation.tab: secondaryDns.textField
             }
 
             TextFieldWithHeaderType {
@@ -80,6 +86,8 @@ PageType {
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
+
+                KeyNavigation.tab: saveButton
             }
 
             BasicButtonType {
@@ -94,7 +102,7 @@ PageType {
 
                 text: qsTr("Restore default")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     var headerText = qsTr("Restore default DNS settings?")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
@@ -114,11 +122,13 @@ PageType {
             }
 
             BasicButtonType {
+                id: saveButton
+
                 Layout.fillWidth: true
 
                 text: qsTr("Save")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     if (primaryDns.textFieldText !== SettingsController.primaryDns) {
                         SettingsController.primaryDns = primaryDns.textFieldText
                     }
@@ -130,4 +140,5 @@ PageType {
             }
         }
     }
+
 }

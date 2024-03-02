@@ -70,14 +70,17 @@ QJsonObject ApiController::fillApiPayload(const QString &protocol, const ApiCont
 void ApiController::updateServerConfigFromApi()
 {
     QtConcurrent::run([this]() {
+        if (m_isConfigUpdateStarted) {
+            emit updateFinished(false);
+            return;
+        }
+
         auto serverConfig = m_serversModel->getDefaultServerConfig();
         auto containerConfig = serverConfig.value(config_key::containers).toArray();
 
-        bool isConfigUpdateStarted = false;
-
         if (serverConfig.value(config_key::configVersion).toInt() && containerConfig.isEmpty()) {
             emit updateStarted();
-            isConfigUpdateStarted = true;
+            m_isConfigUpdateStarted = true;
 
             QNetworkAccessManager manager;
 
@@ -110,6 +113,12 @@ void ApiController::updateServerConfigFromApi()
                 QByteArray ba = QByteArray::fromBase64(data.toUtf8(),
                                                        QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 
+                if (ba.isEmpty()) {
+                    emit errorOccurred(errorString(ApiConfigDownloadError));
+                    m_isConfigUpdateStarted = false;
+                    return;
+                }
+
                 QByteArray ba_uncompressed = qUncompress(ba);
                 if (!ba_uncompressed.isEmpty()) {
                     ba = ba_uncompressed;
@@ -127,17 +136,18 @@ void ApiController::updateServerConfigFromApi()
 
                 auto defaultContainer = apiConfig.value(config_key::defaultContainer).toString();
                 serverConfig.insert(config_key::defaultContainer, defaultContainer);
-                m_serversModel->editServer(serverConfig);
-                emit m_serversModel->defaultContainerChanged(ContainerProps::containerFromString(defaultContainer));
+                m_serversModel->editServer(serverConfig, m_serversModel->getDefaultServerIndex());
             } else {
                 qDebug() << reply->error();
                 qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
                 emit errorOccurred(errorString(ApiConfigDownloadError));
+                m_isConfigUpdateStarted = false;
                 return;
             }
         }
 
-        emit updateFinished(isConfigUpdateStarted);
+        emit updateFinished(m_isConfigUpdateStarted);
+        m_isConfigUpdateStarted = false;
         return;
     });
 }
@@ -153,5 +163,5 @@ void ApiController::clearApiConfig()
 
     serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
 
-    m_serversModel->editServer(serverConfig);
+    m_serversModel->editServer(serverConfig, m_serversModel->getDefaultServerIndex());
 }

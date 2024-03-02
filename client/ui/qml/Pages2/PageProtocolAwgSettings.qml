@@ -12,8 +12,11 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
+
 PageType {
     id: root
+
+    defaultActiveFocusItem: listview.currentItem.portTextField.textField
 
     ColumnLayout {
         id: backButton
@@ -41,9 +44,11 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+            enabled: ServersModel.isProcessedServerHasWriteAccess()
 
             ListView {
+
+
                 id: listview
 
                 width: parent.width
@@ -55,8 +60,12 @@ PageType {
                 model: AwgConfigModel
 
                 delegate: Item {
+                    id: _delegate
+
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
+
+                    property alias portTextField:portTextField
 
                     ColumnLayout {
                         id: col
@@ -93,6 +102,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: junkPacketCountTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -100,7 +111,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Junk packet count")
+                            headerText: "Jc - Junk packet count"
                             textFieldText: junkPacketCount
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -116,6 +127,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: junkPacketMinSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -123,7 +136,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Junk packet minimum size")
+                            headerText: "Jmin - Junk packet minimum size"
                             textFieldText: junkPacketMinSize
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -134,6 +147,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: junkPacketMaxSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -141,7 +156,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Junk packet maximum size")
+                            headerText: "Jmax - Junk packet maximum size"
                             textFieldText: junkPacketMaxSize
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -152,6 +167,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: initPacketJunkSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -159,7 +176,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Init packet junk size")
+                            headerText: "S1 - Init packet junk size"
                             textFieldText: initPacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -170,6 +187,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: responsePacketJunkSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -177,7 +196,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Response packet junk size")
+                            headerText: "S2 - Response packet junk size"
                             textFieldText: responsePacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -188,6 +207,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: initPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -195,7 +216,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Init packet magic header")
+                            headerText: "H1 - Init packet magic header"
                             textFieldText: initPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -206,6 +227,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: responsePacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -213,7 +236,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Response packet magic header")
+                            headerText: "H2 - Response packet magic header"
                             textFieldText: responsePacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -224,6 +247,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: transportPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -231,7 +256,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Transport packet magic header")
+                            headerText: "H4 - Transport packet magic header"
                             textFieldText: transportPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -242,6 +267,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: underloadPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -249,7 +276,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: qsTr("Underload packet magic header")
+                            headerText: "H3 - Underload packet magic header"
                             textFieldText: underloadPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 
@@ -260,6 +287,8 @@ PageType {
                             }
 
                             checkEmptyText: true
+
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         BasicButtonType {
@@ -291,6 +320,8 @@ PageType {
                         }
 
                         BasicButtonType {
+                            id: saveRestartButton
+
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
@@ -308,7 +339,7 @@ PageType {
 
                             text: qsTr("Save and Restart Amnezia")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(AwgConfigModel.getConfig())
@@ -316,6 +347,7 @@ PageType {
                         }
                     }
                 }
+
             }
         }
     }

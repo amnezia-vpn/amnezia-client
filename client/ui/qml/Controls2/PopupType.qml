@@ -66,7 +66,7 @@ Popup {
                 borderWidth: 0
 
                 text: qsTr("Close")
-                onClicked: {
+                clickedFunc: function() {
                     root.close()
                 }
             }

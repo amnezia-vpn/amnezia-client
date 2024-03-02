@@ -13,6 +13,8 @@ import "../Components"
 PageType {
     id: root
 
+    property bool isControlsDisabled: false
+
     Connections {
         target: PageController
 
@@ -44,6 +46,18 @@ PageType {
             while (stackView.depth > 1) {
                 stackView.pop()
             }
+        }
+
+        function onDisableControls(disabled) {
+            isControlsDisabled = disabled
+        }
+
+        function onEscapePressed() {
+            if (isControlsDisabled || busyIndicator.visible) {
+                return
+            }
+
+            PageController.closePage()
         }
     }
 
@@ -115,7 +129,7 @@ PageType {
 
                 text: qsTr("I have the data to connect")
 
-                onClicked: {
+                clickedFunc: function() {
                     connectionTypeSelection.open()
                 }
             }
@@ -135,7 +149,9 @@ PageType {
 
                 text: qsTr("I have nothing")
 
-                onClicked: Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
+                clickedFunc: function() {
+                    Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
+                }
             }
         }
     }

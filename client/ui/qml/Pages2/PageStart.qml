@@ -38,11 +38,14 @@ PageType {
             tabBar.enabled = !visible
         }
 
-        function onEnableTabBar(enabled) {
-            tabBar.enabled = enabled
+        function onDisableControls(disabled) {
+            tabBar.enabled = !disabled
         }
 
         function onClosePage() {
+            tabBar.isServerInfoShow = tabBarStackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageSettingsServerInfo)
+                                        && tabBarStackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageSettingsSplitTunneling)
+
             if (tabBarStackView.depth <= 1) {
                 return
             }
@@ -51,17 +54,35 @@ PageType {
 
         function onGoToPage(page, slide) {
             var pagePath = PageController.getPagePath(page)
+
             if (slide) {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
             } else {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
+
+            tabBar.isServerInfoShow = (page === PageEnum.PageSettingsServerInfo) || (page === PageEnum.PageSettingsSplitTunneling) || tabBar.isServerInfoShow
         }
 
         function onGoToStartPage() {
             connectionTypeSelection.close()
             while (tabBarStackView.depth > 1) {
                 tabBarStackView.pop()
+            }
+        }
+
+        function onEscapePressed() {
+            if (!tabBar.enabled || busyIndicator.visible) {
+                return
+            }
+
+            var pageName = tabBarStackView.currentItem.objectName
+            if ((pageName === PageController.getPagePath(PageEnum.PageShare)) ||
+                    (pageName === PageController.getPagePath(PageEnum.PageSettings))) {
+                PageController.goToPageHome()
+                tabBar.previousIndex = 0
+            } else {
+                PageController.closePage()
             }
         }
     }
@@ -101,19 +122,11 @@ PageType {
         }
 
         function onNoInstalledContainers() {
-            PageController.setTriggeredBtConnectButton(true)
+            PageController.setTriggeredByConnectButton(true)
 
-            ServersModel.currentlyProcessedIndex = ServersModel.getDefaultServerIndex()
+            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
             InstallController.setShouldCreateServer(false)
             PageController.goToPage(PageEnum.PageSetupWizardEasy)
-        }
-    }
-
-    Connections {
-        target: ApiController
-
-        function onErrorOccurred(errorMessage) {
-            PageController.showErrorMessage(errorMessage)
         }
     }
 
@@ -134,11 +147,12 @@ PageType {
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
             tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
+            tabBar.isServerInfoShow = false
         }
 
         Component.onCompleted: {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
-            ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+            ServersModel.processedIndex = ServersModel.defaultIndex
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
     }
@@ -147,6 +161,7 @@ PageType {
         id: tabBar
 
         property int previousIndex: 0
+        property bool isServerInfoShow: false
 
         anchors.right: parent.right
         anchors.left: parent.left
@@ -177,11 +192,11 @@ PageType {
         }
 
         TabImageButtonType {
-            isSelected: tabBar.currentIndex === 0
+            isSelected: tabBar.isServerInfoShow ? false : tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+                ServersModel.processedIndex = ServersModel.defaultIndex
                 tabBar.previousIndex = 0
             }
         }
@@ -211,7 +226,7 @@ PageType {
         }
 
         TabImageButtonType {
-            isSelected: tabBar.currentIndex === 2
+            isSelected: tabBar.isServerInfoShow ? true : tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
