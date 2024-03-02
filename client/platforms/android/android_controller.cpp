@@ -217,6 +217,11 @@ void AndroidController::clearLogs()
     callActivityMethod("clearLogs", "()V");
 }
 
+void AndroidController::toggleScreenshots(bool enabled)
+{
+    callActivityMethod("toggleScreenshots", "(Z)V", enabled);
+}
+
 // Moving log processing to the Android side
 jclass AndroidController::log;
 jmethodID AndroidController::logDebug;

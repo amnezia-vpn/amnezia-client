@@ -14,6 +14,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import android.view.WindowManager.LayoutParams
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.annotation.MainThread
@@ -454,5 +455,14 @@ class AmneziaActivity : QtActivity() {
     fun clearLogs() {
         Log.v(TAG, "Clear logs")
         Log.clearLogs()
+    }
+
+    @Suppress("unused")
+    fun toggleScreenshots(enabled: Boolean) {
+        Log.v(TAG, "Set screenshots enabled: $enabled")
+        mainScope.launch {
+            val flag = if (enabled) 0 else LayoutParams.FLAG_SECURE
+            window.setFlags(flag, LayoutParams.FLAG_SECURE)
+        }
     }
 }
