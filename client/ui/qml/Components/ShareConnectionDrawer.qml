@@ -279,6 +279,8 @@ DrawerType2 {
                 }
 
                 Rectangle {
+                    id: qrCodeContainer
+
                     Layout.fillWidth: true
                     Layout.preferredHeight: width
                     Layout.topMargin: 20
