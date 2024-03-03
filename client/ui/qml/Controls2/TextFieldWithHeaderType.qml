@@ -149,6 +149,7 @@ Item {
                         if (root.clickedFunc && typeof root.clickedFunc === "function") {
                             root.clickedFunc()
                         }
+                        textField.forceActiveFocus()
                     }
                 }
             }

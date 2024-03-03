@@ -47,7 +47,6 @@ Button {
             id: background
 
             anchors.fill: focusBorder
-            anchors.margins: root.activeFocus ? 2 : 0
 
             radius: root.activeFocus ? 14 : 16
             color: {
