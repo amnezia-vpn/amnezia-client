@@ -19,8 +19,13 @@ import org.amnezia.vpn.util.Log
 private const val TAG = "VpnState"
 private const val STORE_FILE_NAME = "vpnState"
 
-data class VpnState(val protocolState: ProtocolState, val serverName: String? = null) : Serializable {
+data class VpnState(
+    val protocolState: ProtocolState,
+    val serverName: String? = null,
+    val serverIndex: Int = -1
+) : Serializable {
     companion object {
+        private const val serialVersionUID: Long = -1760654961004181606
         val defaultState: VpnState = VpnState(DISCONNECTED)
     }
 }
@@ -41,7 +46,11 @@ object VpnStateStore {
     fun dataFlow(): Flow<VpnState> = dataStore.data
 
     suspend fun store(f: (vpnState: VpnState) -> VpnState) {
-        dataStore.updateData(f)
+        try {
+            dataStore.updateData(f)
+        } catch (e : Exception) {
+            Log.e(TAG, "Failed to store VpnState: $e")
+        }
     }
 }
 

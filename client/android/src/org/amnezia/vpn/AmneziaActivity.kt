@@ -352,6 +352,22 @@ class AmneziaActivity : QtActivity() {
     }
 
     @Suppress("unused")
+    fun resetLastServer(index: Int) {
+        Log.v(TAG, "Reset server: $index")
+        mainScope.launch {
+            VpnStateStore.store {
+                if (index == -1 || it.serverIndex == index) {
+                    VpnState.defaultState
+                } else if (it.serverIndex > index) {
+                    it.copy(serverIndex = it.serverIndex - 1)
+                } else {
+                    it
+                }
+            }
+        }
+    }
+
+    @Suppress("unused")
     fun saveFile(fileName: String, data: String) {
         Log.d(TAG, "Save file $fileName")
         mainScope.launch {

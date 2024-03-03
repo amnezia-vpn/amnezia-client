@@ -95,7 +95,14 @@ void AmneziaApplication::init()
         qFatal("Android logging initialization failed");
     }
     AndroidController::instance()->setSaveLogs(m_settings->isSaveLogs());
-    connect(m_settings.get(), &Settings::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
+    connect(m_settings.get(), &Settings::saveLogsChanged,
+            AndroidController::instance(), &AndroidController::setSaveLogs);
+
+    connect(m_settings.get(), &Settings::serverRemoved,
+            AndroidController::instance(), &AndroidController::resetLastServer);
+
+    connect(m_settings.get(), &Settings::settingsCleared,
+            [](){ AndroidController::instance()->resetLastServer(-1); });
 
     connect(AndroidController::instance(), &AndroidController::initConnectionState, this,
             [this](Vpn::ConnectionState state) {

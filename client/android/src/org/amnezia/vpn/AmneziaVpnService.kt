@@ -67,6 +67,7 @@ const val MSG_CLIENT_NAME = "CLIENT_NAME"
 const val AFTER_PERMISSION_CHECK = "AFTER_PERMISSION_CHECK"
 private const val PREFS_CONFIG_KEY = "LAST_CONF"
 private const val PREFS_SERVER_NAME = "LAST_SERVER_NAME"
+private const val PREFS_SERVER_INDEX = "LAST_SERVER_INDEX"
 private const val PROCESS_NAME = "org.amnezia.vpn:amneziaVpnService"
 private const val NOTIFICATION_ID = 1337
 private const val STATISTICS_SENDING_TIMEOUT = 1000L
@@ -82,6 +83,7 @@ class AmneziaVpnService : VpnService() {
     private val protocolCache = mutableMapOf<String, Protocol>()
     private var protocolState = MutableStateFlow(UNKNOWN)
     private var serverName: String? = null
+    private var serverIndex: Int = -1
 
     private val isConnected
         get() = protocolState.value == CONNECTED
@@ -207,7 +209,7 @@ class AmneziaVpnService : VpnService() {
         Log.d(TAG, "Create Amnezia VPN service")
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         connectionScope = CoroutineScope(SupervisorJob() + Dispatchers.IO + connectionExceptionHandler)
-        loadServerName()
+        loadServerData()
         launchProtocolStateHandler()
         networkState = NetworkState(this, ::reconnect)
     }
@@ -325,7 +327,7 @@ class AmneziaVpnService : VpnService() {
                     }
                 }
 
-                VpnStateStore.store { VpnState(protocolState, serverName) }
+                VpnStateStore.store { VpnState(protocolState, serverName, serverIndex) }
             }
         }
     }
@@ -370,7 +372,7 @@ class AmneziaVpnService : VpnService() {
         protocolState.value = CONNECTING
 
         val config = parseConfigToJson(vpnConfig)
-        saveServerName(config)
+        saveServerData(config)
         if (config == null) {
             onError("Invalid VPN config")
             protocolState.value = DISCONNECTED
@@ -468,13 +470,16 @@ class AmneziaVpnService : VpnService() {
             }
         }
 
-    private fun saveServerName(config: JSONObject?) {
-        serverName = config?.opt("description") as String
+    private fun saveServerData(config: JSONObject?) {
+        serverName = config?.opt("description") as String?
+        serverIndex = config?.opt("serverIndex") as Int? ?: -1
         Prefs.save(PREFS_SERVER_NAME, serverName)
+        Prefs.save(PREFS_SERVER_INDEX, serverIndex)
     }
 
-    private fun loadServerName() {
+    private fun loadServerData() {
         serverName = Prefs.load<String>(PREFS_SERVER_NAME).ifBlank { null }
+        if (serverName != null) serverIndex = Prefs.load(PREFS_SERVER_INDEX)
     }
 
     private fun checkPermission(): Boolean =

@@ -270,6 +270,7 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex, const ServerC
                                                   ErrorCode *errorCode)
 {
     QJsonObject vpnConfiguration;
+    vpnConfiguration[config_key::serverIndex] = serverIndex;
 
     for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
         auto s = m_settings->server(serverIndex);

@@ -68,6 +68,7 @@ void Settings::removeServer(int index)
 
     servers.removeAt(index);
     setServersArray(servers);
+    emit serverRemoved(index);
 }
 
 bool Settings::editServer(int index, const QJsonObject &server)
@@ -338,6 +339,7 @@ QString Settings::secondaryDns() const
 void Settings::clearSettings()
 {
     m_settings.clearSettings();
+    emit settingsCleared();
 }
 
 ServerCredentials Settings::defaultServerCredentials() const
