@@ -38,7 +38,7 @@ public:
     void setSaveLogs(bool enabled);
     void exportLogsFile(const QString &fileName);
     void clearLogs();
-    void toggleScreenshots(bool enabled);
+    void setScreenshotsEnabled(bool enabled);
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);

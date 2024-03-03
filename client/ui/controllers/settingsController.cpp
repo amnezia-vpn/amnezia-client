@@ -183,13 +183,6 @@ bool SettingsController::isScreenshotsEnabled()
 void SettingsController::toggleScreenshotsEnabled(bool enable)
 {
     m_settings->setScreenshotsEnabled(enable);
-#ifdef Q_OS_ANDROID
-    AndroidController::instance()->toggleScreenshots(enable);
-#endif
-
-#ifdef Q_OS_IOS
-    AmneziaVPN::toggleScreenshots(enable);
-#endif
 }
 
 bool SettingsController::isCameraPresent()

@@ -458,7 +458,7 @@ class AmneziaActivity : QtActivity() {
     }
 
     @Suppress("unused")
-    fun toggleScreenshots(enabled: Boolean) {
+    fun setScreenshotsEnabled(enabled: Boolean) {
         Log.v(TAG, "Set screenshots enabled: $enabled")
         mainScope.launch {
             val flag = if (enabled) 0 else LayoutParams.FLAG_SECURE
