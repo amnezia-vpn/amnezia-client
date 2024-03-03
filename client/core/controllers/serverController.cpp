@@ -855,7 +855,16 @@ ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredential
                     containerConfig.insert(config_key::transport_proto, transportProto);
 
                     if (protocol == Proto::Awg) {
-                        QString serverConfig = getTextFileFromContainer(container, credentials, protocols::awg::serverConfigPath, &errorCode);
+                        QString serverConfigPath;
+                        if (container == DockerContainer::Awg) {
+                            if (isNewAwgContainer(credentials)) {
+                                serverConfigPath = amnezia::protocols::awg::serverConfigPath;
+                            } else {
+                                serverConfigPath = "/opt/amnezia/awg/wg0.conf";
+                            }
+                        }
+
+                        QString serverConfig = getTextFileFromContainer(container, credentials, serverConfigPath, &errorCode);
 
                         QMap<QString, QString> serverConfigMap;
                         auto serverConfigLines = serverConfig.split("\n");
@@ -959,4 +968,25 @@ ErrorCode ServerController::getDecryptedPrivateKey(const ServerCredentials &cred
 {
     auto error = m_sshClient.getDecryptedPrivateKey(credentials, decryptedPrivateKey, callback);
     return error;
+}
+
+bool ServerController::isNewAwgContainer(const ServerCredentials &credentials)
+{
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+
+    QString script = QString("sudo docker exec -i $CONTAINER_NAME bash -c 'type awg'");
+
+    runScript(credentials, replaceVars(script, genVarsForScript(credentials, DockerContainer::Awg)), cbReadStdOut, cbReadStdErr);
+
+    return stdOut.contains("/usr/bin/awg");
+
 }

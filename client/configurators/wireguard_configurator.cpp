@@ -13,26 +13,29 @@
 #include <openssl/x509.h>
 
 #include "containers/containers_defs.h"
+#include "core/controllers/serverController.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
-#include "core/controllers/serverController.h"
 #include "settings.h"
 #include "utilities.h"
 
 WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings, bool isAwg, QObject *parent)
     : ConfiguratorBase(settings, parent), m_isAwg(isAwg)
 {
-    m_serverConfigPath = m_isAwg ? amnezia::protocols::awg::serverConfigPath
-                                              : amnezia::protocols::wireguard::serverConfigPath;
-    m_serverPublicKeyPath = m_isAwg ? amnezia::protocols::awg::serverPublicKeyPath
-                                                 : amnezia::protocols::wireguard::serverPublicKeyPath;
-    m_serverPskKeyPath = m_isAwg ? amnezia::protocols::awg::serverPskKeyPath
-                                              : amnezia::protocols::wireguard::serverPskKeyPath;
-    m_configTemplate = m_isAwg ? ProtocolScriptType::awg_template
-                                            : ProtocolScriptType::wireguard_template;
+    m_serverConfigPath =
+            m_isAwg ? amnezia::protocols::awg::serverConfigPath : amnezia::protocols::wireguard::serverConfigPath;
+    m_serverPublicKeyPath =
+            m_isAwg ? amnezia::protocols::awg::serverPublicKeyPath : amnezia::protocols::wireguard::serverPublicKeyPath;
+    m_serverPskKeyPath =
+            m_isAwg ? amnezia::protocols::awg::serverPskKeyPath : amnezia::protocols::wireguard::serverPskKeyPath;
+    m_configTemplate = m_isAwg ? ProtocolScriptType::awg_template : ProtocolScriptType::wireguard_template;
 
     m_protocolName = m_isAwg ? config_key::awg : config_key::wireguard;
     m_defaultPort = m_isAwg ? protocols::wireguard::defaultPort : protocols::awg::defaultPort;
+
+    m_interfaceName = m_isAwg ? protocols::awg::interfaceName : protocols::wireguard::interfaceName;
+    m_wgBinaryName = m_isAwg ? protocols::awg::wgBinaryName : protocols::wireguard::wgBinaryName;
+    m_wgQuickBinaryName = m_isAwg ? protocols::awg::wgQuickBinaryName : protocols::wireguard::wgQuickBinaryName;
 }
 
 WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
@@ -83,6 +86,20 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 
     ErrorCode e = ErrorCode::NoError;
     ServerController serverController(m_settings);
+
+    if (container == DockerContainer::Awg) {
+        if (serverController.isNewAwgContainer(credentials)) {
+            m_serverConfigPath = amnezia::protocols::awg::serverConfigPath;
+            m_interfaceName = protocols::awg::interfaceName;
+            m_wgBinaryName = protocols::awg::wgBinaryName;
+            m_wgQuickBinaryName = protocols::awg::wgQuickBinaryName;
+        } else {
+            m_serverConfigPath = "/opt/amnezia/awg/wg0.conf";
+            m_interfaceName = protocols::wireguard::interfaceName;
+            m_wgBinaryName = protocols::wireguard::wgBinaryName;
+            m_wgQuickBinaryName = protocols::wireguard::wgQuickBinaryName;
+        }
+    }
 
     // Get list of already created clients (only IP addresses)
     QString nextIpNumber;
@@ -167,8 +184,8 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         return connData;
     }
 
-    QString script = QString("sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip %1)'")
-                             .arg(m_serverConfigPath);
+    QString script = QString("sudo docker exec -i $CONTAINER_NAME bash -c '%4 syncconf %2 <(%3 strip %1)'")
+                             .arg(m_serverConfigPath, m_interfaceName, m_wgQuickBinaryName, m_wgBinaryName);
 
     e = serverController.runScript(
             credentials, serverController.replaceVars(script, serverController.genVarsForScript(credentials, container)));
@@ -177,7 +194,8 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 }
 
 QString WireguardConfigurator::genWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
-                                                  const QJsonObject &containerConfig, QString &clientId, ErrorCode *errorCode)
+                                                  const QJsonObject &containerConfig, QString &clientId,
+                                                  ErrorCode *errorCode)
 {
     ServerController serverController(m_settings);
     QString scriptData = amnezia::scriptData(m_configTemplate, container);
