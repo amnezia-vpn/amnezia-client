@@ -25,12 +25,13 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
-    if (!m_containersModel->isAnyContainerInstalled()) {
+    int serverIndex = m_serversModel->getDefaultServerIndex();
+
+    if (!m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         emit noInstalledContainers();
         return;
     }
 
-    int serverIndex = m_serversModel->getDefaultServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));

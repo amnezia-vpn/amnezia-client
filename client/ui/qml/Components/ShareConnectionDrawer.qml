@@ -38,6 +38,14 @@ DrawerType2 {
     expandedContent: Item {
         implicitHeight: root.expandedHeight
 
+        Connections {
+            target: root
+
+            function onOpened() {
+                header.forceActiveFocus()
+            }
+        }
+
         Header2Type {
             id: header
             anchors.top: parent.top
@@ -48,6 +56,8 @@ DrawerType2 {
             anchors.rightMargin: 16
 
             headerText: root.headerText
+
+            KeyNavigation.tab: shareButton
         }
 
         FlickableType {
@@ -68,11 +78,14 @@ DrawerType2 {
                 visible: root.contentVisible
 
                 BasicButtonType {
+                    id: shareButton
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
                     text: qsTr("Share")
                     imageSource: "qrc:/images/controls/share-2.svg"
+
+                    KeyNavigation.tab: copyConfigTextButton
 
                     clickedFunc: function() {
                         var fileName = ""
@@ -107,6 +120,8 @@ DrawerType2 {
 
                     text: qsTr("Copy")
                     imageSource: "qrc:/images/controls/copy.svg"
+
+                    KeyNavigation.tab: copyNativeConfigStringButton.visible ? copyNativeConfigStringButton : showSettingsButton
                 }
 
                 BasicButtonType {
@@ -125,9 +140,13 @@ DrawerType2 {
 
                     text: qsTr("Copy config string")
                     imageSource: "qrc:/images/controls/copy.svg"
+
+                    KeyNavigation.tab: showSettingsButton
                 }
 
                 BasicButtonType {
+                    id: showSettingsButton
+
                     Layout.fillWidth: true
                     Layout.topMargin: 24
 
@@ -143,6 +162,8 @@ DrawerType2 {
                     clickedFunc: function() {
                         configContentDrawer.open()
                     }
+
+                    KeyNavigation.tab: header
                 }
 
                 DrawerType2 {
@@ -258,6 +279,8 @@ DrawerType2 {
                 }
 
                 Rectangle {
+                    id: qrCodeContainer
+
                     Layout.fillWidth: true
                     Layout.preferredHeight: width
                     Layout.topMargin: 20

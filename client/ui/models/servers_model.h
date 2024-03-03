@@ -28,6 +28,7 @@ public:
 
         DefaultContainerRole,
 
+        HasInstalledContainers,
         IsServerFromApiRole,
 
         HasAmneziaDns
@@ -101,10 +102,8 @@ public slots:
     bool isServerFromApiAlreadyExists(const quint16 crc);
 
     QVariant getDefaultServerData(const QString roleString);
-    void setDefaultServerData(const QString roleString, const QVariant &value);
 
     QVariant getProcessedServerData(const QString roleString);
-    void setProcessedServerData(const QString roleString, const QVariant &value);
 
     bool isDefaultServerDefaultContainerHasSplitTunneling();
 
@@ -123,12 +122,15 @@ signals:
 
 private:
     ServerCredentials serverCredentials(int index) const;
+
     void updateContainersModel();
     void updateDefaultServerContainersModel();
 
     QString getServerDescription(const QJsonObject &server, const int index) const;
 
     bool isAmneziaDnsContainerInstalled(const int serverIndex) const;
+
+    bool serverHasInstalledContainers(const int serverIndex) const;
 
     QJsonArray m_servers;
 

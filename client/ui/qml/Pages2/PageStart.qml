@@ -38,8 +38,8 @@ PageType {
             tabBar.enabled = !visible
         }
 
-        function onEnableTabBar(enabled) {
-            tabBar.enabled = enabled
+        function onDisableControls(disabled) {
+            tabBar.enabled = !disabled
         }
 
         function onClosePage() {
@@ -60,14 +60,29 @@ PageType {
             } else {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
-            
-            tabBar.isServerInfoShow = page === PageEnum.PageSettingsServerInfo || PageEnum.PageSettingsSplitTunneling || tabBar.isServerInfoShow
+
+            tabBar.isServerInfoShow = (page === PageEnum.PageSettingsServerInfo) || (page === PageEnum.PageSettingsSplitTunneling) || tabBar.isServerInfoShow
         }
 
         function onGoToStartPage() {
             connectionTypeSelection.close()
             while (tabBarStackView.depth > 1) {
                 tabBarStackView.pop()
+            }
+        }
+
+        function onEscapePressed() {
+            if (!tabBar.enabled || busyIndicator.visible) {
+                return
+            }
+
+            var pageName = tabBarStackView.currentItem.objectName
+            if ((pageName === PageController.getPagePath(PageEnum.PageShare)) ||
+                    (pageName === PageController.getPagePath(PageEnum.PageSettings))) {
+                PageController.goToPageHome()
+                tabBar.previousIndex = 0
+            } else {
+                PageController.closePage()
             }
         }
     }
@@ -107,7 +122,7 @@ PageType {
         }
 
         function onNoInstalledContainers() {
-            PageController.setTriggeredBtConnectButton(true)
+            PageController.setTriggeredByConnectButton(true)
 
             ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
             InstallController.setShouldCreateServer(false)
