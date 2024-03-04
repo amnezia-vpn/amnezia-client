@@ -41,11 +41,11 @@ public:
     static QMap<Proto, QString> getLastVpnConfig(const QJsonObject &containerConfig);
     QString createVpnConfigurationForProto(int serverIndex,
         const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig, Proto proto,
-        ErrorCode *errorCode = nullptr);
+        ErrorCode errorCode);
 
     QJsonObject createVpnConfiguration(int serverIndex,
         const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+        const QJsonObject &containerConfig, ErrorCode errorCode);
 
 
     bool isConnected() const;

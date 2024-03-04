@@ -23,7 +23,7 @@ public:
 
     QString genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
                                  const QJsonObject &containerConfig, Proto proto, QString &clientId,
-                                 ErrorCode *errorCode = nullptr);
+                                 ErrorCode errorCode);
 
     QPair<QString, QString> getDnsForConfig(int serverIndex);
     QString &processConfigWithDnsSettings(int serverIndex, DockerContainer container, Proto proto, QString &config);

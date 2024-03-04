@@ -356,7 +356,7 @@ void AmneziaApplication::initControllers()
     m_pageController.reset(new PageController(m_serversModel, m_settings));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
 
-    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_settings));
+    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_settings));
     m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
     connect(m_installController.get(), &InstallController::passphraseRequestStarted, m_pageController.get(),
             &PageController::showPassphraseRequestDrawer);
@@ -368,8 +368,7 @@ void AmneziaApplication::initControllers()
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_clientManagementModel,
-                                                  m_settings, m_configurator));
+    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_clientManagementModel, m_settings));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
     m_settingsController.reset(

@@ -225,7 +225,7 @@ QMap<Proto, QString> VpnConnection::getLastVpnConfig(const QJsonObject &containe
 
 QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const ServerCredentials &credentials,
                                                       DockerContainer container, const QJsonObject &containerConfig,
-                                                      Proto proto, ErrorCode *errorCode)
+                                                      Proto proto, ErrorCode errorCode)
 {
     QMap<Proto, QString> lastVpnConfig = getLastVpnConfig(containerConfig);
 
@@ -237,7 +237,7 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
         QString clientId;
         configData = m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, proto, clientId, errorCode);
 
-        if (errorCode && *errorCode) {
+        if (errorCode != ErrorCode::NoError) {
             return "";
         }
 
@@ -267,7 +267,7 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
 
 QJsonObject VpnConnection::createVpnConfiguration(int serverIndex, const ServerCredentials &credentials,
                                                   DockerContainer container, const QJsonObject &containerConfig,
-                                                  ErrorCode *errorCode)
+                                                  ErrorCode errorCode)
 {
     QJsonObject vpnConfiguration;
 
@@ -282,7 +282,7 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex, const ServerC
                 QJsonDocument::fromJson(createVpnConfigurationForProto(serverIndex, credentials, container,
                                                                        containerConfig, proto, errorCode).toUtf8()).object();
 
-        if (errorCode && *errorCode) {
+        if (errorCode != ErrorCode::NoError) {
             return {};
         }
 
@@ -341,11 +341,11 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     }
 #endif
 
-    ErrorCode e = ErrorCode::NoError;
+    ErrorCode errorCode = ErrorCode::NoError;
 
-    m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig, &e);
+    m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig, errorCode);
 
-    if (e) {
+    if (errorCode != ErrorCode::NoError) {
         emit connectionStateChanged(Vpn::ConnectionState::Error);
         return;
     }
@@ -373,8 +373,8 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
 
     createProtocolConnections();
 
-    e = m_vpnProtocol.data()->start();
-    if (e)
+    errorCode = m_vpnProtocol.data()->start();
+    if (errorCode != ErrorCode::NoError)
         emit connectionStateChanged(Vpn::ConnectionState::Error);
 }
 

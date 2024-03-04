@@ -75,7 +75,7 @@ void ApiController::updateServerConfigFromApi()
             return;
         }
 
-        auto serverConfig = m_serversModel->getDefaultServerConfig();
+        auto serverConfig = m_serversModel->getServerConfig(m_serversModel->getDefaultServerIndex());
         auto containerConfig = serverConfig.value(config_key::containers).toArray();
 
         if (serverConfig.value(config_key::configVersion).toInt() && containerConfig.isEmpty()) {
@@ -154,7 +154,7 @@ void ApiController::updateServerConfigFromApi()
 
 void ApiController::clearApiConfig()
 {
-    auto serverConfig = m_serversModel->getDefaultServerConfig();
+    auto serverConfig = m_serversModel->getServerConfig(m_serversModel->getDefaultServerIndex());
 
     serverConfig.remove(config_key::dns1);
     serverConfig.remove(config_key::dns2);

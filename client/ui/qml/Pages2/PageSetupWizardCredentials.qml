@@ -110,7 +110,7 @@ PageType {
                     }
 
                     InstallController.setShouldCreateServer(true)
-                    InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
+                    InstallController.setProcessedServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
 
                     PageController.showBusyIndicator(true)
                     var isConnectionOpened = InstallController.checkSshConnection()

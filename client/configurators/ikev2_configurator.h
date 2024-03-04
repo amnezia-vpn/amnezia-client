@@ -22,14 +22,14 @@ public:
     };
 
     QString genIkev2Config(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+        const QJsonObject &containerConfig, ErrorCode errorCode);
 
     QString genIkev2Config(const ConnectionData &connData);
     QString genMobileConfig(const ConnectionData &connData);
     QString genStrongSwanConfig(const ConnectionData &connData);
 
     ConnectionData prepareIkev2Config(const ServerCredentials &credentials,
-        DockerContainer container, ErrorCode *errorCode = nullptr);
+        DockerContainer container, ErrorCode errorCode);
 };
 
 #endif // IKEV2_CONFIGURATOR_H

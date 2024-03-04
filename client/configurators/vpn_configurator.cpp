@@ -28,7 +28,7 @@ VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings, QObject *pa
 }
 
 QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
-                                              const QJsonObject &containerConfig, Proto proto, QString &clientId, ErrorCode *errorCode)
+                                              const QJsonObject &containerConfig, Proto proto, QString &clientId, ErrorCode errorCode)
 {
     switch (proto) {
     case Proto::OpenVpn:

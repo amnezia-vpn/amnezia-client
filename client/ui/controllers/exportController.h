@@ -18,8 +18,7 @@ public:
     explicit ExportController(const QSharedPointer<ServersModel> &serversModel,
                               const QSharedPointer<ContainersModel> &containersModel,
                               const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                              const std::shared_ptr<Settings> &settings,
-                              const std::shared_ptr<VpnConfigurator> &configurator, QObject *parent = nullptr);
+                              const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY exportConfigChanged)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY exportConfigChanged)
@@ -64,11 +63,12 @@ private:
 
     void clearPreviousConfig();
 
+    ErrorCode generateNativeConfig(const DockerContainer container, const QString &clientName, QJsonObject &jsonNativeConfig);
+
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
     std::shared_ptr<Settings> m_settings;
-    std::shared_ptr<VpnConfigurator> m_configurator;
 
     QString m_config;
     QString m_nativeConfigString;

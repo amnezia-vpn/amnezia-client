@@ -30,9 +30,6 @@ public:
     ErrorCode updateContainer(const ServerCredentials &credentials, DockerContainer container,
                               const QJsonObject &oldConfig, QJsonObject &newConfig);
 
-    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials,
-                                            QMap<DockerContainer, QJsonObject> &installedContainers);
-
     ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container,
                                      const QJsonObject &config = QJsonObject());
 
@@ -40,7 +37,7 @@ public:
             DockerContainer container, const ServerCredentials &credentials, const QString &file, const QString &path,
             libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
     QByteArray getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                        const QString &path, ErrorCode *errorCode = nullptr);
+                                        const QString &path, ErrorCode errorCode);
 
     QString replaceVars(const QString &script, const Vars &vars);
     Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None,
@@ -55,7 +52,7 @@ public:
                        const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut = nullptr,
                        const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr = nullptr);
 
-    QString checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode = nullptr);
+    QString checkSshConnection(const ServerCredentials &credentials, ErrorCode errorCode);
 
     void cancelInstallation();
 

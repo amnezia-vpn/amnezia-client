@@ -9,6 +9,7 @@
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
 #include "ui/models/protocols_model.h"
+#include "ui/models/clientManagementModel.h"
 
 class InstallController : public QObject
 {
@@ -17,12 +18,13 @@ public:
     explicit InstallController(const QSharedPointer<ServersModel> &serversModel,
                                const QSharedPointer<ContainersModel> &containersModel,
                                const QSharedPointer<ProtocolsModel> &protocolsModel,
+                               const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
     ~InstallController();
 
 public slots:
     void install(DockerContainer container, int port, TransportProto transportProto);
-    void setCurrentlyInstalledServerCredentials(const QString &hostName, const QString &userName,
+    void setProcessedServerCredentials(const QString &hostName, const QString &userName,
                                                 const QString &secretData);
     void setShouldCreateServer(bool shouldCreateServer);
 
@@ -72,16 +74,19 @@ signals:
     void currentContainerUpdated();
 
 private:
-    void installServer(DockerContainer container, QJsonObject &config);
-    void installContainer(DockerContainer container, QJsonObject &config);
+    void installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers, const ServerCredentials &serverCredentials, QString &finishMessage);
+    void installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers, const ServerCredentials &serverCredentials, QString &finishMessage);
     bool isServerAlreadyExists();
+
+    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ProtocolsModel> m_protocolModel;
+    QSharedPointer<ClientManagementModel> m_clientManagementModel;
     std::shared_ptr<Settings> m_settings;
 
-    ServerCredentials m_currentlyInstalledServerCredentials;
+    ServerCredentials m_processedServerCredentials;
 
     bool m_shouldCreateServer;
 

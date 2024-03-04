@@ -82,7 +82,7 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
     }
 
     const QByteArray clientsTableString =
-            serverController.getTextFileFromContainer(container, credentials, clientsTableFile, &error);
+            serverController.getTextFileFromContainer(container, credentials, clientsTableFile, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the clientsTable file from the server";
         endResetModel();
@@ -170,7 +170,7 @@ ErrorCode ClientManagementModel::getWireGuardClients(ServerController &serverCon
     const QString wireGuardConfigFile =
             QString("opt/amnezia/%1/wg0.conf").arg(container == DockerContainer::WireGuard ? "wireguard" : "awg");
     const QString wireguardConfigString =
-            serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
+            serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the wg conf file from the server";
         return error;
@@ -218,7 +218,7 @@ bool ClientManagementModel::isClientExists(const QString &clientId)
 ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QString &clientName,
                                               const DockerContainer container, ServerCredentials credentials)
 {
-    ErrorCode error;
+    ErrorCode error = ErrorCode::NoError;
 
     error = updateModel(container, credentials);
     if (error != ErrorCode::NoError) {
@@ -376,13 +376,13 @@ ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContai
 ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerContainer container,
                                                  ServerCredentials credentials)
 {
-    ErrorCode error;
+    ErrorCode error = ErrorCode::NoError;
     ServerController serverController(m_settings);
 
     const QString wireGuardConfigFile =
             QString("/opt/amnezia/%1/wg0.conf").arg(container == DockerContainer::WireGuard ? "wireguard" : "awg");
     const QString wireguardConfigString =
-            serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
+            serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the wg conf file from the server";
         return error;
