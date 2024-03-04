@@ -56,26 +56,10 @@ AndroidController::AndroidController() : QObject()
         Qt::QueuedConnection);
 
     connect(
-        this, &AndroidController::vpnConnected, this,
-        [this]() {
-            qDebug() << "Android event: VPN connected";
-            emit connectionStateChanged(Vpn::ConnectionState::Connected);
-        },
-        Qt::QueuedConnection);
-
-    connect(
-        this, &AndroidController::vpnDisconnected, this,
-        [this]() {
-            qDebug() << "Android event: VPN disconnected";
-            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
-        },
-        Qt::QueuedConnection);
-
-    connect(
-        this, &AndroidController::vpnReconnecting, this,
-        [this]() {
-            qDebug() << "Android event: VPN reconnecting";
-            emit connectionStateChanged(Vpn::ConnectionState::Reconnecting);
+        this, &AndroidController::vpnStateChanged, this,
+        [this](AndroidController::ConnectionState state) {
+            qDebug() << "Android event: VPN state changed:" << textConnectionState(state);
+            emit connectionStateChanged(convertState(state));
         },
         Qt::QueuedConnection);
 
@@ -106,9 +90,7 @@ bool AndroidController::initialize()
         {"onServiceDisconnected", "()V", reinterpret_cast<void *>(onServiceDisconnected)},
         {"onServiceError", "()V", reinterpret_cast<void *>(onServiceError)},
         {"onVpnPermissionRejected", "()V", reinterpret_cast<void *>(onVpnPermissionRejected)},
-        {"onVpnConnected", "()V", reinterpret_cast<void *>(onVpnConnected)},
-        {"onVpnDisconnected", "()V", reinterpret_cast<void *>(onVpnDisconnected)},
-        {"onVpnReconnecting", "()V", reinterpret_cast<void *>(onVpnReconnecting)},
+        {"onVpnStateChanged", "(I)V", reinterpret_cast<void *>(onVpnStateChanged)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
@@ -156,6 +138,11 @@ ErrorCode AndroidController::start(const QJsonObject &vpnConfig)
 void AndroidController::stop()
 {
     callActivityMethod("stop", "()V");
+}
+
+void AndroidController::resetLastServer(int serverIndex)
+{
+    callActivityMethod("resetLastServer", "(I)V", serverIndex);
 }
 
 void AndroidController::saveFile(const QString &fileName, const QString &data)
@@ -370,30 +357,14 @@ void AndroidController::onVpnPermissionRejected(JNIEnv *env, jobject thiz)
 }
 
 // static
-void AndroidController::onVpnConnected(JNIEnv *env, jobject thiz)
+void AndroidController::onVpnStateChanged(JNIEnv *env, jobject thiz, jint stateCode)
 {
     Q_UNUSED(env);
     Q_UNUSED(thiz);
 
-    emit AndroidController::instance()->vpnConnected();
-}
+    auto state = ConnectionState(stateCode);
 
-// static
-void AndroidController::onVpnDisconnected(JNIEnv *env, jobject thiz)
-{
-    Q_UNUSED(env);
-    Q_UNUSED(thiz);
-
-    emit AndroidController::instance()->vpnDisconnected();
-}
-
-// static
-void AndroidController::onVpnReconnecting(JNIEnv *env, jobject thiz)
-{
-    Q_UNUSED(env);
-    Q_UNUSED(thiz);
-
-    emit AndroidController::instance()->vpnReconnecting();
+    emit AndroidController::instance()->vpnStateChanged(state);
 }
 
 // static
