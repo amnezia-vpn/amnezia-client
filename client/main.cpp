@@ -48,10 +48,6 @@ int main(int argc, char *argv[])
     AllowSetForegroundWindow(0);
 #endif
 
-#if defined(Q_OS_IOS)
-    QtAppDelegateInitialize();
-#endif
-
     app.registerTypes();
 
     app.setApplicationName(APPLICATION_NAME);

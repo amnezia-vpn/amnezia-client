@@ -81,22 +81,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     if action == Constants.kActionStatus {
       handleStatusAppMessage(messageData, completionHandler: completionHandler)
     }
-
-    if action == Constants.kActionStart {
-      //      splitTunnelType = message[Constants.kMessageKeySplitTunnelType] as? String
-      //      splitTunnelSites = message[Constants.kMessageKeySplitTunnelSites] as? String
-    }
-
-    let callbackWrapper: (NSNumber?) -> Void = { errorCode in
-      // let tunnelId = self.tunnelConfig?.id ?? ""
-      let response: [String: Any] = [
-        Constants.kMessageKeyAction: action,
-        Constants.kMessageKeyErrorCode: errorCode ?? NSNull(),
-        Constants.kMessageKeyTunnelId: 0
-      ]
-
-      completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
-    }
   }
 
   override func startTunnel(options: [String: NSObject]?, completionHandler: @escaping (Error?) -> Void) {

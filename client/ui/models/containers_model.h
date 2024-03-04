@@ -49,8 +49,6 @@ public slots:
 
     QJsonObject getContainerConfig(const int containerIndex);
 
-    bool isAnyContainerInstalled();
-
 protected:
     QHash<int, QByteArray> roleNames() const override;
 

@@ -235,7 +235,6 @@ void IosController::checkStatus()
         m_rxBytes = rxBytes;
         m_txBytes = txBytes;
     });
-    
 }
 
 void IosController::vpnStatusDidChange(void *pNotification)
@@ -244,13 +243,13 @@ void IosController::vpnStatusDidChange(void *pNotification)
 
     if (session /* && session == TunnelManager.session */ ) {
         qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
-       
+
         if (session.status == NEVPNStatusDisconnected) {
             if (@available(iOS 16.0, *)) {
                 [session fetchLastDisconnectErrorWithCompletionHandler:^(NSError * _Nullable error) {
                     if (error != nil) {
                         qDebug() << "Disconnect error" << error.domain << error.code << error.localizedDescription;
-                        
+
                         if ([error.domain isEqualToString:NEVPNConnectionErrorDomain]) {
                             switch (error.code) {
                                 case NEVPNConnectionErrorOverslept:
@@ -315,11 +314,11 @@ void IosController::vpnStatusDidChange(void *pNotification)
                                     break;
                             }
                         }
-                        
+
                         NSError *underlyingError = error.userInfo[@"NSUnderlyingError"];
                         if (underlyingError != nil) {
                             qDebug() << "Disconnect underlying error" << underlyingError.domain << underlyingError.code << underlyingError.localizedDescription;
-                            
+
                             if ([underlyingError.domain isEqualToString:@"NEAgentErrorDomain"]) {
                                 switch (underlyingError.code) {
                                     case 1:
@@ -342,7 +341,7 @@ void IosController::vpnStatusDidChange(void *pNotification)
                 qDebug() << "Disconnect error is unavailable on iOS < 16.0";
             }
         }
-        
+
         emit connectionStateChanged(iosStatusToState(session.status));
     }
 }
@@ -367,7 +366,14 @@ bool IosController::setupOpenVPN()
     }
 
     openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
-    openVPNConfig.insert(config_key::splitTunnelSites, m_rawConfig[config_key::splitTunnelSites]);
+
+    QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
+
+    for(int index = 0; index < splitTunnelSites.count(); index++) {
+        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    }
+
+    openVPNConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
 
     QJsonDocument openVPNConfigDoc(openVPNConfig);
     QString openVPNConfigStr(openVPNConfigDoc.toJson(QJsonDocument::Compact));
@@ -418,8 +424,13 @@ bool IosController::setupCloak()
         openVPNConfig.insert(config_key::mtu, protocols::openvpn::defaultMtu);
     }
 
-    openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
-    openVPNConfig.insert(config_key::splitTunnelSites, m_rawConfig[config_key::splitTunnelSites]);
+    QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
+
+    for(int index = 0; index < splitTunnelSites.count(); index++) {
+        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    }
+
+    openVPNConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
 
     QJsonDocument openVPNConfigDoc(openVPNConfig);
     QString openVPNConfigStr(openVPNConfigDoc.toJson(QJsonDocument::Compact));
@@ -448,10 +459,24 @@ bool IosController::setupWireGuard()
     wgConfig.insert(config_key::server_pub_key, config[config_key::server_pub_key]);
     wgConfig.insert(config_key::psk_key, config[config_key::psk_key]);
     wgConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
-    wgConfig.insert(config_key::splitTunnelSites, m_rawConfig[config_key::splitTunnelSites]);
+
+    QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
+
+    for(int index = 0; index < splitTunnelSites.count(); index++) {
+        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    }
+
+    wgConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
 
     if (config.contains(config_key::allowed_ips)) {
-        wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
+        QJsonArray allowed_ips;
+        QStringList allowed_ips_list = config[config_key::allowed_ips].toString().split(", ");
+
+        for(int index = 0; index < allowed_ips_list.length(); index++) {
+            allowed_ips.append(allowed_ips_list[index]);
+        }
+
+        wgConfig.insert(config_key::allowed_ips, allowed_ips);
     } else {
         QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
         wgConfig.insert(config_key::allowed_ips, allowed_ips);
@@ -490,10 +515,24 @@ bool IosController::setupAwg()
     wgConfig.insert(config_key::server_pub_key, config[config_key::server_pub_key]);
     wgConfig.insert(config_key::psk_key, config[config_key::psk_key]);
     wgConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
-    wgConfig.insert(config_key::splitTunnelSites, m_rawConfig[config_key::splitTunnelSites]);
+
+    QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
+
+    for(int index = 0; index < splitTunnelSites.count(); index++) {
+        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    }
+
+    wgConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
 
     if (config.contains(config_key::allowed_ips)) {
-        wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
+        QJsonArray allowed_ips;
+        QStringList allowed_ips_list = config[config_key::allowed_ips].toString().split(", ");
+
+        for(int index = 0; index < allowed_ips_list.length(); index++) {
+            allowed_ips.append(allowed_ips_list[index]);
+        }
+
+        wgConfig.insert(config_key::allowed_ips, allowed_ips);
     } else {
         QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
         wgConfig.insert(config_key::allowed_ips, allowed_ips);
@@ -554,23 +593,17 @@ bool IosController::startWireGuard(const QString &config)
 void IosController::startTunnel()
 {
     NSString *protocolName = @"Unknown";
-    
+
     NETunnelProviderProtocol *tunnelProtocol = (NETunnelProviderProtocol *)m_currentTunnel.protocolConfiguration;
     if (tunnelProtocol.providerConfiguration[@"wireguard"] != nil) {
         protocolName = @"WireGuard";
     } else if (tunnelProtocol.providerConfiguration[@"ovpn"] != nil) {
         protocolName = @"OpenVPN";
     }
-    
+
     m_rxBytes = 0;
     m_txBytes = 0;
-    
-    int STT = m_rawConfig["splitTunnelType"].toInt();
-    QJsonArray splitTunnelSites = m_rawConfig["splitTunnelSites"].toArray();
-    QJsonDocument doc;
-    doc.setArray(splitTunnelSites);
-    QString STS(doc.toJson());
-    
+
     [m_currentTunnel setEnabled:YES];
 
     [m_currentTunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
@@ -591,23 +624,6 @@ void IosController::startTunnel()
                     NSError *startError = nil;
                     qDebug() << iosStatusToState(m_currentTunnel.connection.status);
 
-
-                    NSString *actionKey = [NSString stringWithUTF8String:MessageKey::action];
-                    NSString *actionValue = [NSString stringWithUTF8String:Action::start];
-                    NSString *tunnelIdKey = [NSString stringWithUTF8String:MessageKey::tunnelId];
-                    NSString *tunnelIdValue = !m_tunnelId.isEmpty() ? m_tunnelId.toNSString() : @"";
-                    NSString *SplitTunnelTypeKey = [NSString stringWithUTF8String:MessageKey::SplitTunnelType];
-                    NSString *SplitTunnelTypeValue = [NSString stringWithFormat:@"%d",STT];
-                    NSString *SplitTunnelSitesKey = [NSString stringWithUTF8String:MessageKey::SplitTunnelSites];
-                    NSString *SplitTunnelSitesValue = STS.toNSString();
-                
-
-                    NSDictionary* message = @{actionKey: actionValue, tunnelIdKey: tunnelIdValue,
-                    SplitTunnelTypeKey: SplitTunnelTypeValue, SplitTunnelSitesKey: SplitTunnelSitesValue};
-                
-//                    sendVpnExtensionMessage(message);
-
-
                     BOOL started = [m_currentTunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
 
                     if (!started || startError) {
@@ -621,7 +637,6 @@ void IosController::startTunnel()
         });
     }];
 }
-
 
 bool IosController::isOurManager(NETunnelProviderManager* manager) {
     NETunnelProviderProtocol* tunnelProto = (NETunnelProviderProtocol*)manager.protocolConfiguration;
@@ -684,7 +699,7 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
     NETunnelProviderSession *session = (NETunnelProviderSession *)m_currentTunnel.connection;
 
     NSError *sendError = nil;
-    
+
     if ([session respondsToSelector:@selector(sendProviderMessage:returnError:responseHandler:)]) {
         [session sendProviderMessage:data returnError:&sendError responseHandler:completionHandler];
     } else {

@@ -58,7 +58,7 @@ struct WGConfig: Decodable {
   var str: String {
     """
     [Interface]
-    Address = \(clientIP)/32
+    Address = \(clientIP)
     DNS = \(dns1), \(dns2)
     MTU = \(mtu)
     PrivateKey = \(clientPrivateKey)
@@ -75,7 +75,7 @@ struct WGConfig: Decodable {
   var redux: String {
     """
     [Interface]
-    Address = \(clientIP)/32
+    Address = \(clientIP)
     DNS = \(dns1), \(dns2)
     MTU = \(mtu)
     PrivateKey = ***

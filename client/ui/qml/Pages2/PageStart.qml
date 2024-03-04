@@ -60,8 +60,8 @@ PageType {
             } else {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
-            
-            tabBar.isServerInfoShow = page === PageEnum.PageSettingsServerInfo || PageEnum.PageSettingsSplitTunneling || tabBar.isServerInfoShow
+
+            tabBar.isServerInfoShow = (page === PageEnum.PageSettingsServerInfo) || (page === PageEnum.PageSettingsSplitTunneling) || tabBar.isServerInfoShow
         }
 
         function onGoToStartPage() {
@@ -122,7 +122,7 @@ PageType {
         }
 
         function onNoInstalledContainers() {
-            PageController.setTriggeredBtConnectButton(true)
+            PageController.setTriggeredByConnectButton(true)
 
             ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
             InstallController.setShouldCreateServer(false)

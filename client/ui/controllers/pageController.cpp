@@ -132,7 +132,7 @@ bool PageController::isTriggeredByConnectButton()
     return m_isTriggeredByConnectButton;
 }
 
-void PageController::setTriggeredBtConnectButton(bool trigger)
+void PageController::setTriggeredByConnectButton(bool trigger)
 {
     m_isTriggeredByConnectButton = trigger;
 }
