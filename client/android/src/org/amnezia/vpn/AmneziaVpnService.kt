@@ -312,7 +312,7 @@ class AmneziaVpnService : VpnService() {
 
     @MainThread
     private fun launchSendingStatistics() {
-        /* if (isServiceBound && isConnected) {
+        if (isServiceBound && isConnected) {
             statisticsSendingJob = mainScope.launch {
                 while (true) {
                     clientMessenger.send {
@@ -323,7 +323,7 @@ class AmneziaVpnService : VpnService() {
                     delay(STATISTICS_SENDING_TIMEOUT)
                 }
             }
-        } */
+        }
     }
 
     @MainThread

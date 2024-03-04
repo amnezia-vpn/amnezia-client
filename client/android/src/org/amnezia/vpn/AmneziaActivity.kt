@@ -56,7 +56,7 @@ class AmneziaActivity : QtActivity() {
         object : Handler(Looper.getMainLooper()) {
             override fun handleMessage(msg: Message) {
                 val event = msg.extractIpcMessage<ServiceEvent>()
-                Log.d(TAG, "Handle event: $event")
+                if (event != ServiceEvent.STATISTICS_UPDATE) Log.d(TAG, "Handle event: $event")
                 when (event) {
                     ServiceEvent.CONNECTED -> {
                         QtAndroidController.onVpnConnected()

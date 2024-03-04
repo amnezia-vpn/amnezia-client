@@ -182,8 +182,8 @@ void AmneziaApplication::init()
 // /qt/6.6.1/Src/qtbase/src/plugins/platforms/android/androidjniclipboard.cpp:46
 // So we catch all the copies to the clipboard and clear them from "text/html"
 #ifdef Q_OS_ANDROID
-    connect(QGuiApplication::clipboard(), &QClipboard::dataChanged, []() {
-        auto clipboard = QGuiApplication::clipboard();
+    connect(QApplication::clipboard(), &QClipboard::dataChanged, []() {
+        auto clipboard = QApplication::clipboard();
         if (clipboard->mimeData()->hasHtml()) {
             clipboard->setText(clipboard->text());
         }
