@@ -136,7 +136,12 @@ void SettingsController::clearSettings()
     m_languageModel->changeLanguage(
             static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
     m_sitesModel->setRouteMode(Settings::RouteMode::VpnAllSites);
+
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
+
+#ifdef Q_OS_IOS
+    AmneziaVPN::clearSettings();
+#endif
 }
 
 void SettingsController::clearCachedProfiles()

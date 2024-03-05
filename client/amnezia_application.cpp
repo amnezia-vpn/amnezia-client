@@ -103,6 +103,12 @@ void AmneziaApplication::init()
     connect(m_settings.get(), &Settings::screenshotsEnabledChanged,
             AndroidController::instance(), &AndroidController::setScreenshotsEnabled);
 
+    connect(m_settings.get(), &Settings::serverRemoved,
+            AndroidController::instance(), &AndroidController::resetLastServer);
+
+    connect(m_settings.get(), &Settings::settingsCleared,
+            [](){ AndroidController::instance()->resetLastServer(-1); });
+
     connect(AndroidController::instance(), &AndroidController::initConnectionState, this,
             [this](Vpn::ConnectionState state) {
                 m_connectionController->onConnectionStateChanged(state);

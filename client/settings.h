@@ -193,6 +193,8 @@ public:
 signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);
+    void serverRemoved(int serverIndex);
+    void settingsCleared();
 
 private:
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
