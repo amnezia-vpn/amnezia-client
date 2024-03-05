@@ -73,3 +73,25 @@ QHash<int, QByteArray> WireGuardConfigModel::roleNames() const
 
     return roles;
 }
+
+WgConfig::WgConfig(const QJsonObject &jsonConfig)
+{
+    port = jsonConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
+    mtu = jsonConfig.value(config_key::mtu).toString(protocols::wireguard::defaultMtu);
+}
+
+bool WgConfig::hasEqualServerSettings(const WgConfig &other) const
+{
+    if (port != other.port) {
+        return false;
+    }
+    return true;
+}
+
+bool WgConfig::hasEqualClientSettings(const WgConfig &other) const
+{
+    if (mtu != other.mtu) {
+        return false;
+    }
+    return true;
+}

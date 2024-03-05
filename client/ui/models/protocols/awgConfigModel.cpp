@@ -82,27 +82,20 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
 
     QJsonObject protocolConfig = config.value(config_key::awg).toObject();
 
-    m_protocolConfig[config_key::port] =
-            protocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
-    m_protocolConfig[config_key::mtu] =
-            protocolConfig.value(config_key::mtu).toString(protocols::awg::defaultMtu);
+    m_protocolConfig[config_key::port] = protocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
+    m_protocolConfig[config_key::mtu] = protocolConfig.value(config_key::mtu).toString(protocols::awg::defaultMtu);
     m_protocolConfig[config_key::junkPacketCount] =
             protocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
     m_protocolConfig[config_key::junkPacketMinSize] =
-            protocolConfig.value(config_key::junkPacketMinSize)
-                    .toString(protocols::awg::defaultJunkPacketMinSize);
+            protocolConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize);
     m_protocolConfig[config_key::junkPacketMaxSize] =
-            protocolConfig.value(config_key::junkPacketMaxSize)
-                    .toString(protocols::awg::defaultJunkPacketMaxSize);
+            protocolConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize);
     m_protocolConfig[config_key::initPacketJunkSize] =
-            protocolConfig.value(config_key::initPacketJunkSize)
-                    .toString(protocols::awg::defaultInitPacketJunkSize);
+            protocolConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize);
     m_protocolConfig[config_key::responsePacketJunkSize] =
-            protocolConfig.value(config_key::responsePacketJunkSize)
-                    .toString(protocols::awg::defaultResponsePacketJunkSize);
+            protocolConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize);
     m_protocolConfig[config_key::initPacketMagicHeader] =
-            protocolConfig.value(config_key::initPacketMagicHeader)
-                    .toString(protocols::awg::defaultInitPacketMagicHeader);
+            protocolConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader);
     m_protocolConfig[config_key::responsePacketMagicHeader] =
             protocolConfig.value(config_key::responsePacketMagicHeader)
                     .toString(protocols::awg::defaultResponsePacketMagicHeader);
@@ -139,4 +132,48 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[TransportPacketMagicHeaderRole] = "transportPacketMagicHeader";
 
     return roles;
+}
+
+AwgConfig::AwgConfig(const QJsonObject &jsonConfig)
+{
+    port = jsonConfig.value(config_key::port).toString(protocols::awg::defaultPort);
+    mtu = jsonConfig.value(config_key::mtu).toString(protocols::awg::defaultMtu);
+    junkPacketCount = jsonConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
+    junkPacketMinSize =
+            jsonConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize);
+    junkPacketMaxSize =
+            jsonConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize);
+    initPacketJunkSize =
+            jsonConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize);
+    responsePacketJunkSize =
+            jsonConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize);
+    initPacketMagicHeader =
+            jsonConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader);
+    responsePacketMagicHeader = jsonConfig.value(config_key::responsePacketMagicHeader)
+                                        .toString(protocols::awg::defaultResponsePacketMagicHeader);
+    underloadPacketMagicHeader = jsonConfig.value(config_key::underloadPacketMagicHeader)
+                                         .toString(protocols::awg::defaultUnderloadPacketMagicHeader);
+    transportPacketMagicHeader = jsonConfig.value(config_key::transportPacketMagicHeader)
+                                         .toString(protocols::awg::defaultTransportPacketMagicHeader);
+}
+
+bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
+{
+    if (port != other.port || junkPacketCount != other.junkPacketCount || junkPacketMinSize != other.junkPacketMinSize
+        || junkPacketMaxSize != other.junkPacketMaxSize || initPacketJunkSize != other.initPacketJunkSize
+        || responsePacketJunkSize != other.responsePacketJunkSize || initPacketMagicHeader != other.initPacketMagicHeader
+        || responsePacketMagicHeader != other.responsePacketMagicHeader
+        || underloadPacketMagicHeader != other.underloadPacketMagicHeader
+        || transportPacketMagicHeader != other.transportPacketMagicHeader) {
+        return false;
+    }
+    return true;
+}
+
+bool AwgConfig::hasEqualClientSettings(const AwgConfig &other) const
+{
+    if (mtu != other.mtu) {
+        return false;
+    }
+    return true;
 }
