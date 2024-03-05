@@ -18,8 +18,8 @@ public:
 
 public slots:
     void importConfig();
-    void extractConfigFromFile(const QString &fileName);
-    void extractConfigFromData(QString data);
+    bool extractConfigFromFile(const QString &fileName);
+    bool extractConfigFromData(QString data);
     void extractConfigFromCode(QString code);
     bool extractConfigFromQr(const QByteArray &data);
     QString getConfig();
@@ -39,9 +39,12 @@ public slots:
 
 signals:
     void importFinished();
-    void importErrorOccurred(const QString &errorMessage, bool goToPageHome = false);
+    void importErrorOccurred(const QString &errorMessage, bool goToPageHome);
+    void importErrorOccurred(const QString &errorMessage);
 
     void qrDecodingFinished();
+
+    void restoreAppConfig(const QByteArray &data);
 
 private:
     QJsonObject extractAmneziaConfig(QString &data);

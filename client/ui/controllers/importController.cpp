@@ -18,7 +18,9 @@ namespace
     enum class ConfigTypes {
         Amnezia,
         OpenVpn,
-        WireGuard
+        WireGuard,
+        Backup,
+        Invalid
     };
 
     ConfigTypes checkConfigFormat(const QString &config)
@@ -32,15 +34,22 @@ namespace
         const QString wireguardConfigPatternSectionInterface = "[Interface]";
         const QString wireguardConfigPatternSectionPeer = "[Peer]";
 
-        if (config.contains(openVpnConfigPatternCli)
+        const QString amneziaConfigPattern = "vpn://";
+        const QString backupPattern = "Servers/serversList";
+
+        if (config.contains(backupPattern)) {
+            return ConfigTypes::Backup;
+        } else if (config.contains(openVpnConfigPatternCli)
             && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))
             && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
             return ConfigTypes::OpenVpn;
         } else if (config.contains(wireguardConfigPatternSectionInterface)
                    && config.contains(wireguardConfigPatternSectionPeer)) {
             return ConfigTypes::WireGuard;
+        } else if (config.contains(amneziaConfigPattern)) {
+            return ConfigTypes::Amnezia;
         }
-        return ConfigTypes::Amnezia;
+        return ConfigTypes::Invalid;
     }
 
 #if defined Q_OS_ANDROID
@@ -58,28 +67,51 @@ ImportController::ImportController(const QSharedPointer<ServersModel> &serversMo
 #endif
 }
 
-void ImportController::extractConfigFromFile(const QString &fileName)
+bool ImportController::extractConfigFromFile(const QString &fileName)
 {
     QFile file(fileName);
 
     if (file.open(QIODevice::ReadOnly)) {
         QString data = file.readAll();
 
-        extractConfigFromData(data);
         m_configFileName = QFileInfo(file.fileName()).fileName();
+        return extractConfigFromData(data);
     }
+
+    emit importErrorOccurred(tr("Unable to open file"));
+    return false;
 }
 
-void ImportController::extractConfigFromData(QString data)
+bool ImportController::extractConfigFromData(QString data)
 {
     auto configFormat = checkConfigFormat(data);
-    if (configFormat == ConfigTypes::OpenVpn) {
+    switch (configFormat) {
+    case ConfigTypes::OpenVpn: {
         m_config = extractOpenVpnConfig(data);
-    } else if (configFormat == ConfigTypes::WireGuard) {
-        m_config = extractWireGuardConfig(data);
-    } else {
-        m_config = extractAmneziaConfig(data);
+        return true;
     }
+    case ConfigTypes::WireGuard: {
+        m_config = extractWireGuardConfig(data);
+        return true;
+    }
+    case ConfigTypes::Amnezia: {
+        m_config = extractAmneziaConfig(data);
+        return true;
+    }
+    case ConfigTypes::Backup: {
+        if (!m_serversModel->getServersCount()) {
+            emit restoreAppConfig(data.toUtf8());
+        } else {
+            emit importErrorOccurred(tr("Invalid configuration file"));
+        }
+        break;
+    }
+    case ConfigTypes::Invalid: {
+        emit importErrorOccurred(tr("Invalid configuration file"));
+        break;
+    }
+    }
+    return false;
 }
 
 void ImportController::extractConfigFromCode(QString code)
@@ -139,7 +171,7 @@ void ImportController::importConfig()
     } else {
         qDebug() << "Failed to import profile";
         qDebug().noquote() << QJsonDocument(m_config).toJson();
-        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
+        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
     }
 
     m_config = {};
@@ -230,7 +262,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         hostName = hostNameAndPortMatch.captured(1);
     } else {
         qDebug() << "Failed to import profile";
-        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
+        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
     }
 
     if (hostNameAndPortMatch.hasCaptured(2)) {
@@ -242,22 +274,22 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     lastConfig[config_key::hostName] = hostName;
     lastConfig[config_key::port] = port.toInt();
 
-//    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty()
-//        && !configMap.value("PresharedKey").isEmpty() && !configMap.value("PublicKey").isEmpty()) {
-        lastConfig[config_key::client_priv_key] = configMap.value("PrivateKey");
-        lastConfig[config_key::client_ip] = configMap.value("Address");
-        if (!configMap.value("PresharedKey").isEmpty()) {
-            lastConfig[config_key::psk_key] = configMap.value("PresharedKey");
-        } else if (!configMap.value("PreSharedKey").isEmpty()) {
-            lastConfig[config_key::psk_key] = configMap.value("PreSharedKey");
-        }
+    //    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty()
+    //        && !configMap.value("PresharedKey").isEmpty() && !configMap.value("PublicKey").isEmpty()) {
+    lastConfig[config_key::client_priv_key] = configMap.value("PrivateKey");
+    lastConfig[config_key::client_ip] = configMap.value("Address");
+    if (!configMap.value("PresharedKey").isEmpty()) {
+        lastConfig[config_key::psk_key] = configMap.value("PresharedKey");
+    } else if (!configMap.value("PreSharedKey").isEmpty()) {
+        lastConfig[config_key::psk_key] = configMap.value("PreSharedKey");
+    }
 
-        lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
-//    } else {
-//        qDebug() << "Failed to import profile";
-//        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
-//        return QJsonObject();
-//    }
+    lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
+    //    } else {
+    //        qDebug() << "Failed to import profile";
+    //        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
+    //        return QJsonObject();
+    //    }
 
     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(","));
 

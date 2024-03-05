@@ -85,6 +85,20 @@ PageType {
         }
     }
 
+    Connections {
+        target: ImportController
+
+        function onRestoreAppConfig(data) {
+            PageController.showBusyIndicator(true)
+            SettingsController.restoreAppConfigFromData(data)
+            PageController.showBusyIndicator(false)
+        }
+
+        function onImportErrorOccurred(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
+        }
+    }
+
     FlickableType {
         id: fl
         anchors.top: parent.top

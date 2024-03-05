@@ -129,6 +129,11 @@ void SettingsController::restoreAppConfig(const QString &fileName)
 
     QByteArray data = file.readAll();
 
+    restoreAppConfigFromData(data);
+}
+
+void SettingsController::restoreAppConfigFromData(const QByteArray &data)
+{
     bool ok = m_settings->restoreAppConfig(data);
     if (ok) {
         m_serversModel->resetModel();
