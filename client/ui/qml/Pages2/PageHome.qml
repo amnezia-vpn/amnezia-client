@@ -156,9 +156,16 @@ PageType {
 
             LabelTextType {
                 id: collapsedServerMenuDescription
-                Layout.bottomMargin: 44
+                Layout.bottomMargin: 10
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 text: ServersModel.defaultServerDescriptionCollapsed
+            }
+
+
+            GraphViewType {
+                id: graph1
+                Layout.preferredHeight: 50
+                Layout.fillWidth: true
             }
 
         }
@@ -199,6 +206,12 @@ PageType {
                     verticalAlignment: Qt.AlignVCenter
                     text: ServersModel.defaultServerDescriptionExpanded
                 }
+
+                GraphViewType {
+                     id: graph2
+                     Layout.preferredHeight: 50
+                     Layout.fillWidth: true
+                 }
 
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter

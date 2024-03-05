@@ -20,7 +20,18 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *
             });
     connect(m_impl.get(), &ControllerImpl::disconnected, this,
             [this]() { emit connectionStateChanged(Vpn::ConnectionState::Disconnected); });
+
+    connect(m_impl.get(), &ControllerImpl::statusUpdated, this,
+            &WireguardProtocol::statusUpdated);
+
     m_impl->initialize(nullptr, nullptr);
+}
+
+void WireguardProtocol::statusUpdated(const QString& serverIpv4Gateway, const QString& deviceIpv4Address,
+                                      uint64_t txBytes, uint64_t rxBytes) {
+    setBytesChanged(rxBytes, txBytes);
+    QThread::msleep(1000);
+    m_impl->checkStatus();
 }
 
 WireguardProtocol::~WireguardProtocol()
