@@ -49,6 +49,7 @@ void WireGuardConfigModel::updateModel(const QJsonObject &config)
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::wireguard).toObject();
 
+    m_protocolConfig[config_key::last_config] = protocolConfig.value(config_key::last_config);
     m_protocolConfig[config_key::port] =
         protocolConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
 
@@ -60,6 +61,13 @@ void WireGuardConfigModel::updateModel(const QJsonObject &config)
 
 QJsonObject WireGuardConfigModel::getConfig()
 {
+    const WgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject());
+    const WgConfig newConfig(m_protocolConfig);
+
+    if (!oldConfig.hasEqualServerSettings(newConfig)) {
+        m_protocolConfig.remove(config_key::last_config);
+    }
+
     m_fullConfig.insert(config_key::wireguard, m_protocolConfig);
     return m_fullConfig;
 }
@@ -72,4 +80,26 @@ QHash<int, QByteArray> WireGuardConfigModel::roleNames() const
     roles[MtuRole] = "mtu";
 
     return roles;
+}
+
+WgConfig::WgConfig(const QJsonObject &jsonConfig)
+{
+    port = jsonConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
+    mtu = jsonConfig.value(config_key::mtu).toString(protocols::wireguard::defaultMtu);
+}
+
+bool WgConfig::hasEqualServerSettings(const WgConfig &other) const
+{
+    if (port != other.port) {
+        return false;
+    }
+    return true;
+}
+
+bool WgConfig::hasEqualClientSettings(const WgConfig &other) const
+{
+    if (mtu != other.mtu) {
+        return false;
+    }
+    return true;
 }
