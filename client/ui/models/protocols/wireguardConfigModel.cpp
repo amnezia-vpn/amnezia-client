@@ -49,6 +49,7 @@ void WireGuardConfigModel::updateModel(const QJsonObject &config)
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::wireguard).toObject();
 
+    m_protocolConfig[config_key::last_config] = protocolConfig.value(config_key::last_config);
     m_protocolConfig[config_key::port] =
         protocolConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
 
@@ -60,6 +61,13 @@ void WireGuardConfigModel::updateModel(const QJsonObject &config)
 
 QJsonObject WireGuardConfigModel::getConfig()
 {
+    const WgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject());
+    const WgConfig newConfig(m_protocolConfig);
+
+    if (!oldConfig.hasEqualServerSettings(newConfig)) {
+        m_protocolConfig.remove(config_key::last_config);
+    }
+
     m_fullConfig.insert(config_key::wireguard, m_protocolConfig);
     return m_fullConfig;
 }

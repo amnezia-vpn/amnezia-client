@@ -357,7 +357,7 @@ PageType {
                                      junkPacketCountTextField.errorText === "" &&
                                      portTextField.errorText === ""
 
-                            text: qsTr("Save and Restart Amnezia")
+                            text: qsTr("Save")
 
                             clickedFunc: function() {
                                 forceActiveFocus()

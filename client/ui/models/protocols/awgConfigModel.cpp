@@ -82,6 +82,7 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
 
     QJsonObject protocolConfig = config.value(config_key::awg).toObject();
 
+    m_protocolConfig[config_key::last_config] = protocolConfig.value(config_key::last_config);
     m_protocolConfig[config_key::port] = protocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
     m_protocolConfig[config_key::mtu] = protocolConfig.value(config_key::mtu).toString(protocols::awg::defaultMtu);
     m_protocolConfig[config_key::junkPacketCount] =
@@ -111,6 +112,13 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
 
 QJsonObject AwgConfigModel::getConfig()
 {
+    const AwgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject());
+    const AwgConfig newConfig(m_protocolConfig);
+
+    if (!oldConfig.hasEqualServerSettings(newConfig)) {
+        m_protocolConfig.remove(config_key::last_config);
+    }
+
     m_fullConfig.insert(config_key::awg, m_protocolConfig);
     return m_fullConfig;
 }

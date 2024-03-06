@@ -152,7 +152,7 @@ PageType {
                             enabled: mtuTextField.errorText === "" &&
                                      portTextField.errorText === ""
 
-                            text: qsTr("Save and Restart Amnezia")
+                            text: qsTr("Save")
 
                             onClicked: {
                                 forceActiveFocus()
