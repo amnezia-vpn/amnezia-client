@@ -160,7 +160,6 @@ PageType {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 text: ServersModel.defaultServerDescriptionCollapsed
             }
-
         }
         expandedContent: Item {
             id: serverMenuContainer
