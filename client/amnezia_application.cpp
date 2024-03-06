@@ -24,6 +24,7 @@
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/ios_controller.h"
+    #include <AmneziaVPN-Swift.h>
 #endif
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
@@ -98,6 +99,10 @@ void AmneziaApplication::init()
     connect(m_settings.get(), &Settings::saveLogsChanged,
             AndroidController::instance(), &AndroidController::setSaveLogs);
 
+    AndroidController::instance()->setScreenshotsEnabled(m_settings->isScreenshotsEnabled());
+    connect(m_settings.get(), &Settings::screenshotsEnabledChanged,
+            AndroidController::instance(), &AndroidController::setScreenshotsEnabled);
+
     connect(m_settings.get(), &Settings::serverRemoved,
             AndroidController::instance(), &AndroidController::resetLastServer);
 
@@ -133,6 +138,11 @@ void AmneziaApplication::init()
         m_pageController->replaceStartPage();
         m_pageController->goToPageSettingsBackup();
         m_settingsController->importBackupFromOutside(filePath);
+    });
+
+    AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled());
+    connect(m_settings.get(), &Settings::screenshotsEnabledChanged, [](bool enabled) {
+        AmneziaVPN::toggleScreenshots(enabled);
     });
 #endif
 
