@@ -228,17 +228,10 @@ bool SettingsController::isCameraPresent()
 
 void SettingsController::startLoggingWather()
 {
-    if (isLoggingEnabled()) {
-        m_loggingDisableDate = m_settings->getLogEnableDate().addDays(14);
-        QFuture<void> future = QtConcurrent::run([this]() {
-            while (m_loggingDisableDate > QDateTime::currentDateTime()) {
-                QThread::currentThread()->msleep(1000 * 60 * 60 * 4); // check every 4 hours
-            }
-
-            toggleLogging(false);
-            clearLogs();
-            emit loggingDisableByWathcer();
-            return;
-        });
+    m_loggingDisableDate = m_settings->getLogEnableDate().addDays(14);
+    if (m_loggingDisableDate <= QDateTime::currentDateTime()) {
+        toggleLogging(false);
+        clearLogs();
+        emit loggingDisableByWathcer();
     }
 }
