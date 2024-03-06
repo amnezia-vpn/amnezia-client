@@ -2,29 +2,29 @@
 #define SSHCLIENT_H
 
 #include <QObject>
+#include <QFile>
 
 #include <fcntl.h>
 
 #include <libssh/libssh.h>
-#include <libssh/sftp.h>
 
 #include "defs.h"
 
 using namespace amnezia;
 
 namespace libssh {
-    enum SftpOverwriteMode {
+    enum ScpOverwriteMode {
         /*! Overwrite any existing files */
-        SftpOverwriteExisting = O_TRUNC,
+        ScpOverwriteExisting = O_TRUNC,
         /*! Append new content if the file already exists */
-        SftpAppendToExisting = O_APPEND
+        ScpAppendToExisting = O_APPEND
     };
     class Client : public QObject
     {
         Q_OBJECT
     public:
-        Client(QObject *parent = nullptr);
-        ~Client();
+        Client() = default;
+        ~Client() = default;
 
         ErrorCode connectToHost(const ServerCredentials &credentials);
         void disconnectFromHost();
@@ -32,26 +32,26 @@ namespace libssh {
                                  const std::function<ErrorCode (const QString &, Client &)> &cbReadStdOut,
                                  const std::function<ErrorCode (const QString &, Client &)> &cbReadStdErr);
         ErrorCode writeResponse(const QString &data);
-        ErrorCode sftpFileCopy(const SftpOverwriteMode overwriteMode,
+        ErrorCode scpFileCopy(const ScpOverwriteMode overwriteMode,
                                const QString &localPath,
                                const QString &remotePath,
-                               const QString& fileDesc);
+                               const QString &fileDesc);
         ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &passphraseCallback);
     private:
         ErrorCode closeChannel();
-        ErrorCode closeSftpSession();
+        void closeScpSession();
         ErrorCode fromLibsshErrorCode();
-        ErrorCode fromLibsshSftpErrorCode(int errorCode);
+        ErrorCode fromFileErrorCode(QFileDevice::FileError fileError);
         static int callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata);
 
         ssh_session m_session = nullptr;
         ssh_channel m_channel = nullptr;
-        sftp_session m_sftpSession = nullptr;
+        ssh_scp m_scpSession = nullptr;
 
         static std::function<QString()> m_passphraseCallback;
     signals:
         void writeToChannelFinished();
-        void sftpFileCopyFinished();
+        void scpFileCopyFinished();
     };
 }
 
