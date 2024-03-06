@@ -34,11 +34,14 @@ namespace
         const QString wireguardConfigPatternSectionInterface = "[Interface]";
         const QString wireguardConfigPatternSectionPeer = "[Peer]";
 
-        const QString amneziaConfigPattern = "vpn://";
+        const QString amneziaConfigPattern = "containers";
+        const QString amneziaFreeConfigPattern = "api_key";
         const QString backupPattern = "Servers/serversList";
 
         if (config.contains(backupPattern)) {
             return ConfigTypes::Backup;
+        } else if (config.contains(amneziaConfigPattern) || config.contains(amneziaFreeConfigPattern)) {
+            return ConfigTypes::Amnezia;
         } else if (config.contains(openVpnConfigPatternCli)
             && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))
             && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
@@ -46,8 +49,6 @@ namespace
         } else if (config.contains(wireguardConfigPatternSectionInterface)
                    && config.contains(wireguardConfigPatternSectionPeer)) {
             return ConfigTypes::WireGuard;
-        } else if (config.contains(amneziaConfigPattern)) {
-            return ConfigTypes::Amnezia;
         }
         return ConfigTypes::Invalid;
     }
@@ -84,23 +85,36 @@ bool ImportController::extractConfigFromFile(const QString &fileName)
 
 bool ImportController::extractConfigFromData(QString data)
 {
-    auto configFormat = checkConfigFormat(data);
+    QString config = data;
+    auto configFormat = checkConfigFormat(config);
+    if (configFormat == ConfigTypes::Invalid) {
+        data.replace("vpn://", "");
+        QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+        QByteArray ba_uncompressed = qUncompress(ba);
+        if (!ba_uncompressed.isEmpty()) {
+            ba = ba_uncompressed;
+        }
+
+        config = ba;
+        configFormat = checkConfigFormat(config);
+    }
+
     switch (configFormat) {
     case ConfigTypes::OpenVpn: {
-        m_config = extractOpenVpnConfig(data);
+        m_config = extractOpenVpnConfig(config);
         return true;
     }
     case ConfigTypes::WireGuard: {
-        m_config = extractWireGuardConfig(data);
+        m_config = extractWireGuardConfig(config);
         return true;
     }
     case ConfigTypes::Amnezia: {
-        m_config = extractAmneziaConfig(data);
+        m_config = QJsonDocument::fromJson(config.toUtf8()).object();
         return true;
     }
     case ConfigTypes::Backup: {
         if (!m_serversModel->getServersCount()) {
-            emit restoreAppConfig(data.toUtf8());
+            emit restoreAppConfig(config.toUtf8());
         } else {
             emit importErrorOccurred(tr("Invalid configuration file"));
         }
@@ -112,12 +126,6 @@ bool ImportController::extractConfigFromData(QString data)
     }
     }
     return false;
-}
-
-void ImportController::extractConfigFromCode(QString code)
-{
-    m_config = extractAmneziaConfig(code);
-    m_configFileName = "";
 }
 
 bool ImportController::extractConfigFromQr(const QByteArray &data)
@@ -176,21 +184,6 @@ void ImportController::importConfig()
 
     m_config = {};
     m_configFileName.clear();
-}
-
-QJsonObject ImportController::extractAmneziaConfig(QString &data)
-{
-    data.replace("vpn://", "");
-    QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-
-    QByteArray ba_uncompressed = qUncompress(ba);
-    if (!ba_uncompressed.isEmpty()) {
-        ba = ba_uncompressed;
-    }
-
-    QJsonObject config = QJsonDocument::fromJson(ba).object();
-
-    return config;
 }
 
 QJsonObject ImportController::extractOpenVpnConfig(const QString &data)

@@ -20,7 +20,6 @@ public slots:
     void importConfig();
     bool extractConfigFromFile(const QString &fileName);
     bool extractConfigFromData(QString data);
-    void extractConfigFromCode(QString code);
     bool extractConfigFromQr(const QByteArray &data);
     QString getConfig();
     QString getConfigFileName();
@@ -47,7 +46,6 @@ signals:
     void restoreAppConfig(const QByteArray &data);
 
 private:
-    QJsonObject extractAmneziaConfig(QString &data);
     QJsonObject extractOpenVpnConfig(const QString &data);
     QJsonObject extractWireGuardConfig(const QString &data);
 

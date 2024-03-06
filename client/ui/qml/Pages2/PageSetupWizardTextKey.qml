@@ -77,7 +77,7 @@ PageType {
         text: qsTr("Continue")
 
         clickedFunc: function() {
-            ImportController.extractConfigFromCode(textKey.textFieldText)
+            ImportController.extractConfigFromData(textKey.textFieldText)
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
     }
