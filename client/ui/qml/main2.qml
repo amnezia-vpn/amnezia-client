@@ -86,6 +86,11 @@ Window  {
         function onGoToPageSettingsBackup() {
             PageController.goToPage(PageEnum.PageSettingsBackup)
         }
+
+        function onShowBusyIndicator(visible) {
+            busyIndicator.visible = visible
+            PageController.disableControls(visible)
+        }
     }
 
     Connections {
@@ -212,6 +217,16 @@ Window  {
             id: questionDrawer
 
             anchors.fill: parent
+        }
+    }
+
+    Item {
+        anchors.fill: parent
+
+        BusyIndicatorType {
+            id: busyIndicator
+            anchors.centerIn: parent
+            z: 1
         }
     }
 

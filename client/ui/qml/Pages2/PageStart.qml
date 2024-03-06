@@ -14,6 +14,8 @@ import "../Components"
 PageType {
     id: root
 
+    property bool isControlsDisabled: false
+
     Connections {
         target: PageController
 
@@ -32,14 +34,8 @@ PageType {
             tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
         }
 
-        function onShowBusyIndicator(visible) {
-            busyIndicator.visible = visible
-            tabBarStackView.enabled = !visible
-            tabBar.enabled = !visible
-        }
-
         function onDisableControls(disabled) {
-            tabBar.enabled = !disabled
+            isControlsDisabled = disabled
         }
 
         function onClosePage() {
@@ -67,7 +63,7 @@ PageType {
         }
 
         function onEscapePressed() {
-            if (!tabBar.enabled || busyIndicator.visible) {
+            if (root.isControlsDisabled) {
                 return
             }
 
@@ -136,6 +132,8 @@ PageType {
         width: parent.width
         height: root.height - tabBar.implicitHeight
 
+        enabled: !root.isControlsDisabled
+
         function goToTabBarPage(page) {
             connectionTypeSelection.close()
 
@@ -164,6 +162,8 @@ PageType {
         bottomPadding: 8
         leftPadding: 96
         rightPadding: 96
+
+        enabled: !root.isControlsDisabled
 
         background: Shape {
             width: parent.width
@@ -234,12 +234,6 @@ PageType {
                 connectionTypeSelection.open()
             }
         }
-    }
-
-    BusyIndicatorType {
-        id: busyIndicator
-        anchors.centerIn: parent
-        z: 1
     }
 
     ConnectionTypeSelectionDrawer {
