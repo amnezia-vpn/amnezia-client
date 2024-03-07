@@ -28,21 +28,6 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
       m_settings(settings)
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
-
-#ifdef Q_OS_ANDROID
-    if (!m_settings->isScreenshotsEnabled()) {
-        // Set security screen for Android app
-        AndroidUtils::runOnAndroidThreadSync([]() {
-            QJniObject activity = AndroidUtils::getActivity();
-            QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
-            if (window.isValid()) {
-                const int FLAG_SECURE = 8192;
-                window.callMethod<void>("addFlags", "(I)V", FLAG_SECURE);
-            }
-        });
-    }
-#endif
-
     startLoggingWather();
 }
 
