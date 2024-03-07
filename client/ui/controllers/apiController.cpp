@@ -90,7 +90,7 @@ void ApiController::updateServerConfigFromApi()
             request.setRawHeader("Authorization",
                                  "Api-Key " + serverConfig.value(configKey::accessToken).toString().toUtf8());
             QString endpoint = serverConfig.value(configKey::apiEdnpoint).toString();
-            request.setUrl(endpoint.replace("https", "http")); // todo remove
+            request.setUrl(endpoint);
 
             QString protocol = serverConfig.value(configKey::protocol).toString();
 

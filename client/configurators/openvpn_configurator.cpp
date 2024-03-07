@@ -68,7 +68,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
                                                                amnezia::protocols::openvpn::taKeyPath, errorCode);
 
     if (connData.caCert.isEmpty() || connData.clientCert.isEmpty() || connData.taKey.isEmpty()) {
-        errorCode = ErrorCode::SshSftpFailureError;
+        errorCode = ErrorCode::SshScpFailureError;
     }
 
     return connData;

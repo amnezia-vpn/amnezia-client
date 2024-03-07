@@ -92,11 +92,11 @@ QString SystemController::getFileName(const QString &acceptLabel, const QString 
 
     mainFileDialog->setProperty("acceptLabel", QVariant::fromValue(acceptLabel));
     mainFileDialog->setProperty("nameFilters", QVariant::fromValue(QStringList(nameFilter)));
-    if (!selectedFile.isEmpty()) {
-        mainFileDialog->setProperty("selectedFile", QVariant::fromValue(selectedFile));
-    }
-    mainFileDialog->setProperty("isSaveMode", QVariant::fromValue(isSaveMode));
     mainFileDialog->setProperty("defaultSuffix", QVariant::fromValue(defaultSuffix));
+    mainFileDialog->setProperty("isSaveMode", QVariant::fromValue(isSaveMode));
+    if (!selectedFile.isEmpty()) {
+        mainFileDialog->setProperty("selectedFile", QVariant::fromValue(QUrl(selectedFile)));
+    }
     QMetaObject::invokeMethod(mainFileDialog, "open");
 
     bool isFileDialogAccepted = false;

@@ -270,6 +270,7 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex, const ServerC
                                                   ErrorCode errorCode)
 {
     QJsonObject vpnConfiguration;
+    vpnConfiguration[config_key::serverIndex] = serverIndex;
 
     for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
         auto s = m_settings->server(serverIndex);
@@ -471,10 +472,15 @@ void VpnConnection::disconnectFromVpn()
 
 #ifdef Q_OS_ANDROID
     if (m_vpnProtocol && m_vpnProtocol.data()) {
-        connect(AndroidController::instance(), &AndroidController::vpnDisconnected, this,
-                [this]() {
-                    onConnectionStateChanged(Vpn::ConnectionState::Disconnected);
-                }, Qt::SingleShotConnection);
+        auto *const connection = new QMetaObject::Connection;
+        *connection = connect(AndroidController::instance(), &AndroidController::vpnStateChanged, this,
+                              [this, connection](AndroidController::ConnectionState state) {
+                                  if (state == AndroidController::ConnectionState::DISCONNECTED) {
+                                      onConnectionStateChanged(Vpn::ConnectionState::Disconnected);
+                                      disconnect(*connection);
+                                      delete connection;
+                                  }
+                              });
         m_vpnProtocol.data()->stop();
     }
 #endif

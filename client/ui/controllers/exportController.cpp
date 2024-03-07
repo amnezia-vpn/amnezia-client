@@ -357,4 +357,6 @@ void ExportController::clearPreviousConfig()
     m_config.clear();
     m_nativeConfigString.clear();
     m_qrCodes.clear();
+
+    emit exportConfigChanged();
 }

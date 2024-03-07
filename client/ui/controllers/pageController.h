@@ -83,9 +83,12 @@ public slots:
     void showOnStartup();
 
     bool isTriggeredByConnectButton();
-    void setTriggeredBtConnectButton(bool trigger);
+    void setTriggeredByConnectButton(bool trigger);
 
     void closeApplication();
+
+    void setDrawerDepth(const int depth);
+    int getDrawerDepth();
 
 signals:
     void goToPage(PageLoader::PageEnum page, bool slide = true);
@@ -105,7 +108,7 @@ signals:
     void showNotificationMessage(const QString &message);
 
     void showBusyIndicator(bool visible);
-    void enableTabBar(bool enabled);
+    void disableControls(bool disabled);
 
     void hideMainWindow();
     void raiseMainWindow();
@@ -113,12 +116,17 @@ signals:
     void showPassphraseRequestDrawer();
     void passphraseRequestDrawerClosed(QString passphrase);
 
+    void escapePressed();
+    void closeTopDrawer();
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
 
     std::shared_ptr<Settings> m_settings;
 
     bool m_isTriggeredByConnectButton;
+
+    int m_drawerDepth = 0;
 };
 
 #endif // PAGECONTROLLER_H

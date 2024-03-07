@@ -1,8 +1,7 @@
 FROM alpine:3.15
 LABEL maintainer="AmneziaVPN"
 
-ARG SS_RELEASE="v1.13.1"
-ARG SERVER_ARCH
+ARG SS_RELEASE="v1.18.1"
 
 #Install required packages
 RUN apk add --no-cache curl openvpn easy-rsa bash netcat-openbsd dumb-init rng-tools xz
@@ -15,7 +14,16 @@ RUN mkdir -p /opt/amnezia
 RUN echo -e "#!/bin/bash\ntail -f /dev/null" > /opt/amnezia/start.sh
 RUN chmod a+x /opt/amnezia/start.sh
 
-RUN curl -L https://github.com/shadowsocks/shadowsocks-rust/releases/download/${SS_RELEASE}/shadowsocks-${SS_RELEASE}.${SERVER_ARCH}-unknown-linux-musl.tar.xz  > /usr/bin/ss.tar.xz;\
+RUN SERVER_ARCH=$(uname -m); \
+  SUFFIX=""; \
+  if [ ! -z "$(echo ${SERVER_ARCH} | grep -i arm)" ]; then \
+    if [ ! -z "$(cat /proc/cpuinfo | grep -i vfp)" ]; then \
+      SUFFIX="eabihf"; \
+    else \
+      SUFFIX="eabi"; \
+    fi; \
+  fi; \
+  curl -L https://github.com/shadowsocks/shadowsocks-rust/releases/download/${SS_RELEASE}/shadowsocks-${SS_RELEASE}.${SERVER_ARCH}-unknown-linux-musl${SUFFIX}.tar.xz > /usr/bin/ss.tar.xz;\
   tar -Jxvf /usr/bin/ss.tar.xz -C /usr/bin/;\
   chmod a+x /usr/bin/ssserver;
 

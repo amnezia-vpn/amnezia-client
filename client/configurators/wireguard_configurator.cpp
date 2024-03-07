@@ -150,7 +150,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
                                  .arg(connData.clientPubKey, connData.pskKey, connData.clientIP);
 
     errorCode = serverController.uploadTextFileToContainer(container, credentials, configPart, m_serverConfigPath,
-                                                           libssh::SftpOverwriteMode::SftpAppendToExisting);
+                                                           libssh::ScpOverwriteMode::ScpAppendToExisting);
 
     if (errorCode != ErrorCode::NoError) {
         return connData;

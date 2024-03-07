@@ -13,15 +13,13 @@ import "../Components"
 PageType {
     id: root
 
+    property bool isControlsDisabled: false
+
     Connections {
         target: PageController
 
         function onGoToPageViewConfig() {
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
-        }
-
-        function onShowBusyIndicator(visible) {
-            busyIndicator.visible = visible
         }
 
         function onClosePage() {
@@ -44,6 +42,18 @@ PageType {
             while (stackView.depth > 1) {
                 stackView.pop()
             }
+        }
+
+        function onDisableControls(disabled) {
+            isControlsDisabled = disabled
+        }
+
+        function onEscapePressed() {
+            if (isControlsDisabled) {
+                return
+            }
+
+            PageController.closePage()
         }
     }
 
@@ -144,11 +154,5 @@ PageType {
 
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
-    }
-
-    BusyIndicatorType {
-        id: busyIndicator
-        anchors.centerIn: parent
-        z: 1
     }
 }

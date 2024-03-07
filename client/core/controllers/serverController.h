@@ -35,7 +35,7 @@ public:
 
     ErrorCode uploadTextFileToContainer(
             DockerContainer container, const ServerCredentials &credentials, const QString &file, const QString &path,
-            libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
+            libssh::ScpOverwriteMode overwriteMode = libssh::ScpOverwriteMode::ScpOverwriteExisting);
     QByteArray getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials,
                                         const QString &path, ErrorCode errorCode);
 
@@ -77,7 +77,7 @@ private:
     ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container);
 
     ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
-                               libssh::SftpOverwriteMode overwriteMode = libssh::SftpOverwriteMode::SftpOverwriteExisting);
+                               libssh::ScpOverwriteMode overwriteMode = libssh::ScpOverwriteMode::ScpOverwriteExisting);
 
     ErrorCode setupServerFirewall(const ServerCredentials &credentials);
 
