@@ -68,42 +68,8 @@ PageType {
                 height: 20
                 font.pixelSize: 14
 
-                text: qsTr("This is a free and open source application. If you like it, support the developers with a donation. ") +
-                      qsTr("And if you don’t like the application, all the more reason to support it - the donation will be used for the improving the application.")
+                text: qsTr("Amnezia is a free and open-source application. You can support the developers if you like it.")
                 color: "#CCCAC8"
-            }
-
-            BasicButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Card on Patreon")
-
-                clickedFunc: function() {
-                    Qt.openUrlExternally(qsTr("https://www.patreon.com/amneziavpn"))
-                }
-            }
-
-            BasicButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#D7D8DB"
-                borderWidth: 1
-
-                text: qsTr("Show other methods on Github")
-
-                clickedFunc: function() {
-                    Qt.openUrlExternally(qsTr("https://github.com/amnezia-vpn/amnezia-client#donate"))
-                }
             }
 
             ParagraphTextType {
@@ -196,6 +162,25 @@ PageType {
                 clickedFunc: function() {
                     Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
                 }
+            }
+
+            BasicButtonType {
+              Layout.alignment: Qt.AlignHCenter
+              Layout.bottomMargin: 16
+              Layout.topMargin: -15
+              implicitHeight: 25
+
+              defaultColor: "transparent"
+              hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+              pressedColor: Qt.rgba(1, 1, 1, 0.12)
+              disabledColor: "#878B91"
+              textColor: "#FBB26A"
+
+              text: qsTr("Privay Policy")
+
+              clickedFunc: function() {
+                Qt.openUrlExternally("https://amnezia.org/en/policy")
+              }
             }
         }
     }

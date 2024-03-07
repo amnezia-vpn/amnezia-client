@@ -47,6 +47,13 @@ PageType {
                 headerText: qsTr("Logging")
             }
 
+            CaptionTextType {
+                Layout.fillWidth: true
+                text: qsTr("Enabling this function will save application's logs automatically, " +
+                                "By default, logging functionality is disabled. Enable log saving in case of application malfunction.")
+                color: "#D7D8DB"
+            }
+
             SwitcherType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16

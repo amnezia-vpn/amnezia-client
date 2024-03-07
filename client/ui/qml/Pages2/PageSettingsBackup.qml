@@ -63,14 +63,7 @@ PageType {
             HeaderType {
                 Layout.fillWidth: true
 
-                headerText: qsTr("Backup")
-            }
-
-            ListItemTitleType {
-                Layout.fillWidth: true
-                Layout.topMargin: 10
-
-                text: qsTr("Configuration backup")
+                headerText: qsTr("Back up your configuration")
             }
 
             CaptionTextType {
@@ -79,6 +72,18 @@ PageType {
 
                 text: qsTr("You can save your settings to a backup file to restore them the next time you install the application.")
                 color: "#878B91"
+            }
+
+            CaptionTextWithIconAndBackGroundType {
+                Layout.topMargin: 16
+                implicitHeight: 80
+                implicitWidth: parent.width - 10
+
+                textString: qsTr("The backup will contain your passwords and private keys for all servers added " +
+                                            "to AmneziaVPN. Keep this information in a secure place.")
+                iconWidth: 17
+                iconHeight: 17
+                iconPath: "qrc:/images/info.png"
             }
 
             BasicButtonType {
