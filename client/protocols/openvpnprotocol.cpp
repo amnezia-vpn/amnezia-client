@@ -345,6 +345,7 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                     {
                         if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
                             IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
+                            m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
                             m_configData.insert("vpnGateway", m_vpnGateway);
                             IpcClient::Interface()->enablePeerTraffic(m_configData);
                         }
