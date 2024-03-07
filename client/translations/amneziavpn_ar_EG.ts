@@ -374,10 +374,6 @@ Already installed containers were found on the server. All installed containers 
         <translation>احفظ الإعدادات؟</translation>
     </message>
     <message>
-        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation type="vanished">جميع المستخدمين الذين قمت بمشاركة اتصال معهم لن يستطيعو الاتصال.</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="309"/>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="345"/>
         <source>Continue</source>
@@ -605,10 +601,6 @@ Already installed containers were found on the server. All installed containers 
         <translation>جميع المستخدمين الذين شاركت معهم اتصال لن يكونو قادرين علي الاتصال مرة اخري.</translation>
     </message>
     <message>
-        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation type="vanished">جميع المستخدمين الذين شاركت معهم الاتصال لن يستطيعو الاتصال مجدداً.</translation>
-    </message>
-    <message>
         <source>All users with whom you shared a connection will no longer be able to connect to it</source>
         <translation type="obsolete">جميع المستخدمين الذين شاركت اتصال معهم لن يستطيعو الاتصال بعد الان</translation>
     </message>
@@ -663,10 +655,6 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="185"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
         <translation>جميع المستخدمين الذين شاركت معهم اتصال لن يكونو قادرين علي الاتصال مرة اخري.</translation>
-    </message>
-    <message>
-        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation type="vanished">جميع المستخدمين الذين شاركت معهم اتصال لن يستطيعو الاتصال بعد الان.</translation>
     </message>
     <message>
         <source> from server?</source>
@@ -779,10 +767,6 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="107"/>
         <source>Port</source>
         <translation>منفذ</translation>
-    </message>
-    <message>
-        <source>Login</source>
-        <translation type="vanished">تسجيل الدخول</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="124"/>
@@ -950,22 +934,6 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
         <source>Support Amnezia</source>
         <translation>دعم Amenzia</translation>
-    </message>
-    <message>
-        <source>This is a free and open source application. If you like it, support the developers with a donation. </source>
-        <translation type="vanished">هذا تطبيق مجاني ومفتوح المصدر. إذا عجبك التطبيق, ادعم المطورين ب تبرع. </translation>
-    </message>
-    <message>
-        <source>And if you don’t like the application, all the more reason to support it - the donation will be used for the improving the application.</source>
-        <translation type="vanished">وإذا لم يعجبك التطبيق,، فهذا سبب إضافي لدعمه - سيتم استخدام التبرع لتحسين التطبيق.</translation>
-    </message>
-    <message>
-        <source>Card on Patreon</source>
-        <translation type="vanished">البطاقة علي Patreon</translation>
-    </message>
-    <message>
-        <source>Show other methods on Github</source>
-        <translation type="vanished">اظهر المزيد علي GitHub</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
@@ -1142,14 +1110,6 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation>تم إعادة الاعدادات من  ملف نسخة احتياطية</translation>
     </message>
     <message>
-        <source>Backup</source>
-        <translation type="vanished">نسخة احتياطية</translation>
-    </message>
-    <message>
-        <source>Configuration backup</source>
-        <translation type="vanished">نسخ احتياطي للإعدادات</translation>
-    </message>
-    <message>
         <source>It will help you instantly restore connection settings at the next installation</source>
         <translation type="obsolete">سيساعدك علي إعادة إعدادات الاتصال بسرعة عند إعادة تثبيت التطبيق</translation>
     </message>
@@ -1226,14 +1186,6 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="41"/>
         <source>Connection</source>
         <translation>الاتصال</translation>
-    </message>
-    <message>
-        <source>Auto connect</source>
-        <translation type="vanished">الاتصال التلقائي</translation>
-    </message>
-    <message>
-        <source>Connect to VPN on app start</source>
-        <translation type="vanished">اتصل ب ال VPN عند تشغيل التطبيق</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="65"/>
@@ -1361,12 +1313,6 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="47"/>
         <source>Logging</source>
         <translation>التسجيل</translation>
-    </message>
-    <message>
-        <source>Enabling this function will save application&apos;s logs automatically
-By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
-        <translation type="vanished">سيؤدي تمكين هذه الميزة إلى حفظ سجلات التطبيق تلقائيًا
-بشكل افتراضي, هذه الميزة مٌعطلة. قم بتفعيل هذه الميزة في حالة هناك خلل في التطبيق.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="52"/>
@@ -1544,10 +1490,6 @@ By default, logging functionality is disabled. Enable log saving in case of appl
         <source>Clear server from Amnezia software</source>
         <translation>احذف خادم من Amnezia</translation>
     </message>
-    <message>
-        <source>All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.</source>
-        <translation type="vanished">سيتم حذف جميع الحاويات, هذا يعني ان جميع ملفات التكوين, شهادات و مفاتيح التعريف سيتم حذفهم.</translation>
-    </message>
 </context>
 <context>
     <name>PageSettingsServerInfo</name>
@@ -1575,10 +1517,6 @@ By default, logging functionality is disabled. Enable log saving in case of appl
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="165"/>
         <source>Managment</source>
         <translation>الإدارة</translation>
-    </message>
-    <message>
-        <source>Data</source>
-        <translation type="vanished">البيانات</translation>
     </message>
 </context>
 <context>
@@ -1803,10 +1741,6 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>عنوان خادم IP [:منفذ]</translation>
     </message>
     <message>
-        <source>Login to connect via SSH</source>
-        <translation type="vanished">قم بتسجيل الدخول للأتصال عن طريق SSH</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="104"/>
         <source>Continue</source>
         <translation>واصل</translation>
@@ -1870,21 +1804,9 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>تخطي الإعداد</translation>
     </message>
     <message>
-        <source>Set up a VPN yourself</source>
-        <translation type="vanished">قم بإعداد VPN بنفسك</translation>
-    </message>
-    <message>
-        <source>I want to choose a VPN protocol</source>
-        <translation type="vanished">اريد اختيار بروتوكول VPN</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="158"/>
         <source>Continue</source>
         <translation>واصل</translation>
-    </message>
-    <message>
-        <source>Set up later</source>
-        <translation type="vanished">إعداد في وقت لاحق</translation>
     </message>
 </context>
 <context>
@@ -2048,10 +1970,6 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="68"/>
         <source>New connection</source>
         <translation>اتصال جديد</translation>
-    </message>
-    <message>
-        <source>Do not use connection code from public sources. It could be created to intercept your data.</source>
-        <translation type="vanished">لا تستخدم رمز الاتصال من مصادر مفتوحة, قد تكون مصنوعة للتعارض مع بياناتك.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="102"/>
@@ -3025,10 +2943,6 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <location filename="../containers/containers_defs.cpp" line="215"/>
         <source>DNS Service</source>
         <translation>خدمة ال DNS</translation>
-    </message>
-    <message>
-        <source>Sftp file sharing service - is secure FTP service</source>
-        <translation type="vanished">خدمة نشر ملف Sftp -  هي خدمة FTP امنة</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/qtkeychain/libsecret.cpp" line="119"/>
