@@ -90,7 +90,7 @@ private:
 
     QDateTime m_loggingDisableDate;
 
-    void startLoggingWather();
+    void checkIfNeedDisableLogs();
 };
 
 #endif // SETTINGSCONTROLLER_H
