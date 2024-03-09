@@ -52,6 +52,7 @@ InstallController::InstallController(const QSharedPointer<ServersModel> &servers
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_protocolModel(protocolsModel),
+      m_clientManagementModel(clientManagementModel),
       m_settings(settings)
 {
 }
@@ -186,7 +187,7 @@ void InstallController::installServer(const DockerContainer container,
     server.insert(config_key::description, m_settings->nextAvailableServerName());
 
     QJsonArray containerConfigs;
-    VpnConfigirationsController vpnConfigurationController(m_settings);
+    VpnConfigurationsController vpnConfigurationController(m_settings);
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
         auto containerConfig = iterator.value();
         QString clientId;
@@ -220,8 +221,8 @@ void InstallController::installContainer(const DockerContainer container,
                                          const ServerCredentials &serverCredentials, QString &finishMessage)
 {
     bool isInstalledContainerAddedToGui = false;
-
-    VpnConfigirationsController vpnConfigurationController(m_settings);
+    
+    VpnConfigurationsController vpnConfigurationController(m_settings);
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
         QJsonObject containerConfig = m_containersModel->getContainerConfig(iterator.key());
         if (containerConfig.isEmpty()) {
@@ -284,7 +285,7 @@ void InstallController::scanServerForInstalledContainers()
 
     if (errorCode == ErrorCode::NoError) {
         bool isInstalledContainerAddedToGui = false;
-        VpnConfigirationsController vpnConfigurationController(m_settings);
+        VpnConfigurationsController vpnConfigurationController(m_settings);
 
         for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
             QJsonObject containerConfig = m_containersModel->getContainerConfig(iterator.key());

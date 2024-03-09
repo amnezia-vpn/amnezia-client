@@ -165,9 +165,8 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     return connData;
 }
 
-QString WireguardConfigurator::genWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
-                                                  const QJsonObject &containerConfig, QString &clientId,
-                                                  ErrorCode errorCode)
+QString WireguardConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                            const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode)
 {
     ServerController serverController(m_settings);
     QString scriptData = amnezia::scriptData(m_configTemplate, container);
@@ -200,22 +199,21 @@ QString WireguardConfigurator::genWireguardConfig(const ServerCredentials &crede
     return QJsonDocument(jConfig).toJson();
 }
 
-QString WireguardConfigurator::processConfigWithLocalSettings(QString config)
+QString WireguardConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns,
+                                                              const bool isApiConfig, QString &protocolConfigString)
 {
-    // TODO replace DNS if it already set
-    config.replace("$PRIMARY_DNS", m_settings->primaryDns());
-    config.replace("$SECONDARY_DNS", m_settings->secondaryDns());
+    processConfigWithDnsSettings(dns, protocolConfigString);
 
     QJsonObject jConfig;
-    jConfig[config_key::config] = config;
+    jConfig[config_key::config] = protocolConfigString;
 
     return QJsonDocument(jConfig).toJson();
 }
 
-QString WireguardConfigurator::processConfigWithExportSettings(QString config)
+QString WireguardConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns,
+                                                               const bool isApiConfig, QString &protocolConfigString)
 {
-    config.replace("$PRIMARY_DNS", m_settings->primaryDns());
-    config.replace("$SECONDARY_DNS", m_settings->secondaryDns());
+    processConfigWithDnsSettings(dns, protocolConfigString);
 
-    return config;
+    return protocolConfigString;
 }

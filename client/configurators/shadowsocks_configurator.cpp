@@ -13,8 +13,8 @@ ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> setti
 
 }
 
-QString ShadowSocksConfigurator::genShadowSocksConfig(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, ErrorCode errorCode)
+QString ShadowSocksConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                              const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode);
 {
     ServerController serverController(m_settings);
 

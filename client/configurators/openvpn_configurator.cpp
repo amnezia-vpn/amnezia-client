@@ -14,9 +14,9 @@
 #endif
 
 #include "containers/containers_defs.h"
+#include "core/controllers/serverController.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
-#include "core/controllers/serverController.h"
 #include "settings.h"
 #include "utilities.h"
 
@@ -74,8 +74,8 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     return connData;
 }
 
-QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
-                                              const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode)
+QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                          const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode)
 {
     ServerController serverController(m_settings);
     QString config =
@@ -110,12 +110,15 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     return QJsonDocument(jConfig).toJson();
 }
 
-QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig, const int serverIndex)
+QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                            QString &protocolConfigString)
 {
-    QJsonObject json = QJsonDocument::fromJson(jsonConfig.toUtf8()).object();
+    processConfigWithDnsSettings(dns, protocolConfigString);
+
+    QJsonObject json = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
     QString config = json[config_key::config].toString();
 
-    if (!m_settings->server(serverIndex).value(config_key::configVersion).toInt()) {
+    if (!isApiConfig) {
         QRegularExpression regex("redirect-gateway.*");
         config.replace(regex, "");
 
@@ -130,9 +133,9 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig, 
             // no redirect-gateway
         }
         if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
-    #ifndef Q_OS_ANDROID
+#ifndef Q_OS_ANDROID
             config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
-    #endif
+#endif
             // Prevent ipv6 leak
             config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
             config.append("block-ipv6\n");
@@ -156,9 +159,12 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig, 
     return QJsonDocument(json).toJson();
 }
 
-QString OpenVpnConfigurator::processConfigWithExportSettings(QString jsonConfig)
+QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                             QString &protocolConfigString)
 {
-    QJsonObject json = QJsonDocument::fromJson(jsonConfig.toUtf8()).object();
+    processConfigWithDnsSettings(dns, protocolConfigString);
+
+    QJsonObject json = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
     QString config = json[config_key::config].toString();
 
     QRegularExpression regex("redirect-gateway.*");

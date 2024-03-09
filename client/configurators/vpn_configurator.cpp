@@ -32,12 +32,12 @@ QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentia
 {
     switch (proto) {
     case Proto::OpenVpn:
-        return openVpnConfigurator->genOpenVpnConfig(credentials, container, containerConfig, clientId, errorCode);
+        return openVpnConfigurator->createConfig(credentials, container, containerConfig, clientId, errorCode);
 
     case Proto::ShadowSocks:
         return shadowSocksConfigurator->genShadowSocksConfig(credentials, container, containerConfig, errorCode);
 
-    case Proto::Cloak: return cloakConfigurator->genCloakConfig(credentials, container, containerConfig, errorCode);
+    case Proto::Cloak: return cloakConfigurator->createConfig(credentials, container, containerConfig, errorCode);
 
     case Proto::WireGuard:
         return wireguardConfigurator->genWireguardConfig(credentials, container, containerConfig, clientId, errorCode);

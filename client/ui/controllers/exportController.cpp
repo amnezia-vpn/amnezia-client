@@ -102,7 +102,7 @@ void ExportController::generateConnectionConfig(const QString &clientName)
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
     QString clientId;
-    VpnConfigirationsController vpnConfigurationController(m_settings);
+    VpnConfigurationsController vpnConfigurationController(m_settings);
     ErrorCode errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container,
                                                                                       containerConfig, clientId);
     if (container == DockerContainer::OpenVpn || container == DockerContainer::Awg
@@ -144,15 +144,17 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
 
     int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+    auto dns = m_serversModel->getDnsPair(serverIndex);
+    bool isApiConfig = qvariant_cast<bool>(m_serversModel->data(serverIndex, ServersModel::IsServerFromApiRole));
 
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
-    VpnConfigirationsController vpnConfigurationController(m_settings);
+    VpnConfigurationsController vpnConfigurationController(m_settings);
 
     QString clientId;
     QString protocolConfigString;
-    ErrorCode errorCode = vpnConfigurationController.createProtocolConfigString(serverIndex, credentials, container,
+    ErrorCode errorCode = vpnConfigurationController.createProtocolConfigString(isApiConfig, dns, credentials, container,
                                                                                 containerConfig, clientId, protocolConfigString);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;

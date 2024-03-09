@@ -58,8 +58,8 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
     return connData;
 }
 
-QString Ikev2Configurator::genIkev2Config(const ServerCredentials &credentials, DockerContainer container,
-                                          const QJsonObject &containerConfig, ErrorCode errorCode)
+QString Ikev2Configurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                        const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode);
 {
     Q_UNUSED(containerConfig)
 

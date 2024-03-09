@@ -13,8 +13,8 @@ CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, QObject
 
 }
 
-QString CloakConfigurator::genCloakConfig(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, ErrorCode errorCode)
+QString CloakConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                        const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode);
 {
     ServerController serverController(m_settings);
 
