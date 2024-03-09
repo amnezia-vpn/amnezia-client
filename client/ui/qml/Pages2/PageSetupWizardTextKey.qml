@@ -80,5 +80,6 @@ PageType {
             ImportController.extractConfigFromCode(textKey.textFieldText)
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
+        KeyNavigation.tab: textKey.textField
     }
 }

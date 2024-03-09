@@ -34,6 +34,8 @@ PageType {
         }
     }
 
+    defaultActiveFocusItem: makeBackupButton
+
     BackButtonType {
         id: backButton
 
@@ -106,9 +108,12 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Backup file saved"))
                     }
                 }
+
+                KeyNavigation.tab: restoreBackupButton
             }
 
             BasicButtonType {
+                id: restoreBackupButton
                 Layout.fillWidth: true
                 Layout.topMargin: -8
 
@@ -128,6 +133,8 @@ PageType {
                         restoreBackup(filePath)
                     }
                 }
+
+                KeyNavigation.tab: makeBackupButton
             }
         }
     }

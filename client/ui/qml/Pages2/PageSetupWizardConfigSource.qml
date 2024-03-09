@@ -13,6 +13,8 @@ import "../Config"
 PageType {
     id: root
 
+    defaultActiveFocusItem:fileButton.rightButton
+
     Connections {
         target: ImportController
 
@@ -62,6 +64,7 @@ It's okay as long as it's from someone you trust.")
             }
 
             LabelWithButtonType {
+                id: fileButton
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
@@ -84,11 +87,14 @@ It's okay as long as it's from someone you trust.")
                         }
                     }
                 }
+
+                KeyNavigation.tab: qrButton.visible ? qrButton.rightButton : textButton.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: qrButton
                 Layout.fillWidth: true
                 visible: SettingsController.isCameraPresent()
 
@@ -102,6 +108,8 @@ It's okay as long as it's from someone you trust.")
                         PageController.goToPage(PageEnum.PageSetupWizardQrReader)
                     }
                 }
+
+                KeyNavigation.tab: textButton.rightButton
             }
 
             DividerType {
@@ -109,6 +117,7 @@ It's okay as long as it's from someone you trust.")
             }
 
             LabelWithButtonType {
+                id: textButton
                 Layout.fillWidth: true
 
                 text: qsTr("Key as text")
@@ -118,6 +127,8 @@ It's okay as long as it's from someone you trust.")
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSetupWizardTextKey)
                 }
+
+                KeyNavigation.tab: defaultActiveFocusItem
             }
 
             DividerType {}

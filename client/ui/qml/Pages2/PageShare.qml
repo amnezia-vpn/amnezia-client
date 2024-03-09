@@ -12,6 +12,7 @@ import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Components"
+import "../Config"
 
 PageType {
     id: root
@@ -181,6 +182,14 @@ PageType {
 
                         spacing: 0
 
+                        Connections {
+                            target: shareFullAccessDrawer
+                            enabled: !GC.isMobile()
+                            function onOpened() {
+                                shareFullAccessButton.rightButton.forceActiveFocus()
+                            }
+                        }
+
                         Header2Type {
                             Layout.fillWidth: true
                             Layout.bottomMargin: 16
@@ -193,6 +202,7 @@ PageType {
 
 
                         LabelWithButtonType {
+                            id: shareFullAccessButton
                             Layout.fillWidth: true
 
                             text: qsTr("Share")
@@ -499,8 +509,12 @@ PageType {
                 clickedFunc: function(){
                     if (clientNameTextField.textFieldText !== "") {
                         ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
+                    } else{
+                        clientNameTextField.textField.forceActiveFocus()
                     }
                 }
+
+                KeyNavigation.tab: clientNameTextField.textField
             }
 
             Header2Type {
@@ -514,6 +528,7 @@ PageType {
                 actionButtonImage: "qrc:/images/controls/search.svg"
                 actionButtonFunction: function() {
                     root.isSearchBarVisible = true
+                    searchTextField.textField.forceActiveFocus()
                 }
             }
 
@@ -575,6 +590,7 @@ PageType {
                         anchors.leftMargin: -16
 
                         LabelWithButtonType {
+                            id: clientItem
                             Layout.fillWidth: true
 
                             text: clientName
@@ -605,6 +621,14 @@ PageType {
 
                                 spacing: 8
 
+                                Connections {
+                                    target: clientInfoDrawer
+                                    enabled: !GC.isMobile()
+                                    function onOpened() {
+                                        renameButton.forceActiveFocus()
+                                    }
+                                }
+
                                 Header2Type {
                                     Layout.fillWidth: true
                                     Layout.bottomMargin: 24
@@ -614,6 +638,7 @@ PageType {
                                 }
 
                                 BasicButtonType {
+                                    id: renameButton
                                     Layout.fillWidth: true
                                     Layout.topMargin: 24
 
@@ -648,6 +673,7 @@ PageType {
 
                                             Connections {
                                                 target: clientNameEditDrawer
+                                                enabled: !GC.isMobile()
                                                 function onOpened() {
                                                     clientNameEditor.textField.forceActiveFocus()
                                                 }
@@ -686,12 +712,17 @@ PageType {
                                                         clientNameEditDrawer.close()
                                                     }
                                                 }
+
+                                                KeyNavigation.tab: clientNameEditor.textField
                                             }
                                         }
                                     }
+
+                                    KeyNavigation.tab: revokeButton
                                 }
 
                                 BasicButtonType {
+                                    id: revokeButton
                                     Layout.fillWidth: true
 
                                     defaultColor: "transparent"
@@ -718,6 +749,8 @@ PageType {
 
                                         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                                     }
+
+                                    KeyNavigation.tab: renameButton
                                 }
                             }
                         }

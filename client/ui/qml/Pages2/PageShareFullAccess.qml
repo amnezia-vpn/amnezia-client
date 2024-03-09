@@ -16,6 +16,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: shareButton
+
     BackButtonType {
         id: backButton
 
@@ -117,6 +119,7 @@ PageType {
             }
 
             BasicButtonType {
+                id: shareButton
                 Layout.fillWidth: true
                 Layout.topMargin: 40
 

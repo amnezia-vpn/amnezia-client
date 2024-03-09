@@ -13,6 +13,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: languageLabel.rightButton
+
     BackButtonType {
         id: backButton
 
@@ -127,6 +129,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: languageLabel
                 Layout.fillWidth: true
 
                 text: qsTr("Language")
@@ -136,12 +139,15 @@ PageType {
                 clickedFunction: function() {
                     selectLanguageDrawer.open()
                 }
+
+                KeyNavigation.tab: loggingLabel.rightButton
             }
 
 
             DividerType {}
 
             LabelWithButtonType {
+                id: loggingLabel
                 Layout.fillWidth: true
 
                 text: qsTr("Logging")
@@ -151,11 +157,14 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsLogging)
                 }
+
+                KeyNavigation.tab: resetLabel.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: resetLabel
                 Layout.fillWidth: true
 
                 text: qsTr("Reset settings and remove all data from the application")
@@ -171,12 +180,21 @@ PageType {
                     var yesButtonFunction = function() {
                         SettingsController.clearSettings()
                         PageController.replaceStartPage()
+
+                        if (!GC.isMobile()) {
+                            languageLabel.rightButton.forceActiveFocus()
+                        }
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            languageLabel.rightButton.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
+
+                KeyNavigation.tab: defaultActiveFocusItem
             }
 
             DividerType {}

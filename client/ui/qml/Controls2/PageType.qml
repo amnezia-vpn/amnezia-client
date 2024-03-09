@@ -2,12 +2,20 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "../Config"
+
 Item {
     id: root
 
     property StackView stackView: StackView.view
 
     property var defaultActiveFocusItem: null
+
+    onVisibleChanged: {
+        if (visible && !GC.isMobile()) {
+            timer.start()
+        }
+    }
 
 //    MouseArea {
 //        id: globalMouseArea
@@ -32,6 +40,6 @@ Item {
             }
         }
         repeat: false // Stop the timer after one trigger
-        running: true // Start the timer
+        running: !GC.isMobile()  // Start the timer
     }
 }

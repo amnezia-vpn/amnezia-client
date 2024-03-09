@@ -137,6 +137,7 @@ Item {
 //                    textColor: "#D7D8DB"
 //                    borderWidth: 0
 
+                    focusPolicy: Qt.NoFocus
                     text: root.buttonText
                     imageSource: root.buttonImageSource
 
@@ -191,10 +192,12 @@ Item {
     }
 
     Keys.onEnterPressed: {
-         KeyNavigation.tab.forceActiveFocus();
+        if (KeyNavigation.tab)
+            KeyNavigation.tab.forceActiveFocus();
     }
 
     Keys.onReturnPressed: {
-         KeyNavigation.tab.forceActiveFocus();
+        if (KeyNavigation.tab)
+            KeyNavigation.tab.forceActiveFocus();
     }
 }

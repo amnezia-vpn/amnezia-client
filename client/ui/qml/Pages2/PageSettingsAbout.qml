@@ -13,6 +13,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: donateButton
+
     BackButtonType {
         id: backButton
 
@@ -74,6 +76,7 @@ PageType {
             }
 
             BasicButtonType {
+                id: donateButton
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.leftMargin: 16
@@ -84,9 +87,12 @@ PageType {
                 clickedFunc: function() {
                     Qt.openUrlExternally(qsTr("https://www.patreon.com/amneziavpn"))
                 }
+
+                KeyNavigation.tab: donateButton2
             }
 
             BasicButtonType {
+                id: donateButton2
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -104,6 +110,8 @@ PageType {
                 clickedFunc: function() {
                     Qt.openUrlExternally(qsTr("https://github.com/amnezia-vpn/amnezia-client#donate"))
                 }
+
+                KeyNavigation.tab: donateButton
             }
 
             ParagraphTextType {

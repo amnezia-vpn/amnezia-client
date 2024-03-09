@@ -13,6 +13,8 @@ import "../Config"
 PageType {
     id: root
 
+    defaultActiveFocusItem: servers.rightButton
+
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -38,6 +40,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: servers
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
@@ -48,11 +51,14 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsServersList)
                 }
+
+                KeyNavigation.tab: connection.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: connection
                 Layout.fillWidth: true
 
                 text: qsTr("Connection")
@@ -62,11 +68,13 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsConnection)
                 }
+                KeyNavigation.tab: application.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: application
                 Layout.fillWidth: true
 
                 text: qsTr("Application")
@@ -76,11 +84,13 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsApplication)
                 }
+                KeyNavigation.tab: backup.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: backup
                 Layout.fillWidth: true
 
                 text: qsTr("Backup")
@@ -90,6 +100,7 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsBackup)
                 }
+                KeyNavigation.tab: about.rightButton
             }
 
             DividerType {}
@@ -105,6 +116,7 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsAbout)
                 }
+                KeyNavigation.tab: root.defaultActiveFocusItem
             }
 
             DividerType {}

@@ -93,6 +93,7 @@ PageType {
 
                         Connections {
                             target: serverNameEditDrawer
+                            enabled: !GC.isMobile()
                             function onOpened() {
                                 serverName.textField.forceActiveFocus()
                             }
@@ -127,6 +128,8 @@ PageType {
                                 }
                                 serverNameEditDrawer.close()
                             }
+
+                            KeyNavigation.tab: serverName.textField
                         }
 
                         Component.onCompleted: {

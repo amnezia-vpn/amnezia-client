@@ -40,9 +40,9 @@ DrawerType2 {
 
         Connections {
             target: root
-
+            enabled: !GC.isMobile()
             function onOpened() {
-                header.forceActiveFocus()
+                shareButton.forceActiveFocus()
             }
         }
 
@@ -56,8 +56,6 @@ DrawerType2 {
             anchors.rightMargin: 16
 
             headerText: root.headerText
-
-            KeyNavigation.tab: shareButton
         }
 
         FlickableType {
@@ -85,8 +83,6 @@ DrawerType2 {
                     text: qsTr("Share")
                     imageSource: "qrc:/images/controls/share-2.svg"
 
-                    KeyNavigation.tab: copyConfigTextButton
-
                     clickedFunc: function() {
                         var fileName = ""
                         if (GC.isMobile()) {
@@ -104,6 +100,8 @@ DrawerType2 {
                             PageController.showBusyIndicator(false)
                         }
                     }
+
+                    KeyNavigation.tab: copyConfigTextButton
                 }
 
                 BasicButtonType {
@@ -163,7 +161,7 @@ DrawerType2 {
                         configContentDrawer.open()
                     }
 
-                    KeyNavigation.tab: header
+                    KeyNavigation.tab: shareButton
                 }
 
                 DrawerType2 {

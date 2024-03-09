@@ -12,6 +12,9 @@ Button {
     property string pressedColor: Qt.rgba(1, 1, 1, 0.12)
     property string disableColor: "#2C2D30"
 
+    property string borderFocusedColor: "#D7D8DB"
+    property int borderFocusedWidth: 1
+
     property string imageColor: "#878B91"
     property string disableImageColor: "#2C2D30"
 
@@ -31,6 +34,9 @@ Button {
         id: background
 
         anchors.fill: parent
+        border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
+        border.width: root.activeFocus ? root.borderFocusedWidth : "transparent"
+
         color: {
             if (root.enabled) {
                 if (root.pressed) {

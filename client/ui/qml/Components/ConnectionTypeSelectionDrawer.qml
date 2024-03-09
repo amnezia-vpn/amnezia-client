@@ -26,6 +26,14 @@ DrawerType2 {
             root.expandedHeight = content.implicitHeight + 32
         }
 
+        Connections {
+            target: root
+            enabled: !GC.isMobile()
+            function onOpened() {
+                config.rightButton.forceActiveFocus()
+            }
+        }
+
         Header2Type {
             Layout.fillWidth: true
             Layout.topMargin: 24
@@ -37,7 +45,7 @@ DrawerType2 {
         }
 
         LabelWithButtonType {
-            id: ip
+            id: config
             Layout.fillWidth: true
             Layout.topMargin: 16
 
@@ -48,11 +56,14 @@ DrawerType2 {
                 PageController.goToPage(PageEnum.PageSetupWizardCredentials)
                 root.close()
             }
+
+            KeyNavigation.tab: configFromFile.rightButton
         }
 
         DividerType {}
 
         LabelWithButtonType {
+            id: configFromFile
             Layout.fillWidth: true
 
             text: qsTr("Open config file, key or QR code")
@@ -62,6 +73,8 @@ DrawerType2 {
                 PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
                 root.close()
             }
+
+            KeyNavigation.tab: config.rightButton
         }
 
         DividerType {}

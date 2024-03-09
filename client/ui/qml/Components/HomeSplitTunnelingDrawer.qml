@@ -22,6 +22,18 @@ DrawerType2 {
         anchors.right: parent.right
         spacing: 0
 
+        Connections {
+            target: root
+            enabled: !GC.isMobile()
+            function onOpened() {
+                if (splitTunneling.visible) {
+                    splitTunneling.rightButton.forceActiveFocus()
+                } else {
+                    splitTunnelingSiteBased.rightButton.forceActiveFocus()
+                }
+            }
+        }
+
         Header2Type {
             Layout.fillWidth: true
             Layout.topMargin: 24
@@ -34,6 +46,7 @@ DrawerType2 {
         }
 
         LabelWithButtonType {
+            id: splitTunneling
             Layout.fillWidth: true
             Layout.topMargin: 16
 
@@ -47,6 +60,8 @@ DrawerType2 {
 //                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
 //                root.close()
             }
+
+            KeyNavigation.tab: splitTunnelingSiteBased.rightButton
         }
 
         DividerType {
@@ -54,6 +69,7 @@ DrawerType2 {
         }
 
         LabelWithButtonType {
+            id: splitTunnelingSiteBased
             Layout.fillWidth: true
             Layout.topMargin: 16
 
@@ -67,12 +83,14 @@ DrawerType2 {
                 PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
                 root.close()
             }
+            KeyNavigation.tab: appBasedSplitTunneling.visible ? appBasedSplitTunneling.rightButton : null
         }
 
         DividerType {
         }
 
         LabelWithButtonType {
+            id: appBasedSplitTunneling
             Layout.fillWidth: true
             visible: false
 
@@ -83,6 +101,8 @@ DrawerType2 {
 //                PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
                 root.close()
             }
+
+            KeyNavigation.tab: splitTunneling.rightButton
         }
 
         DividerType {

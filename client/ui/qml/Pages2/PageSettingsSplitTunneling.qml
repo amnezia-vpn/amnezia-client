@@ -296,6 +296,14 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
+            Connections{
+                target: moreActionsDrawer
+                enabled: !GC.isMobile()
+                function onOpened(){
+                    importSitesButton.rightButton.forceActiveFocus()
+                }
+            }
+
             Header2Type {
                 Layout.fillWidth: true
                 Layout.margins: 16
@@ -304,6 +312,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: importSitesButton
                 Layout.fillWidth: true
 
                 text: qsTr("Import")
@@ -317,6 +326,7 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                id: saveSitesButton
                 Layout.fillWidth: true
                 text: qsTr("Save site list")
 
