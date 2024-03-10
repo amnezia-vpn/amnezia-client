@@ -3,7 +3,6 @@
 
 #include <QObject>
 
-#include "configurators/vpn_configurator.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
 #include "ui/models/clientManagementModel.h"

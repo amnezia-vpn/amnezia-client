@@ -81,12 +81,14 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
             continue;
         }
 
+
         QString protocolConfigString = containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
 
         auto configurator = createConfigurator(proto);
         protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
 
         QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+        vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
         vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
     }
 

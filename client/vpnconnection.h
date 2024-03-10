@@ -11,7 +11,6 @@
 #include "core/defs.h"
 #include "settings.h"
 
-
 #ifdef AMNEZIA_DESKTOP
 #include "core/ipcclient.h"
 #endif
@@ -20,9 +19,6 @@
 #include "protocols/android_vpnprotocol.h"
 #endif
 
-class VpnConfigurator;
-class ServerController;
-
 using namespace amnezia;
 
 class VpnConnection : public QObject
@@ -30,23 +26,12 @@ class VpnConnection : public QObject
     Q_OBJECT
 
 public:
-    explicit VpnConnection(std::shared_ptr<Settings> settings,
-        std::shared_ptr<VpnConfigurator> configurator, QObject* parent = nullptr);
+    explicit VpnConnection(std::shared_ptr<Settings> settings, QObject* parent = nullptr);
     ~VpnConnection() override;
 
     static QString bytesPerSecToText(quint64 bytes);
 
     ErrorCode lastError() const;
-
-    static QMap<Proto, QString> getLastVpnConfig(const QJsonObject &containerConfig);
-    QString createVpnConfigurationForProto(int serverIndex,
-        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig, Proto proto,
-        ErrorCode errorCode);
-
-    QJsonObject createVpnConfiguration(int serverIndex,
-        const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode errorCode);
-
 
     bool isConnected() const;
     bool isDisconnected() const;
@@ -63,7 +48,7 @@ public:
 
 public slots:
     void connectToVpn(int serverIndex,
-        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig);
+        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
 
     void disconnectFromVpn();
 
@@ -88,8 +73,6 @@ protected:
 
 private:
     std::shared_ptr<Settings> m_settings;
-    std::shared_ptr<VpnConfigurator> m_configurator;
-
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;

@@ -82,8 +82,7 @@ void AmneziaApplication::init()
 
     m_engine->rootContext()->setContextProperty("Debug", &Logger::Instance());
 
-    m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, this));
-    m_vpnConnection.reset(new VpnConnection(m_settings, m_configurator));
+    m_vpnConnection.reset(new VpnConnection(m_settings));
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
 
@@ -356,18 +355,18 @@ void AmneziaApplication::initModels()
     connect(m_clientManagementModel.get(), &ClientManagementModel::adminConfigRevoked, m_serversModel.get(),
             &ServersModel::clearCachedProfile);
 
-    connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, this,
-            [this](const QString &clientId, const QString &clientName, const DockerContainer container,
-                   ServerCredentials credentials) {
-                m_serversModel->reloadDefaultServerContainerConfig();
-                m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
-                emit m_configurator->clientModelUpdated();
-            });
+//    connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, this,
+//            [this](const QString &clientId, const QString &clientName, const DockerContainer container,
+//                   ServerCredentials credentials) {
+//                m_serversModel->reloadDefaultServerContainerConfig();
+//                m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
+//                emit m_configurator->clientModelUpdated();
+//            });
 }
 
 void AmneziaApplication::initControllers()
 {
-    m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_vpnConnection));
+    m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_vpnConnection, m_settings));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
     connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(),

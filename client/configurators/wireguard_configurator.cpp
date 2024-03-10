@@ -204,10 +204,7 @@ QString WireguardConfigurator::processConfigWithLocalSettings(const QPair<QStrin
 {
     processConfigWithDnsSettings(dns, protocolConfigString);
 
-    QJsonObject jConfig;
-    jConfig[config_key::config] = protocolConfigString;
-
-    return QJsonDocument(jConfig).toJson();
+    return protocolConfigString;
 }
 
 QString WireguardConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns,

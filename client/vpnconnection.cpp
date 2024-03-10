@@ -9,7 +9,6 @@
 #include <configurators/cloak_configurator.h>
 #include <configurators/openvpn_configurator.h>
 #include <configurators/shadowsocks_configurator.h>
-#include <configurators/vpn_configurator.h>
 #include <configurators/wireguard_configurator.h>
 #include "core/controllers/serverController.h"
 
@@ -30,9 +29,8 @@
 #include "utilities.h"
 #include "vpnconnection.h"
 
-VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
-                             QObject *parent)
-    : QObject(parent), m_settings(settings), m_configurator(configurator), m_checkTimer(new QTimer(this))
+VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject *parent)
+    : QObject(parent), m_settings(settings), m_checkTimer(new QTimer(this))
 {
     m_checkTimer.setInterval(1000);
 #ifdef Q_OS_IOS
@@ -207,110 +205,8 @@ ErrorCode VpnConnection::lastError() const
     return m_vpnProtocol.data()->lastError();
 }
 
-QMap<Proto, QString> VpnConnection::getLastVpnConfig(const QJsonObject &containerConfig)
-{
-    QMap<Proto, QString> configs;
-    for (Proto proto : ProtocolProps::allProtocols()) {
-
-        QString cfg = containerConfig.value(ProtocolProps::protoToString(proto))
-                              .toObject()
-                              .value(config_key::last_config)
-                              .toString();
-
-        if (!cfg.isEmpty())
-            configs.insert(proto, cfg);
-    }
-    return configs;
-}
-
-QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const ServerCredentials &credentials,
-                                                      DockerContainer container, const QJsonObject &containerConfig,
-                                                      Proto proto, ErrorCode errorCode)
-{
-    QMap<Proto, QString> lastVpnConfig = getLastVpnConfig(containerConfig);
-
-    QString configData;
-    if (lastVpnConfig.contains(proto)) {
-        configData = lastVpnConfig.value(proto);
-        configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
-    } else {
-        QString clientId;
-        configData = m_configurator->genVpnProtocolConfig(credentials, container, containerConfig, proto, clientId, errorCode);
-
-        if (errorCode != ErrorCode::NoError) {
-            return "";
-        }
-
-        QString configDataBeforeLocalProcessing = configData;
-
-        configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
-
-        if (serverIndex >= 0) {
-            qDebug() << "VpnConnection::createVpnConfiguration: saving config for server #" << serverIndex << container
-                     << proto;
-            QJsonObject protoObject = m_settings->protocolConfig(serverIndex, container, proto);
-            protoObject.insert(config_key::last_config, configDataBeforeLocalProcessing);
-            m_settings->setProtocolConfig(serverIndex, container, proto, protoObject);
-        }
-
-        if ((container != DockerContainer::Cloak && container != DockerContainer::ShadowSocks) ||
-                ((container == DockerContainer::Cloak || container == DockerContainer::ShadowSocks) && proto == Proto::OpenVpn)) {
-            QEventLoop wait;
-            emit m_configurator->newVpnConfigCreated(clientId, QString("Admin [%1]").arg(QSysInfo::prettyProductName()), container, credentials);
-            QObject::connect(m_configurator.get(), &VpnConfigurator::clientModelUpdated, &wait, &QEventLoop::quit);
-            wait.exec();
-        }
-    }
-
-    return configData;
-}
-
-QJsonObject VpnConnection::createVpnConfiguration(int serverIndex, const ServerCredentials &credentials,
-                                                  DockerContainer container, const QJsonObject &containerConfig,
-                                                  ErrorCode errorCode)
-{
-    QJsonObject vpnConfiguration;
-    vpnConfiguration[config_key::serverIndex] = serverIndex;
-
-    for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
-        auto s = m_settings->server(serverIndex);
-        if (m_settings->server(serverIndex).value(config_key::configVersion).toInt() &&
-            container == DockerContainer::Cloak && proto == ProtocolEnumNS::Proto::ShadowSocks) {
-            continue;
-        }
-
-        QJsonObject vpnConfigData =
-                QJsonDocument::fromJson(createVpnConfigurationForProto(serverIndex, credentials, container,
-                                                                       containerConfig, proto, errorCode).toUtf8()).object();
-
-        if (errorCode != ErrorCode::NoError) {
-            return {};
-        }
-
-        vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
-    }
-
-    Proto proto = ContainerProps::defaultProtocol(container);
-    vpnConfiguration[config_key::vpnproto] = ProtocolProps::protoToString(proto);
-
-    auto dns = m_configurator->getDnsForConfig(serverIndex);
-
-    vpnConfiguration[config_key::dns1] = dns.first;
-    vpnConfiguration[config_key::dns2] = dns.second;
-
-    const QJsonObject &server = m_settings->server(serverIndex);
-    vpnConfiguration[config_key::hostName] = server.value(config_key::hostName).toString();
-    vpnConfiguration[config_key::description] = server.value(config_key::description).toString();
-
-    vpnConfiguration[config_key::configVersion] = server.value(config_key::configVersion).toInt();
-    // TODO: try to get hostName, port, description for 3rd party configs
-    // vpnConfiguration[config_key::port] = ...;
-
-    return vpnConfiguration;
-}
-
 void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
-                                 const QJsonObject &containerConfig)
+                                 const QJsonObject &vpnConfiguration)
 {
     qDebug() << QString("ConnectToVpn, Server index is %1, container is %2, route mode is")
                         .arg(serverIndex)
@@ -342,15 +238,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     }
 #endif
 
-    ErrorCode errorCode = ErrorCode::NoError;
-
-    m_vpnConfiguration = createVpnConfiguration(serverIndex, credentials, container, containerConfig, errorCode);
-
-    if (errorCode != ErrorCode::NoError) {
-        emit connectionStateChanged(Vpn::ConnectionState::Error);
-        return;
-    }
-
+    m_vpnConfiguration = vpnConfiguration;
     appendSplitTunnelingConfig();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
@@ -374,7 +262,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
 
     createProtocolConnections();
 
-    errorCode = m_vpnProtocol.data()->start();
+    ErrorCode errorCode = m_vpnProtocol.data()->start();
     if (errorCode != ErrorCode::NoError)
         emit connectionStateChanged(Vpn::ConnectionState::Error);
 }

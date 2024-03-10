@@ -7,11 +7,13 @@
 #endif
 
 #include "core/errorstrings.h"
+#include "core/controllers/vpnConfigirationController.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ContainersModel> &containersModel,
-                                           const QSharedPointer<VpnConnection> &vpnConnection, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_vpnConnection(vpnConnection)
+                                           const QSharedPointer<VpnConnection> &vpnConnection,
+                                           const std::shared_ptr<Settings> &settings, QObject *parent)
+    : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_vpnConnection(vpnConnection), m_settings(settings)
 {
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this,
             &ConnectionController::onConnectionStateChanged);
@@ -44,7 +46,19 @@ void ConnectionController::openConnection()
 
     qApp->processEvents();
 
-    emit connectToVpn(serverIndex, credentials, container, containerConfig);
+    VpnConfigurationsController vpnConfigurationsController(m_settings);
+
+    auto dns = m_serversModel->getDnsPair(serverIndex);
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+
+    ErrorCode errorCode = ErrorCode::NoError;
+    auto vpnConfiguration = vpnConfigurationsController.createVpnConfiguration(dns, serverConfig, containerConfig, container, errorCode);
+    if (errorCode != ErrorCode::NoError) {
+        emit connectionErrorOccurred(tr("unable to create configuration"));
+        return;
+    }
+
+    emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);
 }
 
 void ConnectionController::closeConnection()

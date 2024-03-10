@@ -11,7 +11,7 @@ AwgConfigurator::AwgConfigurator(std::shared_ptr<Settings> settings, QObject *pa
 }
 
 QString AwgConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                      const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode);
+                                      const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode)
 {
     QString config = WireguardConfigurator::createConfig(credentials, container, containerConfig, clientId, errorCode);
 
