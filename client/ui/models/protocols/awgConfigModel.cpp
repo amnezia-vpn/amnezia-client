@@ -117,6 +117,12 @@ QJsonObject AwgConfigModel::getConfig()
 
     if (!oldConfig.hasEqualServerSettings(newConfig)) {
         m_protocolConfig.remove(config_key::last_config);
+    } else {
+        auto lastConfig = m_protocolConfig.value(config_key::last_config).toString();
+        QJsonObject jsonConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
+        jsonConfig[config_key::mtu] = newConfig.mtu;
+
+        m_protocolConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
     }
 
     m_fullConfig.insert(config_key::awg, m_protocolConfig);
