@@ -2892,7 +2892,7 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * Работает по сетевому протоколу TCP.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="216"/>
+        <location filename="../containers/containers_defs.cpp" line="217"/>
         <source>After installation, Amnezia will create a
 
  file storage on your server.
@@ -3125,7 +3125,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="141"/>
         <source>Copy config string</source>
-        <translation type="unfinished"></translation>
+        <translation>Скопировать строку конфигурации</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="160"/>
@@ -3276,32 +3276,32 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="311"/>
+        <location filename="../containers/containers_defs.cpp" line="312"/>
         <source>Low</source>
         <translation>Низкий</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="312"/>
+        <location filename="../containers/containers_defs.cpp" line="313"/>
         <source>Medium or High</source>
         <translation>Средний или Высокий</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="313"/>
+        <location filename="../containers/containers_defs.cpp" line="314"/>
         <source>Extreme</source>
         <translation>Экстремальный</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="321"/>
+        <location filename="../containers/containers_defs.cpp" line="322"/>
         <source>I just want to increase the level of my privacy.</source>
         <translation>Я просто хочу повысить уровень своей приватности.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="322"/>
+        <location filename="../containers/containers_defs.cpp" line="323"/>
         <source>I want to bypass censorship. This option recommended in most cases.</source>
         <translation>Я хочу обойти блокировки. Этот вариант рекомендуется в большинстве случаев.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="324"/>
+        <location filename="../containers/containers_defs.cpp" line="325"/>
         <source>Most VPN protocols are blocked. Recommended if other options are not working.</source>
         <translation>Большинство VPN протоколов заблокированы. Рекомендуется, если другие варианты не работают.</translation>
     </message>

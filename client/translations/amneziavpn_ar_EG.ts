@@ -2814,7 +2814,7 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
 * يعمل عبر بروتوكول شبكة UDP.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="216"/>
+        <location filename="../containers/containers_defs.cpp" line="217"/>
         <source>After installation, Amnezia will create a
 
  file storage on your server.
@@ -3227,32 +3227,32 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="311"/>
+        <location filename="../containers/containers_defs.cpp" line="312"/>
         <source>Low</source>
         <translation>منخفض</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="312"/>
+        <location filename="../containers/containers_defs.cpp" line="313"/>
         <source>Medium or High</source>
         <translation>متوسط او عالي</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="313"/>
+        <location filename="../containers/containers_defs.cpp" line="314"/>
         <source>Extreme</source>
         <translation>شديد</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="321"/>
+        <location filename="../containers/containers_defs.cpp" line="322"/>
         <source>I just want to increase the level of my privacy.</source>
         <translation>انا فقط اريد زيادة مستوي الخصوصية.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="322"/>
+        <location filename="../containers/containers_defs.cpp" line="323"/>
         <source>I want to bypass censorship. This option recommended in most cases.</source>
         <translation>أريد تجاوز الرقابة. يوصى بهذا الخيار في معظم الحالات.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="324"/>
+        <location filename="../containers/containers_defs.cpp" line="325"/>
         <source>Most VPN protocols are blocked. Recommended if other options are not working.</source>
         <translation>يتم حظر معظم بروتوكولات VPN. يوصى به إذا كانت الخيارات الأخرى لا تعمل.</translation>
     </message>

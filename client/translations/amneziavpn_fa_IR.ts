@@ -1075,7 +1075,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="82"/>
         <source>The backup will contain your passwords and private keys for all servers added to AmneziaVPN. Keep this information in a secure place.</source>
-        <translation>نسخه پشتیبان شامل رمزهای عبور و کلیدهای خصوصی شما برای همه سرورهای اضافه شده به AmneziaVPN خواهد بود. این اطلاعات را در مکانی امن نگهداری کنید.</translation>
+        <translation>پشتیبان حاوی رمزهای عبور و کلیدهای خصوصی شما برای تمام سرورهای اضافه شده به AmneziaVPN خواهد بود. این اطلاعات را در یک مکان امن نگه دارید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="94"/>
@@ -1250,7 +1250,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="52"/>
         <source>Enabling this function will save application&apos;s logs automatically, By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
-        <translation>فعال کردن این عملکرد به طور خودکار گزارش های برنامه را ذخیره می کند، به طور پیش فرض، عملکرد گزارش غیرفعال است. در صورت خرابی برنامه، ذخیره گزارش را فعال کنید.</translation>
+        <translation>فعال کردن این عملکرد باعث ذخیره خودکار لاگ‌های برنامه می‌شود. به طور پیش‌فرض، قابلیت ثبت لاگ غیرفعال است. در صورت بروز خطا در برنامه، ذخیره لاگ را فعال کنید.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="61"/>
@@ -2710,7 +2710,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation>سرویس DNS</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="216"/>
+        <location filename="../containers/containers_defs.cpp" line="217"/>
         <source>After installation, Amnezia will create a
 
  file storage on your server.
@@ -3123,32 +3123,32 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="311"/>
+        <location filename="../containers/containers_defs.cpp" line="312"/>
         <source>Low</source>
         <translation>پایین</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="312"/>
+        <location filename="../containers/containers_defs.cpp" line="313"/>
         <source>Medium or High</source>
         <translation>متوسط یا بالا</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="313"/>
+        <location filename="../containers/containers_defs.cpp" line="314"/>
         <source>Extreme</source>
         <translation>شدید</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="321"/>
+        <location filename="../containers/containers_defs.cpp" line="322"/>
         <source>I just want to increase the level of my privacy.</source>
         <translation>من فقط میخواهم سطح حریم شخصی خودم را بالا ببرم</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="322"/>
+        <location filename="../containers/containers_defs.cpp" line="323"/>
         <source>I want to bypass censorship. This option recommended in most cases.</source>
         <translation>من میخواهم از سانسور عبور کنم. این گزینه در اکثر موارد توصیه می‎‌شود</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="324"/>
+        <location filename="../containers/containers_defs.cpp" line="325"/>
         <source>Most VPN protocols are blocked. Recommended if other options are not working.</source>
         <translation>اکثر پروتکل‎های وی‎پی‎ان مسدود شده‎اند. در مواردی که بقیه گزینه‎ها کار نمی‎کنند توصی می‎شود.</translation>
     </message>

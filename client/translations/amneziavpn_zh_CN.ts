@@ -2858,7 +2858,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>ShadowSocks - 掩盖VPN流量，使其类似于正常的网络流量，但在一些高度审查的地区可能会被分析系统识别.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="216"/>
+        <location filename="../containers/containers_defs.cpp" line="217"/>
         <source>After installation, Amnezia will create a
 
  file storage on your server.
@@ -3410,32 +3410,32 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="311"/>
+        <location filename="../containers/containers_defs.cpp" line="312"/>
         <source>Low</source>
         <translation>低</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="312"/>
+        <location filename="../containers/containers_defs.cpp" line="313"/>
         <source>Medium or High</source>
         <translation>中或高</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="313"/>
+        <location filename="../containers/containers_defs.cpp" line="314"/>
         <source>Extreme</source>
         <translation>极度</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="321"/>
+        <location filename="../containers/containers_defs.cpp" line="322"/>
         <source>I just want to increase the level of my privacy.</source>
         <translation>只是想提高隐私保护级别。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="322"/>
+        <location filename="../containers/containers_defs.cpp" line="323"/>
         <source>I want to bypass censorship. This option recommended in most cases.</source>
         <translation>想要绕过审查制度。大多数情况下推荐使用此选项。</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="324"/>
+        <location filename="../containers/containers_defs.cpp" line="325"/>
         <source>Most VPN protocols are blocked. Recommended if other options are not working.</source>
         <translation>大多数 VPN 协议都被阻止。如果其他选项不起作用，推荐此选项。</translation>
     </message>
