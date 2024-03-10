@@ -140,7 +140,10 @@ void AmneziaApplication::init()
         m_settingsController->importBackupFromOutside(filePath);
     });
 
-    AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled());
+    QTimer::singleShot(0, this, [this](){
+        AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled());
+    });
+
     connect(m_settings.get(), &Settings::screenshotsEnabledChanged, [](bool enabled) {
         AmneziaVPN::toggleScreenshots(enabled);
     });

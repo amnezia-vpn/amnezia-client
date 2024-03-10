@@ -4,47 +4,47 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="40"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="41"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>VPN ပရိုတိုကောများကို မထည့်သွင်းရသေးပါ။ 
 ကျေးဇူးပြု၍ VPN ကွန်တိန်နာကို အရင်ထည့်သွင်းပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="64"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="65"/>
         <source>Connection...</source>
         <translation>ချိတ်ဆက်နေပါပြီ...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="69"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="70"/>
         <source>Connected</source>
         <translation>ချိတ်ဆက်ပြီးသွားပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="114"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="115"/>
         <source>Settings updated successfully, Reconnnection...</source>
         <translation>ဆက်တင်များကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ပြီးပါပြီ၊ ပြန်လည်ချိတ်ဆက်နေပါသည်...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="117"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="118"/>
         <source>Settings updated successfully</source>
         <translation>ဆက်တင်များကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ပြီးပါပြီ။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="78"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="79"/>
         <source>Reconnection...</source>
         <translation>ပြန်လည်ချိတ်ဆက်နေပါသည်...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="62"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="83"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="97"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="103"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="84"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="98"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="104"/>
         <source>Connect</source>
         <translation>ချိတ်ဆက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="88"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="89"/>
         <source>Disconnection...</source>
         <translation>အဆက်အသွယ်ဖြတ်နေပါသည်...</translation>
     </message>
@@ -301,17 +301,17 @@ Already installed containers were found on the server. All installed containers 
         <translation>split tunnelling ပိတ်ထားပါသည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="223"/>
         <source>VPN protocol</source>
         <translation>VPN ပရိုတိုကော</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="272"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="271"/>
         <source>Servers</source>
         <translation>ဆာဗာများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="360"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="359"/>
         <source>Unable change server while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆာဗာကို ပြောင်းလဲ၍မရပါ။</translation>
     </message>
@@ -1610,41 +1610,45 @@ Already installed containers were found on the server. All installed containers 
         <translation>ဆာဗာချိတ်ဆက်မှု</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="51"/>
         <source>Do not use connection code from public sources. It may have been created to intercept your data.
 
 It&apos;s okay as long as it&apos;s from someone you trust.</source>
-        <translation>အများသူငှာအသုံးပြုသည့် ရင်းမြစ်များမှ ချိတ်ဆက်ကုဒ်ကို မသုံးပါနှင့်.အဆိုပါကုဒ်များသည် သင့်ဒေတာကို ကြားဖြတ်ရယူရန် ဖန်တီးထားခြင်းဖြစ်နိုင်သည်.
+        <translation type="vanished">အများသူငှာအသုံးပြုသည့် ရင်းမြစ်များမှ ချိတ်ဆက်ကုဒ်ကို မသုံးပါနှင့်.အဆိုပါကုဒ်များသည် သင့်ဒေတာကို ကြားဖြတ်ရယူရန် ဖန်တီးထားခြင်းဖြစ်နိုင်သည်.
 
 သင်ယုံကြည်ရတဲ့သူတစ်ယောက်ဆီမှ ရရှိတဲ့ကုဒ်ဖြစ်နေသရွေ့တော့ အဆင်ပြေပါသည်.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="51"/>
+        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
         <source>What do you have?</source>
         <translation>သင့်တွင်ဘာရှိပါသလဲ?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="67"/>
         <source>File with connection settings</source>
         <translation>ချိတ်ဆက်မှုဆက်တင်များပါဝင်သောဖိုင်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="67"/>
         <source>File with connection settings or backup</source>
         <translation>ချိတ်ဆက်မှုဆက်တင်များ သို့မဟုတ် အရန်သိမ်းဆည်းထားမှုပါဝင်သောဖိုင်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="75"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="74"/>
         <source>Open config file</source>
         <translation>config ဖိုင်ကိုဖွင့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="94"/>
         <source>QR-code</source>
         <translation>QR-ကုဒ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="113"/>
         <source>Key as text</source>
         <translation>Key ကိုစာသားအဖြစ်</translation>
     </message>
@@ -1730,7 +1734,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="197"/>
         <source>Set up later</source>
         <translation>နောက်မှ သတ်မှတ်မည်</translation>
     </message>
@@ -1831,32 +1835,32 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>PageSetupWizardStart</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="54"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="64"/>
         <source>Settings restored from backup file</source>
         <translation>ဆက်တင်များကို အရန်သိမ်းဆည်းထားသောဖိုင်မှ ပြန်လည်ရယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="116"/>
         <source>Free service for creating a personal VPN on your server.</source>
         <translation>သင့်ဆာဗာပေါ်တွင် ကိုယ်ပိုင် VPN ဖန်တီးရန်အတွက် အခမဲ့ဝန်ဆောင်မှု.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="107"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="117"/>
         <source> Helps you access blocked content without revealing your privacy, even to VPN providers.</source>
         <translation> အခြား VPN ဝန်ဆောင်မှုများကိုပင် သင်၏ privacy ကိုမဖော်ပြဘဲ ပိတ်ဆို့ထားသော အကြောင်းအရာများကို သင်ဝင်ရောက်ကြည့်ရှုနိုင်ရန် အကူအညီပေးပါသည်.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="126"/>
         <source>I have the data to connect</source>
         <translation>ကျွန်ုပ်တွင်ချိတ်ဆက်ဖို့အတွက်ဒေတာရှိသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="136"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="146"/>
         <source>I have nothing</source>
         <translation>ကျွန်ုပ်တွင်ဘာမှမရှိပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="149"/>
         <source>https://amnezia.org/instructions/0_starter-guide</source>
         <translation>https://amnezia.org/instructions/0_starter-guide</translation>
     </message>
@@ -1897,9 +1901,13 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>ချိတ်ဆက်မှုအသစ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="95"/>
         <source>Do not use connection code from public sources. It could be created to intercept your data.</source>
-        <translation>အများသူငှာအသုံးပြုသည့် ရင်းမြစ်များမှ ချိတ်ဆက်ကုဒ်ကို မသုံးပါနှင့်.အဆိုပါကုဒ်များသည် သင့်ဒေတာကို ကြားဖြတ်ရယူရန် ဖန်တီးထားခြင်းဖြစ်နိုင်သည်.</translation>
+        <translation type="vanished">အများသူငှာအသုံးပြုသည့် ရင်းမြစ်များမှ ချိတ်ဆက်ကုဒ်ကို မသုံးပါနှင့်.အဆိုပါကုဒ်များသည် သင့်ဒေတာကို ကြားဖြတ်ရယူရန် ဖန်တီးထားခြင်းဖြစ်နိုင်သည်.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="95"/>
+        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="110"/>
@@ -2017,7 +2025,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="243"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="504"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="513"/>
         <source>Users</source>
         <translation>အသုံးပြုသူများ</translation>
     </message>
@@ -2027,52 +2035,52 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>အသုံးပြုသူနာမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="520"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="529"/>
         <source>Search</source>
         <translation>ရှာဖွေမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="604"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="613"/>
         <source>Creation date: </source>
         <translation>ဖန်တီးပြုလုပ်သည့်ရက်စွဲ: </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="618"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="627"/>
         <source>Rename</source>
         <translation>အမည်ပြောင်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="650"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="659"/>
         <source>Client name</source>
         <translation>ကလိုင်းရင့်အမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="663"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="672"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="695"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="704"/>
         <source>Revoke</source>
         <translation>ပြန်ရုပ်သိမ်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="698"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="707"/>
         <source>Revoke the config for a user - %1?</source>
         <translation>အသုံးပြုသူ %1 အတွက် config ကို ပြန်လည်ရုပ်သိမ်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="699"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="708"/>
         <source>The user will no longer be able to connect to your server.</source>
         <translation>ဤအသုံးပြုသူသည် သင့်ဆာဗာသို့ ချိတ်ဆက်နိုင်တော့မည်မဟုတ်ပါ.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="700"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="709"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="701"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="710"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
@@ -2082,20 +2090,20 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>ဆာဗာကို စီမံခန့်ခွဲနိုင်စွမ်းမပါရှိဘဲ VPN အသုံးပြုခွင့်ကို မျှဝေမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="348"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="349"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="356"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="357"/>
         <source>Protocol</source>
         <translation>ပရိုတိုကော</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="449"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="450"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="457"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="458"/>
         <source>Connection format</source>
         <translation>ချိတ်ဆက်မှုဖောမတ်</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="198"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="487"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="496"/>
         <source>Share</source>
         <translation>မျှဝေမည်</translation>
     </message>
@@ -2472,147 +2480,169 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>ဆာဗာသို့ ချိတ်ဆက်ခြင်း အချိန်ကုန်သွားသည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="32"/>
         <source>Sftp error: End-of-file encountered</source>
-        <translation>Sftp မှားယွင်းမှု: ဖိုင်အဆုံးသတ်ကို ကြုံတွေ့ခဲ့ရသည်</translation>
+        <translation type="vanished">Sftp မှားယွင်းမှု: ဖိုင်အဆုံးသတ်ကို ကြုံတွေ့ခဲ့ရသည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="33"/>
         <source>Sftp error: File does not exist</source>
-        <translation>Sftp မှားယွင်းမှု: ဖိုင်မရှိပါ</translation>
+        <translation type="vanished">Sftp မှားယွင်းမှု: ဖိုင်မရှိပါ</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="34"/>
         <source>Sftp error: Permission denied</source>
-        <translation>Sftp မှားယွင်းမှု: ခွင့်ပြုချက် ငြင်းဆိုခံလိုက်ရပါသည်</translation>
+        <translation type="vanished">Sftp မှားယွင်းမှု: ခွင့်ပြုချက် ငြင်းဆိုခံလိုက်ရပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="35"/>
         <source>Sftp error: Generic failure</source>
-        <translation>Sftp မှားယွင်းမှု: ယေဘုယ မအောင်မြင်ခြင်း</translation>
+        <translation type="vanished">Sftp မှားယွင်းမှု: ယေဘုယ မအောင်မြင်ခြင်း</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="36"/>
         <source>Sftp error: Garbage received from server</source>
-        <translation>မှားယွင်းမှု: ဆာဗာမှ အမှိုက်များကို လက်ခံရရှိခဲ့သည်</translation>
+        <translation type="vanished">မှားယွင်းမှု: ဆာဗာမှ အမှိုက်များကို လက်ခံရရှိခဲ့သည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="37"/>
         <source>Sftp error: No connection has been set up</source>
-        <translation>Sftp မှားယွင်းမှု: ချိတ်ဆက်မှု မသတ်မှတ်ရသေးပါ</translation>
+        <translation type="vanished">Sftp မှားယွင်းမှု: ချိတ်ဆက်မှု မသတ်မှတ်ရသေးပါ</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="38"/>
         <source>Sftp error: There was a connection, but we lost it</source>
-        <translation>Sftp မှားယွင်းမှု: ချိတ်ဆက်မှုတစ်ခုရှိခဲ့သော်လည်း ဆုံးရှုံးသွားခဲ့ပါသည်</translation>
+        <translation type="vanished">Sftp မှားယွင်းမှု: ချိတ်ဆက်မှုတစ်ခုရှိခဲ့သော်လည်း ဆုံးရှုံးသွားခဲ့ပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="39"/>
         <source>Sftp error: Operation not supported by libssh yet</source>
-        <translation>Sftp အမှား: လုပ်ဆောင်ချက်ကို libssh မှ မထောက်ပံ့သေးပါ</translation>
+        <translation type="vanished">Sftp အမှား: လုပ်ဆောင်ချက်ကို libssh မှ မထောက်ပံ့သေးပါ</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="40"/>
         <source>Sftp error: Invalid file handle</source>
-        <translation>Sftp မှားယွင်းမှု: ဖိုင်ကိုင်တွယ်မှု မမှန်ကန်ပါ</translation>
+        <translation type="vanished">Sftp မှားယွင်းမှု: ဖိုင်ကိုင်တွယ်မှု မမှန်ကန်ပါ</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="41"/>
         <source>Sftp error: No such file or directory path exists</source>
-        <translation>Sftp မှားယွင်းမှု: ဤဖိုင်အမျိုးအစား သို့မဟုတ် လမ်းညွှန်လမ်းကြောင်းမျိုး မရှိပါ</translation>
+        <translation type="vanished">Sftp မှားယွင်းမှု: ဤဖိုင်အမျိုးအစား သို့မဟုတ် လမ်းညွှန်လမ်းကြောင်းမျိုး မရှိပါ</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="42"/>
         <source>Sftp error: An attempt to create an already existing file or directory has been made</source>
-        <translation>Sftp မှားယွင်းမှု: ရှိပြီးသား ဖိုင် သို့မဟုတ် လမ်းညွှန်ကို ဖန်တီးရန် ကြိုးပမ်းမှုတစ်ခု ပြုလုပ်ပြီးဖြစ်သည်</translation>
+        <translation type="vanished">Sftp မှားယွင်းမှု: ရှိပြီးသား ဖိုင် သို့မဟုတ် လမ်းညွှန်ကို ဖန်တီးရန် ကြိုးပမ်းမှုတစ်ခု ပြုလုပ်ပြီးဖြစ်သည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="43"/>
         <source>Sftp error: Write-protected filesystem</source>
-        <translation>Sftp မှားယွင်းမှု: ရေးသားခြင်းမှကာကွယ်ထားသော ဖိုင်စနစ်</translation>
+        <translation type="vanished">Sftp မှားယွင်းမှု: ရေးသားခြင်းမှကာကွယ်ထားသော ဖိုင်စနစ်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="44"/>
         <source>Sftp error: No media was in remote drive</source>
-        <translation>Sftp မှားယွင်းမှု: မီဒီယာသည် အဝေးမှ drive ထဲတွင် မရှိခဲ့ပါ</translation>
+        <translation type="vanished">Sftp မှားယွင်းမှု: မီဒီယာသည် အဝေးမှ drive ထဲတွင် မရှိခဲ့ပါ</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="62"/>
+        <location filename="../core/errorstrings.cpp" line="50"/>
         <source>The config does not contain any containers and credentials for connecting to the server</source>
         <translation>Config တွင် ဆာဗာသို့ချိတ်ဆက်ရန်အတွက် ကွန်တိန်နာများနှင့် အထောက်အထားများ မပါဝင်ပါ</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="68"/>
+        <location filename="../core/errorstrings.cpp" line="56"/>
         <source>Error when retrieving configuration from API</source>
         <translation>API မှ စီစဉ်သတ်မှတ်မှုကို ရယူသည့်အခါ အမှားအယွင်းဖြစ်ပေါ်နေသည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="69"/>
+        <location filename="../core/errorstrings.cpp" line="57"/>
         <source>This config has already been added to the application</source>
         <translation>ဤ config ကို အပလီကေးရှင်းထဲသို့ ထည့်သွင်းပြီးဖြစ်သည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="76"/>
+        <location filename="../core/errorstrings.cpp" line="72"/>
         <source>ErrorCode: %1. </source>
         <translation>မှားယွင်းမှုကုတ်: %1. </translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="47"/>
+        <location filename="../core/errorstrings.cpp" line="35"/>
         <source>OpenVPN config missing</source>
         <translation>OpenVPN config ပျောက်ဆုံးနေပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="48"/>
+        <location filename="../core/errorstrings.cpp" line="32"/>
+        <source>Scp error: Generic failure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="36"/>
         <source>OpenVPN management server error</source>
         <translation>OpenVPN စီမံခန့်ခွဲမှုဆာဗာ အမှားအယွင်း</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="51"/>
+        <location filename="../core/errorstrings.cpp" line="39"/>
         <source>OpenVPN executable missing</source>
         <translation>OpenVPN စီမံလုပ်ဆောင်နိုင်မှု ပျောက်ဆုံးနေပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="52"/>
+        <location filename="../core/errorstrings.cpp" line="40"/>
         <source>ShadowSocks (ss-local) executable missing</source>
         <translation>ShadowSocks (ss-local) executable ပျောက်နေပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="53"/>
+        <location filename="../core/errorstrings.cpp" line="41"/>
         <source>Cloak (ck-client) executable missing</source>
         <translation>Cloak (ck-client) စီမံလုပ်ဆောင်နိုင်မှု ပျောက်ဆုံးနေပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="54"/>
+        <location filename="../core/errorstrings.cpp" line="42"/>
         <source>Amnezia helper service error</source>
         <translation>Amnezia helper ဝန်ဆောင်မှု မှားယွင်းမှု</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="55"/>
+        <location filename="../core/errorstrings.cpp" line="43"/>
         <source>OpenSSL failed</source>
         <translation>OpenSSL မအောင်မြင်ပါ</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="58"/>
+        <location filename="../core/errorstrings.cpp" line="46"/>
         <source>Can&apos;t connect: another VPN connection is active</source>
         <translation>ချိတ်ဆက်၍မရပါ: အခြား VPN ချိတ်ဆက်မှုတစ်ခုရှိနေပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="59"/>
+        <location filename="../core/errorstrings.cpp" line="47"/>
         <source>Can&apos;t setup OpenVPN TAP network adapter</source>
         <translation>OpenVPN TAP ကွန်ရက် adapter ကို စနစ်တည်ဆောက်၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="60"/>
+        <location filename="../core/errorstrings.cpp" line="48"/>
         <source>VPN pool error: no available addresses</source>
         <translation>VPN pool မှားယွင်းမှု: ရရှိနိုင်သောလိပ်စာများမရှိပါ</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="65"/>
+        <location filename="../core/errorstrings.cpp" line="53"/>
         <source>VPN connection error</source>
         <translation>VPN ချိတ်ဆက်မှုမှားယွင်းနေပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="73"/>
+        <location filename="../core/errorstrings.cpp" line="60"/>
+        <source>QFile error: The file could not be opened</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="61"/>
+        <source>QFile error: An error occurred when reading from the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="62"/>
+        <source>QFile error: The file could not be accessed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="63"/>
+        <source>QFile error: An unspecified error occurred</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="64"/>
+        <source>QFile error: A fatal error occurred</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="65"/>
+        <source>QFile error: The operation was aborted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="69"/>
         <source>Internal error</source>
         <translation>စက်တွင်းဖြစ်သော မှားယွင်းမှု</translation>
     </message>
@@ -2914,8 +2944,8 @@ WireGuard သည် ၎င်း၏ စွမ်းဆောင်ရည်အ�
         <translation>ဆာဗာ #1</translation>
     </message>
     <message>
-        <location filename="../settings.cpp" line="206"/>
-        <location filename="../settings.cpp" line="213"/>
+        <location filename="../settings.cpp" line="207"/>
+        <location filename="../settings.cpp" line="214"/>
         <source>Server</source>
         <translation>ဆာဗာ</translation>
     </message>
@@ -2923,17 +2953,17 @@ WireGuard သည် ၎င်း၏ စွမ်းဆောင်ရည်အ�
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="155"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="140"/>
         <source>All settings have been reset to default values</source>
         <translation>ဆက်တင်အားလုံးကို မူရင်းတန်ဖိုးများအဖြစ် ပြန်လည်သတ်မှတ်ထားသည်</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="161"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="150"/>
         <source>Cached profiles cleared</source>
         <translation>ကက်ရှ်ပရိုဖိုင်များကို ရှင်းလင်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="139"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="123"/>
         <source>Backup file is corrupted</source>
         <translation>အရန်သိမ်းထားသည့်ဖိုင်ပျက်ဆီးနေသည်</translation>
     </message>
@@ -2947,33 +2977,33 @@ WireGuard သည် ၎င်း၏ စွမ်းဆောင်ရည်အ�
         <translation>AmneziaWG config ကိုသိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="74"/>
+        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="85"/>
         <source>Share</source>
         <translation>မျှဝေမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="108"/>
+        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="121"/>
         <source>Copy</source>
         <translation>ကူးယူမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="167"/>
-        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="177"/>
+        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="188"/>
+        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="198"/>
         <source>Copied</source>
         <translation>ကူးယူပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="126"/>
+        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="141"/>
         <source>Copy config string</source>
         <translation>config string ကိုကူးယူမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="141"/>
+        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="160"/>
         <source>Show connection settings</source>
         <translation>ချိတ်ဆက်မှုဆက်တင်များကို ပြပါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="305"/>
+        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="328"/>
         <source>To read the QR code in the Amnezia app, select &quot;Add server&quot; → &quot;I have data to connect&quot; → &quot;QR code, key or settings file&quot;</source>
         <translation>Amnezia အက်ပ်ရှိ QR ကုဒ်ကိုဖတ်ရန်အတွက်အောက်ပါအတိုင်း ရွေးချယ်ပါ &quot;ဆာဗာထည့်ရန်&quot; → &quot;ချိတ်ဆက်ရန် ဒေတာရှိသည်&quot; → &quot;QR ကုဒ်၊ key သို့မဟုတ် ဆက်တင်ဖိုင်&quot;</translation>
     </message>
@@ -3065,7 +3095,7 @@ WireGuard သည် ၎င်း၏ စွမ်းဆောင်ရည်အ�
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="457"/>
+        <location filename="../vpnconnection.cpp" line="458"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>
@@ -3149,12 +3179,12 @@ WireGuard သည် ၎င်း၏ စွမ်းဆောင်ရည်အ�
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="174"/>
+        <location filename="../ui/qml/main2.qml" line="179"/>
         <source>Private key passphrase</source>
         <translation>ကိုယ်ပိုင် key စကားဝှက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="197"/>
+        <location filename="../ui/qml/main2.qml" line="202"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
