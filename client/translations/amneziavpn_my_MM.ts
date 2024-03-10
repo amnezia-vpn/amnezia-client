@@ -2819,24 +2819,20 @@ WireGuard သည် ၎င်း၏ စွမ်းဆောင်ရည်အ�
         <location filename="../containers/containers_defs.cpp" line="217"/>
         <source>After installation, Amnezia will create a
 
- file storage on your server.
-You will be able to access it using
- FileZilla or other SFTP clients,
-as well as mount the disk on your device to access
+ file storage on your server. You will be able to access it using
+ FileZilla or other SFTP clients, as well as mount the disk on your device to access
  it directly from your device.
 
 For more detailed information, you can
  find it in the support section under &quot;Create SFTP file storage.&quot; </source>
         <translation>တပ်ဆင်ပြီးနောက်၊ Amnezia သည် ဖန်တီးပေးလိမ့်မည်။
 
- သင့်ဆာဗာတွင် ဖိုင်သိုလှောင်မှု။.
-၎င်းကို အသုံးပြု၍ သင်ဝင်ရောက်နိုင်မည်ဖြစ်သည်။
- FileZilla သို့မဟုတ် အခြားသော SFTP သုံးစွဲသူများ၊,
-ထို့အပြင် ဝင်ရောက်ကြည့်ရှုရန် သင့်စက်ပေါ်တွင် ဒစ်ကို တပ်ဆင်ပါ။
+ သင့်ဆာဗာတွင် ဖိုင်သိုလှောင်မှု။ ၎င်းကို အသုံးပြု၍ သင်ဝင်ရောက်နိုင်မည်ဖြစ်သည်။
+ FileZilla သို့မဟုတ် အခြား SFTP ဖောက်သည်များအပြင် ဝင်ရောက်ကြည့်ရှုရန် သင့်စက်ပေါ်တွင် ဒစ်ကို တပ်ဆင်ပါ။
  သင့်စက်မှ တိုက်ရိုက်.
 
-ပိုမိုအသေးစိတ်အချက်အလက်များအတွက်, သင်သည်နိုင်ပါတယ်။
- &quot;Screate SFTP file storage.&quot; အောက်ရှိ ပံ့ပိုးမှုကဏ္ဍတွင် ၎င်းကိုရှာပါ။. </translation>
+ပိုမိုအသေးစိတ်အချက်အလက်အတွက်, သင်နိုင်ပါတယ်။
+ &quot;create SFTP file storage.&quot; အောက်ရှိ ပံ့ပိုးမှုကဏ္ဍတွင် ၎င်းကိုရှာပါ။ </translation>
     </message>
     <message>
         <location filename="../protocols/protocols_defs.cpp" line="77"/>

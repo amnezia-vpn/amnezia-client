@@ -2710,28 +2710,6 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation>سرویس DNS</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="217"/>
-        <source>After installation, Amnezia will create a
-
- file storage on your server.
-You will be able to access it using
- FileZilla or other SFTP clients,
-as well as mount the disk on your device to access
- it directly from your device.
-
-For more detailed information, you can
- find it in the support section under &quot;Create SFTP file storage.&quot; </source>
-        <translation>پس از نصب، Amnezia یک را ایجاد می کند.
-
- با استفاده از آن می توانید به آن دسترسی داشته باشید.
- FileZilla یا سایر سرویس گیرندگان SFTP.
-و همچنین دیسک را برای دسترسی روی دستگاه خود سوار کنید
- آن را به طور مستقیم از دستگاه شما.
-
-برای اطلاعات دقیق تر، می توانید
- آن را در بخش پشتیبانی در بخش &quot;ایجاد ذخیره سازی فایل SFTP&quot; پیدا کنید.&quot; </translation>
-    </message>
-    <message>
         <location filename="../containers/containers_defs.cpp" line="92"/>
         <source>Sftp file sharing service</source>
         <translation>سرویس اشتراک گذاری فایل Sftp</translation>
@@ -2838,6 +2816,25 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 * کمترین میزان تنظیمات
 * غیرقابل تشخیص توسط سیستم‎های تحلیل عمیق DPI و مقاوم به بلاک شدن
 * کار بر روی پروتکل شبکه UDP</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="217"/>
+        <source>After installation, Amnezia will create a
+
+ file storage on your server. You will be able to access it using
+ FileZilla or other SFTP clients, as well as mount the disk on your device to access
+ it directly from your device.
+
+For more detailed information, you can
+ find it in the support section under &quot;Create SFTP file storage.&quot; </source>
+        <translation>پس از نصب، Amnezia یک ایجاد خواهد کرد
+
+ ذخیره سازی فایل در سرور شما. شما قادر خواهید بود با استفاده از آن دسترسی داشته باشید
+ FileZilla یا سایر کلاینت های SFTP، و همچنین دیسک را برای دسترسی روی دستگاه خود نصب کنید
+ این به طور مستقیم از دستگاه شما.
+
+برای اطلاعات دقیق تر، می توانید
+ آن را در بخش پشتیبانی تحت &quot;ایجاد ذخیره سازی فایل SFTP&quot; پیدا کنید.&quot; </translation>
     </message>
     <message>
         <location filename="../protocols/protocols_defs.cpp" line="77"/>

@@ -2817,23 +2817,20 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
         <location filename="../containers/containers_defs.cpp" line="217"/>
         <source>After installation, Amnezia will create a
 
- file storage on your server.
-You will be able to access it using
- FileZilla or other SFTP clients,
-as well as mount the disk on your device to access
+ file storage on your server. You will be able to access it using
+ FileZilla or other SFTP clients, as well as mount the disk on your device to access
  it directly from your device.
 
 For more detailed information, you can
  find it in the support section under &quot;Create SFTP file storage.&quot; </source>
         <translation>بعد التثبيت, سينشأ Amnezia
- مخزن ملفات علي الخادم الخاص بك.
-ستكون قادر علي الوصول إلية
- بأستخدام FileZilla او SFTP clients اخر,
-وكذلك تركيب القرص على جهازك للوصول إليه
- مباشر من  جهازك.
 
-للمزيد من المعلومات, يمكنك إيجادها
-تحت قسم الدعم &quot;انشأ مخزن ملفات SFTP.&quot; </translation>
+ مخزن ملفات علي الخادم الخاص بك, ستكون قادر علي  الولوج إلية بأستخدام
+ FilaZilla او اي عملاء SFTP اخرين,كذلك تركيب القرص علي جهازك للولوج إلية
+ مباشر من جهازك.
+
+لمعلومات اكثر, يمكنك
+ إيجادها في قسم الدعم تحت &quot;انشاء مخزن ملفات SFTP.&quot; </translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="108"/>

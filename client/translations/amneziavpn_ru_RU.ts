@@ -2895,15 +2895,20 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
         <location filename="../containers/containers_defs.cpp" line="217"/>
         <source>After installation, Amnezia will create a
 
- file storage on your server.
-You will be able to access it using
- FileZilla or other SFTP clients,
-as well as mount the disk on your device to access
+ file storage on your server. You will be able to access it using
+ FileZilla or other SFTP clients, as well as mount the disk on your device to access
  it directly from your device.
 
 For more detailed information, you can
  find it in the support section under &quot;Create SFTP file storage.&quot; </source>
-        <translation type="unfinished"></translation>
+        <translation>После установки Amnezia создаст
+
+ файловое хранилище на вашем сервере. Вы сможете получить к нему доступ, используя
+ FileZilla или других SFTP-клиентов, а также смонтировать диск на вашем устройстве для доступа
+ это прямо с вашего устройства..
+
+Для получения более подробной информации вы можете
+найдите его в разделе поддержки под &quot;Создать файловое хранилище SFTP.&quot; </translation>
     </message>
     <message>
         <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.

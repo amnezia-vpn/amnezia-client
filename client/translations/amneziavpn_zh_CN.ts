@@ -2861,15 +2861,20 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <location filename="../containers/containers_defs.cpp" line="217"/>
         <source>After installation, Amnezia will create a
 
- file storage on your server.
-You will be able to access it using
- FileZilla or other SFTP clients,
-as well as mount the disk on your device to access
+ file storage on your server. You will be able to access it using
+ FileZilla or other SFTP clients, as well as mount the disk on your device to access
  it directly from your device.
 
 For more detailed information, you can
  find it in the support section under &quot;Create SFTP file storage.&quot; </source>
-        <translation type="unfinished"></translation>
+        <translation>安装后，Amnezia 将创建一个
+
+ 服务器上的文件存储。 您将能够使用它来访问它
+ FileZilla 或其他 SFTP 客户端，以及将磁盘挂载到您的设备上进行访问
+ 直接从您的设备.
+
+欲了解更详细的信息，您可以
+在支持部分找到它 &quot;创建SFTP文件存储.&quot; </translation>
     </message>
     <message>
         <source>OpenVPN over Cloak - OpenVPN with masquerading as web traffic and protection against active-probing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
