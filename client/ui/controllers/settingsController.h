@@ -77,7 +77,7 @@ signals:
 
     void amneziaDnsToggled(bool enable);
 
-    void loggingDisableByWathcer();
+    void loggingDisableByWatcher();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

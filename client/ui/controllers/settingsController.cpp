@@ -216,6 +216,6 @@ void SettingsController::checkIfNeedDisableLogs()
     if (m_loggingDisableDate <= QDateTime::currentDateTime()) {
         toggleLogging(false);
         clearLogs();
-        emit loggingDisableByWathcer();
+        emit loggingDisableByWatcher();
     }
 }
