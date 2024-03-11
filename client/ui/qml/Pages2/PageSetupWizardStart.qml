@@ -24,10 +24,6 @@ PageType {
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
 
-        function onShowBusyIndicator(visible) {
-            busyIndicator.visible = visible
-        }
-
         function onClosePage() {
             if (stackView.depth <= 1) {
                 return
@@ -55,7 +51,7 @@ PageType {
         }
 
         function onEscapePressed() {
-            if (isControlsDisabled || busyIndicator.visible) {
+            if (isControlsDisabled) {
                 return
             }
 
@@ -164,11 +160,5 @@ PageType {
 
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
-    }
-
-    BusyIndicatorType {
-        id: busyIndicator
-        anchors.centerIn: parent
-        z: 1
     }
 }

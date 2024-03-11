@@ -94,7 +94,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
-                text: qsTr("Do not use connection code from public sources. It could be created to intercept your data.")
+                text: qsTr("Do not use connection codes from untrusted sources, as they may be created to intercept your data.")
                 color: "#878B91"
             }
 

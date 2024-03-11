@@ -7,9 +7,7 @@
 #include "ui/qautostart.h"
 #include "version.h"
 #ifdef Q_OS_ANDROID
-    #include "platforms/android/android_utils.h"
     #include "platforms/android/android_controller.h"
-    #include <QJniObject>
 #endif
 
 #ifdef Q_OS_IOS
@@ -29,20 +27,6 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
       m_settings(settings)
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
-
-#ifdef Q_OS_ANDROID
-    if (!m_settings->isScreenshotsEnabled()) {
-        // Set security screen for Android app
-        AndroidUtils::runOnAndroidThreadSync([]() {
-            QJniObject activity = AndroidUtils::getActivity();
-            QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
-            if (window.isValid()) {
-                const int FLAG_SECURE = 8192;
-                window.callMethod<void>("addFlags", "(I)V", FLAG_SECURE);
-            }
-        });
-    }
-#endif
 }
 
 void SettingsController::toggleAmneziaDns(bool enable)
@@ -204,19 +188,6 @@ bool SettingsController::isScreenshotsEnabled()
 void SettingsController::toggleScreenshotsEnabled(bool enable)
 {
     m_settings->setScreenshotsEnabled(enable);
-#ifdef Q_OS_ANDROID
-    std::string command = enable ? "clearFlags" : "addFlags";
-
-    // Set security screen for Android app
-    AndroidUtils::runOnAndroidThreadSync([&command]() {
-        QJniObject activity = AndroidUtils::getActivity();
-        QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
-        if (window.isValid()) {
-            const int FLAG_SECURE = 8192;
-            window.callMethod<void>(command.c_str(), "(I)V", FLAG_SECURE);
-        }
-    });
-#endif
 }
 
 bool SettingsController::isCameraPresent()

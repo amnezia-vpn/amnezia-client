@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     if (doExec) {
         app.init();
 
-        qInfo().noquote() << QString("Started %1 version %2").arg(APPLICATION_NAME, APP_VERSION);
+        qInfo().noquote() << QString("Started %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
         qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
 
         return app.exec();
