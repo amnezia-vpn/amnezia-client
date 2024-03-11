@@ -40,7 +40,7 @@ DrawerType2 {
 
         Connections {
             target: root
-
+            enabled: !GC.isMobile()
             function onOpened() {
                 header.forceActiveFocus()
             }

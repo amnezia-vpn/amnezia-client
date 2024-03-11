@@ -137,6 +137,7 @@ Item {
 //                    textColor: "#D7D8DB"
 //                    borderWidth: 0
 
+                    focusPolicy: Qt.NoFocus
                     text: root.buttonText
                     imageSource: root.buttonImageSource
 
