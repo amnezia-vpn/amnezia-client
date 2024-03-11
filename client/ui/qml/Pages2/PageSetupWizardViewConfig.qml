@@ -75,7 +75,7 @@ PageType {
                 visible: fileName.text !== ""
 
                 Image {
-                    source: "qrc:/images/file-check.jpg"
+                    source: "qrc:/images/controls/file-check-2.svg"
                 }
 
                 Header2TextType {
@@ -115,7 +115,7 @@ PageType {
 
                 iconWidth: 17
                 iconHeight: 17
-                iconPath: "qrc:/images/info.png"
+                iconPath: "qrc:/images/controls/alert-circle.svg"
             }
 
             Rectangle {

@@ -227,8 +227,8 @@
         <file>ui/qml/Components/HomeSplitTunnelingDrawer.qml</file>
         <file>images/controls/split-tunneling.svg</file>
         <file>ui/qml/Controls2/DrawerType2.qml</file>
-        <file>images/file-check.jpg</file>
-        <file>images/info.png</file>
         <file>ui/qml/Controls2/TextTypes/CaptionTextWithIconAndBackGroundType.qml</file>
+        <file>images/controls/alert-circle.svg</file>
+        <file>images/controls/file-check-2.svg</file>
     </qresource>
 </RCC>
