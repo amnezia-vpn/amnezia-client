@@ -86,6 +86,7 @@ PageType {
                         LabelWithButtonType {
                             Layout.fillWidth: true
                             Layout.topMargin: 32
+                            Layout.maximumWidth: root.width
 
                             text: qsTr("Host")
                             descriptionText: ServersModel.getProcessedServerData("HostName")
@@ -103,6 +104,7 @@ PageType {
 
                         LabelWithButtonType {
                             Layout.fillWidth: true
+                            Layout.maximumWidth: root.width
 
                             text: qsTr("Port")
                             descriptionText: port
@@ -120,6 +122,7 @@ PageType {
 
                         LabelWithButtonType {
                             Layout.fillWidth: true
+                            Layout.maximumWidth: root.width
 
                             text: qsTr("Login")
                             descriptionText: username
@@ -137,6 +140,7 @@ PageType {
 
                         LabelWithButtonType {
                             Layout.fillWidth: true
+                            Layout.maximumWidth: root.width
 
                             text: qsTr("Password")
                             descriptionText: password
@@ -160,6 +164,7 @@ PageType {
                             Layout.bottomMargin: 24
                             Layout.leftMargin: 16
                             Layout.rightMargin: 16
+                            Layout.maximumWidth: root.width - 32
 
                             defaultColor: "transparent"
                             hoveredColor: Qt.rgba(1, 1, 1, 0.08)
@@ -181,6 +186,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.leftMargin: 16
                             Layout.rightMargin: 16
+                            Layout.maximumWidth: root.width - 32
 
                             readonly property string windowsFirstLink: "<a href=\"https://github.com/billziss-gh/winfsp/releases/latest\" style=\"color: #FBB26A;\">WinFsp</a>"
                             readonly property string windowsSecondLink: "<a href=\"https://github.com/billziss-gh/sshfs-win/releases\" style=\"color: #FBB26A;\">SSHFS-Win</a>"
@@ -239,6 +245,7 @@ PageType {
                             Layout.bottomMargin: 16
                             Layout.leftMargin: 8
                             implicitHeight: 32
+                            Layout.maximumWidth: root.width - 16
 
                             defaultColor: "transparent"
                             hoveredColor: Qt.rgba(1, 1, 1, 0.08)
