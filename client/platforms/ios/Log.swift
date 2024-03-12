@@ -37,8 +37,8 @@ struct Log {
 
   init(_ str: String) {
     self.records = str.split(whereSeparator: \.isNewline)
-      .compactMap {
-        Record(String($0))!
+      .map {
+        Record(String($0)) ?? Record(date: .init(), level: .error, message: "Log error: \($0.replacingOccurrences(of: "\n", with: " "))")
       }
   }
 
