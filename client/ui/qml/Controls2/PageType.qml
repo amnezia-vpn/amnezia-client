@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "../Config"
+
 Item {
     id: root
 
@@ -32,6 +34,6 @@ Item {
             }
         }
         repeat: false // Stop the timer after one trigger
-        running: true // Start the timer
+        running: !GC.isMobile()  // Start the timer
     }
 }
