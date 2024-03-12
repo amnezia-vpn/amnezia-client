@@ -2674,7 +2674,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="57"/>
         <source>This config has already been added to the application</source>
-        <translation>Этот конфиг уже добавлен в приложение</translation>
+        <translation>Этот конфиг уже был добавлен в приложение</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="72"/>
