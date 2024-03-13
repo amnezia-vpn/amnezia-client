@@ -43,8 +43,8 @@ namespace
         } else if (config.contains(amneziaConfigPattern) || config.contains(amneziaFreeConfigPattern)) {
             return ConfigTypes::Amnezia;
         } else if (config.contains(openVpnConfigPatternCli)
-            && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))
-            && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
+                   && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))
+                   && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
             return ConfigTypes::OpenVpn;
         } else if (config.contains(wireguardConfigPatternSectionInterface)
                    && config.contains(wireguardConfigPatternSectionPeer)) {
@@ -89,7 +89,8 @@ bool ImportController::extractConfigFromData(QString data)
     auto configFormat = checkConfigFormat(config);
     if (configFormat == ConfigTypes::Invalid) {
         data.replace("vpn://", "");
-        QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+        QByteArray ba =
+                QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
         QByteArray ba_uncompressed = qUncompress(ba);
         if (!ba_uncompressed.isEmpty()) {
             ba = ba_uncompressed;
@@ -254,7 +255,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     if (hostNameAndPortMatch.hasCaptured(1)) {
         hostName = hostNameAndPortMatch.captured(1);
     } else {
-        qDebug() << "Failed to import profile";
+        qDebug() << "Key parameter 'Endpoint' is missing";
         emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
     }
 
@@ -267,22 +268,23 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     lastConfig[config_key::hostName] = hostName;
     lastConfig[config_key::port] = port.toInt();
 
-    //    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty()
-    //        && !configMap.value("PresharedKey").isEmpty() && !configMap.value("PublicKey").isEmpty()) {
-    lastConfig[config_key::client_priv_key] = configMap.value("PrivateKey");
-    lastConfig[config_key::client_ip] = configMap.value("Address");
-    if (!configMap.value("PresharedKey").isEmpty()) {
-        lastConfig[config_key::psk_key] = configMap.value("PresharedKey");
-    } else if (!configMap.value("PreSharedKey").isEmpty()) {
-        lastConfig[config_key::psk_key] = configMap.value("PreSharedKey");
-    }
+    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty()
+        && !configMap.value("PublicKey").isEmpty()) {
+        lastConfig[config_key::client_priv_key] = configMap.value("PrivateKey");
+        lastConfig[config_key::client_ip] = configMap.value("Address");
 
-    lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
-    //    } else {
-    //        qDebug() << "Failed to import profile";
-    //        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
-    //        return QJsonObject();
-    //    }
+        if (!configMap.value("PresharedKey").isEmpty()) {
+            lastConfig[config_key::psk_key] = configMap.value("PresharedKey");
+        } else if (!configMap.value("PreSharedKey").isEmpty()) {
+            lastConfig[config_key::psk_key] = configMap.value("PreSharedKey");
+        }
+
+        lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
+    } else {
+        qDebug() << "One of the key parameters is missing (PrivateKey, Address, PublicKey)";
+        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
+        return QJsonObject();
+    }
 
     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(","));
 
