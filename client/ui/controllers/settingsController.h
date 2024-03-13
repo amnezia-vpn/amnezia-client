@@ -45,7 +45,6 @@ public slots:
     QString getAppVersion();
 
     void clearSettings();
-    void clearCachedProfiles();
 
     bool isAutoConnectEnabled();
     void toggleAutoConnect(bool enable);
