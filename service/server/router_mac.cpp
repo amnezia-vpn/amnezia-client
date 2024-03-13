@@ -88,10 +88,10 @@ bool RouterMac::routeDelete(const QString &ipWithSubnet, const QString &gw)
         return false;
     }
 
- //   if (ip == "0.0.0.0") {
- //       qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;
- //       return true;
- //   }
+    if (ipWithSubnet == "0.0.0.0/0") {
+        qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;
+        return true;
+    }
 
     QString cmd;
     if (mask == "255.255.255.255") {
