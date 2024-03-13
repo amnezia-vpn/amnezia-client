@@ -1,7 +1,7 @@
 import QtQuick
 
 Text {
-    lineHeight: LanguageModel.getCurrentLanguageIndex() === 5 ? 40 : 30 // Burmese
+    lineHeight: 30 + LanguageModel.getLineHeightAppend()
     lineHeightMode: Text.FixedHeight
 
     color: "#D7D8DB"
