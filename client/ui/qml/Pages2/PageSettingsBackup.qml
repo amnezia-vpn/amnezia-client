@@ -76,14 +76,13 @@ PageType {
 
             CaptionTextWithIconAndBackGroundType {
                 Layout.topMargin: 16
-                implicitHeight: 80
                 implicitWidth: parent.width - 10
 
                 textString: qsTr("The backup will contain your passwords and private keys for all servers added " +
                                             "to AmneziaVPN. Keep this information in a secure place.")
                 iconWidth: 17
                 iconHeight: 17
-                iconPath: "qrc:/images/info.png"
+                iconPath: "qrc:/images/controls/alert-circle.svg"
             }
 
             BasicButtonType {

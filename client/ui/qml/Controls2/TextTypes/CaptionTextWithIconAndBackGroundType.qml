@@ -15,10 +15,11 @@ Rectangle {
     property real iconTopMargin
     property real iconRightMargin
     property real iconBottomMargin
-    property real iconLeftMargin: 15
+    property real iconLeftMargin: 10
 
     color: backGroundColor
     radius: 8
+    implicitHeight: supportingText.height + 20
 
     RowLayout {
       width: parent.width
@@ -35,7 +36,7 @@ Rectangle {
           color: textColor
       }
 
-      Item {  // setting Item type as a parent is a solution for changing the image size
+      Item {
           Layout.topMargin: iconTopMargin
           Layout.rightMargin: iconRightMargin
           Layout.bottomMargin: supportingText.top
