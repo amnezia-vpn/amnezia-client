@@ -93,6 +93,7 @@ PageType {
 
                         Connections {
                             target: serverNameEditDrawer
+                            enabled: !GC.isMobile()
                             function onOpened() {
                                 serverName.textField.forceActiveFocus()
                             }
