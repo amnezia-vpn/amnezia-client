@@ -209,7 +209,7 @@ PageType {
 
                     var yesButtonFunction = function() {
                         PageController.showBusyIndicator(true)
-                        ApiController.clearApiConfig()
+                        InstallController.removeApiConfig()
                         PageController.showBusyIndicator(false)
                     }
                     var noButtonFunction = function() {

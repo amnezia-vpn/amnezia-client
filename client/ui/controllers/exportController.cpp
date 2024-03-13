@@ -8,7 +8,7 @@
 #include <QImage>
 #include <QStandardPaths>
 
-#include "core/controllers/vpnConfigirationController.h"
+#include "core/controllers/vpnConfigurationController.h"
 #include "core/errorstrings.h"
 #include "systemController.h"
 #ifdef Q_OS_ANDROID

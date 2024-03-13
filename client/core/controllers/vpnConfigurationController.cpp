@@ -1,4 +1,4 @@
-#include "vpnConfigirationController.h"
+#include "vpnConfigurationController.h"
 
 #include "configurators/awg_configurator.h"
 #include "configurators/cloak_configurator.h"

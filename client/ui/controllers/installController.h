@@ -37,6 +37,8 @@ public slots:
     void removeAllContainers();
     void removeCurrentlyProcessedContainer();
 
+    void removeApiConfig();
+
     QRegularExpression ipAddressPortRegExp();
     QRegularExpression ipAddressRegExp();
 

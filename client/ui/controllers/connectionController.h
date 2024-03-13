@@ -55,6 +55,7 @@ signals:
 
     void noInstalledContainers();
 
+    void connectButtonClicked();
     void preparingConfig();
 
 private:

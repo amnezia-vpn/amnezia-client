@@ -8,7 +8,7 @@
 #include <QStandardPaths>
 
 #include "core/controllers/serverController.h"
-#include "core/controllers/vpnConfigirationController.h"
+#include "core/controllers/vpnConfigurationController.h"
 #include "core/errorstrings.h"
 #include "logger.h"
 #include "utilities.h"
@@ -549,6 +549,20 @@ void InstallController::removeCurrentlyProcessedContainer()
         return;
     }
     emit installationErrorOccurred(errorString(errorCode));
+}
+
+void InstallController::removeApiConfig()
+{
+    auto serverConfig = m_serversModel->getServerConfig(m_serversModel->getDefaultServerIndex());
+
+    serverConfig.remove(config_key::dns1);
+    serverConfig.remove(config_key::dns2);
+    serverConfig.remove(config_key::containers);
+    serverConfig.remove(config_key::hostName);
+
+    serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
+
+    m_serversModel->editServer(serverConfig, m_serversModel->getDefaultServerIndex());
 }
 
 QRegularExpression InstallController::ipAddressPortRegExp()

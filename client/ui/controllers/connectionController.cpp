@@ -7,7 +7,8 @@
 #endif
 #include <QtConcurrent>
 
-#include "core/controllers/vpnConfigirationController.h"
+#include "core/controllers/apiController.h"
+#include "core/controllers/vpnConfigurationController.h"
 #include "core/errorstrings.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
@@ -35,13 +36,26 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 void ConnectionController::openConnection()
 {
     int serverIndex = m_serversModel->getDefaultServerIndex();
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+
+    ErrorCode errorCode = ErrorCode::NoError;
+
+    emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
+
+    if (serverConfig.value(config_key::configVersion).toInt() && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
+        ApiController apiController;
+        errorCode = apiController.updateServerConfigFromApi(serverConfig);
+        if (errorCode != ErrorCode::NoError) {
+            emit connectionErrorOccurred(errorString(errorCode));
+            return;
+        }
+        m_serversModel->editServer(serverConfig, serverIndex);
+    }
 
     if (!m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         emit noInstalledContainers();
         return;
     }
-
-    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container =
             qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
@@ -56,8 +70,7 @@ void ConnectionController::openConnection()
     VpnConfigurationsController vpnConfigurationController(m_settings);
 
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
-    ErrorCode errorCode = ErrorCode::NoError;
-    emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
     errorCode = updateProtocolConfig(container, credentials, containerConfig);
     if (errorCode != ErrorCode::NoError) {
         emit connectionErrorOccurred(errorString(errorCode));
@@ -65,7 +78,7 @@ void ConnectionController::openConnection()
     }
 
     auto dns = m_serversModel->getDnsPair(serverIndex);
-    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+    serverConfig = m_serversModel->getServerConfig(serverIndex);
 
     auto vpnConfiguration =
             vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container, errorCode);
