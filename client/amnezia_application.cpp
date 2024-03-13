@@ -354,19 +354,11 @@ void AmneziaApplication::initModels()
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
     connect(m_clientManagementModel.get(), &ClientManagementModel::adminConfigRevoked, m_serversModel.get(),
             &ServersModel::clearCachedProfile);
-
-//    connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, this,
-//            [this](const QString &clientId, const QString &clientName, const DockerContainer container,
-//                   ServerCredentials credentials) {
-//                m_serversModel->reloadDefaultServerContainerConfig();
-//                m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
-//                emit m_configurator->clientModelUpdated();
-//            });
 }
 
 void AmneziaApplication::initControllers()
 {
-    m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_vpnConnection, m_settings));
+    m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_settings));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
     connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(),
@@ -407,8 +399,10 @@ void AmneziaApplication::initControllers()
 
     m_apiController.reset(new ApiController(m_serversModel, m_containersModel));
     m_engine->rootContext()->setContextProperty("ApiController", m_apiController.get());
+
     connect(m_apiController.get(), &ApiController::updateStarted, this,
-            [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Connecting); });
+            [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing); });
+
     connect(m_apiController.get(), &ApiController::errorOccurred, this, [this](const QString &errorMessage) {
         if (m_connectionController->isConnectionInProgress()) {
             emit m_pageController->showErrorMessage(errorMessage);
@@ -416,6 +410,7 @@ void AmneziaApplication::initControllers()
 
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
     });
+
     connect(m_apiController.get(), &ApiController::updateFinished, m_connectionController.get(),
             &ConnectionController::toggleConnection);
 }

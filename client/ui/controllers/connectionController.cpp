@@ -5,15 +5,22 @@
 #else
     #include <QApplication>
 #endif
+#include <QtConcurrent>
 
-#include "core/errorstrings.h"
 #include "core/controllers/vpnConfigirationController.h"
+#include "core/errorstrings.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ContainersModel> &containersModel,
+                                           const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                            const QSharedPointer<VpnConnection> &vpnConnection,
                                            const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_vpnConnection(vpnConnection), m_settings(settings)
+    : QObject(parent),
+      m_serversModel(serversModel),
+      m_containersModel(containersModel),
+      m_clientManagementModel(clientManagementModel),
+      m_vpnConnection(vpnConnection),
+      m_settings(settings)
 {
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this,
             &ConnectionController::onConnectionStateChanged);
@@ -36,8 +43,8 @@ void ConnectionController::openConnection()
 
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
-    DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
-    const QJsonObject &containerConfig = m_containersModel->getContainerConfig(container);
+    DockerContainer container =
+            qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
 
     if (container == DockerContainer::None) {
         emit connectionErrorOccurred(tr("VPN Protocols is not installed.\n Please install VPN container at first"));
@@ -46,13 +53,22 @@ void ConnectionController::openConnection()
 
     qApp->processEvents();
 
-    VpnConfigurationsController vpnConfigurationsController(m_settings);
+    VpnConfigurationsController vpnConfigurationController(m_settings);
+
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
+    ErrorCode errorCode = ErrorCode::NoError;
+    emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
+    errorCode = updateProtocolConfig(container, credentials, containerConfig);
+    if (errorCode != ErrorCode::NoError) {
+        emit connectionErrorOccurred(errorString(errorCode));
+        return;
+    }
 
     auto dns = m_serversModel->getDnsPair(serverIndex);
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
 
-    ErrorCode errorCode = ErrorCode::NoError;
-    auto vpnConfiguration = vpnConfigurationsController.createVpnConfiguration(dns, serverConfig, containerConfig, container, errorCode);
+    auto vpnConfiguration =
+            vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container, errorCode);
     if (errorCode != ErrorCode::NoError) {
         emit connectionErrorOccurred(tr("unable to create configuration"));
         return;
@@ -105,6 +121,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     }
     case Vpn::ConnectionState::Preparing: {
         m_isConnectionInProgress = true;
+        m_connectionStateText = tr("Preparing...");
         break;
     }
     case Vpn::ConnectionState::Error: {
@@ -149,9 +166,14 @@ QString ConnectionController::connectionStateText() const
     return m_connectionStateText;
 }
 
-void ConnectionController::toggleConnection(bool skipConnectionInProgressCheck)
+void ConnectionController::toggleConnection()
 {
-    if (!skipConnectionInProgressCheck && isConnectionInProgress()) {
+    if (m_state == Vpn::ConnectionState::Preparing) {
+        emit preparingConfig();
+        return;
+    }
+
+    if (isConnectionInProgress()) {
         closeConnection();
     } else if (isConnected()) {
         closeConnection();
@@ -168,4 +190,53 @@ bool ConnectionController::isConnectionInProgress() const
 bool ConnectionController::isConnected() const
 {
     return m_isConnected;
+}
+
+bool ConnectionController::isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container)
+{
+    for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
+        QString protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol))
+                                         .toObject()
+                                         .value(config_key::last_config)
+                                         .toString();
+
+        if (protocolConfig.isEmpty()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+ErrorCode ConnectionController::updateProtocolConfig(const DockerContainer container,
+                                                     const ServerCredentials &credentials, QJsonObject &containerConfig)
+{
+    QFutureWatcher<ErrorCode> watcher;
+
+    QFuture<ErrorCode> future = QtConcurrent::run([this, container, &credentials, &containerConfig]() {
+        ErrorCode errorCode = ErrorCode::NoError;
+        if (!isProtocolConfigExists(containerConfig, container)) {
+            QString clientId;
+            VpnConfigurationsController vpnConfigurationController(m_settings);
+            errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig,
+                                                                                    clientId);
+            if (errorCode != ErrorCode::NoError) {
+                return errorCode;
+            }
+            m_serversModel->updateContainerConfig(container, containerConfig);
+
+            errorCode = m_clientManagementModel->appendClient(
+                    clientId, QString("Admin [%1]").arg(QSysInfo::prettyProductName()), container, credentials);
+            if (errorCode != ErrorCode::NoError) {
+                return errorCode;
+            }
+        }
+        return errorCode;
+    });
+
+    QEventLoop wait;
+    connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
+    watcher.setFuture(future);
+    wait.exec();
+
+    return watcher.result();
 }

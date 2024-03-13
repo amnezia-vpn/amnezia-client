@@ -71,7 +71,7 @@ void ApiController::updateServerConfigFromApi()
 {
     QtConcurrent::run([this]() {
         if (m_isConfigUpdateStarted) {
-            emit updateFinished(false);
+            emit updateFinished();
             return;
         }
 
@@ -149,7 +149,7 @@ void ApiController::updateServerConfigFromApi()
             }
         }
 
-        emit updateFinished(m_isConfigUpdateStarted);
+        emit updateFinished();
         m_isConfigUpdateStarted = false;
         return;
     });

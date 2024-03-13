@@ -22,7 +22,7 @@ public slots:
 
 signals:
     void updateStarted();
-    void updateFinished(bool isConfigUpdateStarted);
+    void updateFinished();
     void errorOccurred(const QString &errorMessage);
 
 private:

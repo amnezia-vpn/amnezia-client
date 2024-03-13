@@ -481,24 +481,9 @@ ErrorCode ServersModel::removeContainer(const int containerIndex)
     return errorCode;
 }
 
-void ServersModel::clearCachedProfiles()
-{
-    const auto &containers = m_settings->containers(m_processedServerIndex);
-    for (DockerContainer container : containers.keys()) {
-        m_settings->clearLastConnectionConfig(m_processedServerIndex, container);
-    }
-
-    m_servers.replace(m_processedServerIndex, m_settings->server(m_processedServerIndex));
-    if (m_processedServerIndex == m_defaultServerIndex) {
-        updateDefaultServerContainersModel();
-    }
-    updateContainersModel();
-}
-
 void ServersModel::clearCachedProfile(const DockerContainer container)
 {
     m_settings->clearLastConnectionConfig(m_processedServerIndex, container);
-
     m_servers.replace(m_processedServerIndex, m_settings->server(m_processedServerIndex));
     if (m_processedServerIndex == m_defaultServerIndex) {
         updateDefaultServerContainersModel();

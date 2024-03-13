@@ -2,6 +2,7 @@
 #define CONNECTIONCONTROLLER_H
 
 #include "protocols/vpnprotocol.h"
+#include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
 #include "vpnconnection.h"
@@ -17,6 +18,7 @@ public:
 
     explicit ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                   const QSharedPointer<ContainersModel> &containersModel,
+                                  const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                   const QSharedPointer<VpnConnection> &vpnConnection,
                                   const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
@@ -27,7 +29,7 @@ public:
     QString connectionStateText() const;
 
 public slots:
-    void toggleConnection(bool skipConnectionInProgressCheck);
+    void toggleConnection();
 
     void openConnection();
     void closeConnection();
@@ -38,6 +40,9 @@ public slots:
     void onCurrentContainerUpdated();
 
     void onTranslationsUpdated();
+
+    ErrorCode updateProtocolConfig(const DockerContainer container, const ServerCredentials &credentials,
+                                   QJsonObject &containerConfig);
 
 signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
@@ -50,11 +55,15 @@ signals:
 
     void noInstalledContainers();
 
+    void preparingConfig();
+
 private:
     Vpn::ConnectionState getCurrentConnectionState();
+    bool isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
+    QSharedPointer<ClientManagementModel> m_clientManagementModel;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
 

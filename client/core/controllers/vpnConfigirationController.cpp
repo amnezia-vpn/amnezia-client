@@ -31,6 +31,10 @@ ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const Se
 {
     ErrorCode errorCode = ErrorCode::NoError;
 
+    if (ContainerProps::containerService(container) == ServiceType::Other) {
+        return errorCode;
+    }
+
     for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
         QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
 
@@ -56,6 +60,11 @@ ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isA
                                                                   QString &protocolConfigString)
 {
     ErrorCode errorCode = ErrorCode::NoError;
+
+    if (ContainerProps::containerService(container) == ServiceType::Other) {
+        return errorCode;
+    }
+
     auto mainProtocol = ContainerProps::defaultProtocol(container);
     auto configurator = createConfigurator(mainProtocol);
 
@@ -73,14 +82,18 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
                                                                 const QJsonObject &containerConfig,
                                                                 const DockerContainer container, ErrorCode errorCode)
 {
-    QJsonObject vpnConfiguration;
+    QJsonObject vpnConfiguration{};
+
+    if (ContainerProps::containerService(container) == ServiceType::Other) {
+        return vpnConfiguration;
+    }
+
     bool isApiConfig = serverConfig.value(config_key::configVersion).toInt();
 
     for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
         if (isApiConfig && container == DockerContainer::Cloak && proto == ProtocolEnumNS::Proto::ShadowSocks) {
             continue;
         }
-
 
         QString protocolConfigString = containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
 
