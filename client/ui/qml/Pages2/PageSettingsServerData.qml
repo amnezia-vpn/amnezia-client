@@ -137,7 +137,7 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
 
-                text: qsTr("Remove server from application")
+                text: qsTr("Remove this server from the app")
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
@@ -167,11 +167,11 @@ PageType {
                 visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
-                text: qsTr("Clear server from Amnezia software")
+                text: qsTr("Clear server Amnezia-installed services")
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    var headerText = qsTr("Do you want to clear server from Amnezia software?")
+                    var headerText = qsTr("Do you want to clear server Amnezia-installed services?")
                     var descriptionText = qsTr("All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")

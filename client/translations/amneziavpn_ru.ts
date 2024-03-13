@@ -1459,7 +1459,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="203"/>
-        <source>Do you want to clear server from Amnezia software?</source>
+        <source>Do you want to clear server Amnezia-installed services?</source>
         <translation type="unfinished">Вы хотите очистить сервер от всех сервисов Amnezia?</translation>
     </message>
     <message>
@@ -1474,12 +1474,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="169"/>
-        <source>Remove server from application</source>
+        <source>Remove this server from the app</source>
         <translation>Удалить сервер из приложения</translation>
     </message>
     <message>
-        <source>Remove server?</source>
-        <translation type="vanished">Удалить сервер?</translation>
+        <source>Remove server from application?</source>
+        <translation type="vanished">Удалить сервер из приложения?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="174"/>
@@ -1488,11 +1488,11 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="199"/>
-        <source>Clear server from Amnezia software</source>
+        <source>Clear server Amnezia-installed services</source>
         <translation>Очистить сервер от протоколов и сервисов Amnezia</translation>
     </message>
     <message>
-        <source>Clear server from Amnezia software?</source>
+        <source>Clear server Amnezia-installed services?</source>
         <translation type="vanished">Удалить все сервисы и протоколы Amnezia  с сервера?</translation>
     </message>
     <message>
@@ -1776,7 +1776,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="46"/>
         <source>Configure your server</source>
-        <translation>Настроить ваш сервер</translation>
+        <translation>Настроить свой сервер</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="54"/>
@@ -2674,7 +2674,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="57"/>
         <source>This config has already been added to the application</source>
-        <translation type="unfinished"></translation>
+        <translation>Этот конфиг уже был добавлен в приложение</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="72"/>
