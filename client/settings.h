@@ -185,12 +185,14 @@ public:
     void setScreenshotsEnabled(bool enabled)
     {
         setValue("Conf/screenshotsEnabled", enabled);
+        emit screenshotsEnabledChanged(enabled);
     }
 
     void clearSettings();
 
 signals:
     void saveLogsChanged(bool enabled);
+    void screenshotsEnabledChanged(bool enabled);
     void serverRemoved(int serverIndex);
     void settingsCleared();
 
