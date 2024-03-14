@@ -103,15 +103,15 @@ bool ImportController::extractConfigFromData(QString data)
     switch (configFormat) {
     case ConfigTypes::OpenVpn: {
         m_config = extractOpenVpnConfig(config);
-        return true;
+        return m_config.empty() ? false : true;
     }
     case ConfigTypes::WireGuard: {
         m_config = extractWireGuardConfig(config);
-        return true;
+        return m_config.empty() ? false : true;
     }
     case ConfigTypes::Amnezia: {
         m_config = QJsonDocument::fromJson(config.toUtf8()).object();
-        return true;
+        return m_config.empty() ? false : true;
     }
     case ConfigTypes::Backup: {
         if (!m_serversModel->getServersCount()) {
