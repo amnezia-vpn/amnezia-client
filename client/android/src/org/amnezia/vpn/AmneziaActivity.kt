@@ -14,6 +14,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import android.view.WindowManager.LayoutParams
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.annotation.MainThread
@@ -26,9 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
@@ -36,11 +35,11 @@ import org.amnezia.vpn.util.Log
 import org.qtproject.qt.android.bindings.QtActivity
 
 private const val TAG = "AmneziaActivity"
+const val ACTIVITY_MESSENGER_NAME = "Activity"
 
 private const val CHECK_VPN_PERMISSION_ACTION_CODE = 1
 private const val CREATE_FILE_ACTION_CODE = 2
 private const val OPEN_FILE_ACTION_CODE = 3
-private const val BIND_SERVICE_TIMEOUT = 1000L
 
 class AmneziaActivity : QtActivity() {
 
@@ -58,25 +57,17 @@ class AmneziaActivity : QtActivity() {
                 val event = msg.extractIpcMessage<ServiceEvent>()
                 Log.d(TAG, "Handle event: $event")
                 when (event) {
-                    ServiceEvent.CONNECTED -> {
-                        QtAndroidController.onVpnConnected()
-                    }
-
-                    ServiceEvent.DISCONNECTED -> {
-                        QtAndroidController.onVpnDisconnected()
-                        doUnbindService()
-                    }
-
-                    ServiceEvent.RECONNECTING -> {
-                        QtAndroidController.onVpnReconnecting()
+                    ServiceEvent.STATUS_CHANGED -> {
+                        msg.data?.getStatus()?.let { (state) ->
+                            Log.d(TAG, "Handle protocol state: $state")
+                            QtAndroidController.onVpnStateChanged(state.ordinal)
+                        }
                     }
 
                     ServiceEvent.STATUS -> {
                         if (isWaitingStatus) {
                             isWaitingStatus = false
-                            msg.data?.getStatus()?.let { (state) ->
-                                QtAndroidController.onStatus(state.ordinal)
-                            }
+                            msg.data?.getStatus()?.let { QtAndroidController.onStatus(it) }
                         }
                     }
 
@@ -87,7 +78,7 @@ class AmneziaActivity : QtActivity() {
                     }
 
                     ServiceEvent.ERROR -> {
-                        msg.data?.getString(ERROR_MSG)?.let { error ->
+                        msg.data?.getString(MSG_ERROR)?.let { error ->
                             Log.e(TAG, "From VpnService: $error")
                         }
                         // todo: add error reporting to Qt
@@ -109,14 +100,15 @@ class AmneziaActivity : QtActivity() {
                 // get a messenger from the service to send actions to the service
                 vpnServiceMessenger.set(Messenger(service))
                 // send a messenger to the service to process service events
-                vpnServiceMessenger.send {
-                    Action.REGISTER_CLIENT.packToMessage().apply {
-                        replyTo = activityMessenger
-                    }
-                }
+                vpnServiceMessenger.send(
+                    Action.REGISTER_CLIENT.packToMessage {
+                        putString(MSG_CLIENT_NAME, ACTIVITY_MESSENGER_NAME)
+                    },
+                    replyTo = activityMessenger
+                )
                 isServiceConnected = true
                 if (isWaitingStatus) {
-                    vpnServiceMessenger.send(Action.REQUEST_STATUS)
+                    vpnServiceMessenger.send(Action.REQUEST_STATUS, replyTo = activityMessenger)
                 }
             }
 
@@ -126,6 +118,7 @@ class AmneziaActivity : QtActivity() {
                 vpnServiceMessenger.reset()
                 isWaitingStatus = true
                 QtAndroidController.onServiceDisconnected()
+                doBindService()
             }
 
             override fun onBindingDied(name: ComponentName?) {
@@ -148,8 +141,11 @@ class AmneziaActivity : QtActivity() {
         Log.d(TAG, "Create Amnezia activity: $intent")
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         vpnServiceMessenger = IpcMessenger(
-            onDeadObjectException = ::doUnbindService,
-            messengerName = "VpnService"
+            "VpnService",
+            onDeadObjectException = {
+                doUnbindService()
+                doBindService()
+            }
         )
         intent?.let(::processIntent)
     }
@@ -244,10 +240,9 @@ class AmneziaActivity : QtActivity() {
     private fun doBindService() {
         Log.d(TAG, "Bind service")
         Intent(this, AmneziaVpnService::class.java).also {
-            bindService(it, serviceConnection, BIND_ABOVE_CLIENT)
+            bindService(it, serviceConnection, BIND_ABOVE_CLIENT and BIND_AUTO_CREATE)
         }
         isInBoundState = true
-        handleBindTimeout()
     }
 
     @MainThread
@@ -256,23 +251,11 @@ class AmneziaActivity : QtActivity() {
             Log.d(TAG, "Unbind service")
             isWaitingStatus = true
             QtAndroidController.onServiceDisconnected()
-            vpnServiceMessenger.reset()
             isServiceConnected = false
+            vpnServiceMessenger.send(Action.UNREGISTER_CLIENT, activityMessenger)
+            vpnServiceMessenger.reset()
             isInBoundState = false
             unbindService(serviceConnection)
-        }
-    }
-
-    private fun handleBindTimeout() {
-        mainScope.launch {
-            if (isWaitingStatus) {
-                delay(BIND_SERVICE_TIMEOUT)
-                if (isWaitingStatus && !isServiceConnected) {
-                    Log.d(TAG, "Bind timeout, reset connection status")
-                    isWaitingStatus = false
-                    QtAndroidController.onStatus(ProtocolState.DISCONNECTED.ordinal)
-                }
-            }
         }
     }
 
@@ -312,7 +295,7 @@ class AmneziaActivity : QtActivity() {
         Log.d(TAG, "Connect to VPN")
         vpnServiceMessenger.send {
             Action.CONNECT.packToMessage {
-                putString(VPN_CONFIG, vpnConfig)
+                putString(MSG_VPN_CONFIG, vpnConfig)
             }
         }
     }
@@ -320,7 +303,7 @@ class AmneziaActivity : QtActivity() {
     private fun startVpnService(vpnConfig: String) {
         Log.d(TAG, "Start VPN service")
         Intent(this, AmneziaVpnService::class.java).apply {
-            putExtra(VPN_CONFIG, vpnConfig)
+            putExtra(MSG_VPN_CONFIG, vpnConfig)
         }.also {
             ContextCompat.startForegroundService(this, it)
         }
@@ -366,6 +349,22 @@ class AmneziaActivity : QtActivity() {
         Log.v(TAG, "Stop VPN")
         mainScope.launch {
             disconnectFromVpn()
+        }
+    }
+
+    @Suppress("unused")
+    fun resetLastServer(index: Int) {
+        Log.v(TAG, "Reset server: $index")
+        mainScope.launch {
+            VpnStateStore.store {
+                if (index == -1 || it.serverIndex == index) {
+                    VpnState.defaultState
+                } else if (it.serverIndex > index) {
+                    it.copy(serverIndex = it.serverIndex - 1)
+                } else {
+                    it
+                }
+            }
         }
     }
 
@@ -438,7 +437,7 @@ class AmneziaActivity : QtActivity() {
             Log.saveLogs = enabled
             vpnServiceMessenger.send {
                 Action.SET_SAVE_LOGS.packToMessage {
-                    putBoolean(SAVE_LOGS, enabled)
+                    putBoolean(MSG_SAVE_LOGS, enabled)
                 }
             }
         }
@@ -454,5 +453,14 @@ class AmneziaActivity : QtActivity() {
     fun clearLogs() {
         Log.v(TAG, "Clear logs")
         Log.clearLogs()
+    }
+
+    @Suppress("unused")
+    fun setScreenshotsEnabled(enabled: Boolean) {
+        Log.v(TAG, "Set screenshots enabled: $enabled")
+        mainScope.launch {
+            val flag = if (enabled) 0 else LayoutParams.FLAG_SECURE
+            window.setFlags(flag, LayoutParams.FLAG_SECURE)
+        }
     }
 }

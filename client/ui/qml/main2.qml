@@ -86,6 +86,11 @@ Window  {
         function onGoToPageSettingsBackup() {
             PageController.goToPage(PageEnum.PageSettingsBackup)
         }
+
+        function onShowBusyIndicator(visible) {
+            busyIndicator.visible = visible
+            PageController.disableControls(visible)
+        }
     }
 
     Connections {
@@ -178,9 +183,13 @@ Window  {
                     clickedFunc: function() {
                         hidePassword = !hidePassword
                     }
+
+                    KeyNavigation.tab: saveButton
                 }
 
                 BasicButtonType {
+                    id: saveButton
+
                     Layout.fillWidth: true
 
                     defaultColor: "transparent"
@@ -192,7 +201,7 @@ Window  {
 
                     text: qsTr("Save")
 
-                    onClicked: {
+                    clickedFunc: function() {
                         privateKeyPassphraseDrawer.close()
                         PageController.passphraseRequestDrawerClosed(passphrase.textFieldText)
                     }
@@ -208,6 +217,16 @@ Window  {
             id: questionDrawer
 
             anchors.fill: parent
+        }
+    }
+
+    Item {
+        anchors.fill: parent
+
+        BusyIndicatorType {
+            id: busyIndicator
+            anchors.centerIn: parent
+            z: 1
         }
     }
 

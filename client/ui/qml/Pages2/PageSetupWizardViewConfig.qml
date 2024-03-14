@@ -30,7 +30,7 @@ PageType {
         function onImportFinished() {
             if (!ConnectionController.isConnected) {
                 ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+                ServersModel.processedIndex = ServersModel.defaultIndex
             }
 
             PageController.goToStartPage()
@@ -92,7 +92,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
-                text: qsTr("Do not use connection code from public sources. It could be created to intercept your data.")
+                text: qsTr("Do not use connection codes from untrusted sources, as they may be created to intercept your data.")
                 color: "#878B91"
             }
 
@@ -109,7 +109,7 @@ PageType {
 
                 text: showContent ? qsTr("Collapse content") : qsTr("Show content")
 
-                onClicked: {
+                clickedFunc: function() {
                     showContent = !showContent
                 }
             }
@@ -151,7 +151,7 @@ PageType {
             Layout.bottomMargin: 32
 
             text: qsTr("Connect")
-            onClicked: {
+            clickedFunc: function() {
                 ImportController.importConfig()
             }
         }

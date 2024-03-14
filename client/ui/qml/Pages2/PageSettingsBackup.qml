@@ -88,7 +88,7 @@ PageType {
 
                 text: qsTr("Make a backup")
 
-                onClicked: {
+                clickedFunc: function() {
                     var fileName = ""
                     if (GC.isMobile()) {
                         fileName = "AmneziaVPN.backup"
@@ -121,7 +121,7 @@ PageType {
 
                 text: qsTr("Restore from backup")
 
-                onClicked: {
+                clickedFunc: function() {
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                                 qsTr("Backup files (*.backup)"))
                     if (filePath !== "") {

@@ -13,15 +13,13 @@ import "../Components"
 PageType {
     id: root
 
+    property bool isControlsDisabled: false
+
     Connections {
         target: PageController
 
         function onGoToPageViewConfig() {
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
-        }
-
-        function onShowBusyIndicator(visible) {
-            busyIndicator.visible = visible
         }
 
         function onClosePage() {
@@ -44,6 +42,18 @@ PageType {
             while (stackView.depth > 1) {
                 stackView.pop()
             }
+        }
+
+        function onDisableControls(disabled) {
+            isControlsDisabled = disabled
+        }
+
+        function onEscapePressed() {
+            if (isControlsDisabled) {
+                return
+            }
+
+            PageController.closePage()
         }
     }
 
@@ -68,6 +78,20 @@ PageType {
             if (currentPageName === PageController.getPagePath(PageEnum.PageSetupWizardInstalling)) {
                 PageController.closePage()
             }
+        }
+    }
+
+    Connections {
+        target: ImportController
+
+        function onRestoreAppConfig(data) {
+            PageController.showBusyIndicator(true)
+            SettingsController.restoreAppConfigFromData(data)
+            PageController.showBusyIndicator(false)
+        }
+
+        function onImportErrorOccurred(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
         }
     }
 
@@ -115,7 +139,7 @@ PageType {
 
                 text: qsTr("I have the data to connect")
 
-                onClicked: {
+                clickedFunc: function() {
                     connectionTypeSelection.open()
                 }
             }
@@ -135,18 +159,14 @@ PageType {
 
                 text: qsTr("I have nothing")
 
-                onClicked: Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
+                clickedFunc: function() {
+                    Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
+                }
             }
         }
     }
 
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
-    }
-
-    BusyIndicatorType {
-        id: busyIndicator
-        anchors.centerIn: parent
-        z: 1
     }
 }

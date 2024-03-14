@@ -2,10 +2,14 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import "../Config"
+
 Item {
     id: root
 
     property StackView stackView: StackView.view
+
+    property var defaultActiveFocusItem: null
 
 //    MouseArea {
 //        id: globalMouseArea
@@ -19,4 +23,17 @@ Item {
 //            mouse.accepted = false
 //        }
 //    }
+
+    // Set a timer to set focus after a short delay
+    Timer {
+        id: timer
+        interval: 100 // Milliseconds
+        onTriggered: {
+            if (defaultActiveFocusItem) {
+                defaultActiveFocusItem.forceActiveFocus()
+            }
+        }
+        repeat: false // Stop the timer after one trigger
+        running: !GC.isMobile()  // Start the timer
+    }
 }

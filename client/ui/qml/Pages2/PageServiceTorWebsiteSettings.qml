@@ -125,7 +125,7 @@ PageType {
 
                 text: qsTr("Remove website")
 
-                onClicked: {
+                clickedFunc: function() {
                     var headerText = qsTr("The site with all data will be removed from the tor network.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")

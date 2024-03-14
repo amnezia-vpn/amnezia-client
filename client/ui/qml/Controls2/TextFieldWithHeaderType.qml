@@ -69,9 +69,12 @@ Item {
 
                     TextField {
                         id: textField
+                        activeFocusOnTab: false
 
                         enabled: root.textFieldEditable
                         color: root.enabled ? root.textFieldTextColor : root.textFieldTextDisabledColor
+
+                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
 
                         placeholderText: root.textFieldPlaceholderText
                         placeholderTextColor: "#494B50"
@@ -134,6 +137,7 @@ Item {
 //                    textColor: "#D7D8DB"
 //                    borderWidth: 0
 
+                    focusPolicy: Qt.NoFocus
                     text: root.buttonText
                     imageSource: root.buttonImageSource
 
@@ -142,7 +146,7 @@ Item {
                     Layout.preferredWidth: content.implicitHeight
                     squareLeftSide: true
 
-                    onClicked: {
+                    clickedFunc: function() {
                         if (root.clickedFunc && typeof root.clickedFunc === "function") {
                             root.clickedFunc()
                         }
@@ -185,5 +189,13 @@ Item {
 
     function getBackgroundBorderColor(noneFocusedColor) {
         return textField.focus ? root.borderFocusedColor : noneFocusedColor
+    }
+
+    Keys.onEnterPressed: {
+         KeyNavigation.tab.forceActiveFocus();
+    }
+
+    Keys.onReturnPressed: {
+         KeyNavigation.tab.forceActiveFocus();
     }
 }

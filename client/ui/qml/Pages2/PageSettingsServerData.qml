@@ -28,7 +28,7 @@ PageType {
             PageController.showErrorMessage(message)
         }
 
-        function onRemoveCurrentlyProcessedServerFinished(finishedMessage) {
+        function onRemoveProcessedServerFinished(finishedMessage) {
             if (!ServersModel.getServersCount()) {
                 PageController.replaceStartPage()
             } else {
@@ -38,7 +38,7 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onRebootCurrentlyProcessedServerFinished(finishedMessage) {
+        function onRebootProcessedServerFinished(finishedMessage) {
             PageController.showNotificationMessage(finishedMessage)
         }
 
@@ -64,8 +64,8 @@ PageType {
     Connections {
         target: ServersModel
 
-        function onCurrentlyProcessedServerIndexChanged() {
-            content.isServerWithWriteAccess = ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+        function onProcessedServerIndexChanged() {
+            content.isServerWithWriteAccess = ServersModel.isProcessedServerHasWriteAccess()
         }
     }
 
@@ -82,7 +82,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            property bool isServerWithWriteAccess: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+            property bool isServerWithWriteAccess: ServersModel.isProcessedServerHasWriteAccess()
 
             LabelWithButtonType {
                 visible: content.isServerWithWriteAccess
@@ -149,7 +149,7 @@ PageType {
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             ConnectionController.closeConnection()
                         }
-                        InstallController.rebootCurrentlyProcessedServer()
+                        InstallController.rebootProcessedServer()
                         PageController.showBusyIndicator(false)
                     }
                     var noButtonFunction = function() {
@@ -166,7 +166,7 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
 
-                text: qsTr("Remove server from application")
+                text: qsTr("Remove this server from the app")
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
@@ -180,7 +180,7 @@ PageType {
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             ConnectionController.closeConnection()
                         }
-                        InstallController.removeCurrentlyProcessedServer()
+                        InstallController.removeProcessedServer()
                         PageController.showBusyIndicator(false)
                     }
                     var noButtonFunction = function() {
@@ -196,11 +196,11 @@ PageType {
                 visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
-                text: qsTr("Clear server from Amnezia software")
+                text: qsTr("Clear server Amnezia-installed services")
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    var headerText = qsTr("Do you want to clear server from Amnezia software?")
+                    var headerText = qsTr("Do you want to clear server Amnezia-installed services?")
                     var descriptionText = qsTr("All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
@@ -224,7 +224,7 @@ PageType {
             }
 
             LabelWithButtonType {
-                visible: ServersModel.isCurrentlyProcessedServerFromApi()
+                visible: ServersModel.getProcessedServerData("isServerFromApi")
                 Layout.fillWidth: true
 
                 text: qsTr("Reset API config")
@@ -249,7 +249,7 @@ PageType {
             }
 
             DividerType {
-                visible: ServersModel.isCurrentlyProcessedServerFromApi()
+                visible: ServersModel.getProcessedServerData("isServerFromApi")
             }
         }
     }

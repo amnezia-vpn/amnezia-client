@@ -15,6 +15,7 @@ ListView {
     id: menuContent
 
     property var rootWidth
+    property var selectedText
 
     width: rootWidth
     height: menuContent.contentItem.height
@@ -51,7 +52,7 @@ ListView {
                 showImage: !isInstalled
 
                 checkable: isInstalled && !ConnectionController.isConnected && isSupported
-                checked: proxyContainersModel.mapToSource(index) === ServersModel.getDefaultContainer(ServersModel.defaultIndex)
+                checked: proxyDefaultServerContainersModel.mapToSource(index) === ServersModel.getDefaultServerData("defaultContainer")
 
                 onClicked: {
                     if (ConnectionController.isConnected && isInstalled) {
@@ -61,14 +62,14 @@ ListView {
 
                     if (checked) {
                         containersDropDown.close()
-                        ServersModel.setDefaultContainer(ServersModel.defaultIndex, proxyContainersModel.mapToSource(index))
+                        ServersModel.setDefaultContainer(ServersModel.defaultIndex, proxyDefaultServerContainersModel.mapToSource(index))
                     } else {
                         if (!isSupported && isInstalled) {
                             PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))
                             return
                         }
 
-                        ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(index))
+                        ContainersModel.setCurrentlyProcessedContainerIndex(proxyDefaultServerContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                         containersDropDown.close()

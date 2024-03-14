@@ -14,6 +14,8 @@ import "../Components"
 PageType {
     id: root
 
+    property bool isControlsDisabled: false
+
     Connections {
         target: PageController
 
@@ -32,14 +34,8 @@ PageType {
             tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
         }
 
-        function onShowBusyIndicator(visible) {
-            busyIndicator.visible = visible
-            tabBarStackView.enabled = !visible
-            tabBar.enabled = !visible
-        }
-
-        function onEnableTabBar(enabled) {
-            tabBar.enabled = enabled
+        function onDisableControls(disabled) {
+            isControlsDisabled = disabled
         }
 
         function onClosePage() {
@@ -51,6 +47,7 @@ PageType {
 
         function onGoToPage(page, slide) {
             var pagePath = PageController.getPagePath(page)
+
             if (slide) {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
             } else {
@@ -62,6 +59,21 @@ PageType {
             connectionTypeSelection.close()
             while (tabBarStackView.depth > 1) {
                 tabBarStackView.pop()
+            }
+        }
+
+        function onEscapePressed() {
+            if (root.isControlsDisabled) {
+                return
+            }
+
+            var pageName = tabBarStackView.currentItem.objectName
+            if ((pageName === PageController.getPagePath(PageEnum.PageShare)) ||
+                    (pageName === PageController.getPagePath(PageEnum.PageSettings))) {
+                PageController.goToPageHome()
+                tabBar.previousIndex = 0
+            } else {
+                PageController.closePage()
             }
         }
     }
@@ -101,18 +113,18 @@ PageType {
         }
 
         function onNoInstalledContainers() {
-            PageController.setTriggeredBtConnectButton(true)
+            PageController.setTriggeredByConnectButton(true)
 
-            ServersModel.currentlyProcessedIndex = ServersModel.getDefaultServerIndex()
+            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
             InstallController.setShouldCreateServer(false)
             PageController.goToPage(PageEnum.PageSetupWizardEasy)
         }
     }
 
     Connections {
-        target: ApiController
+        target: ImportController
 
-        function onErrorOccurred(errorMessage) {
+        function onImportErrorOccurred(errorMessage) {
             PageController.showErrorMessage(errorMessage)
         }
     }
@@ -128,6 +140,8 @@ PageType {
         width: parent.width
         height: root.height - tabBar.implicitHeight
 
+        enabled: !root.isControlsDisabled
+
         function goToTabBarPage(page) {
             connectionTypeSelection.close()
 
@@ -138,7 +152,7 @@ PageType {
 
         Component.onCompleted: {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
-            ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+            ServersModel.processedIndex = ServersModel.defaultIndex
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
     }
@@ -156,6 +170,8 @@ PageType {
         bottomPadding: 8
         leftPadding: 96
         rightPadding: 96
+
+        enabled: !root.isControlsDisabled
 
         background: Shape {
             width: parent.width
@@ -181,7 +197,7 @@ PageType {
             image: "qrc:/images/controls/home.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+                ServersModel.processedIndex = ServersModel.defaultIndex
                 tabBar.previousIndex = 0
             }
         }
@@ -226,12 +242,6 @@ PageType {
                 connectionTypeSelection.open()
             }
         }
-    }
-
-    BusyIndicatorType {
-        id: busyIndicator
-        anchors.centerIn: parent
-        z: 1
     }
 
     ConnectionTypeSelectionDrawer {

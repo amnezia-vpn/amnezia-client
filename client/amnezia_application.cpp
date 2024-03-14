@@ -24,6 +24,7 @@
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/ios_controller.h"
+    #include <AmneziaVPN-Swift.h>
 #endif
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
@@ -95,7 +96,18 @@ void AmneziaApplication::init()
         qFatal("Android logging initialization failed");
     }
     AndroidController::instance()->setSaveLogs(m_settings->isSaveLogs());
-    connect(m_settings.get(), &Settings::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
+    connect(m_settings.get(), &Settings::saveLogsChanged,
+            AndroidController::instance(), &AndroidController::setSaveLogs);
+
+    AndroidController::instance()->setScreenshotsEnabled(m_settings->isScreenshotsEnabled());
+    connect(m_settings.get(), &Settings::screenshotsEnabledChanged,
+            AndroidController::instance(), &AndroidController::setScreenshotsEnabled);
+
+    connect(m_settings.get(), &Settings::serverRemoved,
+            AndroidController::instance(), &AndroidController::resetLastServer);
+
+    connect(m_settings.get(), &Settings::settingsCleared,
+            [](){ AndroidController::instance()->resetLastServer(-1); });
 
     connect(AndroidController::instance(), &AndroidController::initConnectionState, this,
             [this](Vpn::ConnectionState state) {
@@ -126,6 +138,14 @@ void AmneziaApplication::init()
         m_pageController->replaceStartPage();
         m_pageController->goToPageSettingsBackup();
         m_settingsController->importBackupFromOutside(filePath);
+    });
+
+    QTimer::singleShot(0, this, [this](){
+        AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled());
+    });
+
+    connect(m_settings.get(), &Settings::screenshotsEnabledChanged, [](bool enabled) {
+        AmneziaVPN::toggleScreenshots(enabled);
     });
 #endif
 
@@ -286,10 +306,16 @@ void AmneziaApplication::initModels()
     m_containersModel.reset(new ContainersModel(this));
     m_engine->rootContext()->setContextProperty("ContainersModel", m_containersModel.get());
 
+    m_defaultServerContainersModel.reset(new ContainersModel(this));
+    m_engine->rootContext()->setContextProperty("DefaultServerContainersModel", m_defaultServerContainersModel.get());
+
     m_serversModel.reset(new ServersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
     connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(),
             &ContainersModel::updateModel);
+    connect(m_serversModel.get(), &ServersModel::defaultServerContainersUpdated, m_defaultServerContainersModel.get(),
+            &ContainersModel::updateModel);
+    m_serversModel->resetModel();
 
     m_languageModel.reset(new LanguageModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
@@ -336,7 +362,7 @@ void AmneziaApplication::initModels()
     connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, this,
             [this](const QString &clientId, const QString &clientName, const DockerContainer container,
                    ServerCredentials credentials) {
-                m_serversModel->reloadContainerConfig();
+                m_serversModel->reloadDefaultServerContainerConfig();
                 m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
                 emit m_configurator->clientModelUpdated();
             });
@@ -388,7 +414,13 @@ void AmneziaApplication::initControllers()
     m_engine->rootContext()->setContextProperty("ApiController", m_apiController.get());
     connect(m_apiController.get(), &ApiController::updateStarted, this,
             [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Connecting); });
-    connect(m_apiController.get(), &ApiController::errorOccurred, this,
-            [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected); });
-    connect(m_apiController.get(), &ApiController::updateFinished, m_connectionController.get(), &ConnectionController::toggleConnection);
+    connect(m_apiController.get(), &ApiController::errorOccurred, this, [this](const QString &errorMessage) {
+        if (m_connectionController->isConnectionInProgress()) {
+            emit m_pageController->showErrorMessage(errorMessage);
+        }
+
+        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+    });
+    connect(m_apiController.get(), &ApiController::updateFinished, m_connectionController.get(),
+            &ConnectionController::toggleConnection);
 }
