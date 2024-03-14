@@ -648,6 +648,7 @@ PageType {
 
                                             Connections {
                                                 target: clientNameEditDrawer
+                                                enabled: !GC.isMobile()
                                                 function onOpened() {
                                                     clientNameEditor.textField.forceActiveFocus()
                                                 }

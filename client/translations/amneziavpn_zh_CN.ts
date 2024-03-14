@@ -1493,7 +1493,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="203"/>
-        <source>Do you want to clear server from Amnezia software?</source>
+        <source>Do you want to clear server Amnezia-installed services?</source>
         <translation>您要清除服务器上的Amnezia软件吗？</translation>
     </message>
     <message>
@@ -1541,7 +1541,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="169"/>
-        <source>Remove server from application</source>
+        <source>Remove this server from the app</source>
         <translation>移除本地服务器信息</translation>
     </message>
     <message>
@@ -1560,7 +1560,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Remove server?</source>
+        <source>Remove server from application?</source>
         <translation type="vanished">移除本地服务器信息?</translation>
     </message>
     <message>
@@ -1570,11 +1570,11 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="199"/>
-        <source>Clear server from Amnezia software</source>
+        <source>Clear server Amnezia-installed services</source>
         <translation>清理Amnezia中服务器信息</translation>
     </message>
     <message>
-        <source>Clear server from Amnezia software?</source>
+        <source>Clear server Amnezia-installed services?</source>
         <translation type="vanished">清理Amnezia中服务器信息</translation>
     </message>
     <message>

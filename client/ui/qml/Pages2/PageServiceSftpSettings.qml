@@ -88,7 +88,7 @@ PageType {
                             Layout.topMargin: 32
 
                             text: qsTr("Host")
-                            descriptionText: ServersModel.getProcessedServerData("HostName")
+                            descriptionText: ServersModel.getProcessedServerData("hostName")
 
                             descriptionOnTop: true
 
