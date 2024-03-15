@@ -1423,7 +1423,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="203"/>
-        <source>Do you want to clear server from Amnezia software?</source>
+        <source>Do you want to clear server Amnezia-installed services?</source>
         <translation>هل تريد حذف الخادم من Amnezia?</translation>
     </message>
     <message>
@@ -1471,7 +1471,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="169"/>
-        <source>Remove server from application</source>
+        <source>Remove this server from the app</source>
         <translation>احذف خادم من التطبيق</translation>
     </message>
     <message>
@@ -1496,7 +1496,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="199"/>
-        <source>Clear server from Amnezia software</source>
+        <source>Clear server Amnezia-installed services</source>
         <translation>احذف خادم من Amnezia</translation>
     </message>
     <message>
