@@ -18,7 +18,7 @@
 #include "logger.h"
 
 constexpr const int WG_TUN_PROC_TIMEOUT = 5000;
-constexpr const char* WG_RUNTIME_DIR = "/var/run/wireguard";
+constexpr const char* WG_RUNTIME_DIR = "/var/run/amneziawg";
 
 namespace {
 Logger logger("WireguardUtilsLinux");
@@ -102,6 +102,10 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     QTextStream out(&message);
     out << "private_key=" << QString(privateKey.toHex()) << "\n";
     out << "replace_peers=true\n";
+
+    if (config.m_mtu != "") {
+      out << "mtu=" << config.m_mtu << "\n";
+    }
 
     if (config.m_junkPacketCount != "") {
         out << "jc=" << config.m_junkPacketCount << "\n";

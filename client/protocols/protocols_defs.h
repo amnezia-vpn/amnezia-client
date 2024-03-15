@@ -152,7 +152,7 @@ namespace amnezia
             constexpr char defaultSubnetCidr[] = "24";
 
             constexpr char defaultPort[] = "51820";
-            constexpr char defaultMtu[] = "1420";
+            constexpr char defaultMtu[] = "1280";
             constexpr char serverConfigPath[] = "/opt/amnezia/wireguard/wg0.conf";
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/wireguard/wireguard_server_public_key.key";
             constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
@@ -168,7 +168,7 @@ namespace amnezia
         namespace awg
         {
             constexpr char defaultPort[] = "55424";
-            constexpr char defaultMtu[] = "1420";
+            constexpr char defaultMtu[] = "1280";
 
             constexpr char serverConfigPath[] = "/opt/amnezia/awg/wg0.conf";
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/awg/wireguard_server_public_key.key";

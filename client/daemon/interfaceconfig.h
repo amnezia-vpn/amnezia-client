@@ -33,7 +33,7 @@ class InterfaceConfig {
   QString m_serverIpv6AddrIn;
   QString m_dnsServer;
   int m_serverPort = 0;
-  int m_deviceMTU = 1420;
+  int m_deviceMTU = 1280;
   QList<IPAddress> m_allowedIPAddressRanges;
   QStringList m_excludedAddresses;
   QStringList m_vpnDisabledApps;
@@ -41,6 +41,7 @@ class InterfaceConfig {
   QString m_installationId;
 #endif
 
+  QString m_mtu;
   QString m_junkPacketCount;
   QString m_junkPacketMinSize;
   QString m_junkPacketMaxSize;

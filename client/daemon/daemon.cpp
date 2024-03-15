@@ -253,7 +253,7 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
 
   if (!obj.contains("deviceMTU") || obj.value("deviceMTU").toString().toInt() == 0)
   {
-    config.m_deviceMTU = 1420;
+    config.m_deviceMTU = 1280;
   } else {
     config.m_deviceMTU = obj.value("deviceMTU").toString().toInt();
 #ifdef Q_OS_WINDOWS
@@ -371,6 +371,10 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   }
   if (!parseStringList(obj, "vpnDisabledApps", config.m_vpnDisabledApps)) {
     return false;
+  }
+
+  if (!obj.value("mtu").isNull()) {
+    config.m_mtu = obj.value("mtu").toString();
   }
 
   if (!obj.value("Jc").isNull() && !obj.value("Jmin").isNull() 

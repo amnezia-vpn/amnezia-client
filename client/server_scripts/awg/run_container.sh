@@ -5,7 +5,7 @@ sudo docker run -d \
 --privileged \
 --cap-add=NET_ADMIN \
 --cap-add=SYS_MODULE \
--p $AWG_SERVER_PORT:$AWG_SERVER_PORT/udp \
+-p 443:443 \
 -v /lib/modules:/lib/modules \
 --sysctl="net.ipv4.conf.all.src_valid_mark=1" \
 --name $CONTAINER_NAME \
