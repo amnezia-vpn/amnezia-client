@@ -7,6 +7,7 @@
 #endif
 
 #ifdef Q_OS_ANDROID
+    #include "platforms/android/android_controller.h"
     #include "platforms/android/android_utils.h"
     #include <QJniObject>
 #endif
@@ -64,7 +65,7 @@ QString PageController::getPagePath(PageLoader::PageEnum page)
 void PageController::closeWindow()
 {
 #ifdef Q_OS_ANDROID
-    qApp->quit();
+    AndroidController::instance()->minimizeApp();
 #else
     if (m_serversModel->getServersCount() == 0) {
         qApp->quit();
