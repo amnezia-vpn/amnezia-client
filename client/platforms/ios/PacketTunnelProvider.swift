@@ -40,7 +40,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     }
   }()
 
-  private lazy var ovpnAdapter: OpenVPNAdapter = {
+  lazy var ovpnAdapter: OpenVPNAdapter = {
     let adapter = OpenVPNAdapter()
     adapter.delegate = self
     return adapter
@@ -49,7 +49,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
   /// Internal queue.
   private let dispatchQueue = DispatchQueue(label: "PacketTunnel", qos: .utility)
 
-  private var openVPNConfig: Data?
   var splitTunnelType: Int!
   var splitTunnelSites: [String]!
 
@@ -60,20 +59,27 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
   var protoType: TunnelProtoType = .none
 
   override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
-    let tmpStr = String(data: messageData, encoding: .utf8)!
-    wg_log(.error, message: tmpStr)
+    guard let message = String(data: messageData, encoding: .utf8) else {
+      if let completionHandler {
+        completionHandler(nil)
+      }
+      return
+    }
+
+    neLog(.info, title: "App said: ", message: message)
+
     guard let message = try? JSONSerialization.jsonObject(with: messageData, options: []) as? [String: Any] else {
-      log(.error, message: "Failed to serialize message from app")
+      neLog(.error, message: "Failed to serialize message from app")
       return
     }
 
     guard let completionHandler else {
-      log(.error, message: "Missing message completion handler")
+      neLog(.error, message: "Missing message completion handler")
       return
     }
 
     guard let action = message[Constants.kMessageKeyAction] as? String else {
-      log(.error, message: "Missing action key in app message")
+      neLog(.error, message: "Missing action key in app message")
       completionHandler(nil)
       return
     }
@@ -88,7 +94,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       let activationAttemptId = options?[Constants.kActivationAttemptId] as? String
       let errorNotifier = ErrorNotifier(activationAttemptId: activationAttemptId)
 
-      log(.info, message: "PacketTunnelProvider startTunnel")
+      neLog(.info, message: "Start tunnel")
 
       if let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol {
         let providerConfiguration = protocolConfiguration.providerConfiguration
@@ -162,7 +168,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     do {
       let wgConfig = try JSONDecoder().decode(WGConfig.self, from: wgConfigData)
       let wgConfigStr = wgConfig.str
-      log(.info, message: "wgConfig: \(wgConfig.redux.replacingOccurrences(of: "\n", with: " "))")
+      wg_log(.info, title: "config: ", message: wgConfig.redux)
 
       let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
 
@@ -235,34 +241,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
       }
     } catch {
-      log(.error, message: "Can't parse WG config: \(error.localizedDescription)")
+      wg_log(.error, message: "Can't parse WG config: \(error.localizedDescription)")
       completionHandler(nil)
-      return
-    }
-  }
-
-  private func startOpenVPN(completionHandler: @escaping (Error?) -> Void) {
-    guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
-          let providerConfiguration = protocolConfiguration.providerConfiguration,
-          let openVPNConfigData = providerConfiguration[Constants.ovpnConfigKey] as? Data else {
-      wg_log(.error, message: "Can't start startOpenVPN()")
-      return
-    }
-
-    do {
-      log(.info, message: "providerConfiguration: \(String(decoding: openVPNConfigData, as: UTF8.self).replacingOccurrences(of: "\n", with: " "))")
-
-      let openVPNConfig = try JSONDecoder().decode(OpenVPNConfig.self, from: openVPNConfigData)
-      log(.info, message: "openVPNConfig: \(openVPNConfig.str.replacingOccurrences(of: "\n", with: " "))")
-      let ovpnConfiguration = Data(openVPNConfig.config.utf8)
-      setupAndlaunchOpenVPN(withConfig: ovpnConfiguration, completionHandler: completionHandler)
-    } catch {
-      log(.error, message: "Can't parse OpenVPN config: \(error.localizedDescription)")
-
-      if let underlyingError = (error as NSError).userInfo[NSUnderlyingErrorKey] as? NSError {
-        log(.error, message: "Can't parse OpenVPN config: \(underlyingError.localizedDescription)")
-      }
-
       return
     }
   }
@@ -379,47 +359,6 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
   }
 
-  private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data,
-                                     withShadowSocks viaSS: Bool = false,
-                                     completionHandler: @escaping (Error?) -> Void) {
-    wg_log(.info, message: "setupAndlaunchOpenVPN")
-
-    let str = String(decoding: ovpnConfiguration, as: UTF8.self)
-
-    let configuration = OpenVPNConfiguration()
-    configuration.fileContent = ovpnConfiguration
-    if str.contains("cloak") {
-      configuration.setPTCloak()
-    }
-
-    let evaluation: OpenVPNConfigurationEvaluation
-    do {
-      evaluation = try ovpnAdapter.apply(configuration: configuration)
-
-    } catch {
-      completionHandler(error)
-      return
-    }
-
-    if !evaluation.autologin {
-      wg_log(.info, message: "Implement login with user credentials")
-    }
-
-    vpnReachability.startTracking { [weak self] status in
-      guard status == .reachableViaWiFi else { return }
-      self?.ovpnAdapter.reconnect(afterTimeInterval: 5)
-    }
-
-    startHandler = completionHandler
-    ovpnAdapter.connect(using: packetFlow)
-
-    //        let ifaces = Interface.allInterfaces()
-    //            .filter { $0.family == .ipv4 }
-    //            .map { iface in iface.name }
-
-    //        wg_log(.error, message: "Available TUN Interfaces: \(ifaces)")
-  }
-
   // MARK: Network observing methods
 
   private func startListeningForNetworkChanges() {
@@ -468,10 +407,10 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     wgAdapter.start(tunnelConfiguration: emptyTunnelConfiguration) { error in
       self.dispatchQueue.async {
         if let error {
-          log(.error, message: "Failed to start an empty tunnel")
+          wg_log(.error, message: "Failed to start an empty tunnel")
           completionHandler(error)
         } else {
-          log(.info, message: "Started an empty tunnel")
+          wg_log(.info, message: "Started an empty tunnel")
           self.tunnelAdapterDidStart()
         }
       }

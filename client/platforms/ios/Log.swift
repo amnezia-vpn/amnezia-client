@@ -29,16 +29,23 @@ struct Log {
     return dateFormatter
   }()
 
-  var records: [Record]
+  var records = [Record]()
+
+  var lastRecordDate = Date.distantPast
 
   init() {
     self.records = []
   }
 
   init(_ str: String) {
-    self.records = str.split(whereSeparator: \.isNewline)
+    records = str.split(whereSeparator: \.isNewline)
       .map {
-        Record(String($0)) ?? Record(date: .init(), level: .error, message: "Log error: \($0.replacingOccurrences(of: "\n", with: " "))")
+        if let record = Record(String($0)) {
+          lastRecordDate = record.date
+          return record
+        } else {
+          return Record(date: lastRecordDate, level: .error, message: "LOG: \($0)")
+        }
       }
   }
 
@@ -58,6 +65,24 @@ struct Log {
     }
 
     self.init(str)
+  }
+
+  static func log(_ type: OSLogType, title: String = "", message: String, url: URL = neLogURL) {
+    guard isLoggingEnabled else { return }
+
+    let date = Date()
+    let level = Record.Level(from: type)
+    let messages = message.split(whereSeparator: \.isNewline)
+
+    for i in 0..<messages.count {
+      let message = String(messages[i])
+
+      if i != 0 && message.first != " " {
+        Record(date: date, level: level, message: "\(title)  \(message)").save(at: url)
+      } else {
+        Record(date: date, level: level, message: "\(title)\(message)").save(at: url)
+      }
+    }
   }
 
   static func clear(at url: URL) {
