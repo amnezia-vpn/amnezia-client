@@ -2,6 +2,8 @@ import Foundation
 import os.log
 
 struct Log {
+  static let osLog = Logger()
+
   private static let IsLoggingEnabledKey = "IsLoggingEnabled"
   static var isLoggingEnabled: Bool {
     get {
