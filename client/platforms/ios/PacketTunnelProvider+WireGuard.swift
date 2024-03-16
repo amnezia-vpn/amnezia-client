@@ -3,12 +3,12 @@ import NetworkExtension
 
 extension PacketTunnelProvider {
   func startWireguard(activationAttemptId: String?,
-                              errorNotifier: ErrorNotifier,
-                              completionHandler: @escaping (Error?) -> Void) {
+                      errorNotifier: ErrorNotifier,
+                      completionHandler: @escaping (Error?) -> Void) {
     guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
           let providerConfiguration = protocolConfiguration.providerConfiguration,
           let wgConfigData: Data = providerConfiguration[Constants.wireGuardConfigKey] as? Data else {
-      wg_log(.error, message: "Can't start WireGuard config missing")
+      wg_log(.error, message: "Can't start, config missing")
       completionHandler(nil)
       return
     }
@@ -51,7 +51,7 @@ extension PacketTunnelProvider {
         }
       }
 
-      wg_log(.info, message: "Starting wireguard tunnel from the " +
+      wg_log(.info, message: "Starting tunnel from the " +
              (activationAttemptId == nil ? "OS directly, rather than the app" : "app"))
 
       // Start the tunnel
@@ -166,38 +166,38 @@ extension PacketTunnelProvider {
     }
   }
 
-//  private func startEmptyTunnel(completionHandler: @escaping (Error?) -> Void) {
-//    dispatchPrecondition(condition: .onQueue(dispatchQueue))
-//
-//    let emptyTunnelConfiguration = TunnelConfiguration(
-//      name: nil,
-//      interface: InterfaceConfiguration(privateKey: PrivateKey()),
-//      peers: []
-//    )
-//
-//    wgAdapter.start(tunnelConfiguration: emptyTunnelConfiguration) { error in
-//      self.dispatchQueue.async {
-//        if let error {
-//          wg_log(.error, message: "Failed to start an empty tunnel")
-//          completionHandler(error)
-//        } else {
-//          wg_log(.info, message: "Started an empty tunnel")
-//          self.tunnelAdapterDidStart()
-//        }
-//      }
-//    }
-//
-//    let settings = NETunnelNetworkSettings(tunnelRemoteAddress: "1.1.1.1")
-//
-//    self.setTunnelNetworkSettings(settings) { error in
-//      completionHandler(error)
-//    }
-//  }
+  //  private func startEmptyTunnel(completionHandler: @escaping (Error?) -> Void) {
+  //    dispatchPrecondition(condition: .onQueue(dispatchQueue))
+  //
+  //    let emptyTunnelConfiguration = TunnelConfiguration(
+  //      name: nil,
+  //      interface: InterfaceConfiguration(privateKey: PrivateKey()),
+  //      peers: []
+  //    )
+  //
+  //    wgAdapter.start(tunnelConfiguration: emptyTunnelConfiguration) { error in
+  //      self.dispatchQueue.async {
+  //        if let error {
+  //          wg_log(.error, message: "Failed to start an empty tunnel")
+  //          completionHandler(error)
+  //        } else {
+  //          wg_log(.info, message: "Started an empty tunnel")
+  //          self.tunnelAdapterDidStart()
+  //        }
+  //      }
+  //    }
+  //
+  //    let settings = NETunnelNetworkSettings(tunnelRemoteAddress: "1.1.1.1")
+  //
+  //    self.setTunnelNetworkSettings(settings) { error in
+  //      completionHandler(error)
+  //    }
+  //  }
 
-//  private func tunnelAdapterDidStart() {
-//    dispatchPrecondition(condition: .onQueue(dispatchQueue))
-//    // ...
-//  }
+  //  private func tunnelAdapterDidStart() {
+  //    dispatchPrecondition(condition: .onQueue(dispatchQueue))
+  //    // ...
+  //  }
 
   func stopWireguard(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
     wg_log(.info, staticMessage: "Stopping tunnel")
@@ -218,5 +218,4 @@ extension PacketTunnelProvider {
 #endif
     }
   }
-
 }

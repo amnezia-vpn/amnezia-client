@@ -76,10 +76,10 @@ struct Log {
     let level = Record.Level(from: type)
     let messages = message.split(whereSeparator: \.isNewline)
 
-    for i in 0..<messages.count {
-      let message = String(messages[i])
+    for index in 0..<messages.count {
+      let message = String(messages[index])
 
-      if i != 0 && message.first != " " {
+      if index != 0 && message.first != " " {
         Record(date: date, level: level, message: "\(title)  \(message)").save(at: url)
       } else {
         Record(date: date, level: level, message: "\(title)\(message)").save(at: url)

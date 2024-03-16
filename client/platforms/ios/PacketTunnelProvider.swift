@@ -15,7 +15,7 @@ struct Constants {
   static let ovpnConfigKey = "ovpn"
   static let wireGuardConfigKey = "wireguard"
   static let loggerTag = "NET"
-
+  
   static let kActionStart = "start"
   static let kActionRestart = "restart"
   static let kActionStop = "stop"
@@ -39,25 +39,25 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       wg_log(logLevel.osLogLevel, message: message)
     }
   }()
-
+  
   lazy var ovpnAdapter: OpenVPNAdapter = {
     let adapter = OpenVPNAdapter()
     adapter.delegate = self
     return adapter
   }()
-
+  
   /// Internal queue.
   private let dispatchQueue = DispatchQueue(label: "PacketTunnel", qos: .utility)
-
+  
   var splitTunnelType: Int!
   var splitTunnelSites: [String]!
-
+  
   let vpnReachability = OpenVPNReachability()
-
+  
   var startHandler: ((Error?) -> Void)?
   var stopHandler: (() -> Void)?
   var protoType: TunnelProtoType = .none
-
+  
   override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
     guard let message = String(data: messageData, encoding: .utf8) else {
       if let completionHandler {
@@ -65,37 +65,37 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       }
       return
     }
-
+    
     neLog(.info, title: "App said: ", message: message)
-
+    
     guard let message = try? JSONSerialization.jsonObject(with: messageData, options: []) as? [String: Any] else {
       neLog(.error, message: "Failed to serialize message from app")
       return
     }
-
+    
     guard let completionHandler else {
       neLog(.error, message: "Missing message completion handler")
       return
     }
-
+    
     guard let action = message[Constants.kMessageKeyAction] as? String else {
       neLog(.error, message: "Missing action key in app message")
       completionHandler(nil)
       return
     }
-
+    
     if action == Constants.kActionStatus {
       handleStatusAppMessage(messageData, completionHandler: completionHandler)
     }
   }
-
+  
   override func startTunnel(options: [String: NSObject]?, completionHandler: @escaping (Error?) -> Void) {
     dispatchQueue.async {
       let activationAttemptId = options?[Constants.kActivationAttemptId] as? String
       let errorNotifier = ErrorNotifier(activationAttemptId: activationAttemptId)
-
+      
       neLog(.info, message: "Start tunnel")
-
+      
       if let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol {
         let providerConfiguration = protocolConfiguration.providerConfiguration
         if (providerConfiguration?[Constants.ovpnConfigKey] as? Data) != nil {
@@ -106,7 +106,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       } else {
         self.protoType = .none
       }
-
+      
       switch self.protoType {
       case .wireguard:
         self.startWireguard(activationAttemptId: activationAttemptId,
@@ -122,7 +122,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       }
     }
   }
-
+  
   override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
     dispatchQueue.async {
       switch self.protoType {
@@ -138,7 +138,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       }
     }
   }
-
+  
   func handleStatusAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
     switch protoType {
     case .wireguard:
@@ -152,18 +152,18 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       break
     }
   }
-
+  
   // MARK: Network observing methods
-
+  
   private func startListeningForNetworkChanges() {
     stopListeningForNetworkChanges()
     addObserver(self, forKeyPath: Constants.kDefaultPathKey, options: .old, context: nil)
   }
-
+  
   private func stopListeningForNetworkChanges() {
     removeObserver(self, forKeyPath: Constants.kDefaultPathKey)
   }
-
+  
   override func observeValue(forKeyPath keyPath: String?,
                              of object: Any?,
                              change: [NSKeyValueChangeKey: Any]?,
@@ -183,7 +183,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
       self.handle(networkChange: self.defaultPath!) { _ in }
     }
   }
-
+  
   private func handle(networkChange changePath: NWPath, completion: @escaping (Error?) -> Void) {
     wg_log(.info, message: "Tunnel restarted.")
     startTunnel(options: nil, completionHandler: completion)

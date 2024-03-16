@@ -22,7 +22,7 @@ extension PacketTunnelProvider {
     }
 
     do {
-//      ovpnLog(.info, message: "providerConfiguration: \(String(decoding: openVPNConfigData, as: UTF8.self))")
+      //      ovpnLog(.info, message: "providerConfiguration: \(String(decoding: openVPNConfigData, as: UTF8.self))")
 
       let openVPNConfig = try JSONDecoder().decode(OpenVPNConfig.self, from: openVPNConfigData)
       ovpnLog(.info, title: "config: ", message: openVPNConfig.str)
@@ -79,7 +79,7 @@ extension PacketTunnelProvider {
 
     //        ovpn_log(.error, message: "Available TUN Interfaces: \(ifaces)")
   }
-  
+
   func handleOpenVPNStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
     guard let completionHandler = completionHandler else { return }
     let bytesin = ovpnAdapter.transportStatistics.bytesIn
