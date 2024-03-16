@@ -42,7 +42,8 @@ void ConnectionController::openConnection()
 
     emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
-    if (serverConfig.value(config_key::configVersion).toInt() && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
+    if (serverConfig.value(config_key::configVersion).toInt()
+        && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         ApiController apiController;
         errorCode = apiController.updateServerConfigFromApi(serverConfig);
         if (errorCode != ErrorCode::NoError) {
@@ -228,17 +229,16 @@ ErrorCode ConnectionController::updateProtocolConfig(const DockerContainer conta
     QFuture<ErrorCode> future = QtConcurrent::run([this, container, &credentials, &containerConfig]() {
         ErrorCode errorCode = ErrorCode::NoError;
         if (!isProtocolConfigExists(containerConfig, container)) {
-            QString clientId;
             VpnConfigurationsController vpnConfigurationController(m_settings);
-            errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig,
-                                                                                    clientId);
+            errorCode =
+                    vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
             }
             m_serversModel->updateContainerConfig(container, containerConfig);
 
-            errorCode = m_clientManagementModel->appendClient(
-                    clientId, QString("Admin [%1]").arg(QSysInfo::prettyProductName()), container, credentials);
+            errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig,
+                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()));
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
             }

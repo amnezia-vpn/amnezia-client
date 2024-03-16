@@ -26,7 +26,7 @@ public:
     };
 
     QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode);
+                         const QJsonObject &containerConfig, ErrorCode errorCode);
 
     QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
                                            QString &protocolConfigString);

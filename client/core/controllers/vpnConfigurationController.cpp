@@ -27,7 +27,7 @@ QScopedPointer<ConfiguratorBase> VpnConfigurationsController::createConfigurator
 
 ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const ServerCredentials &credentials,
                                                                         const DockerContainer container,
-                                                                        QJsonObject &containerConfig, QString &clientId)
+                                                                        QJsonObject &containerConfig)
 {
     ErrorCode errorCode = ErrorCode::NoError;
 
@@ -39,8 +39,7 @@ ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const Se
         QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
 
         auto configurator = createConfigurator(protocol);
-        QString protocolConfigString =
-                configurator->createConfig(credentials, container, containerConfig, clientId, errorCode);
+        QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }
@@ -52,12 +51,9 @@ ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const Se
     return errorCode;
 }
 
-ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isApiConfig,
-                                                                  const QPair<QString, QString> &dns,
-                                                                  const ServerCredentials &credentials,
-                                                                  const DockerContainer container,
-                                                                  const QJsonObject &containerConfig, QString &clientId,
-                                                                  QString &protocolConfigString)
+ErrorCode VpnConfigurationsController::createProtocolConfigString(
+        const bool isApiConfig, const QPair<QString, QString> &dns, const ServerCredentials &credentials,
+        const DockerContainer container, const QJsonObject &containerConfig, QString &protocolConfigString)
 {
     ErrorCode errorCode = ErrorCode::NoError;
 
@@ -68,7 +64,7 @@ ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isA
     auto mainProtocol = ContainerProps::defaultProtocol(container);
     auto configurator = createConfigurator(mainProtocol);
 
-    protocolConfigString = configurator->createConfig(credentials, container, containerConfig, clientId, errorCode);
+    protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -82,7 +78,7 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
                                                                 const QJsonObject &containerConfig,
                                                                 const DockerContainer container, ErrorCode errorCode)
 {
-    QJsonObject vpnConfiguration{};
+    QJsonObject vpnConfiguration {};
 
     if (ContainerProps::containerService(container) == ServiceType::Other) {
         return vpnConfiguration;
@@ -95,7 +91,10 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
             continue;
         }
 
-        QString protocolConfigString = containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
+        QString protocolConfigString = containerConfig.value(ProtocolProps::protoToString(proto))
+                                               .toObject()
+                                               .value(config_key::last_config)
+                                               .toString();
 
         auto configurator = createConfigurator(proto);
         protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
@@ -119,4 +118,23 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
     // vpnConfiguration[config_key::port] = ...;
 
     return vpnConfiguration;
+}
+
+void VpnConfigurationsController::updateContainerConfigAfterInstallation(const DockerContainer container,
+                                                                         QJsonObject &containerConfig,
+                                                                         const QString &stdOut)
+{
+    Proto mainProto = ContainerProps::defaultProtocol(container);
+
+    if (container == DockerContainer::TorWebSite) {
+        QJsonObject protocol = containerConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+
+        qDebug() << "amnezia-tor onions" << stdOut;
+
+        QString onion = stdOut;
+        onion.replace("\n", "");
+        protocol.insert(config_key::site, onion);
+
+        containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
+    }
 }

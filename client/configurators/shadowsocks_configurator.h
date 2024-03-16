@@ -13,7 +13,7 @@ public:
     ShadowSocksConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
     QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode);
+                         const QJsonObject &containerConfig, ErrorCode errorCode);
 };
 
 #endif // SHADOWSOCKS_CONFIGURATOR_H

@@ -75,7 +75,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
 }
 
 QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                          const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode)
+                                          const QJsonObject &containerConfig, ErrorCode errorCode)
 {
     ServerController serverController(m_settings);
     QString config =
@@ -105,7 +105,7 @@ QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, 
     QJsonObject jConfig;
     jConfig[config_key::config] = config;
 
-    clientId = connData.clientId;
+    jConfig[config_key::clientId] = connData.clientId;
 
     return QJsonDocument(jConfig).toJson();
 }

@@ -22,7 +22,7 @@ public:
     };
 
     QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode);
+                         const QJsonObject &containerConfig, ErrorCode errorCode);
 
     QString genIkev2Config(const ConnectionData &connData);
     QString genMobileConfig(const ConnectionData &connData);

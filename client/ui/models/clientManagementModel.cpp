@@ -10,7 +10,8 @@ namespace
 {
     Logger logger("ClientManagementModel");
 
-    namespace configKey {
+    namespace configKey
+    {
         constexpr char clientId[] = "clientId";
         constexpr char clientName[] = "clientName";
         constexpr char container[] = "container";
@@ -61,7 +62,6 @@ void ClientManagementModel::migration(const QByteArray &clientsTableString)
 
         m_clientsTable.push_back(client);
     }
-
 }
 
 ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCredentials credentials)
@@ -74,15 +74,13 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
     ErrorCode error = ErrorCode::NoError;
 
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
-        || container == DockerContainer::Cloak) {
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
     }
 
-    const QByteArray clientsTableString =
-            serverController.getTextFileFromContainer(container, credentials, clientsTableFile, error);
+    const QByteArray clientsTableString = serverController.getTextFileFromContainer(container, credentials, clientsTableFile, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the clientsTable file from the server";
         endResetModel();
@@ -96,8 +94,7 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
 
         int count = 0;
 
-        if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
-            || container == DockerContainer::Cloak) {
+        if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
             error = getOpenVpnClients(serverController, container, credentials, count);
         } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
             error = getWireGuardClients(serverController, container, credentials, count);
@@ -109,8 +106,7 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
 
         const QByteArray newClientsTableString = QJsonDocument(m_clientsTable).toJson();
         if (clientsTableString != newClientsTableString) {
-            error = serverController.uploadTextFileToContainer(container, credentials, newClientsTableString,
-                                                               clientsTableFile);
+            error = serverController.uploadTextFileToContainer(container, credentials, newClientsTableString, clientsTableFile);
             if (error != ErrorCode::NoError) {
                 logger.error() << "Failed to upload the clientsTable file to the server";
             }
@@ -121,7 +117,8 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
     return error;
 }
 
-ErrorCode ClientManagementModel::getOpenVpnClients(ServerController &serverController, DockerContainer container, ServerCredentials credentials, int &count)
+ErrorCode ClientManagementModel::getOpenVpnClients(ServerController &serverController, DockerContainer container,
+                                                   ServerCredentials credentials, int &count)
 {
     ErrorCode error = ErrorCode::NoError;
     QString stdOut;
@@ -130,10 +127,8 @@ ErrorCode ClientManagementModel::getOpenVpnClients(ServerController &serverContr
         return ErrorCode::NoError;
     };
 
-    const QString getOpenVpnClientsList =
-            "sudo docker exec -i $CONTAINER_NAME bash -c 'ls /opt/amnezia/openvpn/pki/issued'";
-    QString script = serverController.replaceVars(getOpenVpnClientsList,
-                                                  serverController.genVarsForScript(credentials, container));
+    const QString getOpenVpnClientsList = "sudo docker exec -i $CONTAINER_NAME bash -c 'ls /opt/amnezia/openvpn/pki/issued'";
+    QString script = serverController.replaceVars(getOpenVpnClientsList, serverController.genVarsForScript(credentials, container));
     error = serverController.runScript(credentials, script, cbReadStdOut);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to retrieve the list of issued certificates on the server";
@@ -163,14 +158,13 @@ ErrorCode ClientManagementModel::getOpenVpnClients(ServerController &serverContr
     return error;
 }
 
-ErrorCode ClientManagementModel::getWireGuardClients(ServerController &serverController, DockerContainer container, ServerCredentials credentials, int &count)
+ErrorCode ClientManagementModel::getWireGuardClients(ServerController &serverController, DockerContainer container,
+                                                     ServerCredentials credentials, int &count)
 {
     ErrorCode error = ErrorCode::NoError;
 
-    const QString wireGuardConfigFile =
-            QString("opt/amnezia/%1/wg0.conf").arg(container == DockerContainer::WireGuard ? "wireguard" : "awg");
-    const QString wireguardConfigString =
-            serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, error);
+    const QString wireGuardConfigFile = QString("opt/amnezia/%1/wg0.conf").arg(container == DockerContainer::WireGuard ? "wireguard" : "awg");
+    const QString wireguardConfigString = serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the wg conf file from the server";
         return error;
@@ -215,8 +209,25 @@ bool ClientManagementModel::isClientExists(const QString &clientId)
     return false;
 }
 
-ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QString &clientName,
-                                              const DockerContainer container, ServerCredentials credentials)
+ErrorCode ClientManagementModel::appendClient(const DockerContainer container, const ServerCredentials &credentials,
+                                              const QJsonObject &containerConfig, const QString &clientName)
+{
+    Proto protocol;
+    if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+        protocol = Proto::OpenVpn;
+    } else if (container == DockerContainer::OpenVpn || container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
+        protocol = ContainerProps::defaultProtocol(container);
+    } else {
+        return ErrorCode::NoError;
+    }
+
+    auto protocolConfig = ContainerProps::getProtocolConfigFromContainer(protocol, containerConfig);
+
+    return appendClient(protocolConfig.value(config_key::clientId).toString(), clientName, container, credentials);
+}
+
+ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
+                                              ServerCredentials credentials)
 {
     ErrorCode error = ErrorCode::NoError;
 
@@ -246,8 +257,7 @@ ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QSt
 
     ServerController serverController(m_settings);
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
-        || container == DockerContainer::Cloak) {
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
@@ -279,15 +289,13 @@ ErrorCode ClientManagementModel::renameClient(const int row, const QString &clie
 
     ServerController serverController(m_settings);
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
-        || container == DockerContainer::Cloak) {
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
     }
 
-    ErrorCode error =
-            serverController.uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
+    ErrorCode error = serverController.uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to upload the clientsTable file to the server";
     }
@@ -295,15 +303,14 @@ ErrorCode ClientManagementModel::renameClient(const int row, const QString &clie
     return error;
 }
 
-ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContainer container,
-                                              ServerCredentials credentials, const int serverIndex)
+ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContainer container, ServerCredentials credentials,
+                                              const int serverIndex)
 {
     ErrorCode errorCode = ErrorCode::NoError;
     auto client = m_clientsTable.at(row).toObject();
     QString clientId = client.value(configKey::clientId).toString();
 
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
-        || container == DockerContainer::Cloak) {
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
         errorCode = revokeOpenVpn(row, container, credentials, serverIndex);
     } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
         errorCode = revokeWireGuard(row, container, credentials);
@@ -333,8 +340,8 @@ ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContain
     return errorCode;
 }
 
-ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContainer container,
-                                               ServerCredentials credentials, const int serverIndex)
+ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContainer container, ServerCredentials credentials,
+                                               const int serverIndex)
 {
     auto client = m_clientsTable.at(row).toObject();
     QString clientId = client.value(configKey::clientId).toString();
@@ -348,8 +355,7 @@ ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContai
                                                .arg(clientId);
 
     ServerController serverController(m_settings);
-    const QString script =
-            serverController.replaceVars(getOpenVpnCertData, serverController.genVarsForScript(credentials, container));
+    const QString script = serverController.replaceVars(getOpenVpnCertData, serverController.genVarsForScript(credentials, container));
     ErrorCode error = serverController.runScript(credentials, script);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to revoke the certificate";
@@ -373,16 +379,14 @@ ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContai
     return ErrorCode::NoError;
 }
 
-ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerContainer container,
-                                                 ServerCredentials credentials)
+ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerContainer container, ServerCredentials credentials)
 {
     ErrorCode error = ErrorCode::NoError;
     ServerController serverController(m_settings);
 
     const QString wireGuardConfigFile =
             QString("/opt/amnezia/%1/wg0.conf").arg(container == DockerContainer::WireGuard ? "wireguard" : "awg");
-    const QString wireguardConfigString =
-            serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, error);
+    const QString wireguardConfigString = serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the wg conf file from the server";
         return error;
@@ -413,8 +417,7 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
     const QByteArray clientsTableString = QJsonDocument(m_clientsTable).toJson();
 
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks
-        || container == DockerContainer::Cloak) {
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
     } else {
         clientsTableFile = clientsTableFile.arg(ContainerProps::containerTypeToString(container));
@@ -428,8 +431,7 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
     const QString script = "sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip %1)'";
     error = serverController.runScript(
             credentials,
-            serverController.replaceVars(script.arg(wireGuardConfigFile),
-                                         serverController.genVarsForScript(credentials, container)));
+            serverController.replaceVars(script.arg(wireGuardConfigFile), serverController.genVarsForScript(credentials, container)));
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to execute the command 'wg syncconf' on the server";
         return error;

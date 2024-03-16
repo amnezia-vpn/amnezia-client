@@ -24,21 +24,3 @@ void ConfiguratorBase::processConfigWithDnsSettings(const QPair<QString, QString
     protocolConfigString.replace("$PRIMARY_DNS", dns.first);
     protocolConfigString.replace("$SECONDARY_DNS", dns.second);
 }
-
-//void ConfiguratorBase::updateContainerConfigAfterInstallation(const DockerContainer container,
-//                                                              QJsonObject &containerConfig, const QString &stdOut)
-//{
-//    Proto mainProto = ContainerProps::defaultProtocol(container);
-
-//    if (container == DockerContainer::TorWebSite) {
-//        QJsonObject protocol = containerConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
-
-//        qDebug() << "amnezia-tor onions" << stdOut;
-
-//        QString onion = stdOut;
-//        onion.replace("\n", "");
-//        protocol.insert(config_key::site, onion);
-
-//        containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
-//    }
-//}

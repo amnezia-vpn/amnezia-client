@@ -28,6 +28,7 @@
 #include "core/server_defs.h"
 #include "settings.h"
 #include "utilities.h"
+#include "vpnConfigurationController.h"
 
 namespace
 {
@@ -474,7 +475,7 @@ ErrorCode ServerController::configureContainerWorker(const ServerCredentials &cr
                                                  genVarsForScript(credentials, container, config)),
                                      cbReadStdOut, cbReadStdErr);
 
-//    m_configurator->updateContainerConfigAfterInstallation(container, config, stdOut);
+    VpnConfigurationsController::updateContainerConfigAfterInstallation(container, config, stdOut);
 
     return e;
 }

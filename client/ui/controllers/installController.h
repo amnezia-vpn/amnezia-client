@@ -6,17 +6,16 @@
 
 #include "containers/containers_defs.h"
 #include "core/defs.h"
-#include "ui/models/containers_model.h"
-#include "ui/models/servers_model.h"
-#include "ui/models/protocols_model.h"
 #include "ui/models/clientManagementModel.h"
+#include "ui/models/containers_model.h"
+#include "ui/models/protocols_model.h"
+#include "ui/models/servers_model.h"
 
 class InstallController : public QObject
 {
     Q_OBJECT
 public:
-    explicit InstallController(const QSharedPointer<ServersModel> &serversModel,
-                               const QSharedPointer<ContainersModel> &containersModel,
+    explicit InstallController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                const QSharedPointer<ProtocolsModel> &protocolsModel,
                                const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
@@ -24,8 +23,7 @@ public:
 
 public slots:
     void install(DockerContainer container, int port, TransportProto transportProto);
-    void setProcessedServerCredentials(const QString &hostName, const QString &userName,
-                                                const QString &secretData);
+    void setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData);
     void setShouldCreateServer(bool shouldCreateServer);
 
     void scanServerForInstalledContainers();
@@ -54,7 +52,7 @@ signals:
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
     void installServerFinished(const QString &finishMessage);
 
-    void updateContainerFinished(const QString& message);
+    void updateContainerFinished(const QString &message);
 
     void scanServerFinished(bool isInstalledContainerFound);
 
@@ -76,8 +74,10 @@ signals:
     void currentContainerUpdated();
 
 private:
-    void installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers, const ServerCredentials &serverCredentials, QString &finishMessage);
-    void installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers, const ServerCredentials &serverCredentials, QString &finishMessage);
+    void installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
+                       const ServerCredentials &serverCredentials, QString &finishMessage);
+    void installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
+                          const ServerCredentials &serverCredentials, QString &finishMessage);
     bool isServerAlreadyExists();
 
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers);

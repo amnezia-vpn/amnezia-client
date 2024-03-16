@@ -12,7 +12,7 @@ public:
     AwgConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
     QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, QString &clientId, ErrorCode errorCode);
+                         const QJsonObject &containerConfig, ErrorCode errorCode);
 };
 
 #endif // AWGCONFIGURATOR_H
