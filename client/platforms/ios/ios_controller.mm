@@ -449,15 +449,8 @@ bool IosController::setupWireGuard()
 
     wgConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
 
-    if (config.contains(config_key::allowed_ips)) {
-        QJsonArray allowed_ips;
-        QStringList allowed_ips_list = config[config_key::allowed_ips].toString().split(", ");
-
-        for(int index = 0; index < allowed_ips_list.length(); index++) {
-            allowed_ips.append(allowed_ips_list[index]);
-        }
-
-        wgConfig.insert(config_key::allowed_ips, allowed_ips);
+    if (config.contains(config_key::allowed_ips) && config[config_key::allowed_ips].isArray()) {
+        wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
     } else {
         QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
         wgConfig.insert(config_key::allowed_ips, allowed_ips);
@@ -494,15 +487,8 @@ bool IosController::setupAwg()
 
     wgConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
 
-    if (config.contains(config_key::allowed_ips)) {
-        QJsonArray allowed_ips;
-        QStringList allowed_ips_list = config[config_key::allowed_ips].toString().split(", ");
-
-        for(int index = 0; index < allowed_ips_list.length(); index++) {
-            allowed_ips.append(allowed_ips_list[index]);
-        }
-
-        wgConfig.insert(config_key::allowed_ips, allowed_ips);
+    if (config.contains(config_key::allowed_ips) && config[config_key::allowed_ips].isArray()) {
+        wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
     } else {
         QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
         wgConfig.insert(config_key::allowed_ips, allowed_ips);
