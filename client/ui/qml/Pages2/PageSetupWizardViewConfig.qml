@@ -109,12 +109,9 @@ PageType {
             CaptionTextWithIconAndBackGroundType {
                 Layout.topMargin: 16
                 implicitWidth: parent.width - 10
-                iconLeftMargin: LanguageModel.getCurrentLanguageIndex() === 3 ? 10 : 15
 
                 textString: qsTr("Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.")
 
-                iconWidth: 17
-                iconHeight: 17
                 iconPath: "qrc:/images/controls/alert-circle.svg"
             }
 

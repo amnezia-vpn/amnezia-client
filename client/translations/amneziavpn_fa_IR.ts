@@ -1065,7 +1065,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="66"/>
         <source>Back up your configuration</source>
-        <translation>از پیکربندی خود نسخه پشتیبان تهیه کنید</translation>
+        <translation>یک نسخه پشتیبان از تنظیمات خود تهیه</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="73"/>

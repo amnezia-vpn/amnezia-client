@@ -574,7 +574,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="385"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Все пользователи, с которыми вы поделились подключением, больше не смогут к нему подключиться.</translation>
+        <translation>Все пользователи, с которыми вы поделились конфигурацией с вашим VPN, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="386"/>
@@ -622,7 +622,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="185"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Все пользователи, с которыми вы поделились подключением, больше не смогут к нему подключиться.</translation>
+        <translation>Все пользователи, с которыми вы поделились конфигурацией с вашим VPN, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
@@ -1424,7 +1424,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="204"/>
         <source>All users whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Все пользователи, с которыми вы поделились подключением, больше не смогут к нему подключиться.</translation>
+        <translation>Все пользователи, с которыми вы поделились конфигурацией с вашим VPN, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="230"/>
@@ -1516,7 +1516,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="117"/>
         <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+        <translation>Все пользователи, с которыми вы поделились конфигурацией с вашим VPN, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>

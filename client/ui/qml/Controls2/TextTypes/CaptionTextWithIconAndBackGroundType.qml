@@ -9,17 +9,17 @@ Rectangle {
     property string textString
 
     property string iconPath
-    property real iconWidth: 15
-    property real iconHeight: 15
+    property real iconWidth: 16
+    property real iconHeight: 16
 
-    property real iconTopMargin
-    property real iconRightMargin
-    property real iconBottomMargin
-    property real iconLeftMargin: 10
+    property real iconRightMargin: 6
+    property real iconLeftMargin: LanguageModel.getCurrentLanguageIndex() === 3 ? 25: 15
+
+    property real textRightMargin: 30
 
     color: backGroundColor
     radius: 8
-    implicitHeight: supportingText.height + 20
+    implicitHeight: supportingText.height + 27
 
     RowLayout {
       width: parent.width
@@ -29,7 +29,7 @@ Rectangle {
       CaptionTextType {
           id: supportingText
           Layout.fillWidth: true
-          Layout.rightMargin: 10
+          Layout.rightMargin: textRightMargin
 
           font.pixelSize: 14
           text: textString
@@ -37,10 +37,9 @@ Rectangle {
       }
 
       Item {
-          Layout.topMargin: iconTopMargin
-          Layout.rightMargin: iconRightMargin
-          Layout.bottomMargin: supportingText.top
           Layout.leftMargin: iconLeftMargin
+          Layout.bottomMargin: supportingText.top
+          Layout.rightMargin: iconRightMargin
 
           width: iconWidth
           height: iconHeight
