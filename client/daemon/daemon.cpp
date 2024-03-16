@@ -256,6 +256,12 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
     config.m_deviceMTU = 1420;
   } else {
     config.m_deviceMTU = obj.value("deviceMTU").toString().toInt();
+#ifdef Q_OS_WINDOWS
+// For Windows min MTU value is 1280 (the smallest MTU legal with IPv6).
+    if (config.m_deviceMTU < 1280) {
+      config.m_deviceMTU = 1280;
+    }
+#endif
   }
 
   config.m_deviceIpv4Address = obj.value("deviceIpv4Address").toString();
