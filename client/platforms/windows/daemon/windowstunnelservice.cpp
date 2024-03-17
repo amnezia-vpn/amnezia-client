@@ -58,7 +58,6 @@ void WindowsTunnelService::stop() {
   if (m_logworker) {
     m_logthread.quit();
     m_logthread.wait();
-    delete m_logworker;
     m_logworker = nullptr;
   }
 }
@@ -104,6 +103,7 @@ bool WindowsTunnelService::start(const QString& configData) {
 
   m_logworker = new WindowsTunnelLogger(WindowsCommons::tunnelLogFile());
   m_logworker->moveToThread(&m_logthread);
+  connect(&m_logthread, &QThread::finished, m_logworker, &QObject::deleteLater);
   m_logthread.start();
 
   SC_HANDLE scm = (SC_HANDLE)m_scm;
