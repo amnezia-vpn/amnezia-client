@@ -13,7 +13,7 @@ Rectangle {
     property real iconHeight: 16
 
     property real iconRightMargin: 6
-    property real iconLeftMargin: LanguageModel.getCurrentLanguageIndex() === 3 ? 25: 15
+    property real iconLeftMargin: LanguageModel.getCurrentLanguageIndex() === 3 || 4 ? 25: 15
 
     property real textRightMargin: 30
 
