@@ -92,12 +92,12 @@ open class Wireguard : Protocol() {
         val configDataJson = config.getJSONObject("wireguard_config_data")
         val configData = parseConfigData(configDataJson.getString("config"))
         return WireguardConfig.build {
-            configWireguard(configData)
+            configWireguard(configData, configDataJson)
             configSplitTunneling(config)
         }
     }
 
-    protected fun WireguardConfig.Builder.configWireguard(configData: Map<String, String>) {
+    protected fun WireguardConfig.Builder.configWireguard(configData: Map<String, String>, configDataJson: JSONObject) {
         configData["Address"]?.split(",")?.map { address ->
             InetNetwork.parse(address.trim())
         }?.forEach(::addAddress)
@@ -118,7 +118,14 @@ open class Wireguard : Protocol() {
         if (routes.any { it !in defRoutes }) disableSplitTunneling()
         addRoutes(routes)
 
-        configData["MTU"]?.let { setMtu(it.toInt()) }
+        configDataJson.optString("mtu").let { mtu ->
+            if (mtu.isNotEmpty()) {
+                setMtu(mtu.toInt())
+            } else {
+                configData["MTU"]?.let { setMtu(it.toInt()) }
+            }
+        }
+
         configData["Endpoint"]?.let { setEndpoint(InetEndpoint.parse(it)) }
         configData["PersistentKeepalive"]?.let { setPersistentKeepalive(it.toInt()) }
         configData["PrivateKey"]?.let { setPrivateKeyHex(it.base64ToHex()) }
