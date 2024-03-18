@@ -76,6 +76,8 @@ private:
     void installContainer(DockerContainer container, QJsonObject &config);
     bool isServerAlreadyExists();
 
+    bool isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
+
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ProtocolsModel> m_protocolModel;
