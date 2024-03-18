@@ -22,33 +22,34 @@ Rectangle {
     implicitHeight: supportingText.height + 27
 
     RowLayout {
-      width: parent.width
-      anchors.centerIn: parent
-      layoutDirection: Qt.RightToLeft
+        width: parent.width
+        anchors.centerIn: parent
+        layoutDirection: Qt.RightToLeft
 
-      CaptionTextType {
-          id: supportingText
-          Layout.fillWidth: true
-          Layout.rightMargin: textRightMargin
+        CaptionTextType {
+            id: supportingText
 
-          font.pixelSize: 14
-          text: textString
-          color: textColor
-      }
+            Layout.fillWidth: true
+            Layout.rightMargin: textRightMargin
 
-      Item {
-          Layout.leftMargin: iconLeftMargin
-          Layout.bottomMargin: supportingText.top
-          Layout.rightMargin: iconRightMargin
+            font.pixelSize: 14
+            text: textString
+            color: textColor
+        }
 
-          width: iconWidth
-          height: iconHeight
+        Item {
+            Layout.leftMargin: iconLeftMargin
+            Layout.bottomMargin: supportingText.top
+            Layout.rightMargin: iconRightMargin
 
-          Image {
-              width: iconWidth
-              height: iconHeight
-              source: iconPath
-          }
-      }
+            width: iconWidth
+            height: iconHeight
+
+            Image {
+                width: iconWidth
+                height: iconHeight
+                source: iconPath
+            }
+        }
     }
 }
