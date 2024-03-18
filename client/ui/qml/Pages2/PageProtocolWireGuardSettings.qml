@@ -15,8 +15,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.portTextField.textField
-
     ColumnLayout {
         id: backButton
 
@@ -43,7 +41,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            enabled: ServersModel.isProcessedServerHasWriteAccess()
+            enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
 
             ListView {
                 id: listview
@@ -54,13 +52,11 @@ PageType {
                 clip: true
                 interactive: false
 
-                model: ShadowSocksConfigModel
+                model: WireGuardConfigModel
 
                 delegate: Item {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
-
-                    property alias portTextField: portTextField
 
                     ColumnLayout {
                         id: col
@@ -76,13 +72,11 @@ PageType {
 
                         HeaderType {
                             Layout.fillWidth: true
-
-                            headerText: qsTr("ShadowSocks settings")
+                            headerText: qsTr("WG settings")
                         }
 
                         TextFieldWithHeaderType {
                             id: portTextField
-
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
@@ -97,68 +91,82 @@ PageType {
                                 }
                             }
 
-                            KeyNavigation.tab: saveRestartButton
+                            checkEmptyText: true
                         }
 
-                        DropDownType {
-                            id: cipherDropDown
+                        TextFieldWithHeaderType {
+                            id: mtuTextField
                             Layout.fillWidth: true
-                            Layout.topMargin: 20
+                            Layout.topMargin: 16
 
-                            descriptionText: qsTr("Cipher")
-                            headerText: qsTr("Cipher")
+                            headerText: qsTr("MTU")
+                            textFieldText: mtu
+                            textField.validator: IntValidator { bottom: 576; top: 65535 }
 
-                            drawerParent: root
-
-                            listView: ListViewWithRadioButtonType {
-                                id: cipherListView
-
-                                rootWidth: root.width
-
-                                model: ListModel {
-                                    ListElement { name : "chacha20-ietf-poly1305" }
-                                    ListElement { name : "xchacha20-ietf-poly1305" }
-                                    ListElement { name : "aes-256-gcm" }
-                                    ListElement { name : "aes-192-gcm" }
-                                    ListElement { name : "aes-128-gcm" }
+                            textField.onEditingFinished: {
+                                if (textFieldText === "") {
+                                    textFieldText = "0"
                                 }
-
-                                clickedFunction: function() {
-                                    cipherDropDown.text = selectedText
-                                    cipher = cipherDropDown.text
-                                    cipherDropDown.close()
+                                if (textFieldText !== mtu) {
+                                    mtu = textFieldText
                                 }
+                            }
+                            checkEmptyText: true
+                        }
 
-                                Component.onCompleted: {
-                                    cipherDropDown.text = cipher
+                        BasicButtonType {
+                            Layout.topMargin: 24
+                            Layout.leftMargin: -8
+                            implicitHeight: 32
 
-                                    for (var i = 0; i < cipherListView.model.count; i++) {
-                                        if (cipherListView.model.get(i).name === cipherDropDown.text) {
-                                            currentIndex = i
-                                        }
-                                    }
+                            defaultColor: "transparent"
+                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                            textColor: "#EB5757"
+
+                            text: qsTr("Remove WG")
+
+                            onClicked: {
+                                questionDrawer.headerText = qsTr("Remove WG from server?")
+                                questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
+                                questionDrawer.yesButtonText = qsTr("Continue")
+                                questionDrawer.noButtonText = qsTr("Cancel")
+
+                                questionDrawer.yesButtonFunction = function() {
+                                    questionDrawer.visible = false
+                                    PageController.goToPage(PageEnum.PageDeinstalling)
+                                    InstallController.removeCurrentlyProcessedContainer()
                                 }
+                                questionDrawer.noButtonFunction = function() {
+                                    questionDrawer.visible = false
+                                }
+                                questionDrawer.visible = true
                             }
                         }
 
                         BasicButtonType {
-                            id: saveRestartButton
-
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
+                            enabled: mtuTextField.errorText === "" &&
+                                     portTextField.errorText === ""
+
                             text: qsTr("Save")
 
-                            clickedFunc: function() {
+                            onClicked: {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.updateContainer(ShadowSocksConfigModel.getConfig())
+                                InstallController.updateContainer(WireGuardConfigModel.getConfig())
                             }
                         }
                     }
                 }
             }
+        }
+
+        QuestionDrawer {
+            id: questionDrawer
         }
     }
 }

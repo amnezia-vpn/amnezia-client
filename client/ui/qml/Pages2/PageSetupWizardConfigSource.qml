@@ -73,12 +73,7 @@ PageType {
                                                                        "Config files (*.vpn *.ovpn *.conf)"
                     var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
                     if (fileName !== "") {
-                        if (fileName.indexOf(".backup") !== -1 && !ServersModel.getServersCount()) {
-                            PageController.showBusyIndicator(true)
-                            SettingsController.restoreAppConfig(fileName)
-                            PageController.showBusyIndicator(false)
-                        } else {
-                            ImportController.extractConfigFromFile(fileName)
+                        if (ImportController.extractConfigFromFile(fileName)) {
                             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
                         }
                     }

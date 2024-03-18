@@ -56,8 +56,8 @@ PageType {
                     regularExpression: InstallController.ipAddressPortRegExp()
                 }
 
-                onFocusChanged: {
-                    textField.text = textField.text.replace(/^\s+|\s+$/g, '');
+                textField.onFocusChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                 }
 
                 KeyNavigation.tab: username.textField
@@ -69,6 +69,10 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("SSH Username")
                 textFieldPlaceholderText: "root"
+
+                textField.onFocusChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                }
 
                 KeyNavigation.tab: secretData.textField
             }
@@ -88,8 +92,8 @@ PageType {
                     hidePassword = !hidePassword
                 }
 
-                onFocusChanged: {
-                    textField.text = textField.text.replace(/^\s+|\s+$/g, '');
+                textField.onFocusChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                 }
 
                 KeyNavigation.tab: continueButton

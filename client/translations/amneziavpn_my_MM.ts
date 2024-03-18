@@ -775,7 +775,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="248"/>
         <source>Remove SFTP and all data stored there</source>
-        <translation>SFTP နှင့် ထိုနေရာတွင် သိမ်းဆည်းထားသည့် ဒေတာအားလုံးကို ဖယ်ရှားမည်</translation>
+        <translation>SFTP ဖယ်ရှားပါ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="251"/>

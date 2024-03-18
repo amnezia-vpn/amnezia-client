@@ -121,6 +121,14 @@ PageType {
         }
     }
 
+    Connections {
+        target: ImportController
+
+        function onImportErrorOccurred(errorMessage) {
+            PageController.showErrorMessage(errorMessage)
+        }
+    }
+
     StackViewType {
         id: tabBarStackView
 
