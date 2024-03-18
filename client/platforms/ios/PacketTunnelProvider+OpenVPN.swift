@@ -2,6 +2,16 @@ import Foundation
 import NetworkExtension
 import OpenVPNAdapter
 
+struct OpenVPNConfig: Decodable {
+  let config: String
+  let splitTunnelType: Int
+  let splitTunnelSites: [String]
+
+  var str: String {
+    "splitTunnelType: \(splitTunnelType) splitTunnelSites: \(splitTunnelSites) config: \(config)"
+  }
+}
+
 extension PacketTunnelProvider {
   func startOpenVPN(completionHandler: @escaping (Error?) -> Void) {
     guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
@@ -12,7 +22,7 @@ extension PacketTunnelProvider {
     }
 
     do {
-//      ovpnLog(.info, message: "providerConfiguration: \(String(decoding: openVPNConfigData, as: UTF8.self))")
+      //      ovpnLog(.info, message: "providerConfiguration: \(String(decoding: openVPNConfigData, as: UTF8.self))")
 
       let openVPNConfig = try JSONDecoder().decode(OpenVPNConfig.self, from: openVPNConfigData)
       ovpnLog(.info, title: "config: ", message: openVPNConfig.str)
@@ -68,6 +78,27 @@ extension PacketTunnelProvider {
     //            .map { iface in iface.name }
 
     //        ovpn_log(.error, message: "Available TUN Interfaces: \(ifaces)")
+  }
+
+  func handleOpenVPNStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+    guard let completionHandler = completionHandler else { return }
+    let bytesin = ovpnAdapter.transportStatistics.bytesIn
+    let bytesout = ovpnAdapter.transportStatistics.bytesOut
+
+    let response: [String: Any] = [
+      "rx_bytes": bytesin,
+      "tx_bytes": bytesout
+    ]
+
+    completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
+  }
+
+  func stopOpenVPN(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
+    stopHandler = completionHandler
+    if vpnReachability.isTracking {
+      vpnReachability.stopTracking()
+    }
+    ovpnAdapter.disconnect()
   }
 }
 
@@ -188,3 +219,5 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
     ovpnLog(.info, message: logMessage)
   }
 }
+
+extension NEPacketTunnelFlow: OpenVPNAdapterPacketFlow {}

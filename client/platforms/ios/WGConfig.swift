@@ -85,13 +85,3 @@ struct WGConfig: Decodable {
     """
   }
 }
-
-struct OpenVPNConfig: Decodable {
-  let config: String
-  let splitTunnelType: Int
-  let splitTunnelSites: [String]
-
-  var str: String {
-    "splitTunnelType: \(splitTunnelType) splitTunnelSites: \(splitTunnelSites) config: \(config)"
-  }
-}
