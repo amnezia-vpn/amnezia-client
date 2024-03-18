@@ -107,6 +107,26 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: mtuTextField
+                            Layout.fillWidth: true
+                            Layout.topMargin: 16
+
+                            headerText: qsTr("MTU")
+                            textFieldText: mtu
+                            textField.validator: IntValidator { bottom: 576; top: 65535 }
+
+                            textField.onEditingFinished: {
+                                if (textFieldText === "") {
+                                    textFieldText = "0"
+                                }
+                                if (textFieldText !== mtu) {
+                                    mtu = textFieldText
+                                }
+                            }
+                            checkEmptyText: true
+                        }
+
+                        TextFieldWithHeaderType {
                             id: junkPacketCountTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
@@ -309,7 +329,7 @@ PageType {
                                      junkPacketCountTextField.errorText === "" &&
                                      portTextField.errorText === ""
 
-                            text: qsTr("Save and Restart Amnezia")
+                            text: qsTr("Save")
 
                             clickedFunc: function() {
                                 forceActiveFocus()

@@ -41,6 +41,7 @@ public slots:
 
     void backupAppConfig(const QString &fileName);
     void restoreAppConfig(const QString &fileName);
+    void restoreAppConfigFromData(const QByteArray &data);
 
     QString getAppVersion();
 

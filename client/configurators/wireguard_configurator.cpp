@@ -183,6 +183,7 @@ QString WireguardConfigurator::createConfig(const ServerCredentials &credentials
     config.replace("$WIREGUARD_SERVER_PUBLIC_KEY", connData.serverPubKey);
     config.replace("$WIREGUARD_PSK", connData.pskKey);
 
+    const QJsonObject &wireguarConfig = containerConfig.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
     QJsonObject jConfig;
     jConfig[config_key::config] = config;
 
@@ -193,6 +194,7 @@ QString WireguardConfigurator::createConfig(const ServerCredentials &credentials
     jConfig[config_key::client_pub_key] = connData.clientPubKey;
     jConfig[config_key::psk_key] = connData.pskKey;
     jConfig[config_key::server_pub_key] = connData.serverPubKey;
+    jConfig[config_key::mtu] = wireguarConfig.value(config_key::mtu).toString(protocols::wireguard::defaultMtu);
 
     jConfig[config_key::clientId] = connData.clientPubKey;
 

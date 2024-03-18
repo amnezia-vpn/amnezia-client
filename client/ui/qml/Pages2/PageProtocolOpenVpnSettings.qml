@@ -373,7 +373,7 @@ PageType {
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
-                            text: qsTr("Save and Restart Amnezia")
+                            text: qsTr("Save")
 
                             clickedFunc: function() {
                                 forceActiveFocus()

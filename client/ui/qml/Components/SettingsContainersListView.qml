@@ -52,11 +52,6 @@ ListView {
                         }
 
                         switch (containerIndex) {
-                        case ContainerEnum.WireGuard: {
-                            ProtocolsModel.updateModel(config)
-                            PageController.goToPage(PageEnum.PageProtocolRaw)
-                            break
-                        }
                         case ContainerEnum.Ipsec: {
                             ProtocolsModel.updateModel(config)
                             PageController.goToPage(PageEnum.PageProtocolRaw)

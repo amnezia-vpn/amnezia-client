@@ -45,7 +45,9 @@ namespace amnezia
         constexpr char server_priv_key[] = "server_priv_key";
         constexpr char server_pub_key[] = "server_pub_key";
         constexpr char psk_key[] = "psk_key";
+        constexpr char mtu[] = "mtu";
         constexpr char allowed_ips[] = "allowed_ips";
+        constexpr char persistent_keep_alive[] = "persistent_keep_alive";
 
         constexpr char client_ip[] = "client_ip"; // internal ip address
 
@@ -105,6 +107,7 @@ namespace amnezia
             constexpr char defaultSubnetAddress[] = "10.8.0.0";
             constexpr char defaultSubnetMask[] = "255.255.255.0";
             constexpr char defaultSubnetCidr[] = "24";
+            constexpr char defaultMtu[] = "1500";
 
             constexpr char serverConfigPath[] = "/opt/amnezia/openvpn/server.conf";
             constexpr char caCertPath[] = "/opt/amnezia/openvpn/pki/ca.crt";
@@ -151,6 +154,7 @@ namespace amnezia
             constexpr char defaultSubnetCidr[] = "24";
 
             constexpr char defaultPort[] = "51820";
+            constexpr char defaultMtu[] = "1420";
             constexpr char serverConfigPath[] = "/opt/amnezia/wireguard/wg0.conf";
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/wireguard/wireguard_server_public_key.key";
             constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
@@ -166,6 +170,7 @@ namespace amnezia
         namespace awg
         {
             constexpr char defaultPort[] = "55424";
+            constexpr char defaultMtu[] = "1420";
 
             constexpr char serverConfigPath[] = "/opt/amnezia/awg/wg0.conf";
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/awg/wireguard_server_public_key.key";
