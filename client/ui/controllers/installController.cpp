@@ -512,18 +512,18 @@ void InstallController::removeAllContainers()
     emit installationErrorOccurred(errorString(errorCode));
 }
 
-void InstallController::removeCurrentlyProcessedContainer()
+void InstallController::removeProcessedContainer()
 {
     int serverIndex = m_serversModel->getProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
-    int container = m_containersModel->getCurrentlyProcessedContainerIndex();
-    QString containerName = m_containersModel->getCurrentlyProcessedContainerName();
+    int container = m_containersModel->getProcessedContainerIndex();
+    QString containerName = m_containersModel->getProcessedContainerName();
 
     ErrorCode errorCode = m_serversModel->removeContainer(container);
     if (errorCode == ErrorCode::NoError) {
 
-        emit removeCurrentlyProcessedContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
+        emit removeProcessedContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
         return;
     }
     emit installationErrorOccurred(errorString(errorCode));
@@ -541,6 +541,20 @@ void InstallController::removeApiConfig()
     serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
 
     m_serversModel->editServer(serverConfig, m_serversModel->getDefaultServerIndex());
+}
+
+void InstallController::clearCachedProfile()
+{
+    int serverIndex = m_serversModel->getProcessedServerIndex();
+    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
+    ServerCredentials serverCredentials =
+            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+
+    m_serversModel->clearCachedProfile(container);
+    m_clientManagementModel->revokeClient(containerConfig, container, serverCredentials, serverIndex);
+
+    emit cachedProfileCleared(tr("%1 cached profile cleared").arg(ContainerProps::containerHumanNames().value(container)));
 }
 
 QRegularExpression InstallController::ipAddressPortRegExp()

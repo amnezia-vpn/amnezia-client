@@ -102,6 +102,10 @@ PageType {
             PageController.showNotificationMessage(message)
             PageController.closePage()
         }
+
+        function onCachedProfileCleared(message) {
+            PageController.showNotificationMessage(message)
+        }
     }
 
     Connections {

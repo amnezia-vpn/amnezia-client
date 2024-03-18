@@ -47,7 +47,7 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onRemoveCurrentlyProcessedContainerFinished(finishedMessage) {
+        function onRemoveProcessedContainerFinished(finishedMessage) {
             PageController.closePage() // close deInstalling page
             PageController.closePage() // close page with remove button
             PageController.showNotificationMessage(finishedMessage)

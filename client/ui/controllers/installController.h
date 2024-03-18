@@ -33,9 +33,11 @@ public slots:
     void removeProcessedServer();
     void rebootProcessedServer();
     void removeAllContainers();
-    void removeCurrentlyProcessedContainer();
+    void removeProcessedContainer();
 
     void removeApiConfig();
+
+    void clearCachedProfile();
 
     QRegularExpression ipAddressPortRegExp();
     QRegularExpression ipAddressRegExp();
@@ -59,7 +61,7 @@ signals:
     void rebootProcessedServerFinished(const QString &finishedMessage);
     void removeProcessedServerFinished(const QString &finishedMessage);
     void removeAllContainersFinished(const QString &finishedMessage);
-    void removeCurrentlyProcessedContainerFinished(const QString &finishedMessage);
+    void removeProcessedContainerFinished(const QString &finishedMessage);
 
     void installationErrorOccurred(const QString &errorMessage);
 
@@ -72,6 +74,8 @@ signals:
     void cancelInstallation();
 
     void currentContainerUpdated();
+
+    void cachedProfileCleared(const QString &message);
 
 private:
     void installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,

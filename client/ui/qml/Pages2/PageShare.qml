@@ -32,7 +32,7 @@ PageType {
     onRevokeConfig: function(index) {
         PageController.showBusyIndicator(true)
         ExportController.revokeConfig(index,
-                                      ContainersModel.getCurrentlyProcessedContainerIndex(),
+                                      ContainersModel.getProcessedContainerIndex(),
                                       ServersModel.getProcessedServerCredentials())
         PageController.showBusyIndicator(false)
         PageController.showNotificationMessage(qsTr("Config revoked"))
@@ -246,7 +246,7 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
+                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
@@ -406,13 +406,13 @@ PageType {
 
                         protocolSelector.text = selectedText
 
-                        ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
+                        ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
 
                         fillConnectionTypeModel()
 
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
+                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
@@ -682,7 +682,7 @@ PageType {
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(index,
                                                                                       clientNameEditor.textFieldText,
-                                                                                      ContainersModel.getCurrentlyProcessedContainerIndex(),
+                                                                                      ContainersModel.getProcessedContainerIndex(),
                                                                                       ServersModel.getProcessedServerCredentials())
                                                         PageController.showBusyIndicator(false)
                                                         clientNameEditDrawer.close()

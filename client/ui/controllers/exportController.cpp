@@ -91,7 +91,7 @@ void ExportController::generateConnectionConfig(const QString &clientName)
     int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
-    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getCurrentlyProcessedContainerIndex());
+    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 

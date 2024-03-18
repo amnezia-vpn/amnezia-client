@@ -340,6 +340,48 @@ ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContain
     return errorCode;
 }
 
+ErrorCode ClientManagementModel::revokeClient(const QJsonObject &containerConfig, const DockerContainer container, ServerCredentials credentials,
+                                              const int serverIndex)
+{
+    ErrorCode errorCode = ErrorCode::NoError;
+    errorCode = updateModel(container, credentials);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    Proto protocol;
+    if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+        protocol = Proto::OpenVpn;
+    } else if (container == DockerContainer::OpenVpn || container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
+        protocol = ContainerProps::defaultProtocol(container);
+    } else {
+        return ErrorCode::NoError;
+    }
+
+    auto protocolConfig = ContainerProps::getProtocolConfigFromContainer(protocol, containerConfig);
+
+    int row;
+    bool clientExists = false;
+    QString clientId = protocolConfig.value(config_key::clientId).toString();
+    for (row = 0; row < rowCount(); row++) {
+        auto client = m_clientsTable.at(row).toObject();
+        if (clientId == client.value(configKey::clientId).toString()) {
+            clientExists = true;
+            break;
+        }
+    }
+    if (!clientExists) {
+        return errorCode;
+    }
+
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+        errorCode = revokeOpenVpn(row, container, credentials, serverIndex);
+    } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
+        errorCode = revokeWireGuard(row, container, credentials);
+    }
+    return errorCode;
+}
+
 ErrorCode ClientManagementModel::revokeOpenVpn(const int row, const DockerContainer container, ServerCredentials credentials,
                                                const int serverIndex)
 {
