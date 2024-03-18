@@ -936,7 +936,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
         <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>Amnezia 是一款免费的开源应用程序。 如果您喜欢的话可以支持开发者。</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="81"/>
@@ -1127,53 +1127,53 @@ And if you don&apos;t like the app, all the more support it - the donation will 
         <translation>备份将包含您添加到 AmneziaVPN 的所有服务器的密码和私钥。请将这些信息保存在安全的地方。</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="92"/>
         <source>Make a backup</source>
         <translation>进行备份</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="99"/>
         <source>Save backup file</source>
         <translation>保存备份</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="101"/>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="130"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="129"/>
         <source>Backup files (*.backup)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="109"/>
         <source>Backup file saved</source>
         <translation>备份文件已保存</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="125"/>
         <source>Restore from backup</source>
         <translation>从备份还原</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="128"/>
         <source>Open backup file</source>
         <translation>打开备份文件</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="140"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="139"/>
         <source>Import settings from a backup file?</source>
         <translation>从备份文件导入设置？</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="141"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="140"/>
         <source>All current settings will be reset</source>
         <translation>当前所有设置将重置</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="142"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="141"/>
         <source>Continue</source>
         <translation>继续</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="143"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="142"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -2064,12 +2064,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>显示内容</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="113"/>
         <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
         <translation>只使用您信任的来源提供的连接代码。公共来源的代码可能是为了拦截您的数据而创建的。</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="157"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="154"/>
         <source>Connect</source>
         <translation>连接</translation>
     </message>
@@ -2888,12 +2888,26 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <source>After installation, Amnezia will create a
 
  file storage on your server. You will be able to access it using
+
+ FileZilla or other SFTP clients, as well as mount the disk on your device to access
+
+ it directly from your device.
+
+For more detailed information, you can
+
+ find it in the support section under &quot;Create SFTP file storage.&quot; </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>After installation, Amnezia will create a
+
+ file storage on your server. You will be able to access it using
  FileZilla or other SFTP clients, as well as mount the disk on your device to access
  it directly from your device.
 
 For more detailed information, you can
  find it in the support section under &quot;Create SFTP file storage.&quot; </source>
-        <translation>安装后，Amnezia 将创建一个
+        <translation type="vanished">安装后，Amnezia 将创建一个
 
  服务器上的文件存储。 您将能够使用它来访问它
  FileZilla 或其他 SFTP 客户端，以及将磁盘挂载到您的设备上进行访问
