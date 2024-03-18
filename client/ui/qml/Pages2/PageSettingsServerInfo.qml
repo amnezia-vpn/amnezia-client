@@ -93,6 +93,7 @@ PageType {
 
                         Connections {
                             target: serverNameEditDrawer
+                            enabled: !GC.isMobile()
                             function onOpened() {
                                 serverName.textField.forceActiveFocus()
                             }
@@ -130,7 +131,7 @@ PageType {
                         }
 
                         Component.onCompleted: {
-                            if (header.itemAt(0)) {
+                            if (header.itemAt(0) && !GC.isMobile()) {
                                 defaultActiveFocusItem = serverName.textField
                             }
                         }

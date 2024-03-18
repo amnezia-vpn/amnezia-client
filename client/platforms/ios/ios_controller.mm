@@ -358,6 +358,13 @@ bool IosController::setupOpenVPN()
 
     QJsonObject openVPNConfig {};
     openVPNConfig.insert(config_key::config, ovpnConfig);
+
+    if (ovpn.contains(config_key::mtu)) {
+        openVPNConfig.insert(config_key::mtu, ovpn[config_key::mtu]);
+    } else {
+        openVPNConfig.insert(config_key::mtu, protocols::openvpn::defaultMtu);
+    }
+
     openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
 
     QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
@@ -410,7 +417,12 @@ bool IosController::setupCloak()
 
     QJsonObject openVPNConfig {};
     openVPNConfig.insert(config_key::config, ovpnConfig);
-    openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+
+    if (ovpn.contains(config_key::mtu)) {
+        openVPNConfig.insert(config_key::mtu, ovpn[config_key::mtu]);
+    } else {
+        openVPNConfig.insert(config_key::mtu, protocols::openvpn::defaultMtu);
+    }
 
     QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
 
@@ -433,6 +445,13 @@ bool IosController::setupWireGuard()
     QJsonObject wgConfig {};
     wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
     wgConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2]);
+
+    if (config.contains(config_key::mtu)) {
+        wgConfig.insert(config_key::mtu, config[config_key::mtu]);
+    } else {
+        wgConfig.insert(config_key::mtu, protocols::wireguard::defaultMtu);
+    }
+
     wgConfig.insert(config_key::hostName, config[config_key::hostName]);
     wgConfig.insert(config_key::port, config[config_key::port]);
     wgConfig.insert(config_key::client_ip, config[config_key::client_ip]);
@@ -449,21 +468,18 @@ bool IosController::setupWireGuard()
 
     wgConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
 
-    if (config.contains(config_key::allowed_ips)) {
-        QJsonArray allowed_ips;
-        QStringList allowed_ips_list = config[config_key::allowed_ips].toString().split(", ");
-
-        for(int index = 0; index < allowed_ips_list.length(); index++) {
-            allowed_ips.append(allowed_ips_list[index]);
-        }
-
-        wgConfig.insert(config_key::allowed_ips, allowed_ips);
+    if (config.contains(config_key::allowed_ips) && config[config_key::allowed_ips].isArray()) {
+        wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
     } else {
         QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
         wgConfig.insert(config_key::allowed_ips, allowed_ips);
     }
 
-    wgConfig.insert("persistent_keep_alive", "25");
+    if (config.contains(config_key::persistent_keep_alive)) {
+        wgConfig.insert(config_key::persistent_keep_alive, config[config_key::persistent_keep_alive]);
+    } else {
+        wgConfig.insert(config_key::persistent_keep_alive, "25");
+    }
 
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
@@ -478,6 +494,13 @@ bool IosController::setupAwg()
     QJsonObject wgConfig {};
     wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
     wgConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2]);
+
+    if (config.contains(config_key::mtu)) {
+        wgConfig.insert(config_key::mtu, config[config_key::mtu]);
+    } else {
+        wgConfig.insert(config_key::mtu, protocols::awg::defaultMtu);
+    }
+
     wgConfig.insert(config_key::hostName, config[config_key::hostName]);
     wgConfig.insert(config_key::port, config[config_key::port]);
     wgConfig.insert(config_key::client_ip, config[config_key::client_ip]);
@@ -494,21 +517,19 @@ bool IosController::setupAwg()
 
     wgConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
 
-    if (config.contains(config_key::allowed_ips)) {
-        QJsonArray allowed_ips;
-        QStringList allowed_ips_list = config[config_key::allowed_ips].toString().split(", ");
-
-        for(int index = 0; index < allowed_ips_list.length(); index++) {
-            allowed_ips.append(allowed_ips_list[index]);
-        }
-
-        wgConfig.insert(config_key::allowed_ips, allowed_ips);
+    if (config.contains(config_key::allowed_ips) && config[config_key::allowed_ips].isArray()) {
+        wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
     } else {
         QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
         wgConfig.insert(config_key::allowed_ips, allowed_ips);
     }
 
-    wgConfig.insert("persistent_keep_alive", "25");
+    if (config.contains(config_key::persistent_keep_alive)) {
+        wgConfig.insert(config_key::persistent_keep_alive, config[config_key::persistent_keep_alive]);
+    } else {
+        wgConfig.insert(config_key::persistent_keep_alive, "25");
+    }
+
     wgConfig.insert(config_key::initPacketMagicHeader, config[config_key::initPacketMagicHeader]);
     wgConfig.insert(config_key::responsePacketMagicHeader, config[config_key::responsePacketMagicHeader]);
     wgConfig.insert(config_key::underloadPacketMagicHeader, config[config_key::underloadPacketMagicHeader]);

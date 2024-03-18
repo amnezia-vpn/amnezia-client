@@ -118,7 +118,7 @@ ServerController::runContainerScript(const ServerCredentials &credentials, Docke
 
 ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container, const ServerCredentials &credentials,
                                                       const QString &file, const QString &path,
-                                                      libssh::SftpOverwriteMode overwriteMode)
+                                                      libssh::ScpOverwriteMode overwriteMode)
 {
     ErrorCode e = ErrorCode::NoError;
     QString tmpFileName = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
@@ -139,7 +139,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     if (e)
         return e;
 
-    if (overwriteMode == libssh::SftpOverwriteMode::SftpOverwriteExisting) {
+    if (overwriteMode == libssh::ScpOverwriteMode::ScpOverwriteExisting) {
         e = runScript(credentials,
                       replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(path),
                                   genVarsForScript(credentials, container)),
@@ -147,7 +147,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 
         if (e)
             return e;
-    } else if (overwriteMode == libssh::SftpOverwriteMode::SftpAppendToExisting) {
+    } else if (overwriteMode == libssh::ScpOverwriteMode::ScpAppendToExisting) {
         e = runScript(credentials,
                       replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(tmpFileName),
                                   genVarsForScript(credentials, container)),
@@ -199,7 +199,7 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
 }
 
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data,
-                                             const QString &remotePath, libssh::SftpOverwriteMode overwriteMode)
+                                             const QString &remotePath, libssh::ScpOverwriteMode overwriteMode)
 {
     auto error = m_sshClient.connectToHost(credentials);
     if (error != ErrorCode::NoError) {
@@ -211,7 +211,7 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     localFile.write(data);
     localFile.close();
 
-    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName(), remotePath, "non_desc");
+    error = m_sshClient.scpFileCopy(overwriteMode, localFile.fileName(), remotePath, "non_desc");
 
     if (error != ErrorCode::NoError) {
         return error;
@@ -359,7 +359,33 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
     }
 
     if (container == DockerContainer::Awg) {
-        return true;
+        if ((oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
+            != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
+            || (oldProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount)
+                != newProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount))
+            || (oldProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize)
+                != newProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize))
+            || (oldProtoConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize)
+                != newProtoConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize))
+            || (oldProtoConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize)
+                != newProtoConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize))
+            || (oldProtoConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize)
+                != newProtoConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize))
+            || (oldProtoConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader)
+                != newProtoConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader))
+            || (oldProtoConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader)
+                != newProtoConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader))
+            || (oldProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader)
+                != newProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader))
+            || (oldProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader)
+                != newProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader)))
+            return true;
+    }
+
+    if (container == DockerContainer::WireGuard){
+        if (oldProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)
+            != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort))
+            return true;
     }
 
     return false;
