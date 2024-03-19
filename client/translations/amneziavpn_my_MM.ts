@@ -1112,7 +1112,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="161"/>
         <source>Reset settings and remove all data from the application</source>
-        <translation>ဆက်တင်များကို ပြန်လည်သတ်မှတ်ပြီး အပလီကေးရှင်းမှ ဒေတာအားလုံးကို ဖယ်ရှားမည်</translation>
+        <translation>ဆက်တင်များနဂိုတိုင်းထားပြီး အပလီကေးရှင်းမှဒေတာအားလုံးဖယ်ရှားမည်</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="166"/>
@@ -2819,7 +2819,7 @@ IKEv2 သည် လုံခြုံရေး၊ တည်ငြိမ်မှ
     <message>
         <location filename="../containers/containers_defs.cpp" line="92"/>
         <source>Sftp file sharing service</source>
-        <translation>Sftp ဖိုင်မျှဝေခြင်းဝန်ဆောင်မှု</translation>
+        <translation>Sftp ဖိုင်မျှဝေခြင်းဆားဗစ်</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="90"/>
