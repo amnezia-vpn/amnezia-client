@@ -1,5 +1,6 @@
 package org.amnezia.vpn
 
+import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Intent
 import android.content.Intent.EXTRA_MIME_TYPES
@@ -14,6 +15,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import android.provider.Settings
 import android.view.WindowManager.LayoutParams
 import android.webkit.MimeTypeMap
 import android.widget.Toast
@@ -50,6 +52,9 @@ class AmneziaActivity : QtActivity() {
     private var isInBoundState = false
     private lateinit var vpnServiceMessenger: IpcMessenger
     private var tmpFileContentToSave: String = ""
+
+    // used to detect always-on vpn while checking vpn permissions
+    private var lastPauseTime = -1L
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -179,6 +184,12 @@ class AmneziaActivity : QtActivity() {
         }
     }
 
+    override fun onPause() {
+        Log.d(TAG, "Pause Amnezia activity")
+        super.onPause()
+        lastPauseTime = System.currentTimeMillis()
+    }
+
     override fun onStop() {
         Log.d(TAG, "Stop Amnezia activity")
         doUnbindService()
@@ -216,13 +227,18 @@ class AmneziaActivity : QtActivity() {
                 when (resultCode) {
                     RESULT_OK -> {
                         Log.d(TAG, "Vpn permission granted")
-                        Toast.makeText(this, "Vpn permission granted", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, resources.getText(R.string.vpnGranted), Toast.LENGTH_LONG).show()
                         checkVpnPermissionCallbacks?.run { onSuccess() }
                     }
 
                     else -> {
-                        Log.w(TAG, "Vpn permission denied, resultCode: $resultCode")
-                        Toast.makeText(this, "Vpn permission denied", Toast.LENGTH_LONG).show()
+                        if (resultCode == RESULT_CANCELED && System.currentTimeMillis() - lastPauseTime < 200) {
+                            Log.w(TAG, "Another always-on VPN is active, vpn permission auto-denied")
+                            showVpnAlwaysOnErrorDialog()
+                        } else {
+                            Log.w(TAG, "Vpn permission denied, resultCode: $resultCode")
+                            Toast.makeText(this, resources.getText(R.string.vpnDenied), Toast.LENGTH_LONG).show()
+                        }
                         checkVpnPermissionCallbacks?.run { onFail() }
                     }
                 }
@@ -278,6 +294,17 @@ class AmneziaActivity : QtActivity() {
             return
         }
         onSuccess()
+    }
+
+     private fun showVpnAlwaysOnErrorDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.vpnSetupFailed)
+            .setMessage(R.string.vpnSetupFailedMessage)
+            .setNegativeButton(R.string.cancel) { _, _ -> }
+            .setPositiveButton(R.string.openVpnSettings) { _, _ ->
+                startActivity(Intent(Settings.ACTION_VPN_SETTINGS))
+            }
+            .show()
     }
 
     @MainThread

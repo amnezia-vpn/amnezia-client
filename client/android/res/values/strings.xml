@@ -2,4 +2,10 @@
 <resources>
     <string name="connecting">Connecting</string>
     <string name="disconnecting">Disconnecting</string>
+    <string name="cancel">Cancel</string>
+    <string name="vpnGranted">VPN permission granted</string>
+    <string name="vpnDenied">VPN permission denied</string>
+    <string name="vpnSetupFailed">VPN setup error</string>
+    <string name="vpnSetupFailedMessage">This error usually occurs because the Always-on feature is enabled for another VPN application. Please disable it in the VPN system settings.</string>
+    <string name="openVpnSettings">Open VPN settings</string>
 </resources>
