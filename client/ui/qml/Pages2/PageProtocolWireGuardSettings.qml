@@ -152,7 +152,7 @@ PageType {
                             enabled: mtuTextField.errorText === "" &&
                                      portTextField.errorText === ""
 
-                            text: qsTr("Save")
+                            text: qsTr("Save and restart")
 
                             onClicked: {
                                 forceActiveFocus()

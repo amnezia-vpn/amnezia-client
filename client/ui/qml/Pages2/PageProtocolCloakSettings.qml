@@ -174,7 +174,7 @@ PageType {
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
-                            text: qsTr("Save")
+                            text: qsTr("Save and restart")
 
                             clickedFunc: function() {
                                 forceActiveFocus()

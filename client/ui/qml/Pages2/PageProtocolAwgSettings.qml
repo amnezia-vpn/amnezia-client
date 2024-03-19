@@ -357,7 +357,7 @@ PageType {
                                      junkPacketCountTextField.errorText === "" &&
                                      portTextField.errorText === ""
 
-                            text: qsTr("Save")
+                            text: qsTr("Save and restart")
 
                             onClicked: {
                                 var headerText = qsTr("Save settings?")
