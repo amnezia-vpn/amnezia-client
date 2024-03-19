@@ -141,6 +141,15 @@ Controller.prototype.FinishedPageCallback = function ()
         installer.autoAcceptMessageBoxes();
         gui.clickButton(buttons.FinishButton);
     }
+
+    if (installer.isUninstaller()) {
+        var widget = gui.pageById(QInstaller.InstallationFinished);
+        if (widget) {
+            widget["RunItCheckBox"].visible = true;
+            widget["RunItCheckBox"].text = "Remove all settings and data";
+            gui.finishButtonClicked.connect(onFinishButtonClicked);
+        }
+    }
 }
 
 Controller.prototype.RestartPageCallback = function ()
@@ -220,6 +229,32 @@ onNextButtonClicked = function()
     var widget = gui.pageById(QInstaller.TargetDirectory);
     if (widget !== null) {
         installer.setValue("APP_BUNDLE_TARGET_DIR", widget.TargetDirectoryLineEdit.text);
+    }
+}
+
+onFinishButtonClicked = function() {
+    var widget = gui.pageById(QInstaller.InstallationFinished);
+    if (widget) {
+        var isChecked = widget["RunItCheckBox"].checked;
+        
+        if (isChecked) {
+            // TODO: Remove MessageBoxes
+            if (runningOnWindows()) {
+                var cmdArgs = ["/C", "reg", "delete", "HKEY_CURRENT_USER\\Software\\AmneziaVPN.ORG", "/f"];
+                var result = installer.execute("cmd", cmdArgs);
+                QMessageBox.warning("quit.question", "Result command", result, QMessageBox.Ok);
+            }
+            else if (runningOnMacOS()) {
+                var cmdArgs = ["rm", "~/Library/Preferences/org.amneziavpn.AmneziaVPN.plist"];
+                var result = installer.execute("/bin/bash", cmdArgs);
+                QMessageBox.warning("quit.question", "Result command", result, QMessageBox.Ok);
+            }
+            else if (runningOnLinux()) {
+                var cmdArgs = ["rm", "~/.config/AmneziaVPN.ORG/AmneziaVPN.conf"];
+                var result = installer.execute("/bin/bash", cmdArgs);
+                QMessageBox.warning("quit.question", "Result command", result, QMessageBox.Ok);
+            }
+        }
     }
 }
 
