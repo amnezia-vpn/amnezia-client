@@ -95,6 +95,7 @@ Window  {
 
     Connections {
         target: SettingsController
+
         function onChangeSettingsFinished(finishedMessage) {
             PageController.showNotificationMessage(finishedMessage)
         }
