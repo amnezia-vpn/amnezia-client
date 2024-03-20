@@ -224,11 +224,11 @@ void Settings::setSaveLogs(bool enabled)
         if (!Logger::init()) {
             qWarning() << "Initialization of debug subsystem failed";
         }
-#endif
-        setLogEnableDate(QDateTime::currentDateTime());
-#ifndef Q_OS_ANDROID
     }
 #endif
+    if (enabled) {
+        setLogEnableDate(QDateTime::currentDateTime());
+    }
     emit saveLogsChanged(enabled);
 }
 
