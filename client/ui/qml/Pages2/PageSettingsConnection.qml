@@ -73,8 +73,6 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                visible: true
-
                 Layout.fillWidth: true
 
                 text: qsTr("Site-based split tunneling")
@@ -87,11 +85,11 @@ PageType {
             }
 
             DividerType {
-                visible: GC.isDesktop()
+                visible: Qt.platform.os !== "ios"
             }
 
             LabelWithButtonType {
-                visible: false
+                visible: Qt.platform.os !== "ios"
 
                 Layout.fillWidth: true
 
@@ -100,11 +98,12 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
                 }
             }
 
             DividerType {
-                visible: false
+                visible: Qt.platform.os !== "ios"
             }
         }
     }

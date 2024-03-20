@@ -342,6 +342,36 @@ void Settings::clearSettings()
     emit settingsCleared();
 }
 
+QString Settings::appsRouteModeString(AppsRouteMode mode) const
+{
+    switch (mode) {
+    case VpnAllApps: return "AllApps";
+    case VpnOnlyForwardApps: return "ForwardApps";
+    case VpnAllExceptApps: return "ExceptApps";
+    }
+}
+
+Settings::AppsRouteMode Settings::getAppsRouteMode() const
+{
+    return static_cast<AppsRouteMode>(value("Conf/appsRouteMode", 0).toInt());
+}
+
+void Settings::setAppsRouteMode(AppsRouteMode mode)
+{
+    setValue("Conf/appsRouteMode", mode);
+}
+
+QStringList Settings::getVpnApps(AppsRouteMode mode) const
+{
+    return value("Conf/" + appsRouteModeString(mode)).toStringList();
+}
+
+void Settings::setVpnApps(AppsRouteMode mode, const QStringList &apps)
+{
+    setValue("Conf/" + appsRouteModeString(mode), apps);
+    m_settings.sync();
+}
+
 ServerCredentials Settings::defaultServerCredentials() const
 {
     return serverCredentials(defaultServerIndex());

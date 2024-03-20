@@ -25,6 +25,7 @@
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
 #include "ui/controllers/apiController.h"
+#include "ui/controllers/appSplitTunnelingController.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
@@ -41,6 +42,7 @@
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/sites_model.h"
 #include "ui/models/clientManagementModel.h"
+#include "ui/models/appSplitTunnelingModel.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
@@ -97,6 +99,7 @@ private:
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<ProtocolsModel> m_protocolsModel;
     QSharedPointer<SitesModel> m_sitesModel;
+    QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
 
     QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
@@ -123,6 +126,7 @@ private:
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
     QScopedPointer<ApiController> m_apiController;
+    QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
 };
 
 #endif // AMNEZIA_APPLICATION_H
