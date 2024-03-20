@@ -186,6 +186,20 @@ PageType {
                 Layout.bottomMargin: 44
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 text: ServersModel.defaultServerDescriptionCollapsed
+
+                FadeBehavior on text { }
+
+                Connections {
+                    target: drawer
+
+                    function onOpen() {
+                        collapsedServerMenuDescription.text = ServersModel.defaultServerDescriptionExpanded
+                    }
+
+                    function onClose() {
+                        collapsedServerMenuDescription.text = ServersModel.defaultServerDescriptionCollapsed
+                    }
+                }
             }
         }
         expandedContent: Item {
@@ -223,7 +237,21 @@ PageType {
                     Layout.fillWidth: true
                     horizontalAlignment: Qt.AlignHCenter
                     verticalAlignment: Qt.AlignVCenter
-                    text: ServersModel.defaultServerDescriptionExpanded
+                    text: ServersModel.defaultServerDescriptionCollapsed
+
+                    FadeBehavior on text { }
+
+                    Connections {
+                        target: drawer
+
+                        function onOpen() {
+                            expandedServersMenuDescription.text = ServersModel.defaultServerDescriptionExpanded
+                        }
+
+                        function onClose() {
+                            expandedServersMenuDescription.text = ServersModel.defaultServerDescriptionCollapsed
+                        }
+                    }
                 }
 
                 RowLayout {
