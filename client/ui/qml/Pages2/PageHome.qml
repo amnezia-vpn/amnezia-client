@@ -41,6 +41,8 @@ PageType {
             BasicButtonType {
                 property bool isLoggingEnabled: SettingsController.isLoggingEnabled
 
+                Layout.alignment: Qt.AlignHCenter
+
                 implicitHeight: 36
 
                 defaultColor: "transparent"
