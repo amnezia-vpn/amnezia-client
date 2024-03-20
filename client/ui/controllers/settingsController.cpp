@@ -27,6 +27,7 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
       m_settings(settings)
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
+    checkIfNeedDisableLogs();
 }
 
 void SettingsController::toggleAmneziaDns(bool enable)
@@ -71,8 +72,11 @@ void SettingsController::toggleLogging(bool enable)
 {
     m_settings->setSaveLogs(enable);
 #ifdef Q_OS_IOS
-  AmneziaVPN::toggleLogging(enable);
+    AmneziaVPN::toggleLogging(enable);
 #endif
+    if (enable == true) {
+        checkIfNeedDisableLogs();
+    }
     emit loggingStateChanged();
 }
 
@@ -204,4 +208,14 @@ bool SettingsController::isCameraPresent()
 #else
     return false;
 #endif
+}
+
+void SettingsController::checkIfNeedDisableLogs()
+{
+    m_loggingDisableDate = m_settings->getLogEnableDate().addDays(14);
+    if (m_loggingDisableDate <= QDateTime::currentDateTime()) {
+        toggleLogging(false);
+        clearLogs();
+        emit loggingDisableByWatcher();
+    }
 }
