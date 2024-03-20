@@ -12,6 +12,7 @@
 #ifdef Q_OS_WIN
 #include "tapcontroller_win.h"
 #include "../client/platforms/windows/daemon/windowsfirewall.h"
+#include "../client/platforms/windows/daemon/windowsdaemon.h"
 #endif
 
 #ifdef Q_OS_LINUX
@@ -24,6 +25,7 @@
 
 IpcServer::IpcServer(QObject *parent):
     IpcInterfaceSource(parent)
+
 {}
 
 int IpcServer::createPrivilegedProcess()
@@ -288,11 +290,11 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
     config.m_dnsServer = configStr.value(amnezia::config_key::dns1).toString();
     config.m_serverPublicKey = "openvpn";
     config.m_serverIpv4Gateway = configStr.value("vpnGateway").toString();
+    config.m_serverIpv4AddrIn = configStr.value("vpnGateway").toString();
+    int vpnAdapterIndex = configStr.value("vpnAdapterIndex").toInt();
 
     int splitTunnelType = configStr.value("splitTunnelType").toInt();
     QJsonArray splitTunnelSites = configStr.value("splitTunnelSites").toArray();
-
-    qDebug() << "splitTunnelType " << splitTunnelType << "splitTunnelSites " << splitTunnelSites;
 
     QStringList AllowedIPAddesses;
 
@@ -325,6 +327,8 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
         }
     }
 
+    WindowsDaemon::instance()->prepareActivation(config);
+    WindowsDaemon::instance()->activateSplitTunnel(config, vpnAdapterIndex);
     return WindowsFirewall::instance()->enablePeerTraffic(config);
 #endif
     return true;
