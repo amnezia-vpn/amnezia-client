@@ -226,7 +226,20 @@ void Settings::setSaveLogs(bool enabled)
         }
     }
 #endif
+    if (enabled) {
+        setLogEnableDate(QDateTime::currentDateTime());
+    }
     emit saveLogsChanged(enabled);
+}
+
+QDateTime Settings::getLogEnableDate()
+{
+    return value("Conf/logEnableDate").toDateTime();
+}
+
+void Settings::setLogEnableDate(QDateTime date)
+{
+    setValue("Conf/logEnableDate", date);
 }
 
 QString Settings::routeModeString(RouteMode mode) const
