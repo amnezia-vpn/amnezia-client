@@ -13,7 +13,7 @@
 
 #include "containers/containers_defs.h"
 #include "settings.h"
-#include "utilities.h"
+#include "core/networkUtilities.h""
 
 VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings, QObject *parent)
     : ConfiguratorBase(settings, parent)
@@ -65,13 +65,13 @@ QPair<QString, QString> VpnConfigurator::getDnsForConfig(int serverIndex)
     dns.first = server.value(config_key::dns1).toString();
     dns.second = server.value(config_key::dns2).toString();
 
-    if (dns.first.isEmpty() || !Utils::checkIPv4Format(dns.first)) {
+    if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
         if (useAmneziaDns && m_settings->containers(serverIndex).contains(DockerContainer::Dns)) {
             dns.first = protocols::dns::amneziaDnsIp;
         } else
             dns.first = m_settings->primaryDns();
     }
-    if (dns.second.isEmpty() || !Utils::checkIPv4Format(dns.second)) {
+    if (dns.second.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.second)) {
         dns.second = m_settings->secondaryDns();
     }
 

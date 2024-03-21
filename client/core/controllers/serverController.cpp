@@ -26,6 +26,7 @@
 #include "logger.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
+#include "core/networkUtilities.h"
 #include "settings.h"
 #include "utilities.h"
 
@@ -651,7 +652,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER",
                     amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
 
-    QString serverIp = Utils::getIPAddress(credentials.hostName);
+    QString serverIp = NetworkUtilities::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {
         vars.append({ { "$SERVER_IP_ADDRESS", serverIp } });
     } else {

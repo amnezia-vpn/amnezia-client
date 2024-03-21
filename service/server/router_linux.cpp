@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <QFileInfo>
 
+#include <core/networkUtilities.h>
+
 RouterLinux &RouterLinux::Instance()
 {
     static RouterLinux s;
@@ -28,10 +30,10 @@ RouterLinux &RouterLinux::Instance()
 
 bool RouterLinux::routeAdd(const QString &ipWithSubnet, const QString &gw, const int &sock)
 {
-    QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
-    QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
+    QString ip = NetworkUtilities::ipAddressFromIpWithSubnet(ipWithSubnet);
+    QString mask = NetworkUtilities::netMaskFromIpWithSubnet(ipWithSubnet);
 
-    if (!Utils::checkIPv4Format(ip) || !Utils::checkIPv4Format(gw)) {
+    if (!NetworkUtilities::checkIPv4Format(ip) || !NetworkUtilities::checkIPv4Format(gw)) {
         qCritical().noquote() << "Critical, trying to add invalid route: " << ip << gw;
         return false;
     }
@@ -98,10 +100,10 @@ bool RouterLinux::routeDelete(const QString &ipWithSubnet, const QString &gw, co
     qDebug().noquote() << "RouterLinux::routeDelete: " << ipWithSubnet << gw;
 #endif
 
-    QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
-    QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
+    QString ip = NetworkUtilities::ipAddressFromIpWithSubnet(ipWithSubnet);
+    QString mask = NetworkUtilities::netMaskFromIpWithSubnet(ipWithSubnet);
 
-    if (!Utils::checkIPv4Format(ip) || !Utils::checkIPv4Format(gw)) {
+    if (!NetworkUtilities::checkIPv4Format(ip) || !NetworkUtilities::checkIPv4Format(gw)) {
         qCritical().noquote() << "Critical, trying to remove invalid route: " << ip << gw;
         return false;
     }

@@ -27,7 +27,7 @@
     #include "platforms/ios/ios_controller.h"
 #endif
 
-#include "utilities.h"
+#include "core/networkUtilities.h""
 #include "vpnconnection.h"
 
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
@@ -123,10 +123,10 @@ void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
     QStringList sites;
     const QVariantMap &m = m_settings->vpnSites(mode);
     for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
-        if (Utils::checkIpSubnetFormat(i.key())) {
+        if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
             ips.append(i.key());
         } else {
-            if (Utils::checkIpSubnetFormat(i.value().toString())) {
+            if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
                 ips.append(i.value().toString());
             }
             sites.append(i.key());

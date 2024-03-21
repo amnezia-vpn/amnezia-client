@@ -1,11 +1,12 @@
 #include "router_win.h"
-#include "../client/utilities.h"
 
 #include <string>
 #include <tlhelp32.h>
 #include <tchar.h>
 
 #include <QProcess>
+
+#include <core/networkUtilities.h>
 
 LONG (NTAPI * NtSuspendProcess)(HANDLE ProcessHandle) = NULL;
 LONG (NTAPI * NtResumeProcess)(HANDLE ProcessHandle)  = NULL;
@@ -35,7 +36,7 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 //                          .arg(ips.join("\n"));
 
 
-    if (!Utils::checkIPv4Format(gw)) {
+    if (!NetworkUtilities::checkIPv4Format(gw)) {
         qCritical().noquote() << "Trying to add invalid route, gw: " << gw;
         return 0;
     }
@@ -102,14 +103,14 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 
     for (int i = 0; i < ips.size(); ++i) {
         QString ipWithMask = ips.at(i);
-        QString ip = Utils::ipAddressFromIpWithSubnet(ipWithMask);
+        QString ip = NetworkUtilities::ipAddressFromIpWithSubnet(ipWithMask);
 
-        if (!Utils::checkIPv4Format(ip)) {
+        if (!NetworkUtilities::checkIPv4Format(ip)) {
             qCritical().noquote() << "Critical, trying to add invalid route, ip: " << ip;
             continue;
         }
 
-        QString mask = Utils::netMaskFromIpWithSubnet(ipWithMask);
+        QString mask = NetworkUtilities::netMaskFromIpWithSubnet(ipWithMask);
 
         // address
         ipfrow.dwForwardDest = inet_addr(ip.toStdString().c_str());
@@ -238,8 +239,8 @@ int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
     for (int i = 0; i < ips.size(); ++i) {
         QString ipMask = ips.at(i);
         if (ipMask.isEmpty()) continue;
-        QString ip = Utils::ipAddressFromIpWithSubnet(ipMask);
-        QString mask = Utils::netMaskFromIpWithSubnet(ipMask);
+        QString ip = NetworkUtilities::ipAddressFromIpWithSubnet(ipMask);
+        QString mask = NetworkUtilities::netMaskFromIpWithSubnet(ipMask);
 
         if (ip.isEmpty()) continue;
 

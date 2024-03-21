@@ -2,6 +2,7 @@
 
 #include "utilities.h"
 #include "containers/containers_defs.h"
+#include "core/networkUtilities.h"
 
 #include <QCryptographicHash>
 #include <QJsonDocument>
@@ -13,7 +14,7 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent):
     VpnProtocol(configuration, parent)
 {
     readXrayConfiguration(configuration);
-    m_routeGateway = Utils::getGatewayAndIface();
+    m_routeGateway = NetworkUtilities::getGatewayAndIface();
     m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
 }

@@ -129,6 +129,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.h
 )
 
 # Mozilla headres
@@ -164,6 +165,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.cpp
 )
 
 # Mozilla sources
