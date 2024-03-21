@@ -233,24 +233,21 @@ onNextButtonClicked = function()
 }
 
 onFinishButtonClicked = function() {
-    var widget = gui.pageById(QInstaller.InstallationFinished);
+    let widget = gui.pageById(QInstaller.InstallationFinished);
     if (widget) {
-        var isChecked = widget["RunItCheckBox"].checked;
+        let isChecked = widget["RunItCheckBox"].checked;
         
         if (isChecked) {
-            // TODO: Remove MessageBoxes
             if (runningOnWindows()) {
-                var cmdArgs = ["/C", "reg", "delete", "HKEY_CURRENT_USER\\Software\\AmneziaVPN.ORG", "/f"];
-                var result = installer.execute("cmd", cmdArgs);
-                QMessageBox.warning("quit.question", "Result command", result, QMessageBox.Ok);
+                let cmdArgs = ["/C", "reg", "delete", "HKEY_CURRENT_USER\\Software\\AmneziaVPN.ORG", "/f"];
+                installer.execute("cmd", cmdArgs);
             }
             else if (runningOnMacOS()) {
-                var cmdArgs = ["rm", "~/Library/Preferences/org.amneziavpn.AmneziaVPN.plist"];
-                var result = installer.execute("/bin/bash", cmdArgs);
-                QMessageBox.warning("quit.question", "Result command", result, QMessageBox.Ok);
+                let cmdArgs = ["-c", "rm ~/Library/Preferences/org.amneziavpn.AmneziaVPN.plist"];
+                installer.execute("/bin/bash", cmdArgs);
             }
             else if (runningOnLinux()) {
-                var cmdArgs = ["-c", "rm /home/$USER/.config/AmneziaVPN.ORG/AmneziaVPN.conf"];
+                let cmdArgs = ["-c", "rm ~/.config/AmneziaVPN.ORG/AmneziaVPN.conf"];
                 installer.execute("/bin/bash", cmdArgs);
             }
         }
