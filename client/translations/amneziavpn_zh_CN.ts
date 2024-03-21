@@ -1080,7 +1080,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="179"/>
-        <source>Privay Policy</source>
+        <source>Privacy Policy</source>
         <translation>隐私政策</translation>
     </message>
 </context>

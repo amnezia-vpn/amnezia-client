@@ -176,7 +176,7 @@ PageType {
               disabledColor: "#878B91"
               textColor: "#FBB26A"
 
-              text: qsTr("Privay Policy")
+              text: qsTr("Privacy Policy")
 
               clickedFunc: function() {
                 Qt.openUrlExternally("https://amnezia.org/en/policy")

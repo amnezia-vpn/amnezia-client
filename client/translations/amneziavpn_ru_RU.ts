@@ -1047,8 +1047,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="179"/>
-        <source>Privay Policy</source>
-        <translation>Nолитика конфиденциальности</translation>
+        <source>Privacy Policy</source>
+        <translation>Политика конфиденциальности</translation>
     </message>
 </context>
 <context>
@@ -2081,7 +2081,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="113"/>
         <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
-        <translation>Используйте коды подключения только из источников, которым вы доверяете. Для перехвата ваших данных могли быть созданы коды из общедоступных источников.</translation>
+        <translation>Используйте файлы конфигурации только из тех источников, которым вы доверяете. Файлы из общедоступных источников могли бы созданы с целью перехвата ваших личных данных</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="154"/>
