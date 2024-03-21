@@ -150,7 +150,15 @@ PageType {
                 width: parent.width
                 height: apps.contentItem.height
 
-                model: AppSplitTunnelingModel
+                model: SortFilterProxyModel {
+                    id: proxyAppSplitTunnelingModel
+                    sourceModel: AppSplitTunnelingModel
+                    filters: RegExpFilter {
+                        roleName: "appPath"
+                        pattern: ".*" + searchField.textField.text + ".*"
+                        caseSensitivity: Qt.CaseInsensitive
+                    }
+                }
 
                 clip: true
                 interactive: false
@@ -179,7 +187,7 @@ PageType {
                                 var noButtonText = qsTr("Cancel")
 
                                 var yesButtonFunction = function() {
-                                    AppSplitTunnelingController.removeApp(index)
+                                    AppSplitTunnelingController.removeApp(proxyAppSplitTunnelingModel.mapToSource(index))
                                 }
                                 var noButtonFunction = function() {
                                 }
@@ -214,7 +222,7 @@ PageType {
         anchors.bottomMargin: 24
 
         TextFieldWithHeaderType {
-            id: website_ip_field
+            id: searchField
 
             Layout.fillWidth: true
 
