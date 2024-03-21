@@ -53,9 +53,6 @@ class AmneziaActivity : QtActivity() {
     private lateinit var vpnServiceMessenger: IpcMessenger
     private var tmpFileContentToSave: String = ""
 
-    // used to detect always-on vpn while checking vpn permissions
-    private var lastPauseTime = -1L
-
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
             override fun handleMessage(msg: Message) {
@@ -184,12 +181,6 @@ class AmneziaActivity : QtActivity() {
         }
     }
 
-    override fun onPause() {
-        Log.d(TAG, "Pause Amnezia activity")
-        super.onPause()
-        lastPauseTime = System.currentTimeMillis()
-    }
-
     override fun onStop() {
         Log.d(TAG, "Stop Amnezia activity")
         doUnbindService()
@@ -232,13 +223,8 @@ class AmneziaActivity : QtActivity() {
                     }
 
                     else -> {
-                        if (resultCode == RESULT_CANCELED && System.currentTimeMillis() - lastPauseTime < 200) {
-                            Log.w(TAG, "Another always-on VPN is active, vpn permission auto-denied")
-                            showVpnAlwaysOnErrorDialog()
-                        } else {
-                            Log.w(TAG, "Vpn permission denied, resultCode: $resultCode")
-                            Toast.makeText(this, resources.getText(R.string.vpnDenied), Toast.LENGTH_LONG).show()
-                        }
+                        Log.w(TAG, "Vpn permission denied, resultCode: $resultCode")
+                        showOnVpnPermissionRejectDialog()
                         checkVpnPermissionCallbacks?.run { onFail() }
                     }
                 }
@@ -296,11 +282,11 @@ class AmneziaActivity : QtActivity() {
         onSuccess()
     }
 
-     private fun showVpnAlwaysOnErrorDialog() {
+    private fun showOnVpnPermissionRejectDialog() {
         AlertDialog.Builder(this)
             .setTitle(R.string.vpnSetupFailed)
             .setMessage(R.string.vpnSetupFailedMessage)
-            .setNegativeButton(R.string.cancel) { _, _ -> }
+            .setNegativeButton(R.string.ok) { _, _ -> }
             .setPositiveButton(R.string.openVpnSettings) { _, _ ->
                 startActivity(Intent(Settings.ACTION_VPN_SETTINGS))
             }

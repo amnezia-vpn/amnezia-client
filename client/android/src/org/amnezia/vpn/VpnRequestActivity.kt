@@ -23,8 +23,6 @@ private const val TAG = "VpnRequestActivity"
 
 class VpnRequestActivity : ComponentActivity() {
 
-    // used to detect always-on vpn while checking vpn permissions
-    private var lastPauseTime = -1L
     private var userPresentReceiver: BroadcastReceiver? = null
     private val requestLauncher =
         registerForActivityResult(StartActivityForResult(), ::checkRequestResult)
@@ -50,11 +48,6 @@ class VpnRequestActivity : ComponentActivity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        lastPauseTime = System.currentTimeMillis()
-    }
-
     override fun onDestroy() {
         userPresentReceiver?.let {
             unregisterReceiver(it)
@@ -70,14 +63,8 @@ class VpnRequestActivity : ComponentActivity() {
             }
 
             else -> {
-                if (resultCode == RESULT_CANCELED && System.currentTimeMillis() - lastPauseTime < 200) {
-                    Log.w(TAG, "Another always-on VPN is active, vpn permission auto-denied")
-                    showVpnAlwaysOnErrorDialog()
-                } else {
-                    Log.w(TAG, "Vpn permission denied, resultCode: $resultCode")
-                    Toast.makeText(this, resources.getText(R.string.vpnDenied), Toast.LENGTH_LONG).show()
-                    finish()
-                }
+                Log.w(TAG, "Vpn permission denied, resultCode: $resultCode")
+                showOnVpnPermissionRejectDialog()
             }
         }
     }
@@ -91,11 +78,11 @@ class VpnRequestActivity : ComponentActivity() {
         }
     }
 
-    private fun showVpnAlwaysOnErrorDialog() {
+    private fun showOnVpnPermissionRejectDialog() {
         AlertDialog.Builder(this, getDialogTheme())
             .setTitle(R.string.vpnSetupFailed)
             .setMessage(R.string.vpnSetupFailedMessage)
-            .setNegativeButton(R.string.cancel) { _, _ -> }
+            .setNegativeButton(R.string.ok) { _, _ -> }
             .setPositiveButton(R.string.openVpnSettings) { _, _ ->
                 startActivity(Intent(Settings.ACTION_VPN_SETTINGS))
             }
