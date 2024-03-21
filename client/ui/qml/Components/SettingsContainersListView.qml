@@ -64,10 +64,8 @@ ListView {
                         }
 
                         case ContainerEnum.WireGuard: {
-                            ProtocolsModel.updateModel(config)
-                            PageController.goToPage(PageEnum.PageProtocolRaw)
-    //                        WireGuardConfigModel.updateModel(config)
-    //                        goToPage(PageEnum.PageProtocolWireGuardSettings)
+                            WireGuardConfigModel.updateModel(config)
+                            PageController.goToPage(PageEnum.PageProtocolWireGuardSettings)
                             break
                         }
                         case ContainerEnum.Awg: {
@@ -78,8 +76,6 @@ ListView {
                         case ContainerEnum.Ipsec: {
                             ProtocolsModel.updateModel(config)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
-    //                        Ikev2ConfigModel.updateModel(config)
-    //                        goToPage(PageEnum.PageProtocolIKev2Settings)
                             break
                         }
                         case ContainerEnum.Sftp: {

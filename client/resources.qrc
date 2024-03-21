@@ -230,6 +230,7 @@
         <file>server_scripts/xray/run_container.sh</file>
         <file>server_scripts/xray/start.sh</file>
         <file>server_scripts/xray/template.json</file>
+        <file>ui/qml/Pages2/PageProtocolWireGuardSettings.qml</file>
         <file>ui/qml/Components/HomeSplitTunnelingDrawer.qml</file>
         <file>images/controls/split-tunneling.svg</file>
         <file>ui/qml/Controls2/DrawerType2.qml</file>
