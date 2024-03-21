@@ -319,7 +319,8 @@ PageType {
                             defaultColor: "transparent"
                             hoveredColor: Qt.rgba(1, 1, 1, 0.08)
                             pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                            textColor: "#EB5757"
+                            disabledColor: "#18191B"
+                            textColor: enabled ? "#EB5757" : "#891010"
 
                             text: qsTr("Remove AmneziaWG")
 
