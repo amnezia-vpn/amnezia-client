@@ -250,9 +250,8 @@ onFinishButtonClicked = function() {
                 QMessageBox.warning("quit.question", "Result command", result, QMessageBox.Ok);
             }
             else if (runningOnLinux()) {
-                var cmdArgs = ["rm", "~/.config/AmneziaVPN.ORG/AmneziaVPN.conf"];
-                var result = installer.execute("/bin/bash", cmdArgs);
-                QMessageBox.warning("quit.question", "Result command", result, QMessageBox.Ok);
+                var cmdArgs = ["-c", "rm /home/$USER/.config/AmneziaVPN.ORG/AmneziaVPN.conf"];
+                installer.execute("/bin/bash", cmdArgs);
             }
         }
     }
