@@ -37,6 +37,7 @@ namespace amnezia
         ServerCancelInstallation = 204,
         ServerUserNotInSudo = 205,
         ServerPacketManagerError = 206,
+        ServerDockerVersionError = 207,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,
