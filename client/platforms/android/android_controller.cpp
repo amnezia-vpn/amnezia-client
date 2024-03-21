@@ -209,6 +209,13 @@ void AndroidController::setScreenshotsEnabled(bool enabled)
     callActivityMethod("setScreenshotsEnabled", "(Z)V", enabled);
 }
 
+QJsonArray AndroidController::getAppList()
+{
+    QJniObject appList = callActivityMethod<jstring>("getAppList", "()Ljava/lang/String;");
+    QJsonArray jsonAppList = QJsonDocument::fromJson(appList.toString().toUtf8()).array();
+    return jsonAppList;
+}
+
 // Moving log processing to the Android side
 jclass AndroidController::log;
 jmethodID AndroidController::logDebug;

@@ -40,6 +40,7 @@ public:
     void exportLogsFile(const QString &fileName);
     void clearLogs();
     void setScreenshotsEnabled(bool enabled);
+    QJsonArray getAppList();
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);

@@ -22,12 +22,15 @@ import androidx.core.content.ContextCompat
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.text.RegexOption.IGNORE_CASE
+import AppListProvider
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
@@ -462,5 +465,18 @@ class AmneziaActivity : QtActivity() {
             val flag = if (enabled) 0 else LayoutParams.FLAG_SECURE
             window.setFlags(flag, LayoutParams.FLAG_SECURE)
         }
+    }
+
+    @Suppress("unused")
+    fun getAppList(): String {
+        var appList = ""
+        runBlocking {
+            mainScope.launch {
+                withContext(Dispatchers.IO) {
+                    appList = AppListProvider.getAppList(packageManager, packageName)
+                }
+            }.join()
+        }
+        return appList
     }
 }
