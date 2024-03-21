@@ -127,7 +127,8 @@ open class Wireguard : Protocol() {
             }
         }
 
-        configData["hostName"]?.let { excludeRoute(InetNetwork.parse(it)) }
+        configDataJson.getString("hostName").let { excludeRoute(InetNetwork.parse(it)) }
+
         configData["Endpoint"]?.let { setEndpoint(InetEndpoint.parse(it)) }
         configData["PersistentKeepalive"]?.let { setPersistentKeepalive(it.toInt()) }
         configData["PrivateKey"]?.let { setPrivateKeyHex(it.base64ToHex()) }
