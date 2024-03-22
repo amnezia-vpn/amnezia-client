@@ -247,7 +247,7 @@ onFinishButtonClicked = function() {
                 installer.execute("/bin/bash", cmdArgs);
             }
             else if (runningOnLinux()) {
-                let cmdArgs = ["-c", "rm ~/.config/AmneziaVPN.ORG/AmneziaVPN.conf"];
+                let cmdArgs = ["-c", "rm -rf ~/.config/AmneziaVPN.ORG"];
                 installer.execute("/bin/bash", cmdArgs);
             }
         }
