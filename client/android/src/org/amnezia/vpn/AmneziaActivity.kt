@@ -6,6 +6,7 @@ import android.content.Intent.EXTRA_MIME_TYPES
 import android.content.Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.net.VpnService
 import android.os.Bundle
@@ -469,6 +470,7 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun getAppList(): String {
+        Log.v(TAG, "Get app list")
         var appList = ""
         runBlocking {
             mainScope.launch {
@@ -478,5 +480,11 @@ class AmneziaActivity : QtActivity() {
             }.join()
         }
         return appList
+    }
+
+    @Suppress("unused")
+    fun getAppIcon(packageName: String, width: Int, height: Int): Bitmap {
+        Log.v(TAG, "Get app icon: $packageName")
+        return AppListProvider.getAppIcon(packageManager, packageName, width, height)
     }
 }

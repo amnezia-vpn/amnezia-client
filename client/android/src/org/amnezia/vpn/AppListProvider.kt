@@ -2,8 +2,15 @@ import android.Manifest.permission.INTERNET
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
+import android.graphics.Bitmap
+import android.graphics.Bitmap.Config.ARGB_8888
+import androidx.core.graphics.drawable.toBitmapOrNull
+import org.amnezia.vpn.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
+
+private const val TAG = "AppListProvider"
 
 object AppListProvider {
     fun getAppList(pm: PackageManager, selfPackageName: String): String {
@@ -16,6 +23,17 @@ object AppListProvider {
             .forEach(jsonArray::put)
         return jsonArray.toString()
     }
+
+    fun getAppIcon(pm: PackageManager, packageName: String, width: Int, height: Int): Bitmap {
+        val icon = try {
+            pm.getApplicationIcon(packageName)
+        } catch (e: NameNotFoundException) {
+            Log.e(TAG, "Package $packageName was not found: $e")
+            pm.defaultActivityIcon
+        }
+        return icon.toBitmapOrNull(width, height, ARGB_8888)
+            ?: Bitmap.createBitmap(width, height, ARGB_8888)
+    }
 }
 
 private class App(pi: PackageInfo, pm: PackageManager, ai: ApplicationInfo = pi.applicationInfo) : Comparable<App> {
@@ -27,7 +45,6 @@ private class App(pi: PackageInfo, pm: PackageManager, ai: ApplicationInfo = pi.
     init {
         val name = ai.loadLabel(pm).toString()
         this.name = if (name != packageName) name else null
-        ai.flags and ApplicationInfo.FLAG_SYSTEM
     }
 
     override fun compareTo(other: App): Int {
