@@ -24,7 +24,6 @@ PageType {
             } else {
                 PageController.closePage()
             }
-            PageController.showErrorMessage(errorMessage)
         }
 
         function onImportFinished() {

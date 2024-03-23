@@ -124,8 +124,16 @@ PageType {
     Connections {
         target: ImportController
 
-        function onImportErrorOccurred(errorMessage) {
+        function onImportErrorOccurred(errorMessage, goToPageHome) {
             PageController.showErrorMessage(errorMessage)
+        }
+    }
+
+    Connections {
+        target: SettingsController
+
+        function onLoggingDisableByWatcher() {
+            PageController.showNotificationMessage(qsTr("Logging was disabled after 14 days, log files were deleted"))
         }
     }
 

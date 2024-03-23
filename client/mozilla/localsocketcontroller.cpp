@@ -124,10 +124,14 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::config_key::client_priv_key));
   json.insert("deviceIpv4Address", wgConfig.value(amnezia::config_key::client_ip));
-  // todo review wg ipv6
-#ifdef Q_OS_MACOS
-  json.insert("deviceIpv6Address", "dead::1");
-#endif
+
+  // set up IPv6 unique-local-address, ULA, with "fd00::/8" prefix, not globally routable.
+  // this will be default IPv6 gateway, OS recognizes that IPv6 link is local and switches to IPv4.
+  // Otherwise some OSes (Linux) try IPv6 forever and hang. 
+  // https://en.wikipedia.org/wiki/Unique_local_address (RFC 4193)
+  // https://man7.org/linux/man-pages/man5/gai.conf.5.html
+  json.insert("deviceIpv6Address", "fd58:baa6:dead::1"); // simply "dead::1" is globally-routable, don't use it
+
   json.insert("serverPublicKey", wgConfig.value(amnezia::config_key::server_pub_key));
   json.insert("serverPskKey", wgConfig.value(amnezia::config_key::psk_key));
   json.insert("serverIpv4AddrIn", wgConfig.value(amnezia::config_key::hostName));

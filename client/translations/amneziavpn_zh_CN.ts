@@ -19,8 +19,8 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="65"/>
-        <source>Connection...</source>
-        <translation>连接中...</translation>
+        <source>Connecting...</source>
+        <translation>连接中</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="70"/>
@@ -29,13 +29,13 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="79"/>
-        <source>Reconnection...</source>
-        <translation>重连中...</translation>
+        <source>Reconnecting...</source>
+        <translation>重连中</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="89"/>
-        <source>Disconnection...</source>
-        <translation>断开中...</translation>
+        <source>Disconnecting...</source>
+        <translation>断开中</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="115"/>

@@ -30,6 +30,8 @@ extension Log {
     }
 
     func save(at url: URL) {
+      osLog.log(level: level.osLogType, "\(message)")
+
       guard let data = "\n\(description)".data(using: .utf8) else { return }
 
       if !FileManager.default.fileExists(atPath: url.path) {
@@ -64,18 +66,37 @@ extension Log.Record {
 
     init(from osLogType: OSLogType) {
       switch osLogType {
-      case OSLogType.default:
+      case .default:
         self = .info
-      case OSLogType.info:
+      case .info:
         self = .info
-      case OSLogType.debug:
+      case .debug:
         self = .debug
-      case OSLogType.error:
+      case .error:
         self = .error
-      case OSLogType.fault:
+      case .fault:
         self = .fatal
       default:
         self = .info
+      }
+    }
+
+    var osLogType: OSLogType {
+      switch self {
+      case .info:
+        return .info
+      case .debug:
+        return .debug
+      case .error:
+        return .error
+      case .fatal:
+        return .fault
+      case .warning:
+        return .info
+      case .critical:
+        return .fault
+      case .system:
+        return .fault
       }
     }
   }

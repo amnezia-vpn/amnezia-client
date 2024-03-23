@@ -12,7 +12,7 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="65"/>
-        <source>Connection...</source>
+        <source>Connecting...</source>
         <translation>Подключение...</translation>
     </message>
     <message>
@@ -32,7 +32,7 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="79"/>
-        <source>Reconnection...</source>
+        <source>Reconnecting...</source>
         <translation>Переподключение...</translation>
     </message>
     <message>
@@ -45,7 +45,7 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="89"/>
-        <source>Disconnection...</source>
+        <source>Disconnecting...</source>
         <translation>Отключение...</translation>
     </message>
 </context>
