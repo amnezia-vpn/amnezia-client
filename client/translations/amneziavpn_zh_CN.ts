@@ -384,8 +384,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="360"/>
-        <source>Save and restart</source>
-        <translation>保存并重新启动</translation>
+        <source>Save</source>
+        <translation>保存</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="363"/>
@@ -403,10 +403,6 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="366"/>
         <source>Cancel</source>
         <translation>取消</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">保存并重启Amnezia</translation>
     </message>
 </context>
 <context>
@@ -434,12 +430,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="177"/>
-        <source>Save and restart</source>
-        <translation>保存并重新启动</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">保存并重启Amnezia</translation>
+        <source>Save</source>
+        <translation>保存</translation>
     </message>
 </context>
 <context>
@@ -624,8 +616,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="407"/>
-        <source>Save and restart</source>
-        <translation>保存并重新启动</translation>
+        <source>Save</source>
+        <translation>保存</translation>
     </message>
     <message>
         <source>All users with whom you shared a connection will no longer be able to connect to it</source>
@@ -640,10 +632,6 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="387"/>
         <source>Cancel</source>
         <translation>取消</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">保存并重启Amnezia</translation>
     </message>
 </context>
 <context>
@@ -721,12 +709,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="151"/>
-        <source>Save and restart</source>
-        <translation>保存并重新启动</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">保存并重启Amnezia</translation>
+        <source>Save</source>
+        <translation>保存</translation>
     </message>
 </context>
 <context>
@@ -773,8 +757,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="155"/>
-        <source>Save and restart</source>
-        <translation>保存并重新启动</translation>
+        <source>Save</source>
+        <translation>保存</translation>
     </message>
 </context>
 <context>

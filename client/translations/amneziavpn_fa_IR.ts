@@ -362,8 +362,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="360"/>
-        <source>Save and restart</source>
-        <translation>ذخیره و راه اندازی مجدد</translation>
+        <source>Save</source>
+        <translation>ذخیره</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="363"/>
@@ -381,10 +381,6 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="366"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">ذخیره و راه اندازی مجدد Amnezia</translation>
     </message>
 </context>
 <context>
@@ -412,12 +408,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="177"/>
-        <source>Save and restart</source>
-        <translation>ذخیره و راه اندازی مجدد</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">ذخیره و راه اندازی دوباره Amnezia</translation>
+        <source>Save</source>
+        <translation>ذخیره</translation>
     </message>
 </context>
 <context>
@@ -612,12 +604,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="407"/>
-        <source>Save and restart</source>
-        <translation>ذخیره و راه اندازی مجدد</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">ذخیره و راه اندازی دوباره Amnezia</translation>
+        <source>Save</source>
+        <translation>ذخیره</translation>
     </message>
 </context>
 <context>
@@ -687,12 +675,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="151"/>
-        <source>Save and restart</source>
-        <translation>ذخیره و راه اندازی مجدد</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">ذخیره و راه اندازی دوباره Amnezia</translation>
+        <source>Save</source>
+        <translation>ذخیره</translation>
     </message>
 </context>
 <context>
@@ -739,8 +723,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="155"/>
-        <source>Save and restart</source>
-        <translation>ذخیره و راه اندازی مجدد</translation>
+        <source>Save</source>
+        <translation>ذخیره</translation>
     </message>
 </context>
 <context>

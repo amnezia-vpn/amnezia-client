@@ -362,8 +362,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="360"/>
-        <source>Save and restart</source>
-        <translation>Сохранить и перезапустить</translation>
+        <source>Save</source>
+        <translation>Сохранить</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="363"/>
@@ -381,10 +381,6 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="366"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">Сохранить и перезагрузить Amnezia</translation>
     </message>
 </context>
 <context>
@@ -412,12 +408,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="177"/>
-        <source>Save and restart</source>
-        <translation>Сохранить и перезапустить</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">Сохранить и перезагрузить Amnezia</translation>
+        <source>Save</source>
+        <translation>Сохранить</translation>
     </message>
 </context>
 <context>
@@ -612,12 +604,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="407"/>
-        <source>Save and restart</source>
-        <translation>Сохранить и перезапустить</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">Сохранить и перезагрузить</translation>
+        <source>Save</source>
+        <translation>Сохранить</translation>
     </message>
 </context>
 <context>
@@ -687,12 +675,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="151"/>
-        <source>Save and restart</source>
-        <translation>Сохранить и перезапустить</translation>
-    </message>
-    <message>
-        <source>Save and Restart Amnezia</source>
-        <translation type="vanished">Сохранить и перезагрузить Amnezia</translation>
+        <source>Save</source>
+        <translation>Сохранить</translation>
     </message>
 </context>
 <context>
@@ -739,8 +723,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="155"/>
-        <source>Save and restart</source>
-        <translation>Сохранить и перезапустить</translation>
+        <source>Save</source>
+        <translation>Сохранить</translation>
     </message>
 </context>
 <context>
