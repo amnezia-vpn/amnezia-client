@@ -10,7 +10,8 @@ namespace
 {
     Logger logger("ClientManagementModel");
 
-    namespace configKey {
+    namespace configKey
+    {
         constexpr char clientId[] = "clientId";
         constexpr char clientName[] = "clientName";
         constexpr char container[] = "container";
@@ -61,7 +62,6 @@ void ClientManagementModel::migration(const QByteArray &clientsTableString)
 
         m_clientsTable.push_back(client);
     }
-
 }
 
 ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCredentials credentials)
@@ -121,7 +121,8 @@ ErrorCode ClientManagementModel::updateModel(DockerContainer container, ServerCr
     return error;
 }
 
-ErrorCode ClientManagementModel::getOpenVpnClients(ServerController &serverController, DockerContainer container, ServerCredentials credentials, int &count)
+ErrorCode ClientManagementModel::getOpenVpnClients(ServerController &serverController, DockerContainer container,
+                                                   ServerCredentials credentials, int &count)
 {
     ErrorCode error = ErrorCode::NoError;
     QString stdOut;
@@ -163,12 +164,13 @@ ErrorCode ClientManagementModel::getOpenVpnClients(ServerController &serverContr
     return error;
 }
 
-ErrorCode ClientManagementModel::getWireGuardClients(ServerController &serverController, DockerContainer container, ServerCredentials credentials, int &count)
+ErrorCode ClientManagementModel::getWireGuardClients(ServerController &serverController, DockerContainer container,
+                                                     ServerCredentials credentials, int &count)
 {
     ErrorCode error = ErrorCode::NoError;
 
-    const QString wireGuardConfigFile =
-            QString("opt/amnezia/%1/wg0.conf").arg(container == DockerContainer::WireGuard ? "wireguard" : "awg");
+    const QString wireGuardConfigFile = DockerContainer::WireGuard ? amnezia::protocols::wireguard::serverConfigPath
+                                                                   : amnezia::protocols::awg::serverConfigPath;
     const QString wireguardConfigString =
             serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
     if (error != ErrorCode::NoError) {
@@ -314,13 +316,16 @@ ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContain
         QJsonArray containers = server.value(config_key::containers).toArray();
         for (auto i = 0; i < containers.size(); i++) {
             auto containerConfig = containers.at(i).toObject();
-            auto containerType = ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
+            auto containerType =
+                    ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
             if (containerType == container) {
                 QJsonObject protocolConfig;
                 if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
-                    protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
+                    protocolConfig =
+                            containerConfig.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
                 } else {
-                    protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(containerType)).toObject();
+                    protocolConfig =
+                            containerConfig.value(ContainerProps::containerTypeToString(containerType)).toObject();
                 }
 
                 if (protocolConfig.value(config_key::last_config).toString().contains(clientId)) {
@@ -379,8 +384,17 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
     ErrorCode error;
     ServerController serverController(m_settings);
 
-    const QString wireGuardConfigFile =
-            QString("/opt/amnezia/%1/wg0.conf").arg(container == DockerContainer::WireGuard ? "wireguard" : "awg");
+    QString wireGuardConfigFile;
+    if (container == DockerContainer::Awg) {
+        if (serverController.isNewAwgContainer(credentials)) {
+            wireGuardConfigFile = amnezia::protocols::awg::serverConfigPath;
+        } else {
+            wireGuardConfigFile = "/opt/amnezia/awg/wg0.conf";
+        }
+    } else {
+        wireGuardConfigFile = amnezia::protocols::wireguard::serverConfigPath;
+    }
+
     const QString wireguardConfigString =
             serverController.getTextFileFromContainer(container, credentials, wireGuardConfigFile, &error);
     if (error != ErrorCode::NoError) {
@@ -425,7 +439,13 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
         return error;
     }
 
-    const QString script = "sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip %1)'";
+    QString interfaceName =
+            DockerContainer::WireGuard ? protocols::wireguard::interfaceName : protocols::awg::interfaceName;
+    QString wgBinaryName = DockerContainer::WireGuard ? protocols::wireguard::wgBinaryName : protocols::awg::wgBinaryName;
+    QString wgQuickBinaryName =
+            DockerContainer::WireGuard ? protocols::wireguard::wgQuickBinaryName : protocols::awg::wgQuickBinaryName;
+    QString script = QString("sudo docker exec -i $CONTAINER_NAME bash -c '%4 syncconf %2 <(%3 strip %1)'")
+                             .arg(wireGuardConfigFile, interfaceName, wgQuickBinaryName, wgBinaryName);
     error = serverController.runScript(
             credentials,
             serverController.replaceVars(script.arg(wireGuardConfigFile),
