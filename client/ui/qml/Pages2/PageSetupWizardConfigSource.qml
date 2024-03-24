@@ -13,6 +13,8 @@ import "../Config"
 PageType {
     id: root
 
+    defaultActiveFocusItem:fileButton.rightButton
+
     Connections {
         target: ImportController
 
@@ -61,6 +63,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: fileButton
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
@@ -78,11 +81,14 @@ PageType {
                         }
                     }
                 }
+
+                KeyNavigation.tab: qrButton.visible ? qrButton.rightButton : textButton.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: qrButton
                 Layout.fillWidth: true
                 visible: SettingsController.isCameraPresent()
 
@@ -96,6 +102,8 @@ PageType {
                         PageController.goToPage(PageEnum.PageSetupWizardQrReader)
                     }
                 }
+
+                KeyNavigation.tab: textButton.rightButton
             }
 
             DividerType {
@@ -103,6 +111,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: textButton
                 Layout.fillWidth: true
 
                 text: qsTr("Key as text")
@@ -112,6 +121,8 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSetupWizardTextKey)
                 }
+
+                KeyNavigation.tab: defaultActiveFocusItem
             }
 
             DividerType {}

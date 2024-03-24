@@ -17,6 +17,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: servers.currentItem.focusItem
+
     ColumnLayout {
         id: header
 
@@ -62,6 +64,8 @@ PageType {
                 delegate: Item {
                     implicitWidth: servers.width
                     implicitHeight: delegateContent.implicitHeight
+
+                    property alias focusItem: server.rightButton
 
                     ColumnLayout {
                         id: delegateContent

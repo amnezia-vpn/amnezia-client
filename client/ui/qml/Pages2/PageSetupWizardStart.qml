@@ -15,6 +15,8 @@ PageType {
 
     property bool isControlsDisabled: false
 
+    defaultActiveFocusItem: startButton
+
     Connections {
         target: PageController
 
@@ -132,6 +134,7 @@ PageType {
             }
 
             BasicButtonType {
+                id: startButton
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
@@ -142,9 +145,11 @@ PageType {
                 clickedFunc: function() {
                     connectionTypeSelection.open()
                 }
+                KeyNavigation.tab: startButton2
             }
 
             BasicButtonType {
+                id: startButton2
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -162,6 +167,7 @@ PageType {
                 clickedFunc: function() {
                     Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
                 }
+                KeyNavigation.tab: startButton
             }
         }
     }

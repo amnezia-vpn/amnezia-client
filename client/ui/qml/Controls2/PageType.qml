@@ -11,6 +11,12 @@ Item {
 
     property var defaultActiveFocusItem: null
 
+    onVisibleChanged: {
+        if (visible && !GC.isMobile()) {
+            timer.start()
+        }
+    }
+
 //    MouseArea {
 //        id: globalMouseArea
 //        z: 99

@@ -128,6 +128,8 @@ PageType {
                                 }
                                 serverNameEditDrawer.close()
                             }
+
+                            KeyNavigation.tab: serverName.textField
                         }
 
                         Component.onCompleted: {

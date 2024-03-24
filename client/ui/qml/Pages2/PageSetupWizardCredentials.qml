@@ -125,6 +125,8 @@ PageType {
 
                     PageController.goToPage(PageEnum.PageSetupWizardEasy)
                 }
+
+                KeyNavigation.tab: hostname.textField
             }
 
             LabelTextType {

@@ -11,6 +11,8 @@ import "../Config"
 PageType {
     id: root
 
+    defaultActiveFocusItem: dnsServersButton.rightButton
+
     BackButtonType {
         id: backButton
 
@@ -59,6 +61,7 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                id: dnsServersButton
                 Layout.fillWidth: true
 
                 text: qsTr("DNS servers")
@@ -68,11 +71,14 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsDns)
                 }
+
+                KeyNavigation.tab: splitTunnelingButton.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: splitTunnelingButton
                 visible: true
 
                 Layout.fillWidth: true
@@ -84,6 +90,7 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
                 }
+                KeyNavigation.tab: splitTunnelingButton2.visible ? splitTunnelingButton2.rightButton : root.defaultActiveFocusItem
             }
 
             DividerType {
@@ -91,6 +98,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: splitTunnelingButton2
                 visible: false
 
                 Layout.fillWidth: true
@@ -101,6 +109,7 @@ PageType {
 
                 clickedFunction: function() {
                 }
+                KeyNavigation.tab: root.defaultActiveFocusItem
             }
 
             DividerType {

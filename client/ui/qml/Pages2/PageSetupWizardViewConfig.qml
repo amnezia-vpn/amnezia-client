@@ -15,6 +15,8 @@ PageType {
 
     property bool showContent: false
 
+    defaultActiveFocusItem: showContentButton
+
     Connections {
         target: ImportController
 
@@ -52,7 +54,7 @@ PageType {
         id: fl
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight + connectButton.implicitHeight
+        contentHeight: content.implicitHeight + connectButtonLayout.implicitHeight
 
         ColumnLayout {
             id: content
@@ -96,6 +98,7 @@ PageType {
             }
 
             BasicButtonType {
+                id: showContentButton
                 Layout.topMargin: 16
                 Layout.leftMargin: -8
                 implicitHeight: 32
@@ -111,6 +114,8 @@ PageType {
                 clickedFunc: function() {
                     showContent = !showContent
                 }
+
+                KeyNavigation.tab: connectButton
             }
 
             Rectangle {
@@ -137,7 +142,7 @@ PageType {
     }
 
     ColumnLayout {
-        id: connectButton
+        id: connectButtonLayout
 
         anchors.bottom: parent.bottom
         anchors.left: parent.left
@@ -146,6 +151,7 @@ PageType {
         anchors.leftMargin: 16
 
         BasicButtonType {
+            id: connectButton
             Layout.fillWidth: true
             Layout.bottomMargin: 32
 
@@ -153,6 +159,8 @@ PageType {
             clickedFunc: function() {
                 ImportController.importConfig()
             }
+
+            KeyNavigation.tab: defaultActiveFocusItem
         }
     }
 }

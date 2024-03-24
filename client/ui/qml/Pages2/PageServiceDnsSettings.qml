@@ -28,6 +28,8 @@ PageType {
         }
     }
 
+    defaultActiveFocusItem: removeButton.rightButton
+
     FlickableType {
         id: fl
         anchors.top: backButton.bottom

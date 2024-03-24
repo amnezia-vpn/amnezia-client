@@ -27,6 +27,8 @@ Item {
 
     property string rightImageColor: "#d7d8db"
 
+    property alias rightButton: rightImage
+
     property bool descriptionOnTop: false
 
     implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
@@ -205,6 +207,18 @@ Item {
             if (clickedFunction && typeof clickedFunction === "function") {
                 clickedFunction()
             }
+        }
+    }
+
+    Keys.onEnterPressed: {
+        if (clickedFunction && typeof clickedFunction === "function") {
+            clickedFunction()
+        }
+    }
+
+    Keys.onReturnPressed: {
+        if (clickedFunction && typeof clickedFunction === "function") {
+            clickedFunction()
         }
     }
 }

@@ -192,10 +192,12 @@ Item {
     }
 
     Keys.onEnterPressed: {
-         KeyNavigation.tab.forceActiveFocus();
+        if (KeyNavigation.tab)
+            KeyNavigation.tab.forceActiveFocus();
     }
 
     Keys.onReturnPressed: {
-         KeyNavigation.tab.forceActiveFocus();
+        if (KeyNavigation.tab)
+            KeyNavigation.tab.forceActiveFocus();
     }
 }

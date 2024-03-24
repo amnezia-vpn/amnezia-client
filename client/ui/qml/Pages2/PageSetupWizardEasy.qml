@@ -17,6 +17,8 @@ PageType {
 
     property bool isEasySetup: true
 
+    defaultActiveFocusItem: continueButton
+
     SortFilterProxyModel {
         id: proxyContainersModel
         sourceModel: ContainersModel
@@ -169,6 +171,7 @@ PageType {
                         PageController.goToPage(PageEnum.PageSetupWizardProtocols)
                     }
                 }
+                KeyNavigation.tab: setupLaterButton
             }
 
             BasicButtonType {
@@ -200,6 +203,8 @@ PageType {
                     PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                     InstallController.addEmptyServer()
                 }
+
+                KeyNavigation.tab: continueButton
             }
         }
     }
