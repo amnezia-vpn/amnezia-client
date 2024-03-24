@@ -170,7 +170,7 @@ Can&apos;t be disabled for current server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="454"/>
+        <location filename="../ui/controllers/importController.cpp" line="455"/>
         <source>Scanned %1 of %2.</source>
         <translation>%2 ၏ %1 ကို စကင်န်ဖတ်ထားသည်.</translation>
     </message>
@@ -302,27 +302,32 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="56"/>
+        <source>Logging enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling enabled</source>
         <translation>split tunnelling ဖွင့်ထားပါသည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling disabled</source>
         <translation>split tunnelling ပိတ်ထားပါသည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="250"/>
         <source>VPN protocol</source>
         <translation>VPN ပရိုတိုကော</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="271"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="298"/>
         <source>Servers</source>
         <translation>ဆာဗာများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="359"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="386"/>
         <source>Unable change server while there is an active connection</source>
         <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆာဗာကို ပြောင်းလဲ၍မရပါ။</translation>
     </message>
@@ -1307,68 +1312,73 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsLogging</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="47"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="23"/>
+        <source>Logging is enabled. Note that logs will be automatically disabled after 14 days, and all log files will be deleted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="59"/>
         <source>Logging</source>
         <translation>လော့ဂ်အင်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="52"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="64"/>
         <source>Enabling this function will save application&apos;s logs automatically, By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
         <translation>ဤလုပ်ဆောင်ချက်ကို ဖွင့်ခြင်းဖြင့် အပလီကေးရှင်း၏ မှတ်တမ်းများကို အလိုအလျောက် သိမ်းဆည်းပေးမည် ဖြစ်ပြီး မူရင်းအတိုင်း၊ မှတ်တမ်းလုပ်ဆောင်ချက်ကို ပိတ်ထားသည်။ အပလီကေးရှင်းချို့ယွင်းချက်ရှိသောအခါ မှတ်တမ်းသိမ်းဆည်းခြင်းကို ဖွင့်ပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="73"/>
         <source>Save logs</source>
         <translation>မှတ်တမ်းများကိုသိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="106"/>
         <source>Open folder with logs</source>
         <translation>မှတ်တမ်းများဖြင့် ဖိုင်တွဲကိုဖွင့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="128"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="129"/>
         <source>Logs files (*.log)</source>
         <translatorcomment>မှတ်တမ်းဖိုင်များ (*.log)</translatorcomment>
         <translation>မှတ်တမ်းဖိုင်များ (*.log)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="138"/>
         <source>Logs file saved</source>
         <translation>မှတ်တမ်းဖိုင်များသိမ်းဆည်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="135"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="147"/>
         <source>Save logs to file</source>
         <translation>မှတ်တမ်းများကို ဖိုင်တွင်သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="165"/>
         <source>Clear logs?</source>
         <translation>မှတ်တမ်းများရှင်းလင်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="166"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="167"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="161"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="173"/>
         <source>Logs have been cleaned up</source>
         <translation>မှတ်တမ်းများကို ရှင်းလင်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="174"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="186"/>
         <source>Clear logs</source>
         <translation>မှတ်တမ်းများရှင်းလင်းမည်</translation>
     </message>
@@ -1513,7 +1523,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="166"/>
-        <source>Managment</source>
+        <source>Management</source>
         <translation>စီမံခန့်ခွဲမှု</translation>
     </message>
 </context>
@@ -1948,27 +1958,27 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>PageSetupWizardViewConfig</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="67"/>
         <source>New connection</source>
         <translation>ချိတ်ဆက်မှုအသစ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Collapse content</source>
         <translation>အကြောင်းအရာများကိုဖြန့်ချမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Show content</source>
         <translation>အကြောင်းအရာများကိုပြမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="112"/>
         <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
         <translation>သင်ယုံကြည်ရသော ရင်းမြစ်များမှသာ ချိတ်ဆက်ကုဒ်များကို အသုံးပြုပါ။ သင့်ဒေတာကို ကြားဖြတ်ရန် အများသူငှာ ရင်းမြစ်များမှ ကုဒ်များကို ဖန်တီးထားသည်။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="153"/>
         <source>Connect</source>
         <translation>ချိတ်ဆက်မည်</translation>
     </message>
@@ -2205,6 +2215,14 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="128"/>
         <source>File with connection settings to </source>
         <translation>ဤဆာဗာနှင့်ချိတ်ဆက်မှု ဆက်တင်များပါရှိသော ဖိုင် </translation>
+    </message>
+</context>
+<context>
+    <name>PageStart</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="136"/>
+        <source>Logging was disabled after 14 days, log files were deleted</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3015,17 +3033,17 @@ For more detailed information, you can
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="145"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="149"/>
         <source>All settings have been reset to default values</source>
         <translation>ဆက်တင်အားလုံးကို မူရင်းတန်ဖိုးများအဖြစ် ပြန်လည်သတ်မှတ်ထားသည်</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="155"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="159"/>
         <source>Cached profiles cleared</source>
         <translation>ကက်ရှ်ပရိုဖိုင်များကို ရှင်းလင်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="128"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="132"/>
         <source>Backup file is corrupted</source>
         <translation>အရန်သိမ်းထားသည့်ဖိုင်ပျက်ဆီးနေသည်</translation>
     </message>
@@ -3241,12 +3259,12 @@ For more detailed information, you can
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="179"/>
+        <location filename="../ui/qml/main2.qml" line="180"/>
         <source>Private key passphrase</source>
         <translation>ကိုယ်ပိုင် key စကားဝှက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="202"/>
+        <location filename="../ui/qml/main2.qml" line="203"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>

@@ -170,7 +170,7 @@ Can&apos;t be disabled for current server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="454"/>
+        <location filename="../ui/controllers/importController.cpp" line="455"/>
         <source>Scanned %1 of %2.</source>
         <translation>Отсканировано %1 из%2.</translation>
     </message>
@@ -302,27 +302,32 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="56"/>
+        <source>Logging enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling enabled</source>
         <translation>Раздельное туннелирование включено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling disabled</source>
         <translation>Раздельное туннелирование выключено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="250"/>
         <source>VPN protocol</source>
         <translation>VPN протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="271"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="298"/>
         <source>Servers</source>
         <translation>Серверы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="359"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="386"/>
         <source>Unable change server while there is an active connection</source>
         <translation>Невозможно изменить сервер при активном соединении</translation>
     </message>
@@ -1335,67 +1340,72 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsLogging</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="47"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="23"/>
+        <source>Logging is enabled. Note that logs will be automatically disabled after 14 days, and all log files will be deleted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="59"/>
         <source>Logging</source>
         <translation>Логирование</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="52"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="64"/>
         <source>Enabling this function will save application&apos;s logs automatically, By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
         <translation>Включение этой функции позволяет сохранять логи на вашем устройстве. По-умолчанию она отключена.  Включите сохранение логов в случае сбоя в работе приложения.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="73"/>
         <source>Save logs</source>
         <translation>Сохранять логи</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="106"/>
         <source>Open folder with logs</source>
         <translation>Открыть папку с логами</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="128"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="129"/>
         <source>Logs files (*.log)</source>
         <translation>Logs files (*.log)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="138"/>
         <source>Logs file saved</source>
         <translation>Файл с логами сохранен</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="135"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="147"/>
         <source>Save logs to file</source>
         <translation>Сохранить логи в файл</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="165"/>
         <source>Clear logs?</source>
         <translation>Очистить логи?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="166"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="167"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="161"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="173"/>
         <source>Logs have been cleaned up</source>
         <translation>Логи удалены</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="174"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="186"/>
         <source>Clear logs</source>
         <translation>Удалить логи</translation>
     </message>
@@ -1552,7 +1562,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="166"/>
-        <source>Managment</source>
+        <source>Management</source>
         <translation>Управление</translation>
     </message>
     <message>
@@ -2044,7 +2054,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageSetupWizardViewConfig</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="67"/>
         <source>New connection</source>
         <translation>Новое соединение</translation>
     </message>
@@ -2053,22 +2063,22 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватить ваши данные.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Collapse content</source>
         <translation>Свернуть</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Show content</source>
         <translation>Показать содержимое ключа</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="112"/>
         <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
         <translation>Используйте файлы конфигурации только из тех источников, которым вы доверяете. Файлы из общедоступных источников могли быть созданы с целью перехвата ваших личных данных</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="153"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
@@ -2325,6 +2335,14 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="128"/>
         <source>File with connection settings to </source>
         <translation>Файл с настройками доступа к </translation>
+    </message>
+</context>
+<context>
+    <name>PageStart</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="136"/>
+        <source>Logging was disabled after 14 days, log files were deleted</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3178,17 +3196,17 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="145"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="149"/>
         <source>All settings have been reset to default values</source>
         <translation>Все настройки были сброшены к значению &quot;По умолчанию&quot;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="155"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="159"/>
         <source>Cached profiles cleared</source>
         <translation>Кэш профиля очищен</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="128"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="132"/>
         <source>Backup file is corrupted</source>
         <translation>Backup файл поврежден</translation>
     </message>
@@ -3424,12 +3442,12 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="179"/>
+        <location filename="../ui/qml/main2.qml" line="180"/>
         <source>Private key passphrase</source>
         <translation>Кодовая фраза для закрытого ключа</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="202"/>
+        <location filename="../ui/qml/main2.qml" line="203"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>

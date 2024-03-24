@@ -169,7 +169,7 @@ Can&apos;t be disabled for current server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="454"/>
+        <location filename="../ui/controllers/importController.cpp" line="455"/>
         <source>Scanned %1 of %2.</source>
         <translation>扫描 %1 of %2.</translation>
     </message>
@@ -324,27 +324,32 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="56"/>
+        <source>Logging enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling enabled</source>
         <translation>用户分隔隧道已启用</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling disabled</source>
         <translation>分隔隧道已禁用</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="250"/>
         <source>VPN protocol</source>
         <translation>VPN协议</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="271"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="298"/>
         <source>Servers</source>
         <translation>服务器</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="359"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="386"/>
         <source>Unable change server while there is an active connection</source>
         <translation>已建立连接时无法更改服务器配置</translation>
     </message>
@@ -1380,67 +1385,72 @@ And if you don&apos;t like the app, all the more support it - the donation will 
 <context>
     <name>PageSettingsLogging</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="47"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="23"/>
+        <source>Logging is enabled. Note that logs will be automatically disabled after 14 days, and all log files will be deleted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="59"/>
         <source>Logging</source>
         <translation>日志</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="52"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="64"/>
         <source>Enabling this function will save application&apos;s logs automatically, By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
         <translation>默认情况下，日志功能是禁用的。如果应用程序出现故障，则启用日志保存功能。</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="73"/>
         <source>Save logs</source>
         <translation>记录日志</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="106"/>
         <source>Open folder with logs</source>
         <translation>打开日志文件夹</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="128"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="129"/>
         <source>Logs files (*.log)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="138"/>
         <source>Logs file saved</source>
         <translation>日志文件已保存</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="135"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="147"/>
         <source>Save logs to file</source>
         <translation>保存日志到文件</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="165"/>
         <source>Clear logs?</source>
         <translation>清理日志？</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="166"/>
         <source>Continue</source>
         <translation>继续</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="167"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="161"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="173"/>
         <source>Logs have been cleaned up</source>
         <translation>日志已清理</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="174"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="186"/>
         <source>Clear logs</source>
         <translation>清理日志</translation>
     </message>
@@ -1597,7 +1607,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="166"/>
-        <source>Managment</source>
+        <source>Management</source>
         <translation>管理</translation>
     </message>
     <message>
@@ -2109,7 +2119,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageSetupWizardViewConfig</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="67"/>
         <source>New connection</source>
         <translation>新连接</translation>
     </message>
@@ -2118,22 +2128,22 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">请勿使用公共来源的连接码。它可以被创建来拦截您的数据。</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Collapse content</source>
         <translation>折叠内容</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Show content</source>
         <translation>显示内容</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="112"/>
         <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
         <translation>只使用您信任的来源提供的连接代码。公共来源的代码可能是为了拦截您的数据而创建的。</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="153"/>
         <source>Connect</source>
         <translation>连接</translation>
     </message>
@@ -2414,6 +2424,14 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="128"/>
         <source>File with connection settings to </source>
         <translation>连接配置文件的内容为 </translation>
+    </message>
+</context>
+<context>
+    <name>PageStart</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="136"/>
+        <source>Logging was disabled after 14 days, log files were deleted</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3308,17 +3326,17 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="128"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="132"/>
         <source>Backup file is corrupted</source>
         <translation>备份文件已损坏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="145"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="149"/>
         <source>All settings have been reset to default values</source>
         <translation>所配置恢复为默认值</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="155"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="159"/>
         <source>Cached profiles cleared</source>
         <translation>缓存的配置文件已清除</translation>
     </message>
@@ -3558,12 +3576,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="179"/>
+        <location filename="../ui/qml/main2.qml" line="180"/>
         <source>Private key passphrase</source>
         <translation>私钥密码</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="202"/>
+        <location filename="../ui/qml/main2.qml" line="203"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>

@@ -170,7 +170,7 @@ Can&apos;t be disabled for current server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="454"/>
+        <location filename="../ui/controllers/importController.cpp" line="455"/>
         <source>Scanned %1 of %2.</source>
         <translation>ارزیابی %1 از %2.</translation>
     </message>
@@ -302,27 +302,32 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="56"/>
+        <source>Logging enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling enabled</source>
         <translation>فعال شدن تونل تقسیم‌شده</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling disabled</source>
         <translation>تونل تقسیم‌شده غیرفعال شده</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="250"/>
         <source>VPN protocol</source>
         <translation>پروتکل وی‎پی‎ان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="271"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="298"/>
         <source>Servers</source>
         <translation>سرورها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="359"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="386"/>
         <source>Unable change server while there is an active connection</source>
         <translation>امکان تغییر سرور در هنگام متصل بودن وجود ندارد</translation>
     </message>
@@ -1307,67 +1312,72 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsLogging</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="47"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="23"/>
+        <source>Logging is enabled. Note that logs will be automatically disabled after 14 days, and all log files will be deleted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="59"/>
         <source>Logging</source>
         <translation>گزارشات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="52"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="64"/>
         <source>Enabling this function will save application&apos;s logs automatically, By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
         <translation>فعال کردن این عملکرد باعث ذخیره خودکار لاگ‌های برنامه می‌شود. به طور پیش‌فرض، قابلیت ثبت لاگ غیرفعال است. در صورت بروز خطا در برنامه، ذخیره لاگ را فعال کنید.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="73"/>
         <source>Save logs</source>
         <translation>ذخیره گزارشات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="106"/>
         <source>Open folder with logs</source>
         <translation>باز کردن پوشه گزارشات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="128"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="129"/>
         <source>Logs files (*.log)</source>
         <translation>Logs files (*.log)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="138"/>
         <source>Logs file saved</source>
         <translation>فایل گزارشات ذخیره شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="135"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="147"/>
         <source>Save logs to file</source>
         <translation>ذخیره گزارشات در فایل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="165"/>
         <source>Clear logs?</source>
         <translation>پاک کردن گزارشات؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="166"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="167"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="161"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="173"/>
         <source>Logs have been cleaned up</source>
         <translation>گزارشات پاک شدند</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="174"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="186"/>
         <source>Clear logs</source>
         <translation>پاک کردن گزارشات</translation>
     </message>
@@ -1512,7 +1522,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="166"/>
-        <source>Managment</source>
+        <source>Management</source>
         <translation>مدیریت</translation>
     </message>
 </context>
@@ -1947,27 +1957,27 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>PageSetupWizardViewConfig</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="67"/>
         <source>New connection</source>
         <translation>ارتباط جدید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Collapse content</source>
         <translation>جمع کردن محتوا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Show content</source>
         <translation>نمایش محتوا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="112"/>
         <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
         <translation>از کدهای اتصال فقط از منابع مورد اعتماد خود استفاده کنید. ممکن است کدهایی از منابع عمومی برای رهگیری داده های شما ایجاد شده باشند</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="153"/>
         <source>Connect</source>
         <translation>اتصال</translation>
     </message>
@@ -2204,6 +2214,14 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="128"/>
         <source>File with connection settings to </source>
         <translation>فایل شامل تنظیمات ارتباط با </translation>
+    </message>
+</context>
+<context>
+    <name>PageStart</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="136"/>
+        <source>Logging was disabled after 14 days, log files were deleted</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3017,17 +3035,17 @@ For more detailed information, you can
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="145"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="149"/>
         <source>All settings have been reset to default values</source>
         <translation>تمام تنظیمات به مقادیر پیش فرض ریست شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="155"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="159"/>
         <source>Cached profiles cleared</source>
         <translation>پروفایل ذخیره شده پاک شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="128"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="132"/>
         <source>Backup file is corrupted</source>
         <translation>فایل بک‎آپ خراب شده است</translation>
     </message>
@@ -3243,12 +3261,12 @@ For more detailed information, you can
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="179"/>
+        <location filename="../ui/qml/main2.qml" line="180"/>
         <source>Private key passphrase</source>
         <translation>عبارت کلید خصوصی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="202"/>
+        <location filename="../ui/qml/main2.qml" line="203"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>

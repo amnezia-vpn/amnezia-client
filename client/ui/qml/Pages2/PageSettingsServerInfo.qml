@@ -163,7 +163,7 @@ PageType {
             }
             TabButtonType {
                 isSelected: tabBar.currentIndex === 2
-                text: qsTr("Managment")
+                text: qsTr("Management")
             }
         }
 
