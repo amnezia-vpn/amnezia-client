@@ -426,11 +426,11 @@ void VpnConnection::appendSplitTunnelingConfig()
     m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
 
     auto appsRouteMode = m_settings->getAppsRouteMode();
-    auto appsPath = m_settings->getVpnApps(appsRouteMode);
+    auto apps = m_settings->getVpnApps(appsRouteMode);
 
     QJsonArray appsJsonArray;
-    for (const auto &appPath : appsPath) {
-        appsJsonArray.append(appPath);
+    for (const auto &app : apps) {
+        appsJsonArray.append(app.appPath.isEmpty() ? app.appPath : app.packageName);
     }
 
     m_vpnConfiguration.insert(config_key::appSplitTunnelType, appsRouteMode);

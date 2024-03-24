@@ -230,14 +230,22 @@ PageType {
             buttonImageSource: "qrc:/images/controls/plus.svg"
 
             clickedFunc: function() {
+                searchField.focus = false
                 PageController.showBusyIndicator(true)
-                var fileName = SystemController.getFileName(qsTr("Open executable file"),
-                                                            qsTr("Executable file (*.*)"))
-                if (fileName !== "") {
-                    AppSplitTunnelingController.addApp(fileName)
-                }
+//                var fileName = SystemController.getFileName(qsTr("Open executable file"),
+//                                                            qsTr("Executable file (*.*)"))
+//                if (fileName !== "") {
+//                    AppSplitTunnelingController.addApp(fileName)
+//                }
+                installedAppDrawer.open()
                 PageController.showBusyIndicator(false)
             }
         }
+    }
+
+    InstalledAppsDrawer {
+        id: installedAppDrawer
+
+        anchors.fill: parent
     }
 }

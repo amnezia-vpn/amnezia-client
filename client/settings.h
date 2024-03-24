@@ -205,8 +205,8 @@ public:
     AppsRouteMode getAppsRouteMode() const;
     void setAppsRouteMode(AppsRouteMode mode);
 
-    QStringList getVpnApps(AppsRouteMode mode) const;
-    void setVpnApps(AppsRouteMode mode, const QStringList &apps);
+    QVector<InstalledAppInfo> getVpnApps(AppsRouteMode mode) const;
+    void setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps);
 
 signals:
     void saveLogsChanged(bool enabled);

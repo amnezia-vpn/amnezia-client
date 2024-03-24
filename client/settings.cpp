@@ -374,14 +374,32 @@ void Settings::setAppsRouteMode(AppsRouteMode mode)
     setValue("Conf/appsRouteMode", mode);
 }
 
-QStringList Settings::getVpnApps(AppsRouteMode mode) const
+QVector<InstalledAppInfo> Settings::getVpnApps(AppsRouteMode mode) const
 {
-    return value("Conf/" + appsRouteModeString(mode)).toStringList();
+    QVector<InstalledAppInfo> apps;
+    auto appsArray = value("Conf/" + appsRouteModeString(mode)).toJsonArray();
+    for (const auto &app : appsArray) {
+        InstalledAppInfo appInfo;
+        appInfo.appName = app.toObject().value("appName").toString();
+        appInfo.packageName = app.toObject().value("packageName").toString();
+        appInfo.appPath = app.toObject().value("appPath").toString();
+
+        apps.push_back(appInfo);
+    }
+    return apps;
 }
 
-void Settings::setVpnApps(AppsRouteMode mode, const QStringList &apps)
+void Settings::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps)
 {
-    setValue("Conf/" + appsRouteModeString(mode), apps);
+    QJsonArray appsArray;
+    for (const auto &app : apps) {
+        QJsonObject appInfo;
+        appInfo.insert("appName", app.appName);
+        appInfo.insert("packageName", app.packageName);
+        appInfo.insert("appPath", app.appPath);
+        appsArray.push_back(appInfo);
+    }
+    setValue("Conf/" + appsRouteModeString(mode), appsArray);
     m_settings.sync();
 }
 

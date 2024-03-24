@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 
 #include "settings.h"
+#include "core/defs.h"
 
 class AppSplitTunnelingModel: public QAbstractListModel
 {
@@ -26,7 +27,7 @@ public:
     Q_PROPERTY(bool isTunnelingEnabled READ isSplitTunnelingEnabled NOTIFY splitTunnelingToggled)
 
 public slots:
-    bool addApp(const QString &path);
+    bool addApp(const InstalledAppInfo &appInfo);
     void removeApp(QModelIndex index);
 
     int getRouteMode();
@@ -48,7 +49,7 @@ private:
     bool m_isSplitTunnelingEnabled;
     Settings::AppsRouteMode m_currentRouteMode;
 
-    QVector<QString> m_apps;
+    QVector<InstalledAppInfo> m_apps;
 };
 
 #endif // APPSPLITTUNNELINGMODEL_H

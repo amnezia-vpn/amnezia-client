@@ -14,6 +14,7 @@
 
 #include "logger.h"
 #include "version.h"
+#include "ui/models/installedAppsModel.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
 #if defined(Q_OS_ANDROID)
@@ -126,6 +127,8 @@ void AmneziaApplication::init()
     });
 #endif
 
+
+
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
     connect(IosController::Instance(), &IosController::importConfigFromOutside, [this](QString data) {
@@ -234,7 +237,9 @@ void AmneziaApplication::registerTypes()
     qmlRegisterSingletonType(QUrl("qrc:/ui/qml/Filters/ContainersModelFilters.qml"), "ContainersModelFilters", 1, 0,
                              "ContainersModelFilters");
 
-    //
+    qmlRegisterType<InstalledAppsModel>("InstalledAppsModel", 1, 0, "InstalledAppsModel");
+
+
     Vpn::declareQmlVpnConnectionStateEnum();
     PageLoader::declareQmlPageEnum();
 }
