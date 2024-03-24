@@ -2,6 +2,7 @@
 #define ANDROID_CONTROLLER_H
 
 #include <QJniObject>
+#include <QPixmap>
 
 #include "protocols/vpnprotocol.h"
 
@@ -41,6 +42,7 @@ public:
     void clearLogs();
     void setScreenshotsEnabled(bool enabled);
     QJsonArray getAppList();
+    QPixmap getAppIcon(const QString &package, int width, int height);
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);

@@ -20,7 +20,7 @@ set(QT_ANDROID_MULTI_ABI_FORWARD_VARS "QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL;CMAKE
 
 # We need to include qtprivate api's
 # As QAndroidBinder is not yet implemented with a public api
-set(LIBS ${LIBS} Qt6::CorePrivate)
+set(LIBS ${LIBS} Qt6::CorePrivate -ljnigraphics)
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/platforms/android)
 
