@@ -19,6 +19,7 @@
 #include "platforms/ios/QRCodeReaderBase.h"
 #if defined(Q_OS_ANDROID)
     #include "platforms/android/android_controller.h"
+    #include "core/installedAppsImageProvider.h"
 #endif
 
 #include "protocols/qml_register_protocols.h"
@@ -82,6 +83,8 @@ void AmneziaApplication::init()
             Qt::QueuedConnection);
 
     m_engine->rootContext()->setContextProperty("Debug", &Logger::Instance());
+
+    m_engine->addImageProvider(QLatin1String("installedAppImage"), new InstalledAppsImageProvider);
 
     m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, this));
     m_vpnConnection.reset(new VpnConnection(m_settings, m_configurator));

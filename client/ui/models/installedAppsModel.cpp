@@ -22,9 +22,7 @@ QVariant InstalledAppsModel::data(const QModelIndex &index, int role) const
         return m_installedApps.at(index.row()).toObject().value("name");
     }
     case AppIconRole: {
-        auto package = m_installedApps.at(index.row()).toObject().value("package");
-        //        auto iconPixMap = AndroidController::instance()->getAppIcon(package, 24, 24);
-        return {};
+        return m_installedApps.at(index.row()).toObject().value("package").toString();
     }
     case PackageNameRole: {
         return m_installedApps.at(index.row()).toObject().value("package");

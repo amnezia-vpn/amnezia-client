@@ -87,22 +87,21 @@ DrawerType2 {
                         anchors.fill: parent
 
                         RowLayout {
+                            Layout.fillWidth: true
+
+                            Image {
+                                source: "image://installedAppImage/" + appIcon
+                            }
+
                             CheckBoxType {
                                 Layout.fillWidth: true
+                                Layout.rightMargin: 24
 
                                 text: appName
 
                                 onCheckedChanged: {
                                     listView.model.selectedStateChanged(index, checked)
                                 }
-                            }
-
-                            Image {
-                                source: iconSource
-                                visible: radioButton.checked
-
-                                width: 24
-                                height: 24
                             }
                         }
 
