@@ -430,7 +430,7 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     QJsonArray appsJsonArray;
     for (const auto &app : apps) {
-        appsJsonArray.append(app.appPath.isEmpty() ? app.appPath : app.packageName);
+        appsJsonArray.append(app.appPath.isEmpty() ? app.packageName : app.appPath);
     }
 
     m_vpnConfiguration.insert(config_key::appSplitTunnelType, appsRouteMode);
