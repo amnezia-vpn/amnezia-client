@@ -299,129 +299,111 @@ PageType {
                 }
             }
 
-            Flickable {
-                id: serversContainer
+
+            ButtonGroup {
+                id: serversRadioButtonGroup
+            }
+
+            ListView {
+                id: serversMenuContent
 
                 anchors.top: serversMenuHeader.bottom
                 anchors.right: parent.right
                 anchors.left: parent.left
+                anchors.bottom: parent.bottom
                 anchors.topMargin: 16
 
-                contentHeight: col.height + col.anchors.bottomMargin
-                implicitHeight: parent.height - serversMenuHeader.implicitHeight
-                clip: true
+                model: ServersModel
+                currentIndex: ServersModel.defaultIndex
 
                 ScrollBar.vertical: ScrollBar {
                     id: scrollBar
-                    policy: serversContainer.height >= serversContainer.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
+                    policy: serversMenuContent.height >= serversMenuContent.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
                 }
 
                 Keys.onUpPressed: scrollBar.decrease()
                 Keys.onDownPressed: scrollBar.increase()
 
-                Column {
-                    id: col
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottomMargin: 32
-
-                    spacing: 16
-
-                    ButtonGroup {
-                        id: serversRadioButtonGroup
+                Connections {
+                    target: ServersModel
+                    function onDefaultServerIndexChanged(serverIndex) {
+                        serversMenuContent.currentIndex = serverIndex
                     }
+                }
 
-                    ListView {
-                        id: serversMenuContent
-                        width: parent.width
-                        height: serversMenuContent.contentItem.height
+                clip: true
 
-                        model: ServersModel
-                        currentIndex: ServersModel.defaultIndex
+                delegate: Item {
+                    id: menuContentDelegate
 
-                        Connections {
-                            target: ServersModel
-                            function onDefaultServerIndexChanged(serverIndex) {
-                                serversMenuContent.currentIndex = serverIndex
+                    property variant delegateData: model
+
+                    implicitWidth: serversMenuContent.width
+                    implicitHeight: serverRadioButtonContent.implicitHeight
+
+                    ColumnLayout {
+                        id: serverRadioButtonContent
+
+                        anchors.fill: parent
+                        anchors.rightMargin: 16
+                        anchors.leftMargin: 16
+
+                        spacing: 0
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            VerticalRadioButton {
+                                id: serverRadioButton
+
+                                Layout.fillWidth: true
+
+                                text: name
+                                descriptionText: serverDescription
+
+                                checked: index === serversMenuContent.currentIndex
+                                checkable: !ConnectionController.isConnected
+
+                                ButtonGroup.group: serversRadioButtonGroup
+
+                                onClicked: {
+                                    if (ConnectionController.isConnected) {
+                                        PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
+                                        return
+                                    }
+
+                                    serversMenuContent.currentIndex = index
+
+                                    ServersModel.defaultIndex = index
+                                }
+
+                                MouseArea {
+                                    anchors.fill: serverRadioButton
+                                    cursorShape: Qt.PointingHandCursor
+                                    enabled: false
+                                }
+                            }
+
+                            ImageButtonType {
+                                image: "qrc:/images/controls/settings.svg"
+                                imageColor: "#D7D8DB"
+
+                                implicitWidth: 56
+                                implicitHeight: 56
+
+                                z: 1
+
+                                onClicked: function() {
+                                    ServersModel.processedIndex = index
+                                    PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                                    drawer.close()
+                                }
                             }
                         }
 
-                        clip: true
-                        interactive: false
-
-                        delegate: Item {
-                            id: menuContentDelegate
-
-                            property variant delegateData: model
-
-                            implicitWidth: serversMenuContent.width
-                            implicitHeight: serverRadioButtonContent.implicitHeight
-
-                            ColumnLayout {
-                                id: serverRadioButtonContent
-
-                                anchors.fill: parent
-                                anchors.rightMargin: 16
-                                anchors.leftMargin: 16
-
-                                spacing: 0
-
-                                RowLayout {
-                                    VerticalRadioButton {
-                                        id: serverRadioButton
-
-                                        Layout.fillWidth: true
-
-                                        text: name
-                                        descriptionText: serverDescription
-
-                                        checked: index === serversMenuContent.currentIndex
-                                        checkable: !ConnectionController.isConnected
-
-                                        ButtonGroup.group: serversRadioButtonGroup
-
-                                        onClicked: {
-                                            if (ConnectionController.isConnected) {
-                                                PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
-                                                return
-                                            }
-
-                                            serversMenuContent.currentIndex = index
-
-                                            ServersModel.defaultIndex = index
-                                        }
-
-                                        MouseArea {
-                                            anchors.fill: serverRadioButton
-                                            cursorShape: Qt.PointingHandCursor
-                                            enabled: false
-                                        }
-                                    }
-
-                                    ImageButtonType {
-                                        image: "qrc:/images/controls/settings.svg"
-                                        imageColor: "#D7D8DB"
-
-                                        implicitWidth: 56
-                                        implicitHeight: 56
-
-                                        z: 1
-
-                                        onClicked: function() {
-                                            ServersModel.processedIndex = index
-                                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                                            drawer.close()
-                                        }
-                                    }
-                                }
-
-                                DividerType {
-                                    Layout.fillWidth: true
-                                    Layout.leftMargin: 0
-                                    Layout.rightMargin: 0
-                                }
-                            }
+                        DividerType {
+                            Layout.fillWidth: true
+                            Layout.leftMargin: 0
+                            Layout.rightMargin: 0
                         }
                     }
                 }
