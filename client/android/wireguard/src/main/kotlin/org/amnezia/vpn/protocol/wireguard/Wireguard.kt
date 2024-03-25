@@ -95,6 +95,7 @@ open class Wireguard : Protocol() {
         return WireguardConfig.build {
             configWireguard(configData, configDataJson)
             configSplitTunneling(config)
+            configAppSplitTunneling(config)
         }
     }
 
