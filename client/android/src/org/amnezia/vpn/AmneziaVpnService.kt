@@ -215,11 +215,9 @@ class AmneziaVpnService : VpnService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val isAlwaysOnCompat =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) isAlwaysOn
-            else intent?.component?.packageName != packageName
+        val isAlwaysOn = intent != null && intent.action == SERVICE_INTERFACE
 
-        if (isAlwaysOnCompat) {
+        if (isAlwaysOn) {
             Log.d(TAG, "Start service via Always-on")
             connect()
         } else if (intent?.getBooleanExtra(AFTER_PERMISSION_CHECK, false) == true) {
