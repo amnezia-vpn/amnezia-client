@@ -62,13 +62,13 @@ PageType {
 
             ConnectButton {
                 id: connectButton
-                anchors.centerIn: parent
+                Layout.fillHeight: true
+                Layout.alignment: Qt.AlignCenter
             }
 
             BasicButtonType {
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 34
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                Layout.bottomMargin: 34
                 leftPadding: 16
                 rightPadding: 16
 
