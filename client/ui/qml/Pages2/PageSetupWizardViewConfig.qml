@@ -105,9 +105,9 @@ PageType {
                 }
             }
 
-            CaptionTextWithIconAndBackGroundType {
+            WarningType {
                 Layout.topMargin: 16
-                implicitWidth: parent.width - 10
+                Layout.fillWidth: true
 
                 textString: qsTr("Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.")
 
