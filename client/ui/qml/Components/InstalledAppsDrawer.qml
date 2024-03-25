@@ -91,6 +91,9 @@ DrawerType2 {
 
                             Image {
                                 source: "image://installedAppImage/" + appIcon
+
+                                sourceSize.width: 48
+                                sourceSize.height: 48
                             }
 
                             CheckBoxType {

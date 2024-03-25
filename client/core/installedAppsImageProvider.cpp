@@ -8,5 +8,5 @@ InstalledAppsImageProvider::InstalledAppsImageProvider() : QQuickImageProvider(Q
 
 QPixmap InstalledAppsImageProvider::requestPixmap(const QString &id, QSize *size, const QSize &requestedSize)
 {
-    return AndroidController::instance()->getAppIcon(id, 48, 48);
+    return AndroidController::instance()->getAppIcon(id, size, requestedSize);
 }

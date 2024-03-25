@@ -42,7 +42,7 @@ public:
     void clearLogs();
     void setScreenshotsEnabled(bool enabled);
     QJsonArray getAppList();
-    QPixmap getAppIcon(const QString &package, int width, int height);
+    QPixmap getAppIcon(const QString &package, QSize *size, const QSize &requestedSize);
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);

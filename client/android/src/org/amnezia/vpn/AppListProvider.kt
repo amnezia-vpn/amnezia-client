@@ -31,8 +31,10 @@ object AppListProvider {
             Log.e(TAG, "Package $packageName was not found: $e")
             pm.defaultActivityIcon
         }
-        return icon.toBitmapOrNull(width, height, ARGB_8888)
-            ?: Bitmap.createBitmap(width, height, ARGB_8888)
+        val w: Int = if (width > 0) width else icon.intrinsicWidth
+        val h: Int = if (height > 0) height else icon.intrinsicHeight
+        return icon.toBitmapOrNull(w, h, ARGB_8888)
+            ?: Bitmap.createBitmap(w, h, ARGB_8888)
     }
 }
 

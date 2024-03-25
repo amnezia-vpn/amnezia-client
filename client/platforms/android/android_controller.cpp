@@ -219,11 +219,11 @@ QJsonArray AndroidController::getAppList()
     return jsonAppList;
 }
 
-QPixmap AndroidController::getAppIcon(const QString &package, int width, int height)
+QPixmap AndroidController::getAppIcon(const QString &package, QSize *size, const QSize &requestedSize)
 {
     QJniObject bitmap = callActivityMethod<jobject>("getAppIcon", "(Ljava/lang/String;II)Landroid/graphics/Bitmap;",
                                                     QJniObject::fromString(package).object<jstring>(),
-                                                    width, height);
+                                                    requestedSize.width(), requestedSize.height());
 
     QJniEnvironment env;
     AndroidBitmapInfo info;
@@ -231,6 +231,12 @@ QPixmap AndroidController::getAppIcon(const QString &package, int width, int hei
 
     void *pixels;
     if (AndroidBitmap_lockPixels(env.jniEnv(), bitmap.object(), &pixels) != ANDROID_BITMAP_RESULT_SUCCESS) return {};
+
+    int width = info.width;
+    int height = info.height;
+
+    size->setWidth(width);
+    size->setHeight(height);
 
     QImage image(width, height, QImage::Format_RGBA8888);
     if (info.stride == uint32_t(image.bytesPerLine())) {
