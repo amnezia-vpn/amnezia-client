@@ -157,7 +157,7 @@ open class Wireguard : Protocol() {
             if (tunFd == null) {
                 throw VpnStartException("Create VPN interface: permission not granted or revoked")
             }
-            Log.v(TAG, "Wg-go backend ${GoBackend.awgVersion()}")
+            Log.i(TAG, "awg-go backend ${GoBackend.awgVersion()}")
             tunnelHandle = GoBackend.awgTurnOn(ifName, tunFd.detachFd(), config.toWgUserspaceString())
         }
 
