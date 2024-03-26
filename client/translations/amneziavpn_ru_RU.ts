@@ -3015,8 +3015,8 @@ For more detailed information, you can
  FileZilla или других SFTP-клиентов, а также смонтировать диск на вашем устройстве для доступа
  непосредственно с вашего устройства.
 
-Для получения более подробной информации вы можете
-найдите его в разделе поддержки под &quot;Создать файловое хранилище SFTP.&quot; </translation>
+Более подробную информацию, вы можете
+найти в разделе поддержки &quot;Создание файлового хранилища SFTP.&quot; </translation>
     </message>
     <message>
         <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
