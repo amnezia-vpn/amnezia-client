@@ -325,7 +325,7 @@ PageType {
 
                             onClicked: {
                                 var headerText = qsTr("Remove AmneziaWG from server?")
-                                var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                                 var yesButtonText = qsTr("Continue")
                                 var noButtonText = qsTr("Cancel")
 
@@ -359,15 +359,24 @@ PageType {
 
                             text: qsTr("Save")
 
-                            clickedFunc: function() {
-                                forceActiveFocus()
-                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.updateContainer(AwgConfigModel.getConfig())
+                            onClicked: {
+                                var headerText = qsTr("Save settings?")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
+
+                                var yesButtonFunction = function() {
+                                    forceActiveFocus()
+                                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                                    InstallController.updateContainer(AwgConfigModel.getConfig())
+                                }
+                                var noButtonFunction = function() {
+                                }
+                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
                         }
                     }
                 }
-
             }
         }
     }

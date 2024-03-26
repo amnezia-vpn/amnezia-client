@@ -74,7 +74,7 @@ PageType {
                 visible: fileName.text !== ""
 
                 Image {
-                    source: "qrc:/images/controls/file-cog-2.svg"
+                    source: "qrc:/images/controls/file-check-2.svg"
                 }
 
                 Header2TextType {
@@ -85,14 +85,6 @@ PageType {
                     text: ImportController.getConfigFileName()
                     wrapMode: Text.Wrap
                 }
-            }
-
-            CaptionTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-
-                text: qsTr("Do not use connection codes from untrusted sources, as they may be created to intercept your data.")
-                color: "#878B91"
             }
 
             BasicButtonType {
@@ -111,6 +103,15 @@ PageType {
                 clickedFunc: function() {
                     showContent = !showContent
                 }
+            }
+
+            WarningType {
+                Layout.topMargin: 16
+                Layout.fillWidth: true
+
+                textString: qsTr("Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.")
+
+                iconPath: "qrc:/images/controls/alert-circle.svg"
             }
 
             Rectangle {

@@ -2,29 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ru_RU">
 <context>
-    <name>AmneziaApplication</name>
-    <message>
-        <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
-        <translation type="vanished">Раздельное туннелирование для &quot;Wireguard&quot; не реализовано, опция отключена</translation>
-    </message>
-    <message>
-        <source>Split tunneling for %1 is not implemented, the option was disabled</source>
-        <translation type="vanished">Раздельное туннелирование для %1 не реализовано, опция отключена</translation>
-    </message>
-</context>
-<context>
-    <name>AndroidController</name>
-    <message>
-        <source>AmneziaVPN</source>
-        <translation type="vanished">AmneziaVPN</translation>
-    </message>
-    <message>
-        <source>VPN Connected</source>
-        <extracomment>Refers to the app - which is currently running the background and waiting</extracomment>
-        <translation type="vanished">VPN Подключен</translation>
-    </message>
-</context>
-<context>
     <name>ConnectionController</name>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="41"/>
@@ -51,7 +28,7 @@
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="118"/>
         <source>Settings updated successfully</source>
-        <translation>Настройки успешно обновлены.</translation>
+        <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="79"/>
@@ -133,17 +110,13 @@
         <source>The selected protocol is not supported on the current platform</source>
         <translation>Выбранный протокол не поддерживается на данном устройстве</translation>
     </message>
-    <message>
-        <source>Reconnect via VPN Procotol: </source>
-        <translation type="vanished">Переподключение через VPN протокол: </translation>
-    </message>
 </context>
 <context>
     <name>HomeSplitTunnelingDrawer</name>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="32"/>
         <source>Split tunneling</source>
-        <translation>Раздельное-туннелирование</translation>
+        <translation>Раздельное VPN-туннелирование</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="33"/>
@@ -153,19 +126,19 @@
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="42"/>
         <source>Split tunneling on the server</source>
-        <translation>Раздельное-туннелирование на сервере</translation>
+        <translation>Раздельное туннелирование на сервере</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="43"/>
         <source>Enabled 
 Can&apos;t be disabled for current server</source>
-        <translation>Включено.
-Не может быть отключено для текущего сервера.</translation>
+        <translation>Включено 
+Невозможно отключить для текущего сервера</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="62"/>
         <source>Site-based split tunneling</source>
-        <translation>Раздельное туннелирование по сайтам</translation>
+        <translation>Раздельное туннелирование сайтов</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="63"/>
@@ -180,13 +153,24 @@ Can&apos;t be disabled for current server</source>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="79"/>
         <source>App-based split tunneling</source>
-        <translation>Раздельное VPN-туннелирование по приложениям</translation>
+        <translation>Раздельное VPN-туннелирование приложений</translation>
     </message>
 </context>
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="423"/>
+        <location filename="../ui/controllers/importController.cpp" line="82"/>
+        <source>Unable to open file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/importController.cpp" line="120"/>
+        <location filename="../ui/controllers/importController.cpp" line="125"/>
+        <source>Invalid configuration file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/importController.cpp" line="455"/>
         <source>Scanned %1 of %2.</source>
         <translation>Отсканировано %1 из%2.</translation>
     </message>
@@ -194,62 +178,63 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="144"/>
-        <location filename="../ui/controllers/installController.cpp" line="195"/>
+        <location filename="../ui/controllers/installController.cpp" line="146"/>
+        <location filename="../ui/controllers/installController.cpp" line="197"/>
         <source>%1 installed successfully. </source>
         <translation>%1 успешно установлен. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="146"/>
-        <location filename="../ui/controllers/installController.cpp" line="197"/>
+        <location filename="../ui/controllers/installController.cpp" line="148"/>
+        <location filename="../ui/controllers/installController.cpp" line="199"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 уже установлен на сервер. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="149"/>
+        <location filename="../ui/controllers/installController.cpp" line="151"/>
         <source>
 Added containers that were already installed on the server</source>
-        <translation>Добавлены сервисы и протоколы, которые были ранее установлены на сервер</translation>
+        <translation>
+Добавлены сервисы и протоколы, которые были ранее установлены на сервер</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="213"/>
+        <location filename="../ui/controllers/installController.cpp" line="215"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 На сервере обнаружены установленные протоколы и сервисы, все они добавлены в приложение</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="290"/>
+        <location filename="../ui/controllers/installController.cpp" line="296"/>
         <source>Settings updated successfully</source>
         <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="305"/>
+        <location filename="../ui/controllers/installController.cpp" line="311"/>
         <source>Server &apos;%1&apos; was rebooted</source>
-        <translation>Сервер &apos;%1&apos; перезагружен</translation>
+        <translation>Сервер &apos;%1&apos; был перезагружен</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="314"/>
+        <location filename="../ui/controllers/installController.cpp" line="320"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>Сервер &apos;%1&apos; был удален</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="324"/>
+        <location filename="../ui/controllers/installController.cpp" line="330"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>Все протоколы и сервисы были удалены с сервера &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="341"/>
+        <location filename="../ui/controllers/installController.cpp" line="347"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 был удален с сервера &apos;%2&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="487"/>
+        <location filename="../ui/controllers/installController.cpp" line="493"/>
         <source>Please login as the user</source>
         <translation>Пожалуйста, войдите в систему от имени пользователя</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="515"/>
+        <location filename="../ui/controllers/installController.cpp" line="521"/>
         <source>Server added successfully</source>
         <translation>Сервер успешно добавлен</translation>
     </message>
@@ -317,27 +302,32 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="56"/>
+        <source>Logging enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling enabled</source>
-        <translation type="unfinished">Раздельное туннелирование включено</translation>
+        <translation>Раздельное туннелирование включено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling disabled</source>
-        <translation type="unfinished">Раздельное туннелирование выключено</translation>
+        <translation>Раздельное туннелирование выключено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="250"/>
         <source>VPN protocol</source>
         <translation>VPN протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="271"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="298"/>
         <source>Servers</source>
         <translation>Серверы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="359"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="386"/>
         <source>Unable change server while there is an active connection</source>
         <translation>Невозможно изменить сервер при активном соединении</translation>
     </message>
@@ -355,38 +345,47 @@ Already installed containers were found on the server. All installed containers 
         <translation>Порт</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="304"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="114"/>
+        <source>MTU</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="324"/>
         <source>Remove AmneziaWG</source>
         <translation>Удалить AmneziaWG</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="307"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="327"/>
         <source>Remove AmneziaWG from server?</source>
         <translation>Удалить AmneziaWG с сервера?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="308"/>
-        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="328"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="364"/>
+        <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
+        <translation>Все пользователи, с которыми вы поделились конфигурацией с вашим VPN, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
-        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="vanished">Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="360"/>
+        <source>Save</source>
+        <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="309"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="363"/>
+        <source>Save settings?</source>
+        <translation>Сохранить настройки?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="329"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="365"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="310"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="330"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="366"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="340"/>
-        <source>Save and Restart Amnezia</source>
-        <translation>Сохранить и перезагрузить Amnezia</translation>
     </message>
 </context>
 <context>
@@ -414,8 +413,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="177"/>
-        <source>Save and Restart Amnezia</source>
-        <translation>Сохранить и перезагрузить Amnezia</translation>
+        <source>Save</source>
+        <translation>Сохранить</translation>
     </message>
 </context>
 <context>
@@ -426,13 +425,9 @@ Already installed containers were found on the server. All installed containers 
         <translation>настройки OpenVPN</translation>
     </message>
     <message>
-        <source>VPN Addresses Subnet</source>
-        <translation type="vanished">Подсеть для VPN</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="90"/>
         <source>VPN address subnet</source>
-        <translation type="unfinished"></translation>
+        <translation>Подсеть VPN-адресов</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="106"/>
@@ -599,12 +594,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="385"/>
-        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
-    </message>
-    <message>
-        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="vanished">Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+        <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
+        <translation>Все пользователи, с которыми вы поделились конфигурацией с вашим VPN, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="386"/>
@@ -618,8 +609,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="407"/>
-        <source>Save and Restart Amnezia</source>
-        <translation>Сохранить и перезагрузить</translation>
+        <source>Save</source>
+        <translation>Сохранить</translation>
     </message>
 </context>
 <context>
@@ -651,8 +642,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="185"/>
-        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+        <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
+        <translation>Все пользователи, с которыми вы поделились конфигурацией с вашим VPN, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
@@ -689,8 +680,56 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="151"/>
-        <source>Save and Restart Amnezia</source>
-        <translation>Сохранить и перезагрузить Amnezia</translation>
+        <source>Save</source>
+        <translation>Сохранить</translation>
+    </message>
+</context>
+<context>
+    <name>PageProtocolWireGuardSettings</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="75"/>
+        <source>WG settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="83"/>
+        <source>Port</source>
+        <translation type="unfinished">Порт</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="102"/>
+        <source>MTU</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="127"/>
+        <source>Remove WG</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="130"/>
+        <source>Remove WG from server?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="131"/>
+        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
+        <translation type="unfinished">Все пользователи, с которыми вы поделились конфигурацией с вашим VPN, больше не смогут к нему подключаться.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="132"/>
+        <source>Continue</source>
+        <translation type="unfinished">Продолжить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="133"/>
+        <source>Cancel</source>
+        <translation type="unfinished">Отменить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="155"/>
+        <source>Save</source>
+        <translation>Сохранить</translation>
     </message>
 </context>
 <context>
@@ -712,7 +751,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="53"/>
         <source>The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.</source>
-        <translation>Адрес DNS совпадает с адресом вашего сервера. Настроить DNS можно во вкладке &quot;Соединения&quot; настроек приложения</translation>
+        <translation>Адрес DNS совпадает с адресом вашего сервера. Настроить DNS можно во вкладке &quot;Соединения&quot; настроек приложения.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="62"/>
@@ -767,8 +806,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="124"/>
-        <source>Login</source>
-        <translation>Логин</translation>
+        <source>User name</source>
+        <translation>Имя пользователя</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="141"/>
@@ -848,21 +887,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="94"/>
         <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this URL.</source>
-        <translation type="unfinished">Используйте &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; для открытия этой ссылки.</translation>
+        <translation>Используйте &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; для открытия этой ссылки.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="103"/>
         <source>After creating your onion site, it takes a few minutes for the Tor network to make it available for use.</source>
-        <translation type="unfinished">Через несколько минут после установки ваш Onion сайт станет доступен в сети Tor.</translation>
+        <translation>Через несколько минут после установки ваш Onion сайт станет доступен в сети Tor.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="112"/>
         <source>When configuring WordPress set the this onion address as domain.</source>
         <translation>При настройке WordPress укажите этот Onion адрес в качестве домена.</translation>
-    </message>
-    <message>
-        <source>When configuring WordPress set the this address as domain.</source>
-        <translation type="vanished">При настройке WordPress укажите этот Onion адрес в качестве домена.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="126"/>
@@ -926,103 +961,83 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsAbout</name>
     <message>
-        <source>Support the project with a donation</source>
-        <translation type="vanished">Поддержите проект пожертвованием</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
         <source>Support Amnezia</source>
         <translation>Поддержите Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
-        <source>This is a free and open source application. If you like it, support the developers with a donation. </source>
-        <translation>Это бесплатное приложение с открытым исходным кодом. Если оно вам нравится - поддержите разработчиков пожертвованием. </translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="72"/>
-        <source>And if you don’t like the application, all the more reason to support it - the donation will be used for the improving the application.</source>
-        <translation>А, если оно вам не нравится, тем более поддержите - пожертвование пойдет на улучшение приложения.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="82"/>
-        <source>Card on Patreon</source>
-        <translation>Картой на Patreon</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="85"/>
-        <source>https://www.patreon.com/amneziavpn</source>
-        <translation>https://www.patreon.com/amneziavpn</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="102"/>
         <source>Show other methods on Github</source>
-        <translation>Показать другие способы на Github</translation>
+        <translation type="vanished">Показать другие способы на Github</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="105"/>
-        <source>https://github.com/amnezia-vpn/amnezia-client#donate</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
+        <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
+        <translation>Amnezia - бесплатное приложение с открытым исходным кодом. Поддержите разработчиков, если оно вам нравится.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="81"/>
         <source>Contacts</source>
         <translation>Контакты</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="122"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="88"/>
         <source>Telegram group</source>
         <translation>Группа в Telegram</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="89"/>
         <source>To discuss features</source>
         <translation>Для обсуждений</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="127"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="93"/>
         <source>https://t.me/amnezia_vpn_en</source>
         <translation>https://t.me/amnezia_vpn</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="136"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="102"/>
         <source>Mail</source>
         <translation>Почта</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="137"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="103"/>
         <source>For reviews and bug reports</source>
         <translation>Для отзывов и сообщений об ошибках</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="115"/>
         <source>Github</source>
         <translation>Github</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="119"/>
         <source>https://github.com/amnezia-vpn/amnezia-client</source>
         <translation>https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="162"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="128"/>
         <source>Website</source>
         <translation>Веб-сайт</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="132"/>
         <source>https://amnezia.org</source>
         <translation>https://amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="178"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="144"/>
         <source>Software version: %1</source>
         <translation>Версия ПО: %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="194"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="160"/>
         <source>Check for updates</source>
         <translation>Проверить обновления</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="179"/>
+        <source>Privacy Policy</source>
+        <translation>Политика конфиденциальности</translation>
     </message>
 </context>
 <context>
@@ -1035,27 +1050,27 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="52"/>
         <source>Allow application screenshots</source>
-        <translation type="unfinished">Разрешить скриншоты приложения</translation>
+        <translation>Разрешить скриншоты приложения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="72"/>
         <source>Auto start</source>
-        <translation type="unfinished">Автозапуск</translation>
+        <translation>Автозапуск</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
         <source>Launch the application every time the device is starts</source>
-        <translation type="unfinished">Открывать приложение при запуске устройства</translation>
+        <translation>Открывать приложение при запуске устройства</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="93"/>
         <source>Auto connect</source>
-        <translation type="unfinished">Автоподключение</translation>
+        <translation>Автоподключение</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="94"/>
         <source>Connect to VPN on app start</source>
-        <translation type="unfinished">Подключение к VPN при запуске приложения</translation>
+        <translation>Подключение к VPN при запуске приложения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="114"/>
@@ -1116,9 +1131,8 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsBackup</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="66"/>
         <source>Backup</source>
-        <translation>Резервное копирование</translation>
+        <translation type="vanished">Резервное копирование</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="27"/>
@@ -1126,63 +1140,72 @@ Already installed containers were found on the server. All installed containers 
         <translation>Восстановление настроек из бэкап файла</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="73"/>
-        <source>Configuration backup</source>
-        <translation>Бэкап конфигурация</translation>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="66"/>
+        <source>Back up your configuration</source>
+        <translation>Резервное копирование</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="80"/>
+        <source>Configuration backup</source>
+        <translation type="vanished">Бэкап конфигурация</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="73"/>
         <source>You can save your settings to a backup file to restore them the next time you install the application.</source>
         <translation>Поможет мгновенно восстановить настройки соединений при следующей установке.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="81"/>
+        <source>The backup will contain your passwords and private keys for all servers added to AmneziaVPN. Keep this information in a secure place.</source>
+        <translation>Резервная копия будет содержать ваши пароли и закрытые ключи для всех серверов, добавленных в AmneziaVPN. Храните эту информацию в надежном месте.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="92"/>
         <source>Make a backup</source>
         <translation>Сделать бэкап</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="96"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="99"/>
         <source>Save backup file</source>
         <translation>Сохранить бэкап файл</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="97"/>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="129"/>
         <source>Backup files (*.backup)</source>
         <translation>Файлы резервного копирования (*.backup)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="109"/>
         <source>Backup file saved</source>
         <translation>Бэкап файл сохранен</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="122"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="125"/>
         <source>Restore from backup</source>
         <translation>Восстановить из бэкапа</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="125"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="128"/>
         <source>Open backup file</source>
         <translation>Открыть бэкап файл</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="136"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="139"/>
         <source>Import settings from a backup file?</source>
         <translation>Импортировать настройки из бэкап файла?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="137"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="140"/>
         <source>All current settings will be reset</source>
         <translation>Все текущие настройки будут сброшены</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="138"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="141"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="142"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
@@ -1220,12 +1243,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="65"/>
         <source>When AmneziaDNS is not used or installed</source>
-        <translation type="unfinished">Эти адреса будут использоваться, если не включен AmneziaDNS</translation>
+        <translation>Эти адреса будут использоваться, если не включен AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
         <source>Allows you to use the VPN only for certain Apps</source>
-        <translation type="unfinished"></translation>
+        <translation>Позволяет использовать VPN только для определенных приложений</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="80"/>
@@ -1252,7 +1275,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="39"/>
         <source>Default server does not support custom dns</source>
-        <translation type="unfinished">Сервер по умолчанию не поддерживает пользовательские dns</translation>
+        <translation>Сервер по умолчанию не поддерживает пользовательские dns</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="57"/>
@@ -1266,7 +1289,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="62"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation type="unfinished"></translation>
+        <translation>Если AmneziaDNS не используется или не установлен</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="69"/>
@@ -1317,62 +1340,72 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsLogging</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="47"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="23"/>
+        <source>Logging is enabled. Note that logs will be automatically disabled after 14 days, and all log files will be deleted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="59"/>
         <source>Logging</source>
         <translation>Логирование</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="54"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="64"/>
+        <source>Enabling this function will save application&apos;s logs automatically, By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
+        <translation>Включение этой функции позволяет сохранять логи на вашем устройстве. По-умолчанию она отключена.  Включите сохранение логов в случае сбоя в работе приложения.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="73"/>
         <source>Save logs</source>
         <translation>Сохранять логи</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="87"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="106"/>
         <source>Open folder with logs</source>
         <translation>Открыть папку с логами</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="128"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="129"/>
         <source>Logs files (*.log)</source>
         <translation>Logs files (*.log)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="138"/>
         <source>Logs file saved</source>
         <translation>Файл с логами сохранен</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="147"/>
         <source>Save logs to file</source>
         <translation>Сохранить логи в файл</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="165"/>
         <source>Clear logs?</source>
         <translation>Очистить логи?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="166"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="148"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="167"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="173"/>
         <source>Logs have been cleaned up</source>
         <translation>Логи удалены</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="186"/>
         <source>Clear logs</source>
         <translation>Удалить логи</translation>
     </message>
@@ -1440,27 +1473,32 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="138"/>
         <source>Reboot server</source>
-        <translation type="unfinished">Перезагрузить сервер</translation>
+        <translation>Перезагрузить сервер</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="142"/>
         <source>Do you want to reboot the server?</source>
-        <translation type="unfinished">Вы уверены, что хотите перезагрузить сервер?</translation>
+        <translation>Вы уверены, что хотите перезагрузить сервер?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="143"/>
         <source>The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?</source>
-        <translation type="unfinished">Процесс перезагрузки может занять около 30 секунд. Вы уверены, что хотите продолжить?</translation>
+        <translation>Процесс перезагрузки может занять около 30 секунд. Вы уверены, что хотите продолжить?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="173"/>
         <source>Do you want to remove the server from application?</source>
-        <translation type="unfinished">Вы уверены, что хотите удалить сервер из приложения?</translation>
+        <translation>Вы уверены, что хотите удалить сервер из приложения?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="203"/>
-        <source>Do you want to clear server Amnezia-installed services?</source>
-        <translation type="unfinished">Вы хотите очистить сервер от всех сервисов Amnezia?</translation>
+        <source>Do you want to clear server from Amnezia software?</source>
+        <translation>Вы хотите очистить сервер от всех сервисов Amnezia?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="204"/>
+        <source>All users whom you shared a connection with will no longer be able to connect to it.</source>
+        <translation>Все пользователи, с которыми вы поделились конфигурацией с вашим VPN, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="230"/>
@@ -1470,16 +1508,16 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="234"/>
         <source>Do you want to reset API config?</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы хотите сбросить конфигурацию API?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="169"/>
-        <source>Remove this server from the app</source>
+        <source>Remove server from application</source>
         <translation>Удалить сервер из приложения</translation>
     </message>
     <message>
-        <source>Remove server from application?</source>
-        <translation type="vanished">Удалить сервер из приложения?</translation>
+        <source>Remove server?</source>
+        <translation type="vanished">Удалить сервер?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="174"/>
@@ -1488,45 +1526,48 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="199"/>
-        <source>Clear server Amnezia-installed services</source>
+        <source>Clear server from Amnezia software</source>
         <translation>Очистить сервер от протоколов и сервисов Amnezia</translation>
     </message>
     <message>
-        <source>Clear server Amnezia-installed services?</source>
+        <source>Clear server from Amnezia software?</source>
         <translation type="vanished">Удалить все сервисы и протоколы Amnezia  с сервера?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="204"/>
         <source>All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.</source>
-        <translation>На сервере будут удалены все данные, связанные с Amnezia: протоколы, сервисы, конфигурационные файлы, ключи и сертификаты.</translation>
+        <translation type="vanished">На сервере будут удалены все данные, связанные с Amnezia: протоколы, сервисы, конфигурационные файлы, ключи и сертификаты.</translation>
     </message>
 </context>
 <context>
     <name>PageSettingsServerInfo</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="106"/>
         <source>Server name</source>
         <translation>Имя сервера</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="118"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="119"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="156"/>
         <source>Protocols</source>
         <translation>Протоколы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="161"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="162"/>
         <source>Services</source>
         <translation>Сервисы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="166"/>
+        <source>Management</source>
+        <translation>Управление</translation>
+    </message>
+    <message>
         <source>Data</source>
-        <translation>Данные</translation>
+        <translation type="vanished">Данные</translation>
     </message>
 </context>
 <context>
@@ -1549,7 +1590,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="117"/>
         <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation>Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
+        <translation>Все пользователи, с которыми вы поделились конфигурацией с вашим VPN, больше не смогут к нему подключаться.</translation>
     </message>
     <message>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
@@ -1579,7 +1620,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="36"/>
         <source>Default server does not support split tunneling function</source>
-        <translation type="unfinished"></translation>
+        <translation>Сервер по умолчанию не поддерживает функцию раздельного туннелирования</translation>
     </message>
     <message>
         <source>Only the sites listed here will be accessed via VPN</source>
@@ -1632,12 +1673,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="33"/>
         <source>Cannot change split tunneling settings during active connection</source>
-        <translation type="unfinished">Невозможно изменить настройки раздельного туннелирования при включенном VPN</translation>
+        <translation>Невозможно изменить настройки раздельного туннелирования при включенном VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="262"/>
         <source>website or IP</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="309"/>
@@ -1701,7 +1742,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="51"/>
         <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation>Не используйте код подключения из недоверенных источников. Его могли создать, чтобы перехватить ваши данные.</translation>
+        <translation>Не используйте коды подключения из ненадежных источников, так как они могут быть созданы для перехвата ваших данных.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
@@ -1724,12 +1765,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>Открыть файл с конфигурацией</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="89"/>
         <source>QR-code</source>
         <translation>QR-код</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="108"/>
         <source>Key as text</source>
         <translation>Ключ в виде текста</translation>
     </message>
@@ -1754,7 +1795,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="vanished">Password / SSH private key</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="104"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="108"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
@@ -1764,47 +1805,51 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Все данные, которые вы вводите, останутся строго конфиденциальными и не будут переданы или раскрыты Amnezia или каким-либо третьим лицам</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="142"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="146"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
         <translation>Введите адрес в формате 255.255.255.255:88</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="70"/>
         <source>Login to connect via SSH</source>
-        <translation>Login to connect via SSH</translation>
+        <translation type="vanished">Login to connect via SSH</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="46"/>
         <source>Configure your server</source>
-        <translation>Настроить свой сервер</translation>
+        <translation>Настроить ваш сервер</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="54"/>
         <source>255.255.255.255:22</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="82"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="70"/>
+        <source>SSH Username</source>
+        <translation>SSH Имя пользователя</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="86"/>
         <source>Password or SSH private key</source>
-        <translation type="unfinished"></translation>
+        <translation>Пароль или закрытый ключ SSH</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="130"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="134"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation type="unfinished">Все данные, которые вы вводите, останутся строго конфиденциальными и не будут переданы или раскрыты Amnezia или каким-либо третьим лицам</translation>
+        <translation>Все данные, которые вы вводите, останутся строго конфиденциальными и не будут переданы или раскрыты Amnezia или каким-либо третьим лицам</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="143"/>
         <source>Ip address cannot be empty</source>
         <translation>Поле IP address не может быть пустым</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="150"/>
         <source>Login cannot be empty</source>
         <translation>Поле Login не может быть пустым</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="150"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="154"/>
         <source>Password/private key cannot be empty</source>
         <translation>Поле Password/Private key не может быть пустым</translation>
     </message>
@@ -1818,23 +1863,30 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="139"/>
+        <source>Choose a VPN protocol</source>
+        <translation>Выберите протокол VPN</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="196"/>
+        <source>Skip setup</source>
+        <translation>Пропустить настройку</translation>
+    </message>
+    <message>
         <source>Set up a VPN yourself</source>
-        <translation>Настроить VPN самостоятельно</translation>
+        <translation type="vanished">Настроить VPN самостоятельно</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="140"/>
         <source>I want to choose a VPN protocol</source>
-        <translation>Выбрать VPN-протокол</translation>
+        <translation type="vanished">Выбрать VPN-протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="159"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="158"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="197"/>
         <source>Set up later</source>
-        <translation>Настроить позднее</translation>
+        <translation type="vanished">Настроить позднее</translation>
     </message>
 </context>
 <context>
@@ -1875,7 +1927,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="166"/>
         <source>Cancel installation</source>
-        <translation type="unfinished"></translation>
+        <translation>Отменить установку</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="21"/>
@@ -1946,29 +1998,29 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Восстановление настроек из бэкап файла</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="130"/>
         <source>Free service for creating a personal VPN on your server.</source>
         <translation>Простое и бесплатное приложение для запуска self-hosted VPN с высокими требованиями к приватности.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="131"/>
         <source> Helps you access blocked content without revealing your privacy, even to VPN providers.</source>
         <translation> Помогает получить доступ к заблокированному контенту, не раскрывая вашу конфиденциальность даже провайдерам VPN.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="140"/>
         <source>I have the data to connect</source>
         <translation>У меня есть данные для подключения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="160"/>
         <source>I have nothing</source>
         <translation>У меня ничего нет</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="163"/>
         <source>https://amnezia.org/instructions/0_starter-guide</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -2002,7 +2054,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageSetupWizardViewConfig</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="67"/>
         <source>New connection</source>
         <translation>Новое соединение</translation>
     </message>
@@ -2011,19 +2063,19 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Не используйте код подключения из публичных источников. Его могли создать, чтобы перехватить ваши данные.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="95"/>
-        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation>Не используйте код подключения из недоверенных источников. Его могли создать, чтобы перехватить ваши данные.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Collapse content</source>
         <translation>Свернуть</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="101"/>
         <source>Show content</source>
         <translation>Показать содержимое ключа</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="112"/>
+        <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
+        <translation>Используйте файлы конфигурации только из тех источников, которым вы доверяете. Файлы из общедоступных источников могли быть созданы с целью перехвата ваших личных данных</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="153"/>
@@ -2073,7 +2125,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="37"/>
         <source>Config revoked</source>
-        <translation type="unfinished"></translation>
+        <translation>Конфигурация отозвана</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="44"/>
@@ -2098,17 +2150,17 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="72"/>
         <source>Save AmneziaWG config</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохраняем конфигурацию AmneziaWG</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="79"/>
         <source>Save ShadowSocks config</source>
-        <translation type="unfinished">Сохранить конфигурацию ShadowSocks</translation>
+        <translation>Сохранить конфигурацию ShadowSocks</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="86"/>
         <source>Save Cloak config</source>
-        <translation type="unfinished">Сохранить конфигурацию Cloak</translation>
+        <translation>Сохранить конфигурацию Cloak</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="111"/>
@@ -2118,17 +2170,17 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="126"/>
         <source>AmneziaWG native format</source>
-        <translation type="unfinished"></translation>
+        <translation>AmneziaWG нативный формат</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="131"/>
         <source>ShadowSocks native format</source>
-        <translation type="unfinished">ShadowSocks нативный формат</translation>
+        <translation>ShadowSocks нативный формат</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="136"/>
         <source>Cloak native format</source>
-        <translation type="unfinished">Cloak нативный формат</translation>
+        <translation>Cloak нативный формат</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="161"/>
@@ -2138,73 +2190,73 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
         <source>Share full access to the server and VPN</source>
-        <translation type="unfinished">Поделиться полным доступом к серверу</translation>
+        <translation>Поделиться полным доступом к серверу</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="191"/>
         <source>Use for your own devices, or share with those you trust to manage the server.</source>
-        <translation type="unfinished">Используйте для собственных устройств или передайте управление сервером тем, кому вы доверяете.</translation>
+        <translation>Используйте для собственных устройств или передайте управление сервером тем, кому вы доверяете.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="243"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="513"/>
         <source>Users</source>
-        <translation type="unfinished">Пользователи</translation>
+        <translation>Пользователи</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="274"/>
         <source>User name</source>
-        <translation type="unfinished">Имя пользователя</translation>
+        <translation>Имя пользователя</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="529"/>
         <source>Search</source>
-        <translation type="unfinished"></translation>
+        <translation>Поиск</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="613"/>
         <source>Creation date: </source>
-        <translation type="unfinished">Дата создания</translation>
+        <translation>Дата создания: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="627"/>
         <source>Rename</source>
-        <translation type="unfinished">Переименовать</translation>
+        <translation>Переименовать</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="659"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="660"/>
         <source>Client name</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя клиента</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="672"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="673"/>
         <source>Save</source>
-        <translation type="unfinished">Сохранить</translation>
+        <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="704"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="705"/>
         <source>Revoke</source>
-        <translation type="unfinished">Отозвать</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="707"/>
-        <source>Revoke the config for a user - %1?</source>
-        <translation type="unfinished">Отозвать доступ для пользователя - %1?</translation>
+        <translation>Отозвать</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="708"/>
-        <source>The user will no longer be able to connect to your server.</source>
-        <translation type="unfinished">Пользователь больше не сможет подключаться к вашему серверу</translation>
+        <source>Revoke the config for a user - %1?</source>
+        <translation>Отозвать доступ для пользователя - %1?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="709"/>
-        <source>Continue</source>
-        <translation type="unfinished">Продолжить</translation>
+        <source>The user will no longer be able to connect to your server.</source>
+        <translation>Пользователь больше не сможет подключаться к вашему серверу.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="710"/>
+        <source>Continue</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="711"/>
         <source>Cancel</source>
-        <translation type="unfinished">Отменить</translation>
+        <translation>Отменить</translation>
     </message>
     <message>
         <source>Full access</source>
@@ -2239,49 +2291,58 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="49"/>
         <source>Full access to the server and VPN</source>
-        <translation type="unfinished">Полный доступ к серверу и VPN</translation>
+        <translation>Полный доступ к серверу и VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="57"/>
         <source>We recommend that you use full access to the server only for your own additional devices.
 </source>
-        <translation type="unfinished">Мы рекомендуем использовать полный доступ к серверу только для собственных устройств.</translation>
+        <translation>Мы рекомендуем использовать полный доступ к серверу только для собственных устройств.
+</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="58"/>
         <source>If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. </source>
-        <translation type="unfinished">Если вы поделитесь полным доступом с другими людьми, то они смогут удалять и добавлять протоколы и сервисы на сервер, что приведет к некорректной работе VPN для всех пользователей.</translation>
+        <translation>Если вы поделитесь полным доступом с другими людьми, то они смогут удалять и добавлять протоколы и сервисы на сервер, что приведет к некорректной работе VPN для всех пользователей. </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="74"/>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="75"/>
         <source>Server</source>
-        <translation type="unfinished">Сервер</translation>
+        <translation>Сервер</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="101"/>
         <source>Accessing </source>
-        <translation type="unfinished">Доступ </translation>
+        <translation>Доступ </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="102"/>
         <source>File with accessing settings to </source>
-        <translation type="unfinished"></translation>
+        <translation>Файл с настройками доступа к </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="123"/>
         <source>Share</source>
-        <translation type="unfinished">Поделиться</translation>
+        <translation>Поделиться</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="127"/>
         <source>Connection to </source>
-        <translation type="unfinished">Подключение к </translation>
+        <translation>Подключение к </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="128"/>
         <source>File with connection settings to </source>
-        <translation type="unfinished">Файл с настройками доступа к </translation>
+        <translation>Файл с настройками доступа к </translation>
+    </message>
+</context>
+<context>
+    <name>PageStart</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="136"/>
+        <source>Logging was disabled after 14 days, log files were deleted</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2664,12 +2725,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="50"/>
         <source>The config does not contain any containers and credentials for connecting to the server</source>
-        <translation type="unfinished">Конфиг не содержит контейнеров и учетных данных для подключения к серверу</translation>
+        <translation>Конфиг не содержит контейнеров и учетных данных для подключения к серверу</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="56"/>
         <source>Error when retrieving configuration from API</source>
-        <translation type="unfinished"></translation>
+        <translation>Ошибка при получении конфигурации из API</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="57"/>
@@ -2679,7 +2740,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="72"/>
         <source>ErrorCode: %1. </source>
-        <translation type="unfinished"></translation>
+        <translation>Код ошибки: %1. </translation>
     </message>
     <message>
         <source>Failed to save config to disk</source>
@@ -2738,7 +2799,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="53"/>
         <source>VPN connection error</source>
-        <translation type="unfinished"></translation>
+        <translation>Ошибка VPN-подключения</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="60"/>
@@ -2783,17 +2844,17 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../containers/containers_defs.cpp" line="101"/>
         <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
-        <translation type="unfinished">ShadowSocks - маскирует VPN-трафик под обычный веб-трафик, но распознается системами анализа в некоторых регионах с высоким уровнем цензуры.</translation>
+        <translation>ShadowSocks - маскирует VPN-трафик под обычный веб-трафик, но распознается системами анализа в некоторых регионах с высоким уровнем цензуры.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="104"/>
         <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
-        <translation type="unfinished">OpenVPN over Cloak - OpenVPN с маскировкой VPN под web-трафик и защитой от обнаружения active-probbing. Подходит для регионов с самым высоким уровнем цензуры.</translation>
+        <translation>OpenVPN over Cloak - OpenVPN с маскировкой VPN под web-трафик и защитой от обнаружения active-probbing. Подходит для регионов с самым высоким уровнем цензуры.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="122"/>
         <source>Create a file vault on your server to securely store and transfer files.</source>
-        <translation type="unfinished">Создайте на сервере файловое хранилище для безопасного хранения и передачи файлов.</translation>
+        <translation>Создайте на сервере файловое хранилище для безопасного хранения и передачи файлов.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="155"/>
@@ -2939,6 +3000,25 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * Работает по сетевому протоколу TCP.</translation>
     </message>
     <message>
+        <location filename="../containers/containers_defs.cpp" line="217"/>
+        <source>After installation, Amnezia will create a
+
+ file storage on your server. You will be able to access it using
+ FileZilla or other SFTP clients, as well as mount the disk on your device to access
+ it directly from your device.
+
+For more detailed information, you can
+ find it in the support section under &quot;Create SFTP file storage.&quot; </source>
+        <translation>После установки Amnezia создаст
+
+ файловое хранилище на вашем сервере. Вы сможете получить к нему доступ, используя
+ FileZilla или других SFTP-клиентов, а также смонтировать диск на вашем устройстве для доступа
+ непосредственно с вашего устройства.
+
+Более подробную информацию, вы можете
+найти в разделе поддержки &quot;Создание файлового хранилища SFTP.&quot; </translation>
+    </message>
+    <message>
         <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
 
 OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client and the server.
@@ -3022,9 +3102,8 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation type="vanished">AmneziaWG протокол</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="216"/>
         <source>Sftp file sharing service - is secure FTP service</source>
-        <translation>Файловое хранилище для безопасного хранения данных</translation>
+        <translation type="vanished">Файловое хранилище для безопасного хранения данных</translation>
     </message>
     <message>
         <location filename="../protocols/protocols_defs.cpp" line="77"/>
@@ -3117,17 +3196,17 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="140"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="149"/>
         <source>All settings have been reset to default values</source>
         <translation>Все настройки были сброшены к значению &quot;По умолчанию&quot;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="150"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="159"/>
         <source>Cached profiles cleared</source>
         <translation>Кэш профиля очищен</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="123"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="132"/>
         <source>Backup file is corrupted</source>
         <translation>Backup файл поврежден</translation>
     </message>
@@ -3159,12 +3238,12 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="141"/>
         <source>Copy config string</source>
-        <translation type="unfinished"></translation>
+        <translation>Скопировать строку конфигурации</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="160"/>
         <source>Show connection settings</source>
-        <translation type="unfinished">Показать настройки подключения</translation>
+        <translation>Показать настройки подключения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="328"/>
@@ -3310,32 +3389,32 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="308"/>
+        <location filename="../containers/containers_defs.cpp" line="312"/>
         <source>Low</source>
         <translation>Низкий</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="309"/>
+        <location filename="../containers/containers_defs.cpp" line="313"/>
         <source>Medium or High</source>
         <translation>Средний или Высокий</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="310"/>
+        <location filename="../containers/containers_defs.cpp" line="314"/>
         <source>Extreme</source>
         <translation>Экстремальный</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="318"/>
+        <location filename="../containers/containers_defs.cpp" line="322"/>
         <source>I just want to increase the level of my privacy.</source>
         <translation>Я просто хочу повысить уровень своей приватности.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="319"/>
+        <location filename="../containers/containers_defs.cpp" line="323"/>
         <source>I want to bypass censorship. This option recommended in most cases.</source>
         <translation>Я хочу обойти блокировки. Этот вариант рекомендуется в большинстве случаев.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="321"/>
+        <location filename="../containers/containers_defs.cpp" line="325"/>
         <source>Most VPN protocols are blocked. Recommended if other options are not working.</source>
         <translation>Большинство VPN протоколов заблокированы. Рекомендуется, если другие варианты не работают.</translation>
     </message>
@@ -3363,12 +3442,12 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="179"/>
+        <location filename="../ui/qml/main2.qml" line="180"/>
         <source>Private key passphrase</source>
         <translation>Кодовая фраза для закрытого ключа</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="202"/>
+        <location filename="../ui/qml/main2.qml" line="203"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
