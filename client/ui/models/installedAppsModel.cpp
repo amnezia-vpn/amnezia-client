@@ -1,5 +1,8 @@
 #include "installedAppsModel.h"
 
+#include <QtConcurrent>
+#include <QEventLoop>
+
 #include "platforms/android/android_controller.h"
 
 InstalledAppsModel::InstalledAppsModel(QObject *parent) : QAbstractListModel(parent)
@@ -19,7 +22,12 @@ QVariant InstalledAppsModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case AppNameRole: {
-        return m_installedApps.at(index.row()).toObject().value("name");
+        auto appName = m_installedApps.at(index.row()).toObject().value("name").toString();
+        auto packageName = m_installedApps.at(index.row()).toObject().value("package").toString();
+        if (appName.isEmpty()) {
+            appName = packageName;
+        }
+        return appName;
     }
     case AppIconRole: {
         return m_installedApps.at(index.row()).toObject().value("package").toString();
@@ -59,9 +67,19 @@ QVector<QPair<QString, QString>> InstalledAppsModel::getSelectedAppsInfo()
 
 void InstalledAppsModel::updateModel()
 {
-    beginResetModel();
-    m_installedApps = AndroidController::instance()->getAppList();
-    endResetModel();
+    QFuture<void> future = QtConcurrent::run([this]() {
+        beginResetModel();
+        m_installedApps = AndroidController::instance()->getAppList();
+        endResetModel();
+    });
+
+    QFutureWatcher<void> watcher;
+    QEventLoop wait;
+    connect(&watcher, &QFutureWatcher<void>::finished, &wait, &QEventLoop::quit);
+    watcher.setFuture(future);
+    wait.exec();
+
+    return;
 }
 
 QHash<int, QByteArray> InstalledAppsModel::roleNames() const

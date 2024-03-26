@@ -30,6 +30,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.h
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/installedAppsImageProvider.h
 )
 
 set(SOURCES ${SOURCES}
@@ -38,6 +39,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/installedAppsImageProvider.cpp
 )
 
 foreach(abi IN ITEMS ${QT_ANDROID_ABIS})

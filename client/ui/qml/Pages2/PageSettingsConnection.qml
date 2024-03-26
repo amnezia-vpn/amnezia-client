@@ -11,6 +11,8 @@ import "../Config"
 PageType {
     id: root
 
+    property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
+
     BackButtonType {
         id: backButton
 
@@ -85,11 +87,11 @@ PageType {
             }
 
             DividerType {
-                visible: Qt.platform.os !== "ios"
+                visible: root.isAppSplitTinnelingEnabled
             }
 
             LabelWithButtonType {
-                visible: Qt.platform.os !== "ios"
+                visible: root.isAppSplitTinnelingEnabled
 
                 Layout.fillWidth: true
 
@@ -103,7 +105,7 @@ PageType {
             }
 
             DividerType {
-                visible: Qt.platform.os !== "ios"
+                visible: root.isAppSplitTinnelingEnabled
             }
         }
     }

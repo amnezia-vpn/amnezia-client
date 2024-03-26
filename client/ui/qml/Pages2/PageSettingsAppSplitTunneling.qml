@@ -232,12 +232,17 @@ PageType {
             clickedFunc: function() {
                 searchField.focus = false
                 PageController.showBusyIndicator(true)
-//                var fileName = SystemController.getFileName(qsTr("Open executable file"),
-//                                                            qsTr("Executable file (*.*)"))
-//                if (fileName !== "") {
-//                    AppSplitTunnelingController.addApp(fileName)
-//                }
-                installedAppDrawer.open()
+
+                if (Qt.platform.os === "windows") {
+                    var fileName = SystemController.getFileName(qsTr("Open executable file"),
+                                                                qsTr("Executable file (*.*)"))
+                    if (fileName !== "") {
+                        AppSplitTunnelingController.addApp(fileName)
+                    }
+                } else if (Qt.platform.os === "android"){
+                    installedAppDrawer.open()
+                }
+
                 PageController.showBusyIndicator(false)
             }
         }

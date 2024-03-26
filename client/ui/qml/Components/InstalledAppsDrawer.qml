@@ -87,24 +87,23 @@ DrawerType2 {
                         anchors.fill: parent
 
                         RowLayout {
-                            Layout.fillWidth: true
-
-                            Image {
-                                source: "image://installedAppImage/" + appIcon
-
-                                sourceSize.width: 48
-                                sourceSize.height: 48
-                            }
-
                             CheckBoxType {
                                 Layout.fillWidth: true
-                                Layout.rightMargin: 24
 
                                 text: appName
 
                                 onCheckedChanged: {
                                     listView.model.selectedStateChanged(index, checked)
                                 }
+                            }
+
+                            Image {
+                                source: "image://installedAppImage/" + appIcon
+
+                                sourceSize.width: 24
+                                sourceSize.height: 24
+
+                                Layout.rightMargin: 48
                             }
                         }
 
