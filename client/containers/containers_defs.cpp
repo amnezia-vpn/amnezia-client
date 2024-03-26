@@ -230,7 +230,11 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
 
         { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
         { DockerContainer::Dns, QObject::tr("DNS Service") },
-        { DockerContainer::Sftp, QObject::tr("Sftp file sharing service - is secure FTP service") }
+        { DockerContainer::Sftp,
+          QObject::tr("After installation, Amnezia will create a\n\n file storage on your server. "
+                      "You will be able to access it using\n FileZilla or other SFTP clients, "
+                      "as well as mount the disk on your device to access\n it directly from your device.\n\n"
+                      "For more detailed information, you can\n find it in the support section under \"Create SFTP file storage.\" ") }
     };
 }
 

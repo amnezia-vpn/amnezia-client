@@ -211,7 +211,7 @@ ErrorCode OpenVpnProtocol::start()
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
 
-    m_openVpnProcess->waitForSource(1000);
+    m_openVpnProcess->waitForSource(5000);
     if (!m_openVpnProcess->isInitialized()) {
         qWarning() << "IpcProcess replica is not connected!";
         setLastError(ErrorCode::AmneziaServiceConnectionFailed);

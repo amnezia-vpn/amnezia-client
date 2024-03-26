@@ -1,5 +1,6 @@
 package org.amnezia.vpn
 
+import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Intent
 import android.content.Intent.EXTRA_MIME_TYPES
@@ -14,6 +15,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import android.provider.Settings
 import android.view.WindowManager.LayoutParams
 import android.webkit.MimeTypeMap
 import android.widget.Toast
@@ -216,13 +218,13 @@ class AmneziaActivity : QtActivity() {
                 when (resultCode) {
                     RESULT_OK -> {
                         Log.d(TAG, "Vpn permission granted")
-                        Toast.makeText(this, "Vpn permission granted", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, resources.getText(R.string.vpnGranted), Toast.LENGTH_LONG).show()
                         checkVpnPermissionCallbacks?.run { onSuccess() }
                     }
 
                     else -> {
                         Log.w(TAG, "Vpn permission denied, resultCode: $resultCode")
-                        Toast.makeText(this, "Vpn permission denied", Toast.LENGTH_LONG).show()
+                        showOnVpnPermissionRejectDialog()
                         checkVpnPermissionCallbacks?.run { onFail() }
                     }
                 }
@@ -278,6 +280,17 @@ class AmneziaActivity : QtActivity() {
             return
         }
         onSuccess()
+    }
+
+    private fun showOnVpnPermissionRejectDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.vpnSetupFailed)
+            .setMessage(R.string.vpnSetupFailedMessage)
+            .setNegativeButton(R.string.ok) { _, _ -> }
+            .setPositiveButton(R.string.openVpnSettings) { _, _ ->
+                startActivity(Intent(Settings.ACTION_VPN_SETTINGS))
+            }
+            .show()
     }
 
     @MainThread

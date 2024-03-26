@@ -124,7 +124,7 @@ PageType {
     Connections {
         target: ImportController
 
-        function onImportErrorOccurred(errorMessage) {
+        function onImportErrorOccurred(errorMessage, goToPageHome) {
             PageController.showErrorMessage(errorMessage)
         }
     }
