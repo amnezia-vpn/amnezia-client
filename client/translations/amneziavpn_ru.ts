@@ -942,7 +942,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="72"/>
         <source>And if you don’t like the application, all the more reason to support it - the donation will be used for the improving the application.</source>
-        <translation>А, если оно вам не нравится, тем более поддержите - пожертвование пойдет на улучшение приложения.</translation>
+        <translation>А если оно вам не нравится, тем более поддержите - пожертвование пойдет на улучшение приложения.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="82"/>
