@@ -79,7 +79,7 @@ bool ImportController::extractConfigFromFile(const QString &fileName)
         return extractConfigFromData(data);
     }
 
-    emit importErrorOccurred(tr("Unable to open file"));
+    emit importErrorOccurred(tr("Unable to open file"), false);
     return false;
 }
 
@@ -117,12 +117,12 @@ bool ImportController::extractConfigFromData(QString data)
         if (!m_serversModel->getServersCount()) {
             emit restoreAppConfig(config.toUtf8());
         } else {
-            emit importErrorOccurred(tr("Invalid configuration file"));
+            emit importErrorOccurred(tr("Invalid configuration file"), false);
         }
         break;
     }
     case ConfigTypes::Invalid: {
-        emit importErrorOccurred(tr("Invalid configuration file"));
+        emit importErrorOccurred(tr("Invalid configuration file"), false);
         break;
     }
     }
@@ -257,6 +257,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     } else {
         qDebug() << "Key parameter 'Endpoint' is missing";
         emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
+        return QJsonObject();
     }
 
     if (hostNameAndPortMatch.hasCaptured(2)) {
@@ -282,7 +283,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
     } else {
         qDebug() << "One of the key parameters is missing (PrivateKey, Address, PublicKey)";
-        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
+        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
         return QJsonObject();
     }
 

@@ -42,7 +42,7 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="65"/>
-        <source>Connection...</source>
+        <source>Connecting...</source>
         <translation>در حال ارتباط...</translation>
     </message>
     <message>
@@ -63,7 +63,7 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="79"/>
-        <source>Reconnection...</source>
+        <source>Reconnecting...</source>
         <translation>اتصال دوباره...</translation>
     </message>
     <message>
@@ -76,7 +76,7 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="89"/>
-        <source>Disconnection...</source>
+        <source>Disconnecting...</source>
         <translation>قطع ارتباط...</translation>
     </message>
 </context>
