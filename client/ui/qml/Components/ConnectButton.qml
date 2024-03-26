@@ -17,15 +17,15 @@ Button {
     implicitWidth: 190
     implicitHeight: 190
 
+    text: ConnectionController.connectionStateText
+
     Connections {
         target: ConnectionController
 
-        function onConnectionErrorOccurred(errorMessage) {
-            PageController.showErrorMessage(errorMessage)
+        function onPreparingConfig() {
+            PageController.showNotificationMessage(qsTr("Unable to disconnect during configuration preparation"))
         }
     }
-
-    text: ConnectionController.connectionStateText
 
 //    enabled: !ConnectionController.isConnectionInProgress
 
@@ -139,6 +139,6 @@ Button {
 
     onClicked: {
         ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
-        ApiController.updateServerConfigFromApi()
+        ConnectionController.connectButtonClicked()
     }
 }

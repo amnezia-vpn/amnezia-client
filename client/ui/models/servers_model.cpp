@@ -1,10 +1,13 @@
 #include "servers_model.h"
 
 #include "core/controllers/serverController.h"
+#include "utilities.h"
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent)
     : m_settings(settings), QAbstractListModel(parent)
 {
+    m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
+
     connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerNameChanged);
 
     connect(this, &ServersModel::defaultServerIndexChanged, this, [this](const int serverIndex) {
@@ -336,9 +339,9 @@ void ServersModel::updateDefaultServerContainersModel()
     emit defaultServerContainersUpdated(containers);
 }
 
-QJsonObject ServersModel::getDefaultServerConfig()
+QJsonObject ServersModel::getServerConfig(const int serverIndex)
 {
-    return m_servers.at(m_defaultServerIndex).toObject();
+    return m_servers.at(serverIndex).toObject();
 }
 
 void ServersModel::reloadDefaultServerContainerConfig()
@@ -478,24 +481,9 @@ ErrorCode ServersModel::removeContainer(const int containerIndex)
     return errorCode;
 }
 
-void ServersModel::clearCachedProfiles()
-{
-    const auto &containers = m_settings->containers(m_processedServerIndex);
-    for (DockerContainer container : containers.keys()) {
-        m_settings->clearLastConnectionConfig(m_processedServerIndex, container);
-    }
-
-    m_servers.replace(m_processedServerIndex, m_settings->server(m_processedServerIndex));
-    if (m_processedServerIndex == m_defaultServerIndex) {
-        updateDefaultServerContainersModel();
-    }
-    updateContainersModel();
-}
-
 void ServersModel::clearCachedProfile(const DockerContainer container)
 {
     m_settings->clearLastConnectionConfig(m_processedServerIndex, container);
-
     m_servers.replace(m_processedServerIndex, m_settings->server(m_processedServerIndex));
     if (m_processedServerIndex == m_defaultServerIndex) {
         updateDefaultServerContainersModel();
@@ -513,6 +501,30 @@ bool ServersModel::isAmneziaDnsContainerInstalled(const int serverIndex) const
         }
     }
     return false;
+}
+
+QPair<QString, QString> ServersModel::getDnsPair(int serverIndex)
+{
+    QPair<QString, QString> dns;
+
+    const QJsonObject &server = m_servers.at(m_processedServerIndex).toObject();
+    const auto containers = server.value(config_key::containers).toArray();
+
+    dns.first = server.value(config_key::dns1).toString();
+    dns.second = server.value(config_key::dns2).toString();
+
+    if (dns.first.isEmpty() || !Utils::checkIPv4Format(dns.first)) {
+        if (m_isAmneziaDnsEnabled && containers.contains(DockerContainer::Dns)) {
+            dns.first = protocols::dns::amneziaDnsIp;
+        } else
+            dns.first = m_settings->primaryDns();
+    }
+    if (dns.second.isEmpty() || !Utils::checkIPv4Format(dns.second)) {
+        dns.second = m_settings->secondaryDns();
+    }
+
+    qDebug() << "VpnConfigurator::getDnsForConfig" << dns.first << dns.second;
+    return dns;
 }
 
 QStringList ServersModel::getAllInstalledServicesName(const int serverIndex)

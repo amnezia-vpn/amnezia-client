@@ -90,6 +90,8 @@ namespace amnezia
 
         constexpr char crc[] = "crc";
 
+        constexpr char clientId[] = "clientId";
+
     }
 
     namespace protocols

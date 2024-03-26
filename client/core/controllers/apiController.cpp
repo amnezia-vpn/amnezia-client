@@ -5,9 +5,8 @@
 #include <QNetworkReply>
 #include <QtConcurrent>
 
-#include "configurators/openvpn_configurator.h"
-#include "configurators/wireguard_configurator.h"
 #include "core/errorstrings.h"
+#include "configurators/wireguard_configurator.h"
 
 namespace
 {
@@ -24,9 +23,7 @@ namespace
     }
 }
 
-ApiController::ApiController(const QSharedPointer<ServersModel> &serversModel,
-                             const QSharedPointer<ContainersModel> &containersModel, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel)
+ApiController::ApiController(QObject *parent) : QObject(parent)
 {
 }
 
@@ -67,21 +64,14 @@ QJsonObject ApiController::fillApiPayload(const QString &protocol, const ApiCont
     return obj;
 }
 
-void ApiController::updateServerConfigFromApi()
+ErrorCode ApiController::updateServerConfigFromApi(QJsonObject &serverConfig)
 {
-    QtConcurrent::run([this]() {
-        if (m_isConfigUpdateStarted) {
-            emit updateFinished(false);
-            return;
-        }
+    QFutureWatcher<ErrorCode> watcher;
 
-        auto serverConfig = m_serversModel->getDefaultServerConfig();
+    QFuture<ErrorCode> future = QtConcurrent::run([this, &serverConfig]() {
         auto containerConfig = serverConfig.value(config_key::containers).toArray();
 
-        if (serverConfig.value(config_key::configVersion).toInt() && containerConfig.isEmpty()) {
-            emit updateStarted();
-            m_isConfigUpdateStarted = true;
-
+        if (serverConfig.value(config_key::configVersion).toInt()) {
             QNetworkAccessManager manager;
 
             QNetworkRequest request;
@@ -114,9 +104,7 @@ void ApiController::updateServerConfigFromApi()
                                                        QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 
                 if (ba.isEmpty()) {
-                    emit errorOccurred(errorString(ApiConfigDownloadError));
-                    m_isConfigUpdateStarted = false;
-                    return;
+                    return ErrorCode::ApiConfigDownloadError;
                 }
 
                 QByteArray ba_uncompressed = qUncompress(ba);
@@ -136,35 +124,22 @@ void ApiController::updateServerConfigFromApi()
 
                 auto defaultContainer = apiConfig.value(config_key::defaultContainer).toString();
                 serverConfig.insert(config_key::defaultContainer, defaultContainer);
-                m_serversModel->editServer(serverConfig, m_serversModel->getDefaultServerIndex());
             } else {
                 QString err = reply->errorString();
                 qDebug() << QString::fromUtf8(reply->readAll());
                 qDebug() << reply->error();
                 qDebug() << err;
                 qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-                emit errorOccurred(errorString(ApiConfigDownloadError));
-                m_isConfigUpdateStarted = false;
-                return;
+                return ErrorCode::ApiConfigDownloadError;
             }
         }
-
-        emit updateFinished(m_isConfigUpdateStarted);
-        m_isConfigUpdateStarted = false;
-        return;
+        return ErrorCode::NoError;
     });
-}
 
-void ApiController::clearApiConfig()
-{
-    auto serverConfig = m_serversModel->getDefaultServerConfig();
+    QEventLoop wait;
+    connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
+    watcher.setFuture(future);
+    wait.exec();
 
-    serverConfig.remove(config_key::dns1);
-    serverConfig.remove(config_key::dns2);
-    serverConfig.remove(config_key::containers);
-    serverConfig.remove(config_key::hostName);
-
-    serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
-
-    m_serversModel->editServer(serverConfig, m_serversModel->getDefaultServerIndex());
+    return watcher.result();
 }

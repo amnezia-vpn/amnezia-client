@@ -66,7 +66,7 @@ PageType {
 
                 text: qsTr("Website address")
                 descriptionText: {
-                    var containerIndex = ContainersModel.getCurrentlyProcessedContainerIndex()
+                    var containerIndex = ContainersModel.getProcessedContainerIndex()
                     var config = ContainersModel.getContainerConfig(containerIndex)
                     return config[ContainerProps.containerTypeToString(containerIndex)]["site"]
                 }
@@ -132,7 +132,7 @@ PageType {
 
                     var yesButtonFunction = function() {
                         PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeCurrentlyProcessedContainer()
+                        InstallController.removeProcessedContainer()
                     }
                     var noButtonFunction = function() {
                     }
