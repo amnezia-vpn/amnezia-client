@@ -126,7 +126,7 @@
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="42"/>
         <source>Split tunneling on the server</source>
-        <translation>Разделенное туннелирование на сервере</translation>
+        <translation>Раздельное туннелирование на сервере</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="43"/>
@@ -373,7 +373,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="363"/>
         <source>Save settings?</source>
-        <translation>сохранить настройки?</translation>
+        <translation>Сохранить настройки?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="329"/>
@@ -2170,7 +2170,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="126"/>
         <source>AmneziaWG native format</source>
-        <translation>Родной формат AmneziaWG</translation>
+        <translation>AmneziaWG нативный формат</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="131"/>
@@ -3013,7 +3013,7 @@ For more detailed information, you can
 
  файловое хранилище на вашем сервере. Вы сможете получить к нему доступ, используя
  FileZilla или других SFTP-клиентов, а также смонтировать диск на вашем устройстве для доступа
- это прямо с вашего устройства..
+ непосредственно с вашего устройства.
 
 Для получения более подробной информации вы можете
 найдите его в разделе поддержки под &quot;Создать файловое хранилище SFTP.&quot; </translation>
