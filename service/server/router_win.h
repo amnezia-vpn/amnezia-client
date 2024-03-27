@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QObject>
 
+#include "../client/platforms/windows/daemon/dnsutilswindows.h"
 
 #include <WinSock2.h>  //includes Windows.h
 #include <WS2tcpip.h>
@@ -41,10 +42,13 @@ public:
     void flushDns();
     void resetIpStack();
 
+    void StartRoutingIpv6();
+    void StopRoutingIpv6();
+
     void suspendWcmSvc(bool suspend);
+    bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
 
 private:
-    RouterWin() {}
     RouterWin(RouterWin const &) = delete;
     RouterWin& operator= (RouterWin const&) = delete;
 
@@ -54,11 +58,11 @@ private:
     BOOL InitNtFunctions();
     BOOL SuspendProcess(BOOL fSuspend, DWORD dwProcessId);
 
-
 private:
+    RouterWin() {m_dnsUtil = new DnsUtilsWindows(this);}
     QMultiMap<QString, MIB_IPFORWARDROW> m_ipForwardRows;
     bool m_suspended = false;
-
+    DnsUtilsWindows *m_dnsUtil; 
 };
 
 #endif // ROUTERWIN_H

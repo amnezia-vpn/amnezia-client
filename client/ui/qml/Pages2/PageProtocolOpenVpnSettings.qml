@@ -382,7 +382,7 @@ PageType {
 
                             clickedFunc: function() {
                                 var headerText = qsTr("Remove OpenVpn from server?")
-                                var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                                 var yesButtonText = qsTr("Continue")
                                 var noButtonText = qsTr("Cancel")
 

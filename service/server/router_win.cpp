@@ -1,11 +1,12 @@
 #include "router_win.h"
-#include "../client/utilities.h"
 
 #include <string>
 #include <tlhelp32.h>
 #include <tchar.h>
 
 #include <QProcess>
+
+#include <core/networkUtilities.h>
 
 LONG (NTAPI * NtSuspendProcess)(HANDLE ProcessHandle) = NULL;
 LONG (NTAPI * NtResumeProcess)(HANDLE ProcessHandle)  = NULL;
@@ -35,7 +36,7 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 //                          .arg(ips.join("\n"));
 
 
-    if (!Utils::checkIPv4Format(gw)) {
+    if (!NetworkUtilities::checkIPv4Format(gw)) {
         qCritical().noquote() << "Trying to add invalid route, gw: " << gw;
         return 0;
     }
@@ -58,14 +59,12 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
         dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
     }
 
-
     if (dwStatus != ERROR_SUCCESS) {
         qDebug() << "getIpForwardTable failed.";
         if (pIpForwardTable)
             free(pIpForwardTable);
         return 0;
     }
-
 
     int success_count = 0;
     MIB_IPFORWARDROW ipfrow;
@@ -76,7 +75,6 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
     ipfrow.dwForwardNextHop = inet_addr(gw.toStdString().c_str());
     ipfrow.dwForwardType = MIB_IPROUTE_TYPE_INDIRECT;	/* XXX - next hop != final dest */
     ipfrow.dwForwardProto = MIB_IPPROTO_NETMGMT;	/* XXX - MIB_PROTO_NETMGMT */
-
 
     // Set iface for route
     IPAddr dwGwAddr = inet_addr(gw.toStdString().c_str());
@@ -105,14 +103,14 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 
     for (int i = 0; i < ips.size(); ++i) {
         QString ipWithMask = ips.at(i);
-        QString ip = Utils::ipAddressFromIpWithSubnet(ipWithMask);
+        QString ip = NetworkUtilities::ipAddressFromIpWithSubnet(ipWithMask);
 
-        if (!Utils::checkIPv4Format(ip)) {
+        if (!NetworkUtilities::checkIPv4Format(ip)) {
             qCritical().noquote() << "Critical, trying to add invalid route, ip: " << ip;
             continue;
         }
 
-        QString mask = Utils::netMaskFromIpWithSubnet(ipWithMask);
+        QString mask = NetworkUtilities::netMaskFromIpWithSubnet(ipWithMask);
 
         // address
         ipfrow.dwForwardDest = inet_addr(ip.toStdString().c_str());
@@ -136,7 +134,6 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
             qDebug() << "Router::routeAdd: failed CreateIpForwardEntry(), Error:" << ip << gw << dwStatus;
         }
     }
-
 
     // Free resources
     if (pIpForwardTable)
@@ -215,8 +212,7 @@ int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
     DWORD dwSize = 0;
     BOOL bOrder = FALSE;
     DWORD dwStatus = 0;
-    ULONG gw_addr= inet_addr(gw.toStdString().c_str());
-
+    ULONG gw_addr = inet_addr(gw.toStdString().c_str());
 
     // Find out how big our buffer needs to be.
     dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
@@ -229,7 +225,6 @@ int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
         // Now get the table.
         dwStatus = GetIpForwardTable(pIpForwardTable, &dwSize, bOrder);
     }
-
 
     if (dwStatus != ERROR_SUCCESS) {
         qDebug() << "getIpForwardTable failed.";
@@ -244,8 +239,8 @@ int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
     for (int i = 0; i < ips.size(); ++i) {
         QString ipMask = ips.at(i);
         if (ipMask.isEmpty()) continue;
-        QString ip = Utils::ipAddressFromIpWithSubnet(ipMask);
-        QString mask = Utils::netMaskFromIpWithSubnet(ipMask);
+        QString ip = NetworkUtilities::ipAddressFromIpWithSubnet(ipMask);
+        QString mask = NetworkUtilities::netMaskFromIpWithSubnet(ipMask);
 
         if (ip.isEmpty()) continue;
 
@@ -441,5 +436,55 @@ BOOL RouterWin::SuspendProcess(BOOL fSuspend, DWORD dwProcessId)
     CloseHandle(pHandle);
 
     return ok;
+}
+
+bool RouterWin::updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers)
+{
+    return m_dnsUtil->updateResolvers(ifname, resolvers);
+}
+
+
+void RouterWin::StopRoutingIpv6()
+{
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 add route fc00::/7 interface={NetworkInterface.IPv6LoopbackInterfaceIndex} metric=0 store=active");
+        p.start(command);
+        p.waitForFinished();
+    }
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 add route 2000::/4 interface={NetworkInterface.IPv6LoopbackInterfaceIndex} metric=0 store=active");
+        p.start(command);
+        p.waitForFinished();
+    }
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 add route 3000::/4 interface={NetworkInterface.IPv6LoopbackInterfaceIndex} metric=0 store=active");
+        p.start(command);
+        p.waitForFinished();
+    }
+}
+
+void RouterWin::StartRoutingIpv6()
+{
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 delete route fc00::/7 interface={NetworkInterface.IPv6LoopbackInterfaceIndex}");
+        p.start(command);
+        p.waitForFinished();
+    }
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 delete route 2000::/4 interface={NetworkInterface.IPv6LoopbackInterfaceIndex}");
+        p.start(command);
+        p.waitForFinished();
+    }
+    {
+        QProcess p;
+        QString command = QString("interface ipv6 delete route 3000::/4 interface={NetworkInterface.IPv6LoopbackInterfaceIndex}");
+        p.start(command);
+        p.waitForFinished();
+    }
 }
 
