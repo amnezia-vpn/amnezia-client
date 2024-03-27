@@ -7,6 +7,7 @@ struct WGConfig: Decodable {
   let initPacketJunkSize, responsePacketJunkSize: String?
   let dns1: String
   let dns2: String
+  let mtu: String
   let hostName: String
   let port: Int
   let clientIP: String
@@ -25,6 +26,7 @@ struct WGConfig: Decodable {
     case initPacketJunkSize = "S1", responsePacketJunkSize = "S2"
     case dns1
     case dns2
+    case mtu
     case hostName
     case port
     case clientIP = "client_ip"
@@ -58,6 +60,7 @@ struct WGConfig: Decodable {
     [Interface]
     Address = \(clientIP)
     DNS = \(dns1), \(dns2)
+    MTU = \(mtu)
     PrivateKey = \(clientPrivateKey)
     \(settings)
     [Peer]
@@ -74,6 +77,7 @@ struct WGConfig: Decodable {
     [Interface]
     Address = \(clientIP)
     DNS = \(dns1), \(dns2)
+    MTU = \(mtu)
     PrivateKey = ***
     \(settings)
     [Peer]
@@ -83,15 +87,5 @@ struct WGConfig: Decodable {
     Endpoint = \(hostName):\(port)
     PersistentKeepalive = \(persistentKeepAlive)
     """
-  }
-}
-
-struct OpenVPNConfig: Decodable {
-  let config: String
-  let splitTunnelType: Int
-  let splitTunnelSites: [String]
-
-  var str: String {
-    "splitTunnelType: \(splitTunnelType) splitTunnelSites: \(splitTunnelSites) config: \(config)"
   }
 }

@@ -9,7 +9,10 @@
 
 #include "core/errorstrings.h"
 #include "core/controllers/serverController.h"
+#include "core/networkUtilities.h"
 #include "utilities.h"
+#include "ui/models/protocols/awgConfigModel.h"
+#include "ui/models/protocols/wireguardConfigModel.h"
 
 namespace
 {
@@ -273,12 +276,16 @@ void InstallController::updateContainer(QJsonObject config)
 
     const DockerContainer container = ContainerProps::containerFromString(config.value(config_key::container).toString());
     QJsonObject oldContainerConfig = m_containersModel->getContainerConfig(container);
+    ErrorCode errorCode = ErrorCode::NoError;
 
-    ServerController serverController(m_settings);
-    connect(&serverController, &ServerController::serverIsBusy, this, &InstallController::serverIsBusy);
-    connect(this, &InstallController::cancelInstallation, &serverController, &ServerController::cancelInstallation);
+    if (isUpdateDockerContainerRequired(container, oldContainerConfig, config)) {
+        ServerController serverController(m_settings);
+        connect(&serverController, &ServerController::serverIsBusy, this, &InstallController::serverIsBusy);
+        connect(this, &InstallController::cancelInstallation, &serverController, &ServerController::cancelInstallation);
 
-    auto errorCode = serverController.updateContainer(serverCredentials, container, oldContainerConfig, config);
+        errorCode = serverController.updateContainer(serverCredentials, container, oldContainerConfig, config);
+    }
+
     if (errorCode == ErrorCode::NoError) {
         m_serversModel->updateContainerConfig(container, config);
         m_protocolModel->updateModel(config);
@@ -346,12 +353,12 @@ void InstallController::removeCurrentlyProcessedContainer()
 
 QRegularExpression InstallController::ipAddressPortRegExp()
 {
-    return Utils::ipAddressPortRegExp();
+    return NetworkUtilities::ipAddressPortRegExp();
 }
 
 QRegularExpression InstallController::ipAddressRegExp()
 {
-    return Utils::ipAddressRegExp();
+    return NetworkUtilities::ipAddressRegExp();
 }
 
 void InstallController::setCurrentlyInstalledServerCredentials(const QString &hostName, const QString &userName,
@@ -444,7 +451,6 @@ void InstallController::mountSftpDrive(const QString &port, const QString &passw
         process->write((password + "\n").toUtf8());
     }
 
-    // qDebug().noquote() << "onPushButtonSftpMountDriveClicked" << args;
 
 #endif
 }
@@ -513,4 +519,30 @@ void InstallController::addEmptyServer()
     m_serversModel->addServer(server);
 
     emit installServerFinished(tr("Server added successfully"));
+}
+
+bool InstallController::isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
+{
+    Proto mainProto = ContainerProps::defaultProtocol(container);
+
+    const QJsonObject &oldProtoConfig = oldConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+    const QJsonObject &newProtoConfig = newConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+
+    if (container == DockerContainer::Awg) {
+        const AwgConfig oldConfig(oldProtoConfig);
+        const AwgConfig newConfig(newProtoConfig);
+
+        if (!oldConfig.hasEqualServerSettings(newConfig)) {
+            return true;
+        }
+    } else if (container == DockerContainer::WireGuard) {
+        const WgConfig oldConfig(oldProtoConfig);
+        const WgConfig newConfig(newProtoConfig);
+
+        if (!oldConfig.hasEqualServerSettings(newConfig)) {
+            return true;
+        }
+    }
+
+    return false;
 }

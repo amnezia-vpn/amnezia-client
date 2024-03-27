@@ -2,6 +2,8 @@ import Foundation
 import os.log
 
 struct Log {
+  static let osLog = Logger()
+
   private static let IsLoggingEnabledKey = "IsLoggingEnabled"
   static var isLoggingEnabled: Bool {
     get {
@@ -29,16 +31,23 @@ struct Log {
     return dateFormatter
   }()
 
-  var records: [Record]
+  var records = [Record]()
+
+  var lastRecordDate = Date.distantPast
 
   init() {
     self.records = []
   }
 
   init(_ str: String) {
-    self.records = str.split(whereSeparator: \.isNewline)
-      .compactMap {
-        Record(String($0))!
+    records = str.split(whereSeparator: \.isNewline)
+      .map {
+        if let record = Record(String($0)) {
+          lastRecordDate = record.date
+          return record
+        } else {
+          return Record(date: lastRecordDate, level: .error, message: "LOG: \($0)")
+        }
       }
   }
 
@@ -58,6 +67,24 @@ struct Log {
     }
 
     self.init(str)
+  }
+
+  static func log(_ type: OSLogType, title: String = "", message: String, url: URL = neLogURL) {
+    guard isLoggingEnabled else { return }
+
+    let date = Date()
+    let level = Record.Level(from: type)
+    let messages = message.split(whereSeparator: \.isNewline)
+
+    for index in 0..<messages.count {
+      let message = String(messages[index])
+
+      if index != 0 && message.first != " " {
+        Record(date: date, level: level, message: "\(title)  \(message)").save(at: url)
+      } else {
+        Record(date: date, level: level, message: "\(title)\(message)").save(at: url)
+      }
+    }
   }
 
   static func clear(at url: URL) {

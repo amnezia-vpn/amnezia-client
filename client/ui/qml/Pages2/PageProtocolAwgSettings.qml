@@ -107,6 +107,26 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: mtuTextField
+                            Layout.fillWidth: true
+                            Layout.topMargin: 16
+
+                            headerText: qsTr("MTU")
+                            textFieldText: mtu
+                            textField.validator: IntValidator { bottom: 576; top: 65535 }
+
+                            textField.onEditingFinished: {
+                                if (textFieldText === "") {
+                                    textFieldText = "0"
+                                }
+                                if (textFieldText !== mtu) {
+                                    mtu = textFieldText
+                                }
+                            }
+                            checkEmptyText: true
+                        }
+
+                        TextFieldWithHeaderType {
                             id: junkPacketCountTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
@@ -305,7 +325,7 @@ PageType {
 
                             onClicked: {
                                 var headerText = qsTr("Remove AmneziaWG from server?")
-                                var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                                 var yesButtonText = qsTr("Continue")
                                 var noButtonText = qsTr("Cancel")
 
@@ -337,17 +357,26 @@ PageType {
                                      junkPacketCountTextField.errorText === "" &&
                                      portTextField.errorText === ""
 
-                            text: qsTr("Save and Restart Amnezia")
+                            text: qsTr("Save")
 
-                            clickedFunc: function() {
-                                forceActiveFocus()
-                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.updateContainer(AwgConfigModel.getConfig())
+                            onClicked: {
+                                var headerText = qsTr("Save settings?")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
+
+                                var yesButtonFunction = function() {
+                                    forceActiveFocus()
+                                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                                    InstallController.updateContainer(AwgConfigModel.getConfig())
+                                }
+                                var noButtonFunction = function() {
+                                }
+                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
                         }
                     }
                 }
-
             }
         }
     }
