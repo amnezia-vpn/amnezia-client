@@ -86,6 +86,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
+                            enabled: isPortEditable
+
                             headerText: qsTr("Port")
                             textFieldText: port
                             textField.maximumLength: 5
@@ -104,6 +106,8 @@ PageType {
                             id: cipherDropDown
                             Layout.fillWidth: true
                             Layout.topMargin: 20
+
+                            enabled: isCipherEditable
 
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")

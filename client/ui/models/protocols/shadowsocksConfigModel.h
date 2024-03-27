@@ -13,7 +13,9 @@ class ShadowSocksConfigModel : public QAbstractListModel
 public:
     enum Roles {
         PortRole = Qt::UserRole + 1,
-        CipherRole
+        CipherRole,
+        IsPortEditableRole,
+        IsCipherEditableRole
     };
 
     explicit ShadowSocksConfigModel(QObject *parent = nullptr);

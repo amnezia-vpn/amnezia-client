@@ -129,7 +129,6 @@ PageType {
                         TextFieldWithHeaderType {
                             id: portTextField
 
-
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 

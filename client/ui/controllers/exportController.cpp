@@ -148,7 +148,10 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
 
     jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 
-    errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig, clientName);
+    if (container == DockerContainer::OpenVpn || container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
+        auto clientId = jsonNativeConfig.value(config_key::clientId).toString();
+        errorCode = m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
+    }
     return errorCode;
 }
 

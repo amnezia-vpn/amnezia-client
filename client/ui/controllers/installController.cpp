@@ -740,17 +740,17 @@ bool InstallController::isUpdateDockerContainerRequired(const DockerContainer co
         const AwgConfig oldConfig(oldProtoConfig);
         const AwgConfig newConfig(newProtoConfig);
 
-        if (!oldConfig.hasEqualServerSettings(newConfig)) {
-            return true;
+        if (oldConfig.hasEqualServerSettings(newConfig)) {
+            return false;
         }
     } else if (container == DockerContainer::WireGuard) {
         const WgConfig oldConfig(oldProtoConfig);
         const WgConfig newConfig(newProtoConfig);
 
-        if (!oldConfig.hasEqualServerSettings(newConfig)) {
-            return true;
+        if (oldConfig.hasEqualServerSettings(newConfig)) {
+            return false;
         }
     }
 
-    return false;
+    return true;
 }
