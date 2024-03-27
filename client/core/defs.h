@@ -73,6 +73,8 @@ namespace amnezia
         CloakExecutableMissing = 602,
         AmneziaServiceConnectionFailed = 603,
         ExecutableMissing = 604,
+        XrayExecutableMissing = 605,
+        Tun2SockExecutableMissing = 606,        
 
         // VPN errors
         OpenVpnAdaptersInUseError = 700,
@@ -84,6 +86,8 @@ namespace amnezia
         OpenSslFailed = 800,
         ShadowSocksExecutableCrashed = 801,
         CloakExecutableCrashed = 802,
+        XrayExecutableCrashed = 803,
+        Tun2SockExecutableCrashed = 804,
 
         // import and install errors
         ImportInvalidConfigError = 900,

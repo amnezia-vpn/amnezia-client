@@ -13,6 +13,7 @@ class WireguardConfigurator;
 class Ikev2Configurator;
 class SshConfigurator;
 class AwgConfigurator;
+class XrayConfigurator;
 
 // Retrieve connection settings from server
 class VpnConfigurator : public ConfiguratorBase
@@ -42,6 +43,7 @@ public:
     std::shared_ptr<Ikev2Configurator> ikev2Configurator;
     std::shared_ptr<SshConfigurator> sshConfigurator;
     std::shared_ptr<AwgConfigurator> awgConfigurator;
+    std::shared_ptr<XrayConfigurator> xrayConfigurator;
 
 signals:
     void newVpnConfigCreated(const QString &clientId, const QString &clientName, const DockerContainer container,

@@ -27,7 +27,7 @@
     #include "platforms/ios/ios_controller.h"
 #endif
 
-#include "utilities.h"
+#include "core/networkUtilities.h""
 #include "vpnconnection.h"
 
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
@@ -59,6 +59,8 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 {
 
 #ifdef AMNEZIA_DESKTOP
+    QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
+    
     if (IpcClient::Interface()) {
         if (state == Vpn::ConnectionState::Connected) {
             IpcClient::Interface()->resetIpStack();
@@ -92,6 +94,9 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
                 IpcClient::Interface()->clearSavedRoutes();
             }
+        } else if (state == Vpn::ConnectionState::Connecting) {
+
+        } else if (state == Vpn::ConnectionState::Disconnected) {
         }
     }
 #endif
@@ -118,10 +123,10 @@ void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
     QStringList sites;
     const QVariantMap &m = m_settings->vpnSites(mode);
     for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
-        if (Utils::checkIpSubnetFormat(i.key())) {
+        if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
             ips.append(i.key());
         } else {
-            if (Utils::checkIpSubnetFormat(i.value().toString())) {
+            if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
                 ips.append(i.value().toString());
             }
             sites.append(i.key());
@@ -246,8 +251,7 @@ QString VpnConnection::createVpnConfigurationForProto(int serverIndex, const Ser
         configData = m_configurator->processConfigWithLocalSettings(serverIndex, container, proto, configData);
 
         if (serverIndex >= 0) {
-            qDebug() << "VpnConnection::createVpnConfiguration: saving config for server #" << serverIndex << container
-                     << proto;
+            qDebug() << "VpnConnection::createVpnConfiguration: saving config for server #" << serverIndex << container;
             QJsonObject protoObject = m_settings->protocolConfig(serverIndex, container, proto);
             protoObject.insert(config_key::last_config, configDataBeforeLocalProcessing);
             m_settings->setProtocolConfig(serverIndex, container, proto, protoObject);
@@ -472,6 +476,7 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 void VpnConnection::disconnectFromVpn()
 {
 #ifdef AMNEZIA_DESKTOP
+    QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
     if (IpcClient::Interface()) {
         IpcClient::Interface()->flushDns();
 

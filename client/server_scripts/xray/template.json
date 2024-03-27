@@ -1,0 +1,46 @@
+{
+    "log": {
+        "loglevel": "error"
+    },
+    "inbounds": [
+        {
+            "listen": "127.0.0.1",
+            "port": 10808,
+            "protocol": "socks",
+            "settings": {
+                "udp": true
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "vless",
+            "settings": {
+                "vnext": [
+                    {
+                        "address": "$SERVER_IP_ADDRESS",
+                        "port": 443,
+                        "users": [
+                            {
+                                "id": "$XRAY_CLIENT_ID",
+                                "flow": "xtls-rprx-vision",
+                                "encryption": "none"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "streamSettings": {
+                "network": "tcp",
+                "security": "reality",
+                "realitySettings": {
+                    "fingerprint": "chrome",
+                    "serverName": "$XRAY_SITE_NAME",
+                    "publicKey": "$XRAY_PUBLIC_KEY",
+                    "shortId": "$XRAY_SHORT_ID",
+                    "spiderX": ""
+                }
+            }
+        }
+    ]
+}

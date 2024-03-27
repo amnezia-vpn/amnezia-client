@@ -162,6 +162,30 @@ void IpcServer::cleanUp()
     Logger::cleanUp();
 }
 
+bool IpcServer::createTun(const QString &dev, const QString &subnet)
+{
+    return Router::createTun(dev, subnet);
+}
+
+bool IpcServer::deleteTun(const QString &dev)
+{
+    return Router::deleteTun(dev);
+}
+
+bool IpcServer::updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers)
+{
+    return Router::updateResolvers(ifname, resolvers);
+}
+
+void IpcServer::StartRoutingIpv6()
+{
+    Router::StartRoutingIpv6();
+}
+void IpcServer::StopRoutingIpv6()
+{
+    Router::StopRoutingIpv6();
+}
+
 void IpcServer::setLogsEnabled(bool enabled)
 {
 #ifdef MZ_DEBUG
@@ -225,6 +249,7 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
     QStringList dnsServers;
     dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
     dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());

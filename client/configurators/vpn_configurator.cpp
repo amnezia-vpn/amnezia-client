@@ -6,14 +6,14 @@
 #include "ssh_configurator.h"
 #include "wireguard_configurator.h"
 #include "awg_configurator.h"
-
+#include "xray_configurator.h"
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 
 #include "containers/containers_defs.h"
 #include "settings.h"
-#include "utilities.h"
+#include "core/networkUtilities.h""
 
 VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings, QObject *parent)
     : ConfiguratorBase(settings, parent)
@@ -25,6 +25,7 @@ VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings, QObject *pa
     ikev2Configurator = std::shared_ptr<Ikev2Configurator>(new Ikev2Configurator(settings, this));
     sshConfigurator = std::shared_ptr<SshConfigurator>(new SshConfigurator(settings, this));
     awgConfigurator = std::shared_ptr<AwgConfigurator>(new AwgConfigurator(settings, this));
+    xrayConfigurator = std::shared_ptr<XrayConfigurator>(new XrayConfigurator(settings, this));
 }
 
 QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentials, DockerContainer container,
@@ -45,6 +46,9 @@ QString VpnConfigurator::genVpnProtocolConfig(const ServerCredentials &credentia
     case Proto::Awg:
         return awgConfigurator->genAwgConfig(credentials, container, containerConfig, clientId, errorCode);
 
+    case Proto::Xray:
+        return xrayConfigurator->genXrayConfig(credentials, container, containerConfig, clientId, errorCode);
+
     case Proto::Ikev2: return ikev2Configurator->genIkev2Config(credentials, container, containerConfig, errorCode);
 
     default: return "";
@@ -61,13 +65,13 @@ QPair<QString, QString> VpnConfigurator::getDnsForConfig(int serverIndex)
     dns.first = server.value(config_key::dns1).toString();
     dns.second = server.value(config_key::dns2).toString();
 
-    if (dns.first.isEmpty() || !Utils::checkIPv4Format(dns.first)) {
+    if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
         if (useAmneziaDns && m_settings->containers(serverIndex).contains(DockerContainer::Dns)) {
             dns.first = protocols::dns::amneziaDnsIp;
         } else
             dns.first = m_settings->primaryDns();
     }
-    if (dns.second.isEmpty() || !Utils::checkIPv4Format(dns.second)) {
+    if (dns.second.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.second)) {
         dns.second = m_settings->secondaryDns();
     }
 
