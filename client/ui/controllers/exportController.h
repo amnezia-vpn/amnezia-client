@@ -37,6 +37,7 @@ public slots:
     void generateAwgConfig(const QString &clientName);
     void generateShadowSocksConfig();
     void generateCloakConfig();
+    void generateXrayConfig();
 
     QString getConfig();
     QString getNativeConfigString();

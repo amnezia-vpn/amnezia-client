@@ -343,6 +343,9 @@ void AmneziaApplication::initModels()
     m_awgConfigModel.reset(new AwgConfigModel(this));
     m_engine->rootContext()->setContextProperty("AwgConfigModel", m_awgConfigModel.get());
 
+    m_xrayConfigModel.reset(new XrayConfigModel(this));
+    m_engine->rootContext()->setContextProperty("XrayConfigModel", m_xrayConfigModel.get());
+
 #ifdef Q_OS_WINDOWS
     m_ikev2ConfigModel.reset(new Ikev2ConfigModel(this));
     m_engine->rootContext()->setContextProperty("Ikev2ConfigModel", m_ikev2ConfigModel.get());

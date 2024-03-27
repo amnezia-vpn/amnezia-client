@@ -9,6 +9,7 @@
 
 #include "core/errorstrings.h"
 #include "core/controllers/serverController.h"
+#include "core/networkUtilities.h"
 #include "utilities.h"
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
@@ -352,12 +353,12 @@ void InstallController::removeCurrentlyProcessedContainer()
 
 QRegularExpression InstallController::ipAddressPortRegExp()
 {
-    return Utils::ipAddressPortRegExp();
+    return NetworkUtilities::ipAddressPortRegExp();
 }
 
 QRegularExpression InstallController::ipAddressRegExp()
 {
-    return Utils::ipAddressRegExp();
+    return NetworkUtilities::ipAddressRegExp();
 }
 
 void InstallController::setCurrentlyInstalledServerCredentials(const QString &hostName, const QString &userName,
@@ -450,7 +451,6 @@ void InstallController::mountSftpDrive(const QString &port, const QString &passw
         process->write((password + "\n").toUtf8());
     }
 
-    // qDebug().noquote() << "onPushButtonSftpMountDriveClicked" << args;
 
 #endif
 }

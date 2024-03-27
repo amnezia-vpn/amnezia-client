@@ -1,8 +1,6 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
-#include <QHostAddress>
-#include <QHostInfo>
 #include <QProcess>
 #include <QRandomGenerator>
 #include <QRegularExpression>
@@ -118,60 +116,6 @@ bool Utils::processIsRunning(const QString &fileName)
 #endif
 }
 
-QString Utils::getIPAddress(const QString &host)
-{
-    if (ipAddressRegExp().match(host).hasMatch()) {
-        return host;
-    }
-
-    QList<QHostAddress> addresses = QHostInfo::fromName(host).addresses();
-    if (!addresses.isEmpty()) {
-        return addresses.first().toString();
-    }
-    qDebug() << "Unable to resolve address for " << host;
-    return "";
-}
-
-QString Utils::getStringBetween(const QString &s, const QString &a, const QString &b)
-{
-    int ap = s.indexOf(a), bp = s.indexOf(b, ap + a.length());
-    if (ap < 0 || bp < 0)
-        return QString();
-    ap += a.length();
-    if (bp - ap <= 0)
-        return QString();
-    return s.mid(ap, bp - ap).trimmed();
-}
-
-bool Utils::checkIPv4Format(const QString &ip)
-{
-    if (ip.isEmpty())
-        return false;
-    int count = ip.count(".");
-    if (count != 3)
-        return false;
-
-    QHostAddress addr(ip);
-    return (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol);
-}
-
-bool Utils::checkIpSubnetFormat(const QString &ip)
-{
-    if (!ip.contains("/"))
-        return checkIPv4Format(ip);
-
-    QStringList parts = ip.split("/");
-    if (parts.size() != 2)
-        return false;
-
-    bool ok;
-    int subnet = parts.at(1).toInt(&ok);
-    if (subnet >= 0 && subnet <= 32 && ok)
-        return checkIPv4Format(parts.at(0));
-    else
-        return false;
-}
-
 void Utils::killProcessByName(const QString &name)
 {
     qDebug().noquote() << "Kill process" << name;
@@ -182,45 +126,6 @@ void Utils::killProcessByName(const QString &name)
 #else
     QProcess::execute(QString("pkill %1").arg(name));
 #endif
-}
-
-QString Utils::netMaskFromIpWithSubnet(const QString ip)
-{
-    if (!ip.contains("/"))
-        return "255.255.255.255";
-
-    bool ok;
-    int prefix = ip.split("/").at(1).toInt(&ok);
-    if (!ok)
-        return "255.255.255.255";
-
-    unsigned long mask = (0xFFFFFFFF << (32 - prefix)) & 0xFFFFFFFF;
-
-    return QString("%1.%2.%3.%4").arg(mask >> 24).arg((mask >> 16) & 0xFF).arg((mask >> 8) & 0xFF).arg(mask & 0xFF);
-}
-
-QString Utils::ipAddressFromIpWithSubnet(const QString ip)
-{
-    if (ip.count(".") != 3)
-        return "";
-    return ip.split("/").first();
-}
-
-QStringList Utils::summarizeRoutes(const QStringList &ips, const QString cidr)
-{
-    //    QMap<int, int>
-    //    QHostAddress
-
-    //    QMap<QString, QStringList> subnets; // <"a.b", <list subnets>>
-
-    //    for (const QString &ip : ips) {
-    //        if (ip.count(".") != 3) continue;
-
-    //        const QStringList &parts = ip.split(".");
-    //        subnets[parts.at(0) + "." + parts.at(1)].append(ip);
-    //    }
-
-    return QStringList();
 }
 
 QString Utils::openVpnExecPath()
@@ -256,6 +161,19 @@ QString Utils::certUtilPath()
     return winPath + "\\system32\\certutil.exe";
 #else
     return "";
+#endif
+}
+
+QString Utils::tun2socksPath()
+{
+#ifdef Q_OS_WIN
+    return Utils::executable("xray/tun2socks", true);
+#elif defined Q_OS_LINUX
+    // We have service that runs OpenVPN on Linux. We need to make same
+    // path for client and service.
+    return Utils::executable("../../client/bin/tun2socks", true);
+#else
+    return Utils::executable("/tun2socks", true);
 #endif
 }
 

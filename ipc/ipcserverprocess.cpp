@@ -32,6 +32,8 @@ void IpcServerProcess::start()
     if (m_process->program().isEmpty()) {
         qDebug() << "IpcServerProcess failed to start, program is empty";
     }
+
+    Utils::killProcessByName(m_process->program());
     m_process->start();
     qDebug() << "IpcServerProcess started, " << m_process->program() << m_process->arguments();
 

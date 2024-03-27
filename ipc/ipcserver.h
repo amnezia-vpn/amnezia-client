@@ -27,9 +27,14 @@ public:
     virtual QStringList getTapList() override;
     virtual void cleanUp() override;
     virtual void setLogsEnabled(bool enabled) override;
+    virtual bool createTun(const QString &dev, const QString &subnet) override;
+    virtual bool deleteTun(const QString &dev) override;
+    virtual void StartRoutingIpv6() override;
+    virtual void StopRoutingIpv6() override;
     virtual bool enablePeerTraffic(const QJsonObject &configStr) override;
     virtual bool enableKillSwitch(const QJsonObject &excludeAddr, int vpnAdapterIndex) override;
     virtual bool disableKillSwitch() override;
+    virtual bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) override;
 
 private:
     int m_localpid = 0;
