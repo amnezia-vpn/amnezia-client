@@ -65,13 +65,20 @@ QString PageController::getPagePath(PageLoader::PageEnum page)
 void PageController::closeWindow()
 {
 #ifdef Q_OS_ANDROID
-    AndroidController::instance()->minimizeApp();
+    qApp->quit();
 #else
     if (m_serversModel->getServersCount() == 0) {
         qApp->quit();
     } else {
         emit hideMainWindow();
     }
+#endif
+}
+
+void PageController::hideWindow()
+{
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->minimizeApp();
 #endif
 }
 
