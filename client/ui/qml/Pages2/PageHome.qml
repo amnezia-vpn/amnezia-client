@@ -33,44 +33,71 @@ PageType {
         anchors.fill: parent
         anchors.bottomMargin: drawer.collapsedHeight
 
-        ConnectButton {
-            id: connectButton
-            anchors.centerIn: parent
-        }
-
-        BasicButtonType {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.topMargin: 34
             anchors.bottomMargin: 34
-            leftPadding: 16
-            rightPadding: 16
 
-            implicitHeight: 36
+            BasicButtonType {
+                property bool isLoggingEnabled: SettingsController.isLoggingEnabled
 
-            defaultColor: "transparent"
-            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-            disabledColor: "#878B91"
-            textColor: "#878B91"
-            leftImageColor: "transparent"
-            borderWidth: 0
+                Layout.alignment: Qt.AlignHCenter
 
-            property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled ||
-                                                   (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
+                implicitHeight: 36
 
-            text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
+                defaultColor: "transparent"
+                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                disabledColor: "#878B91"
+                textColor: "#878B91"
+                borderWidth: 0
 
-            imageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
-            rightImageSource: "qrc:/images/controls/chevron-down.svg"
+                visible: isLoggingEnabled ? true : false
+                text: qsTr("Logging enabled")
 
-            onClicked: {
-                homeSplitTunnelingDrawer.open()
+                onClicked: {
+                    PageController.goToPage(PageEnum.PageSettingsLogging)
+                }
             }
 
-            HomeSplitTunnelingDrawer {
-                id: homeSplitTunnelingDrawer
+            ConnectButton {
+                id: connectButton
+                Layout.fillHeight: true
+                Layout.alignment: Qt.AlignCenter
+            }
 
-                parent: root
+            BasicButtonType {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                Layout.bottomMargin: 34
+                leftPadding: 16
+                rightPadding: 16
+
+                implicitHeight: 36
+
+                defaultColor: "transparent"
+                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                disabledColor: "#878B91"
+                textColor: "#878B91"
+                leftImageColor: "transparent"
+                borderWidth: 0
+
+                property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled ||
+                                                       (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
+
+                text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
+
+                imageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
+                rightImageSource: "qrc:/images/controls/chevron-down.svg"
+
+                onClicked: {
+                    homeSplitTunnelingDrawer.open()
+                }
+
+                HomeSplitTunnelingDrawer {
+                    id: homeSplitTunnelingDrawer
+                    parent: root
+                }
             }
         }
     }

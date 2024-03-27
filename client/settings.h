@@ -100,6 +100,9 @@ public:
     }
     void setSaveLogs(bool enabled);
 
+    QDateTime getLogEnableDate();
+    void setLogEnableDate(QDateTime date);
+
     enum RouteMode {
         VpnAllSites,
         VpnOnlyForwardSites,

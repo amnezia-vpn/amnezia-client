@@ -106,7 +106,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     m_state = state;
 
     m_isConnected = false;
-    m_connectionStateText = tr("Connection...");
+    m_connectionStateText = tr("Connecting...");
     switch (state) {
     case Vpn::ConnectionState::Connected: {
         m_isConnectionInProgress = false;
@@ -120,7 +120,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     }
     case Vpn::ConnectionState::Reconnecting: {
         m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Reconnection...");
+        m_connectionStateText = tr("Reconnecting...");
         break;
     }
     case Vpn::ConnectionState::Disconnected: {
@@ -130,7 +130,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     }
     case Vpn::ConnectionState::Disconnecting: {
         m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Disconnection...");
+        m_connectionStateText = tr("Disconnecting...");
         break;
     }
     case Vpn::ConnectionState::Preparing: {

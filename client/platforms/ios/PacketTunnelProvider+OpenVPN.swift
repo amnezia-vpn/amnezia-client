@@ -2,6 +2,106 @@ import Foundation
 import NetworkExtension
 import OpenVPNAdapter
 
+struct OpenVPNConfig: Decodable {
+  let config: String
+  let splitTunnelType: Int
+  let splitTunnelSites: [String]
+
+  var str: String {
+    "splitTunnelType: \(splitTunnelType) splitTunnelSites: \(splitTunnelSites) config: \(config)"
+  }
+}
+
+extension PacketTunnelProvider {
+  func startOpenVPN(completionHandler: @escaping (Error?) -> Void) {
+    guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
+          let providerConfiguration = protocolConfiguration.providerConfiguration,
+          let openVPNConfigData = providerConfiguration[Constants.ovpnConfigKey] as? Data else {
+      ovpnLog(.error, message: "Can't start")
+      return
+    }
+
+    do {
+      //      ovpnLog(.info, message: "providerConfiguration: \(String(decoding: openVPNConfigData, as: UTF8.self))")
+
+      let openVPNConfig = try JSONDecoder().decode(OpenVPNConfig.self, from: openVPNConfigData)
+      ovpnLog(.info, title: "config: ", message: openVPNConfig.str)
+      let ovpnConfiguration = Data(openVPNConfig.config.utf8)
+      setupAndlaunchOpenVPN(withConfig: ovpnConfiguration, completionHandler: completionHandler)
+    } catch {
+      ovpnLog(.error, message: "Can't parse config: \(error.localizedDescription)")
+
+      if let underlyingError = (error as NSError).userInfo[NSUnderlyingErrorKey] as? NSError {
+        ovpnLog(.error, message: "Can't parse config: \(underlyingError.localizedDescription)")
+      }
+
+      return
+    }
+  }
+
+  private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data,
+                                     withShadowSocks viaSS: Bool = false,
+                                     completionHandler: @escaping (Error?) -> Void) {
+    ovpnLog(.info, message: "Setup and launch")
+
+    let str = String(decoding: ovpnConfiguration, as: UTF8.self)
+
+    let configuration = OpenVPNConfiguration()
+    configuration.fileContent = ovpnConfiguration
+    if str.contains("cloak") {
+      configuration.setPTCloak()
+    }
+
+    let evaluation: OpenVPNConfigurationEvaluation
+    do {
+      evaluation = try ovpnAdapter.apply(configuration: configuration)
+
+    } catch {
+      completionHandler(error)
+      return
+    }
+
+    if !evaluation.autologin {
+      ovpnLog(.info, message: "Implement login with user credentials")
+    }
+
+    vpnReachability.startTracking { [weak self] status in
+      guard status == .reachableViaWiFi else { return }
+      self?.ovpnAdapter.reconnect(afterTimeInterval: 5)
+    }
+
+    startHandler = completionHandler
+    ovpnAdapter.connect(using: packetFlow)
+
+    //        let ifaces = Interface.allInterfaces()
+    //            .filter { $0.family == .ipv4 }
+    //            .map { iface in iface.name }
+
+    //        ovpn_log(.error, message: "Available TUN Interfaces: \(ifaces)")
+  }
+
+  func handleOpenVPNStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+    guard let completionHandler = completionHandler else { return }
+    let bytesin = ovpnAdapter.transportStatistics.bytesIn
+    let bytesout = ovpnAdapter.transportStatistics.bytesOut
+
+    let response: [String: Any] = [
+      "rx_bytes": bytesin,
+      "tx_bytes": bytesout
+    ]
+
+    completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))
+  }
+
+  func stopOpenVPN(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
+    stopHandler = completionHandler
+    if vpnReachability.isTracking {
+      vpnReachability.stopTracking()
+    }
+    ovpnAdapter.disconnect()
+  }
+}
+
 extension PacketTunnelProvider: OpenVPNAdapterDelegate {
   // OpenVPNAdapter calls this delegate method to configure a VPN tunnel.
   // `completionHandler` callback requires an object conforming to `OpenVPNAdapterPacketFlow`
@@ -116,6 +216,8 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
   // Use this method to process any log message returned by OpenVPN library.
   func openVPNAdapter(_ openVPNAdapter: OpenVPNAdapter, handleLogMessage logMessage: String) {
     // Handle log messages
-    wg_log(.info, message: logMessage)
+    ovpnLog(.info, message: logMessage)
   }
 }
+
+extension NEPacketTunnelFlow: OpenVPNAdapterPacketFlow {}

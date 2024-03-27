@@ -90,7 +90,7 @@ PageType {
             PageController.showBusyIndicator(false)
         }
 
-        function onImportErrorOccurred(errorMessage) {
+        function onImportErrorOccurred(errorMessage, goToPageHome) {
             PageController.showErrorMessage(errorMessage)
         }
     }

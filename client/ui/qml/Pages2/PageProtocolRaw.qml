@@ -181,8 +181,8 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
-                    var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
+                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
+                    var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 

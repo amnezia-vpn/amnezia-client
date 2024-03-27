@@ -121,7 +121,7 @@ PageType {
                         LabelWithButtonType {
                             Layout.fillWidth: true
 
-                            text: qsTr("Login")
+                            text: qsTr("User name")
                             descriptionText: username
 
                             descriptionOnTop: true

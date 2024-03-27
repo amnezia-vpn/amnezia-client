@@ -15,6 +15,18 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    Connections {
+        target: SettingsController
+
+        function onLoggingStateChanged() {
+            if (SettingsController.isLoggingEnabled) {
+                var message = qsTr("Logging is enabled. Note that logs will be automatically \
+disabled after 14 days, and all log files will be deleted.")
+                PageController.showNotificationMessage(message)
+            }
+        }
+    }
+
     BackButtonType {
         id: backButton
 
@@ -45,6 +57,8 @@ PageType {
                 Layout.fillWidth: true
 
                 headerText: qsTr("Logging")
+                descriptionText: qsTr("Enabling this function will save application's logs automatically, " +
+                                      "By default, logging functionality is disabled. Enable log saving in case of application malfunction.")
             }
 
             SwitcherType {
