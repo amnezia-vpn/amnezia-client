@@ -224,14 +224,6 @@ onBrowseButtonClicked = function()
     }
 }
 
-onNextButtonClicked = function()
-{
-    var widget = gui.pageById(QInstaller.TargetDirectory);
-    if (widget !== null) {
-        installer.setValue("APP_BUNDLE_TARGET_DIR", widget.TargetDirectoryLineEdit.text);
-    }
-}
-
 onFinishButtonClicked = function() {
     let widget = gui.pageById(QInstaller.InstallationFinished);
     if (widget) {
