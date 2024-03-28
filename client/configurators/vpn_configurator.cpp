@@ -13,7 +13,7 @@
 
 #include "containers/containers_defs.h"
 #include "settings.h"
-#include "core/networkUtilities.h""
+#include "core/networkUtilities.h"
 
 VpnConfigurator::VpnConfigurator(std::shared_ptr<Settings> settings, QObject *parent)
     : ConfiguratorBase(settings, parent)
