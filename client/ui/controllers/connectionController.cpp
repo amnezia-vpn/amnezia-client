@@ -6,6 +6,7 @@
     #include <QApplication>
 #endif
 
+#include "utilities.h"
 #include "core/errorstrings.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
@@ -25,6 +26,14 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
+#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
+    if (!Utils::isBackgroundServicesEnabled())
+    {
+        emit connectionErrorOccurred(tr("Permissions error: Background services forbidden. Please check your settings"));
+        return;
+    }
+#endif
+
     int serverIndex = m_serversModel->getDefaultServerIndex();
 
     if (!m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
