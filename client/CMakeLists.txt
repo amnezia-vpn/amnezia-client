@@ -206,10 +206,6 @@ file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_LIST_DIR}/ui/models/protocols/*.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/models/services/*.cpp
 )
-if(NOT ANDROID)
-    list(REMOVE_ITEM UI_MODELS_H ${CMAKE_CURRENT_LIST_DIR}/ui/models/installedAppsModel.h)
-    list(REMOVE_ITEM UI_MODELS_CPP ${CMAKE_CURRENT_LIST_DIR}/ui/models/installedAppsModel.cpp)
-endif()
 
 file(GLOB UI_CONTROLLERS_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/controllers/*.h)
 file(GLOB UI_CONTROLLERS_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/controllers/*.cpp)

@@ -10,21 +10,17 @@ AppSplitTunnelingController::AppSplitTunnelingController(const std::shared_ptr<S
 {
 }
 
-void AppSplitTunnelingController::addApp(const QString &appName, const QString &packageName, const QString &appPath)
+void AppSplitTunnelingController::addApp(const QString &appPath)
 {
 
-    InstalledAppInfo appInfo { appName, packageName, appPath };
+    InstalledAppInfo appInfo { "", "", appPath };
     if (!appPath.isEmpty()) {
         QFileInfo fileInfo(appPath);
-        if (fileInfo.isExecutable()) {
-            emit errorOccurred(tr("The selected file is not executable"));
-        }
-
         appInfo.appName = fileInfo.fileName();
     }
 
     if (m_appSplitTunnelingModel->addApp(appInfo)) {
-        emit finished(tr("Application added: %1").arg(appName));
+        emit finished(tr("Application added: %1").arg(appInfo.appName));
 
     } else {
         emit errorOccurred(tr("The application has already been added"));

@@ -14,7 +14,7 @@ public:
                                          const QSharedPointer<AppSplitTunnelingModel> &sitesModel, QObject *parent = nullptr);
 
 public slots:
-    void addApp(const QString &appName, const QString &packageName = "", const QString &appPath = "");
+    void addApp(const QString &appPath);
     void addApps(QVector<QPair<QString, QString>> apps);
     void removeApp(const int index);
 

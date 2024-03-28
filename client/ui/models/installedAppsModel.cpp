@@ -1,9 +1,11 @@
 #include "installedAppsModel.h"
 
-#include <QtConcurrent>
 #include <QEventLoop>
+#include <QtConcurrent>
 
-#include "platforms/android/android_controller.h"
+#ifdef Q_OS_ANDROID
+    #include "platforms/android/android_controller.h"
+#endif
 
 InstalledAppsModel::InstalledAppsModel(QObject *parent) : QAbstractListModel(parent)
 {
@@ -59,7 +61,7 @@ QVector<QPair<QString, QString>> InstalledAppsModel::getSelectedAppsInfo()
             appName = packageName;
         }
 
-        appsInfo.push_back({appName, packageName});
+        appsInfo.push_back({ appName, packageName });
     }
 
     return appsInfo;
@@ -69,7 +71,9 @@ void InstalledAppsModel::updateModel()
 {
     QFuture<void> future = QtConcurrent::run([this]() {
         beginResetModel();
+#ifdef Q_OS_ANDROID
         m_installedApps = AndroidController::instance()->getAppList();
+#endif
         endResetModel();
     });
 

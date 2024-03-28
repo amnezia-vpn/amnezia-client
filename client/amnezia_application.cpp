@@ -14,12 +14,12 @@
 
 #include "logger.h"
 #include "version.h"
+#include "ui/models/installedAppsModel.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
 #if defined(Q_OS_ANDROID)
     #include "platforms/android/android_controller.h"
     #include "core/installedAppsImageProvider.h"
-    #include "ui/models/installedAppsModel.h"
 #endif
 
 #include "protocols/qml_register_protocols.h"
@@ -240,9 +240,7 @@ void AmneziaApplication::registerTypes()
     qmlRegisterSingletonType(QUrl("qrc:/ui/qml/Filters/ContainersModelFilters.qml"), "ContainersModelFilters", 1, 0,
                              "ContainersModelFilters");
 
-#ifdef Q_OS_ANDROID
     qmlRegisterType<InstalledAppsModel>("InstalledAppsModel", 1, 0, "InstalledAppsModel");
-#endif
 
     Vpn::declareQmlVpnConnectionStateEnum();
     PageLoader::declareQmlPageEnum();
