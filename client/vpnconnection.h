@@ -97,6 +97,8 @@ private:
     // Only for iOS for now, check counters
     QTimer m_checkTimer;
 
+    std::optional<ErrorCode> m_connectionError;
+
 #ifdef AMNEZIA_DESKTOP
     IpcClient *m_IpcClient {nullptr};
 #endif

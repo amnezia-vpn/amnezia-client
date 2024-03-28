@@ -11,6 +11,9 @@
 #import <Cocoa/Cocoa.h>
 #import <ServiceManagement/ServiceManagement.h>
 
+#include "version.h"
+#include "utilities.h"
+
 namespace {
 Logger logger("MacOSUtils");
 }
@@ -119,6 +122,13 @@ void MacOSUtils::patchNSStatusBarSetImageForBigSur() {
   Method original = class_getInstanceMethod([NSStatusBarButton class], @selector(setImage:));
   Method patched = class_getInstanceMethod([NSStatusBarButton class], @selector(setImagePatched:));
   method_exchangeImplementations(original, patched);
+}
+
+// just check if background process alive
+// the process dead if allow in the background permission disabled
+bool MacOSUtils::isBackgroundServicesEnabled()
+{
+  return Utils::processIsRunning(SERVICE_NAME);
 }
 
 @interface NSImageScalingHelper : NSObject

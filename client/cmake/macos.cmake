@@ -22,13 +22,15 @@ set_target_properties(${PROJECT} PROPERTIES MACOSX_BUNDLE TRUE)
 set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
 
-
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macosutils.h
 )
 
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/macosutils.mm
+
 )
 
 set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/images/app.icns)
