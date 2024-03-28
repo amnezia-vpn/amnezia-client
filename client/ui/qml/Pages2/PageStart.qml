@@ -40,6 +40,7 @@ PageType {
 
         function onClosePage() {
             if (tabBarStackView.depth <= 1) {
+                PageController.hideWindow()
                 return
             }
             tabBarStackView.pop()

@@ -209,6 +209,11 @@ void AndroidController::setScreenshotsEnabled(bool enabled)
     callActivityMethod("setScreenshotsEnabled", "(Z)V", enabled);
 }
 
+void AndroidController::minimizeApp()
+{
+    callActivityMethod("minimizeApp", "()V");
+}
+
 // Moving log processing to the Android side
 jclass AndroidController::log;
 jmethodID AndroidController::logDebug;
