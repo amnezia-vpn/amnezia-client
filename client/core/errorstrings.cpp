@@ -65,6 +65,11 @@ QString errorString(ErrorCode code) {
     case(FatalError): errorMessage =  QObject::tr("QFile error: A fatal error occurred"); break;
     case(AbortError): errorMessage =  QObject::tr("QFile error: The operation was aborted"); break;
 
+    // Services errors
+    case(BackgroundServicePermissionsError):
+      errorMessage = QObject::tr("Permissions error: Background services forbidden. Please check your settings");
+      break;
+
     case(InternalError):
     default:
         errorMessage = QObject::tr("Internal error"); break;
