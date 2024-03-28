@@ -418,6 +418,8 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
         return ErrorCode::ServerPacketManagerError;
     if (stdOut.contains("command not found"))
         return ErrorCode::ServerDockerFailedError;
+    if (stdOut.contains("Docker is not supported"))
+        return ErrorCode::ServerDockerVersionError;
 
     return error;
 }
