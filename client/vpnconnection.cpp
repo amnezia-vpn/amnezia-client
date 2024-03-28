@@ -30,6 +30,8 @@
 #include "core/networkUtilities.h""
 #include "vpnconnection.h"
 
+#include "platforms/macos/macosutils.h"
+
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,
                              QObject *parent)
     : QObject(parent), m_settings(settings), m_configurator(configurator), m_checkTimer(new QTimer(this))
@@ -205,6 +207,11 @@ ErrorCode VpnConnection::lastError() const
     return ErrorCode::AndroidError;
 #endif
 
+    if (m_connectionError)
+    {
+        return *m_connectionError;
+    }
+
     if (!m_vpnProtocol.data()) {
         return ErrorCode::InternalError;
     }
@@ -316,6 +323,17 @@ QJsonObject VpnConnection::createVpnConfiguration(int serverIndex, const ServerC
 void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
                                  const QJsonObject &containerConfig)
 {
+    m_connectionError.reset();
+
+#ifdef Q_OS_APPLE
+    if (!MacOSUtils::isBackgroundServicesEnabled())
+    {
+        m_connectionError = ErrorCode::BackgroundServicePermissionsError;
+        emit connectionStateChanged(Vpn::ConnectionState::Error);
+        return;
+    }
+#endif
+
     qDebug() << QString("ConnectToVpn, Server index is %1, container is %2, route mode is")
                         .arg(serverIndex)
                         .arg(ContainerProps::containerToString(container))

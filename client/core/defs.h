@@ -91,7 +91,10 @@ namespace amnezia
         PermissionsError = 1202,
         UnspecifiedError = 1203,
         FatalError = 1204,
-        AbortError = 1205
+        AbortError = 1205,
+
+        // Services errors
+        BackgroundServicePermissionsError = 1206,
     };
 
 } // namespace amnezia

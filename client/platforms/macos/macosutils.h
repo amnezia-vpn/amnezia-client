@@ -23,6 +23,8 @@ class MacOSUtils final {
   static void showDockIcon();
 
   static void patchNSStatusBarSetImageForBigSur();
+
+  static bool isBackgroundServicesEnabled();
 };
 
 #endif  // MACOSUTILS_H
