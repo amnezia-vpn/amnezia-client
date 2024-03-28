@@ -20,7 +20,7 @@ set(QT_ANDROID_MULTI_ABI_FORWARD_VARS "QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL;CMAKE
 
 # We need to include qtprivate api's
 # As QAndroidBinder is not yet implemented with a public api
-set(LIBS ${LIBS} Qt6::CorePrivate)
+set(LIBS ${LIBS} Qt6::CorePrivate -ljnigraphics)
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/platforms/android)
 
@@ -30,6 +30,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.h
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/installedAppsImageProvider.h
 )
 
 set(SOURCES ${SOURCES}
@@ -38,6 +39,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/installedAppsImageProvider.cpp
 )
 
 foreach(abi IN ITEMS ${QT_ANDROID_ABIS})

@@ -117,6 +117,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   int splitTunnelType = rawConfig.value("splitTunnelType").toInt();
   QJsonArray splitTunnelSites = rawConfig.value("splitTunnelSites").toArray();
 
+  int appSplitTunnelType = rawConfig.value(amnezia::config_key::appSplitTunnelType).toInt();
+  QJsonArray splitTunnelApps = rawConfig.value(amnezia::config_key::splitTunnelApps).toArray();
+
   QJsonObject wgConfig = rawConfig.value(protocolName + "_config_data").toObject();
 
   QJsonObject json;
@@ -217,12 +220,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   json.insert("excludedAddresses", jsExcludedAddresses);
 
-
-  //  QJsonArray splitTunnelApps;
-  //  for (const auto& uri : hop.m_vpnDisabledApps) {
-  //    splitTunnelApps.append(QJsonValue(uri));
-  //  }
-  //  json.insert("vpnDisabledApps", splitTunnelApps);
+  json.insert("vpnDisabledApps", splitTunnelApps);
   
   if (protocolName == amnezia::config_key::awg) {
     json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));

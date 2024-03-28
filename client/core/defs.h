@@ -22,6 +22,20 @@ namespace amnezia
         }
     };
 
+    struct InstalledAppInfo {
+        QString appName;
+        QString packageName;
+        QString appPath;
+
+        bool operator==(const InstalledAppInfo& other) const {
+            if (!packageName.isEmpty()) {
+                return packageName == other.packageName;
+            } else {
+                return appPath == other.appPath;
+            }
+        }
+    };
+
     enum ErrorCode {
         // General error codes
         NoError = 0,

@@ -11,6 +11,8 @@ import "../Config"
 PageType {
     id: root
 
+    property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
+
     BackButtonType {
         id: backButton
 
@@ -73,8 +75,6 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                visible: true
-
                 Layout.fillWidth: true
 
                 text: qsTr("Site-based split tunneling")
@@ -87,11 +87,11 @@ PageType {
             }
 
             DividerType {
-                visible: GC.isDesktop()
+                visible: root.isAppSplitTinnelingEnabled
             }
 
             LabelWithButtonType {
-                visible: false
+                visible: root.isAppSplitTinnelingEnabled
 
                 Layout.fillWidth: true
 
@@ -100,11 +100,12 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
                 }
             }
 
             DividerType {
-                visible: false
+                visible: root.isAppSplitTinnelingEnabled
             }
         }
     }

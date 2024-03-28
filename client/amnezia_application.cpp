@@ -14,10 +14,12 @@
 
 #include "logger.h"
 #include "version.h"
+#include "ui/models/installedAppsModel.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
 #if defined(Q_OS_ANDROID)
     #include "platforms/android/android_controller.h"
+    #include "core/installedAppsImageProvider.h"
 #endif
 
 #include "protocols/qml_register_protocols.h"
@@ -124,7 +126,11 @@ void AmneziaApplication::init()
         m_importController->extractConfigFromData(data);
         m_pageController->goToPageViewConfig();
     });
+
+    m_engine->addImageProvider(QLatin1String("installedAppImage"), new InstalledAppsImageProvider);
 #endif
+
+
 
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
@@ -234,7 +240,8 @@ void AmneziaApplication::registerTypes()
     qmlRegisterSingletonType(QUrl("qrc:/ui/qml/Filters/ContainersModelFilters.qml"), "ContainersModelFilters", 1, 0,
                              "ContainersModelFilters");
 
-    //
+    qmlRegisterType<InstalledAppsModel>("InstalledAppsModel", 1, 0, "InstalledAppsModel");
+
     Vpn::declareQmlVpnConnectionStateEnum();
     PageLoader::declareQmlPageEnum();
 }
@@ -325,6 +332,9 @@ void AmneziaApplication::initModels()
     m_sitesModel.reset(new SitesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
 
+    m_appSplitTunnelingModel.reset(new AppSplitTunnelingModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("AppSplitTunnelingModel", m_appSplitTunnelingModel.get());
+
     m_protocolsModel.reset(new ProtocolsModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
 
@@ -406,6 +416,9 @@ void AmneziaApplication::initControllers()
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
+
+    m_appSplitTunnelingController.reset(new AppSplitTunnelingController(m_settings, m_appSplitTunnelingModel));
+    m_engine->rootContext()->setContextProperty("AppSplitTunnelingController", m_appSplitTunnelingController.get());
 
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());

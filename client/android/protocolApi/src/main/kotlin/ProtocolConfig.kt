@@ -16,6 +16,7 @@ open class ProtocolConfig protected constructor(
     val excludedRoutes: Set<InetNetwork>,
     val includedAddresses: Set<InetNetwork>,
     val excludedAddresses: Set<InetNetwork>,
+    val includedApplications: Set<String>,
     val excludedApplications: Set<String>,
     val httpProxy: ProxyInfo?,
     val allowAllAF: Boolean,
@@ -31,6 +32,7 @@ open class ProtocolConfig protected constructor(
         builder.excludedRoutes,
         builder.includedAddresses,
         builder.excludedAddresses,
+        builder.includedApplications,
         builder.excludedApplications,
         builder.httpProxy,
         builder.allowAllAF,
@@ -45,6 +47,7 @@ open class ProtocolConfig protected constructor(
         internal val excludedRoutes: MutableSet<InetNetwork> = hashSetOf()
         internal val includedAddresses: MutableSet<InetNetwork> = hashSetOf()
         internal val excludedAddresses: MutableSet<InetNetwork> = hashSetOf()
+        internal val includedApplications: MutableSet<String> = hashSetOf()
         internal val excludedApplications: MutableSet<String> = hashSetOf()
 
         internal var searchDomain: String? = null
@@ -87,6 +90,9 @@ open class ProtocolConfig protected constructor(
 
         fun excludeAddress(addr: InetNetwork) = apply { this.excludedAddresses += addr }
         fun excludeAddresses(addresses: Collection<InetNetwork>) = apply { this.excludedAddresses += addresses }
+
+        fun includeApplication(application: String) = apply { this.includedApplications += application }
+        fun includeApplications(applications: Collection<String>) = apply { this.includedApplications += applications }
 
         fun excludeApplication(application: String) = apply { this.excludedApplications += application }
         fun excludeApplications(applications: Collection<String>) = apply { this.excludedApplications += applications }

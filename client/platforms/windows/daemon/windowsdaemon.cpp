@@ -50,6 +50,15 @@ void WindowsDaemon::prepareActivation(const InterfaceConfig& config) {
   m_inetAdapterIndex = WindowsCommons::AdapterIndexTo(serveraddr);
 }
 
+void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex) {
+  if (config.m_vpnDisabledApps.length() > 0) {
+      m_splitTunnelManager.start(m_inetAdapterIndex, vpnAdapterIndex);
+      m_splitTunnelManager.setRules(config.m_vpnDisabledApps);
+  } else {
+      m_splitTunnelManager.stop();
+  }
+}
+
 bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
   if (op == Down) {
     m_splitTunnelManager.stop();
@@ -64,12 +73,8 @@ bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
     }
   }
 
-  if (config.m_vpnDisabledApps.length() > 0) {
-    m_splitTunnelManager.start(m_inetAdapterIndex);
-    m_splitTunnelManager.setRules(config.m_vpnDisabledApps);
-  } else {
-    m_splitTunnelManager.stop();
-  }
+  activateSplitTunnel(config);
+
   return true;
 }
 
