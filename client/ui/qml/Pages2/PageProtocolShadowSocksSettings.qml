@@ -152,6 +152,8 @@ PageType {
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
+                            enabled: isPortEditable | isCipherEditable
+
                             text: qsTr("Save")
 
                             clickedFunc: function() {

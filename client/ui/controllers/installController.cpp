@@ -469,6 +469,7 @@ void InstallController::updateContainer(QJsonObject config)
         connect(this, &InstallController::cancelInstallation, &serverController, &ServerController::cancelInstallation);
 
         errorCode = serverController.updateContainer(serverCredentials, container, oldContainerConfig, config);
+        clearCachedProfile();
     }
 
     if (errorCode == ErrorCode::NoError) {
