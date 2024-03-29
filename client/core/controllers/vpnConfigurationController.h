@@ -17,15 +17,13 @@ public:
 public slots:
     ErrorCode createProtocolConfigForContainer(const ServerCredentials &credentials, const DockerContainer container,
                                                QJsonObject &containerConfig);
-    ErrorCode createProtocolConfigString(const bool isApiConfig, const QPair<QString, QString> &dns,
-                                         const ServerCredentials &credentials, const DockerContainer container,
-                                         const QJsonObject &containerConfig, QString &protocolConfigString);
+    ErrorCode createProtocolConfigString(const bool isApiConfig, const QPair<QString, QString> &dns, const ServerCredentials &credentials,
+                                         const DockerContainer container, const QJsonObject &containerConfig, const Proto protocol,
+                                         QString &protocolConfigString);
     QJsonObject createVpnConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
-                                       const QJsonObject &containerConfig, const DockerContainer container,
-                                       ErrorCode errorCode);
+                                       const QJsonObject &containerConfig, const DockerContainer container, ErrorCode errorCode);
 
-    static void updateContainerConfigAfterInstallation(const DockerContainer container, QJsonObject &containerConfig,
-                                                       const QString &stdOut);
+    static void updateContainerConfigAfterInstallation(const DockerContainer container, QJsonObject &containerConfig, const QString &stdOut);
 signals:
 
 private:

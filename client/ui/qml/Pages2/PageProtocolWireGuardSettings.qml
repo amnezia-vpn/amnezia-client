@@ -41,7 +41,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+            enabled: ServersModel.isProcessedServerHasWriteAccess()
 
             ListView {
                 id: listview
@@ -135,7 +135,7 @@ PageType {
                                 questionDrawer.yesButtonFunction = function() {
                                     questionDrawer.visible = false
                                     PageController.goToPage(PageEnum.PageDeinstalling)
-                                    InstallController.removeCurrentlyProcessedContainer()
+                                    InstallController.removeProcessedContainer()
                                 }
                                 questionDrawer.noButtonFunction = function() {
                                     questionDrawer.visible = false

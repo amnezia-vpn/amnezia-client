@@ -125,7 +125,8 @@ void ExportController::generateConnectionConfig(const QString &clientName)
     emit exportConfigChanged();
 }
 
-ErrorCode ExportController::generateNativeConfig(const DockerContainer container, const QString &clientName, QJsonObject &jsonNativeConfig)
+ErrorCode ExportController::generateNativeConfig(const DockerContainer container, const QString &clientName, const Proto &protocol,
+                                                 QJsonObject &jsonNativeConfig)
 {
     clearPreviousConfig();
 
@@ -140,15 +141,16 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
     VpnConfigurationsController vpnConfigurationController(m_settings);
 
     QString protocolConfigString;
+
     ErrorCode errorCode = vpnConfigurationController.createProtocolConfigString(isApiConfig, dns, credentials, container, containerConfig,
-                                                                                protocolConfigString);
+                                                                                protocol, protocolConfigString);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
 
     jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
+    if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg) {
         auto clientId = jsonNativeConfig.value(config_key::clientId).toString();
         errorCode = m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
     }
@@ -158,7 +160,15 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
 void ExportController::generateOpenVpnConfig(const QString &clientName)
 {
     QJsonObject nativeConfig;
-    ErrorCode errorCode = generateNativeConfig(DockerContainer::OpenVpn, clientName, nativeConfig);
+    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());
+    ErrorCode errorCode = ErrorCode::NoError;
+
+    if (container == DockerContainer::Cloak || container == DockerContainer::ShadowSocks) {
+        errorCode = generateNativeConfig(container, clientName, Proto::OpenVpn, nativeConfig);
+    } else {
+        errorCode = generateNativeConfig(container, clientName, ContainerProps::defaultProtocol(container), nativeConfig);
+    }
+
     if (errorCode) {
         emit exportErrorOccurred(errorString(errorCode));
         return;
@@ -176,7 +186,7 @@ void ExportController::generateOpenVpnConfig(const QString &clientName)
 void ExportController::generateWireGuardConfig(const QString &clientName)
 {
     QJsonObject nativeConfig;
-    ErrorCode errorCode = generateNativeConfig(DockerContainer::WireGuard, clientName, nativeConfig);
+    ErrorCode errorCode = generateNativeConfig(DockerContainer::WireGuard, clientName, Proto::WireGuard, nativeConfig);
     if (errorCode) {
         emit exportErrorOccurred(errorString(errorCode));
         return;
@@ -196,7 +206,7 @@ void ExportController::generateWireGuardConfig(const QString &clientName)
 void ExportController::generateAwgConfig(const QString &clientName)
 {
     QJsonObject nativeConfig;
-    ErrorCode errorCode = generateNativeConfig(DockerContainer::Awg, clientName, nativeConfig);
+    ErrorCode errorCode = generateNativeConfig(DockerContainer::Awg, clientName, Proto::Awg, nativeConfig);
     if (errorCode) {
         emit exportErrorOccurred(errorString(errorCode));
         return;
@@ -216,7 +226,15 @@ void ExportController::generateAwgConfig(const QString &clientName)
 void ExportController::generateShadowSocksConfig()
 {
     QJsonObject nativeConfig;
-    ErrorCode errorCode = generateNativeConfig(DockerContainer::ShadowSocks, "", nativeConfig);
+    DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());
+    ErrorCode errorCode = ErrorCode::NoError;
+
+    if (container == DockerContainer::Cloak) {
+        errorCode = generateNativeConfig(container, "", Proto::ShadowSocks, nativeConfig);
+    } else {
+        errorCode = generateNativeConfig(container, "", ContainerProps::defaultProtocol(container), nativeConfig);
+    }
+
     if (errorCode) {
         emit exportErrorOccurred(errorString(errorCode));
         return;
@@ -242,7 +260,7 @@ void ExportController::generateShadowSocksConfig()
 void ExportController::generateCloakConfig()
 {
     QJsonObject nativeConfig;
-    ErrorCode errorCode = generateNativeConfig(DockerContainer::Cloak, "", nativeConfig);
+    ErrorCode errorCode = generateNativeConfig(DockerContainer::Cloak, "", Proto::Cloak, nativeConfig);
     if (errorCode) {
         emit exportErrorOccurred(errorString(errorCode));
         return;
@@ -262,7 +280,7 @@ void ExportController::generateCloakConfig()
 void ExportController::generateXrayConfig()
 {
     QJsonObject nativeConfig;
-    ErrorCode errorCode = generateNativeConfig(DockerContainer::Xray, "", nativeConfig);
+    ErrorCode errorCode = generateNativeConfig(DockerContainer::Xray, "", Proto::Xray, nativeConfig);
     if (errorCode) {
         emit exportErrorOccurred(errorString(errorCode));
         return;

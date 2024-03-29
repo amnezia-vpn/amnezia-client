@@ -28,8 +28,7 @@ QScopedPointer<ConfiguratorBase> VpnConfigurationsController::createConfigurator
 }
 
 ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const ServerCredentials &credentials,
-                                                                        const DockerContainer container,
-                                                                        QJsonObject &containerConfig)
+                                                                        const DockerContainer container, QJsonObject &containerConfig)
 {
     ErrorCode errorCode = ErrorCode::NoError;
 
@@ -53,9 +52,10 @@ ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const Se
     return errorCode;
 }
 
-ErrorCode VpnConfigurationsController::createProtocolConfigString(
-        const bool isApiConfig, const QPair<QString, QString> &dns, const ServerCredentials &credentials,
-        const DockerContainer container, const QJsonObject &containerConfig, QString &protocolConfigString)
+ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isApiConfig, const QPair<QString, QString> &dns,
+                                                                  const ServerCredentials &credentials, const DockerContainer container,
+                                                                  const QJsonObject &containerConfig, const Proto protocol,
+                                                                  QString &protocolConfigString)
 {
     ErrorCode errorCode = ErrorCode::NoError;
 
@@ -63,8 +63,7 @@ ErrorCode VpnConfigurationsController::createProtocolConfigString(
         return errorCode;
     }
 
-    auto mainProtocol = ContainerProps::defaultProtocol(container);
-    auto configurator = createConfigurator(mainProtocol);
+    auto configurator = createConfigurator(protocol);
 
     protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
     if (errorCode != ErrorCode::NoError) {
@@ -75,10 +74,9 @@ ErrorCode VpnConfigurationsController::createProtocolConfigString(
     return errorCode;
 }
 
-QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QString, QString> &dns,
-                                                                const QJsonObject &serverConfig,
-                                                                const QJsonObject &containerConfig,
-                                                                const DockerContainer container, ErrorCode errorCode)
+QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
+                                                                const QJsonObject &containerConfig, const DockerContainer container,
+                                                                ErrorCode errorCode)
 {
     QJsonObject vpnConfiguration {};
 
@@ -93,10 +91,8 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
             continue;
         }
 
-        QString protocolConfigString = containerConfig.value(ProtocolProps::protoToString(proto))
-                                               .toObject()
-                                               .value(config_key::last_config)
-                                               .toString();
+        QString protocolConfigString =
+                containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
 
         auto configurator = createConfigurator(proto);
         protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
@@ -122,8 +118,7 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
     return vpnConfiguration;
 }
 
-void VpnConfigurationsController::updateContainerConfigAfterInstallation(const DockerContainer container,
-                                                                         QJsonObject &containerConfig,
+void VpnConfigurationsController::updateContainerConfigAfterInstallation(const DockerContainer container, QJsonObject &containerConfig,
                                                                          const QString &stdOut)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
