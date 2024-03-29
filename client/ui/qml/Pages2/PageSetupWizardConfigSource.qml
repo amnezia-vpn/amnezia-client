@@ -69,8 +69,8 @@ PageType {
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
 
                 clickedFunction: function() {
-                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.backup)" :
-                                                                       "Config files (*.vpn *.ovpn *.conf)"
+                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
+                                                                       "Config files (*.vpn *.ovpn *.conf *.json)"
                     var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
                     if (fileName !== "") {
                         if (ImportController.extractConfigFromFile(fileName)) {

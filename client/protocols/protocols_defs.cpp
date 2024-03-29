@@ -71,6 +71,7 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
              { Proto::Awg, "AmneziaWG" },
              { Proto::Ikev2, "IKEv2" },
              { Proto::L2tp, "L2TP" },
+             { Proto::Xray, "XRay" },
 
              { Proto::TorWebSite, "Website in Tor network" },
              { Proto::Dns, "DNS Service" },
@@ -92,6 +93,7 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
     case Proto::WireGuard: return ServiceType::Vpn;
     case Proto::Awg: return ServiceType::Vpn;
     case Proto::Ikev2: return ServiceType::Vpn;
+    case Proto::Xray: return ServiceType::Vpn;
 
     case Proto::TorWebSite: return ServiceType::Other;
     case Proto::Dns: return ServiceType::Other;
@@ -122,6 +124,7 @@ int ProtocolProps::defaultPort(Proto p)
     case Proto::ShadowSocks: return QString(protocols::shadowsocks::defaultPort).toInt();
     case Proto::WireGuard: return QString(protocols::wireguard::defaultPort).toInt();
     case Proto::Awg: return QString(protocols::awg::defaultPort).toInt();
+    case Proto::Xray: return QString(protocols::xray::defaultPort).toInt();
     case Proto::Ikev2: return -1;
     case Proto::L2tp: return -1;
 
@@ -162,6 +165,8 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     case Proto::Awg: return TransportProto::Udp;
     case Proto::Ikev2: return TransportProto::Udp;
     case Proto::L2tp: return TransportProto::Udp;
+    case Proto::Xray: return TransportProto::Tcp;
+
     // non-vpn
     case Proto::TorWebSite: return TransportProto::Tcp;
     case Proto::Dns: return TransportProto::Udp;
@@ -180,12 +185,15 @@ bool ProtocolProps::defaultTransportProtoChangeable(Proto p)
     case Proto::Awg: return false;
     case Proto::Ikev2: return false;
     case Proto::L2tp: return false;
+    case Proto::Xray: return false;
+
     // non-vpn
     case Proto::TorWebSite: return false;
     case Proto::Dns: return false;
     case Proto::Sftp: return false;
     default: return false;
     }
+    return false;
 }
 
 QString ProtocolProps::key_proto_config_data(Proto p)

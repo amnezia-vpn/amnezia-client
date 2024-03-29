@@ -19,6 +19,7 @@ namespace
         Amnezia,
         OpenVpn,
         WireGuard,
+        Xray,
         Backup,
         Invalid
     };
@@ -33,6 +34,9 @@ namespace
 
         const QString wireguardConfigPatternSectionInterface = "[Interface]";
         const QString wireguardConfigPatternSectionPeer = "[Peer]";
+
+        const QString xrayConfigPatternInbound = "inbounds";
+        const QString xrayConfigPatternOutbound = "outbounds";
 
         const QString amneziaConfigPattern = "containers";
         const QString amneziaFreeConfigPattern = "api_key";
@@ -49,6 +53,8 @@ namespace
         } else if (config.contains(wireguardConfigPatternSectionInterface)
                    && config.contains(wireguardConfigPatternSectionPeer)) {
             return ConfigTypes::WireGuard;
+        } else if ((config.contains(xrayConfigPatternInbound)) && (config.contains(xrayConfigPatternOutbound))) {
+            return ConfigTypes::Xray;
         }
         return ConfigTypes::Invalid;
     }
@@ -107,6 +113,10 @@ bool ImportController::extractConfigFromData(QString data)
     }
     case ConfigTypes::WireGuard: {
         m_config = extractWireGuardConfig(config);
+        return m_config.empty() ? false : true;
+    }
+    case ConfigTypes::Xray: {
+        m_config = extractXrayConfig(config);
         return m_config.empty() ? false : true;
     }
     case ConfigTypes::Amnezia: {
@@ -343,6 +353,42 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         config[config_key::dns1] = dnsMatch.captured(1);
         config[config_key::dns2] = dnsMatch.captured(2);
     }
+
+    config[config_key::hostName] = hostName;
+
+    return config;
+}
+
+QJsonObject ImportController::extractXrayConfig(const QString &data)
+{
+    QJsonParseError parserErr;
+    QJsonDocument jsonConf = QJsonDocument::fromJson(data.toLocal8Bit(), &parserErr);
+
+    QJsonObject xrayVpnConfig;
+    xrayVpnConfig[config_key::config] = jsonConf.toJson().constData();
+    QJsonObject lastConfig;
+    lastConfig[config_key::last_config] = jsonConf.toJson().constData();
+    lastConfig[config_key::isThirdPartyConfig] = true;
+
+    QJsonObject containers;
+    containers.insert(config_key::container, QJsonValue("amnezia-xray"));
+    containers.insert(config_key::xray, QJsonValue(lastConfig));
+
+    QJsonArray arr;
+    arr.push_back(containers);
+
+    QString hostName;
+
+    const static QRegularExpression hostNameRegExp("\"address\":\\s*\"([^\"]+)");
+    QRegularExpressionMatch hostNameMatch = hostNameRegExp.match(data);
+    if (hostNameMatch.hasMatch()) {
+        hostName = hostNameMatch.captured(1);
+    }
+
+    QJsonObject config;
+    config[config_key::containers] = arr;
+    config[config_key::defaultContainer] = "amnezia-xray";
+    config[config_key::description] = m_settings->nextAvailableServerName();
 
     config[config_key::hostName] = hostName;
 

@@ -11,6 +11,7 @@
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/errorstrings.h"
 #include "logger.h"
+#include "core/networkUtilities.h"
 #include "utilities.h"
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
@@ -565,12 +566,12 @@ void InstallController::clearCachedProfile()
 
 QRegularExpression InstallController::ipAddressPortRegExp()
 {
-    return Utils::ipAddressPortRegExp();
+    return NetworkUtilities::ipAddressPortRegExp();
 }
 
 QRegularExpression InstallController::ipAddressRegExp()
 {
-    return Utils::ipAddressRegExp();
+    return NetworkUtilities::ipAddressRegExp();
 }
 
 void InstallController::setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData)
@@ -660,7 +661,6 @@ void InstallController::mountSftpDrive(const QString &port, const QString &passw
         process->write((password + "\n").toUtf8());
     }
 
-    // qDebug().noquote() << "onPushButtonSftpMountDriveClicked" << args;
 
 #endif
 }

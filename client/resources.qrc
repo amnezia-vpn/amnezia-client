@@ -198,6 +198,7 @@
         <file>ui/qml/Pages2/PageProtocolOpenVpnSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolShadowSocksSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolCloakSettings.qml</file>
+        <file>ui/qml/Pages2/PageProtocolXraySettings.qml</file>        
         <file>ui/qml/Pages2/PageProtocolRaw.qml</file>
         <file>ui/qml/Pages2/PageSettingsLogging.qml</file>
         <file>ui/qml/Pages2/PageServiceSftpSettings.qml</file>
@@ -224,6 +225,11 @@
         <file>ui/qml/Pages2/PageShareFullAccess.qml</file>
         <file>images/controls/close.svg</file>
         <file>images/controls/search.svg</file>
+        <file>server_scripts/xray/configure_container.sh</file>
+        <file>server_scripts/xray/Dockerfile</file>
+        <file>server_scripts/xray/run_container.sh</file>
+        <file>server_scripts/xray/start.sh</file>
+        <file>server_scripts/xray/template.json</file>
         <file>ui/qml/Pages2/PageProtocolWireGuardSettings.qml</file>
         <file>ui/qml/Components/HomeSplitTunnelingDrawer.qml</file>
         <file>images/controls/split-tunneling.svg</file>

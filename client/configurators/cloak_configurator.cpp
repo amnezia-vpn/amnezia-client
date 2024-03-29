@@ -50,6 +50,5 @@ QString CloakConfigurator::createConfig(const ServerCredentials &credentials, Do
     QString textCfg = serverController.replaceVars(QJsonDocument(config).toJson(),
                                                    serverController.genVarsForScript(credentials, container, containerConfig));
 
-    // qDebug().noquote() << textCfg;
     return textCfg;
 }

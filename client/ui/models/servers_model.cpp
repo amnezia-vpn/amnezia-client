@@ -1,7 +1,7 @@
 #include "servers_model.h"
 
 #include "core/controllers/serverController.h"
-#include "utilities.h"
+#include "core/networkUtilities.h"
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent)
     : m_settings(settings), QAbstractListModel(parent)
@@ -513,13 +513,13 @@ QPair<QString, QString> ServersModel::getDnsPair(int serverIndex)
     dns.first = server.value(config_key::dns1).toString();
     dns.second = server.value(config_key::dns2).toString();
 
-    if (dns.first.isEmpty() || !Utils::checkIPv4Format(dns.first)) {
+    if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
         if (m_isAmneziaDnsEnabled && containers.contains(DockerContainer::Dns)) {
             dns.first = protocols::dns::amneziaDnsIp;
         } else
             dns.first = m_settings->primaryDns();
     }
-    if (dns.second.isEmpty() || !Utils::checkIPv4Format(dns.second)) {
+    if (dns.second.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.second)) {
         dns.second = m_settings->secondaryDns();
     }
 

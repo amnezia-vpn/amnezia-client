@@ -222,7 +222,7 @@ void ExportController::generateShadowSocksConfig()
         return;
     }
 
-    QStringList lines = nativeConfig.value(config_key::config).toString().replace("\r", "").split("\n");
+    QStringList lines = QString(QJsonDocument(nativeConfig).toJson()).replace("\r", "").split("\n");
     for (const QString &line : lines) {
         m_config.append(line + "\n");
     }
@@ -251,7 +251,24 @@ void ExportController::generateCloakConfig()
     nativeConfig.remove(config_key::transport_proto);
     nativeConfig.insert("ProxyMethod", "shadowsocks");
 
-    QStringList lines = nativeConfig.value(config_key::config).toString().replace("\r", "").split("\n");
+    QStringList lines = QString(QJsonDocument(nativeConfig).toJson()).replace("\r", "").split("\n");
+    for (const QString &line : lines) {
+        m_config.append(line + "\n");
+    }
+
+    emit exportConfigChanged();
+}
+
+void ExportController::generateXrayConfig()
+{
+    QJsonObject nativeConfig;
+    ErrorCode errorCode = generateNativeConfig(DockerContainer::Xray, "", nativeConfig);
+    if (errorCode) {
+        emit exportErrorOccurred(errorString(errorCode));
+        return;
+    }
+
+    QStringList lines = QString(QJsonDocument(nativeConfig).toJson()).replace("\r", "").split("\n");
     for (const QString &line : lines) {
         m_config.append(line + "\n");
     }

@@ -6,6 +6,7 @@
 #include "configurators/openvpn_configurator.h"
 #include "configurators/shadowsocks_configurator.h"
 #include "configurators/wireguard_configurator.h"
+#include "configurators/xray_configurator.h"
 
 VpnConfigurationsController::VpnConfigurationsController(const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject { parent }, m_settings(settings)
@@ -21,6 +22,7 @@ QScopedPointer<ConfiguratorBase> VpnConfigurationsController::createConfigurator
     case Proto::WireGuard: return QScopedPointer<ConfiguratorBase>(new WireguardConfigurator(m_settings, false));
     case Proto::Awg: return QScopedPointer<ConfiguratorBase>(new AwgConfigurator(m_settings));
     case Proto::Ikev2: return QScopedPointer<ConfiguratorBase>(new Ikev2Configurator(m_settings));
+    case Proto::Xray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(m_settings));
     default: return QScopedPointer<ConfiguratorBase>();
     }
 }

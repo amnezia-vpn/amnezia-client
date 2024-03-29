@@ -25,7 +25,8 @@ PageType {
         WireGuard,
         Awg,
         ShadowSocks,
-        Cloak
+        Cloak,
+        Xray
     }
 
     signal revokeConfig(int index)
@@ -89,6 +90,13 @@ PageType {
                 shareConnectionDrawer.configFileName = "amnezia_for_cloak"
                 break
             }
+            case PageShare.ConfigType.Xray: {
+                ExportController.generateXrayConfig()
+                shareConnectionDrawer.configCaption = qsTr("Save XRay config")
+                shareConnectionDrawer.configExtension = ".json"
+                shareConnectionDrawer.configFileName = "amnezia_for_xray"
+                break
+            }
             }
 
             PageController.showBusyIndicator(false)
@@ -136,6 +144,11 @@ PageType {
         id: cloakConnectionFormat
         property string name: qsTr("Cloak native format")
         property var type: PageShare.ConfigType.Cloak
+    }
+    QtObject {
+        id: xrayConnectionFormat
+        property string name: qsTr("XRay native format")
+        property var type: PageShare.ConfigType.Xray
     }
 
     FlickableType {
@@ -436,6 +449,8 @@ PageType {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                             root.connectionTypesModel.push(shadowSocksConnectionFormat)
                             root.connectionTypesModel.push(cloakConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-xray")) {
+                            root.connectionTypesModel.push(xrayConnectionFormat)
                         }
                     }
                 }

@@ -26,6 +26,7 @@
 #include "logger.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
+#include "core/networkUtilities.h"
 #include "settings.h"
 #include "utilities.h"
 #include "vpnConfigurationController.h"
@@ -442,9 +443,6 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
-    //    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
-    //        stdOut += data + "\n";
-    //    };
 
     e = runScript(credentials,
                   replaceVars(amnezia::scriptData(SharedScriptType::build_container),
@@ -464,9 +462,6 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
-    // auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
-    //     stdOut += data + "\n";
-    // };
 
     ErrorCode e = runScript(credentials,
                             replaceVars(amnezia::scriptData(ProtocolScriptType::run_container, container),
@@ -535,6 +530,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
     const QJsonObject &amneziaWireguarConfig = config.value(ProtocolProps::protoToString(Proto::Awg)).toObject();
+    const QJsonObject &xrayConfig = config.value(ProtocolProps::protoToString(Proto::Xray)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
 
     Vars vars;
@@ -591,6 +587,10 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$CLOAK_SERVER_PORT", cloakConfig.value(config_key::port).toString(protocols::cloak::defaultPort) } });
     vars.append({ { "$FAKE_WEB_SITE_ADDRESS",
                     cloakConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite) } });
+
+    // Xray vars
+    vars.append({ { "$XRAY_SITE_NAME",
+                  xrayConfig.value(config_key::site).toString(protocols::xray::defaultSite) } });
 
     // Wireguard vars
     vars.append(
@@ -650,7 +650,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER",
                     amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
 
-    QString serverIp = Utils::getIPAddress(credentials.hostName);
+    QString serverIp = NetworkUtilities::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {
         vars.append({ { "$SERVER_IP_ADDRESS", serverIp } });
     } else {

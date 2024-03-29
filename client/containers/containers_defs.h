@@ -22,6 +22,7 @@ namespace amnezia
             Cloak,
             ShadowSocks,
             Ipsec,
+            Xray,
 
             // non-vpn
             TorWebSite,

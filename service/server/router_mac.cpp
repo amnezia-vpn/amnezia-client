@@ -3,7 +3,8 @@
 
 #include <QProcess>
 #include <QThread>
-#include <utilities.h>
+
+#include <core/networkUtilities.h>
 
 RouterMac &RouterMac::Instance()
 {
@@ -13,14 +14,14 @@ RouterMac &RouterMac::Instance()
 
 bool RouterMac::routeAdd(const QString &ipWithSubnet, const QString &gw)
 {
-    QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
-    QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
+    QString ip = NetworkUtilities::ipAddressFromIpWithSubnet(ipWithSubnet);
+    QString mask = NetworkUtilities::netMaskFromIpWithSubnet(ipWithSubnet);
 
 #ifdef MZ_DEBUG
     qDebug().noquote() << "RouterMac::routeAdd: " << ipWithSubnet << gw;
 #endif
 
-    if (!Utils::checkIPv4Format(ip) || !Utils::checkIPv4Format(gw)) {
+    if (!NetworkUtilities::checkIPv4Format(ip) || !NetworkUtilities::checkIPv4Format(gw)) {
         qCritical().noquote() << "Critical, trying to add invalid route: " << ip << gw;
         return false;
     }
@@ -76,19 +77,19 @@ bool RouterMac::clearSavedRoutes()
 
 bool RouterMac::routeDelete(const QString &ipWithSubnet, const QString &gw)
 {
-    QString ip = Utils::ipAddressFromIpWithSubnet(ipWithSubnet);
-    QString mask = Utils::netMaskFromIpWithSubnet(ipWithSubnet);
+    QString ip = NetworkUtilities::ipAddressFromIpWithSubnet(ipWithSubnet);
+    QString mask = NetworkUtilities::netMaskFromIpWithSubnet(ipWithSubnet);
 
 #ifdef MZ_DEBUG
     qDebug().noquote() << "RouterMac::routeDelete: " << ipWithSubnet << gw;
 #endif
 
-    if (!Utils::checkIPv4Format(ip) || !Utils::checkIPv4Format(gw)) {
+    if (!NetworkUtilities::checkIPv4Format(ip) || !NetworkUtilities::checkIPv4Format(gw)) {
         qCritical().noquote() << "Critical, trying to remove invalid route: " << ip << gw;
         return false;
     }
 
-    if (ip == "0.0.0.0") {
+    if (ipWithSubnet == "0.0.0.0/0") {
         qDebug().noquote() << "Warning, trying to remove default route, skipping: " << ip << gw;
         return true;
     }
@@ -127,6 +128,42 @@ bool RouterMac::routeDeleteList(const QString &gw, const QStringList &ips)
         if (routeDelete(ip, gw)) cnt++;
     }
     return cnt;
+}
+
+bool RouterMac::createTun(const QString &dev, const QString &subnet) {
+    qDebug().noquote() << "createTun start";
+
+    QProcess process;
+    QStringList commands;
+
+    commands << "ifconfig" << dev << "inet" << subnet << subnet << "up";
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not start activate tun device!\n";
+        return false;
+    }
+    else if (!process.waitForFinished(2000))
+    {
+        qDebug().noquote() << "Could not activate tun device!\n";
+        return false;
+    }
+    commands.clear();
+
+    return true;
+}
+
+bool RouterMac::updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers)
+{
+    return m_dnsUtil->updateResolvers(ifname, resolvers);
+}
+
+
+bool RouterMac::deleteTun(const QString &dev)
+{
+    qDebug().noquote() << "deleteTun start";
+
+    return true;
 }
 
 void RouterMac::flushDns()

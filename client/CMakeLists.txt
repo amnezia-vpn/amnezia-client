@@ -131,6 +131,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.h
 )
 
 # Mozilla headres
@@ -168,6 +169,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.cpp
 )
 
 # Mozilla sources
@@ -297,6 +299,7 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnovercloakprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/shadowsocksvpnprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/wireguardprotocol.h
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/xrayprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/awgprotocol.h
     )
 
@@ -308,6 +311,7 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnovercloakprotocol.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/shadowsocksvpnprotocol.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/wireguardprotocol.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/xrayprotocol.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/awgprotocol.cpp
     )
 endif()
