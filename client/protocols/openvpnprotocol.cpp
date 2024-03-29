@@ -339,6 +339,7 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                             IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
                             m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
                             m_configData.insert("vpnGateway", m_vpnGateway);
+                            m_configData.insert("vpnServer", m_configData.value(amnezia::config_key::hostName).toString());
                             IpcClient::Interface()->enablePeerTraffic(m_configData);
                         }
                     }

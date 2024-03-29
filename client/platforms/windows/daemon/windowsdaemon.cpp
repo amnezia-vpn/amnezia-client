@@ -18,6 +18,7 @@
 #include "dnsutilswindows.h"
 #include "leakdetector.h"
 #include "logger.h"
+#include "core/networkUtilities.h"
 #include "platforms/windows/windowscommons.h"
 #include "platforms/windows/windowsservicemanager.h"
 #include "windowsfirewall.h"
@@ -43,11 +44,15 @@ WindowsDaemon::~WindowsDaemon() {
   logger.debug() << "Daemon released";
 }
 
-void WindowsDaemon::prepareActivation(const InterfaceConfig& config) {
+void WindowsDaemon::prepareActivation(const InterfaceConfig& config, int inetAdapterIndex) {
   // Before creating the interface we need to check which adapter
   // routes to the server endpoint
-  auto serveraddr = QHostAddress(config.m_serverIpv4AddrIn);
-  m_inetAdapterIndex = WindowsCommons::AdapterIndexTo(serveraddr);
+  if (inetAdapterIndex == 0) {
+      auto serveraddr = QHostAddress(config.m_serverIpv4AddrIn);
+      m_inetAdapterIndex = NetworkUtilities::AdapterIndexTo(serveraddr);
+  } else {
+      m_inetAdapterIndex = inetAdapterIndex;
+  }
 }
 
 void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex) {

@@ -112,6 +112,7 @@ ErrorCode XrayProtocol::startTun2Sock()
 
     m_t2sProcess->setProgram(PermittedProcess::Tun2Socks);
 #ifdef Q_OS_WIN
+    m_configData.insert("inetAdapterIndex", NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress)));
     QStringList arguments({"-device", "tun://tun2", "-proxy", XrayConStr, "-tun-post-up",
                            QString("cmd /c netsh interface ip set address name=\"tun2\" static %1 255.255.255.255").arg(amnezia::protocols::xray::defaultLocalAddr)});
 #endif
@@ -168,6 +169,7 @@ ErrorCode XrayProtocol::startTun2Sock()
                         IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
                         m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
                         m_configData.insert("vpnGateway", m_vpnGateway);
+                        m_configData.insert("vpnServer", m_remoteAddress);
                         IpcClient::Interface()->enablePeerTraffic(m_configData);
                     }
                 }

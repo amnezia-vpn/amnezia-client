@@ -31,6 +31,8 @@
 
 #include <QHostAddress>
 #include <QHostInfo>
+#include <QNetworkInterface>
+#include "qendian.h"
 
 QRegularExpression NetworkUtilities::ipAddressRegExp()
 {
@@ -200,6 +202,24 @@ DWORD GetAdaptersAddressesWrapper(const ULONG Family,
     return dwRetVal;
 }
 #endif
+
+// static
+int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
+    qDebug() << "Getting Current Internet Adapter that routes to"
+                   << dst.toString();
+    quint32_be ipBigEndian;
+    quint32 ip = dst.toIPv4Address();
+    qToBigEndian(ip, &ipBigEndian);
+    _MIB_IPFORWARDROW routeInfo;
+    auto result = GetBestRoute(ipBigEndian, 0, &routeInfo);
+    if (result != NO_ERROR) {
+        return -1;
+    }
+    auto adapter =
+        QNetworkInterface::interfaceFromIndex(routeInfo.dwForwardIfIndex);
+    qDebug() << "Internet Adapter:" << adapter.name();
+    return routeInfo.dwForwardIfIndex;
+}
 
 QString NetworkUtilities::getGatewayAndIface()
 {

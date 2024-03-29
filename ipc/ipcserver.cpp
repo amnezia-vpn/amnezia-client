@@ -315,8 +315,9 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
     config.m_dnsServer = configStr.value(amnezia::config_key::dns1).toString();
     config.m_serverPublicKey = "openvpn";
     config.m_serverIpv4Gateway = configStr.value("vpnGateway").toString();
-    config.m_serverIpv4AddrIn = configStr.value("vpnGateway").toString();
+    config.m_serverIpv4AddrIn = configStr.value("vpnServer").toString();
     int vpnAdapterIndex = configStr.value("vpnAdapterIndex").toInt();
+    int inetAdapterIndex = configStr.value("inetAdapterIndex").toInt();
 
     int splitTunnelType = configStr.value("splitTunnelType").toInt();
     QJsonArray splitTunnelSites = configStr.value("splitTunnelSites").toArray();
@@ -334,7 +335,7 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
     if (splitTunnelType == 1) {
         for (auto v : splitTunnelSites) {
             QString ipRange = v.toString();
-            if (ipRange.split('/').size() > 1){
+            if (ipRange.split('/').size() > 1) {
                 config.m_allowedIPAddressRanges.append(
                     IPAddress(QHostAddress(ipRange.split('/')[0]), atoi(ipRange.split('/')[1].toLocal8Bit())));
             } else {
@@ -359,9 +360,10 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
         config.m_vpnDisabledApps.append(i.toString());
     }
 
-    WindowsDaemon::instance()->prepareActivation(config);
+    WindowsFirewall::instance()->enablePeerTraffic(config);
+    WindowsDaemon::instance()->prepareActivation(config, inetAdapterIndex);
     WindowsDaemon::instance()->activateSplitTunnel(config, vpnAdapterIndex);
-    return WindowsFirewall::instance()->enablePeerTraffic(config);
+    return true;
 #endif
     return true;
 }
