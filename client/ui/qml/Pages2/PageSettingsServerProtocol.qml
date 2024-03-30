@@ -126,6 +126,8 @@ PageType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
+
+            visible: ServersModel.isProcessedServerHasWriteAccess()
         }
 
         LabelWithButtonType {
@@ -165,10 +167,8 @@ PageType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
-        }
-    }
 
-    QuestionDrawer {
-        id: questionDrawer
+            visible: ServersModel.isProcessedServerHasWriteAccess()
+        }
     }
 }
