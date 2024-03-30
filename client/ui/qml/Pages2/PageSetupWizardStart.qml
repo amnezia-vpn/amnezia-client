@@ -24,6 +24,7 @@ PageType {
 
         function onClosePage() {
             if (stackView.depth <= 1) {
+                PageController.hideWindow()
                 return
             }
             stackView.pop()
