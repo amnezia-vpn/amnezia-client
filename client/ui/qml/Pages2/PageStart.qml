@@ -15,6 +15,7 @@ PageType {
     id: root
 
     property bool isControlsDisabled: false
+    property bool isTabBarDisabled: false
 
     Connections {
         target: PageController
@@ -36,6 +37,10 @@ PageType {
 
         function onDisableControls(disabled) {
             isControlsDisabled = disabled
+        }
+
+        function onDisableTabBar(disabled) {
+            isTabBarDisabled = disabled
         }
 
         function onClosePage() {
@@ -63,7 +68,7 @@ PageType {
         }
 
         function onEscapePressed() {
-            if (root.isControlsDisabled) {
+            if (root.isControlsDisabled || root.isTabBarDisabled) {
                 return
             }
 
@@ -179,7 +184,7 @@ PageType {
         leftPadding: 96
         rightPadding: 96
 
-        enabled: !root.isControlsDisabled
+        enabled: !root.isControlsDisabled && !root.isTabBarDisabled
 
         background: Shape {
             width: parent.width

@@ -110,6 +110,7 @@ signals:
 
     void showBusyIndicator(bool visible);
     void disableControls(bool disabled);
+    void disableTabBar(bool disabled);
 
     void hideMainWindow();
     void raiseMainWindow();

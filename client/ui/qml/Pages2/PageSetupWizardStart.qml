@@ -48,6 +48,10 @@ PageType {
             isControlsDisabled = disabled
         }
 
+        function onDisableTabBar(disabled) {
+            isControlsDisabled = disabled
+        }
+
         function onEscapePressed() {
             if (isControlsDisabled) {
                 return
