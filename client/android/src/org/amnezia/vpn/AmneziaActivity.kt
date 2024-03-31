@@ -476,4 +476,12 @@ class AmneziaActivity : QtActivity() {
             window.setFlags(flag, LayoutParams.FLAG_SECURE)
         }
     }
+
+    @Suppress("unused")
+    fun minimizeApp() {
+        Log.v(TAG, "Minimize application")
+        mainScope.launch {
+            moveTaskToBack(false)
+        }
+    }
 }
