@@ -55,6 +55,7 @@ void ConnectionController::openConnection()
 
     if (!m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         emit noInstalledContainers();
+        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
         return;
     }
 
