@@ -331,6 +331,7 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                 m_vpnLocalAddress = l.split(" ").at(1);
                 m_vpnGateway = l.split(" ").at(2);
 #ifdef Q_OS_WIN
+                QThread::msleep(300);
                 QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
                 for (int i = 0; i < netInterfaces.size(); i++) {
                     for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
