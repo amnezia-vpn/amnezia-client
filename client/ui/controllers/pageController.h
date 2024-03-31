@@ -76,6 +76,7 @@ public slots:
     QString getPagePath(PageLoader::PageEnum page);
 
     void closeWindow();
+    void hideWindow();
     void keyPressEvent(Qt::Key key);
 
     unsigned int getInitialPageNavigationBarColor();
