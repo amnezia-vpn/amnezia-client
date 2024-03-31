@@ -19,6 +19,7 @@ QString errorString(ErrorCode code) {
     case(ServerDockerFailedError): errorMessage = QObject::tr("Server error: Docker failed"); break;
     case(ServerCancelInstallation): errorMessage = QObject::tr("Installation canceled by user"); break;
     case(ServerUserNotInSudo): errorMessage = QObject::tr("The user does not have permission to use sudo"); break;
+    case(ServerPacketManagerError): errorMessage = QObject::tr("Server error: Packet manager error"); break;
 
     // Libssh errors
     case(SshRequestDeniedError): errorMessage = QObject::tr("Ssh request was denied"); break;
