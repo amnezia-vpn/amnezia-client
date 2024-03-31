@@ -14,6 +14,7 @@ PageType {
     id: root
 
     property bool showContent: false
+    defaultActiveFocusItem: focusItem
 
     Connections {
         target: ImportController
@@ -96,7 +97,13 @@ PageType {
                 color: "#878B91"
             }
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: showContentButton
+            }
+
             BasicButtonType {
+                id: showContentButton
                 Layout.topMargin: 16
                 Layout.leftMargin: -8
                 implicitHeight: 32
@@ -108,6 +115,7 @@ PageType {
                 textColor: "#FBB26A"
 
                 text: showContent ? qsTr("Collapse content") : qsTr("Show content")
+                KeyNavigation.tab: connectButton
 
                 clickedFunc: function() {
                     showContent = !showContent
@@ -138,15 +146,16 @@ PageType {
     }
 
     ColumnLayout {
-        id: connectButton
-
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.rightMargin: 16
         anchors.leftMargin: 16
 
+        Keys.onTabPressed: lastItemTabClicked(focusItem)
+
         BasicButtonType {
+            id: connectButton
             Layout.fillWidth: true
             Layout.bottomMargin: 32
 

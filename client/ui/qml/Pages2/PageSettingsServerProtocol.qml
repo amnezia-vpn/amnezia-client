@@ -18,6 +18,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     ColumnLayout {
         id: header
 
@@ -37,6 +39,11 @@ PageType {
 
             headerText: ContainersModel.getCurrentlyProcessedContainerName() + qsTr(" settings")
         }
+    }
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: protocols
     }
 
     FlickableType {
@@ -62,9 +69,31 @@ PageType {
                 interactive: false
                 model: ProtocolsModel
 
+                activeFocusOnTab: true
+                Keys.onTabPressed: {
+                    if (currentIndex < this.count - 1) {
+                        this.incrementCurrentIndex()
+                    } else {
+                        this.currentIndex = 0
+                        removeButton.forceActiveFocus()
+                    }
+                }
+
+                onVisibleChanged: {
+                    if (visible) {
+                        this.currentIndex = 0
+                    }
+                }
+
                 delegate: Item {
                     implicitWidth: protocols.width
                     implicitHeight: delegateContent.implicitHeight
+
+                    onFocusChanged: {
+                        if (focus) {
+                            button.rightButton.forceActiveFocus()
+                        }
+                    }
 
                     ColumnLayout {
                         id: delegateContent
@@ -109,6 +138,8 @@ PageType {
 
                 visible: ServersModel.isProcessedServerHasWriteAccess()
 
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
+
                 text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
                 textColor: "#EB5757"
 
@@ -123,6 +154,9 @@ PageType {
                         InstallController.removeCurrentlyProcessedContainer()
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            focusItem.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

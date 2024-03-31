@@ -79,6 +79,16 @@ PageType {
 
                         spacing: 0
 
+                        Item {
+                            id: focusItem
+                            onFocusChanged: {
+                                if (activeFocus) {
+                                    fl.ensureVisible(focusItem)
+                                }
+                            }
+                            KeyNavigation.tab: portTextField.textField
+                        }
+
                         HeaderType {
                             Layout.fillWidth: true
 
@@ -94,6 +104,7 @@ PageType {
                             textFieldText: port
                             textField.maximumLength: 5
                             textField.validator: IntValidator { bottom: 1; top: 65535 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== port) {
@@ -114,6 +125,7 @@ PageType {
                             headerText: "Jc - Junk packet count"
                             textFieldText: junkPacketCount
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 console.log("1")
@@ -139,6 +151,7 @@ PageType {
                             headerText: "Jmin - Junk packet minimum size"
                             textFieldText: junkPacketMinSize
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== junkPacketMinSize) {
@@ -159,6 +172,7 @@ PageType {
                             headerText: "Jmax - Junk packet maximum size"
                             textFieldText: junkPacketMaxSize
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== junkPacketMaxSize) {
@@ -179,6 +193,7 @@ PageType {
                             headerText: "S1 - Init packet junk size"
                             textFieldText: initPacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== initPacketJunkSize) {
@@ -199,6 +214,7 @@ PageType {
                             headerText: "S2 - Response packet junk size"
                             textFieldText: responsePacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== responsePacketJunkSize) {
@@ -219,6 +235,7 @@ PageType {
                             headerText: "H1 - Init packet magic header"
                             textFieldText: initPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== initPacketMagicHeader) {
@@ -239,6 +256,7 @@ PageType {
                             headerText: "H2 - Response packet magic header"
                             textFieldText: responsePacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== responsePacketMagicHeader) {
@@ -259,6 +277,7 @@ PageType {
                             headerText: "H4 - Transport packet magic header"
                             textFieldText: transportPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== transportPacketMagicHeader) {
@@ -275,6 +294,7 @@ PageType {
                             id: underloadPacketMagicHeaderTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+                            parentFlickable: fl
 
                             headerText: "H3 - Underload packet magic header"
                             textFieldText: underloadPacketMagicHeader
@@ -288,13 +308,15 @@ PageType {
 
                             checkEmptyText: true
 
-                            KeyNavigation.tab: saveRestartButton
+                            KeyNavigation.tab: removeButton
                         }
 
                         BasicButtonType {
+                            id: removeButton
                             Layout.topMargin: 24
                             Layout.leftMargin: -8
                             implicitHeight: 32
+                            parentFlickable: fl
 
                             defaultColor: "transparent"
                             hoveredColor: Qt.rgba(1, 1, 1, 0.08)
@@ -302,8 +324,9 @@ PageType {
                             textColor: "#EB5757"
 
                             text: qsTr("Remove AmneziaWG")
+                            KeyNavigation.tab: saveRestartButton
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 var headerText = qsTr("Remove AmneziaWG from server?")
                                 var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
                                 var yesButtonText = qsTr("Continue")
@@ -314,6 +337,9 @@ PageType {
                                     InstallController.removeCurrentlyProcessedContainer()
                                 }
                                 var noButtonFunction = function() {
+                                    if (!GC.isMobile()) {
+                                        removeButton.forceActiveFocus()
+                                    }
                                 }
                                 showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
@@ -321,6 +347,7 @@ PageType {
 
                         BasicButtonType {
                             id: saveRestartButton
+                            parentFlickable: fl
 
                             Layout.fillWidth: true
                             Layout.topMargin: 24
@@ -338,6 +365,8 @@ PageType {
                                      portTextField.errorText === ""
 
                             text: qsTr("Save and Restart Amnezia")
+
+                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()

@@ -16,6 +16,7 @@ PageType {
     id: root
 
     property bool isEasySetup: true
+    defaultActiveFocusItem: focusItem
 
     SortFilterProxyModel {
         id: proxyContainersModel
@@ -57,6 +58,14 @@ PageType {
             anchors.leftMargin: 16
 
             spacing: 16
+
+            Item {
+                id: focusItem
+                implicitWidth: 1
+                implicitHeight: 54
+
+                KeyNavigation.tab: continueButton
+            }
 
             HeaderType {
                 id: header
@@ -146,17 +155,14 @@ PageType {
                 }
             }
 
-            Item {
-                implicitWidth: 1
-                implicitHeight: 54
-            }
-
             BasicButtonType {
                 id: continueButton
 
                 implicitWidth: parent.width
 
                 text: qsTr("Continue")
+                KeyNavigation.tab: setupLaterButton
+                parentFlickable: fl
 
                 clickedFunc: function() {
                     if (root.isEasySetup) {
@@ -184,6 +190,9 @@ PageType {
                 disabledColor: "#878B91"
                 textColor: "#D7D8DB"
                 borderWidth: 1
+
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
+                parentFlickable: fl
 
                 visible: {
                     if (PageController.isTriggeredByConnectButton()) {

@@ -20,6 +20,9 @@ PageType {
 
     property var installedProtocolsCount
 
+    onFocusChanged: settingsContainersListView.forceActiveFocus()
+    signal lastItemTabClickedSignal()
+
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -35,6 +38,7 @@ PageType {
 
             SettingsContainersListView {
                 id: settingsContainersListView
+
                 Connections {
                     target: ServersModel
 

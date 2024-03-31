@@ -11,6 +11,8 @@ import "../Config"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     BackButtonType {
         id: backButton
 
@@ -41,7 +43,13 @@ PageType {
                 headerText: qsTr("Connection")
             }
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: amneziaDnsSwitch
+            }
+
             SwitcherType {
+                id: amneziaDnsSwitch
                 Layout.fillWidth: true
                 Layout.margins: 16
 
@@ -54,11 +62,14 @@ PageType {
                         SettingsController.toggleAmneziaDns(checked)
                     }
                 }
+
+                KeyNavigation.tab: dnsServersButton.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: dnsServersButton
                 Layout.fillWidth: true
 
                 text: qsTr("DNS servers")
@@ -68,11 +79,14 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsDns)
                 }
+
+                KeyNavigation.tab: splitTunnelingButton.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: splitTunnelingButton
                 visible: true
 
                 Layout.fillWidth: true
@@ -84,6 +98,10 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
                 }
+
+            Keys.onTabPressed: splitTunnelingButton2.visible ?
+                                   splitTunnelingButton2.forceActiveFocus() :
+                                   lastItemTabClicked()
             }
 
             DividerType {
@@ -91,6 +109,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: splitTunnelingButton2
                 visible: false
 
                 Layout.fillWidth: true
@@ -101,6 +120,8 @@ PageType {
 
                 clickedFunction: function() {
                 }
+
+                Keys.onTabPressed: lastItemTabClicked()
             }
 
             DividerType {

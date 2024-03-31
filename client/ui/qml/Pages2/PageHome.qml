@@ -18,6 +18,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     Connections {
         target: PageController
 
@@ -33,17 +35,24 @@ PageType {
         anchors.fill: parent
         anchors.bottomMargin: drawer.collapsedHeight
 
+        Item {
+            id: focusItem
+            KeyNavigation.tab: splitTunnelingButton
+        }
+
         ConnectButton {
             id: connectButton
             anchors.centerIn: parent
         }
 
         BasicButtonType {
+            id: splitTunnelingButton
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 34
             leftPadding: 16
             rightPadding: 16
+
 
             implicitHeight: 36
 
@@ -63,12 +72,23 @@ PageType {
             imageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
             rightImageSource: "qrc:/images/controls/chevron-down.svg"
 
+            Keys.onEnterPressed: splitTunnelingButton.clicked()
+            Keys.onReturnPressed: splitTunnelingButton.clicked()
+
+            KeyNavigation.tab: drawer
+
             onClicked: {
                 homeSplitTunnelingDrawer.open()
             }
 
             HomeSplitTunnelingDrawer {
                 id: homeSplitTunnelingDrawer
+
+                onClosed: {
+                    if (!GC.isMobile()) {
+                        focusItem.forceActiveFocus()
+                    }
+                }
 
                 parent: root
             }
@@ -80,7 +100,23 @@ PageType {
         id: drawer
         anchors.fill: parent
 
+        onClosed: {
+            if (!GC.isMobile()) {
+                focusItem.forceActiveFocus()
+            }
+        }
+
         collapsedContent:  ColumnLayout {
+            Connections {
+                target: drawer
+                enabled: !GC.isMobile()
+                function onActiveFocusChanged() {
+                    if (drawer.activeFocus && !drawer.isOpened) {
+                        collapsedButtonChevron.forceActiveFocus()
+                    }
+                }
+            }
+
             DividerType {
                 Layout.topMargin: 10
                 Layout.fillWidth: false
@@ -125,6 +161,8 @@ PageType {
                     text: ServersModel.defaultServerName
                     horizontalAlignment: Qt.AlignHCenter
 
+                    KeyNavigation.tab: tabBar
+
                     Behavior on opacity {
                         PropertyAnimation { duration: 200 }
                     }
@@ -146,6 +184,11 @@ PageType {
                     topPadding: 4
                     bottomPadding: 3
 
+                    Keys.onEnterPressed: collapsedButtonChevron.clicked()
+                    Keys.onReturnPressed: collapsedButtonChevron.clicked()
+                    Keys.onTabPressed: lastItemTabClicked(focusItem)
+
+
                     onClicked: {
                         if (drawer.isCollapsed) {
                             drawer.open()
@@ -161,6 +204,7 @@ PageType {
                 text: ServersModel.defaultServerDescriptionCollapsed
             }
         }
+
         expandedContent: Item {
             id: serverMenuContainer
 
@@ -170,13 +214,20 @@ PageType {
                 drawer.expandedHeight = serverMenuContainer.implicitHeight
             }
 
+            Connections {
+                target: drawer
+                enabled: !GC.isMobile()
+                function onOpened() {
+                    focusItem1.forceActiveFocus()
+                }
+            }
+
             ColumnLayout {
                 id: serversMenuHeader
 
                 anchors.top: parent.top
                 anchors.right: parent.right
                 anchors.left: parent.left
-
 
                 Header1TextType {
                     Layout.fillWidth: true
@@ -206,6 +257,11 @@ PageType {
                     visible: !ServersModel.isDefaultServerFromApi
                     onVisibleChanged: expandedServersMenuDescription.Layout
 
+                    Item {
+                        id: focusItem1
+                        KeyNavigation.tab: containersDropDown
+                    }
+
                     DropDownType {
                         id: containersDropDown
 
@@ -228,9 +284,16 @@ PageType {
                         }
 
                         drawerParent: root
+                        KeyNavigation.tab: serversMenuContent
 
                         listView: HomeContainersListView {
+                            id: containersListView
                             rootWidth: root.width
+                            onVisibleChanged: {
+                                if (containersDropDown.visible && !GC.isMobile()) {
+                                    focusItem1.forceActiveFocus()
+                                }
+                            }
 
                             Connections {
                                 target: ServersModel
@@ -272,7 +335,7 @@ PageType {
                 }
             }
 
-            Flickable {
+            FlickableType {
                 id: serversContainer
 
                 anchors.top: serversMenuHeader.bottom
@@ -311,17 +374,32 @@ PageType {
                         height: serversMenuContent.contentItem.height
 
                         model: ServersModel
-                        currentIndex: ServersModel.defaultIndex
 
-                        Connections {
-                            target: ServersModel
-                            function onDefaultServerIndexChanged(serverIndex) {
-                                serversMenuContent.currentIndex = serverIndex
-                            }
-                        }
+                        KeyNavigation.tab: focusItem1
 
                         clip: true
                         interactive: false
+
+                        activeFocusOnTab: true
+                        focus: true
+                        onActiveFocusChanged: {
+                            if (activeFocus) {
+                                serversMenuContent.currentIndex = 0
+                                serversMenuContent.currentItem.forceActiveFocus()
+                            }
+                        }
+
+                        onCurrentIndexChanged: {
+                            if (currentItem) {
+                                serversContainer.ensureVisible(currentItem)
+                            }
+                        }
+
+                        onVisibleChanged: {
+                            if (serversMenuContent.visible && !GC.isMobile()) {
+                                currentIndex = 0
+                            }
+                        }
 
                         delegate: Item {
                             id: menuContentDelegate
@@ -330,6 +408,12 @@ PageType {
 
                             implicitWidth: serversMenuContent.width
                             implicitHeight: serverRadioButtonContent.implicitHeight
+
+                            onActiveFocusChanged: {
+                                if (activeFocus) {
+                                    serverRadioButton.forceActiveFocus()
+                                }
+                            }
 
                             ColumnLayout {
                                 id: serverRadioButtonContent
@@ -349,7 +433,7 @@ PageType {
                                         text: name
                                         descriptionText: serverDescription
 
-                                        checked: index === serversMenuContent.currentIndex
+                                        checked: index === ServersModel.defaultIndex
                                         checkable: !ConnectionController.isConnected
 
                                         ButtonGroup.group: serversRadioButtonGroup
@@ -360,8 +444,6 @@ PageType {
                                                 return
                                             }
 
-                                            serversMenuContent.currentIndex = index
-
                                             ServersModel.defaultIndex = index
                                         }
 
@@ -370,21 +452,38 @@ PageType {
                                             cursorShape: Qt.PointingHandCursor
                                             enabled: false
                                         }
+
+                                        Keys.onTabPressed: serverInfoButton.forceActiveFocus()
+                                        Keys.onEnterPressed: serverRadioButton.clicked()
+                                        Keys.onReturnPressed: serverRadioButton.clicked()
                                     }
 
                                     ImageButtonType {
+                                        id: serverInfoButton
                                         image: "qrc:/images/controls/settings.svg"
                                         imageColor: "#D7D8DB"
 
                                         implicitWidth: 56
                                         implicitHeight: 56
-
                                         z: 1
+
+                                        Keys.onTabPressed: {
+                                            if (index < serversMenuContent.count - 1) {
+                                                serversMenuContent.incrementCurrentIndex()
+                                                serversMenuContent.currentItem.forceActiveFocus()
+                                            } else {
+                                                serversContainer.ensureVisible(serversMenuContent.itemAtIndex(0))
+                                                serverInfoButton.focus = false
+                                                focusItem1.forceActiveFocus()
+                                            }
+                                        }
+                                        Keys.onEnterPressed: serverInfoButton.clicked()
+                                        Keys.onReturnPressed: serverInfoButton.clicked()
 
                                         onClicked: function() {
                                             ServersModel.processedIndex = index
-                                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
                                             drawer.close()
+                                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
                                         }
                                     }
                                 }

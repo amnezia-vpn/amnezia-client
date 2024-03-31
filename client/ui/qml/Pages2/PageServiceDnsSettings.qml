@@ -15,6 +15,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     ColumnLayout {
         id: backButton
 
@@ -41,6 +43,11 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: removeButton
+            }
+
             HeaderType {
                 id: header
 
@@ -62,6 +69,8 @@ PageType {
                 text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
                 textColor: "#EB5757"
 
+                Keys.onTabPressed: root.lastItemTabClicked()
+
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
                     var yesButtonText = qsTr("Continue")
@@ -72,6 +81,9 @@ PageType {
                         InstallController.removeCurrentlyProcessedContainer()
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            removeButton.rightButton.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

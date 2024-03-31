@@ -4,6 +4,7 @@ import QtQuick.Layouts
 
 import "../Controls2"
 import "../Controls2/TextTypes"
+import "../Config"
 
 DrawerType2 {
     id: root
@@ -15,6 +16,14 @@ DrawerType2 {
 
         Component.onCompleted: {
             root.expandedHeight = container.implicitHeight
+        }
+
+        Connections {
+            target: root
+            enabled: !GC.isMobile()
+            function onOpened() {
+                listView.forceActiveFocus()
+            }
         }
 
         ColumnLayout {
@@ -69,6 +78,16 @@ DrawerType2 {
 
                     ButtonGroup {
                         id: buttonGroup
+                    }
+
+                    activeFocusOnTab: true
+                    focus: true
+                    Keys.onTabPressed: {
+                        if (currentIndex < this.count - 1) {
+                            this.incrementCurrentIndex()
+                        } else {
+                            this.currentIndex = 0
+                        }
                     }
 
                     delegate: Item {
@@ -137,6 +156,9 @@ DrawerType2 {
                                 }
                             }
                         }
+
+                        Keys.onEnterPressed: radioButton.clicked()
+                        Keys.onReturnPressed: radioButton.clicked()
                     }
                 }
             }

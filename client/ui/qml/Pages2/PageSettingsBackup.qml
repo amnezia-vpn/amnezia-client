@@ -16,6 +16,8 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    defaultActiveFocusItem: firstActiveFocusItem
+
     Connections {
         target: SettingsController
 
@@ -81,6 +83,11 @@ PageType {
                 color: "#878B91"
             }
 
+            Item {
+                id: firstActiveFocusItem
+                KeyNavigation.tab: makeBackupButton
+            }
+
             BasicButtonType {
                 id: makeBackupButton
                 Layout.fillWidth: true
@@ -106,9 +113,12 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Backup file saved"))
                     }
                 }
+
+                KeyNavigation.tab: restoreBackupButton
             }
 
             BasicButtonType {
+                id: restoreBackupButton
                 Layout.fillWidth: true
                 Layout.topMargin: -8
 
@@ -128,6 +138,8 @@ PageType {
                         restoreBackup(filePath)
                     }
                 }
+
+                Keys.onTabPressed: lastItemTabClicked()
             }
         }
     }

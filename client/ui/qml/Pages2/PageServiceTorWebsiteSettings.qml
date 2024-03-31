@@ -16,6 +16,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     Connections {
         target: InstallController
 
@@ -52,6 +54,11 @@ PageType {
 
             spacing: 0
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: websiteName.rightButton
+            }
+
             HeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -61,6 +68,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: websiteName
                 Layout.fillWidth: true
                 Layout.topMargin: 32
 
@@ -77,9 +85,14 @@ PageType {
                 rightImageSource: "qrc:/images/controls/copy.svg"
                 rightImageColor: "#D7D8DB"
 
+                KeyNavigation.tab: removeButton
+
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
                     PageController.showNotificationMessage(qsTr("Copied"))
+                    if (!GC.isMobile()) {
+                        this.rightButton.forceActiveFocus()
+                    }
                 }
             }
 
@@ -113,6 +126,7 @@ PageType {
             }
 
             BasicButtonType {
+                id: removeButton
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
                 Layout.leftMargin: 8
@@ -125,6 +139,8 @@ PageType {
 
                 text: qsTr("Remove website")
 
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
+
                 clickedFunc: function() {
                     var headerText = qsTr("The site with all data will be removed from the tor network.")
                     var yesButtonText = qsTr("Continue")
@@ -135,6 +151,9 @@ PageType {
                         InstallController.removeCurrentlyProcessedContainer()
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            removeButton.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

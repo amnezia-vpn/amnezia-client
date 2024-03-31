@@ -15,6 +15,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: listview
+
     Connections {
         target: InstallController
 
@@ -62,9 +64,17 @@ PageType {
 
                 model: SftpConfigModel
 
+                onFocusChanged: {
+                    if (focus) {
+                        listview.currentItem.focusItem.forceActiveFocus()
+                    }
+                }
+
                 delegate: Item {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
+
+                    property alias focusItem: focusItem
 
                     ColumnLayout {
                         id: col
@@ -75,6 +85,11 @@ PageType {
 
                         spacing: 0
 
+                        Item {
+                            id: focusItem
+                            KeyNavigation.tab: hostLabel.rightButton
+                        }
+
                         HeaderType {
                             Layout.fillWidth: true
                             Layout.leftMargin: 16
@@ -84,8 +99,12 @@ PageType {
                         }
 
                         LabelWithButtonType {
+                            id: hostLabel
                             Layout.fillWidth: true
                             Layout.topMargin: 32
+
+                            parentFlickable: fl
+                            KeyNavigation.tab: portLabel.rightButton
 
                             text: qsTr("Host")
                             descriptionText: ServersModel.getProcessedServerData("hostName")
@@ -98,10 +117,14 @@ PageType {
                             clickedFunction: function() {
                                 GC.copyToClipBoard(descriptionText)
                                 PageController.showNotificationMessage(qsTr("Copied"))
+                                if (!GC.isMobile()) {
+                                    this.rightButton.forceActiveFocus()
+                                }
                             }
                         }
 
                         LabelWithButtonType {
+                            id: portLabel
                             Layout.fillWidth: true
 
                             text: qsTr("Port")
@@ -109,16 +132,23 @@ PageType {
 
                             descriptionOnTop: true
 
+                            parentFlickable: fl
+                            KeyNavigation.tab: usernameLabel.rightButton
+
                             rightImageSource: "qrc:/images/controls/copy.svg"
                             rightImageColor: "#D7D8DB"
 
                             clickedFunction: function() {
                                 GC.copyToClipBoard(descriptionText)
                                 PageController.showNotificationMessage(qsTr("Copied"))
+                                if (!GC.isMobile()) {
+                                    this.rightButton.forceActiveFocus()
+                                }
                             }
                         }
 
                         LabelWithButtonType {
+                            id: usernameLabel
                             Layout.fillWidth: true
 
                             text: qsTr("Login")
@@ -126,16 +156,23 @@ PageType {
 
                             descriptionOnTop: true
 
+                            parentFlickable: fl
+                            KeyNavigation.tab: passwordLabel.rightButton
+
                             rightImageSource: "qrc:/images/controls/copy.svg"
                             rightImageColor: "#D7D8DB"
 
                             clickedFunction: function() {
                                 GC.copyToClipBoard(descriptionText)
                                 PageController.showNotificationMessage(qsTr("Copied"))
+                                if (!GC.isMobile()) {
+                                    this.rightButton.forceActiveFocus()
+                                }
                             }
                         }
 
                         LabelWithButtonType {
+                            id: passwordLabel
                             Layout.fillWidth: true
 
                             text: qsTr("Password")
@@ -143,16 +180,29 @@ PageType {
 
                             descriptionOnTop: true
 
+                            parentFlickable: fl
+                            Keys.onTabPressed: {
+                                if (mountButton.visible) {
+                                    mountButton.forceActiveFocus()
+                                } else {
+                                    detailedInstructionsButton.forceActiveFocus()
+                                }
+                            }
+
                             rightImageSource: "qrc:/images/controls/copy.svg"
                             rightImageColor: "#D7D8DB"
 
                             clickedFunction: function() {
                                 GC.copyToClipBoard(descriptionText)
                                 PageController.showNotificationMessage(qsTr("Copied"))
+                                if (!GC.isMobile()) {
+                                    this.rightButton.forceActiveFocus()
+                                }
                             }
                         }
 
                         BasicButtonType {
+                            id: mountButton
                             visible: !GC.isMobile()
 
                             Layout.fillWidth: true
@@ -168,13 +218,16 @@ PageType {
                             textColor: "#D7D8DB"
                             borderWidth: 1
 
+                            parentFlickable: fl
+                            KeyNavigation.tab: detailedInstructionsButton
+
                             text: qsTr("Mount folder on device")
 
                             clickedFunc: function() {
                                 PageController.showBusyIndicator(true)
                                 InstallController.mountSftpDrive(port, password, username)
                                 PageController.showBusyIndicator(false)
-                            }
+                                }
                         }
 
                         ParagraphTextType {
@@ -216,6 +269,7 @@ PageType {
                         }
 
                         BasicButtonType {
+                            id: detailedInstructionsButton
                             Layout.topMargin: 16
                             Layout.bottomMargin: 16
                             Layout.leftMargin: 8
@@ -229,12 +283,16 @@ PageType {
 
                             text: qsTr("Detailed instructions")
 
+                            parentFlickable: fl
+                            KeyNavigation.tab: removeButton
+
                             clickedFunc: function() {
 //                                Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
                             }
                         }
 
                         BasicButtonType {
+                            id: removeButton
                             Layout.topMargin: 24
                             Layout.bottomMargin: 16
                             Layout.leftMargin: 8
@@ -244,6 +302,9 @@ PageType {
                             hoveredColor: Qt.rgba(1, 1, 1, 0.08)
                             pressedColor: Qt.rgba(1, 1, 1, 0.12)
                             textColor: "#EB5757"
+
+                            parentFlickable: fl
+                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             text: qsTr("Remove SFTP and all data stored there")
 
@@ -257,6 +318,9 @@ PageType {
                                     InstallController.removeCurrentlyProcessedContainer()
                                 }
                                 var noButtonFunction = function() {
+                                    if (!GC.isMobile()) {
+                                        removeButton.forceActiveFocus()
+                                    }
                                 }
 
                                 showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

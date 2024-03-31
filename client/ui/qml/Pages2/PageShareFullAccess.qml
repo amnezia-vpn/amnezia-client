@@ -12,9 +12,12 @@ import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Components"
+import "../Config"
 
 PageType {
     id: root
+
+    defaultActiveFocusItem: focusItem
 
     BackButtonType {
         id: backButton
@@ -59,6 +62,11 @@ PageType {
                 color: "#878B91"
             }
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: serverSelector
+            }
+
             DropDownType {
                 id: serverSelector
 
@@ -73,6 +81,8 @@ PageType {
 
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
+
+                KeyNavigation.tab: shareButton
 
                 listView: ListViewWithRadioButtonType {
                     id: serverSelectorListView
@@ -100,7 +110,7 @@ PageType {
 
                         shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
                         shareConnectionDrawer.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
-                        serverSelector.close()
+                        // serverSelector.close()
                     }
 
                     Component.onCompleted: {
@@ -117,11 +127,14 @@ PageType {
             }
 
             BasicButtonType {
+                id: shareButton
                 Layout.fillWidth: true
                 Layout.topMargin: 40
 
                 text: qsTr("Share")
                 imageSource: "qrc:/images/controls/share-2.svg"
+
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunc: function() {
                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
@@ -149,5 +162,10 @@ PageType {
         id: shareConnectionDrawer
 
         anchors.fill: parent
+        onClosed: {
+            if (!GC.isMobile()) {
+                focusItem.forceActiveFocus()
+            }
+        }
     }
 }

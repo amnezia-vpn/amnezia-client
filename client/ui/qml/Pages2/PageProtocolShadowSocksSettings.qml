@@ -74,6 +74,11 @@ PageType {
 
                         spacing: 0
 
+                        Item {
+                            id: focusItem
+                            KeyNavigation.tab: portTextField.textField
+                        }
+
                         HeaderType {
                             Layout.fillWidth: true
 
@@ -97,7 +102,7 @@ PageType {
                                 }
                             }
 
-                            KeyNavigation.tab: saveRestartButton
+                            KeyNavigation.tab: cipherDropDown
                         }
 
                         DropDownType {
@@ -109,6 +114,7 @@ PageType {
                             headerText: qsTr("Cipher")
 
                             drawerParent: root
+                            KeyNavigation.tab: saveRestartButton
 
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView
@@ -149,6 +155,7 @@ PageType {
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save and Restart Amnezia")
+                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()

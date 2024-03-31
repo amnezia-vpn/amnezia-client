@@ -18,6 +18,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     Connections {
         target: PageController
 
@@ -37,6 +39,11 @@ PageType {
         ]
     }
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: header
+    }
+
     ColumnLayout {
         anchors.fill: parent
 
@@ -46,7 +53,15 @@ PageType {
             id: header
             model: proxyServersModel
 
+            activeFocusOnTab: true
+            onFocusChanged: {
+                header.itemAt(0).focusItem.forceActiveFocus()
+            }
+
             delegate: ColumnLayout {
+
+                property alias focusItem: headerContent.actionButton
+
                 id: content
 
                 Layout.topMargin: 20
@@ -55,6 +70,7 @@ PageType {
                 }
 
                 HeaderType {
+                    id: headerContent
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
@@ -70,6 +86,8 @@ PageType {
                         }
                     }
 
+                    KeyNavigation.tab: tabBar
+
                     actionButtonFunction: function() {
                         serverNameEditDrawer.open()
                     }
@@ -82,6 +100,12 @@ PageType {
 
                     anchors.fill: parent
                     expandedHeight: root.height * 0.35
+
+                    onClosed: {
+                        if (!GC.isMobile()) {
+                            headerContent.actionButton.forceActiveFocus()
+                        }
+                    }
 
                     expandedContent: ColumnLayout {
                         anchors.top: parent.top
@@ -97,6 +121,11 @@ PageType {
                             function onOpened() {
                                 serverName.textField.forceActiveFocus()
                             }
+                        }
+
+                        Item {
+                            id: focusItem1
+                            KeyNavigation.tab: serverName.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -117,6 +146,7 @@ PageType {
                             Layout.fillWidth: true
 
                             text: qsTr("Save")
+                            KeyNavigation.tab: focusItem1
 
                             clickedFunc: function() {
                                 if (serverName.textFieldText === "") {
@@ -129,12 +159,6 @@ PageType {
                                 serverNameEditDrawer.close()
                             }
                         }
-
-                        Component.onCompleted: {
-                            if (header.itemAt(0) && !GC.isMobile()) {
-                                defaultActiveFocusItem = serverName.textField
-                            }
-                        }
                     }
                 }
             }
@@ -144,30 +168,56 @@ PageType {
             id: tabBar
 
             Layout.fillWidth: true
-
             background: Rectangle {
                 color: "transparent"
             }
 
+            activeFocusOnTab: true
+            onFocusChanged: {
+                if (activeFocus) {
+                    protocolsTab.forceActiveFocus()
+                }
+            }
+
             TabButtonType {
+                id: protocolsTab
                 visible: protocolsPage.installedProtocolsCount
                 width: protocolsPage.installedProtocolsCount ? undefined : 0
                 isSelected: tabBar.currentIndex === 0
                 text: qsTr("Protocols")
+
+                KeyNavigation.tab: servicesTab
+                Keys.onReturnPressed: tabBar.currentIndex = 0
+                Keys.onEnterPressed: tabBar.currentIndex = 0
             }
             TabButtonType {
+                id: servicesTab
                 visible: servicesPage.installedServicesCount
                 width: servicesPage.installedServicesCount ? undefined : 0
                 isSelected: tabBar.currentIndex === 1
                 text: qsTr("Services")
+
+                KeyNavigation.tab: dataTab
+                Keys.onReturnPressed: tabBar.currentIndex = 1
+                Keys.onEnterPressed: tabBar.currentIndex = 1
             }
             TabButtonType {
+                id: dataTab
                 isSelected: tabBar.currentIndex === 2
                 text: qsTr("Data")
+
+                Keys.onReturnPressed: tabBar.currentIndex = 2
+                Keys.onEnterPressed: tabBar.currentIndex = 2
+                KeyNavigation.tab: stackView.currentIndex === 0 ?
+                                       protocolsPage :
+                                       stackView.currentIndex === 1 ?
+                                           servicesPage :
+                                           dataPage
             }
         }
 
         StackLayout {
+            id: stackView
             Layout.preferredWidth: root.width
             Layout.preferredHeight: root.height - tabBar.implicitHeight - header.implicitHeight
 
@@ -176,14 +226,22 @@ PageType {
             PageSettingsServerProtocols {
                 id: protocolsPage
                 stackView: root.stackView
+
+                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
             PageSettingsServerServices {
                 id: servicesPage
                 stackView: root.stackView
+
+                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
             PageSettingsServerData {
+                id: dataPage
                 stackView: root.stackView
+
+                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
         }
+
     }
 }

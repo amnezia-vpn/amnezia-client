@@ -26,6 +26,23 @@ ListView {
     clip: true
     interactive: false
 
+    property FlickableType parentFlickable
+    activeFocusOnTab: true
+    focus: true
+    Keys.onTabPressed: {
+        if (currentIndex < this.count - 1) {
+            this.incrementCurrentIndex()
+        } else {
+            this.currentIndex = 0
+        }
+    }
+
+    onCurrentIndexChanged: {
+        if (parentFlickable) {
+            parentFlickable.ensureVisible(this.currentItem)
+        }
+    }
+
     ButtonGroup {
         id: buttonGroup
     }
@@ -116,6 +133,14 @@ ListView {
             if (root.currentIndex === index) {
                 root.selectedText = name
             }
+        }
+
+        Keys.onReturnPressed: {
+            radioButton.clicked()
+        }
+
+        Keys.onEnterPressed: {
+            radioButton.clicked()
         }
     }
 }

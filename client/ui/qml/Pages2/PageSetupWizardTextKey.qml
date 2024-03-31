@@ -75,10 +75,16 @@ PageType {
         anchors.bottomMargin: 32
 
         text: qsTr("Continue")
+        Keys.onTabPressed: lastItemTabClicked(focusItem)
 
         clickedFunc: function() {
             ImportController.extractConfigFromCode(textKey.textFieldText)
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
+    }
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: textKey.textField
     }
 }

@@ -103,6 +103,8 @@ PageType {
 
                 text: qsTr("Continue")
 
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
+
                 clickedFunc: function() {
                     forceActiveFocus()
                     if (!isCredentialsFilled()) {
@@ -121,6 +123,11 @@ PageType {
 
                     PageController.goToPage(PageEnum.PageSetupWizardEasy)
                 }
+            }
+
+            Item {
+                id: focusItem
+                KeyNavigation.tab: hostname.textField
             }
 
             LabelTextType {

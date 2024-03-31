@@ -17,11 +17,36 @@ ListView {
     property var rootWidth
     property var selectedText
 
+    property bool a: true
+
     width: rootWidth
     height: menuContent.contentItem.height
 
     clip: true
     interactive: false
+
+    property FlickableType parentFlickable
+    activeFocusOnTab: true
+    focus: true
+    Keys.onTabPressed: {
+        if (currentIndex < menuContent.count - 1) {
+            menuContent.incrementCurrentIndex()
+        } else {
+            menuContent.currentIndex = 0
+        }
+    }
+
+    onVisibleChanged: {
+        if (visible) {
+            menuContent.currentIndex = 0
+        }
+    }
+
+    onCurrentIndexChanged: {
+        if (parentFlickable) {
+            parentFlickable.ensureVisible(menuContent.currentItem)
+        }
+    }
 
     ButtonGroup {
         id: containersRadioButtonGroup
@@ -30,6 +55,12 @@ ListView {
     delegate: Item {
         implicitWidth: rootWidth
         implicitHeight: content.implicitHeight
+
+        onActiveFocusChanged: {
+            if (activeFocus) {
+                containerRadioButton.forceActiveFocus()
+            }
+        }
 
         ColumnLayout {
             id: content
@@ -80,6 +111,19 @@ ListView {
                     anchors.fill: containerRadioButton
                     cursorShape: Qt.PointingHandCursor
                     enabled: false
+                }
+
+                Keys.onEnterPressed: {
+                    if (checkable) {
+                        checked = true
+                    }
+                    containerRadioButton.clicked()
+                }
+                Keys.onReturnPressed: {
+                    if (checkable) {
+                        checked = true
+                    }
+                    containerRadioButton.clicked()
                 }
             }
 

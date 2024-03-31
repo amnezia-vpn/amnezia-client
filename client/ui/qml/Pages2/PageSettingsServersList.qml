@@ -17,6 +17,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     ColumnLayout {
         id: header
 
@@ -38,7 +40,13 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: servers
+    }
+
     FlickableType {
+        id: fl
         anchors.top: header.bottom
         anchors.topMargin: 16
         contentHeight: col.implicitHeight
@@ -59,9 +67,35 @@ PageType {
                 clip: true
                 interactive: false
 
+                activeFocusOnTab: true
+                focus: true
+                Keys.onTabPressed: {
+                    if (currentIndex < servers.count - 1) {
+                        servers.incrementCurrentIndex()
+                    } else {
+                        servers.currentIndex = 0
+                        focusItem.forceActiveFocus()
+                        root.lastItemTabClicked()
+                    }
+
+                    fl.ensureVisible(this.currentItem)
+                }
+
+                onVisibleChanged: {
+                    if (visible) {
+                        currentIndex = 0
+                    }
+                }
+
                 delegate: Item {
                     implicitWidth: servers.width
                     implicitHeight: delegateContent.implicitHeight
+
+                    onFocusChanged: {
+                        if (focus) {
+                            server.rightButton.forceActiveFocus()
+                        }
+                    }
 
                     ColumnLayout {
                         id: delegateContent
@@ -75,6 +109,7 @@ PageType {
                             Layout.fillWidth: true
 
                             text: name
+                            parentFlickable: fl
                             descriptionText: {
                                 var servicesNameString = ""
                                 var servicesName = ServersModel.getAllInstalledServicesName(index)

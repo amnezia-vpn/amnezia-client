@@ -18,6 +18,13 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: listView
+    }
+
     ColumnLayout {
         id: header
 
@@ -55,15 +62,28 @@ PageType {
             anchors.topMargin: 32
 
             ListView {
+                id: listView
                 width: parent.width
                 height: contentItem.height
                 clip: true
                 interactive: false
                 model: ProtocolsModel
 
+                activeFocusOnTab: true
+                focus: true
+
+                onActiveFocusChanged: {
+                    if (focus) {
+                        listView.currentIndex = 0
+                        listView.currentItem.focusItem.forceActiveFocus()
+                    }
+                }
+
                 delegate: Item {
                     implicitWidth: parent.width
                     implicitHeight: delegateContent.implicitHeight
+
+                    property alias focusItem: button
 
                     ColumnLayout {
                         id: delegateContent
@@ -81,6 +101,8 @@ PageType {
                                 configContentDrawer.open()
                             }
 
+                            KeyNavigation.tab: removeButton
+
                             MouseArea {
                                 anchors.fill: button
                                 cursorShape: Qt.PointingHandCursor
@@ -94,6 +116,12 @@ PageType {
                             id: configContentDrawer
 
                             expandedHeight: root.height * 0.9
+
+                            onClosed: {
+                                if (!GC.isMobile()) {
+                                    defaultActiveFocusItem.forceActiveFocus()
+                                }
+                            }
 
                             parent: root
                             anchors.fill: parent
@@ -180,6 +208,7 @@ PageType {
                 text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
                 textColor: "#EB5757"
 
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
                     var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
@@ -191,6 +220,7 @@ PageType {
                         InstallController.removeCurrentlyProcessedContainer()
                     }
                     var noButtonFunction = function() {
+                        focusItem.forceActiveFocus()
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

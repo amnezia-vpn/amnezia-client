@@ -13,6 +13,7 @@ Item {
 
     property alias errorText: errorField.text
     property bool checkEmptyText: false
+    property bool rightButtonClickedOnEnter: false
 
     property string buttonText
     property string buttonImageSource
@@ -35,6 +36,18 @@ Item {
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
+
+    property FlickableType parentFlickable
+    Connections {
+        target: textField
+        function onFocusChanged() {
+            if (textField.activeFocus) {
+                if (root.parentFlickable) {
+                    root.parentFlickable.ensureVisible(root)
+                }
+            }
+        }
+    }
 
     ColumnLayout {
         id: content
@@ -192,10 +205,22 @@ Item {
     }
 
     Keys.onEnterPressed: {
-         KeyNavigation.tab.forceActiveFocus();
+        if (root.rightButtonClickedOnEnter && root.clickedFunc && typeof root.clickedFunc === "function") {
+            clickedFunc()
+        }
+
+        if (KeyNavigation.tab) {
+            KeyNavigation.tab.forceActiveFocus();
+        }
     }
 
     Keys.onReturnPressed: {
-         KeyNavigation.tab.forceActiveFocus();
+        if (root.rightButtonClickedOnEnter &&root.clickedFunc && typeof root.clickedFunc === "function") {
+            clickedFunc()
+        }
+
+        if (KeyNavigation.tab) {
+            KeyNavigation.tab.forceActiveFocus();
+        }
     }
 }

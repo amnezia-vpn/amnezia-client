@@ -69,6 +69,11 @@ PageType {
                             Layout.leftMargin: -16
                         }
 
+                        Item {
+                            id: focusItem
+                            KeyNavigation.tab: showDetailsButton
+                        }
+
                         HeaderType {
                             id: header
 
@@ -93,6 +98,7 @@ PageType {
                             textColor: "#FBB26A"
 
                             text: qsTr("More detailed")
+                            KeyNavigation.tab: transportProtoSelector
 
                             clickedFunc: function() {
                                 showDetailsDrawer.open()
@@ -102,10 +108,23 @@ PageType {
                         DrawerType2 {
                             id: showDetailsDrawer
                             parent: root
+                            onClosed: {
+                                if (!GC.isMobile()) {
+                                    defaultActiveFocusItem.forceActiveFocus()
+                                }
+                            }
 
                             anchors.fill: parent
                             expandedHeight: parent.height * 0.9
                             expandedContent: Item {
+                                Connections {
+                                    target: showDetailsDrawer
+                                    enabled: !GC.isMobile()
+                                    function onOpened() {
+                                        focusItem2.forceActiveFocus()
+                                    }
+                                }
+
                                 implicitHeight: showDetailsDrawer.expandedHeight
 
                                 BackButtonType {
@@ -122,6 +141,7 @@ PageType {
                                 }
 
                                 FlickableType {
+                                    id: fl
                                     anchors.top: showDetailsBackButton.bottom
                                     anchors.left: parent.left
                                     anchors.right: parent.right
@@ -141,6 +161,16 @@ PageType {
                                         anchors.rightMargin: 16
                                         anchors.leftMargin: 16
 
+                                        Item {
+                                            id: focusItem2
+                                            KeyNavigation.tab: showDetailsCloseButton
+                                            onFocusChanged: {
+                                                if (focusItem2.activeFocus) {
+                                                    fl.contentY = 0
+                                                }
+                                            }
+                                        }
+
                                         Header2Type {
                                             id: showDetailsDrawerHeader
                                             Layout.fillWidth: true
@@ -158,17 +188,19 @@ PageType {
                                             textFormat: Text.MarkdownText
                                         }
 
-
                                         Rectangle {
                                             Layout.fillHeight: true
                                             color: "transparent"
                                         }
 
                                         BasicButtonType {
+                                            id: showDetailsCloseButton
                                             Layout.fillWidth: true
                                             Layout.bottomMargin: 32
+                                            parentFlickable: fl
 
                                             text: qsTr("Close")
+                                            Keys.onTabPressed: lastItemTabClicked(focusItem2)
 
 											clickedFunc: function()  {
                                                 showDetailsDrawer.close()
@@ -192,6 +224,8 @@ PageType {
 
                             Layout.fillWidth: true
                             rootWidth: root.width
+
+                            KeyNavigation.tab: (port.visible && port.enabled) ? port.textField : installButton
                         }
 
                         TextFieldWithHeaderType {
@@ -220,6 +254,8 @@ PageType {
 
                             text: qsTr("Install")
 
+                            Keys.onTabPressed: lastItemTabClicked(focusItem)
+
                             clickedFunc: function() {
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.install(dockerContainer, port.textFieldText, transportProtoSelector.currentIndex)
@@ -241,7 +277,10 @@ PageType {
                             transportProtoSelector.visible = protocolSelectorVisible
                             transportProtoHeader.visible = protocolSelectorVisible
 
-                            defaultActiveFocusItem = port.textField
+                            if (port.visible && port.enabled)
+                                defaultActiveFocusItem = port.textField
+                            else
+                                defaultActiveFocusItem = focusItem
                         }
                     }
                 }
