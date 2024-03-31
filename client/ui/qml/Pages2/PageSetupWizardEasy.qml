@@ -136,8 +136,7 @@ PageType {
             CardType {
                 implicitWidth: parent.width
 
-                headerText: qsTr("Set up a VPN yourself")
-                bodyText: qsTr("I want to choose a VPN protocol")
+                headerText: qsTr("Choose a VPN protocol")
 
                 ButtonGroup.group: buttonGroup
 
@@ -187,15 +186,14 @@ PageType {
 
                 visible: {
                     if (PageController.isTriggeredByConnectButton()) {
-                        PageController.setTriggeredBtConnectButton(false)
-
-                        return ContainersModel.isAnyContainerInstalled()
+                        PageController.setTriggeredByConnectButton(false)
+                        return false
                     }
 
                     return  true
                 }
 
-                text: qsTr("Set up later")
+                text: qsTr("Skip setup")
 
                 clickedFunc: function() {
                     PageController.goToPage(PageEnum.PageSetupWizardInstalling)

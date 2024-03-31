@@ -87,6 +87,9 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     case DefaultContainerRole: {
         return ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
     }
+    case HasInstalledContainers: {
+        return serverHasInstalledContainers(index.row());
+    }
     case IsServerFromApiRole: {
         return server.value(config_key::configVersion).toInt();
     }
@@ -302,6 +305,7 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[ContainsAmneziaDnsRole] = "containsAmneziaDns";
 
     roles[DefaultContainerRole] = "defaultContainer";
+    roles[HasInstalledContainers] = "hasInstalledContainers";
 
     roles[IsServerFromApiRole] = "isServerFromApi";
     return roles;
@@ -548,6 +552,19 @@ bool ServersModel::isServerFromApiAlreadyExists(const quint16 crc)
     return false;
 }
 
+bool ServersModel::serverHasInstalledContainers(const int serverIndex) const
+{
+    QJsonObject server = m_servers.at(serverIndex).toObject();
+    const auto containers = server.value(config_key::containers).toArray();
+    for (auto it = containers.begin(); it != containers.end(); it++) {
+        auto container = ContainerProps::containerFromString(it->toObject().value(config_key::container).toString());
+        if (ContainerProps::containerService(container) == ServiceType::Vpn) {
+            return true;
+        }
+    }
+    return false;
+}
+
 QVariant ServersModel::getDefaultServerData(const QString roleString)
 {
     auto roles = roleNames();
@@ -560,11 +577,6 @@ QVariant ServersModel::getDefaultServerData(const QString roleString)
     return {};
 }
 
-void ServersModel::setDefaultServerData(const QString roleString, const QVariant &value)
-{
-
-}
-
 QVariant ServersModel::getProcessedServerData(const QString roleString)
 {
     auto roles = roleNames();
@@ -575,11 +587,6 @@ QVariant ServersModel::getProcessedServerData(const QString roleString)
     }
 
     return {};
-}
-
-void ServersModel::setProcessedServerData(const QString roleString, const QVariant &value)
-{
-
 }
 
 bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()

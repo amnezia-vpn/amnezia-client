@@ -44,12 +44,13 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
-    if (!m_containersModel->isAnyContainerInstalled()) {
+    int serverIndex = m_serversModel->getDefaultServerIndex();
+
+    if (!m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         emit noInstalledContainers();
         return;
     }
 
-    int serverIndex = m_serversModel->getDefaultServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
     DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
@@ -80,7 +81,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     m_state = state;
 
     m_isConnected = false;
-    m_connectionStateText = tr("Connection...");
+    m_connectionStateText = tr("Connecting...");
     switch (state) {
     case Vpn::ConnectionState::Connected: {
         m_isConnectionInProgress = false;
@@ -95,7 +96,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     }
     case Vpn::ConnectionState::Reconnecting: {
         m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Reconnection...");
+        m_connectionStateText = tr("Reconnecting...");
         break;
     }
     case Vpn::ConnectionState::Disconnected: {
@@ -105,7 +106,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     }
     case Vpn::ConnectionState::Disconnecting: {
         m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Disconnection...");
+        m_connectionStateText = tr("Disconnecting...");
         m_tick.stop();
         break;
     }

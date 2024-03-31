@@ -41,6 +41,7 @@ public slots:
 
     void backupAppConfig(const QString &fileName);
     void restoreAppConfig(const QString &fileName);
+    void restoreAppConfigFromData(const QByteArray &data);
 
     QString getAppVersion();
 
@@ -76,6 +77,8 @@ signals:
 
     void amneziaDnsToggled(bool enable);
 
+    void loggingDisableByWatcher();
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
@@ -84,6 +87,10 @@ private:
     std::shared_ptr<Settings> m_settings;
 
     QString m_appVersion;
+
+    QDateTime m_loggingDisableDate;
+
+    void checkIfNeedDisableLogs();
 };
 
 #endif // SETTINGSCONTROLLER_H

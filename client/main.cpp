@@ -26,9 +26,10 @@ int main(int argc, char *argv[])
     AllowSetForegroundWindow(ASFW_ANY);
 #endif
 
-// QTBUG-95974 QTBUG-95764 QTBUG-102168
 #ifdef Q_OS_ANDROID
+    // QTBUG-95974 QTBUG-95764 QTBUG-102168
     qputenv("QT_ANDROID_DISABLE_ACCESSIBILITY", "1");
+    qputenv("ANDROID_OPENSSL_SUFFIX", "_3");
 #endif
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
@@ -48,10 +49,6 @@ int main(int argc, char *argv[])
     AllowSetForegroundWindow(0);
 #endif
 
-#if defined(Q_OS_IOS)
-    QtAppDelegateInitialize();
-#endif
-
     app.registerTypes();
 
     app.setApplicationName(APPLICATION_NAME);
@@ -65,7 +62,7 @@ int main(int argc, char *argv[])
     if (doExec) {
         app.init();
 
-        qInfo().noquote() << QString("Started %1 version %2").arg(APPLICATION_NAME, APP_VERSION);
+        qInfo().noquote() << QString("Started %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
         qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
 
         return app.exec();

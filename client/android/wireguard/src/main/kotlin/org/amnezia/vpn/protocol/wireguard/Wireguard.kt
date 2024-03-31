@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.VpnService.Builder
 import java.util.TreeMap
 import kotlinx.coroutines.flow.MutableStateFlow
+import org.amnezia.awg.GoBackend
 import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
@@ -61,7 +62,7 @@ open class Wireguard : Protocol() {
     override val statistics: Statistics
         get() {
             if (tunnelHandle == -1) return Statistics.EMPTY_STATISTICS
-            val config = GoBackend.wgGetConfig(tunnelHandle) ?: return Statistics.EMPTY_STATISTICS
+            val config = GoBackend.awgGetConfig(tunnelHandle) ?: return Statistics.EMPTY_STATISTICS
             return Statistics.build {
                 var optsCount = 0
                 config.splitToSequence("\n").forEach { line ->
@@ -92,12 +93,12 @@ open class Wireguard : Protocol() {
         val configDataJson = config.getJSONObject("wireguard_config_data")
         val configData = parseConfigData(configDataJson.getString("config"))
         return WireguardConfig.build {
-            configWireguard(configData)
+            configWireguard(configData, configDataJson)
             configSplitTunneling(config)
         }
     }
 
-    protected fun WireguardConfig.Builder.configWireguard(configData: Map<String, String>) {
+    protected fun WireguardConfig.Builder.configWireguard(configData: Map<String, String>, configDataJson: JSONObject) {
         configData["Address"]?.split(",")?.map { address ->
             InetNetwork.parse(address.trim())
         }?.forEach(::addAddress)
@@ -118,7 +119,14 @@ open class Wireguard : Protocol() {
         if (routes.any { it !in defRoutes }) disableSplitTunneling()
         addRoutes(routes)
 
-        configData["MTU"]?.let { setMtu(it.toInt()) }
+        configDataJson.optString("mtu").let { mtu ->
+            if (mtu.isNotEmpty()) {
+                setMtu(mtu.toInt())
+            } else {
+                configData["MTU"]?.let { setMtu(it.toInt()) }
+            }
+        }
+
         configData["Endpoint"]?.let { setEndpoint(InetEndpoint.parse(it)) }
         configData["PersistentKeepalive"]?.let { setPersistentKeepalive(it.toInt()) }
         configData["PrivateKey"]?.let { setPrivateKeyHex(it.base64ToHex()) }
@@ -149,8 +157,8 @@ open class Wireguard : Protocol() {
             if (tunFd == null) {
                 throw VpnStartException("Create VPN interface: permission not granted or revoked")
             }
-            Log.v(TAG, "Wg-go backend ${GoBackend.wgVersion()}")
-            tunnelHandle = GoBackend.wgTurnOn(ifName, tunFd.detachFd(), config.toWgUserspaceString())
+            Log.i(TAG, "awg-go backend ${GoBackend.awgVersion()}")
+            tunnelHandle = GoBackend.awgTurnOn(ifName, tunFd.detachFd(), config.toWgUserspaceString())
         }
 
         if (tunnelHandle < 0) {
@@ -158,8 +166,8 @@ open class Wireguard : Protocol() {
             throw VpnStartException("Wireguard tunnel creation error")
         }
 
-        if (!protect(GoBackend.wgGetSocketV4(tunnelHandle)) || !protect(GoBackend.wgGetSocketV6(tunnelHandle))) {
-            GoBackend.wgTurnOff(tunnelHandle)
+        if (!protect(GoBackend.awgGetSocketV4(tunnelHandle)) || !protect(GoBackend.awgGetSocketV6(tunnelHandle))) {
+            GoBackend.awgTurnOff(tunnelHandle)
             tunnelHandle = -1
             throw VpnStartException("Protect VPN interface: permission not granted or revoked")
         }
@@ -172,7 +180,7 @@ open class Wireguard : Protocol() {
         }
         val handleToClose = tunnelHandle
         tunnelHandle = -1
-        GoBackend.wgTurnOff(handleToClose)
+        GoBackend.awgTurnOff(handleToClose)
         state.value = DISCONNECTED
     }
 

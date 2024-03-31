@@ -3,7 +3,7 @@
 #include "QThread"
 #include "QCoreApplication"
 
-#include "utilities.h"
+#include "core/networkUtilities.h"
 #include "version.h"
 
 #include "containers/containers_defs.h"
@@ -68,6 +68,7 @@ void Settings::removeServer(int index)
 
     servers.removeAt(index);
     setServersArray(servers);
+    emit serverRemoved(index);
 }
 
 bool Settings::editServer(int index, const QJsonObject &server)
@@ -225,7 +226,20 @@ void Settings::setSaveLogs(bool enabled)
         }
     }
 #endif
+    if (enabled) {
+        setLogEnableDate(QDateTime::currentDateTime());
+    }
     emit saveLogsChanged(enabled);
+}
+
+QDateTime Settings::getLogEnableDate()
+{
+    return value("Conf/logEnableDate").toDateTime();
+}
+
+void Settings::setLogEnableDate(QDateTime date)
+{
+    setValue("Conf/logEnableDate", date);
 }
 
 QString Settings::routeModeString(RouteMode mode) const
@@ -274,9 +288,9 @@ QStringList Settings::getVpnIps(RouteMode mode) const
     QStringList ips;
     const QVariantMap &m = vpnSites(mode);
     for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
-        if (Utils::checkIpSubnetFormat(i.key())) {
+        if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
             ips.append(i.key());
-        } else if (Utils::checkIpSubnetFormat(i.value().toString())) {
+        } else if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
             ips.append(i.value().toString());
         }
     }
@@ -338,6 +352,7 @@ QString Settings::secondaryDns() const
 void Settings::clearSettings()
 {
     m_settings.clearSettings();
+    emit settingsCleared();
 }
 
 ServerCredentials Settings::defaultServerCredentials() const

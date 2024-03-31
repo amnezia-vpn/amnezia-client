@@ -1,18 +1,18 @@
 import Foundation
 import os.log
 
-public func wg_log(_ type: OSLogType, staticMessage: StaticString) {
-  guard Log.isLoggingEnabled else { return }
-
-  Log.Record(date: Date(), level: Log.Record.Level(from: type), message: "\(staticMessage)").save(at: Log.neLogURL)
+public func wg_log(_ type: OSLogType, title: String = "", staticMessage: StaticString) {
+  neLog(type, title: "WG: \(title)", message: "\(staticMessage)")
 }
 
-public func wg_log(_ type: OSLogType, message: String) {
-  log(type, message: message)
+public func wg_log(_ type: OSLogType, title: String = "", message: String) {
+  neLog(type, title: "WG: \(title)", message: message)
 }
 
-public func log(_ type: OSLogType, message: String) {
-  guard Log.isLoggingEnabled else { return }
+public func ovpnLog(_ type: OSLogType, title: String = "", message: String) {
+  neLog(type, title: "OVPN: \(title)", message: message)
+}
 
-  Log.Record(date: Date(), level: Log.Record.Level(from: type), message: message).save(at: Log.neLogURL)
+public func neLog(_ type: OSLogType, title: String = "", message: String) {
+    Log.log(type, title: "NE: \(title)", message: message)
 }

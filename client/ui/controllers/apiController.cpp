@@ -90,7 +90,7 @@ void ApiController::updateServerConfigFromApi()
             request.setRawHeader("Authorization",
                                  "Api-Key " + serverConfig.value(configKey::accessToken).toString().toUtf8());
             QString endpoint = serverConfig.value(configKey::apiEdnpoint).toString();
-            request.setUrl(endpoint.replace("https", "http")); // todo remove
+            request.setUrl(endpoint);
 
             QString protocol = serverConfig.value(configKey::protocol).toString();
 
@@ -138,7 +138,10 @@ void ApiController::updateServerConfigFromApi()
                 serverConfig.insert(config_key::defaultContainer, defaultContainer);
                 m_serversModel->editServer(serverConfig, m_serversModel->getDefaultServerIndex());
             } else {
+                QString err = reply->errorString();
+                qDebug() << QString::fromUtf8(reply->readAll());
                 qDebug() << reply->error();
+                qDebug() << err;
                 qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
                 emit errorOccurred(errorString(ApiConfigDownloadError));
                 m_isConfigUpdateStarted = false;

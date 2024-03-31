@@ -19,6 +19,7 @@ QString errorString(ErrorCode code) {
     case(ServerDockerFailedError): errorMessage = QObject::tr("Server error: Docker failed"); break;
     case(ServerCancelInstallation): errorMessage = QObject::tr("Installation canceled by user"); break;
     case(ServerUserNotInSudo): errorMessage = QObject::tr("The user does not have permission to use sudo"); break;
+    case(ServerPacketManagerError): errorMessage = QObject::tr("Server error: Packet manager error"); break;
 
     // Libssh errors
     case(SshRequestDeniedError): errorMessage = QObject::tr("Ssh request was denied"); break;
@@ -28,20 +29,8 @@ QString errorString(ErrorCode code) {
     case(SshPrivateKeyFormatError): errorMessage = QObject::tr("The selected private key format is not supported, use openssh ED25519 key types or PEM key types"); break;
     case(SshTimeoutError): errorMessage = QObject::tr("Timeout connecting to server"); break;
 
-    // Libssh sftp errors
-    case(SshSftpEofError): errorMessage = QObject::tr("Sftp error: End-of-file encountered"); break;
-    case(SshSftpNoSuchFileError): errorMessage = QObject::tr("Sftp error: File does not exist"); break;
-    case(SshSftpPermissionDeniedError): errorMessage = QObject::tr("Sftp error: Permission denied"); break;
-    case(SshSftpFailureError): errorMessage = QObject::tr("Sftp error: Generic failure"); break;
-    case(SshSftpBadMessageError): errorMessage = QObject::tr("Sftp error: Garbage received from server"); break;
-    case(SshSftpNoConnectionError): errorMessage = QObject::tr("Sftp error: No connection has been set up"); break;
-    case(SshSftpConnectionLostError): errorMessage = QObject::tr("Sftp error: There was a connection, but we lost it"); break;
-    case(SshSftpOpUnsupportedError): errorMessage = QObject::tr("Sftp error: Operation not supported by libssh yet"); break;
-    case(SshSftpInvalidHandleError): errorMessage = QObject::tr("Sftp error: Invalid file handle"); break;
-    case(SshSftpNoSuchPathError): errorMessage = QObject::tr("Sftp error: No such file or directory path exists"); break;
-    case(SshSftpFileAlreadyExistsError): errorMessage = QObject::tr("Sftp error: An attempt to create an already existing file or directory has been made"); break;
-    case(SshSftpWriteProtectError): errorMessage = QObject::tr("Sftp error: Write-protected filesystem"); break;
-    case(SshSftpNoMediaError): errorMessage = QObject::tr("Sftp error: No media was in remote drive"); break;
+    // Ssh scp errors
+    case(SshScpFailureError): errorMessage = QObject::tr("Scp error: Generic failure"); break;
 
     // Local errors
     case (OpenVpnConfigMissing): errorMessage = QObject::tr("OpenVPN config missing"); break;
@@ -67,6 +56,14 @@ QString errorString(ErrorCode code) {
     // Api errors
     case (ApiConfigDownloadError): errorMessage = QObject::tr("Error when retrieving configuration from API"); break;
     case (ApiConfigAlreadyAdded): errorMessage = QObject::tr("This config has already been added to the application"); break;
+
+    // QFile errors
+    case(OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;
+    case(ReadError): errorMessage = QObject::tr("QFile error: An error occurred when reading from the file"); break;
+    case(PermissionsError): errorMessage = QObject::tr("QFile error: The file could not be accessed"); break;
+    case(UnspecifiedError): errorMessage =  QObject::tr("QFile error: An unspecified error occurred"); break;
+    case(FatalError): errorMessage =  QObject::tr("QFile error: A fatal error occurred"); break;
+    case(AbortError): errorMessage =  QObject::tr("QFile error: The operation was aborted"); break;
 
     case(InternalError):
     default:

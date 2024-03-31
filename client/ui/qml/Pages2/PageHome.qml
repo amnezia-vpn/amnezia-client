@@ -33,44 +33,71 @@ PageType {
         anchors.fill: parent
         anchors.bottomMargin: drawer.collapsedHeight
 
-        ConnectButton {
-            id: connectButton
-            anchors.centerIn: parent
-        }
-
-        BasicButtonType {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.topMargin: 34
             anchors.bottomMargin: 34
-            leftPadding: 16
-            rightPadding: 16
 
-            implicitHeight: 36
+            BasicButtonType {
+                property bool isLoggingEnabled: SettingsController.isLoggingEnabled
 
-            defaultColor: "transparent"
-            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-            disabledColor: "#878B91"
-            textColor: "#878B91"
-            leftImageColor: "transparent"
-            borderWidth: 0
+                Layout.alignment: Qt.AlignHCenter
 
-            property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled ||
-                                                   (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
+                implicitHeight: 36
 
-            text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
+                defaultColor: "transparent"
+                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                disabledColor: "#878B91"
+                textColor: "#878B91"
+                borderWidth: 0
 
-            imageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
-            rightImageSource: "qrc:/images/controls/chevron-down.svg"
+                visible: isLoggingEnabled ? true : false
+                text: qsTr("Logging enabled")
 
-            onClicked: {
-                homeSplitTunnelingDrawer.open()
+                onClicked: {
+                    PageController.goToPage(PageEnum.PageSettingsLogging)
+                }
             }
 
-            HomeSplitTunnelingDrawer {
-                id: homeSplitTunnelingDrawer
+            ConnectButton {
+                id: connectButton
+                Layout.fillHeight: true
+                Layout.alignment: Qt.AlignCenter
+            }
 
-                parent: root
+            BasicButtonType {
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
+                Layout.bottomMargin: 34
+                leftPadding: 16
+                rightPadding: 16
+
+                implicitHeight: 36
+
+                defaultColor: "transparent"
+                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                disabledColor: "#878B91"
+                textColor: "#878B91"
+                leftImageColor: "transparent"
+                borderWidth: 0
+
+                property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled ||
+                                                       (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
+
+                text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
+
+                imageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
+                rightImageSource: "qrc:/images/controls/chevron-down.svg"
+
+                onClicked: {
+                    homeSplitTunnelingDrawer.open()
+                }
+
+                HomeSplitTunnelingDrawer {
+                    id: homeSplitTunnelingDrawer
+                    parent: root
+                }
             }
         }
     }
@@ -161,18 +188,17 @@ PageType {
                 text: ServersModel.defaultServerDescriptionCollapsed
             }
 
-
             GraphViewType {
                 id: graph1
                 Layout.preferredHeight: 50
                 Layout.fillWidth: true
             }
-
         }
-        expandedContent:  Item {
+        
+        expandedContent: Item {
             id: serverMenuContainer
 
-            implicitHeight: root.height * 0.9
+            implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
 
             Component.onCompleted: {
                 drawer.expandedHeight = serverMenuContainer.implicitHeight
@@ -265,7 +291,7 @@ PageType {
                             model: SortFilterProxyModel {
                                 id: proxyDefaultServerContainersModel
                                 sourceModel: DefaultServerContainersModel
-                                
+
                                 sorters: [
                                     RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
                                 ]
@@ -286,129 +312,111 @@ PageType {
                 }
             }
 
-            Flickable {
-                id: serversContainer
+
+            ButtonGroup {
+                id: serversRadioButtonGroup
+            }
+
+            ListView {
+                id: serversMenuContent
 
                 anchors.top: serversMenuHeader.bottom
                 anchors.right: parent.right
                 anchors.left: parent.left
+                anchors.bottom: parent.bottom
                 anchors.topMargin: 16
 
-                contentHeight: col.height + col.anchors.bottomMargin
-                implicitHeight: parent.height - serversMenuHeader.implicitHeight
-                clip: true
+                model: ServersModel
+                currentIndex: ServersModel.defaultIndex
 
                 ScrollBar.vertical: ScrollBar {
                     id: scrollBar
-                    policy: serversContainer.height >= serversContainer.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
+                    policy: serversMenuContent.height >= serversMenuContent.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
                 }
 
                 Keys.onUpPressed: scrollBar.decrease()
                 Keys.onDownPressed: scrollBar.increase()
 
-                Column {
-                    id: col
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottomMargin: 32
-
-                    spacing: 16
-
-                    ButtonGroup {
-                        id: serversRadioButtonGroup
+                Connections {
+                    target: ServersModel
+                    function onDefaultServerIndexChanged(serverIndex) {
+                        serversMenuContent.currentIndex = serverIndex
                     }
+                }
 
-                    ListView {
-                        id: serversMenuContent
-                        width: parent.width
-                        height: serversMenuContent.contentItem.height
+                clip: true
 
-                        model: ServersModel
-                        currentIndex: ServersModel.defaultIndex
+                delegate: Item {
+                    id: menuContentDelegate
 
-                        Connections {
-                            target: ServersModel
-                            function onDefaultServerIndexChanged(serverIndex) {
-                                serversMenuContent.currentIndex = serverIndex
+                    property variant delegateData: model
+
+                    implicitWidth: serversMenuContent.width
+                    implicitHeight: serverRadioButtonContent.implicitHeight
+
+                    ColumnLayout {
+                        id: serverRadioButtonContent
+
+                        anchors.fill: parent
+                        anchors.rightMargin: 16
+                        anchors.leftMargin: 16
+
+                        spacing: 0
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            VerticalRadioButton {
+                                id: serverRadioButton
+
+                                Layout.fillWidth: true
+
+                                text: name
+                                descriptionText: serverDescription
+
+                                checked: index === serversMenuContent.currentIndex
+                                checkable: !ConnectionController.isConnected
+
+                                ButtonGroup.group: serversRadioButtonGroup
+
+                                onClicked: {
+                                    if (ConnectionController.isConnected) {
+                                        PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
+                                        return
+                                    }
+
+                                    serversMenuContent.currentIndex = index
+
+                                    ServersModel.defaultIndex = index
+                                }
+
+                                MouseArea {
+                                    anchors.fill: serverRadioButton
+                                    cursorShape: Qt.PointingHandCursor
+                                    enabled: false
+                                }
+                            }
+
+                            ImageButtonType {
+                                image: "qrc:/images/controls/settings.svg"
+                                imageColor: "#D7D8DB"
+
+                                implicitWidth: 56
+                                implicitHeight: 56
+
+                                z: 1
+
+                                onClicked: function() {
+                                    ServersModel.processedIndex = index
+                                    PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                                    drawer.close()
+                                }
                             }
                         }
 
-                        clip: true
-                        interactive: false
-
-                        delegate: Item {
-                            id: menuContentDelegate
-
-                            property variant delegateData: model
-
-                            implicitWidth: serversMenuContent.width
-                            implicitHeight: serverRadioButtonContent.implicitHeight
-
-                            ColumnLayout {
-                                id: serverRadioButtonContent
-
-                                anchors.fill: parent
-                                anchors.rightMargin: 16
-                                anchors.leftMargin: 16
-
-                                spacing: 0
-
-                                RowLayout {
-                                    VerticalRadioButton {
-                                        id: serverRadioButton
-
-                                        Layout.fillWidth: true
-
-                                        text: name
-                                        descriptionText: serverDescription
-
-                                        checked: index === serversMenuContent.currentIndex
-                                        checkable: !ConnectionController.isConnected
-
-                                        ButtonGroup.group: serversRadioButtonGroup
-
-                                        onClicked: {
-                                            if (ConnectionController.isConnected) {
-                                                PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
-                                                return
-                                            }
-
-                                            serversMenuContent.currentIndex = index
-
-                                            ServersModel.defaultIndex = index
-                                        }
-
-                                        MouseArea {
-                                            anchors.fill: serverRadioButton
-                                            cursorShape: Qt.PointingHandCursor
-                                            enabled: false
-                                        }
-                                    }
-
-                                    ImageButtonType {
-                                        image: "qrc:/images/controls/settings.svg"
-                                        imageColor: "#D7D8DB"
-
-                                        implicitWidth: 56
-                                        implicitHeight: 56
-
-                                        z: 1
-
-                                        onClicked: function() {
-                                            ServersModel.processedIndex = index
-                                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                                            drawer.close()
-                                        }
-                                    }
-                                }
-
-                                DividerType {
-                                    Layout.fillWidth: true
-                                    Layout.leftMargin: 0
-                                    Layout.rightMargin: 0
-                                }
-                            }
+                        DividerType {
+                            Layout.fillWidth: true
+                            Layout.leftMargin: 0
+                            Layout.rightMargin: 0
                         }
                     }
                 }

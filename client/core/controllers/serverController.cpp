@@ -26,6 +26,7 @@
 #include "logger.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
+#include "core/networkUtilities.h"
 #include "settings.h"
 #include "utilities.h"
 
@@ -118,7 +119,7 @@ ServerController::runContainerScript(const ServerCredentials &credentials, Docke
 
 ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container, const ServerCredentials &credentials,
                                                       const QString &file, const QString &path,
-                                                      libssh::SftpOverwriteMode overwriteMode)
+                                                      libssh::ScpOverwriteMode overwriteMode)
 {
     ErrorCode e = ErrorCode::NoError;
     QString tmpFileName = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
@@ -139,7 +140,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     if (e)
         return e;
 
-    if (overwriteMode == libssh::SftpOverwriteMode::SftpOverwriteExisting) {
+    if (overwriteMode == libssh::ScpOverwriteMode::ScpOverwriteExisting) {
         e = runScript(credentials,
                       replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(path),
                                   genVarsForScript(credentials, container)),
@@ -147,7 +148,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 
         if (e)
             return e;
-    } else if (overwriteMode == libssh::SftpOverwriteMode::SftpAppendToExisting) {
+    } else if (overwriteMode == libssh::ScpOverwriteMode::ScpAppendToExisting) {
         e = runScript(credentials,
                       replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(tmpFileName),
                                   genVarsForScript(credentials, container)),
@@ -199,7 +200,7 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
 }
 
 ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data,
-                                             const QString &remotePath, libssh::SftpOverwriteMode overwriteMode)
+                                             const QString &remotePath, libssh::ScpOverwriteMode overwriteMode)
 {
     auto error = m_sshClient.connectToHost(credentials);
     if (error != ErrorCode::NoError) {
@@ -211,7 +212,7 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
     localFile.write(data);
     localFile.close();
 
-    error = m_sshClient.sftpFileCopy(overwriteMode, localFile.fileName(), remotePath, "non_desc");
+    error = m_sshClient.scpFileCopy(overwriteMode, localFile.fileName(), remotePath, "non_desc");
 
     if (error != ErrorCode::NoError) {
         return error;
@@ -359,7 +360,33 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
     }
 
     if (container == DockerContainer::Awg) {
-        return true;
+        if ((oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
+            != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
+            || (oldProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount)
+                != newProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount))
+            || (oldProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize)
+                != newProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize))
+            || (oldProtoConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize)
+                != newProtoConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize))
+            || (oldProtoConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize)
+                != newProtoConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize))
+            || (oldProtoConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize)
+                != newProtoConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize))
+            || (oldProtoConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader)
+                != newProtoConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader))
+            || (oldProtoConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader)
+                != newProtoConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader))
+            || (oldProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader)
+                != newProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader))
+            || (oldProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader)
+                != newProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader)))
+            return true;
+    }
+
+    if (container == DockerContainer::WireGuard){
+        if (oldProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)
+            != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort))
+            return true;
     }
 
     return false;
@@ -418,9 +445,6 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
-    //    auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
-    //        stdOut += data + "\n";
-    //    };
 
     e = runScript(credentials,
                   replaceVars(amnezia::scriptData(SharedScriptType::build_container),
@@ -440,9 +464,6 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
-    // auto cbReadStdErr = [&](const QString &data, QSharedPointer<QSsh::SshRemoteProcess> proc) {
-    //     stdOut += data + "\n";
-    // };
 
     ErrorCode e = runScript(credentials,
                             replaceVars(amnezia::scriptData(ProtocolScriptType::run_container, container),
@@ -511,6 +532,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
     const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
     const QJsonObject &amneziaWireguarConfig = config.value(ProtocolProps::protoToString(Proto::Awg)).toObject();
+    const QJsonObject &xrayConfig = config.value(ProtocolProps::protoToString(Proto::Xray)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
 
     Vars vars;
@@ -567,6 +589,10 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$CLOAK_SERVER_PORT", cloakConfig.value(config_key::port).toString(protocols::cloak::defaultPort) } });
     vars.append({ { "$FAKE_WEB_SITE_ADDRESS",
                     cloakConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite) } });
+
+    // Xray vars
+    vars.append({ { "$XRAY_SITE_NAME",
+                  xrayConfig.value(config_key::site).toString(protocols::xray::defaultSite) } });
 
     // Wireguard vars
     vars.append(
@@ -626,7 +652,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER",
                     amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
 
-    QString serverIp = Utils::getIPAddress(credentials.hostName);
+    QString serverIp = NetworkUtilities::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {
         vars.append({ { "$SERVER_IP_ADDRESS", serverIp } });
     } else {

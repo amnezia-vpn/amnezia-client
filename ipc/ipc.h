@@ -13,6 +13,7 @@ namespace amnezia {
 enum PermittedProcess {
     OpenVPN,
     Wireguard,
+    Tun2Socks,
     CertUtil
 };
 
@@ -24,6 +25,8 @@ inline QString permittedProcessPath(PermittedProcess pid)
         return Utils::wireguardExecPath();
     } else if (pid == PermittedProcess::CertUtil) {
         return Utils::certUtilPath();
+    } else if (pid == PermittedProcess::Tun2Socks) {
+        return Utils::tun2socksPath();
     }
     return "";
 }

@@ -18,7 +18,10 @@ namespace
     enum class ConfigTypes {
         Amnezia,
         OpenVpn,
-        WireGuard
+        WireGuard,
+        Xray,
+        Backup,
+        Invalid
     };
 
     ConfigTypes checkConfigFormat(const QString &config)
@@ -32,15 +35,28 @@ namespace
         const QString wireguardConfigPatternSectionInterface = "[Interface]";
         const QString wireguardConfigPatternSectionPeer = "[Peer]";
 
-        if (config.contains(openVpnConfigPatternCli)
-            && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))
-            && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
+        const QString xrayConfigPatternInbound = "inbounds";
+        const QString xrayConfigPatternOutbound = "outbounds";
+
+        const QString amneziaConfigPattern = "containers";
+        const QString amneziaFreeConfigPattern = "api_key";
+        const QString backupPattern = "Servers/serversList";
+
+        if (config.contains(backupPattern)) {
+            return ConfigTypes::Backup;
+        } else if (config.contains(amneziaConfigPattern) || config.contains(amneziaFreeConfigPattern)) {
+            return ConfigTypes::Amnezia;
+        } else if (config.contains(openVpnConfigPatternCli)
+                   && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))
+                   && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
             return ConfigTypes::OpenVpn;
         } else if (config.contains(wireguardConfigPatternSectionInterface)
                    && config.contains(wireguardConfigPatternSectionPeer)) {
             return ConfigTypes::WireGuard;
+        } else if ((config.contains(xrayConfigPatternInbound)) && (config.contains(xrayConfigPatternOutbound))) {
+            return ConfigTypes::Xray;
         }
-        return ConfigTypes::Amnezia;
+        return ConfigTypes::Invalid;
     }
 
 #if defined Q_OS_ANDROID
@@ -58,34 +74,69 @@ ImportController::ImportController(const QSharedPointer<ServersModel> &serversMo
 #endif
 }
 
-void ImportController::extractConfigFromFile(const QString &fileName)
+bool ImportController::extractConfigFromFile(const QString &fileName)
 {
     QFile file(fileName);
 
     if (file.open(QIODevice::ReadOnly)) {
         QString data = file.readAll();
 
-        extractConfigFromData(data);
         m_configFileName = QFileInfo(file.fileName()).fileName();
+        return extractConfigFromData(data);
     }
+
+    emit importErrorOccurred(tr("Unable to open file"), false);
+    return false;
 }
 
-void ImportController::extractConfigFromData(QString data)
+bool ImportController::extractConfigFromData(QString data)
 {
-    auto configFormat = checkConfigFormat(data);
-    if (configFormat == ConfigTypes::OpenVpn) {
-        m_config = extractOpenVpnConfig(data);
-    } else if (configFormat == ConfigTypes::WireGuard) {
-        m_config = extractWireGuardConfig(data);
-    } else {
-        m_config = extractAmneziaConfig(data);
-    }
-}
+    QString config = data;
+    auto configFormat = checkConfigFormat(config);
+    if (configFormat == ConfigTypes::Invalid) {
+        data.replace("vpn://", "");
+        QByteArray ba =
+                QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+        QByteArray ba_uncompressed = qUncompress(ba);
+        if (!ba_uncompressed.isEmpty()) {
+            ba = ba_uncompressed;
+        }
 
-void ImportController::extractConfigFromCode(QString code)
-{
-    m_config = extractAmneziaConfig(code);
-    m_configFileName = "";
+        config = ba;
+        configFormat = checkConfigFormat(config);
+    }
+
+    switch (configFormat) {
+    case ConfigTypes::OpenVpn: {
+        m_config = extractOpenVpnConfig(config);
+        return m_config.empty() ? false : true;
+    }
+    case ConfigTypes::WireGuard: {
+        m_config = extractWireGuardConfig(config);
+        return m_config.empty() ? false : true;
+    }
+    case ConfigTypes::Xray: {
+        m_config = extractXrayConfig(config);
+        return m_config.empty() ? false : true;
+    }
+    case ConfigTypes::Amnezia: {
+        m_config = QJsonDocument::fromJson(config.toUtf8()).object();
+        return m_config.empty() ? false : true;
+    }
+    case ConfigTypes::Backup: {
+        if (!m_serversModel->getServersCount()) {
+            emit restoreAppConfig(config.toUtf8());
+        } else {
+            emit importErrorOccurred(tr("Invalid configuration file"), false);
+        }
+        break;
+    }
+    case ConfigTypes::Invalid: {
+        emit importErrorOccurred(tr("Invalid configuration file"), false);
+        break;
+    }
+    }
+    return false;
 }
 
 bool ImportController::extractConfigFromQr(const QByteArray &data)
@@ -139,26 +190,11 @@ void ImportController::importConfig()
     } else {
         qDebug() << "Failed to import profile";
         qDebug().noquote() << QJsonDocument(m_config).toJson();
-        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
+        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
     }
 
     m_config = {};
     m_configFileName.clear();
-}
-
-QJsonObject ImportController::extractAmneziaConfig(QString &data)
-{
-    data.replace("vpn://", "");
-    QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-
-    QByteArray ba_uncompressed = qUncompress(ba);
-    if (!ba_uncompressed.isEmpty()) {
-        ba = ba_uncompressed;
-    }
-
-    QJsonObject config = QJsonDocument::fromJson(ba).object();
-
-    return config;
 }
 
 QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
@@ -229,8 +265,9 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     if (hostNameAndPortMatch.hasCaptured(1)) {
         hostName = hostNameAndPortMatch.captured(1);
     } else {
-        qDebug() << "Failed to import profile";
-        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
+        qDebug() << "Key parameter 'Endpoint' is missing";
+        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
+        return QJsonObject();
     }
 
     if (hostNameAndPortMatch.hasCaptured(2)) {
@@ -242,10 +279,11 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     lastConfig[config_key::hostName] = hostName;
     lastConfig[config_key::port] = port.toInt();
 
-//    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty()
-//        && !configMap.value("PresharedKey").isEmpty() && !configMap.value("PublicKey").isEmpty()) {
+    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty()
+        && !configMap.value("PublicKey").isEmpty()) {
         lastConfig[config_key::client_priv_key] = configMap.value("PrivateKey");
         lastConfig[config_key::client_ip] = configMap.value("Address");
+
         if (!configMap.value("PresharedKey").isEmpty()) {
             lastConfig[config_key::psk_key] = configMap.value("PresharedKey");
         } else if (!configMap.value("PreSharedKey").isEmpty()) {
@@ -253,11 +291,15 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         }
 
         lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
-//    } else {
-//        qDebug() << "Failed to import profile";
-//        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError));
-//        return QJsonObject();
-//    }
+    } else {
+        qDebug() << "One of the key parameters is missing (PrivateKey, Address, PublicKey)";
+        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
+        return QJsonObject();
+    }
+
+    if (!configMap.value("MTU").isEmpty()) {
+        lastConfig[config_key::mtu] = configMap.value("MTU");
+    }
 
     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(","));
 
@@ -311,6 +353,42 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         config[config_key::dns1] = dnsMatch.captured(1);
         config[config_key::dns2] = dnsMatch.captured(2);
     }
+
+    config[config_key::hostName] = hostName;
+
+    return config;
+}
+
+QJsonObject ImportController::extractXrayConfig(const QString &data)
+{
+    QJsonParseError parserErr;
+    QJsonDocument jsonConf = QJsonDocument::fromJson(data.toLocal8Bit(), &parserErr);
+
+    QJsonObject xrayVpnConfig;
+    xrayVpnConfig[config_key::config] = jsonConf.toJson().constData();
+    QJsonObject lastConfig;
+    lastConfig[config_key::last_config] = jsonConf.toJson().constData();
+    lastConfig[config_key::isThirdPartyConfig] = true;
+
+    QJsonObject containers;
+    containers.insert(config_key::container, QJsonValue("amnezia-xray"));
+    containers.insert(config_key::xray, QJsonValue(lastConfig));
+
+    QJsonArray arr;
+    arr.push_back(containers);
+
+    QString hostName;
+
+    const static QRegularExpression hostNameRegExp("\"address\":\\s*\"([^\"]+)");
+    QRegularExpressionMatch hostNameMatch = hostNameRegExp.match(data);
+    if (hostNameMatch.hasMatch()) {
+        hostName = hostNameMatch.captured(1);
+    }
+
+    QJsonObject config;
+    config[config_key::containers] = arr;
+    config[config_key::defaultContainer] = "amnezia-xray";
+    config[config_key::description] = m_settings->nextAvailableServerName();
 
     config[config_key::hostName] = hostName;
 

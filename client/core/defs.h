@@ -46,25 +46,12 @@ namespace amnezia
         SshPrivateKeyFormatError = 304,
         SshTimeoutError = 305,
 
-        // Ssh sftp errors
-        SshSftpEofError = 400,
-        SshSftpNoSuchFileError = 401,
-        SshSftpPermissionDeniedError = 402,
-        SshSftpFailureError = 403,
-        SshSftpBadMessageError = 404,
-        SshSftpNoConnectionError = 405,
-        SshSftpConnectionLostError = 406,
-        SshSftpOpUnsupportedError = 407,
-        SshSftpInvalidHandleError = 408,
-        SshSftpNoSuchPathError = 409,
-        SshSftpFileAlreadyExistsError = 410,
-        SshSftpWriteProtectError = 411,
-        SshSftpNoMediaError = 412,
+        // Ssh scp errors
+        SshScpFailureError = 400,
 
         // Local errors
         OpenVpnConfigMissing = 500,
         OpenVpnManagementServerError = 501,
-        ConfigMissing = 502,
 
         // Distro errors
         OpenVpnExecutableMissing = 600,
@@ -72,6 +59,8 @@ namespace amnezia
         CloakExecutableMissing = 602,
         AmneziaServiceConnectionFailed = 603,
         ExecutableMissing = 604,
+        XrayExecutableMissing = 605,
+        Tun2SockExecutableMissing = 606,        
 
         // VPN errors
         OpenVpnAdaptersInUseError = 700,
@@ -83,6 +72,8 @@ namespace amnezia
         OpenSslFailed = 800,
         ShadowSocksExecutableCrashed = 801,
         CloakExecutableCrashed = 802,
+        XrayExecutableCrashed = 803,
+        Tun2SockExecutableCrashed = 804,
 
         // import and install errors
         ImportInvalidConfigError = 900,
@@ -92,7 +83,15 @@ namespace amnezia
 
         // Api errors
         ApiConfigDownloadError = 1100,
-        ApiConfigAlreadyAdded = 1101
+        ApiConfigAlreadyAdded = 1101,
+
+        // QFile errors
+        OpenError = 1200,
+        ReadError = 1201,
+        PermissionsError = 1202,
+        UnspecifiedError = 1203,
+        FatalError = 1204,
+        AbortError = 1205
     };
 
 } // namespace amnezia

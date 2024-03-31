@@ -22,8 +22,10 @@ PageType {
         AmneziaConnection,
         OpenVpn,
         WireGuard,
+        Awg,
         ShadowSocks,
-        Cloak
+        Cloak,
+        Xray
     }
 
     signal revokeConfig(int index)
@@ -48,7 +50,10 @@ PageType {
             PageController.showBusyIndicator(true)
 
             switch (type) {
-            case PageShare.ConfigType.AmneziaConnection: ExportController.generateConnectionConfig(clientNameTextField.textFieldText); break;
+            case PageShare.ConfigType.AmneziaConnection: {
+                ExportController.generateConnectionConfig(clientNameTextField.textFieldText);
+                break;
+            }
             case PageShare.ConfigType.OpenVpn: {
                 ExportController.generateOpenVpnConfig(clientNameTextField.textFieldText)
                 shareConnectionDrawer.configCaption = qsTr("Save OpenVPN config")
@@ -63,6 +68,13 @@ PageType {
                 shareConnectionDrawer.configFileName = "amnezia_for_wireguard"
                 break
             }
+            case PageShare.ConfigType.Awg: {
+                ExportController.generateAwgConfig(clientNameTextField.textFieldText)
+                shareConnectionDrawer.configCaption = qsTr("Save AmneziaWG config")
+                shareConnectionDrawer.configExtension = ".conf"
+                shareConnectionDrawer.configFileName = "amnezia_for_awg"
+                break
+            }
             case PageShare.ConfigType.ShadowSocks: {
                 ExportController.generateShadowSocksConfig()
                 shareConnectionDrawer.configCaption = qsTr("Save ShadowSocks config")
@@ -75,6 +87,13 @@ PageType {
                 shareConnectionDrawer.configCaption = qsTr("Save Cloak config")
                 shareConnectionDrawer.configExtension = ".json"
                 shareConnectionDrawer.configFileName = "amnezia_for_cloak"
+                break
+            }
+            case PageShare.ConfigType.Xray: {
+                ExportController.generateXrayConfig()
+                shareConnectionDrawer.configCaption = qsTr("Save XRay config")
+                shareConnectionDrawer.configExtension = ".json"
+                shareConnectionDrawer.configFileName = "amnezia_for_xray"
                 break
             }
             }
@@ -111,6 +130,11 @@ PageType {
         property var type: PageShare.ConfigType.WireGuard
     }
     QtObject {
+        id: awgConnectionFormat
+        property string name: qsTr("AmneziaWG native format")
+        property var type: PageShare.ConfigType.Awg
+    }
+    QtObject {
         id: shadowSocksConnectionFormat
         property string name: qsTr("ShadowSocks native format")
         property var type: PageShare.ConfigType.ShadowSocks
@@ -119,6 +143,11 @@ PageType {
         id: cloakConnectionFormat
         property string name: qsTr("Cloak native format")
         property var type: PageShare.ConfigType.Cloak
+    }
+    QtObject {
+        id: xrayConnectionFormat
+        property string name: qsTr("XRay native format")
+        property var type: PageShare.ConfigType.Xray
     }
 
     FlickableType {
@@ -292,6 +321,10 @@ PageType {
                             ValueFilter {
                                 roleName: "hasWriteAccess"
                                 value: true
+                            },
+                            ValueFilter {
+                                roleName: "hasInstalledContainers"
+                                value: true
                             }
                         ]
                     }
@@ -308,8 +341,12 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        serverSelectorListView.currentIndex = ServersModel.isDefaultServerHasWriteAccess() ?
-                                    proxyServersModel.mapFromSource(ServersModel.defaultIndex) : 0
+                        if (ServersModel.isDefaultServerHasWriteAccess() && ServersModel.getDefaultServerData("hasInstalledContainers")) {
+                            serverSelectorListView.currentIndex = proxyServersModel.mapFromSource(ServersModel.defaultIndex)
+                        } else {
+                            serverSelectorListView.currentIndex = 0
+                        }
+
                         serverSelectorListView.triggerCurrentItem()
                     }
 
@@ -402,6 +439,8 @@ PageType {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
                             root.connectionTypesModel.push(wireGuardConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-awg")) {
+                            root.connectionTypesModel.push(awgConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                             root.connectionTypesModel.push(shadowSocksConnectionFormat)
@@ -409,6 +448,8 @@ PageType {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                             root.connectionTypesModel.push(shadowSocksConnectionFormat)
                             root.connectionTypesModel.push(cloakConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-xray")) {
+                            root.connectionTypesModel.push(xrayConnectionFormat)
                         }
                     }
                 }
@@ -462,6 +503,7 @@ PageType {
 
                 Layout.fillWidth: true
                 Layout.topMargin: 40
+                Layout.bottomMargin: 32
 
                 enabled: shareButtonEnabled
                 visible: accessTypeSelector.currentIndex === 0
@@ -621,6 +663,7 @@ PageType {
 
                                             Connections {
                                                 target: clientNameEditDrawer
+                                                enabled: !GC.isMobile()
                                                 function onOpened() {
                                                     clientNameEditor.textField.forceActiveFocus()
                                                 }

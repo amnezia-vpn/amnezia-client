@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="connecting">Connecting</string>
+    <string name="disconnecting">Disconnecting</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="vpnGranted">VPN permission granted</string>
+    <string name="vpnDenied">VPN permission denied</string>
+    <string name="vpnSetupFailed">VPN setup error</string>
+    <string name="vpnSetupFailedMessage">To connect to AmneziaVPN, please do the following:\n\n- Allow the app to set up a VPN connection\n- Disable Always-on VPN for any other VPN app in the VPN system settings</string>
+    <string name="openVpnSettings">Open VPN settings</string>
+</resources>

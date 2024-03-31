@@ -28,6 +28,10 @@ fun Bundle.putStatus(status: Status) {
     putInt(STATE_KEY, status.state.ordinal)
 }
 
+fun Bundle.putStatus(state: ProtocolState) {
+    putInt(STATE_KEY, state.ordinal)
+}
+
 fun Bundle.getStatus(): Status =
     Status.build {
         setState(ProtocolState.entries[getInt(STATE_KEY)])

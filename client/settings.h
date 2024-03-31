@@ -100,6 +100,9 @@ public:
     }
     void setSaveLogs(bool enabled);
 
+    QDateTime getLogEnableDate();
+    void setLogEnableDate(QDateTime date);
+
     enum RouteMode {
         VpnAllSites,
         VpnOnlyForwardSites,
@@ -185,12 +188,16 @@ public:
     void setScreenshotsEnabled(bool enabled)
     {
         setValue("Conf/screenshotsEnabled", enabled);
+        emit screenshotsEnabledChanged(enabled);
     }
 
     void clearSettings();
 
 signals:
     void saveLogsChanged(bool enabled);
+    void screenshotsEnabledChanged(bool enabled);
+    void serverRemoved(int serverIndex);
+    void settingsCleared();
 
 private:
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;

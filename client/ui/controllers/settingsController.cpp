@@ -7,9 +7,7 @@
 #include "ui/qautostart.h"
 #include "version.h"
 #ifdef Q_OS_ANDROID
-    #include "platforms/android/android_utils.h"
     #include "platforms/android/android_controller.h"
-    #include <QJniObject>
 #endif
 
 #ifdef Q_OS_IOS
@@ -29,20 +27,7 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
       m_settings(settings)
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
-
-#ifdef Q_OS_ANDROID
-    if (!m_settings->isScreenshotsEnabled()) {
-        // Set security screen for Android app
-        AndroidUtils::runOnAndroidThreadSync([]() {
-            QJniObject activity = AndroidUtils::getActivity();
-            QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
-            if (window.isValid()) {
-                const int FLAG_SECURE = 8192;
-                window.callMethod<void>("addFlags", "(I)V", FLAG_SECURE);
-            }
-        });
-    }
-#endif
+    checkIfNeedDisableLogs();
 }
 
 void SettingsController::toggleAmneziaDns(bool enable)
@@ -87,8 +72,11 @@ void SettingsController::toggleLogging(bool enable)
 {
     m_settings->setSaveLogs(enable);
 #ifdef Q_OS_IOS
-  AmneziaVPN::toggleLogging(enable);
+    AmneziaVPN::toggleLogging(enable);
 #endif
+    if (enable == true) {
+        checkIfNeedDisableLogs();
+    }
     emit loggingStateChanged();
 }
 
@@ -129,6 +117,11 @@ void SettingsController::restoreAppConfig(const QString &fileName)
 
     QByteArray data = file.readAll();
 
+    restoreAppConfigFromData(data);
+}
+
+void SettingsController::restoreAppConfigFromData(const QByteArray &data)
+{
     bool ok = m_settings->restoreAppConfig(data);
     if (ok) {
         m_serversModel->resetModel();
@@ -152,7 +145,12 @@ void SettingsController::clearSettings()
     m_languageModel->changeLanguage(
             static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
     m_sitesModel->setRouteMode(Settings::RouteMode::VpnAllSites);
+
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
+
+#ifdef Q_OS_IOS
+    AmneziaVPN::clearSettings();
+#endif
 }
 
 void SettingsController::clearCachedProfiles()
@@ -199,19 +197,6 @@ bool SettingsController::isScreenshotsEnabled()
 void SettingsController::toggleScreenshotsEnabled(bool enable)
 {
     m_settings->setScreenshotsEnabled(enable);
-#ifdef Q_OS_ANDROID
-    std::string command = enable ? "clearFlags" : "addFlags";
-
-    // Set security screen for Android app
-    AndroidUtils::runOnAndroidThreadSync([&command]() {
-        QJniObject activity = AndroidUtils::getActivity();
-        QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
-        if (window.isValid()) {
-            const int FLAG_SECURE = 8192;
-            window.callMethod<void>(command.c_str(), "(I)V", FLAG_SECURE);
-        }
-    });
-#endif
 }
 
 bool SettingsController::isCameraPresent()
@@ -223,4 +208,14 @@ bool SettingsController::isCameraPresent()
 #else
     return false;
 #endif
+}
+
+void SettingsController::checkIfNeedDisableLogs()
+{
+    m_loggingDisableDate = m_settings->getLogEnableDate().addDays(14);
+    if (m_loggingDisableDate <= QDateTime::currentDateTime()) {
+        toggleLogging(false);
+        clearLogs();
+        emit loggingDisableByWatcher();
+    }
 }

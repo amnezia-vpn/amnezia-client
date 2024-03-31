@@ -14,6 +14,8 @@ import "../Components"
 PageType {
     id: root
 
+    property bool isControlsDisabled: false
+
     Connections {
         target: PageController
 
@@ -32,20 +34,11 @@ PageType {
             tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
         }
 
-        function onShowBusyIndicator(visible) {
-            busyIndicator.visible = visible
-            tabBarStackView.enabled = !visible
-            tabBar.enabled = !visible
-        }
-
-        function onEnableTabBar(enabled) {
-            tabBar.enabled = enabled
+        function onDisableControls(disabled) {
+            isControlsDisabled = disabled
         }
 
         function onClosePage() {
-            tabBar.isServerInfoShow = tabBarStackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageSettingsServerInfo)
-                                        && tabBarStackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageSettingsSplitTunneling)
-
             if (tabBarStackView.depth <= 1) {
                 return
             }
@@ -60,14 +53,27 @@ PageType {
             } else {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
-            
-            tabBar.isServerInfoShow = page === PageEnum.PageSettingsServerInfo || PageEnum.PageSettingsSplitTunneling || tabBar.isServerInfoShow
         }
 
         function onGoToStartPage() {
             connectionTypeSelection.close()
             while (tabBarStackView.depth > 1) {
                 tabBarStackView.pop()
+            }
+        }
+
+        function onEscapePressed() {
+            if (root.isControlsDisabled) {
+                return
+            }
+
+            var pageName = tabBarStackView.currentItem.objectName
+            if ((pageName === PageController.getPagePath(PageEnum.PageShare)) ||
+                    (pageName === PageController.getPagePath(PageEnum.PageSettings))) {
+                PageController.goToPageHome()
+                tabBar.previousIndex = 0
+            } else {
+                PageController.closePage()
             }
         }
     }
@@ -107,11 +113,27 @@ PageType {
         }
 
         function onNoInstalledContainers() {
-            PageController.setTriggeredBtConnectButton(true)
+            PageController.setTriggeredByConnectButton(true)
 
             ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
             InstallController.setShouldCreateServer(false)
             PageController.goToPage(PageEnum.PageSetupWizardEasy)
+        }
+    }
+
+    Connections {
+        target: ImportController
+
+        function onImportErrorOccurred(errorMessage, goToPageHome) {
+            PageController.showErrorMessage(errorMessage)
+        }
+    }
+
+    Connections {
+        target: SettingsController
+
+        function onLoggingDisableByWatcher() {
+            PageController.showNotificationMessage(qsTr("Logging was disabled after 14 days, log files were deleted"))
         }
     }
 
@@ -126,13 +148,14 @@ PageType {
         width: parent.width
         height: root.height - tabBar.implicitHeight
 
+        enabled: !root.isControlsDisabled
+
         function goToTabBarPage(page) {
             connectionTypeSelection.close()
 
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
             tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
-            tabBar.isServerInfoShow = false
         }
 
         Component.onCompleted: {
@@ -146,7 +169,6 @@ PageType {
         id: tabBar
 
         property int previousIndex: 0
-        property bool isServerInfoShow: false
 
         anchors.right: parent.right
         anchors.left: parent.left
@@ -156,6 +178,8 @@ PageType {
         bottomPadding: 8
         leftPadding: 96
         rightPadding: 96
+
+        enabled: !root.isControlsDisabled
 
         background: Shape {
             width: parent.width
@@ -177,7 +201,7 @@ PageType {
         }
 
         TabImageButtonType {
-            isSelected: tabBar.isServerInfoShow ? false : tabBar.currentIndex === 0
+            isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
@@ -211,7 +235,7 @@ PageType {
         }
 
         TabImageButtonType {
-            isSelected: tabBar.isServerInfoShow ? true : tabBar.currentIndex === 2
+            isSelected: tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
@@ -226,12 +250,6 @@ PageType {
                 connectionTypeSelection.open()
             }
         }
-    }
-
-    BusyIndicatorType {
-        id: busyIndicator
-        anchors.centerIn: parent
-        z: 1
     }
 
     ConnectionTypeSelectionDrawer {

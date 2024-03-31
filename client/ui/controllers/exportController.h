@@ -34,8 +34,10 @@ public slots:
     void generateConnectionConfig(const QString &clientName);
     void generateOpenVpnConfig(const QString &clientName);
     void generateWireGuardConfig(const QString &clientName);
+    void generateAwgConfig(const QString &clientName);
     void generateShadowSocksConfig();
     void generateCloakConfig();
+    void generateXrayConfig();
 
     QString getConfig();
     QString getNativeConfigString();
