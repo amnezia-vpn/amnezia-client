@@ -146,6 +146,8 @@ PageType {
                             rightImageSource: "qrc:/images/controls/copy.svg"
                             rightImageColor: "#D7D8DB"
 
+                            buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+
                             clickedFunction: function() {
                                 GC.copyToClipBoard(descriptionText)
                                 PageController.showNotificationMessage(qsTr("Copied"))
