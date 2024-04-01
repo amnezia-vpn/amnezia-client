@@ -4,6 +4,8 @@
 #include <QRegularExpression>
 #include <QRegExp>
 #include <QString>
+#include <QHostAddress>
+
 
 class NetworkUtilities : public QObject
 {
@@ -14,6 +16,8 @@ public:
     static bool checkIPv4Format(const QString &ip);
     static bool checkIpSubnetFormat(const QString &ip);
     static QString getGatewayAndIface();
+    // Returns the Interface Index that could Route to dst
+    static int AdapterIndexTo(const QHostAddress& dst);
 
     static QRegularExpression ipAddressRegExp();
     static QRegularExpression ipAddressPortRegExp();
