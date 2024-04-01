@@ -24,11 +24,14 @@ public:
 
 public slots:
     ErrorCode updateModel(DockerContainer container, ServerCredentials credentials);
+    ErrorCode appendClient(const DockerContainer container, const ServerCredentials &credentials, const QJsonObject &containerConfig,
+                           const QString &clientName);
     ErrorCode appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
                            ServerCredentials credentials);
-    ErrorCode renameClient(const int row, const QString &userName, const DockerContainer container,
-                           ServerCredentials credentials, bool addTimeStamp = false);
+    ErrorCode renameClient(const int row, const QString &userName, const DockerContainer container, ServerCredentials credentials,
+                           bool addTimeStamp = false);
     ErrorCode revokeClient(const int index, const DockerContainer container, ServerCredentials credentials, const int serverIndex);
+    ErrorCode revokeClient(const QJsonObject &containerConfig, const DockerContainer container, ServerCredentials credentials, const int serverIndex);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
