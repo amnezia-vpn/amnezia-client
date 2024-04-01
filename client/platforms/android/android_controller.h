@@ -41,6 +41,7 @@ public:
     void exportLogsFile(const QString &fileName);
     void clearLogs();
     void setScreenshotsEnabled(bool enabled);
+    void minimizeApp();
     QJsonArray getAppList();
     QPixmap getAppIcon(const QString &package, QSize *size, const QSize &requestedSize);
 

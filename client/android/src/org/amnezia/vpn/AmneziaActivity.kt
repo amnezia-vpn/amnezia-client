@@ -482,6 +482,14 @@ class AmneziaActivity : QtActivity() {
     }
 
     @Suppress("unused")
+    fun minimizeApp() {
+        Log.v(TAG, "Minimize application")
+        mainScope.launch {
+            moveTaskToBack(false)
+        }
+    }
+
+    @Suppress("unused")
     fun getAppList(): String {
         Log.v(TAG, "Get app list")
         var appList = ""

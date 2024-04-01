@@ -212,6 +212,11 @@ void AndroidController::setScreenshotsEnabled(bool enabled)
     callActivityMethod("setScreenshotsEnabled", "(Z)V", enabled);
 }
 
+void AndroidController::minimizeApp()
+{
+    callActivityMethod("minimizeApp", "()V");
+}
+
 QJsonArray AndroidController::getAppList()
 {
     QJniObject appList = callActivityMethod<jstring>("getAppList", "()Ljava/lang/String;");

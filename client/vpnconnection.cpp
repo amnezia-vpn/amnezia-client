@@ -27,7 +27,7 @@
     #include "platforms/ios/ios_controller.h"
 #endif
 
-#include "core/networkUtilities.h""
+#include "core/networkUtilities.h"
 #include "vpnconnection.h"
 
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, std::shared_ptr<VpnConfigurator> configurator,

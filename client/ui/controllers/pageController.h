@@ -77,6 +77,7 @@ public slots:
     QString getPagePath(PageLoader::PageEnum page);
 
     void closeWindow();
+    void hideWindow();
     void keyPressEvent(Qt::Key key);
 
     unsigned int getInitialPageNavigationBarColor();
@@ -111,6 +112,7 @@ signals:
 
     void showBusyIndicator(bool visible);
     void disableControls(bool disabled);
+    void disableTabBar(bool disabled);
 
     void hideMainWindow();
     void raiseMainWindow();
