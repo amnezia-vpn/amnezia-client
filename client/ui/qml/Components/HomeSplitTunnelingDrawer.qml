@@ -11,6 +11,8 @@ import "../Config"
 DrawerType2 {
     id: root
 
+    property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
+
     anchors.fill: parent
     expandedHeight: parent.height * 0.7
 
@@ -73,10 +75,12 @@ DrawerType2 {
         }
 
         LabelWithButtonType {
+            visible: isAppSplitTinnelingEnabled
+
             Layout.fillWidth: true
-            visible: false
 
             text: qsTr("App-based split tunneling")
+            descriptionText: AppSplitTunnelingModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
@@ -86,7 +90,7 @@ DrawerType2 {
         }
 
         DividerType {
-            visible: false
+            visible: isAppSplitTinnelingEnabled
         }
     }
 }

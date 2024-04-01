@@ -82,7 +82,7 @@ PageType {
                 leftImageColor: "transparent"
                 borderWidth: 0
 
-                property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled ||
+                property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled || AppSplitTunnelingModel.isTunnelingEnabled ||
                                                        (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
 
                 text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
