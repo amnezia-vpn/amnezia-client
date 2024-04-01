@@ -29,8 +29,7 @@
 #include "core/networkUtilities.h"
 #include "settings.h"
 #include "utilities.h"
-
-#include <configurators/vpn_configurator.h>
+#include "vpnConfigurationController.h"
 
 namespace
 {
@@ -179,11 +178,10 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 }
 
 QByteArray ServerController::getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                      const QString &path, ErrorCode *errorCode)
+                                                      const QString &path, ErrorCode errorCode)
 {
 
-    if (errorCode)
-        *errorCode = ErrorCode::NoError;
+    errorCode = ErrorCode::NoError;
 
     QString script = QString("sudo docker exec -i %1 sh -c \"xxd -p \'%2\'\"")
                              .arg(ContainerProps::containerToString(container))
@@ -195,7 +193,7 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
         return ErrorCode::NoError;
     };
 
-    *errorCode = runScript(credentials, script, cbReadStdOut);
+    errorCode = runScript(credentials, script, cbReadStdOut);
     return QByteArray::fromHex(stdOut.toUtf8());
 }
 
@@ -498,7 +496,7 @@ ErrorCode ServerController::configureContainerWorker(const ServerCredentials &cr
                                                  genVarsForScript(credentials, container, config)),
                                      cbReadStdOut, cbReadStdErr);
 
-    m_configurator->updateContainerConfigAfterInstallation(container, config, stdOut);
+    VpnConfigurationsController::updateContainerConfigAfterInstallation(container, config, stdOut);
 
     return e;
 }
@@ -662,7 +660,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     return vars;
 }
 
-QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode)
+QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode errorCode)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -674,11 +672,7 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
         return ErrorCode::NoError;
     };
 
-    ErrorCode e =
-            runScript(credentials, amnezia::scriptData(SharedScriptType::check_connection), cbReadStdOut, cbReadStdErr);
-
-    if (errorCode)
-        *errorCode = e;
+    errorCode = runScript(credentials, amnezia::scriptData(SharedScriptType::check_connection), cbReadStdOut, cbReadStdErr);
 
     return stdOut;
 }
@@ -837,147 +831,6 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
     emit serverIsBusy(false);
 
     return future.result();
-}
-
-ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredentials &credentials,
-                                                          QMap<DockerContainer, QJsonObject> &installedContainers)
-{
-    QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
-        stdOut += data + "\n";
-        return ErrorCode::NoError;
-    };
-    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
-        stdOut += data + "\n";
-        return ErrorCode::NoError;
-    };
-
-    QString script = QString("sudo docker ps --format '{{.Names}} {{.Ports}}'");
-
-    ErrorCode errorCode = runScript(credentials, script, cbReadStdOut, cbReadStdErr);
-    if (errorCode != ErrorCode::NoError) {
-        return errorCode;
-    }
-
-    auto containersInfo = stdOut.split("\n");
-    for (auto &containerInfo : containersInfo) {
-        if (containerInfo.isEmpty()) {
-            continue;
-        }
-        const static QRegularExpression containerAndPortRegExp("(amnezia[-a-z]*).*?:([0-9]*)->[0-9]*/(udp|tcp).*");
-        QRegularExpressionMatch containerAndPortMatch = containerAndPortRegExp.match(containerInfo);
-        if (containerAndPortMatch.hasMatch()) {
-            QString name = containerAndPortMatch.captured(1);
-            QString port = containerAndPortMatch.captured(2);
-            QString transportProto = containerAndPortMatch.captured(3);
-            DockerContainer container = ContainerProps::containerFromString(name);
-
-            QJsonObject config;
-            Proto mainProto = ContainerProps::defaultProtocol(container);
-            for (auto protocol : ContainerProps::protocolsForContainer(container)) {
-                QJsonObject containerConfig;
-                if (protocol == mainProto) {
-                    containerConfig.insert(config_key::port, port);
-                    containerConfig.insert(config_key::transport_proto, transportProto);
-
-                    if (protocol == Proto::Awg) {
-                        QString serverConfig = getTextFileFromContainer(container, credentials, protocols::awg::serverConfigPath, &errorCode);
-
-                        QMap<QString, QString> serverConfigMap;
-                        auto serverConfigLines = serverConfig.split("\n");
-                        for (auto &line : serverConfigLines) {
-                            auto trimmedLine = line.trimmed();
-                            if (trimmedLine.startsWith("[") && trimmedLine.endsWith("]")) {
-                                continue;
-                            } else {
-                                QStringList parts = trimmedLine.split(" = ");
-                                if (parts.count() == 2) {
-                                    serverConfigMap.insert(parts[0].trimmed(), parts[1].trimmed());
-                                }
-                            }
-                        }
-
-                        containerConfig[config_key::junkPacketCount] = serverConfigMap.value(config_key::junkPacketCount);
-                        containerConfig[config_key::junkPacketMinSize] = serverConfigMap.value(config_key::junkPacketMinSize);
-                        containerConfig[config_key::junkPacketMaxSize] = serverConfigMap.value(config_key::junkPacketMaxSize);
-                        containerConfig[config_key::initPacketJunkSize] = serverConfigMap.value(config_key::initPacketJunkSize);
-                        containerConfig[config_key::responsePacketJunkSize] = serverConfigMap.value(config_key::responsePacketJunkSize);
-                        containerConfig[config_key::initPacketMagicHeader] = serverConfigMap.value(config_key::initPacketMagicHeader);
-                        containerConfig[config_key::responsePacketMagicHeader] = serverConfigMap.value(config_key::responsePacketMagicHeader);
-                        containerConfig[config_key::underloadPacketMagicHeader] = serverConfigMap.value(config_key::underloadPacketMagicHeader);
-                        containerConfig[config_key::transportPacketMagicHeader] = serverConfigMap.value(config_key::transportPacketMagicHeader);
-                    } else if (protocol == Proto::Sftp) {
-                        stdOut.clear();
-                        script = QString("sudo docker inspect --format '{{.Config.Cmd}}' %1").arg(name);
-
-                        ErrorCode errorCode = runScript(credentials, script, cbReadStdOut, cbReadStdErr);
-                        if (errorCode != ErrorCode::NoError) {
-                            return errorCode;
-                        }
-
-                        auto sftpInfo = stdOut.split(":");
-                        if (sftpInfo.size() < 2) {
-                            logger.error() << "Key parameters for the sftp container are missing";
-                            continue;
-                        }
-                        auto userName = sftpInfo.at(0);
-                        userName = userName.remove(0, 1);
-                        auto password = sftpInfo.at(1);
-
-                        containerConfig.insert(config_key::userName, userName);
-                        containerConfig.insert(config_key::password, password);
-                    }
-
-                    config.insert(config_key::container, ContainerProps::containerToString(container));
-                }
-                config.insert(ProtocolProps::protoToString(protocol), containerConfig);
-            }
-            installedContainers.insert(container, config);
-        }
-        const static QRegularExpression torOrDnsRegExp("(amnezia-(?:torwebsite|dns)).*?([0-9]*)/(udp|tcp).*");
-        QRegularExpressionMatch torOrDnsRegMatch = torOrDnsRegExp.match(containerInfo);
-        if (torOrDnsRegMatch.hasMatch()) {
-            QString name = torOrDnsRegMatch.captured(1);
-            QString port = torOrDnsRegMatch.captured(2);
-            QString transportProto = torOrDnsRegMatch.captured(3);
-            DockerContainer container = ContainerProps::containerFromString(name);
-
-            QJsonObject config;
-            Proto mainProto = ContainerProps::defaultProtocol(container);
-            for (auto protocol : ContainerProps::protocolsForContainer(container)) {
-                QJsonObject containerConfig;
-                if (protocol == mainProto) {
-                    containerConfig.insert(config_key::port, port);
-                    containerConfig.insert(config_key::transport_proto, transportProto);
-
-                    if (protocol == Proto::TorWebSite) {
-                        stdOut.clear();
-                        script = QString("sudo docker exec -i %1 sh -c 'cat /var/lib/tor/hidden_service/hostname'").arg(name);
-
-                        ErrorCode errorCode = runScript(credentials, script, cbReadStdOut, cbReadStdErr);
-                        if (errorCode != ErrorCode::NoError) {
-                            return errorCode;
-                        }
-
-                        if (stdOut.isEmpty()) {
-                            logger.error() << "Key parameters for the tor container are missing";
-                            continue;
-                        }
-
-                        QString onion = stdOut;
-                        onion.replace("\n", "");
-                        containerConfig.insert(config_key::site, onion);
-                    }
-
-                    config.insert(config_key::container, ContainerProps::containerToString(container));
-                }
-                config.insert(ProtocolProps::protoToString(protocol), containerConfig);
-            }
-            installedContainers.insert(container, config);
-        }
-    }
-
-    return ErrorCode::NoError;
 }
 
 ErrorCode ServerController::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey,

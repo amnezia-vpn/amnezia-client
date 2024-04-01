@@ -14,8 +14,8 @@ import "../Config"
 PageType {
     id: root
 
-    Component.onCompleted: PageController.disableControls(true)
-    Component.onDestruction: PageController.disableControls(false)
+    Component.onCompleted: PageController.disableTabBar(true)
+    Component.onDestruction: PageController.disableTabBar(false)
 
     property bool isTimerRunning: true
     property string progressBarText: qsTr("Usually it takes no more than 5 minutes")
@@ -26,7 +26,7 @@ PageType {
 
         function onInstallContainerFinished(finishedMessage, isServiceInstall) {
             if (!ConnectionController.isConnected && !isServiceInstall) {
-                ServersModel.setDefaultContainer(ServersModel.processedIndex, ContainersModel.getCurrentlyProcessedContainerIndex())
+                ServersModel.setDefaultContainer(ServersModel.processedIndex, ContainersModel.getProcessedContainerIndex())
             }
 
             PageController.closePage() // close installing page

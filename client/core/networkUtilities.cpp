@@ -10,6 +10,8 @@
     #include <Iptypes.h>
     #include <WinSock2.h>
     #include <winsock.h>
+    #include <QNetworkInterface>
+    #include "qendian.h"
 #endif
 #ifdef Q_OS_LINUX
     #include <arpa/inet.h>
@@ -157,6 +159,27 @@ bool NetworkUtilities::checkIpSubnetFormat(const QString &ip)
         return checkIPv4Format(parts.at(0));
     else
         return false;
+}
+
+// static
+int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
+#ifdef Q_OS_WIN
+    qDebug() << "Getting Current Internet Adapter that routes to"
+             << dst.toString();
+    quint32_be ipBigEndian;
+    quint32 ip = dst.toIPv4Address();
+    qToBigEndian(ip, &ipBigEndian);
+    _MIB_IPFORWARDROW routeInfo;
+    auto result = GetBestRoute(ipBigEndian, 0, &routeInfo);
+    if (result != NO_ERROR) {
+        return -1;
+    }
+    auto adapter =
+        QNetworkInterface::interfaceFromIndex(routeInfo.dwForwardIfIndex);
+    qDebug() << "Internet Adapter:" << adapter.name();
+    return routeInfo.dwForwardIfIndex;
+#endif
+    return 0;
 }
 
 #ifdef Q_OS_WIN

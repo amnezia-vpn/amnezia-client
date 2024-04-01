@@ -15,6 +15,7 @@ PageType {
     id: root
 
     property bool isControlsDisabled: false
+    property bool isTabBarDisabled: false
 
     Connections {
         target: PageController
@@ -38,8 +39,13 @@ PageType {
             isControlsDisabled = disabled
         }
 
+        function onDisableTabBar(disabled) {
+            isTabBarDisabled = disabled
+        }
+
         function onClosePage() {
             if (tabBarStackView.depth <= 1) {
+                PageController.hideWindow()
                 return
             }
             tabBarStackView.pop()
@@ -63,7 +69,7 @@ PageType {
         }
 
         function onEscapePressed() {
-            if (root.isControlsDisabled) {
+            if (root.isControlsDisabled || root.isTabBarDisabled) {
                 return
             }
 
@@ -101,6 +107,10 @@ PageType {
         function onUpdateContainerFinished(message) {
             PageController.showNotificationMessage(message)
             PageController.closePage()
+        }
+
+        function onCachedProfileCleared(message) {
+            PageController.showNotificationMessage(message)
         }
     }
 
@@ -179,7 +189,7 @@ PageType {
         leftPadding: 96
         rightPadding: 96
 
-        enabled: !root.isControlsDisabled
+        enabled: !root.isControlsDisabled && !root.isTabBarDisabled
 
         background: Shape {
             width: parent.width

@@ -42,10 +42,10 @@ public:
 public slots:
     void updateModel(const QJsonArray &containers);
 
-    void setCurrentlyProcessedContainerIndex(int containerIndex);
-    int getCurrentlyProcessedContainerIndex();
+    void setProcessedContainerIndex(int containerIndex);
+    int getProcessedContainerIndex();
 
-    QString getCurrentlyProcessedContainerName();
+    QString getProcessedContainerName();
 
     QJsonObject getContainerConfig(const int containerIndex);
 
@@ -58,7 +58,7 @@ signals:
 private:
     QMap<DockerContainer, QJsonObject> m_containers;
 
-    int m_currentlyProcessedContainerIndex;
+    int m_processedContainerIndex;
 };
 
 #endif // CONTAINERS_MODEL_H

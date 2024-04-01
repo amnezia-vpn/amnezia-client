@@ -2,6 +2,9 @@
 #include <QJsonDocument>
 #include <QQmlFile>
 #include <QEventLoop>
+#include <QImage>
+
+#include <android/bitmap.h>
 
 #include "android_controller.h"
 #include "android_utils.h"
@@ -207,6 +210,51 @@ void AndroidController::clearLogs()
 void AndroidController::setScreenshotsEnabled(bool enabled)
 {
     callActivityMethod("setScreenshotsEnabled", "(Z)V", enabled);
+}
+
+void AndroidController::minimizeApp()
+{
+    callActivityMethod("minimizeApp", "()V");
+}
+
+QJsonArray AndroidController::getAppList()
+{
+    QJniObject appList = callActivityMethod<jstring>("getAppList", "()Ljava/lang/String;");
+    QJsonArray jsonAppList = QJsonDocument::fromJson(appList.toString().toUtf8()).array();
+    return jsonAppList;
+}
+
+QPixmap AndroidController::getAppIcon(const QString &package, QSize *size, const QSize &requestedSize)
+{
+    QJniObject bitmap = callActivityMethod<jobject>("getAppIcon", "(Ljava/lang/String;II)Landroid/graphics/Bitmap;",
+                                                    QJniObject::fromString(package).object<jstring>(),
+                                                    requestedSize.width(), requestedSize.height());
+
+    QJniEnvironment env;
+    AndroidBitmapInfo info;
+    if (AndroidBitmap_getInfo(env.jniEnv(), bitmap.object(), &info) != ANDROID_BITMAP_RESULT_SUCCESS) return {};
+
+    void *pixels;
+    if (AndroidBitmap_lockPixels(env.jniEnv(), bitmap.object(), &pixels) != ANDROID_BITMAP_RESULT_SUCCESS) return {};
+
+    int width = info.width;
+    int height = info.height;
+
+    size->setWidth(width);
+    size->setHeight(height);
+
+    QImage image(width, height, QImage::Format_RGBA8888);
+    if (info.stride == uint32_t(image.bytesPerLine())) {
+        memcpy((void *) image.constBits(), pixels, info.stride * height);
+    } else {
+        auto *bmpPtr = static_cast<uchar *>(pixels);
+        for (int i = 0; i < height; i++, bmpPtr += info.stride)
+            memcpy((void *) image.constScanLine(i), bmpPtr, width);
+    }
+
+    if (AndroidBitmap_unlockPixels(env.jniEnv(), bitmap.object()) != ANDROID_BITMAP_RESULT_SUCCESS) return {};
+
+    return QPixmap::fromImage(image);
 }
 
 // Moving log processing to the Android side

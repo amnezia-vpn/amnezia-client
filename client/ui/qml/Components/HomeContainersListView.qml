@@ -69,7 +69,7 @@ ListView {
                             return
                         }
 
-                        ContainersModel.setCurrentlyProcessedContainerIndex(proxyDefaultServerContainersModel.mapToSource(index))
+                        ContainersModel.setProcessedContainerIndex(proxyDefaultServerContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                         containersDropDown.close()
