@@ -13,6 +13,7 @@ namespace LanguageSettings
         English,
         Russian,
         China_cn,
+        Ukrainian,
         Persian,
         Arabic,
         Burmese
