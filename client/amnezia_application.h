@@ -14,6 +14,8 @@
 #include "settings.h"
 #include "vpnconnection.h"
 
+#include "core/controllers/apiController.h"
+
 #include "ui/controllers/connectionController.h"
 #include "ui/controllers/exportController.h"
 #include "ui/controllers/importController.h"
@@ -22,7 +24,6 @@
 #include "ui/controllers/settingsController.h"
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
-#include "ui/controllers/apiController.h"
 #include "ui/controllers/appSplitTunnelingController.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
