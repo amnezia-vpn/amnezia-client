@@ -115,35 +115,6 @@ PageType {
                         }
 
                         BasicButtonType {
-                            Layout.topMargin: 24
-                            Layout.leftMargin: -8
-                            implicitHeight: 32
-
-                            defaultColor: "transparent"
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                            textColor: "#EB5757"
-
-                            text: qsTr("Remove WG")
-
-                            clickedFunc: function() {
-                                var headerText = qsTr("Remove WG from server?")
-                                var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
-                                var yesButtonText = qsTr("Continue")
-                                var noButtonText = qsTr("Cancel")
-
-                                var yesButtonFunction = function() {
-                                    PageController.goToPage(PageEnum.PageDeinstalling)
-                                    InstallController.removeCurrentlyProcessedContainer()
-                                }
-                                var noButtonFunction = function() {
-                                }
-
-                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                            }
-                        }
-
-                        BasicButtonType {
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
@@ -162,10 +133,6 @@ PageType {
                     }
                 }
             }
-        }
-
-        QuestionDrawer {
-            id: questionDrawer
         }
     }
 }

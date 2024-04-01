@@ -47,7 +47,7 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onRemoveCurrentlyProcessedContainerFinished(finishedMessage) {
+        function onRemoveProcessedContainerFinished(finishedMessage) {
             PageController.closePage() // close deInstalling page
             PageController.closePage() // close page with remove button
             PageController.showNotificationMessage(finishedMessage)
@@ -83,35 +83,6 @@ PageType {
             anchors.right: parent.right
 
             property bool isServerWithWriteAccess: ServersModel.isProcessedServerHasWriteAccess()
-
-            LabelWithButtonType {
-                visible: content.isServerWithWriteAccess
-                Layout.fillWidth: true
-
-                text: qsTr("Clear Amnezia cache")
-                descriptionText: qsTr("May be needed when changing other settings")
-
-                clickedFunction: function() {
-                    var headerText = qsTr("Clear cached profiles?")
-                    var descriptionText = qsTr("")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        PageController.showBusyIndicator(true)
-                        SettingsController.clearCachedProfiles()
-                        PageController.showBusyIndicator(false)
-                    }
-                    var noButtonFunction = function() {
-                    }
-
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                }
-            }
-
-            DividerType {
-                visible: content.isServerWithWriteAccess
-            }
 
             LabelWithButtonType {
                 visible: content.isServerWithWriteAccess
@@ -238,7 +209,7 @@ PageType {
 
                     var yesButtonFunction = function() {
                         PageController.showBusyIndicator(true)
-                        ApiController.clearApiConfig()
+                        InstallController.removeApiConfig()
                         PageController.showBusyIndicator(false)
                     }
                     var noButtonFunction = function() {

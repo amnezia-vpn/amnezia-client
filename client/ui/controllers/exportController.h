@@ -3,10 +3,9 @@
 
 #include <QObject>
 
-#include "configurators/vpn_configurator.h"
+#include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
-#include "ui/models/clientManagementModel.h"
 #ifdef Q_OS_ANDROID
     #include "platforms/android/authResultReceiver.h"
 #endif
@@ -15,11 +14,9 @@ class ExportController : public QObject
 {
     Q_OBJECT
 public:
-    explicit ExportController(const QSharedPointer<ServersModel> &serversModel,
-                              const QSharedPointer<ContainersModel> &containersModel,
-                              const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                              const std::shared_ptr<Settings> &settings,
-                              const std::shared_ptr<VpnConfigurator> &configurator, QObject *parent = nullptr);
+    explicit ExportController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+                              const QSharedPointer<ClientManagementModel> &clientManagementModel, const std::shared_ptr<Settings> &settings,
+                              QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY exportConfigChanged)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY exportConfigChanged)
@@ -65,11 +62,13 @@ private:
 
     void clearPreviousConfig();
 
+    ErrorCode generateNativeConfig(const DockerContainer container, const QString &clientName, const Proto &protocol,
+                                   QJsonObject &jsonNativeConfig);
+
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
     std::shared_ptr<Settings> m_settings;
-    std::shared_ptr<VpnConfigurator> m_configurator;
 
     QString m_config;
     QString m_nativeConfigString;

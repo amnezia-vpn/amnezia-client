@@ -14,7 +14,7 @@
 #include "settings.h"
 #include "vpnconnection.h"
 
-#include "configurators/vpn_configurator.h"
+#include "core/controllers/apiController.h"
 
 #include "ui/controllers/connectionController.h"
 #include "ui/controllers/exportController.h"
@@ -24,7 +24,6 @@
 #include "ui/controllers/settingsController.h"
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
-#include "ui/controllers/apiController.h"
 #include "ui/controllers/appSplitTunnelingController.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
@@ -86,7 +85,6 @@ private:
 
     QQmlApplicationEngine *m_engine {};
     std::shared_ptr<Settings> m_settings;
-    std::shared_ptr<VpnConfigurator> m_configurator;
 
     QSharedPointer<ContainerProps> m_containerProps;
     QSharedPointer<ProtocolProps> m_protocolProps;
