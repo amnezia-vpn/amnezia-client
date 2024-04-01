@@ -79,6 +79,7 @@ open class OpenVpn : Protocol() {
                 }
                 configPluggableTransport(configBuilder, config)
                 configBuilder.configSplitTunneling(config)
+                configBuilder.configAppSplitTunneling(config)
 
                 scope.launch {
                     val status = client.connect()

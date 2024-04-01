@@ -35,8 +35,10 @@ class Daemon : public QObject {
   virtual QJsonObject getStatus();
 
   // Callback before any Activating measure is done
-  virtual void prepareActivation(const InterfaceConfig& config){
-      Q_UNUSED(config)};
+  virtual void prepareActivation(const InterfaceConfig& config, int inetAdapterIndex = 0) {
+      Q_UNUSED(config)  };
+  virtual void activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex = 0) {
+      Q_UNUSED(config)  };
 
   QString logs();
   void cleanLogs();

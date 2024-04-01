@@ -22,7 +22,7 @@ PageType {
 
     property var isServerFromApi: ServersModel.getDefaultServerData("isServerFromApi")
     
-    defaultActiveFocusItem: website_ip_field.textField
+    defaultActiveFocusItem: searchField.textField
 
     property bool pageEnabled: {
         return !ConnectionController.isConnected && !isServerFromApi
@@ -188,7 +188,24 @@ PageType {
                 width: parent.width
                 height: sites.contentItem.height
 
-                model: SitesModel
+                model: SortFilterProxyModel {
+                    id: proxySitesModel
+                    sourceModel: SitesModel
+                    filters: [
+                        AnyOf {
+                            RegExpFilter {
+                                roleName: "url"
+                                pattern: ".*" + searchField.textField.text + ".*"
+                                caseSensitivity: Qt.CaseInsensitive
+                            }
+                            RegExpFilter {
+                                roleName: "ip"
+                                pattern: ".*" + searchField.textField.text + ".*"
+                                caseSensitivity: Qt.CaseInsensitive
+                            }
+                        }
+                    ]
+                }
 
                 clip: true
                 interactive: false
@@ -218,7 +235,7 @@ PageType {
                                 var noButtonText = qsTr("Cancel")
 
                                 var yesButtonFunction = function() {
-                                    SitesController.removeSite(index)
+                                    SitesController.removeSite(proxySitesModel.mapToSource(index))
                                 }
                                 var noButtonFunction = function() {
                                 }
@@ -255,7 +272,7 @@ PageType {
         anchors.bottomMargin: 24
 
         TextFieldWithHeaderType {
-            id: website_ip_field
+            id: searchField
 
             Layout.fillWidth: true
 
@@ -429,9 +446,5 @@ PageType {
                 }
             }
         }
-    }
-
-    QuestionDrawer {
-        id: questionDrawer
     }
 }
