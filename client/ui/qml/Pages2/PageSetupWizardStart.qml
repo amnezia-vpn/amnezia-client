@@ -24,6 +24,7 @@ PageType {
 
         function onClosePage() {
             if (stackView.depth <= 1) {
+                PageController.hideWindow()
                 return
             }
             stackView.pop()
@@ -45,6 +46,10 @@ PageType {
         }
 
         function onDisableControls(disabled) {
+            isControlsDisabled = disabled
+        }
+
+        function onDisableTabBar(disabled) {
             isControlsDisabled = disabled
         }
 

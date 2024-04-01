@@ -86,13 +86,6 @@ Item {
         }
     }
 
-    /** Set once based on first implicit height change once all children are layed out */
-    Component.onCompleted: {
-        if (root.isCollapsed && root.collapsedHeight == 0) {
-            root.collapsedHeight = drawerContent.implicitHeight
-        }
-    }
-
     Rectangle {
         id: background
 
@@ -186,7 +179,7 @@ Item {
         y: root.height - drawerContent.height
         state: root.drawerCollapsed
 
-        implicitHeight: root.isCollapsed ? collapsedLoader.implicitHeight : expandedLoader.implicitHeight
+        implicitHeight: root.isCollapsed ? collapsedHeight : expandedHeight
 
         onStateChanged: {
             if (root.isCollapsed) {
@@ -246,7 +239,6 @@ Item {
         Loader {
             id: collapsedLoader
 
-            visible: root.isCollapsed
             sourceComponent: root.collapsedContent
 
             anchors.right: parent.right

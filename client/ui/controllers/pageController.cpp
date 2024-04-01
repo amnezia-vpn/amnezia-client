@@ -7,6 +7,7 @@
 #endif
 
 #ifdef Q_OS_ANDROID
+    #include "platforms/android/android_controller.h"
     #include "platforms/android/android_utils.h"
     #include <QJniObject>
 #endif
@@ -71,6 +72,13 @@ void PageController::closeWindow()
     } else {
         emit hideMainWindow();
     }
+#endif
+}
+
+void PageController::hideWindow()
+{
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->minimizeApp();
 #endif
 }
 
