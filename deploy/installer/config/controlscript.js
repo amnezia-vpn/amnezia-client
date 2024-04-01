@@ -235,8 +235,8 @@ onFinishButtonClicked = function() {
                 installer.execute("cmd", cmdArgs);
             }
             else if (runningOnMacOS()) {
-                let cmdArgs = ["-c", "rm ~/Library/Preferences/org.amneziavpn.AmneziaVPN.plist"];
-                installer.execute("/bin/bash", cmdArgs);
+                let plistPath = QDesktopServices.storageLocation(QDesktopServices.HomeLocation) + "/Library/Preferences/org.amneziavpn.AmneziaVPN.plist";
+                installer.performOperation("Delete", [plistPath]);
             }
             else if (runningOnLinux()) {
                 let cmdArgs = ["-c", "rm -rf ~/.config/AmneziaVPN.ORG"];
