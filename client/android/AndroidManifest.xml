@@ -24,9 +24,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- Enable when VPN-per-app mode will be implemented -->
-    <!-- <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/> -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
 
     <application
         android:name=".AmneziaApplication"

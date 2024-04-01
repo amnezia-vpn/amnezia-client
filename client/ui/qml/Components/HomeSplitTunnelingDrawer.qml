@@ -57,7 +57,7 @@ DrawerType2 {
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            enabled: ! ServersModel.isDefaultServerDefaultContainerHasSplitTunneling || !ServersModel.getDefaultServerData("isServerFromApi")
+            enabled: !ServersModel.isDefaultServerDefaultContainerHasSplitTunneling || !ServersModel.getDefaultServerData("isServerFromApi")
 
             text: qsTr("Site-based split tunneling")
             descriptionText: enabled && SitesModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
@@ -80,7 +80,7 @@ DrawerType2 {
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
-//                PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
+                PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
                 root.close()
             }
         }

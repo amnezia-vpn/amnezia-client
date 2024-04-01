@@ -134,7 +134,7 @@ void WindowsSplitTunnel::setRules(const QStringList& appPaths) {
   logger.debug() << "New Configuration applied: " << getState();
 }
 
-void WindowsSplitTunnel::start(int inetAdapterIndex) {
+void WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
   // To Start we need to send 2 things:
   // Network info (what is vpn what is network)
   logger.debug() << "Starting SplitTunnel";
@@ -171,7 +171,7 @@ void WindowsSplitTunnel::start(int inetAdapterIndex) {
   }
   logger.debug() << "Driver is  ready || new State:" << getState();
 
-  auto config = generateIPConfiguration(inetAdapterIndex);
+  auto config = generateIPConfiguration(inetAdapterIndex, vpnAdapterIndex);
   auto ok = DeviceIoControl(m_driver, IOCTL_REGISTER_IP_ADDRESSES, &config[0],
                             (DWORD)config.size(), nullptr, 0, &bytesReturned,
                             nullptr);
@@ -270,14 +270,19 @@ std::vector<uint8_t> WindowsSplitTunnel::generateAppConfiguration(
 }
 
 std::vector<uint8_t> WindowsSplitTunnel::generateIPConfiguration(
-    int inetAdapterIndex) {
+    int inetAdapterIndex, int vpnAdapterIndex) {
   std::vector<uint8_t> out(sizeof(IP_ADDRESSES_CONFIG));
 
   auto config = reinterpret_cast<IP_ADDRESSES_CONFIG*>(&out[0]);
 
   auto ifaces = QNetworkInterface::allInterfaces();
+
+  if (vpnAdapterIndex == 0) {
+    vpnAdapterIndex = WindowsCommons::VPNAdapterIndex();
+  }
+
   // Always the VPN
-  getAddress(WindowsCommons::VPNAdapterIndex(), &config->TunnelIpv4,
+  getAddress(vpnAdapterIndex, &config->TunnelIpv4,
              &config->TunnelIpv6);
   // 2nd best route
   getAddress(inetAdapterIndex, &config->InternetIpv4, &config->InternetIpv6);

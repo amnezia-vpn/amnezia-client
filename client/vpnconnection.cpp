@@ -317,6 +317,17 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
     m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
+
+    auto appsRouteMode = m_settings->getAppsRouteMode();
+    auto apps = m_settings->getVpnApps(appsRouteMode);
+
+    QJsonArray appsJsonArray;
+    for (const auto &app : apps) {
+        appsJsonArray.append(app.appPath.isEmpty() ? app.packageName : app.appPath);
+    }
+
+    m_vpnConfiguration.insert(config_key::appSplitTunnelType, appsRouteMode);
+    m_vpnConfiguration.insert(config_key::splitTunnelApps, appsJsonArray);
 }
 
 #ifdef Q_OS_ANDROID
