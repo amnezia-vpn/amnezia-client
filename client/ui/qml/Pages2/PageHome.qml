@@ -298,24 +298,37 @@ PageType {
                 }
             }
 
-            Flickable {
-                id: serversContainer
+
+            ButtonGroup {
+                id: serversRadioButtonGroup
+            }
+
+            ListView {
+                id: serversMenuContent
 
                 anchors.top: serversMenuHeader.bottom
                 anchors.right: parent.right
                 anchors.left: parent.left
+                anchors.bottom: parent.bottom
                 anchors.topMargin: 16
 
-                implicitHeight: parent.height - serversMenuHeader.implicitHeight
-                clip: true
-                interactive: true
+                model: ServersModel
+                currentIndex: ServersModel.defaultIndex
+
+                ScrollBar.vertical: ScrollBar {
+                    id: scrollBar
+                    policy: serversMenuContent.height >= serversMenuContent.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
+                }
 
                 Keys.onUpPressed: scrollBar.decrease()
                 Keys.onDownPressed: scrollBar.increase()
 
-                ButtonGroup {
-                        id: serversRadioButtonGroup
+                Connections {
+                    target: ServersModel
+                    function onDefaultServerIndexChanged(serverIndex) {
+                        serversMenuContent.currentIndex = serverIndex
                     }
+                }
 
                 ListView {
                       id: serversMenuContent
