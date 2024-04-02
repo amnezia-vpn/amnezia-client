@@ -18,6 +18,7 @@ import "../Components"
 PageType {
     id: root
 
+    property var selectedServerIndex: ServersModel.getDefaultServerIndex()
     Connections {
         target: PageController
 
@@ -101,7 +102,6 @@ PageType {
             }
         }
     }
-
 
     DrawerType2 {
         id: drawer
@@ -327,83 +327,113 @@ PageType {
                     }
                 }
 
-                clip: true
+                ListView {
+                      id: serversMenuContent
+                      width: parent.width
+                      spacing: 16
 
-                delegate: Item {
-                    id: menuContentDelegate
+                      anchors.fill: parent
+                      anchors.bottomMargin: 32
 
-                    property variant delegateData: model
+                      highlightFollowsCurrentItem: true
+                      highlightMoveDuration: 100
 
-                    implicitWidth: serversMenuContent.width
-                    implicitHeight: serverRadioButtonContent.implicitHeight
+                      model: ServersModel
 
-                    ColumnLayout {
-                        id: serverRadioButtonContent
+                      Component.onCompleted: currentIndex = selectedServerIndex //auto-scroll to the selected server
 
-                        anchors.fill: parent
-                        anchors.rightMargin: 16
-                        anchors.leftMargin: 16
+                      ScrollBar.vertical: ScrollBar {
+                          id: scrollBar
+                          active: true
+                          policy: serversContainer.height >= serversMenuContent.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
+                          width: 12
+                      }
 
-                        spacing: 0
+                      Connections {
+                          target: ServersModel
+                          function onDefaultServerIndexChanged(serverIndex) {
+                              serversMenuContent.currentIndex = serverIndex
+                          }
+                      }
 
-                        RowLayout {
-                            Layout.fillWidth: true
-                            VerticalRadioButton {
-                                id: serverRadioButton
+                      clip: true
+                      interactive: true
 
-                                Layout.fillWidth: true
+                      delegate: Item {
+                          id: menuContentDelegate
 
-                                text: name
-                                descriptionText: serverDescription
+                          property variant delegateData: model
 
-                                checked: index === serversMenuContent.currentIndex
-                                checkable: !ConnectionController.isConnected
+                          implicitWidth: serversMenuContent.width
+                          implicitHeight: serverRadioButtonContent.implicitHeight
 
-                                ButtonGroup.group: serversRadioButtonGroup
+                          ColumnLayout {
+                              id: serverRadioButtonContent
 
-                                onClicked: {
-                                    if (ConnectionController.isConnected) {
-                                        PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
-                                        return
-                                    }
+                              anchors.fill: parent
+                              anchors.rightMargin: 16
+                              anchors.leftMargin: 16
 
-                                    serversMenuContent.currentIndex = index
+                              spacing: 0
 
-                                    ServersModel.defaultIndex = index
-                                }
+                              RowLayout {
+                                  VerticalRadioButton {
+                                      id: serverRadioButton
 
-                                MouseArea {
-                                    anchors.fill: serverRadioButton
-                                    cursorShape: Qt.PointingHandCursor
-                                    enabled: false
-                                }
-                            }
+                                      Layout.fillWidth: true
 
-                            ImageButtonType {
-                                image: "qrc:/images/controls/settings.svg"
-                                imageColor: "#D7D8DB"
+                                      text: name
+                                      descriptionText: serverDescription
 
-                                implicitWidth: 56
-                                implicitHeight: 56
+                                      checked: index === serversMenuContent.currentIndex
+                                      checkable: !ConnectionController.isConnected
 
-                                z: 1
+                                      ButtonGroup.group: serversRadioButtonGroup
 
-                                onClicked: function() {
-                                    ServersModel.processedIndex = index
-                                    PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                                    drawer.close()
-                                }
-                            }
-                        }
+                                      onClicked: {
+                                          if (ConnectionController.isConnected) {
+                                              PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
+                                              return
+                                          }
 
-                        DividerType {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 0
-                            Layout.rightMargin: 0
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+                                          serversMenuContent.currentIndex = index
+
+                                          ServersModel.defaultIndex = index
+                                      }
+
+                                      MouseArea {
+                                          anchors.fill: serverRadioButton
+                                          cursorShape: Qt.PointingHandCursor
+                                          enabled: false
+                                      }
+                                  }
+
+                                  ImageButtonType {
+                                      image: "qrc:/images/controls/settings.svg"
+                                      imageColor: "#D7D8DB"
+
+                                      implicitWidth: 56
+                                      implicitHeight: 56
+
+                                      z: 1
+
+                                      onClicked: function() {
+                                          ServersModel.processedIndex = index
+                                          PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                                          drawer.close()
+                                      }
+                                  }
+                              }
+
+                              DividerType {
+                                  Layout.fillWidth: true
+                                  Layout.leftMargin: 0
+                                  Layout.rightMargin: 0
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      }
+  }
