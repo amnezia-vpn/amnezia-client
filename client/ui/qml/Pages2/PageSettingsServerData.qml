@@ -116,12 +116,13 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        PageController.showBusyIndicator(true)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            ConnectionController.closeConnection()
+                            PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.rebootProcessedServer()
+                            PageController.showBusyIndicator(false)
                         }
-                        InstallController.rebootProcessedServer()
-                        PageController.showBusyIndicator(false)
                     }
                     var noButtonFunction = function() {
                     }
@@ -147,12 +148,13 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        PageController.showBusyIndicator(true)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            ConnectionController.closeConnection()
+                            PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.removeProcessedServer()
+                            PageController.showBusyIndicator(false)
                         }
-                        InstallController.removeProcessedServer()
-                        PageController.showBusyIndicator(false)
                     }
                     var noButtonFunction = function() {
                     }
@@ -177,11 +179,12 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        PageController.goToPage(PageEnum.PageDeinstalling)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            ConnectionController.closeConnection()
+                            PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
+                        } else {
+                            PageController.goToPage(PageEnum.PageDeinstalling)
+                            InstallController.removeAllContainers()
                         }
-                        InstallController.removeAllContainers()
                     }
                     var noButtonFunction = function() {
                     }
@@ -208,9 +211,13 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        PageController.showBusyIndicator(true)
-                        InstallController.removeApiConfig()
-                        PageController.showBusyIndicator(false)
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.removeApiConfig()
+                            PageController.showBusyIndicator(false)
+                        }
                     }
                     var noButtonFunction = function() {
                     }
