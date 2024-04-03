@@ -20,6 +20,17 @@ import "../Components"
 PageType {
     id: root
 
+    property bool pageEnabled
+
+    Component.onCompleted: {
+        if (ConnectionController.isConnected) {
+            PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
+            root.pageEnabled = false
+        } else {
+            root.pageEnabled = true
+        }
+    }
+
     QtObject {
         id: routeMode
         property int allApps: 0
@@ -70,6 +81,8 @@ PageType {
                 Layout.leftMargin: 16
 
                 headerText: qsTr("App split tunneling")
+
+                enabled: root.pageEnabled
             }
 
             SwitcherType {
@@ -77,6 +90,8 @@ PageType {
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
+
+                enabled: root.pageEnabled
 
                 checked: AppSplitTunnelingModel.isTunnelingEnabled
                 onToggled: {                    
@@ -99,7 +114,7 @@ PageType {
 
             headerText: qsTr("Mode")
 
-            enabled: Qt.platform.os === "android"
+            enabled: Qt.platform.os === "android" && root.pageEnabled
 
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
@@ -138,6 +153,8 @@ PageType {
         anchors.top: header.bottom
         anchors.topMargin: 16
         contentHeight: col.implicitHeight + addAppButton.implicitHeight + addAppButton.anchors.bottomMargin + addAppButton.anchors.topMargin
+
+        enabled: root.pageEnabled
 
         Column {
             id: col
@@ -212,6 +229,8 @@ PageType {
 
     RowLayout {
         id: addAppButton
+
+        enabled: root.pageEnabled
 
         anchors.bottom: parent.bottom
         anchors.left: parent.left
