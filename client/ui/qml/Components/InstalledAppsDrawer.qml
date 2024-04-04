@@ -103,7 +103,7 @@ DrawerType2 {
                                 text: appName
 
                                 onCheckedChanged: {
-                                    listView.model.selectedStateChanged(index, checked)
+                                    installedAppsModel.selectedStateChanged(index, checked)
                                 }
                             }
 
@@ -152,7 +152,7 @@ DrawerType2 {
 
             clickedFunc: function() {
                 PageController.showBusyIndicator(true)
-                AppSplitTunnelingController.addApps(listView.model.getSelectedAppsInfo())
+                AppSplitTunnelingController.addApps(installedAppsModel.getSelectedAppsInfo())
                 PageController.showBusyIndicator(false)
                 root.close()
             }
