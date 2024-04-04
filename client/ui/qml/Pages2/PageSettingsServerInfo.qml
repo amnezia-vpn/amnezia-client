@@ -204,7 +204,7 @@ PageType {
             TabButtonType {
                 id: dataTab
                 isSelected: tabBar.currentIndex === 2
-                text: qsTr("Data")
+                text: qsTr("Management")
 
                 Keys.onReturnPressed: tabBar.currentIndex = 2
                 Keys.onEnterPressed: tabBar.currentIndex = 2

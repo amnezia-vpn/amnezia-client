@@ -143,7 +143,6 @@ PageType {
                         TextFieldWithHeaderType {
                             id: portTextField
 
-
                             Layout.fillWidth: true
                             Layout.topMargin: 40
                             parentFlickable: fl
@@ -419,48 +418,11 @@ PageType {
                             textAreaText: additionalServerCommands
                             placeholderText: qsTr("Commands:")
                             parentFlickable: fl
-                            KeyNavigation.tab: removeOpenVpnButton.visible ?
-                                               removeOpenVpnButton :
-                                               saveRestartButton
+                            KeyNavigation.tab: saveRestartButton
                             textArea.onEditingFinished: {
                                 if (additionalServerCommands !== textAreaText) {
                                     additionalServerCommands = textAreaText
                                 }
-                            }
-                        }
-
-                        BasicButtonType {
-                            id: removeOpenVpnButton
-                            Layout.topMargin: 24
-                            Layout.leftMargin: -8
-                            implicitHeight: 32
-
-                            parentFlickable: fl
-                            KeyNavigation.tab: saveRestartButton
-
-                            visible: ContainersModel.getCurrentlyProcessedContainerIndex() === ContainerEnum.OpenVpn
-
-                            defaultColor: "transparent"
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                            textColor: "#EB5757"
-
-                            text: qsTr("Remove OpenVPN")
-
-                            clickedFunc: function() {
-                                var headerText = qsTr("Remove OpenVpn from server?")
-                                var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
-                                var yesButtonText = qsTr("Continue")
-                                var noButtonText = qsTr("Cancel")
-
-                                var yesButtonFunction = function() {
-                                    PageController.goToPage(PageEnum.PageDeinstalling)
-                                    InstallController.removeCurrentlyProcessedContainer()
-                                }
-                                var noButtonFunction = function() {
-                                }
-
-                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
                         }
 
@@ -471,10 +433,9 @@ PageType {
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
+                            text: qsTr("Save")
                             parentFlickable: fl
                             Keys.onTabPressed: lastItemTabClicked(focusItem)
-
-                            text: qsTr("Save and Restart Amnezia")
 
                             clickedFunc: function() {
                                 forceActiveFocus()

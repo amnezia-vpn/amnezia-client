@@ -96,11 +96,11 @@ RadioButton {
     }
 
     contentItem: Item {
-        implicitWidth: content.implicitWidth
-        implicitHeight: content.implicitHeight
-
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.leftMargin: 8 + background.width
+
+        implicitHeight: content.implicitHeight
 
         ColumnLayout {
             id: content

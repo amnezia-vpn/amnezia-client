@@ -1,11 +1,13 @@
 package org.amnezia.vpn
 
+import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Intent
 import android.content.Intent.EXTRA_MIME_TYPES
 import android.content.Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.net.VpnService
 import android.os.Bundle
@@ -14,6 +16,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import android.provider.Settings
 import android.view.WindowManager.LayoutParams
 import android.webkit.MimeTypeMap
 import android.widget.Toast
@@ -22,12 +25,15 @@ import androidx.core.content.ContextCompat
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.text.RegexOption.IGNORE_CASE
+import AppListProvider
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
@@ -216,13 +222,13 @@ class AmneziaActivity : QtActivity() {
                 when (resultCode) {
                     RESULT_OK -> {
                         Log.d(TAG, "Vpn permission granted")
-                        Toast.makeText(this, "Vpn permission granted", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, resources.getText(R.string.vpnGranted), Toast.LENGTH_LONG).show()
                         checkVpnPermissionCallbacks?.run { onSuccess() }
                     }
 
                     else -> {
                         Log.w(TAG, "Vpn permission denied, resultCode: $resultCode")
-                        Toast.makeText(this, "Vpn permission denied", Toast.LENGTH_LONG).show()
+                        showOnVpnPermissionRejectDialog()
                         checkVpnPermissionCallbacks?.run { onFail() }
                     }
                 }
@@ -278,6 +284,17 @@ class AmneziaActivity : QtActivity() {
             return
         }
         onSuccess()
+    }
+
+    private fun showOnVpnPermissionRejectDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.vpnSetupFailed)
+            .setMessage(R.string.vpnSetupFailedMessage)
+            .setNegativeButton(R.string.ok) { _, _ -> }
+            .setPositiveButton(R.string.openVpnSettings) { _, _ ->
+                startActivity(Intent(Settings.ACTION_VPN_SETTINGS))
+            }
+            .show()
     }
 
     @MainThread
@@ -462,5 +479,33 @@ class AmneziaActivity : QtActivity() {
             val flag = if (enabled) 0 else LayoutParams.FLAG_SECURE
             window.setFlags(flag, LayoutParams.FLAG_SECURE)
         }
+    }
+
+    @Suppress("unused")
+    fun minimizeApp() {
+        Log.v(TAG, "Minimize application")
+        mainScope.launch {
+            moveTaskToBack(false)
+        }
+    }
+
+    @Suppress("unused")
+    fun getAppList(): String {
+        Log.v(TAG, "Get app list")
+        var appList = ""
+        runBlocking {
+            mainScope.launch {
+                withContext(Dispatchers.IO) {
+                    appList = AppListProvider.getAppList(packageManager, packageName)
+                }
+            }.join()
+        }
+        return appList
+    }
+
+    @Suppress("unused")
+    fun getAppIcon(packageName: String, width: Int, height: Int): Bitmap {
+        Log.v(TAG, "Get app icon: $packageName")
+        return AppListProvider.getAppIcon(packageManager, packageName, width, height)
     }
 }

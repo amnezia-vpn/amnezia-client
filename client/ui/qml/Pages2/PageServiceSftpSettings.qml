@@ -151,7 +151,7 @@ PageType {
                             id: usernameLabel
                             Layout.fillWidth: true
 
-                            text: qsTr("Login")
+                            text: qsTr("User name")
                             descriptionText: username
 
                             descriptionOnTop: true
@@ -315,7 +315,7 @@ PageType {
 
                                 var yesButtonFunction = function() {
                                     PageController.goToPage(PageEnum.PageDeinstalling)
-                                    InstallController.removeCurrentlyProcessedContainer()
+                                    InstallController.removeProcessedContainer()
                                 }
                                 var noButtonFunction = function() {
                                     if (!GC.isMobile()) {

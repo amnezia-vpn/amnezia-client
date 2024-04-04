@@ -42,7 +42,7 @@ PageType {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            headerText: ContainersModel.getCurrentlyProcessedContainerName() + qsTr(" settings")
+            headerText: ContainersModel.getProcessedContainerName() + qsTr(" settings")
         }
     }
 
@@ -205,19 +205,19 @@ PageType {
 
                 visible: ServersModel.isProcessedServerHasWriteAccess()
 
-                text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
+                text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: "#EB5757"
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
                 clickedFunction: function() {
-                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
-                    var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
+                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
+                    var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
                         PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeCurrentlyProcessedContainer()
+                        InstallController.removeProcessedContainer()
                     }
                     var noButtonFunction = function() {
                         focusItem.forceActiveFocus()

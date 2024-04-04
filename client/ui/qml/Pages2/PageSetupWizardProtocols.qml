@@ -145,7 +145,7 @@ PageType {
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {
-                                ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(index))
+                                ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(index))
                                 PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                             }
                         }

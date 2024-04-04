@@ -13,18 +13,16 @@ ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> setti
 
 }
 
-QString ShadowSocksConfigurator::genShadowSocksConfig(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
+QString ShadowSocksConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                              const QJsonObject &containerConfig, ErrorCode errorCode)
 {
-    ErrorCode e = ErrorCode::NoError;
     ServerController serverController(m_settings);
 
     QString ssKey = serverController.getTextFileFromContainer(container, credentials,
-                                                              amnezia::protocols::shadowsocks::ssKeyPath, &e);
+                                                              amnezia::protocols::shadowsocks::ssKeyPath, errorCode);
     ssKey.replace("\n", "");
 
-    if (e) {
-        if (errorCode) *errorCode = e;
+    if (errorCode != ErrorCode::NoError) {
         return "";
     }
 

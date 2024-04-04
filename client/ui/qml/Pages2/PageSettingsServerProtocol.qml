@@ -36,14 +36,15 @@ PageType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
+            Layout.bottomMargin: 32
 
-            headerText: ContainersModel.getCurrentlyProcessedContainerName() + qsTr(" settings")
+            headerText: ContainersModel.getProcessedContainerName() + qsTr(" settings")
         }
     }
 
     Item {
         id: focusItem
-        KeyNavigation.tab: protocols
+        KeyNavigation.tab: clearCacheButton
     }
 
     FlickableType {
@@ -63,10 +64,10 @@ PageType {
 
             ListView {
                 id: protocols
-                width: parent.width
+                Layout.fillWidth: true
                 height: protocols.contentItem.height
                 clip: true
-                interactive: false
+                interactive: true
                 model: ProtocolsModel
 
                 activeFocusOnTab: true
@@ -114,6 +115,8 @@ PageType {
                                 case ProtocolEnum.ShadowSocks: ShadowSocksConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                                 case ProtocolEnum.Cloak: CloakConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                                 case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                                 case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                                 }
                                 PageController.goToPage(protocolPage);
@@ -132,26 +135,71 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: clearCacheButton
+
+                Layout.fillWidth: true
+
+                visible: ServersModel.isProcessedServerHasWriteAccess()
+                KeyNavigation.tab: removeButton
+
+                text: qsTr("Clear %1 profile").arg(ContainersModel.getProcessedContainerName())
+
+                clickedFunction: function() {
+                    var headerText = qsTr("Clear %1 profile?").arg(ContainersModel.getProcessedContainerName())
+                    var descriptionText = qsTr("")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        PageController.showBusyIndicator(true)
+                        InstallController.clearCachedProfile()
+                        PageController.showBusyIndicator(false)
+                    }
+                    var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            focusItem.forceActiveFocus()
+                        }
+                    }
+
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+
+                MouseArea {
+                    anchors.fill: clearCacheButton
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
+                }
+            }
+
+            DividerType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: ServersModel.isProcessedServerHasWriteAccess()
+            }
+
+            LabelWithButtonType {
                 id: removeButton
 
-                width: parent.width
+                Layout.fillWidth: true
 
                 visible: ServersModel.isProcessedServerHasWriteAccess()
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
-
-                text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
+                text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: "#EB5757"
 
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
+
                 clickedFunction: function() {
-                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
+                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                     var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
                         PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeCurrentlyProcessedContainer()
+                        InstallController.removeProcessedContainer()
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {
@@ -169,11 +217,14 @@ PageType {
                 }
             }
 
-            DividerType {}
-        }
-    }
+            DividerType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-    QuestionDrawer {
-        id: questionDrawer
+                visible: ServersModel.isProcessedServerHasWriteAccess()
+            }
+        }
+
     }
 }

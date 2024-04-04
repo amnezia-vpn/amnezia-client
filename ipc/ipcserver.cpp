@@ -12,6 +12,7 @@
 #ifdef Q_OS_WIN
 #include "tapcontroller_win.h"
 #include "../client/platforms/windows/daemon/windowsfirewall.h"
+#include "../client/platforms/windows/daemon/windowsdaemon.h"
 #endif
 
 #ifdef Q_OS_LINUX
@@ -24,6 +25,7 @@
 
 IpcServer::IpcServer(QObject *parent):
     IpcInterfaceSource(parent)
+
 {}
 
 int IpcServer::createPrivilegedProcess()
@@ -160,6 +162,30 @@ void IpcServer::cleanUp()
     Logger::cleanUp();
 }
 
+bool IpcServer::createTun(const QString &dev, const QString &subnet)
+{
+    return Router::createTun(dev, subnet);
+}
+
+bool IpcServer::deleteTun(const QString &dev)
+{
+    return Router::deleteTun(dev);
+}
+
+bool IpcServer::updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers)
+{
+    return Router::updateResolvers(ifname, resolvers);
+}
+
+void IpcServer::StartRoutingIpv6()
+{
+    Router::StartRoutingIpv6();
+}
+void IpcServer::StopRoutingIpv6()
+{
+    Router::StopRoutingIpv6();
+}
+
 void IpcServer::setLogsEnabled(bool enabled)
 {
 #ifdef MZ_DEBUG
@@ -223,6 +249,7 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
     QStringList dnsServers;
     dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
     dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
@@ -288,11 +315,12 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
     config.m_dnsServer = configStr.value(amnezia::config_key::dns1).toString();
     config.m_serverPublicKey = "openvpn";
     config.m_serverIpv4Gateway = configStr.value("vpnGateway").toString();
+    config.m_serverIpv4AddrIn = configStr.value("vpnServer").toString();
+    int vpnAdapterIndex = configStr.value("vpnAdapterIndex").toInt();
+    int inetAdapterIndex = configStr.value("inetAdapterIndex").toInt();
 
     int splitTunnelType = configStr.value("splitTunnelType").toInt();
     QJsonArray splitTunnelSites = configStr.value("splitTunnelSites").toArray();
-
-    qDebug() << "splitTunnelType " << splitTunnelType << "splitTunnelSites " << splitTunnelSites;
 
     QStringList AllowedIPAddesses;
 
@@ -307,7 +335,7 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
     if (splitTunnelType == 1) {
         for (auto v : splitTunnelSites) {
             QString ipRange = v.toString();
-            if (ipRange.split('/').size() > 1){
+            if (ipRange.split('/').size() > 1) {
                 config.m_allowedIPAddressRanges.append(
                     IPAddress(QHostAddress(ipRange.split('/')[0]), atoi(ipRange.split('/')[1].toLocal8Bit())));
             } else {
@@ -325,7 +353,17 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
         }
     }
 
-    return WindowsFirewall::instance()->enablePeerTraffic(config);
+    for (const QJsonValue& i : configStr.value(amnezia::config_key::splitTunnelApps).toArray()) {
+        if (!i.isString()) {
+            break;
+        }
+        config.m_vpnDisabledApps.append(i.toString());
+    }
+
+    WindowsFirewall::instance()->enablePeerTraffic(config);
+    WindowsDaemon::instance()->prepareActivation(config, inetAdapterIndex);
+    WindowsDaemon::instance()->activateSplitTunnel(config, vpnAdapterIndex);
+    return true;
 #endif
     return true;
 }

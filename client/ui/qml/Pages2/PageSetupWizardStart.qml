@@ -26,6 +26,7 @@ PageType {
 
         function onClosePage() {
             if (stackView.depth <= 1) {
+                PageController.hideWindow()
                 return
             }
             stackView.pop()
@@ -47,6 +48,10 @@ PageType {
         }
 
         function onDisableControls(disabled) {
+            isControlsDisabled = disabled
+        }
+
+        function onDisableTabBar(disabled) {
             isControlsDisabled = disabled
         }
 
@@ -80,6 +85,20 @@ PageType {
             if (currentPageName === PageController.getPagePath(PageEnum.PageSetupWizardInstalling)) {
                 PageController.closePage()
             }
+        }
+    }
+
+    Connections {
+        target: ImportController
+
+        function onRestoreAppConfig(data) {
+            PageController.showBusyIndicator(true)
+            SettingsController.restoreAppConfigFromData(data)
+            PageController.showBusyIndicator(false)
+        }
+
+        function onImportErrorOccurred(errorMessage, goToPageHome) {
+            PageController.showErrorMessage(errorMessage)
         }
     }
 

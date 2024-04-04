@@ -20,7 +20,7 @@ set(QT_ANDROID_MULTI_ABI_FORWARD_VARS "QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL;CMAKE
 
 # We need to include qtprivate api's
 # As QAndroidBinder is not yet implemented with a public api
-set(LIBS ${LIBS} Qt6::CorePrivate)
+set(LIBS ${LIBS} Qt6::CorePrivate -ljnigraphics)
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/platforms/android)
 
@@ -30,6 +30,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.h
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/installedAppsImageProvider.h
 )
 
 set(SOURCES ${SOURCES}
@@ -38,17 +39,18 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/authResultReceiver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/installedAppsImageProvider.cpp
 )
 
 foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
     set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_EXTRA_LIBS
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/amneziawg/android/${abi}/libwg.so
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/amneziawg/android/${abi}/libwg-go.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/amneziawg/android/${abi}/libwg-quick.so
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libck-ovpn-plugin.so
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libovpn3.so
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libovpnutil.so
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/librsapss.so
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/android/${abi}/libssh.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openssl3/android/${abi}/libcrypto_3.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openssl3/android/${abi}/libssl_3.so
     )
 endforeach()

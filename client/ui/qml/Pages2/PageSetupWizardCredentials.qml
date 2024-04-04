@@ -56,8 +56,8 @@ PageType {
                     regularExpression: InstallController.ipAddressPortRegExp()
                 }
 
-                onFocusChanged: {
-                    textField.text = textField.text.replace(/^\s+|\s+$/g, '');
+                textField.onFocusChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                 }
 
                 KeyNavigation.tab: username.textField
@@ -67,8 +67,12 @@ PageType {
                 id: username
 
                 Layout.fillWidth: true
-                headerText: qsTr("Login to connect via SSH")
+                headerText: qsTr("SSH Username")
                 textFieldPlaceholderText: "root"
+
+                textField.onFocusChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                }
 
                 KeyNavigation.tab: secretData.textField
             }
@@ -88,8 +92,8 @@ PageType {
                     hidePassword = !hidePassword
                 }
 
-                onFocusChanged: {
-                    textField.text = textField.text.replace(/^\s+|\s+$/g, '');
+                textField.onFocusChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                 }
 
                 KeyNavigation.tab: continueButton
@@ -112,7 +116,7 @@ PageType {
                     }
 
                     InstallController.setShouldCreateServer(true)
-                    InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
+                    InstallController.setProcessedServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
 
                     PageController.showBusyIndicator(true)
                     var isConnectionOpened = InstallController.checkSshConnection()

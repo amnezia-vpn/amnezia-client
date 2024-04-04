@@ -2,98 +2,109 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="fa_IR">
 <context>
-    <name>AmneziaApplication</name>
+    <name>AppSplitTunnelingController</name>
     <message>
-        <source>Split tunneling for WireGuard is not implemented, the option was disabled</source>
-        <translation type="vanished">Раздельное туннелирование для &quot;Wireguard&quot; не реализовано,опция отключена</translation>
+        <location filename="../ui/controllers/appSplitTunnelingController.cpp" line="23"/>
+        <source>Application added: %1</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Split tunneling for %1 is not implemented, the option was disabled</source>
-        <translation type="vanished">جداسازی ترافیک برای %1 پیاده سازی نشده، این گزینه غیرفعال است</translation>
+        <location filename="../ui/controllers/appSplitTunnelingController.cpp" line="26"/>
+        <source>The application has already been added</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/appSplitTunnelingController.cpp" line="38"/>
+        <source>The selected applications have been added</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/appSplitTunnelingController.cpp" line="49"/>
+        <source>Application removed: %1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>AndroidController</name>
+    <name>ConnectButton</name>
     <message>
-        <source>AmneziaVPN</source>
-        <translation type="vanished">AmneziaVPN</translation>
-    </message>
-    <message>
-        <source>VPN Connected</source>
-        <extracomment>Refers to the app - which is currently running the background and waiting</extracomment>
-        <translation type="vanished">وی‎پی‎ان متصل است</translation>
-    </message>
-</context>
-<context>
-    <name>ApiController</name>
-    <message>
-        <source>Error when retrieving configuration from cloud server</source>
-        <translation type="vanished">خطا در حین دریافت پیکربندی از سمت سرور</translation>
+        <location filename="../ui/qml/Components/ConnectButton.qml" line="26"/>
+        <source>Unable to disconnect during configuration preparation</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="41"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="66"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>پروتکل وی‎پی‎ان نصب نشده است
 لطفا کانتینر وی‎پی‎ان را نصب کنید</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="65"/>
-        <source>Connection...</source>
+        <location filename="../ui/controllers/connectionController.cpp" line="88"/>
+        <source>unable to create configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionController.cpp" line="110"/>
+        <source>Connecting...</source>
         <translation>در حال ارتباط...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="70"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="115"/>
         <source>Connected</source>
         <translation>متصل</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="115"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="139"/>
+        <source>Preparing...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionController.cpp" line="161"/>
         <source>Settings updated successfully, Reconnnection...</source>
         <translation>تنظیمات به روز رسانی شد
 در حال اتصال دوباره...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="118"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="164"/>
         <source>Settings updated successfully</source>
         <translation>تنظیمات با موفقیت به‎روز‎رسانی شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="79"/>
-        <source>Reconnection...</source>
+        <location filename="../ui/controllers/connectionController.cpp" line="124"/>
+        <source>Reconnecting...</source>
         <translation>اتصال دوباره...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="62"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="84"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="98"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="104"/>
+        <location filename="../ui/controllers/connectionController.h" line="75"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="129"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="144"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="150"/>
         <source>Connect</source>
         <translation>اتصال</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="89"/>
-        <source>Disconnection...</source>
+        <location filename="../ui/controllers/connectionController.cpp" line="134"/>
+        <source>Disconnecting...</source>
         <translation>قطع ارتباط...</translation>
     </message>
 </context>
 <context>
     <name>ConnectionTypeSelectionDrawer</name>
     <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="44"/>
         <source>Add new connection</source>
         <translation>ایجاد ارتباط جدید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="44"/>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="57"/>
         <source>Configure your server</source>
         <translation>تنظیم سرور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="58"/>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="74"/>
         <source>Open config file, key or QR code</source>
         <translation>بارگذاری فایل تنظیمات، کلید یا QR Code</translation>
     </message>
@@ -124,7 +135,7 @@
 <context>
     <name>ExportController</name>
     <message>
-        <location filename="../ui/controllers/exportController.cpp" line="39"/>
+        <location filename="../ui/controllers/exportController.cpp" line="31"/>
         <source>Access error!</source>
         <translation>خطای دسترسی!</translation>
     </message>
@@ -132,68 +143,77 @@
 <context>
     <name>HomeContainersListView</name>
     <message>
-        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="59"/>
+        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="90"/>
         <source>Unable change protocol while there is an active connection</source>
         <translation>امکان تغییر پروتکل در هنگام متصل بودن وجود ندارد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="68"/>
+        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="99"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation>پروتکل انتخاب شده بر روی این پلتفرم پشتیبانی نمی‎‎شود</translation>
-    </message>
-    <message>
-        <source>Reconnect via VPN Procotol: </source>
-        <translation type="vanished">پروتکل VPN را متصل مجدد کنید&quot; </translation>
     </message>
 </context>
 <context>
     <name>HomeSplitTunnelingDrawer</name>
     <message>
-        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="32"/>
-        <source>Split tunneling</source>
-        <translation type="unfinished">جداسازی ترافیک</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="33"/>
-        <source>Allows you to connect to some sites or applications through a VPN connection and bypass others</source>
-        <translation>اجازه می‌دهد به شما که از طریق اتصال VPN به برخی از وب‌سایت‌ها یا برنامه‌ها وصل شوید و از دیگران عبور کنید.</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="42"/>
-        <source>Split tunneling on the server</source>
-        <translation type="unfinished"></translation>
+        <source>Split tunneling</source>
+        <translation>جداسازی ترافیک</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="43"/>
+        <source>Allows you to connect to some sites or applications through a VPN connection and bypass others</source>
+        <translation>اجازه می‌دهد به شما که از طریق اتصال VPN به برخی از وب‌سایت‌ها یا برنامه‌ها وصل شوید و از دیگران عبور کنید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="58"/>
+        <source>Split tunneling on the server</source>
+        <translation>تقسیم تونل‌ها در سرور</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="59"/>
         <source>Enabled 
 Can&apos;t be disabled for current server</source>
-        <translation type="unfinished"></translation>
+        <translation>فعال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="62"/>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="81"/>
         <source>Site-based split tunneling</source>
-        <translation type="unfinished">جداسازی ترافیک بر اساس سایت</translation>
+        <translation>جداسازی ترافیک بر اساس سایت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="63"/>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="82"/>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="102"/>
         <source>Enabled</source>
-        <translation type="unfinished">فعال</translation>
+        <translation>فعال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="63"/>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="82"/>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="102"/>
         <source>Disabled</source>
-        <translation type="unfinished">غیر فعال</translation>
+        <translation>غیر فعال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="79"/>
+        <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="101"/>
         <source>App-based split tunneling</source>
-        <translation type="unfinished">جداسازی ترافیک بر اساس نرم‎افزار</translation>
+        <translation>جداسازی ترافیک بر اساس نرم‎افزار</translation>
     </message>
 </context>
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="423"/>
+        <location filename="../ui/controllers/importController.cpp" line="88"/>
+        <source>Unable to open file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/importController.cpp" line="130"/>
+        <location filename="../ui/controllers/importController.cpp" line="135"/>
+        <source>Invalid configuration file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/importController.cpp" line="501"/>
         <source>Scanned %1 of %2.</source>
         <translation>ارزیابی %1 از %2.</translation>
     </message>
@@ -201,65 +221,81 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="144"/>
-        <location filename="../ui/controllers/installController.cpp" line="195"/>
+        <location filename="../ui/controllers/installController.cpp" line="156"/>
         <source>%1 installed successfully. </source>
-        <translation>%1 با موفقیت نصب شد</translation>
+        <translation>%1 با موفقیت نصب شد. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="146"/>
-        <location filename="../ui/controllers/installController.cpp" line="197"/>
+        <location filename="../ui/controllers/installController.cpp" line="158"/>
         <source>%1 is already installed on the server. </source>
-        <translation>%1 در حال حاضر بر روی سرور نصب شده است</translation>
+        <translation>%1 در حال حاضر بر روی سرور نصب شده است. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="149"/>
+        <location filename="../ui/controllers/installController.cpp" line="177"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 کانتینرهایی که بر روی سرور موجود بودند اضافه شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="213"/>
+        <location filename="../ui/controllers/installController.cpp" line="245"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 کانتینرهای نصب شده بر روی سرور شناسایی شدند. تمام کانتینترهای نصب شده به نرم افزار اضافه شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="290"/>
+        <location filename="../ui/controllers/installController.cpp" line="483"/>
         <source>Settings updated successfully</source>
         <translation>تنظیمات با موفقیت به‎روز‎رسانی شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="305"/>
+        <location filename="../ui/controllers/installController.cpp" line="498"/>
         <source>Server &apos;%1&apos; was rebooted</source>
-        <translation type="unfinished"></translation>
+        <translation>سرور %1 راه اندازی مجدد شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="314"/>
+        <location filename="../ui/controllers/installController.cpp" line="507"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>سرور %1 حذف شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="324"/>
+        <location filename="../ui/controllers/installController.cpp" line="517"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>تمام کانتینترها از سرور %1 حذف شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="341"/>
+        <location filename="../ui/controllers/installController.cpp" line="534"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 از سرور %2 حذف شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="487"/>
+        <location filename="../ui/controllers/installController.cpp" line="565"/>
+        <source>%1 cached profile cleared</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/installController.cpp" line="702"/>
         <source>Please login as the user</source>
         <translation>لطفا به عنوان کاربر وارد شوید</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="515"/>
+        <location filename="../ui/controllers/installController.cpp" line="730"/>
         <source>Server added successfully</source>
         <translation>سرور با موفقیت اضافه شد</translation>
+    </message>
+</context>
+<context>
+    <name>InstalledAppsDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="54"/>
+        <source>Choose application</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="126"/>
+        <source>Add selected</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -325,27 +361,32 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="64"/>
+        <source>Logging enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="102"/>
         <source>Split tunneling enabled</source>
         <translation>فعال شدن تونل تقسیم‌شده</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="102"/>
         <source>Split tunneling disabled</source>
         <translation>تونل تقسیم‌شده غیرفعال شده</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="307"/>
         <source>VPN protocol</source>
         <translation>پروتکل وی‎پی‎ان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="271"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="362"/>
         <source>Servers</source>
         <translation>سرورها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="359"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="433"/>
         <source>Unable change server while there is an active connection</source>
         <translation>امکان تغییر سرور در هنگام متصل بودن وجود ندارد</translation>
     </message>
@@ -353,326 +394,317 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolAwgSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="85"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="95"/>
         <source>AmneziaWG settings</source>
         <translation>تنظیمات AmneziaWG</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="103"/>
         <source>Port</source>
         <translation>پورت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="304"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="125"/>
+        <source>MTU</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Remove AmneziaWG</source>
-        <translation>حذف AmneziaWG</translation>
+        <translation type="vanished">حذف AmneziaWG</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="307"/>
         <source>Remove AmneziaWG from server?</source>
-        <translation>آیا میخواهید AmneziaWG از سرور حذف شود؟</translation>
+        <translation type="vanished">آیا میخواهید AmneziaWG از سرور حذف شود؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="308"/>
-        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation>تمام کاربرانی که این اتصال را با آن‎ها با اشتراک گذاشته‎اید دیگر نمی‎توانند به آن متصل شوند.</translation>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="359"/>
+        <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
+        <translation>همه کاربرانی که با آن‌ها ارتباطی به اشتراک گذاشته‌اید دیگر قادر به اتصال به آن نخواهند بود.</translation>
     </message>
     <message>
-        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="vanished">همه کاربرانی که با آن‌ها این پروتکل VPN را به اشتراک گذاشته‌اید دیگر نمی‌توانند به آن متصل شوند.</translation>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="353"/>
+        <source>Save</source>
+        <translation>ذخیره</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="309"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="358"/>
+        <source>Save settings?</source>
+        <translation>تنظیمات را ذخیره کن?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="360"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="310"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="361"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="340"/>
-        <source>Save and Restart Amnezia</source>
-        <translation>ذخیره و راه اندازی مجدد Amnezia</translation>
     </message>
 </context>
 <context>
     <name>PageProtocolCloakSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="85"/>
         <source>Cloak settings</source>
         <translation>تنظیمات Cloak</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="94"/>
         <source>Disguised as traffic from</source>
         <translation>پنهان کردن به عنوان ترافیک از</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="120"/>
         <source>Port</source>
         <translation>پورت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="134"/>
-        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="135"/>
+        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="140"/>
         <source>Cipher</source>
         <translation>رمزگذاری</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="177"/>
-        <source>Save and Restart Amnezia</source>
-        <translation>ذخیره و راه اندازی دوباره Amnezia</translation>
+        <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="183"/>
+        <source>Save</source>
+        <translation>ذخیره</translation>
     </message>
 </context>
 <context>
     <name>PageProtocolOpenVpnSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="81"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="91"/>
         <source>OpenVPN settings</source>
         <translation>تنظیمات OpenVPN</translation>
     </message>
     <message>
-        <source>VPN Addresses Subnet</source>
-        <translation type="vanished">آدرس زیرشبکه وی‎پی‎ان</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="100"/>
         <source>VPN address subnet</source>
-        <translation type="unfinished"></translation>
+        <translation>زیرشبکه آدرس VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="117"/>
         <source>Network protocol</source>
         <translation>پروتکل شبکه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="138"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="152"/>
         <source>Port</source>
         <translation>پورت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="158"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="173"/>
         <source>Auto-negotiate encryption</source>
         <translation>رمزگذاری خودکار</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="175"/>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="176"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="194"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="195"/>
         <source>Hash</source>
         <translation>هش</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="186"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="209"/>
         <source>SHA512</source>
         <translation>SHA512</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="187"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="210"/>
         <source>SHA384</source>
         <translation>SHA384</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="188"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="211"/>
         <source>SHA256</source>
         <translation>SHA256</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="189"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="212"/>
         <source>SHA3-512</source>
         <translation>SHA3-512</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="213"/>
         <source>SHA3-384</source>
         <translation>SHA3-384</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="191"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="214"/>
         <source>SHA3-256</source>
         <translation>SHA3-256</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="192"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="215"/>
         <source>whirlpool</source>
         <translation>whirlpool</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="193"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="216"/>
         <source>BLAKE2b512</source>
         <translation>BLAKE2b512</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="194"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="217"/>
         <source>BLAKE2s256</source>
         <translation>BLAKE2s256</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="195"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="218"/>
         <source>SHA1</source>
         <translation>SHA1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="223"/>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="246"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="247"/>
         <source>Cipher</source>
         <translation>رمزگذاری</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="234"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="260"/>
         <source>AES-256-GCM</source>
         <translation>AES-256-GCM</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="235"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="261"/>
         <source>AES-192-GCM</source>
         <translation>AES-192-GCM</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="236"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="262"/>
         <source>AES-128-GCM</source>
         <translation>AES-128-GCM</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="237"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="263"/>
         <source>AES-256-CBC</source>
         <translation>AES-256-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="238"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="264"/>
         <source>AES-192-CBC</source>
         <translation>AES-192-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="239"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="265"/>
         <source>AES-128-CBC</source>
         <translation>AES-128-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="240"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="266"/>
         <source>ChaCha20-Poly1305</source>
         <translation>ChaCha20-Poly1305</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="241"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="267"/>
         <source>ARIA-256-CBC</source>
         <translation>ARIA-256-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="268"/>
         <source>CAMELLIA-256-CBC</source>
         <translation>CAMELLIA-256-CBC</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="243"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="269"/>
         <source>none</source>
         <translation>none</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="278"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="317"/>
         <source>TLS auth</source>
         <translation>اعتبار TLS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="293"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="336"/>
         <source>Block DNS requests outside of VPN</source>
         <translation>مسدود کردن درخواست‎های DNS خارج از وی‎پی‎ان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="312"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="361"/>
         <source>Additional client configuration commands</source>
         <translation>تنظیمات و دستورات اضافه برنامه متصل شونده</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="328"/>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="360"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="380"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="419"/>
         <source>Commands:</source>
         <translation>دستورات:</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="344"/>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="402"/>
         <source>Additional server configuration commands</source>
         <translation>تنظیمات و دستورات اضافه سرور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="381"/>
         <source>Remove OpenVPN</source>
-        <translation>حذف OpenVPN</translation>
+        <translation type="vanished">حذف OpenVPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="384"/>
         <source>Remove OpenVpn from server?</source>
-        <translation>آیا میخواهید OpenVPN از سرور حذف شود؟</translation>
+        <translation type="vanished">آیا میخواهید OpenVPN از سرور حذف شود؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="385"/>
-        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation>تمام کاربرانی که این اتصال را با آن‎ها با اشتراک گذاشته‎اید دیگر نمی‎توانند به آن متصل شوند.</translation>
+        <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
+        <translation type="vanished">همه کاربرانی که با آن‌ها ارتباطی به اشتراک گذاشته‌اید دیگر قادر به اتصال به آن نخواهند بود.</translation>
     </message>
     <message>
-        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="vanished">همه کاربرانی که با آن این پروتکل VPN را به اشتراک گذاشته‌اید دیگر نمی‌توانند به آن متصل شوند.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="386"/>
         <source>Continue</source>
-        <translation>ادامه</translation>
+        <translation type="vanished">ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="387"/>
         <source>Cancel</source>
-        <translation>کنسل</translation>
+        <translation type="vanished">کنسل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="407"/>
-        <source>Save and Restart Amnezia</source>
-        <translation>ذخیره و راه اندازی دوباره Amnezia</translation>
+        <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="436"/>
+        <source>Save</source>
+        <translation>ذخیره</translation>
     </message>
 </context>
 <context>
     <name>PageProtocolRaw</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="38"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="45"/>
         <source> settings</source>
-        <translation>تنظیمات</translation>
+        <translation> تنظیمات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="78"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="98"/>
         <source>Show connection options</source>
         <translation>نمایش تنظیمات اتصال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="135"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="163"/>
         <source>Connection options %1</source>
         <translation>تنظیمات اتصال %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="180"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="208"/>
         <source>Remove </source>
-        <translation>حذف</translation>
+        <translation>حذف </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="184"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="213"/>
         <source>Remove %1 from server?</source>
         <translation>%1 از سرور حذف شود؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="185"/>
-        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation>تمام کاربرانی که این اتصال را با آن‎ها با اشتراک گذاشته‎اید دیگر نمی‎توانند به آن متصل شوند.</translation>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="214"/>
+        <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
+        <translation>همه کاربرانی که با آن‌ها ارتباطی به اشتراک گذاشته‌اید دیگر قادر به اتصال به آن نخواهند بود.</translation>
     </message>
     <message>
         <source>All users who you shared a connection with will no longer be able to connect to it.</source>
         <translation type="obsolete">همه کاربرانی که با آن این پروتکل VPN را به اشتراک گذاشته‌اید دیگر نمی‌توانند به آن متصل شوند.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="186"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="215"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="187"/>
+        <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="216"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
@@ -680,25 +712,74 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageProtocolShadowSocksSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="85"/>
         <source>ShadowSocks settings</source>
         <translation>تنظیمات ShadowSocks</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="96"/>
         <source>Port</source>
         <translation>پورت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="108"/>
-        <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="118"/>
         <source>Cipher</source>
         <translation>رمزگذاری</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="151"/>
-        <source>Save and Restart Amnezia</source>
-        <translation>ذخیره و راه اندازی دوباره Amnezia</translation>
+        <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="163"/>
+        <source>Save</source>
+        <translation>ذخیره</translation>
+    </message>
+</context>
+<context>
+    <name>PageProtocolWireGuardSettings</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="75"/>
+        <source>WG settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="83"/>
+        <source>Port</source>
+        <translation type="unfinished">پورت</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="102"/>
+        <source>MTU</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
+        <translation type="obsolete">تمام کاربرانی که این ارتباط را با آنها به اشتراک گذاشته‎اید دیگر نمی‎توانند به آن متصل شوند.</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="obsolete">کنسل</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="125"/>
+        <source>Save</source>
+        <translation>ذخیره</translation>
+    </message>
+</context>
+<context>
+    <name>PageProtocolXraySettings</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="76"/>
+        <source>XRay settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="83"/>
+        <source>Disguised as traffic from</source>
+        <translation type="unfinished">پنهان کردن به عنوان ترافیک از</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="106"/>
+        <source>Save</source>
+        <translation type="unfinished">ذخیره</translation>
     </message>
 </context>
 <context>
@@ -711,34 +792,34 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageServiceDnsSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="52"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="59"/>
         <source>A DNS service is installed on your server, and it is only accessible via VPN.
 </source>
-        <translation>یک سرویس DSN بر روی سرور شما نصب شده و فقط از طریق وی‎پی‎ان قابل دسترسی می‎باشد
+        <translation>یک سرویس DSN بر روی سرور شما نصب شده و فقط از طریق وی‎پی‎ان قابل دسترسی می‎باشد.
 </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="53"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="60"/>
         <source>The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.</source>
-        <translation>آدرس DSN همان آدرس سرور شماست. میتوانید از قسمت تنظیمات و تب اتصالات DSN خود را تنظیم کنید</translation>
+        <translation>آدرس DSN همان آدرس سرور شماست. میتوانید از قسمت تنظیمات و تب اتصالات DSN خود را تنظیم کنید.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="62"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="69"/>
         <source>Remove </source>
-        <translation>جذف</translation>
+        <translation>جذف </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="75"/>
         <source>Remove %1 from server?</source>
         <translation>%1 از سرور حذف شود؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="76"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="68"/>
+        <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="77"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
@@ -746,87 +827,87 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageServiceSftpSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="22"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="24"/>
         <source>Settings updated successfully</source>
         <translation>تنظیمات با موفقیت به‎روز‎رسانی شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="83"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="98"/>
         <source>SFTP settings</source>
         <translation>تنظیمات SFTP</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="109"/>
         <source>Host</source>
         <translation>هاست</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="100"/>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="117"/>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="134"/>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="151"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="143"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="197"/>
         <source>Copied</source>
         <translation>کپی شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="107"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="130"/>
         <source>Port</source>
         <translation>پورت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="124"/>
-        <source>Login</source>
-        <translation>ورود</translation>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="154"/>
+        <source>User name</source>
+        <translation>نام کاربری</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="141"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="178"/>
         <source>Password</source>
         <translation>رمز عبور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="171"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="224"/>
         <source>Mount folder on device</source>
         <translation>بارگذاری پوشه بر روی دستگاه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="196"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="249"/>
         <source>In order to mount remote SFTP folder as local drive, perform following steps: &lt;br&gt;</source>
         <translation>برای بارگذاری پوشه SFTP بر روی درایو محلی قدم‎های زیر را انجام دهید: &lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="198"/>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="201"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="251"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="254"/>
         <source>&lt;br&gt;1. Install the latest version of </source>
-        <translation>&lt;br&gt; 1. آخرین نسخه را نصب کنید: </translation>
+        <translation>&lt;br&gt; 1. آخرین نسخه را نصب کنید </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="199"/>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="202"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="255"/>
         <source>&lt;br&gt;2. Install the latest version of </source>
-        <translation>&lt;br&gt; 2. آخرین نسخه را نصب کنید: </translation>
+        <translation>&lt;br&gt; 2. آخرین نسخه را نصب کنید </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="230"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="284"/>
         <source>Detailed instructions</source>
         <translation>جزییات دستورالعمل‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="248"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="309"/>
         <source>Remove SFTP and all data stored there</source>
         <translation>حذف SFTP و تمام داده‎های ذخیره شده در آن</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="251"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="312"/>
         <source>Remove SFTP and all data stored there?</source>
         <translation>پوشه SFTP و تمام داده‎های آن حذف شوند؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="313"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="253"/>
+        <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="314"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
@@ -834,73 +915,57 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageServiceTorWebsiteSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="23"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="25"/>
         <source>Settings updated successfully</source>
         <translation>تنظیمات با موفقیت به‎روز‎‌رسانی شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="60"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="67"/>
         <source>Tor website settings</source>
         <translation>تنظیمات وب‎سایت Tor</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="75"/>
         <source>Website address</source>
         <translation>آدرس وب‎سایت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="82"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="92"/>
         <source>Copied</source>
         <translation>کپی شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="107"/>
         <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this URL.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this URL. </source>
-        <translation type="vanished">استفاده &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; برای باز کردن این نشانی.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="116"/>
         <source>After creating your onion site, it takes a few minutes for the Tor network to make it available for use.</source>
         <translation>پس از ایجاد سایت پیاز خود، چند دقیقه طول می‌کشد تا شبکه تور آن را برای استفاده فراهم کند.</translation>
     </message>
     <message>
-        <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this url.</source>
-        <translation type="vanished">از &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; برای باز کردن این url استفاده کنید.</translation>
-    </message>
-    <message>
-        <source>After installation it takes several minutes while your onion site will become available in the Tor Network.</source>
-        <translation type="vanished">بعد از نصب چند دقیقه طول میکشد که سایت پیازی شما در شبکه Tor در دسترس قرار گیرد.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="112"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="125"/>
         <source>When configuring WordPress set the this onion address as domain.</source>
         <translation>زمانی که سایت وردپرس را تنظیم میکنید این آدرس پیازی را به عنوان دامنه قرار دهید.</translation>
     </message>
     <message>
-        <source>When configuring WordPress set the this address as domain.</source>
-        <translation type="vanished">هنگام تنظیم وردپرس، این آدرس پیاز را به عنوان دامنه مشخص کنید.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="140"/>
         <source>Remove website</source>
         <translation>حذف وب سایت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="145"/>
         <source>The site with all data will be removed from the tor network.</source>
         <translation>سایت با تمام داده‎ها از شبکه Tor حذف خواهد شد.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="130"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="146"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="131"/>
+        <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="147"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
@@ -908,37 +973,37 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="37"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="40"/>
         <source>Settings</source>
         <translation>تنظیمات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="44"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="50"/>
         <source>Servers</source>
         <translation>سرورها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="58"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="67"/>
         <source>Connection</source>
         <translation>ارتباط</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="72"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="84"/>
         <source>Application</source>
         <translation>نرم‎افزار</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="101"/>
         <source>Backup</source>
         <translation>بک‎آپ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="101"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="118"/>
         <source>About AmneziaVPN</source>
         <translation>درباره Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="137"/>
         <source>Close application</source>
         <translation>بستن نرم‎افزار</translation>
     </message>
@@ -946,189 +1011,218 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsAbout</name>
     <message>
-        <source>Support the project with a donation</source>
-        <translation type="vanished">حمایت از پروژه با کمک‎های مالی</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="56"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="64"/>
         <source>Support Amnezia</source>
         <translation>پشتیبانی از Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="71"/>
-        <source>This is a free and open source application. If you like it, support the developers with a donation. </source>
-        <translation>این نرم‎افزار یک پروژه رایگان است. اگر آن را دوست دارید با کمک‎های مالی از توسعه‎دهندگان آن حمایت کنید.</translation>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="79"/>
+        <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
+        <translation>Amnezia یک برنامه رایگان و متن باز است. اگر دوست دارید می توانید از توسعه دهندگان حمایت کنید.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="72"/>
-        <source>And if you don’t like the application, all the more reason to support it - the donation will be used for the improving the application.</source>
-        <translation>و اگر آن‎را دوست ندارید دلایل بیشتری برای کمک به نرم‎افزار است، کمک‎های مالی شما برای بهبود نرم‎افزار استفاده میشود.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="82"/>
-        <source>Card on Patreon</source>
-        <translation>کارت روی Patreon</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="85"/>
-        <source>https://www.patreon.com/amneziavpn</source>
-        <translation>https://www.patreon.com/amneziavpn</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="102"/>
-        <source>Show other methods on Github</source>
-        <translation>نمایش متد‎های دیگر در گیت هاب</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="105"/>
-        <source>https://github.com/amnezia-vpn/amnezia-client#donate</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="89"/>
         <source>Contacts</source>
         <translation>مخاطب</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="122"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="97"/>
         <source>Telegram group</source>
         <translation>گروه تلگرام</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="98"/>
         <source>To discuss features</source>
         <translation>برای گفتگو در مورد ویژگی‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="127"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="105"/>
         <source>https://t.me/amnezia_vpn_en</source>
         <translation>https://t.me/amnezia_vpn</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="136"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="115"/>
         <source>Mail</source>
         <translation>ایمیل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="137"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="116"/>
         <source>For reviews and bug reports</source>
         <translation>برای ارائه نظرات و گزارشات باگ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="133"/>
         <source>Github</source>
         <translation>Github</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="140"/>
         <source>https://github.com/amnezia-vpn/amnezia-client</source>
         <translation>https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="162"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="151"/>
         <source>Website</source>
         <translation>وب سایت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="158"/>
         <source>https://amnezia.org</source>
         <translation>https://amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="178"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="171"/>
         <source>Software version: %1</source>
         <translation>%1 :نسخه نرم‎افزار</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="194"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="188"/>
         <source>Check for updates</source>
         <translation>بررسی بروز‎رسانی</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="210"/>
+        <source>Privacy Policy</source>
+        <translation></translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsAppSplitTunneling</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="37"/>
+        <source>Only the Apps listed here will be accessed through the VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="42"/>
+        <source>Apps from the list should not be accessed via VPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="72"/>
+        <source>App split tunneling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="100"/>
+        <source>Mode</source>
+        <translation type="unfinished">حالت</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="185"/>
+        <source>Remove </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="186"/>
+        <source>Continue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="187"/>
+        <source>Cancel</source>
+        <translation type="unfinished">کنسل</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="229"/>
+        <source>application name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="237"/>
+        <source>Open executable file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="238"/>
+        <source>Executable file (*.*)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>PageSettingsApplication</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="43"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="89"/>
         <source>Application</source>
         <translation>نرم افزار</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="52"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="99"/>
         <source>Allow application screenshots</source>
         <translation>مجوز اسکرین‎شات در برنامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="72"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="123"/>
         <source>Auto start</source>
         <translation>شروع خودکار</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="73"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="124"/>
         <source>Launch the application every time the device is starts</source>
         <translation>راه‎اندازی نرم‎افزار با هر بار روشن شدن دستگاه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="148"/>
         <source>Auto connect</source>
-        <translation type="unfinished">اتصال خودکار</translation>
+        <translation>اتصال خودکار</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="149"/>
         <source>Connect to VPN on app start</source>
-        <translation type="unfinished">اتصال به وی‎‎پی‎ان با شروع نرم‎افزار</translation>
+        <translation>اتصال به وی‎‎پی‎ان با شروع نرم‎افزار</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="173"/>
         <source>Start minimized</source>
         <translation>شروع به صورت کوچک</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="174"/>
         <source>Launch application minimized</source>
         <translation>راه‎اندازی برنامه به صورت کوچک</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="132"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="195"/>
         <source>Language</source>
         <translation>زبان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="214"/>
         <source>Logging</source>
         <translation>گزارشات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="148"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="215"/>
         <source>Enabled</source>
         <translation>فعال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="148"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="215"/>
         <source>Disabled</source>
         <translation>غیر فعال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="161"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="232"/>
         <source>Reset settings and remove all data from the application</source>
         <translation>ریست کردن تنظیمات و حذف تمام داده‎ها از نرم‎افزار</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="240"/>
         <source>Reset settings and remove all data from the application?</source>
         <translation>ریست کردن تنظیمات و حذف تمام داده‎ها از نرم‎افزار؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="241"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
         <translation>تمام تنظیمات به حالت پیش‎فرض ریست می‎شوند. تمام سرویس‎های Amnezia بر روی سرور باقی می‎مانند.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="168"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="242"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
@@ -1136,73 +1230,73 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsBackup</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="66"/>
-        <source>Backup</source>
-        <translation>پشتیبان‎گیری</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="27"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="29"/>
         <source>Settings restored from backup file</source>
         <translation>تنظیمات از فایل پشتیبان بازیابی شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="73"/>
-        <source>Configuration backup</source>
-        <translation>پشتیبان‎گیری از پیکربندی</translation>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="68"/>
+        <source>Back up your configuration</source>
+        <translation>یک نسخه پشتیبان از تنظیمات خود تهیه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="69"/>
         <source>You can save your settings to a backup file to restore them the next time you install the application.</source>
         <translation>می‎توانید تنظیمات را در یک فایل پشتیبان ذخیره کرده و دفعه بعد که نرم‎افزار را نصب کردید آن‎ها را بازیابی کنید.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="76"/>
+        <source>The backup will contain your passwords and private keys for all servers added to AmneziaVPN. Keep this information in a secure place.</source>
+        <translation>پشتیبان حاوی رمزهای عبور و کلیدهای خصوصی شما برای تمام سرورهای اضافه شده به AmneziaVPN خواهد بود. این اطلاعات را در یک مکان امن نگه دارید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="92"/>
         <source>Make a backup</source>
         <translation>ایجاد یک پشتیبان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="96"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="99"/>
         <source>Save backup file</source>
         <translation>ذخیره فایل پشتیبان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="97"/>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="100"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="132"/>
         <source>Backup files (*.backup)</source>
         <translation>Backup files (*.backup)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="109"/>
         <source>Backup file saved</source>
         <translation>فایل پشتیبان ذخیره شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="122"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="128"/>
         <source>Restore from backup</source>
         <translation>بازیابی از پشتیبان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="125"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="131"/>
         <source>Open backup file</source>
         <translation>باز کردن فایل پشتیبان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="136"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="144"/>
         <source>Import settings from a backup file?</source>
         <translation>ورود تنظیمات از فایل پشتیبان؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="137"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="145"/>
         <source>All current settings will be reset</source>
         <translation>تمام تنظیمات جاری ریست خواهد شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="138"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="146"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="147"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
@@ -1210,65 +1304,49 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsConnection</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="41"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="45"/>
         <source>Connection</source>
         <translation>ارتباط</translation>
     </message>
     <message>
-        <source>Auto connect</source>
-        <translation type="vanished">اتصال خودکار</translation>
-    </message>
-    <message>
-        <source>Connect to VPN on app start</source>
-        <translation type="vanished">اتصال به وی‎‎پی‎ان با شروع نرم‎افزار</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="48"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="58"/>
         <source>Use AmneziaDNS</source>
         <translation>استفاده از AmneziaDNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="49"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="59"/>
         <source>If AmneziaDNS is installed on the server</source>
         <translation>اگر AmneziaDNS بر روی سرور نصب شده باشد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="64"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="77"/>
         <source>DNS servers</source>
         <translation>سرورهای DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="65"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="78"/>
         <source>When AmneziaDNS is not used or installed</source>
-        <translation>وقتی AmneziaDNS استفاده نشده یا نصب نشده است.</translation>
+        <translation>وقتی AmneziaDNS استفاده نشده یا نصب نشده است</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="118"/>
         <source>Allows you to use the VPN only for certain Apps</source>
-        <translation type="unfinished"></translation>
+        <translation>به شما امکان می دهد از VPN فقط برای برخی برنامه ها استفاده کنید</translation>
     </message>
     <message>
-        <source>If AmneziaDNS is not used or installed</source>
-        <translation type="vanished">اگر AmneziaDNS نصب نشده یا استفاده نشود</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="94"/>
         <source>Site-based split tunneling</source>
         <translation>جداسازی ترافیک بر اساس سایت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="81"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="95"/>
         <source>Allows you to select which sites you want to access through the VPN</source>
         <translation>میتوانید مشخص کنید که چه سایت‎هایی از وی‎پی‎ان استفاده کنند</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="98"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="117"/>
         <source>App-based split tunneling</source>
         <translation>جداسازی ترافیک بر اساس نرم‎افزار</translation>
-    </message>
-    <message>
-        <source>Allows you to use the VPN only for certain applications</source>
-        <translation type="vanished">میتوانید مشخص کنید که چه نرم‎افزارهایی از وی‎پی‎ان استفاده کنند</translation>
     </message>
 </context>
 <context>
@@ -1276,7 +1354,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="39"/>
         <source>Default server does not support custom dns</source>
-        <translation>سرور پیش‌فرض از دی‌ان‌اس سفارشی پشتیبانی نمی‌کند.</translation>
+        <translation>سرور پیش‌فرض از دی‌ان‌اس سفارشی پشتیبانی نمی‌کند</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="57"/>
@@ -1299,37 +1377,37 @@ Already installed containers were found on the server. All installed containers 
         <translation>DNS ثانویه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="104"/>
         <source>Restore default</source>
         <translation>بازگشت به پیش‎فرض</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="106"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="107"/>
         <source>Restore default DNS settings?</source>
         <translation>بازگشت به تنظیمات پیش‎فرض DNS؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="107"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="108"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="108"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="109"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="116"/>
         <source>Settings have been reset</source>
         <translation>تنظیمات ریست شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="139"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="138"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="148"/>
         <source>Settings saved</source>
         <translation>ذخیره تنظیمات</translation>
     </message>
@@ -1337,62 +1415,72 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsLogging</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="47"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="23"/>
+        <source>Logging is enabled. Note that logs will be automatically disabled after 14 days, and all log files will be deleted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="61"/>
         <source>Logging</source>
         <translation>گزارشات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="54"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="62"/>
+        <source>Enabling this function will save application&apos;s logs automatically, By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
+        <translation>فعال کردن این عملکرد باعث ذخیره خودکار لاگ‌های برنامه می‌شود. به طور پیش‌فرض، قابلیت ثبت لاگ غیرفعال است. در صورت بروز خطا در برنامه، ذخیره لاگ را فعال کنید.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="76"/>
         <source>Save logs</source>
         <translation>ذخیره گزارشات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="87"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="114"/>
         <source>Open folder with logs</source>
         <translation>باز کردن پوشه گزارشات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="140"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="141"/>
         <source>Logs files (*.log)</source>
         <translation>Logs files (*.log)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="150"/>
         <source>Logs file saved</source>
         <translation>فایل گزارشات ذخیره شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="159"/>
         <source>Save logs to file</source>
         <translation>ذخیره گزارشات در فایل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="181"/>
         <source>Clear logs?</source>
         <translation>پاک کردن گزارشات؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="182"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="148"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="183"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="189"/>
         <source>Logs have been cleaned up</source>
         <translation>گزارشات پاک شدند</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="167"/>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="208"/>
         <source>Clear logs</source>
         <translation>پاک کردن گزارشات</translation>
     </message>
@@ -1400,27 +1488,24 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsServerData</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="23"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="30"/>
         <source>All installed containers have been added to the application</source>
         <translation>تمام کانتینرهای نصب شده به نرم‎افزار اضافه شدند</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="91"/>
         <source>Clear Amnezia cache</source>
-        <translation>پاک کردن حافظه داخلی Amnezia</translation>
+        <translation type="vanished">پاک کردن حافظه داخلی Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="92"/>
         <source>May be needed when changing other settings</source>
-        <translation>وقتی تنظیمات دیگر را تغییر دهید ممکن است نیاز باشد</translation>
+        <translation type="vanished">وقتی تنظیمات دیگر را تغییر دهید ممکن است نیاز باشد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="95"/>
         <source>Clear cached profiles?</source>
-        <translation>پاک کردن پروفایل ذخیره شده؟</translation>
+        <translation type="vanished">پاک کردن پروفایل ذخیره شده؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="25"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="32"/>
         <source>No new installed containers found</source>
         <translation>کانتینر نصب شده جدیدی پیدا نشد</translation>
     </message>
@@ -1430,166 +1515,146 @@ Already installed containers were found on the server. All installed containers 
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="97"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="144"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="175"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="205"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="236"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="177"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="219"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="259"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="98"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="145"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="176"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="206"/>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="237"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="178"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="220"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="260"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="120"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="99"/>
         <source>Check the server for previously installed Amnezia services</source>
         <translation>چک کردن سرویس‎های نصب شده Amnezia بر روی سرور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="100"/>
         <source>Add them to the application if they were not displayed</source>
         <translation>اضافه کردن آنها به نرم‎افزار اگر نمایش داده نشده‎اند</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="138"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="120"/>
         <source>Reboot server</source>
-        <translation>سرور را دوباره راه‌اندازی کنید.</translation>
+        <translation>سرور را دوباره راه‌اندازی کنید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="142"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="126"/>
         <source>Do you want to reboot the server?</source>
         <translation>آیا می‌خواهید سرور را دوباره راه‌اندازی کنید؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="143"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="127"/>
         <source>The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?</source>
         <translation>فرآیند راه‌اندازی ممکن است حدود ۳۰ ثانیه طول بکشد. آیا مطمئن هستید که می‌خواهید ادامه دهید؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="173"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="175"/>
         <source>Do you want to remove the server from application?</source>
         <translation>آیا می‌خواهید سرور را از برنامه حذف کنید؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="203"/>
-        <source>Do you want to clear server Amnezia-installed services?</source>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="217"/>
+        <source>Do you want to clear server from Amnezia software?</source>
         <translation>آیا می‌خواهید سرور را از نرم‌افزار Amnezia پاک کنید؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="230"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="218"/>
+        <source>All users whom you shared a connection with will no longer be able to connect to it.</source>
+        <translation>همه کاربرانی که با آن‌ها ارتباطی به اشتراک گذاشته‌اید دیگر قادر به اتصال به آن نخواهند بود.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="251"/>
         <source>Reset API config</source>
-        <translation type="unfinished"></translation>
+        <translation>تنظیمات API را بازنشانی کنید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="234"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="257"/>
         <source>Do you want to reset API config?</source>
-        <translation type="unfinished"></translation>
+        <translation>آیا می خواهید پیکربندی API را بازنشانی کنید؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="169"/>
-        <source>Remove this server from the app</source>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="161"/>
+        <source>Remove server from application</source>
         <translation>حذف کردن سرور از نرم‎افزار</translation>
     </message>
     <message>
-        <source>Remove server from application?</source>
-        <translation type="vanished">حذف سرور؟</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="174"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="176"/>
         <source>All installed AmneziaVPN services will still remain on the server.</source>
         <translation>تمام سرویس‎های نصب‎شده Amnezia همچنان بر روی سرور باقی خواهند ماند.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="199"/>
-        <source>Clear server Amnezia-installed services</source>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="209"/>
+        <source>Clear server from Amnezia software</source>
         <translation>پاک کردن سرور از نرم‎افزار Amnezia</translation>
-    </message>
-    <message>
-        <source>Clear server Amnezia-installed services?</source>
-        <translation type="vanished">سرور از نرم‎افزار Amnezia پاک شود؟</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="204"/>
-        <source>All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.</source>
-        <translation>تمام کانتینرها از سرور پاک شوند، به این معنی که تمام فایل‎های پیکربندی، کلیدها و مجوزها حذف خواهند شد.</translation>
     </message>
 </context>
 <context>
     <name>PageSettingsServerInfo</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="105"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="135"/>
         <source>Server name</source>
         <translation>نام سرور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="118"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="148"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="187"/>
         <source>Protocols</source>
         <translation>پروتکل‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="161"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="198"/>
         <source>Services</source>
         <translation>سرویس‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="165"/>
-        <source>Data</source>
-        <translation>داده</translation>
+        <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="207"/>
+        <source>Management</source>
+        <translation>مدیریت</translation>
     </message>
 </context>
 <context>
     <name>PageSettingsServerProtocol</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="38"/>
         <source> settings</source>
-        <translation> تنظیمات</translation>
+        <translation type="vanished"> تنظیمات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="112"/>
         <source>Remove </source>
-        <translation>حذف </translation>
+        <translation type="vanished">حذف </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="116"/>
         <source>Remove %1 from server?</source>
-        <translation>حذف %1 از سرور؟</translation>
+        <translation type="vanished">حذف %1 از سرور؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="117"/>
         <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation>تمام کاربرانی که این ارتباط را با آنها به اشتراک گذاشته‎اید دیگر نمی‎توانند به آن متصل شوند.</translation>
+        <translation type="vanished">تمام کاربرانی که این ارتباط را با آنها به اشتراک گذاشته‎اید دیگر نمی‎توانند به آن متصل شوند.</translation>
     </message>
     <message>
-        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="vanished">تمام کاربرانی که با آن VPN را به اشتراک گذاشته‌اید، دیگر نمی‌توانند به آن متصل شوند.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="118"/>
         <source>Continue</source>
-        <translation>ادامه</translation>
+        <translation type="vanished">ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="119"/>
         <source>Cancel</source>
-        <translation>کنسل</translation>
+        <translation type="vanished">کنسل</translation>
     </message>
 </context>
 <context>
     <name>PageSettingsServersList</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="37"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="39"/>
         <source>Servers</source>
         <translation>سرورها</translation>
     </message>
@@ -1599,11 +1664,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="36"/>
         <source>Default server does not support split tunneling function</source>
-        <translation>سرور پیش‌فرض از عملکرد تونل‌سازی تقسیم شده پشتیبانی نمی‌کند.</translation>
-    </message>
-    <message>
-        <source>Addresses from the list should be accessed via VPN</source>
-        <translation type="vanished">دسترسی به آدرس‎های لیست از طریق وی‎پی‎ان</translation>
+        <translation>سرور پیش‌فرض از عملکرد تونل‌سازی تقسیم شده پشتیبانی نمی‌کند</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="74"/>
@@ -1616,93 +1677,85 @@ Already installed containers were found on the server. All installed containers 
         <translation>جداسازی ترافیک</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="138"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="144"/>
         <source>Mode</source>
         <translation>حالت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="216"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="266"/>
         <source>Remove </source>
         <translation>حذف </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="217"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="267"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="218"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="268"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
     <message>
-        <source>Site or IP</source>
-        <translation type="vanished">سایت یا آی‎پی</translation>
-    </message>
-    <message>
-        <source>Import/Export Sites</source>
-        <translation type="vanished">بارگذاری / خروجی‎گرفتن از سایت‎ها</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="33"/>
         <source>Cannot change split tunneling settings during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی توان تنظیمات تونل تقسیم را در طول اتصال فعال تغییر داد</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="69"/>
         <source>Only the sites listed here will be accessed through the VPN</source>
-        <translation>تنها سایت‌های موجود در اینجا از طریق VPN دسترسی داده خواهند شد.</translation>
+        <translation>تنها سایت‌های موجود در اینجا از طریق VPN دسترسی داده خواهند شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="262"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="320"/>
         <source>website or IP</source>
         <translation>وب‌سایت یا آدرس IP</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="303"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="398"/>
         <source>Import / Export Sites</source>
         <translation>وارد کردن / صادر کردن وب‌سایت‌ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="309"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="405"/>
         <source>Import</source>
         <translation>بارگذاری</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="321"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="420"/>
         <source>Save site list</source>
         <translation>ذخیره لیست سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="328"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="429"/>
         <source>Save sites</source>
         <translation>ذخیره سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="329"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="398"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="413"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="430"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="520"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="537"/>
         <source>Sites files (*.json)</source>
         <translation>Sites files (*.json)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="388"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="503"/>
         <source>Import a list of sites</source>
         <translation>بارگذاری لیست سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="394"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="515"/>
         <source>Replace site list</source>
         <translation>جایگزین کردن لیست سایت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="397"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="412"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="519"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="536"/>
         <source>Open sites file</source>
         <translation>باز کردن فایل سایت‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="409"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="532"/>
         <source>Add imported sites to existing ones</source>
         <translation>اضافه کردن سایت‎های بارگذاری شده به سایت‎های موجود</translation>
     </message>
@@ -1710,7 +1763,7 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSetupWizardConfigSource</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="50"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="52"/>
         <source>Server connection</source>
         <translation>ارتباط سرور</translation>
     </message>
@@ -1723,37 +1776,37 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 ایرادی ندارد که از طرف کسی باشد که به او اعتماد دارید.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="51"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="53"/>
         <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation type="unfinished"></translation>
+        <translation>از کدهای اتصال از منابع نامعتبر استفاده نکنید، زیرا ممکن است برای رهگیری داده های شما ایجاد شده باشند.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="62"/>
         <source>What do you have?</source>
         <translation>چی داری؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="75"/>
         <source>File with connection settings</source>
         <translation>فایل شامل تنظیمات اتصال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="75"/>
         <source>File with connection settings or backup</source>
         <translation>فایل شامل تنظیمات اتصال یا بک‎آپ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="74"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="84"/>
         <source>Open config file</source>
         <translation>باز کردن فایل تنظیمات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="100"/>
         <source>QR-code</source>
         <translation>QR-Code</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="122"/>
         <source>Key as text</source>
         <translation>متن شامل کلید</translation>
     </message>
@@ -1761,41 +1814,19 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>PageSetupWizardCredentials</name>
     <message>
-        <source>Server connection</source>
-        <translation type="vanished">اتصال به سرور</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="53"/>
         <source>Server IP address [:port]</source>
         <translation>آدرس آی‎پی سرور (:پورت)</translation>
     </message>
     <message>
-        <source>255.255.255.255:88</source>
-        <translation type="vanished">255.255.255.255:88</translation>
-    </message>
-    <message>
-        <source>Password / SSH private key</source>
-        <translation type="vanished">Password / SSH private key</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="104"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="108"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <source>All data you enter will remain strictly confidential
-and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation type="vanished">تمام داده‎هایی که شما وارد می‎کنید به شدت محرمانه‎ است و با Amnezia یا هر شخص ثالث دیگری به اشتراک گذاشته نمی‎شود</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="142"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="153"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
         <translation>آدرس را با فرمت 255.255.255.255:88 وارد کنید</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="70"/>
-        <source>Login to connect via SSH</source>
-        <translation>ورود و اتصال با استفاده از SSH</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="46"/>
@@ -1805,30 +1836,35 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="54"/>
         <source>255.255.255.255:22</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="82"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="70"/>
+        <source>SSH Username</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="86"/>
         <source>Password or SSH private key</source>
-        <translation type="unfinished"></translation>
+        <translation>رمز عبور یا کلید خصوصی SSH</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="130"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="141"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>تمام داده‎هایی که شما وارد می‎کنید به شدت محرمانه‎ است و با Amnezia یا هر شخص ثالث دیگری به اشتراک گذاشته نمی‎شود</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="150"/>
         <source>Ip address cannot be empty</source>
         <translation>آدرس آی‎پی نمی‎تواند خالی باشد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="157"/>
         <source>Login cannot be empty</source>
         <translation>نام‎کاربری نمی‎تواند خالی باشد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="150"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="161"/>
         <source>Password/private key cannot be empty</source>
         <translation>پسورد یا کلید خصوصی نمی‎تواند خالی باشد</translation>
     </message>
@@ -1836,29 +1872,24 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageSetupWizardEasy</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="76"/>
         <source>What is the level of internet control in your region?</source>
         <translation>سطح کنترل اینترنت در منطقه شما چگونه است؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="139"/>
-        <source>Set up a VPN yourself</source>
-        <translation>یک وی‎پی‎ان برای خودتان بسازید</translation>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="148"/>
+        <source>Choose a VPN protocol</source>
+        <translation>یک پروتکل VPN را انتخاب کنید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="140"/>
-        <source>I want to choose a VPN protocol</source>
-        <translation>می‎خواهم پروتکل وی‎پی‎ان را انتخاب کنم</translation>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="205"/>
+        <source>Skip setup</source>
+        <translation>رد شدن از تنظیم</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="159"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="162"/>
         <source>Continue</source>
         <translation>ادامه</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="197"/>
-        <source>Set up later</source>
-        <translation>بعدا تنظیم شود</translation>
     </message>
 </context>
 <context>
@@ -1876,7 +1907,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="68"/>
         <source>busy installing other software. Amnezia installation </source>
-        <translation>busy installing other software. Amnezia installation</translation>
+        <translation>مشغول نصب نرم افزارهای دیگر نصب Amnezia </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="69"/>
@@ -1903,32 +1934,32 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageSetupWizardProtocolSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="77"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="82"/>
         <source>Installing %1</source>
         <translation>در حال نصب %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="100"/>
         <source>More detailed</source>
         <translation>جزییات بیشتر</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="171"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="202"/>
         <source>Close</source>
         <translation>بستن</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="187"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="219"/>
         <source>Network protocol</source>
         <translation>پروتکل شبکه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="203"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="237"/>
         <source>Port</source>
         <translation>پورت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="221"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="255"/>
         <source>Install</source>
         <translation>نصب</translation>
     </message>
@@ -1936,14 +1967,14 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageSetupWizardProtocols</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="73"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="80"/>
         <source>VPN protocol</source>
         <translation>پروتکل وی‎پی‎ان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="74"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="81"/>
         <source>Choose the one with the highest priority for you. Later, you can install other protocols and additional services, such as DNS proxy and SFTP.</source>
-        <translation>پروتکلی که بیشترین اولویت را برای شما دارد انتخاب کنید. بعدا، میتوانید پروتکل‎ها و سرویس‎های اضافه مانند پروکسی DNS و SFTP را هم نصب کنید</translation>
+        <translation>پروتکلی که بیشترین اولویت را برای شما دارد انتخاب کنید. بعدا، میتوانید پروتکل‎ها و سرویس‎های اضافه مانند پروکسی DNS و SFTP را هم نصب کنید.</translation>
     </message>
 </context>
 <context>
@@ -1951,40 +1982,40 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardQrReader.qml" line="37"/>
         <source>Point the camera at the QR code and hold for a couple of seconds. </source>
-        <translation>دوربین را روی QR Code بگیرید و برای چند ثانیه آن را نگه دارید.</translation>
+        <translation>دوربین را روی QR Code بگیرید و برای چند ثانیه آن را نگه دارید. </translation>
     </message>
 </context>
 <context>
     <name>PageSetupWizardStart</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="64"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="71"/>
         <source>Settings restored from backup file</source>
         <translation>تنظیمات از فایل بک‎آپ بازیابی شدند</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="137"/>
         <source>Free service for creating a personal VPN on your server.</source>
         <translation>سرویس رایگان برای ایجاد وی‎پی‎ان شخصی بر روی سرور خودتان.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="138"/>
         <source> Helps you access blocked content without revealing your privacy, even to VPN providers.</source>
-        <translation>به شما کمک می‎کند که بدون فاش کردن حریم شخصی خودتان حتی برای ارائه دهنده وی‎پی‎ان به محتوای مسدود شده دسترسی پیدا کنید.</translation>
+        <translation> به شما کمک می‎کند که بدون فاش کردن حریم شخصی خودتان, حتی برای ارائه دهنده وی‎پی‎ان به محتوای مسدود شده دسترسی پیدا کنید.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="153"/>
         <source>I have the data to connect</source>
         <translation>من داده برای اتصال دارم</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="176"/>
         <source>I have nothing</source>
         <translation>من هیچی ندارم</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="179"/>
         <source>https://amnezia.org/instructions/0_starter-guide</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1997,7 +2028,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="42"/>
         <source>A line that starts with vpn://...</source>
-        <translation>یک کلید متنی که با vpn:// شروع می‎شود</translation>
+        <translation>خطی که با آن شروع می شود vpn://...</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="53"/>
@@ -2023,26 +2054,22 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>ارتباط جدید</translation>
     </message>
     <message>
-        <source>Do not use connection code from public sources. It could be created to intercept your data.</source>
-        <translation type="vanished">از کد اتصالی که در منابع عمومی هست استفاده نکنید. ممکن است برای شنود اطلاعات شما ایجاد شده باشد.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="95"/>
-        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="108"/>
         <source>Collapse content</source>
         <translation>جمع کردن محتوا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="108"/>
         <source>Show content</source>
         <translation>نمایش محتوا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="120"/>
+        <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
+        <translation>از کدهای اتصال فقط از منابع مورد اعتماد خود استفاده کنید. ممکن است کدهایی از منابع عمومی برای رهگیری داده های شما ایجاد شده باشند</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="162"/>
         <source>Connect</source>
         <translation>اتصال</translation>
     </message>
@@ -2050,214 +2077,192 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageShare</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="125"/>
         <source>OpenVpn native format</source>
         <translation>فرمت OpenVPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="130"/>
         <source>WireGuard native format</source>
         <translation>فرمت WireGuard</translation>
     </message>
     <message>
-        <source>VPN Access</source>
-        <translation type="vanished">دسترسی VPN</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="232"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="282"/>
         <source>Connection</source>
         <translation>ارتباط</translation>
     </message>
     <message>
-        <source>VPN access without the ability to manage the server</source>
-        <translation type="vanished">دسترسی به VPN بدون امکان مدیریت سرور</translation>
-    </message>
-    <message>
-        <source>Access to server management. The user with whom you share full access to the connection will be able to add and remove your protocols and services to the server, as well as change settings.</source>
-        <translation type="vanished">دسترسی به مدیریت سرور. کاربری که با او دسترسی کامل به اتصال را به اشتراک می‌گذارید، می‌تواند پروتکل‌ها و سرویس‌های شما را در سرور اضافه و حذف کند، همچنین تنظیمات را تغییر دهد.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="295"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="296"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="355"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="356"/>
         <source>Server</source>
         <translation>سرور</translation>
     </message>
     <message>
-        <source>Accessing </source>
-        <translation type="vanished">در حال دسترسی به </translation>
-    </message>
-    <message>
-        <source>File with accessing settings to </source>
-        <translation type="vanished">فایل شامل تنظیمات دسترسی به </translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="37"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="39"/>
         <source>Config revoked</source>
         <translation>تنظیمات ابطال‎شد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="44"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="46"/>
         <source>Connection to </source>
         <translation>ارتباط با </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="45"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="47"/>
         <source>File with connection settings to </source>
         <translation>فایل شامل تنظیمات ارتباط با </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="58"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="60"/>
         <source>Save OpenVPN config</source>
         <translation>ذخیره تنظیمات OpenVPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="65"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="67"/>
         <source>Save WireGuard config</source>
         <translation>ذخیره تنظیمات WireGuard</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="72"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="74"/>
         <source>Save AmneziaWG config</source>
-        <translation type="unfinished"></translation>
+        <translation>تنظیمات AmneziaWG را ذخیره کنید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="81"/>
         <source>Save ShadowSocks config</source>
         <translation>ذخیره تنظیمات ShadowSocks</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="88"/>
         <source>Save Cloak config</source>
         <translation>ذخیره تنظیمات Cloak</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="111"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="95"/>
+        <source>Save XRay config</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="120"/>
         <source>For the AmneziaVPN app</source>
         <translation>برای نرم‎افزار AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="135"/>
         <source>AmneziaWG native format</source>
-        <translation type="unfinished"></translation>
+        <translation>فرمت بومی AmneziaWG</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="131"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="140"/>
         <source>ShadowSocks native format</source>
         <translation>فرمت ShadowSocks</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="136"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="145"/>
         <source>Cloak native format</source>
         <translation>فرمت Cloak</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="161"/>
-        <source>Share VPN Access</source>
-        <translation>به اشتراک گذاشتن دسترسی وی‎پی‎ان</translation>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="150"/>
+        <source>XRay native format</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="188"/>
+        <source>Share VPN Access</source>
+        <translation>اتصال vpn را به اشتراک بگذارید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="232"/>
         <source>Share full access to the server and VPN</source>
         <translation>به اشتراک گذاشتن دسترسی کامل به سرور و وی‎پی‎ان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="191"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="233"/>
         <source>Use for your own devices, or share with those you trust to manage the server.</source>
         <translation>برای دستگاه‎های خودتان استفاده کنید یا با آنهایی که برای مدیریت سرور به آن‎ها اعتماد دارید به اشتراک بگذارید.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="243"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="513"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="299"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="591"/>
         <source>Users</source>
         <translation>کاربران</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="274"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="333"/>
         <source>User name</source>
         <translation>نام کاربری</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="529"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="612"/>
         <source>Search</source>
         <translation>جستجو</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="613"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="794"/>
         <source>Creation date: </source>
-        <translation>تاریخ ایجاد:</translation>
+        <translation>تاریخ ایجاد: </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="627"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="814"/>
         <source>Rename</source>
         <translation>تغییر نام</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="659"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="860"/>
         <source>Client name</source>
         <translation>نام کلاینت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="672"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="873"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="704"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="907"/>
         <source>Revoke</source>
         <translation>ابطال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="707"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="911"/>
         <source>Revoke the config for a user - %1?</source>
-        <translation> لغو پیکربندی برای یک کاربر %1؟</translation>
+        <translation>لغو پیکربندی برای یک کاربر - %1?</translation>
     </message>
     <message>
-        <source>Revoke the config for a user - </source>
-        <translation type="vanished">ابطال تنظیمات برای کاربر </translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="708"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="912"/>
         <source>The user will no longer be able to connect to your server.</source>
         <translation>کاربر دیگر نمی‎تواند به سرور وصل شود.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="709"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="913"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="710"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="914"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
     <message>
-        <source>Full access</source>
-        <translation type="vanished">دسترسی کامل</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="263"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="322"/>
         <source>Share VPN access without the ability to manage the server</source>
         <translation>به اشتراک گذاشتن دسترسی وی‎پی‎ان بدون امکان مدیریت سرور</translation>
     </message>
     <message>
-        <source>Share access to server management. The user with whom you share full access to the server will be able to add and remove any protocols and services to the server, as well as change settings.</source>
-        <translation type="vanished">به اشتراک گذاری دسترسی به مدیریت سرور. کاربری که دسترسی کامل سرور با او به اشتراک گذاشته می‎شود می‎تواند پروتکل‌‎ها و سرویس‎ها را در سرور حذف یا اضافه کند و یا تنظیمات سرور را تغییر دهد.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="356"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="357"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="417"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="418"/>
         <source>Protocol</source>
         <translation>پروتکل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="457"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="458"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="526"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="527"/>
         <source>Connection format</source>
         <translation>فرمت ارتباط</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="198"/>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="496"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="245"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="568"/>
         <source>Share</source>
         <translation>اشتراک‎گذاری</translation>
     </message>
@@ -2265,58 +2270,66 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageShareFullAccess</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="49"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="52"/>
         <source>Full access to the server and VPN</source>
         <translation>دسترسی کامل به سرور و وی‎پی‎ان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="57"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="60"/>
         <source>We recommend that you use full access to the server only for your own additional devices.
 </source>
-        <translation>ما پیشنهاد میکنیم که ازحالت دسترسی کامل به سرور فقط برای دستگاه‎های دیگر خودتان استفاده کنید
+        <translation>ما پیشنهاد میکنیم که ازحالت دسترسی کامل به سرور فقط برای دستگاه‎های دیگر خودتان استفاده کنید.
 </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="58"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="61"/>
         <source>If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. </source>
-        <translation>اگر دسترسی کامل را با دیگران به اشتراک بگذارید، آن‎ها می‎توانند پروتکل‎ها و سرویس‎ها را حذف یا اضافه کنند که باعث می‎شود که وی‎پی‎ان دیگر برای سایر کاربران کار نکند.</translation>
+        <translation>اگر دسترسی کامل را با دیگران به اشتراک بگذارید، آن‎ها می‎توانند پروتکل‎ها و سرویس‎ها را حذف یا اضافه کنند که باعث می‎شود که وی‎پی‎ان دیگر برای سایر کاربران کار نکند. </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="74"/>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="75"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="82"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="83"/>
         <source>Server</source>
         <translation>سرور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="101"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="111"/>
         <source>Accessing </source>
         <translation>در حال دسترسی به </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="112"/>
         <source>File with accessing settings to </source>
         <translation>فایل شامل تنظیمات دسترسی به </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="134"/>
         <source>Share</source>
         <translation>اشتراک‎گذاری</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="127"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="140"/>
         <source>Connection to </source>
         <translation>ارتباط با </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="141"/>
         <source>File with connection settings to </source>
         <translation>فایل شامل تنظیمات ارتباط با </translation>
     </message>
 </context>
 <context>
+    <name>PageStart</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageStart.qml" line="158"/>
+        <source>Logging was disabled after 14 days, log files were deleted</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>PopupType</name>
     <message>
-        <location filename="../ui/qml/Controls2/PopupType.qml" line="68"/>
+        <location filename="../ui/qml/Controls2/PopupType.qml" line="82"/>
         <source>Close</source>
         <translation>بستن</translation>
     </message>
@@ -2604,39 +2617,34 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>The user does not have permission to use sudo</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="24"/>
+        <location filename="../core/errorstrings.cpp" line="25"/>
         <source>Ssh request was denied</source>
         <translation>Ssh request was denied</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="25"/>
+        <location filename="../core/errorstrings.cpp" line="26"/>
         <source>Ssh request was interrupted</source>
         <translation>Ssh request was interrupted</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="26"/>
+        <location filename="../core/errorstrings.cpp" line="27"/>
         <source>Ssh internal error</source>
         <translation>Ssh internal error</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="27"/>
+        <location filename="../core/errorstrings.cpp" line="28"/>
         <source>Invalid private key or invalid passphrase entered</source>
         <translation>Invalid private key or invalid passphrase entered</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="28"/>
+        <location filename="../core/errorstrings.cpp" line="29"/>
         <source>The selected private key format is not supported, use openssh ED25519 key types or PEM key types</source>
         <translation>The selected private key format is not supported, use openssh ED25519 key types or PEM key types</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="29"/>
+        <location filename="../core/errorstrings.cpp" line="30"/>
         <source>Timeout connecting to server</source>
         <translation>Timeout connecting to server</translation>
-    </message>
-    <message>
-        <location filename="../core/errorstrings.cpp" line="32"/>
-        <source>Scp error: Generic failure</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Sftp error: End-of-file encountered</source>
@@ -2691,145 +2699,147 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Sftp error: No media was in remote drive</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="50"/>
+        <location filename="../core/errorstrings.cpp" line="51"/>
         <source>The config does not contain any containers and credentials for connecting to the server</source>
         <translation>تنظیمات شامل هیچ کانتینر یا اعتبارنامه‎ای برای اتصال به سرور نیست</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="53"/>
+        <location filename="../core/errorstrings.cpp" line="54"/>
         <source>VPN connection error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../core/errorstrings.cpp" line="56"/>
-        <source>Error when retrieving configuration from API</source>
-        <translation type="unfinished"></translation>
+        <translation>خطای اتصال VPN</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="57"/>
+        <source>Error when retrieving configuration from API</source>
+        <translation>خطا هنگام بازیابی پیکربندی از API</translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="58"/>
         <source>This config has already been added to the application</source>
-        <translation type="unfinished"></translation>
+        <translation>این پیکربندی قبلاً به برنامه اضافه شده است</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="60"/>
-        <source>QFile error: The file could not be opened</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../core/errorstrings.cpp" line="61"/>
-        <source>QFile error: An error occurred when reading from the file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../core/errorstrings.cpp" line="62"/>
-        <source>QFile error: The file could not be accessed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../core/errorstrings.cpp" line="63"/>
-        <source>QFile error: An unspecified error occurred</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../core/errorstrings.cpp" line="64"/>
-        <source>QFile error: A fatal error occurred</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../core/errorstrings.cpp" line="65"/>
-        <source>QFile error: The operation was aborted</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../core/errorstrings.cpp" line="72"/>
+        <location filename="../core/errorstrings.cpp" line="73"/>
         <source>ErrorCode: %1. </source>
-        <translation type="unfinished"></translation>
+        <translation>کد خطا: %1. </translation>
     </message>
     <message>
-        <source>Failed to save config to disk</source>
-        <translation type="vanished">Failed to save config to disk</translation>
-    </message>
-    <message>
-        <location filename="../core/errorstrings.cpp" line="35"/>
+        <location filename="../core/errorstrings.cpp" line="36"/>
         <source>OpenVPN config missing</source>
         <translation>OpenVPN config missing</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="36"/>
+        <location filename="../core/errorstrings.cpp" line="22"/>
+        <source>Server error: Packet manager error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="33"/>
+        <source>Scp error: Generic failure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="37"/>
         <source>OpenVPN management server error</source>
         <translation>OpenVPN management server error</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="39"/>
+        <location filename="../core/errorstrings.cpp" line="40"/>
         <source>OpenVPN executable missing</source>
         <translation>OpenVPN executable missing</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="40"/>
+        <location filename="../core/errorstrings.cpp" line="41"/>
         <source>ShadowSocks (ss-local) executable missing</source>
         <translation>ShadowSocks (ss-local) executable missing</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="41"/>
+        <location filename="../core/errorstrings.cpp" line="42"/>
         <source>Cloak (ck-client) executable missing</source>
         <translation>Cloak (ck-client) executable missing</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="42"/>
+        <location filename="../core/errorstrings.cpp" line="43"/>
         <source>Amnezia helper service error</source>
         <translation>Amnezia helper service error</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="43"/>
+        <location filename="../core/errorstrings.cpp" line="44"/>
         <source>OpenSSL failed</source>
         <translation>OpenSSL failed</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="46"/>
+        <location filename="../core/errorstrings.cpp" line="47"/>
         <source>Can&apos;t connect: another VPN connection is active</source>
         <translation>Can&apos;t connect: another VPN connection is active</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="47"/>
+        <location filename="../core/errorstrings.cpp" line="48"/>
         <source>Can&apos;t setup OpenVPN TAP network adapter</source>
         <translation>Can&apos;t setup OpenVPN TAP network adapter</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="48"/>
+        <location filename="../core/errorstrings.cpp" line="49"/>
         <source>VPN pool error: no available addresses</source>
         <translation>VPN pool error: no available addresses</translation>
     </message>
     <message>
-        <source>The config does not contain any containers and credentiaks for connecting to the server</source>
-        <translation type="vanished">The config does not contain any containers and credentiaks for connecting to the server</translation>
+        <location filename="../core/errorstrings.cpp" line="61"/>
+        <source>QFile error: The file could not be opened</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="69"/>
+        <location filename="../core/errorstrings.cpp" line="62"/>
+        <source>QFile error: An error occurred when reading from the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="63"/>
+        <source>QFile error: The file could not be accessed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="64"/>
+        <source>QFile error: An unspecified error occurred</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="65"/>
+        <source>QFile error: A fatal error occurred</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="66"/>
+        <source>QFile error: The operation was aborted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="70"/>
         <source>Internal error</source>
         <translation>Internal error</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="88"/>
+        <location filename="../containers/containers_defs.cpp" line="94"/>
         <source>IPsec</source>
         <translation>IPsec</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="101"/>
+        <location filename="../containers/containers_defs.cpp" line="107"/>
         <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
         <translation>شدوساکس - ترافیک VPN را پنهان می کند، به طوری که مشابه ترافیک وب عادی می شود، اما ممکن است توسط سیستم های تجزیه و تحلیل در برخی از مناطق با سانسور شدید شناسایی شود.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="104"/>
+        <location filename="../containers/containers_defs.cpp" line="110"/>
         <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
-        <translation>OpenVPN روی Cloak - OpenVPN با VPN که به عنوان ترافیک وب پنهان می‌شود و مقاومت در برابر تشخیص فعال از طریق پیشرفته. ایده‌آل برای دور زدن مسدود کردن در مناطق با بالاترین سطوح سانسور</translation>
+        <translation>OpenVPN روی Cloak - OpenVPN با VPN که به عنوان ترافیک وب پنهان می‌شود و مقاومت در برابر تشخیص فعال از طریق پیشرفته. ایده‌آل برای دور زدن مسدود کردن در مناطق با بالاترین سطوح سانسور.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="122"/>
+        <location filename="../containers/containers_defs.cpp" line="131"/>
         <source>Create a file vault on your server to securely store and transfer files.</source>
-        <translation>ساختن یک گنجانده فایل بر روی سرور شما برای ذخیره و انتقال ایمن فایل‌ها</translation>
+        <translation>ساختن یک گنجانده فایل بر روی سرور شما برای ذخیره و انتقال ایمن فایل‌ها.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="155"/>
+        <location filename="../containers/containers_defs.cpp" line="164"/>
         <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for protecting against blocking.
 
 OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client and the server.
@@ -2856,18 +2866,19 @@ Cloak OpenVPN را از شناسایی و مسدود کردن محافظت می�
 
 Cloak می‌تواند اطلاعات فراداده بسته را تغییر دهد تا ترافیک VPN را به طور کامل به عنوان ترافیک وب عادی پنهان کند و همچنین VPN را از شناسایی توسط Active Probing محافظت کند. این باعث می‌شود این سیستم بسیار مقاوم در برابر شناسایی شود.
 
-فوراً پس از دریافت اولین بسته داده، Cloak اتصال ورودی را تأیید می‌کند. اگر تأیید اعتبار ناموفق باشد، پلاگین سرور را به عنوان یک وب‌سایت جعلی پنهان می‌کند و VPN شما برای سیستم‌های تجزیه و تحلیل غیر قابل دسترسی می‌شود.
+فوراً پس از دریافت اولین بسته داده، Cloak اتصال ورودی را تأیید می‌کند. اگر تأیید اعتبار ناموفق باشد، پلاگین سرور را به عنوان یک وب‌سایت جعلی پنهان می‌کند و VPN شما برای سیستم‌های تجزیه و تحلیل غیر قابل دسترسی می‌شود
 
 اگر در منطقه شما سطح بسیار بالایی از سانسور اینترنت وجود دارد، به شما توصیه می‌شود که از اولین اتصال فقط از OpenVPN over Cloak استفاده کنید.
 
-    در دسترس در AmneziaVPN بر روی تمام پلتفرم‌ها
-    مصرف بالای برق در دستگاه‌های تلفن همراه
-    تنظیمات انعطاف پذیر
-    توسط سیستم‌های تجزیه و تحلیل DPI شناخته نمی‌شود
-    بر روی پروتکل شبکه TCP، پورت 443 کار می‌کند.</translation>
+* در دسترس در AmneziaVPN بر روی تمام پلتفرم‌ها
+* مصرف بالای برق در دستگاه‌های تلفن همراه
+* تنظیمات انعطاف پذیر
+* توسط سیستم‌های تجزیه و تحلیل DPI شناخته نمی‌شود
+* بر روی پروتکل شبکه TCP، پورت 443 کار می‌کند.
+</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="174"/>
+        <location filename="../containers/containers_defs.cpp" line="183"/>
         <source>A relatively new popular VPN protocol with a simplified architecture.
 WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
 WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
@@ -2877,10 +2888,18 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
 * Works over UDP network protocol.</source>
-        <translation type="unfinished"></translation>
+        <translation>یک پروتکل VPN محبوب نسبتا جدید با معماری ساده شده.
+WireGuard اتصال VPN پایدار و عملکرد بالا را در همه دستگاه ها فراهم می کند. از تنظیمات رمزگذاری سخت کد شده استفاده می کند. WireGuard در مقایسه با OpenVPN دارای تأخیر کمتر و توان انتقال داده بهتر است.
+WireGuard به دلیل امضاهای بسته متمایز خود، بسیار مستعد مسدود شدن است. برخلاف برخی دیگر از پروتکل‌های VPN که از تکنیک‌های مبهم سازی استفاده می‌کنند، الگوهای امضای ثابت بسته‌های WireGuard را می‌توان به راحتی شناسایی کرد و بنابراین توسط Deep پیشرفته مسدود شدسیستم های بازرسی بسته (DPI) و سایر ابزارهای نظارت بر شبکه.
+
+* در AmneziaVPN در همه سیستم عامل ها موجود است
+* مصرف برق کم
+* حداقل تعداد تنظیمات
+* به راحتی توسط سیستم های تجزیه و تحلیل DPI شناخته می شود، مستعد مسدود شدن است
+* روی پروتکل شبکه UDP کار می کند.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="203"/>
+        <location filename="../containers/containers_defs.cpp" line="223"/>
         <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
 One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
@@ -2901,70 +2920,63 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * روی پروتکل شبکه UDP، پورت‎های 500 و 4500 کار می‎کند.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="215"/>
+        <location filename="../containers/containers_defs.cpp" line="235"/>
         <source>DNS Service</source>
         <translation>سرویس DNS</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="92"/>
+        <location filename="../containers/containers_defs.cpp" line="98"/>
         <source>Sftp file sharing service</source>
-        <translation>سرویس اشتراک گذاری فایل Sftp</translation>
+        <translation>سرویس فایل اشتراک Sftp</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="90"/>
-        <location filename="../containers/containers_defs.cpp" line="214"/>
+        <location filename="../containers/containers_defs.cpp" line="96"/>
+        <location filename="../containers/containers_defs.cpp" line="234"/>
         <source>Website in Tor network</source>
         <translation>وب سایت در شبکه Tor</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="91"/>
+        <location filename="../containers/containers_defs.cpp" line="97"/>
         <source>Amnezia DNS</source>
         <translation>Amnezia DNS</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="98"/>
+        <location filename="../containers/containers_defs.cpp" line="104"/>
         <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
         <translation>پروتکل OpenVPN یکی از پروتکل‎های وی‎پی‎ان محبوب می‎باشد با تنظیمات و پیکربندی‎های قابل تغییر. از پروتکل امنیتی داخلی خود با تبادل کلید SSL/TLS استفاده می‎کند.</translation>
     </message>
     <message>
-        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but is recognised by analysis systems in some highly censored regions.</source>
-        <translation type="vanished">پروتکل ShadowSocks ترافیک وی‎پی‎ان را پنهان و آن را شبیه ترافیک عادی وب می‎کند، اما در مناطقی که سانسور شدیدی اعمال می‎شود با سیستم‎های تحلیلی قابل شناسایی است.</translation>
-    </message>
-    <message>
-        <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probbing detection. Ideal for bypassing blocking in regions with the highest levels of censorship.</source>
-        <translation type="vanished">پروتکل OpenVPN over Cloak که همان پروتکل OpenVPN با قابلیت پنهان کردن ترافیک از سیستم‎های تحلیل فعال برروی شبکه. ایده‎آل برای گذر از ممنوعیت در مناطقی که سانسور شدیدی اعمال می‎کنند.</translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="108"/>
+        <location filename="../containers/containers_defs.cpp" line="114"/>
         <source>WireGuard - New popular VPN protocol with high performance, high speed and low power consumption. Recommended for regions with low levels of censorship.</source>
         <translation>پروتکل WireGuard یک پروتکل وی‎پی‎ان جدید با عملکرد بسیار خوب، سرعت بالا و مصرف انرژی پایین. برای مناطقی که سطح سانسور پایینی دارند پیشنهاد می‎شود.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="111"/>
+        <location filename="../containers/containers_defs.cpp" line="117"/>
         <source>AmneziaWG - Special protocol from Amnezia, based on WireGuard. It&apos;s fast like WireGuard, but very resistant to blockages. Recommended for regions with high levels of censorship.</source>
         <translation>پروتکل AmneziaWG یک پروتکل اختصاصی Amnezia که بر اساس WireGaurd کار میکند. به اندازه WireGaurd پرسرعت است و در عین حال بسیار مقاوم به بلاک شدن توسط شبکه ست. مناسب برای مناطق با سطح سانسور بالاست.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="115"/>
+        <location filename="../containers/containers_defs.cpp" line="121"/>
+        <source>XRay with REALITY - Suitable for countries with the highest level of internet censorship. Traffic masking as web traffic at the TLS level, and protection against detection by active probing methods.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="124"/>
         <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
         <translation>پروتکل IKEv2 پروتکلی پایدار و مدرن که مقداری سریعتر از سایر پروتکل‎هاست. بعد از قطع سیگنال دوباره اتصال را بازیابی می‎کند. به صورت پیش‎فرض بر روی آخرین نسخه دستگاه‎های اندروید و iOS پیشتیبانی می‎شود.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="118"/>
+        <location filename="../containers/containers_defs.cpp" line="127"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
         <translation>با دو کلیک یک سایت وردپرس در شبکه Tor راه‎اندازی کنید.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="120"/>
+        <location filename="../containers/containers_defs.cpp" line="129"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
         <translation>سرور DNS را با مال خودتان جایگزین کنید. این کار سطح حریم خصوصی شما را افزایش می‎دهد.</translation>
     </message>
     <message>
-        <source>Creates a file vault on your server to securely store and transfer files.</source>
-        <translation type="vanished">یک محفظه ایمن بر روی سرور خودتان ایجاد کنید که به طور امن بتوانید فایل‎ها را ذخیره و جابجا کنید.</translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="129"/>
+        <location filename="../containers/containers_defs.cpp" line="138"/>
         <source>OpenVPN stands as one of the most popular and time-tested VPN protocols available.
 It employs its unique security protocol, leveraging the strength of SSL/TLS for encryption and key exchange. Furthermore, OpenVPN&apos;s support for a multitude of authentication methods makes it versatile and adaptable, catering to a wide range of devices and operating systems. Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, which continually reinforces its security. With a strong balance of performance, security, and compatibility, OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.
 
@@ -2987,7 +2999,7 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * امکان کار بر روی دو پروتکل TCP و UDP</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="145"/>
+        <location filename="../containers/containers_defs.cpp" line="154"/>
         <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
 
 * Available in the AmneziaVPN only on desktop platforms
@@ -3005,66 +3017,7 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * عملکرد بر روی پروتکل شبکه TCP</translation>
     </message>
     <message>
-        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
-
-OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client and the server.
-
-Cloak protects OpenVPN from detection and blocking. 
-
-Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
-
-Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
-
-If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
-
-* Available in the AmneziaVPN across all platforms
-* High power consumption on mobile devices
-* Flexible settings
-* Not recognised by DPI analysis systems
-* Works over TCP network protocol, 443 port.
-</source>
-        <translation type="vanished">این یک ترکیب از پروتکل OpenVPN و افزونه Cloak می‎باشد که به طور خاص برای محافظت از بلاک شدن طراحی شده است.
-
-پروتکل OpenVPN با رمزنگاری تمام ترافیک اینترنت بین دستگاه و سرور یک اتصال وی‎پی‎ان امن را فراهم می‎کند.
-
-افزونه Cloak از OpenVPN در مقابل شناسایی و بلاک شدن محافظت می‎کند
-
-افزونه Cloak می‎تواند داده‎های بسته ترافیکی را تغییر دهد و در نتیجه ترافیک وی‎پی‎ان شبیه ترافیک عادی وب می‎شود و همچنین از وی‎پی‎ان در مقابل شناسایی شدن توسط DPI محافظت می‎کند. این باعث می‎شود که این پروتکل به شناسایی‎شدن بسیار مقاوم باشد
-
-درست بعد از دریافت اولین بسته داده،افزونه Cloak اتصال ورودی را احراز هویت می‎کند و اگر عملیات احراز هویت انجام نشود Cloak سرور را به عنوان یک وب سایت جعلی در‎ می‎آورد و وی‎پی‎ان شما را از تحلیل شبکه پنهان می‎کند.
-
-اگر در منطقه شما سطح بالایی از سانسور وجود دارد ما به شما پیشنهاد می‎کنیم از اولین ارتباط تنها از OpenVPN over Cloak استفاده کنید.
-
-
-* بر روی تمام پلتفرم‎ها در AmneziaVPN در دسترس است
-* مصرف بالای انرژی در دستگاه‎های موبایل
-* تنظیمات منطعف
-* غیرقابل تشخیص و شناسایی توسط سیستم‎های تحلیل عمیق DPI
-* کار کردن روی پروتکل شبکه TCP، پورت 443
-</translation>
-    </message>
-    <message>
-        <source>A relatively new popular VPN protocol with a simplified architecture.
-Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
-WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
-
-* Available in the AmneziaVPN across all platforms
-* Low power consumption
-* Minimum number of settings
-* Easily recognised by DPI analysis systems, susceptible to blocking
-* Works over UDP network protocol.</source>
-        <translation type="vanished">یک پروتکل نسبتا محبوب وی‎پی‎ان با معماری ساده
-اتصال وی‎پی‎‎ان پایدار با عملکرد بالا بر روی تمام دستگاه‎‌ها فراهم می‎کند. از تنظیمات ثابت برای رمزنگاری استفاده می‎کند و در مقایسه با OpenVPN سرعت بهتری در انتقال اطلاعات دارد.
-پروتکل WireGaurd به دلیل امضای بسته داده مخصوص، احتمال بسیار بالایی برای شناسایی و بلاک شدن دارد.برعکس سایر پروتکل‎های وی‎پی‎ان که از روش‎های مخفی کردن استفاده می‎کنند، امضای ثابت WireGuard به راحتی می‎تواند توسط سیستم‎های تحلیل عمیق DPI یا سایر روش‎های بررسی شبکه شناسایی و بلاک شود.
-
-* بر روی تمام پلتفرم‌ها در AmneziaVPN قابل دسترسی است.
-* مصرف انرژی پایین
-* کمترین میزان تنظیمات
-* امکان شناسایی شدن توسط سیستم‎های تحلیل عمیق DPI به آسانی و بلاک شدن
-* کار بر روی پروتکل شبکه UDP</translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="187"/>
+        <location filename="../containers/containers_defs.cpp" line="196"/>
         <source>A modern iteration of the popular VPN protocol, AmneziaWG builds upon the foundation set by WireGuard, retaining its simplified architecture and high-performance capabilities across devices.
 While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. AmneziaWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
 This means that AmneziaWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
@@ -3085,16 +3038,34 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 * کار بر روی پروتکل شبکه UDP</translation>
     </message>
     <message>
-        <source>AmneziaWG container</source>
-        <translation type="vanished">AmneziaWG протокол</translation>
+        <location filename="../containers/containers_defs.cpp" line="212"/>
+        <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
+It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
+This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
+Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="216"/>
-        <source>Sftp file sharing service - is secure FTP service</source>
-        <translation>سرویس اشتراک فایل Sftp یک سرویس امن FTP می‎باشد</translation>
+        <location filename="../containers/containers_defs.cpp" line="237"/>
+        <source>After installation, Amnezia will create a
+
+ file storage on your server. You will be able to access it using
+ FileZilla or other SFTP clients, as well as mount the disk on your device to access
+ it directly from your device.
+
+For more detailed information, you can
+ find it in the support section under &quot;Create SFTP file storage.&quot; </source>
+        <translation>پس از نصب، Amnezia یک ایجاد خواهد کرد
+
+ ذخیره سازی فایل در سرور شما. شما قادر خواهید بود با استفاده از آن دسترسی داشته باشید
+ FileZilla یا سایر کلاینت های SFTP، و همچنین دیسک را برای دسترسی روی دستگاه خود نصب کنید
+ این به طور مستقیم از دستگاه شما.
+
+برای اطلاعات دقیق تر، می توانید
+ آن را در بخش پشتیبانی تحت &quot;ایجاد ذخیره سازی فایل SFTP&quot; پیدا کنید.&quot; </translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="77"/>
+        <location filename="../protocols/protocols_defs.cpp" line="78"/>
         <source>Sftp service</source>
         <translation>سرویس Sftp</translation>
     </message>
@@ -3158,19 +3129,11 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <source>error 0x%1: %2</source>
         <translation>error 0x%1: %2</translation>
     </message>
-    <message>
-        <source>WireGuard Configuration Highlighter</source>
-        <translation type="vanished">هایلایتر پیکربندی WireGuard</translation>
-    </message>
-    <message>
-        <source>&amp;Randomize colors</source>
-        <translation type="vanished">رنگ‎های تصادفی</translation>
-    </message>
 </context>
 <context>
     <name>SelectLanguageDrawer</name>
     <message>
-        <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="55"/>
+        <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="64"/>
         <source>Choose language</source>
         <translation>انتخاب زبان</translation>
     </message>
@@ -3192,17 +3155,16 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="140"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="149"/>
         <source>All settings have been reset to default values</source>
         <translation>تمام تنظیمات به مقادیر پیش فرض ریست شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="150"/>
         <source>Cached profiles cleared</source>
-        <translation>پروفایل ذخیره شده پاک شد</translation>
+        <translation type="vanished">پروفایل ذخیره شده پاک شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="123"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="132"/>
         <source>Backup file is corrupted</source>
         <translation>فایل بک‎آپ خراب شده است</translation>
     </message>
@@ -3326,7 +3288,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>TextFieldWithHeaderType</name>
     <message>
-        <location filename="../ui/qml/Controls2/TextFieldWithHeaderType.qml" line="108"/>
+        <location filename="../ui/qml/Controls2/TextFieldWithHeaderType.qml" line="121"/>
         <source>The field can&apos;t be empty</source>
         <translation>این فیلد نمی‌تواند خالی باشد.</translation>
     </message>
@@ -3334,7 +3296,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="458"/>
+        <location filename="../vpnconnection.cpp" line="362"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>
@@ -3342,42 +3304,42 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnProtocol</name>
     <message>
-        <location filename="../protocols/vpnprotocol.cpp" line="130"/>
+        <location filename="../protocols/vpnprotocol.cpp" line="132"/>
         <source>Unknown</source>
         <translation>ناشناخته</translation>
     </message>
     <message>
-        <location filename="../protocols/vpnprotocol.cpp" line="131"/>
+        <location filename="../protocols/vpnprotocol.cpp" line="133"/>
         <source>Disconnected</source>
         <translation>قطع شده</translation>
     </message>
     <message>
-        <location filename="../protocols/vpnprotocol.cpp" line="132"/>
+        <location filename="../protocols/vpnprotocol.cpp" line="134"/>
         <source>Preparing</source>
         <translation>درحال آماده‎سازی</translation>
     </message>
     <message>
-        <location filename="../protocols/vpnprotocol.cpp" line="133"/>
+        <location filename="../protocols/vpnprotocol.cpp" line="135"/>
         <source>Connecting...</source>
         <translation>برقراری ارتباط...</translation>
     </message>
     <message>
-        <location filename="../protocols/vpnprotocol.cpp" line="134"/>
+        <location filename="../protocols/vpnprotocol.cpp" line="136"/>
         <source>Connected</source>
         <translation>وصل شد</translation>
     </message>
     <message>
-        <location filename="../protocols/vpnprotocol.cpp" line="135"/>
+        <location filename="../protocols/vpnprotocol.cpp" line="137"/>
         <source>Disconnecting...</source>
         <translation>در حال قطع شدن...</translation>
     </message>
     <message>
-        <location filename="../protocols/vpnprotocol.cpp" line="136"/>
+        <location filename="../protocols/vpnprotocol.cpp" line="138"/>
         <source>Reconnecting...</source>
         <translation>برقراری ارتباط دوباره...</translation>
     </message>
     <message>
-        <location filename="../protocols/vpnprotocol.cpp" line="137"/>
+        <location filename="../protocols/vpnprotocol.cpp" line="139"/>
         <source>Error</source>
         <translation>خطا</translation>
     </message>
@@ -3385,65 +3347,45 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="308"/>
+        <location filename="../containers/containers_defs.cpp" line="332"/>
         <source>Low</source>
         <translation>پایین</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="309"/>
+        <location filename="../containers/containers_defs.cpp" line="333"/>
         <source>Medium or High</source>
         <translation>متوسط یا بالا</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="310"/>
+        <location filename="../containers/containers_defs.cpp" line="334"/>
         <source>Extreme</source>
         <translation>شدید</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="318"/>
+        <location filename="../containers/containers_defs.cpp" line="342"/>
         <source>I just want to increase the level of my privacy.</source>
         <translation>من فقط میخواهم سطح حریم شخصی خودم را بالا ببرم</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="319"/>
+        <location filename="../containers/containers_defs.cpp" line="343"/>
         <source>I want to bypass censorship. This option recommended in most cases.</source>
         <translation>من میخواهم از سانسور عبور کنم. این گزینه در اکثر موارد توصیه می‎‌شود</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="321"/>
+        <location filename="../containers/containers_defs.cpp" line="345"/>
         <source>Most VPN protocols are blocked. Recommended if other options are not working.</source>
         <translation>اکثر پروتکل‎های وی‎پی‎ان مسدود شده‎اند. در مواردی که بقیه گزینه‎ها کار نمی‎کنند توصی می‎شود.</translation>
-    </message>
-    <message>
-        <source>High</source>
-        <translation type="vanished">بالایی</translation>
-    </message>
-    <message>
-        <source>Medium</source>
-        <translation type="vanished">متوسط</translation>
-    </message>
-    <message>
-        <source>Many foreign websites and VPN providers are blocked</source>
-        <translation type="vanished">بسیاری از وب‌سایت‌ها و ارائه‌دهندگان VPN خارجی مسدود شده‌اند.</translation>
-    </message>
-    <message>
-        <source>Some foreign sites are blocked, but VPN providers are not blocked</source>
-        <translation type="vanished">بعضی از وب‌سایت‌های خارجی مسدود شده‌اند، اما ارائه‌دهندگان VPN مسدود نمی‌شوند.</translation>
-    </message>
-    <message>
-        <source>I just want to increase the level of privacy</source>
-        <translation type="vanished">من فقط می‌خواهم سطح حریم خصوصی خود را افزایش دهم.</translation>
     </message>
 </context>
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="179"/>
+        <location filename="../ui/qml/main2.qml" line="180"/>
         <source>Private key passphrase</source>
         <translation>عبارت کلید خصوصی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="202"/>
+        <location filename="../ui/qml/main2.qml" line="203"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>

@@ -13,6 +13,8 @@ PageType {
 
     defaultActiveFocusItem: focusItem
 
+    property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
+
     BackButtonType {
         id: backButton
 
@@ -87,8 +89,6 @@ PageType {
 
             LabelWithButtonType {
                 id: splitTunnelingButton
-                visible: true
-
                 Layout.fillWidth: true
 
                 text: qsTr("Site-based split tunneling")
@@ -105,12 +105,12 @@ PageType {
             }
 
             DividerType {
-                visible: GC.isDesktop()
+                visible: root.isAppSplitTinnelingEnabled
             }
 
             LabelWithButtonType {
                 id: splitTunnelingButton2
-                visible: false
+                visible: root.isAppSplitTinnelingEnabled
 
                 Layout.fillWidth: true
 
@@ -119,13 +119,14 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
                 }
 
                 Keys.onTabPressed: lastItemTabClicked()
             }
 
             DividerType {
-                visible: false
+                visible: root.isAppSplitTinnelingEnabled
             }
         }
     }

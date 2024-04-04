@@ -1,5 +1,8 @@
 #include "containers_defs.h"
 
+#include "QJsonObject"
+#include "QJsonDocument"
+
 QDebug operator<<(QDebug debug, const amnezia::DockerContainer &c)
 {
     QDebugStateSaver saver(debug);
@@ -58,6 +61,8 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
 
     case DockerContainer::Ipsec: return { Proto::Ikev2 /*, Protocol::L2tp */ };
 
+    case DockerContainer::Xray: return { Proto::Xray };
+
     case DockerContainer::Dns: return { Proto::Dns };
 
     case DockerContainer::Sftp: return { Proto::Sftp };
@@ -85,6 +90,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
              { DockerContainer::Awg, "AmneziaWG" },
+             { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
@@ -111,6 +117,9 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                QObject::tr("AmneziaWG - Special protocol from Amnezia, based on WireGuard. It's fast like WireGuard, "
                            "but very resistant to blockages. "
                            "Recommended for regions with high levels of censorship.") },
+             { DockerContainer::Xray,
+               QObject::tr("XRay with REALITY - Suitable for countries with the highest level of internet censorship. "
+                           "Traffic masking as web traffic at the TLS level, and protection against detection by active probing methods.") },
              { DockerContainer::Ipsec,
                QObject::tr("IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after "
                            "signal loss. It has native support on the latest versions of Android and iOS.") },
@@ -199,6 +208,17 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "* Minimum number of settings\n"
                       "* Not recognised by DPI analysis systems, resistant to blocking\n"
                       "* Works over UDP network protocol.") },
+        { DockerContainer::Xray,
+          QObject::tr("The REALITY protocol, a pioneering development by the creators of XRay, "
+                      "is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.\n"
+                      "It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, "
+                      "thus presenting an authentic TLS certificate and data. \n"
+                      "This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, "
+                      "legitimate sites without the need for specific configurations. \n"
+                      "Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, "
+                      "REALITY's innovative \"friend or foe\" recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. "
+                      "This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.")
+        },
         { DockerContainer::Ipsec,
           QObject::tr("IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.\n"
                       "One of its distinguishing features is its ability to swiftly switch between networks and devices, "
@@ -213,7 +233,11 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
 
         { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
         { DockerContainer::Dns, QObject::tr("DNS Service") },
-        { DockerContainer::Sftp, QObject::tr("Sftp file sharing service - is secure FTP service") }
+        { DockerContainer::Sftp,
+          QObject::tr("After installation, Amnezia will create a\n\n file storage on your server. "
+                      "You will be able to access it using\n FileZilla or other SFTP clients, "
+                      "as well as mount the disk on your device to access\n it directly from your device.\n\n"
+                      "For more detailed information, you can\n find it in the support section under \"Create SFTP file storage.\" ") }
     };
 }
 
@@ -231,6 +255,7 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::ShadowSocks: return Proto::ShadowSocks;
     case DockerContainer::WireGuard: return Proto::WireGuard;
     case DockerContainer::Awg: return Proto::Awg;
+    case DockerContainer::Xray: return Proto::Xray;
     case DockerContainer::Ipsec: return Proto::Ikev2;
 
     case DockerContainer::TorWebSite: return Proto::TorWebSite;
@@ -274,7 +299,6 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
 
 #elif defined(Q_OS_LINUX)
     switch (c) {
-    case DockerContainer::WireGuard: return true;
     case DockerContainer::Ipsec: return false;
     default: return true;
     }
@@ -341,4 +365,14 @@ bool ContainerProps::isShareable(DockerContainer container)
     case DockerContainer::Sftp: return false;
     default: return true;
     }
+}
+
+QJsonObject ContainerProps::getProtocolConfigFromContainer(const Proto protocol, const QJsonObject &containerConfig)
+{
+    QString protocolConfigString = containerConfig.value(ProtocolProps::protoToString(protocol))
+                                           .toObject()
+                                           .value(config_key::last_config)
+                                           .toString();
+
+    return QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 }

@@ -139,32 +139,6 @@ Item {
                         }
                     }
                 }
-
-                BasicButtonType {
-                    visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
-
-//                    defaultColor: "transparent"
-//                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-//                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-//                    disabledColor: "#878B91"
-//                    textColor: "#D7D8DB"
-//                    borderWidth: 0
-
-                    focusPolicy: Qt.NoFocus
-                    text: root.buttonText
-                    imageSource: root.buttonImageSource
-
-//                        Layout.rightMargin: 24
-                    Layout.preferredHeight: content.implicitHeight
-                    Layout.preferredWidth: content.implicitHeight
-                    squareLeftSide: true
-
-                    clickedFunc: function() {
-                        if (root.clickedFunc && typeof root.clickedFunc === "function") {
-                            root.clickedFunc()
-                        }
-                    }
-                }
             }
         }
 
@@ -197,6 +171,28 @@ Item {
 
         onExited: {
             backgroud.border.color = getBackgroundBorderColor(root.borderColor)
+        }
+    }
+
+    BasicButtonType {
+        visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
+
+        focusPolicy: Qt.NoFocus
+        text: root.buttonText
+        imageSource: root.buttonImageSource
+
+        anchors.top: content.top
+        anchors.bottom: content.bottom
+        anchors.right: content.right
+
+        height: content.implicitHeight
+        width: content.implicitHeight
+        squareLeftSide: true
+
+        clickedFunc: function() {
+            if (root.clickedFunc && typeof root.clickedFunc === "function") {
+                root.clickedFunc()
+            }
         }
     }
 

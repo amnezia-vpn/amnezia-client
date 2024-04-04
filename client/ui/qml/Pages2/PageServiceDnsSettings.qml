@@ -66,19 +66,19 @@ PageType {
                 Layout.topMargin: 24
                 width: parent.width
 
-                text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
+                text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: "#EB5757"
 
                 Keys.onTabPressed: root.lastItemTabClicked()
 
                 clickedFunction: function() {
-                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
+                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
                         PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeCurrentlyProcessedContainer()
+                        InstallController.removeProcessedContainer()
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {

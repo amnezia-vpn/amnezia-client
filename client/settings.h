@@ -100,6 +100,9 @@ public:
     }
     void setSaveLogs(bool enabled);
 
+    QDateTime getLogEnableDate();
+    void setLogEnableDate(QDateTime date);
+
     enum RouteMode {
         VpnAllSites,
         VpnOnlyForwardSites,
@@ -189,6 +192,21 @@ public:
     }
 
     void clearSettings();
+
+    enum AppsRouteMode {
+        VpnAllApps,
+        VpnOnlyForwardApps,
+        VpnAllExceptApps
+    };
+    Q_ENUM(AppsRouteMode)
+
+    QString appsRouteModeString(AppsRouteMode mode) const;
+
+    AppsRouteMode getAppsRouteMode() const;
+    void setAppsRouteMode(AppsRouteMode mode);
+
+    QVector<InstalledAppInfo> getVpnApps(AppsRouteMode mode) const;
+    void setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps);
 
 signals:
     void saveLogsChanged(bool enabled);

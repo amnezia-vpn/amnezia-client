@@ -54,7 +54,7 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onRemoveCurrentlyProcessedContainerFinished(finishedMessage) {
+        function onRemoveProcessedContainerFinished(finishedMessage) {
             PageController.closePage() // close deInstalling page
             PageController.closePage() // close page with remove button
             PageController.showNotificationMessage(finishedMessage)
@@ -93,44 +93,6 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButton
-                visible: content.isServerWithWriteAccess
-                Layout.fillWidth: true
-
-                text: qsTr("Clear Amnezia cache")
-                descriptionText: qsTr("May be needed when changing other settings")
-
-                KeyNavigation.tab: labelWithButton1
-
-                clickedFunction: function() {
-                    var headerText = qsTr("Clear cached profiles?")
-                    var descriptionText = qsTr("")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        PageController.showBusyIndicator(true)
-                        SettingsController.clearCachedProfiles()
-                        PageController.showBusyIndicator(false)
-
-                        if (!GC.isMobile()) {
-                            labelWithButton.forceActiveFocus()
-                        }                    }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            labelWithButton.forceActiveFocus()
-                        }
-                    }
-
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                }
-            }
-
-            DividerType {
-                visible: content.isServerWithWriteAccess
-            }
-
-            LabelWithButtonType {
-                id: labelWithButton1
                 visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
@@ -196,7 +158,7 @@ PageType {
                 id: labelWithButton3
                 Layout.fillWidth: true
 
-                text: qsTr("Remove this server from the app")
+                text: qsTr("Remove server from application")
                 textColor: "#EB5757"
 
                 Keys.onTabPressed: {
@@ -244,7 +206,7 @@ PageType {
                 visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
-                text: qsTr("Clear server Amnezia-installed services")
+                text: qsTr("Clear server from Amnezia software")
                 textColor: "#EB5757"
 
                 Keys.onTabPressed: labelWithButton5.visible ?
@@ -252,8 +214,8 @@ PageType {
                                     root.lastItemTabClickedSignal()
 
                 clickedFunction: function() {
-                    var headerText = qsTr("Do you want to clear server Amnezia-installed services?")
-                    var descriptionText = qsTr("All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.")
+                    var headerText = qsTr("Do you want to clear server from Amnezia software?")
+                    var descriptionText = qsTr("All users whom you shared a connection with will no longer be able to connect to it.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 
@@ -299,7 +261,7 @@ PageType {
 
                     var yesButtonFunction = function() {
                         PageController.showBusyIndicator(true)
-                        ApiController.clearApiConfig()
+                        InstallController.removeApiConfig()
                         PageController.showBusyIndicator(false)
 
                         if (!GC.isMobile()) {

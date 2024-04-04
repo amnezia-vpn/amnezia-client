@@ -25,14 +25,15 @@ PageType {
         WireGuard,
         Awg,
         ShadowSocks,
-        Cloak
+        Cloak,
+        Xray
     }
 
     signal revokeConfig(int index)
     onRevokeConfig: function(index) {
         PageController.showBusyIndicator(true)
         ExportController.revokeConfig(index,
-                                      ContainersModel.getCurrentlyProcessedContainerIndex(),
+                                      ContainersModel.getProcessedContainerIndex(),
                                       ServersModel.getProcessedServerCredentials())
         PageController.showBusyIndicator(false)
         PageController.showNotificationMessage(qsTr("Config revoked"))
@@ -89,6 +90,13 @@ PageType {
                 shareConnectionDrawer.configFileName = "amnezia_for_cloak"
                 break
             }
+            case PageShare.ConfigType.Xray: {
+                ExportController.generateXrayConfig()
+                shareConnectionDrawer.configCaption = qsTr("Save XRay config")
+                shareConnectionDrawer.configExtension = ".json"
+                shareConnectionDrawer.configFileName = "amnezia_for_xray"
+                break
+            }
             }
 
             PageController.showBusyIndicator(false)
@@ -136,6 +144,11 @@ PageType {
         id: cloakConnectionFormat
         property string name: qsTr("Cloak native format")
         property var type: PageShare.ConfigType.Cloak
+    }
+    QtObject {
+        id: xrayConnectionFormat
+        property string name: qsTr("XRay native format")
+        property var type: PageShare.ConfigType.Xray
     }
 
     FlickableType {
@@ -290,7 +303,7 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
+                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                             focusItem.forceActiveFocus()
@@ -453,13 +466,13 @@ PageType {
 
                         protocolSelector.text = selectedText
 
-                        ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
+                        ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
 
                         fillConnectionTypeModel()
 
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
+                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
@@ -483,6 +496,8 @@ PageType {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                             root.connectionTypesModel.push(shadowSocksConnectionFormat)
                             root.connectionTypesModel.push(cloakConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-xray")) {
+                            root.connectionTypesModel.push(xrayConnectionFormat)
                         }
                     }
                 }
@@ -867,7 +882,7 @@ PageType {
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(index,
                                                                                       clientNameEditor.textFieldText,
-                                                                                      ContainersModel.getCurrentlyProcessedContainerIndex(),
+                                                                                      ContainersModel.getProcessedContainerIndex(),
                                                                                       ServersModel.getProcessedServerCredentials())
                                                         PageController.showBusyIndicator(false)
                                                         clientNameEditDrawer.close()

@@ -3,7 +3,7 @@
 #include "QThread"
 #include "QCoreApplication"
 
-#include "utilities.h"
+#include "core/networkUtilities.h"
 #include "version.h"
 
 #include "containers/containers_defs.h"
@@ -226,7 +226,20 @@ void Settings::setSaveLogs(bool enabled)
         }
     }
 #endif
+    if (enabled) {
+        setLogEnableDate(QDateTime::currentDateTime());
+    }
     emit saveLogsChanged(enabled);
+}
+
+QDateTime Settings::getLogEnableDate()
+{
+    return value("Conf/logEnableDate").toDateTime();
+}
+
+void Settings::setLogEnableDate(QDateTime date)
+{
+    setValue("Conf/logEnableDate", date);
 }
 
 QString Settings::routeModeString(RouteMode mode) const
@@ -275,9 +288,9 @@ QStringList Settings::getVpnIps(RouteMode mode) const
     QStringList ips;
     const QVariantMap &m = vpnSites(mode);
     for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
-        if (Utils::checkIpSubnetFormat(i.key())) {
+        if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
             ips.append(i.key());
-        } else if (Utils::checkIpSubnetFormat(i.value().toString())) {
+        } else if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
             ips.append(i.value().toString());
         }
     }
@@ -340,6 +353,54 @@ void Settings::clearSettings()
 {
     m_settings.clearSettings();
     emit settingsCleared();
+}
+
+QString Settings::appsRouteModeString(AppsRouteMode mode) const
+{
+    switch (mode) {
+    case VpnAllApps: return "AllApps";
+    case VpnOnlyForwardApps: return "ForwardApps";
+    case VpnAllExceptApps: return "ExceptApps";
+    }
+}
+
+Settings::AppsRouteMode Settings::getAppsRouteMode() const
+{
+    return static_cast<AppsRouteMode>(value("Conf/appsRouteMode", 0).toInt());
+}
+
+void Settings::setAppsRouteMode(AppsRouteMode mode)
+{
+    setValue("Conf/appsRouteMode", mode);
+}
+
+QVector<InstalledAppInfo> Settings::getVpnApps(AppsRouteMode mode) const
+{
+    QVector<InstalledAppInfo> apps;
+    auto appsArray = value("Conf/" + appsRouteModeString(mode)).toJsonArray();
+    for (const auto &app : appsArray) {
+        InstalledAppInfo appInfo;
+        appInfo.appName = app.toObject().value("appName").toString();
+        appInfo.packageName = app.toObject().value("packageName").toString();
+        appInfo.appPath = app.toObject().value("appPath").toString();
+
+        apps.push_back(appInfo);
+    }
+    return apps;
+}
+
+void Settings::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps)
+{
+    QJsonArray appsArray;
+    for (const auto &app : apps) {
+        QJsonObject appInfo;
+        appInfo.insert("appName", app.appName);
+        appInfo.insert("packageName", app.packageName);
+        appInfo.insert("appPath", app.appPath);
+        appsArray.push_back(appInfo);
+    }
+    setValue("Conf/" + appsRouteModeString(mode), appsArray);
+    m_settings.sync();
 }
 
 ServerCredentials Settings::defaultServerCredentials() const
