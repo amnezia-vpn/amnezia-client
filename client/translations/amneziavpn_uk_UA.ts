@@ -184,7 +184,7 @@
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="34"/>
         <source>Split tunneling</source>
-        <translation>Роздільне-тунелювання</translation>
+        <translation>Роздільне тунелювання</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="35"/>
@@ -194,7 +194,7 @@
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="44"/>
         <source>Split tunneling on the server</source>
-        <translation>Роздільне-тунелювання на сервері</translation>
+        <translation>Роздільне тунелювання на сервері</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="45"/>
@@ -206,7 +206,7 @@ Can&apos;t be disabled for current server</source>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="64"/>
         <source>Site-based split tunneling</source>
-        <translation>Роздільне-тунелювання по сайтам</translation>
+        <translation>Роздільне тунелювання по сайтам</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="65"/>
@@ -223,7 +223,7 @@ Can&apos;t be disabled for current server</source>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="82"/>
         <source>App-based split tunneling</source>
-        <translation>Роздільне-тунелювання по застосункам</translation>
+        <translation>Роздільне тунелювання застосунків</translation>
     </message>
 </context>
 <context>
@@ -283,17 +283,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/controllers/installController.cpp" line="507"/>
         <source>Server &apos;%1&apos; was removed</source>
-        <translation>Сервер &apos;%1&apos; был видалений</translation>
+        <translation>Сервер &apos;%1&apos; був видалений</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="517"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
-        <translation>Всі сервіси та протоколи були видалені із сервера &apos;%1&apos;</translation>
+        <translation>Всі сервіси та протоколи були видалені з сервера &apos;%1&apos;</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="534"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
-        <translation>%1 був видалений із сервера &apos;%2&apos;</translation>
+        <translation>%1 був видалений з сервера &apos;%2&apos;</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="565"/>
@@ -394,12 +394,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling enabled</source>
-        <translation type="unfinished">Роздільне-тунелювання увімкнено</translation>
+        <translation type="unfinished">Роздільне тунелювання увімкнено</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="88"/>
         <source>Split tunneling disabled</source>
-        <translation type="unfinished">Роздільне-тунелювання вимкнено</translation>
+        <translation type="unfinished">Роздільне тунелювання вимкнено</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="247"/>
@@ -664,7 +664,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="292"/>
         <source>Block DNS requests outside of VPN</source>
-        <translation>Блокувати DNS запити мимо VPN тунеля</translation>
+        <translation>Блокувати DNS запити за межами VPN тунеля</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="311"/>
@@ -741,7 +741,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="184"/>
         <source>Remove %1 from server?</source>
-        <translation>Видалити %1 із сервера?</translation>
+        <translation>Видалити %1 з сервера?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="185"/>
@@ -865,7 +865,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="66"/>
         <source>Remove %1 from server?</source>
-        <translation>Видалити %1 із сервера?</translation>
+        <translation>Видалити %1 з сервера?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="67"/>
@@ -925,7 +925,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="171"/>
         <source>Mount folder on device</source>
-        <translation>Додати директорую з вошого пристрою</translation>
+        <translation>Змонтувати папку з вашого пристрою</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="196"/>
@@ -995,7 +995,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="94"/>
         <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this URL.</source>
-        <translation type="unfinished">Використовуйте &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; для відкриття цієї силки.</translation>
+        <translation type="unfinished">Використовуйте &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; для відкриття цього посилання.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="103"/>
@@ -1005,11 +1005,11 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="112"/>
         <source>When configuring WordPress set the this onion address as domain.</source>
-        <translation>При налаштуванні WordPress укажіть цей Onion в якості домена.</translation>
+        <translation>При налаштуванні WordPress, вкажіть цей Onion в якості домена.</translation>
     </message>
     <message>
         <source>When configuring WordPress set the this address as domain.</source>
-        <translation type="vanished">При налаштуванні WordPress укажіть цей Onion в якості домена.</translation>
+        <translation type="vanished">При налаштуванні WordPress, вкажіть цей Onion в якості домена.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="126"/>
@@ -1438,7 +1438,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="80"/>
         <source>Site-based split tunneling</source>
-        <translation>Роздільне-тунелювання сайтів</translation>
+        <translation>Роздільне тунелювання сайтів</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="81"/>
@@ -1469,7 +1469,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <source>When AmneziaDNS is not used or installed</source>
-        <translation type="vanished">Ці адреси будать використовуватись, коли вимкнено або не встановлено AmneziaDNS</translation>
+        <translation type="vanished">Ці адреси будуть використовуватись, коли вимкнено або не встановлено AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="62"/>
@@ -1719,11 +1719,11 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <source>Clear server Amnezia-installed services</source>
-        <translation type="vanished">Видалити всі сервіси і притоколи Amnezia із сервера</translation>
+        <translation type="vanished">Видалити всі сервіси і протоколи Amnezia з сервера</translation>
     </message>
     <message>
         <source>Clear server Amnezia-installed services?</source>
-        <translation type="vanished">Видалити всі сервіси і притоколи Amnezia із сервера?</translation>
+        <translation type="vanished">Видалити всі сервіси і протоколи Amnezia з сервера?</translation>
     </message>
     <message>
         <source>All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.</source>
@@ -1745,7 +1745,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="156"/>
         <source>Protocols</source>
-        <translation>Притоколи</translation>
+        <translation>Протоколи</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="162"/>
@@ -1792,7 +1792,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="144"/>
         <source>Remove %1 from server?</source>
-        <translation>Видалити %1 із сервера?</translation>
+        <translation>Видалити %1 з сервера?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="145"/>
@@ -1833,7 +1833,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="74"/>
         <source>Addresses from the list should not be accessed via VPN</source>
-        <translation>Адреси із списку не мають відприватись через VPN</translation>
+        <translation>Адреси із списку не повинні відкриватись через VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="106"/>
@@ -1872,12 +1872,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="69"/>
         <source>Only the sites listed here will be accessed through the VPN</source>
-        <translation>Тільки адрси із списку мають відкриватись через VPN</translation>
+        <translation>Тільки адреси зі списку повинні відкриватись через VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="33"/>
         <source>Cannot change split tunneling settings during active connection</source>
-        <translation type="unfinished">Не можна змінити налаштування роздільного-тунелювання при підключеному VPN</translation>
+        <translation type="unfinished">Не можна змінити налаштування роздільного тунелювання при підключеному VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="36"/>
@@ -1946,7 +1946,7 @@ Already installed containers were found on the server. All installed containers 
 It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="vanished">Не використовуйте код підключення з загальнодоступних джерел. Можливо, його було створено для перехоплення ваших даних.
 
-Все в порядку, якщо ви використовуєте код яким поділився користувач якому ви довіряєте.</translation>
+Все в порядку, якщо ви використовуєте код, яким поділився користувач, якому ви довіряєте.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="51"/>
@@ -1956,7 +1956,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
         <source>What do you have?</source>
-        <translation>Виберіть що у вас</translation>
+        <translation>Виберіть що у вас є</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="67"/>
@@ -2012,7 +2012,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <source>All data you enter will remain strictly confidential
 and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Усі введені вами дані залишатимуться суворо конфіденційними
-і не буде передано чи розголошено Amnezia або будь-яким третім особам</translation>
+і не будуть передані чи розголошені Amnezia або будь-яким третім особам</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="146"/>
@@ -2046,7 +2046,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="134"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation type="unfinished">Усі дані, які ви вводите, залишатимуться суворо конфіденційними та не будуть передані чи розголошені Amnezia або будь-яким третім сторонам</translation>
+        <translation type="unfinished">Усі дані, які ви вводите, залишатимуться суворо конфіденційними та не будуть передані чи розголошені Amnezia або будь-яким третім особам</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="143"/>
@@ -2108,7 +2108,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <source>Amnesia has detected that your server is currently </source>
-        <translation type="vanished">Amnezia виявила, що сервер </translation>
+        <translation type="vanished">Amnezia виявила, що ваш сервер зараз</translation>
     </message>
     <message>
         <source>busy installing other software. Amnesia installation </source>
@@ -2137,7 +2137,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="166"/>
         <source>Cancel installation</source>
-        <translation type="unfinished">Відмінисти встановлення</translation>
+        <translation type="unfinished">Відмінити встановлення</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="21"/>
@@ -2197,7 +2197,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardQrReader.qml" line="37"/>
         <source>Point the camera at the QR code and hold for a couple of seconds. </source>
-        <translation>Наведіть камеру на QR-код і утримуйте її на протязі декількох секунд. </translation>
+        <translation>Наведіть камеру на QR-код і утримуйте її протягом декількох секунд.</translation>
     </message>
 </context>
 <context>
@@ -2419,7 +2419,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="205"/>
         <source>Use for your own devices, or share with those you trust to manage the server.</source>
-        <translation type="unfinished">Використовуйте для власних пристроїв або передайте керування сервером, тим кому довіряєте.</translation>
+        <translation type="unfinished">Використовуйте для власних пристроїв або передайте керування сервером тим, кому довіряєте.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="257"/>
@@ -2430,7 +2430,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="288"/>
         <source>User name</source>
-        <translation type="unfinished">Імя користувача</translation>
+        <translation type="unfinished">Ім'я користувача</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="545"/>
