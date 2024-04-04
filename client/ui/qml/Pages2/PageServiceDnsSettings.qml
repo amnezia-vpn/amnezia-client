@@ -68,8 +68,14 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeProcessedContainer()
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
+                        && SettingsController.isAmneziaDnsEnabled()) {
+                            PageController.showNotificationMessage(qsTr("Cannot remove Amnezia DNS from running server"))
+                        } else
+                        {
+                            PageController.goToPage(PageEnum.PageDeinstalling)
+                            InstallController.removeProcessedContainer()
+                        }
                     }
                     var noButtonFunction = function() {
                     }
