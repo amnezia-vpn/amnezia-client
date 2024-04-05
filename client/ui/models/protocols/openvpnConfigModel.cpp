@@ -105,12 +105,12 @@ void OpenVpnConfigModel::updateModel(const QJsonObject &config)
     m_protocolConfig.insert(config_key::hash,
                             protocolConfig.value(config_key::hash).toString(protocols::openvpn::defaultHash));
     m_protocolConfig.insert(config_key::block_outside_dns,
-                            protocolConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth));
+                            protocolConfig.value(config_key::block_outside_dns).toBool(protocols::openvpn::defaultBlockOutsideDns));
     m_protocolConfig.insert(config_key::port,
                             protocolConfig.value(config_key::port).toString(protocols::openvpn::defaultPort));
     m_protocolConfig.insert(
             config_key::tls_auth,
-            protocolConfig.value(config_key::block_outside_dns).toBool(protocols::openvpn::defaultBlockOutsideDns));
+            protocolConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth));
     m_protocolConfig.insert(config_key::additional_client_config,
                             protocolConfig.value(config_key::additional_client_config)
                                     .toString(protocols::openvpn::defaultAdditionalClientConfig));
