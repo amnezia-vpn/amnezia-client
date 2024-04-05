@@ -90,6 +90,14 @@ target_sources(networkextension PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
 )
 
+target_sources(networkextension PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
+)
+
+set_property(TARGET networkextension APPEND PROPERTY RESOURCE
+    ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
+)
+
 ## Build wireguard-go-version.h
 execute_process(
     COMMAND go list -m golang.zx2c4.com/wireguard
