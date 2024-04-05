@@ -400,8 +400,9 @@ void ServersModel::addContainerConfig(const int containerIndex, const QJsonObjec
     server.insert(config_key::containers, containers);
 
     auto defaultContainer = server.value(config_key::defaultContainer).toString();
-    if ((ContainerProps::containerFromString(defaultContainer) == DockerContainer::None
-         || ContainerProps::containerService(container) != ServiceType::Other)) {
+    if (ContainerProps::containerFromString(defaultContainer) == DockerContainer::None
+         && ContainerProps::containerService(container) != ServiceType::Other
+         && ContainerProps::isSupportedByCurrentPlatform(container)) {
         server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
     }
 

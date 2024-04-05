@@ -25,8 +25,9 @@ PageType {
         target: InstallController
 
         function onInstallContainerFinished(finishedMessage, isServiceInstall) {
-            if (!ConnectionController.isConnected && !isServiceInstall) {
-                ServersModel.setDefaultContainer(ServersModel.processedIndex, ContainersModel.getProcessedContainerIndex())
+            var containerIndex = ContainersModel.getProcessedContainerIndex()
+            if (!ConnectionController.isConnected && !ContainersModel.isServiceContainer(containerIndex)) {
+                ServersModel.setDefaultContainer(ServersModel.processedIndex, containerIndex)
             }
 
             PageController.closePage() // close installing page

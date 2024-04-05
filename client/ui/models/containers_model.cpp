@@ -83,6 +83,16 @@ QJsonObject ContainersModel::getContainerConfig(const int containerIndex)
     return qvariant_cast<QJsonObject>(data(index(containerIndex), ConfigRole));
 }
 
+bool ContainersModel::isSupportedByCurrentPlatform(const int containerIndex)
+{
+    return qvariant_cast<bool>(data(index(containerIndex), IsSupportedRole));
+}
+
+bool ContainersModel::isServiceContainer(const int containerIndex)
+{
+    return qvariant_cast<amnezia::ServiceType>(data(index(containerIndex), ServiceTypeRole) == ServiceType::Other);
+}
+
 QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
