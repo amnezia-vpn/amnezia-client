@@ -31,10 +31,15 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
     }
 
     QJsonObject server = m_servers.at(index.row()).toObject();
+    const auto configVersion = server.value(config_key::configVersion).toInt();
 
     switch (role) {
     case NameRole: {
-        server.insert(config_key::description, value.toString());
+        if (configVersion) {
+            server.insert(config_key::name, value.toString());
+        } else {
+            server.insert(config_key::description, value.toString());
+        }
         m_settings->editServer(index.row(), server);
         m_servers.replace(index.row(), server);
         if (index.row() == m_defaultServerIndex) {
