@@ -103,7 +103,7 @@ DrawerType2 {
                                 text: appName
 
                                 onCheckedChanged: {
-                                    installedAppsModel.selectedStateChanged(installedAppsModel.mapToSource(index), checked)
+                                    installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
                                 }
                             }
 
