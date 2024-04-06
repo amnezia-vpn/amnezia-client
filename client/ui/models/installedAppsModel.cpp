@@ -64,6 +64,7 @@ QVector<QPair<QString, QString>> InstalledAppsModel::getSelectedAppsInfo()
         appsInfo.push_back({ appName, packageName });
     }
 
+    m_selectedAppIndexes.clear();
     return appsInfo;
 }
 

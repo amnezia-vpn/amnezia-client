@@ -256,6 +256,16 @@ Settings::RouteMode Settings::routeMode() const
     return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt());
 }
 
+bool Settings::getSitesSplitTunnelingEnabled() const
+{
+    return value("Conf/sitesSplitTunnelingEnabled", false).toBool();
+}
+
+void Settings::setSitesSplitTunnelingEnabled(bool enabled)
+{
+    setValue("Conf/sitesSplitTunnelingEnabled", enabled);
+}
+
 bool Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
 {
     QVariantMap sites = vpnSites(mode);
@@ -401,6 +411,16 @@ void Settings::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &a
     }
     setValue("Conf/" + appsRouteModeString(mode), appsArray);
     m_settings.sync();
+}
+
+bool Settings::getAppsSplitTunnelingEnabled() const
+{
+    return value("Conf/appsSplitTunnelingEnabled", false).toBool();
+}
+
+void Settings::setAppsSplitTunnelingEnabled(bool enabled)
+{
+    setValue("Conf/appsSplitTunnelingEnabled", enabled);
 }
 
 ServerCredentials Settings::defaultServerCredentials() const

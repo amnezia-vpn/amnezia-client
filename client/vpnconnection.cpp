@@ -301,7 +301,11 @@ void VpnConnection::appendSplitTunnelingConfig()
         }
     }
 
-    auto routeMode = m_settings->routeMode();
+    Settings::RouteMode routeMode = Settings::RouteMode::VpnAllSites;
+    if (m_settings->getSitesSplitTunnelingEnabled()) {
+        routeMode = m_settings->routeMode();
+    }
+
     auto sites = m_settings->getVpnIps(routeMode);
 
     QJsonArray sitesJsonArray;
@@ -318,7 +322,11 @@ void VpnConnection::appendSplitTunnelingConfig()
     m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
     m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
 
-    auto appsRouteMode = m_settings->getAppsRouteMode();
+    Settings::AppsRouteMode appsRouteMode = Settings::AppsRouteMode::VpnAllApps;
+    if (m_settings->getAppsSplitTunnelingEnabled()) {
+        appsRouteMode = m_settings->getAppsRouteMode();
+    }
+
     auto apps = m_settings->getVpnApps(appsRouteMode);
 
     QJsonArray appsJsonArray;
