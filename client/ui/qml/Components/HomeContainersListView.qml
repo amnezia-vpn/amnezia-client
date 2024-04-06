@@ -51,7 +51,7 @@ ListView {
                 imageSource: "qrc:/images/controls/download.svg"
                 showImage: !isInstalled
 
-                checkable: isInstalled && !ConnectionController.isConnected && isSupported
+                checkable: isInstalled && !ConnectionController.isConnected
                 checked: proxyDefaultServerContainersModel.mapToSource(index) === ServersModel.getDefaultServerData("defaultContainer")
 
                 onClicked: {
