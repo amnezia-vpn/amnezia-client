@@ -51,7 +51,7 @@ ListView {
                 imageSource: "qrc:/images/controls/download.svg"
                 showImage: !isInstalled
 
-                checkable: isInstalled && !ConnectionController.isConnected && isSupported
+                checkable: isInstalled && !ConnectionController.isConnected
                 checked: proxyDefaultServerContainersModel.mapToSource(index) === ServersModel.getDefaultServerData("defaultContainer")
 
                 onClicked: {
@@ -64,11 +64,6 @@ ListView {
                         containersDropDown.close()
                         ServersModel.setDefaultContainer(ServersModel.defaultIndex, proxyDefaultServerContainersModel.mapToSource(index))
                     } else {
-                        if (!isSupported && isInstalled) {
-                            PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))
-                            return
-                        }
-
                         ContainersModel.setProcessedContainerIndex(proxyDefaultServerContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
