@@ -15,6 +15,11 @@ PageType {
 
     defaultActiveFocusItem: primaryDns.textField
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -22,6 +27,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: root.defaultActiveFocusItem
     }
 
     FlickableType {
@@ -149,11 +156,6 @@ PageType {
                 }
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
-            }
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: root.defaultActiveFocusItem
             }
         }
     }

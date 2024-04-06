@@ -39,8 +39,15 @@ PageType {
 
             spacing: 0
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: backButton
+            }
+
             BackButtonType {
+                id: backButton
                 Layout.topMargin: 20
+                KeyNavigation.tab: fileButton.rightButton
             }
 
             HeaderType {
@@ -60,11 +67,6 @@ PageType {
                 Layout.leftMargin: 16
 
                 text: qsTr("What do you have?")
-            }
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: fileButton.rightButton
             }
 
             LabelWithButtonType {

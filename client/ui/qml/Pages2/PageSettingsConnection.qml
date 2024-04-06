@@ -15,6 +15,11 @@ PageType {
 
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -22,6 +27,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: amneziaDnsSwitch
     }
 
     FlickableType {
@@ -43,11 +50,6 @@ PageType {
                 Layout.rightMargin: 16
 
                 headerText: qsTr("Connection")
-            }
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: amneziaDnsSwitch
             }
 
             SwitcherType {

@@ -15,7 +15,7 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview
+    defaultActiveFocusItem: focusItem
 
     Connections {
         target: InstallController
@@ -25,8 +25,13 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -35,12 +40,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listview
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -74,7 +81,7 @@ PageType {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
-                    property alias focusItem: focusItem
+                    property alias focusItem: hostLabel.rightButton
 
                     ColumnLayout {
                         id: col
@@ -84,11 +91,6 @@ PageType {
                         anchors.right: parent.right
 
                         spacing: 0
-
-                        Item {
-                            id: focusItem
-                            KeyNavigation.tab: hostLabel.rightButton
-                        }
 
                         HeaderType {
                             Layout.fillWidth: true

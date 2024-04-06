@@ -60,13 +60,15 @@ PageType {
 
             delegate: ColumnLayout {
 
-                property alias focusItem: headerContent.actionButton
+                property alias focusItem: backButton
 
                 id: content
 
                 Layout.topMargin: 20
 
                 BackButtonType {
+                    id: backButton
+                    KeyNavigation.tab: headerContent.actionButton
                 }
 
                 HeaderType {

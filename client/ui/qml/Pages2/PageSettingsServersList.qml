@@ -19,6 +19,11 @@ PageType {
 
     defaultActiveFocusItem: focusItem
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
         id: header
 
@@ -29,6 +34,8 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: servers
         }
 
         HeaderType {
@@ -38,11 +45,6 @@ PageType {
 
             headerText: qsTr("Servers")
         }
-    }
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: servers
     }
 
     FlickableType {

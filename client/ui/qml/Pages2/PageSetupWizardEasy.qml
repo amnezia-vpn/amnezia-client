@@ -33,6 +33,14 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        implicitWidth: 1
+        implicitHeight: 54
+
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -40,6 +48,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: continueButton
     }
 
     FlickableType {
@@ -58,14 +68,6 @@ PageType {
             anchors.leftMargin: 16
 
             spacing: 16
-
-            Item {
-                id: focusItem
-                implicitWidth: 1
-                implicitHeight: 54
-
-                KeyNavigation.tab: continueButton
-            }
 
             HeaderType {
                 id: header

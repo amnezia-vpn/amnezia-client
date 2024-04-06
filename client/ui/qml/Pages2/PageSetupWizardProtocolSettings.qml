@@ -61,16 +61,18 @@ PageType {
                         anchors.rightMargin: 16
                         anchors.leftMargin: 16
 
+                        Item {
+                            id: focusItem
+                            KeyNavigation.tab: backButton
+                        }
+
                         BackButtonType {
                             id: backButton
 
                             Layout.topMargin: 20
                             Layout.rightMargin: -16
                             Layout.leftMargin: -16
-                        }
 
-                        Item {
-                            id: focusItem
                             KeyNavigation.tab: showDetailsButton
                         }
 
@@ -127,6 +129,16 @@ PageType {
 
                                 implicitHeight: showDetailsDrawer.expandedHeight
 
+                                Item {
+                                    id: focusItem2
+                                    KeyNavigation.tab: showDetailsBackButton
+                                    onFocusChanged: {
+                                        if (focusItem2.activeFocus) {
+                                            fl.contentY = 0
+                                        }
+                                    }
+                                }
+
                                 BackButtonType {
                                     id: showDetailsBackButton
 
@@ -134,6 +146,8 @@ PageType {
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.topMargin: 16
+
+                                    KeyNavigation.tab: showDetailsCloseButton
 
                                     backButtonFunction: function() {
                                         showDetailsDrawer.close()
@@ -160,16 +174,6 @@ PageType {
                                         anchors.right: parent.right
                                         anchors.rightMargin: 16
                                         anchors.leftMargin: 16
-
-                                        Item {
-                                            id: focusItem2
-                                            KeyNavigation.tab: showDetailsCloseButton
-                                            onFocusChanged: {
-                                                if (focusItem2.activeFocus) {
-                                                    fl.contentY = 0
-                                                }
-                                            }
-                                        }
 
                                         Header2Type {
                                             id: showDetailsDrawerHeader

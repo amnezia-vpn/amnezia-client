@@ -29,6 +29,11 @@ disabled after 14 days, and all log files will be deleted.")
 
     defaultActiveFocusItem: focusItem
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -36,6 +41,8 @@ disabled after 14 days, and all log files will be deleted.")
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: switcher
     }
 
     FlickableType {
@@ -61,11 +68,6 @@ disabled after 14 days, and all log files will be deleted.")
                 headerText: qsTr("Logging")
                 descriptionText: qsTr("Enabling this function will save application's logs automatically, " +
                                       "By default, logging functionality is disabled. Enable log saving in case of application malfunction.")
-            }
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: switcher
             }
 
             SwitcherType {

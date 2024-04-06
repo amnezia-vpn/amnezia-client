@@ -17,8 +17,13 @@ PageType {
 
     defaultActiveFocusItem: listview.currentItem.trafficFromField.textField
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -27,12 +32,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listview.currentItem.trafficFromField.textField
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -73,11 +80,6 @@ PageType {
                         anchors.rightMargin: 16
 
                         spacing: 0
-
-                        Item {
-                            id: focusItem
-                            KeyNavigation.tab: trafficFromField.textField
-                        }
 
                         HeaderType {
                             Layout.fillWidth: true

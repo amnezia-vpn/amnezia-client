@@ -44,7 +44,7 @@ PageType {
                 id: focusItem
                 KeyNavigation.tab: loggingButton.visible ?
                                        loggingButton :
-                                       splitTunnelingButton
+                                       connectButton
             }
 
             BasicButtonType {
@@ -68,7 +68,7 @@ PageType {
                 Keys.onEnterPressed: loggingButton.clicked()
                 Keys.onReturnPressed: loggingButton.clicked()
 
-                KeyNavigation.tab: splitTunnelingButton
+                KeyNavigation.tab: connectButton
 
                 onClicked: {
                     PageController.goToPage(PageEnum.PageSettingsLogging)
@@ -79,6 +79,7 @@ PageType {
                 id: connectButton
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignCenter
+                KeyNavigation.tab: splitTunnelingButton
             }
 
             BasicButtonType {
@@ -247,7 +248,7 @@ PageType {
 
                         Keys.onEnterPressed: collapsedButtonChevron.clicked()
                         Keys.onReturnPressed: collapsedButtonChevron.clicked()
-                        Keys.onTabPressed: lastItemTabClicked(focusItem)
+                        Keys.onTabPressed: lastItemTabClicked()
 
 
                         onClicked: {

@@ -16,6 +16,11 @@ PageType {
 
     defaultActiveFocusItem: focusItem
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     SortFilterProxyModel {
         id: proxyContainersModel
         sourceModel: ContainersModel
@@ -32,7 +37,7 @@ PageType {
     }
 
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -41,12 +46,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: containers
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight + content.anchors.topMargin + content.anchors.bottomMargin
 
@@ -57,11 +64,6 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottomMargin: 20
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: containers
-            }
 
             Item {
                 width: parent.width

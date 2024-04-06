@@ -14,7 +14,24 @@ PageType {
     id: root
 
     property bool showContent: false
+
     defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
+    BackButtonType {
+        id: backButton
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.topMargin: 20
+
+        KeyNavigation.tab: showContentButton
+    }
 
     Connections {
         target: ImportController
@@ -38,15 +55,6 @@ PageType {
                 PageController.replaceStartPage()
             }
         }
-    }
-
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20
     }
 
     FlickableType {
@@ -86,11 +94,6 @@ PageType {
                     text: ImportController.getConfigFileName()
                     wrapMode: Text.Wrap
                 }
-            }
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: showContentButton
             }
 
             BasicButtonType {

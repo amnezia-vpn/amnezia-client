@@ -17,8 +17,13 @@ PageType {
 
     defaultActiveFocusItem: focusItem
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -27,12 +32,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: removeButton
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -42,11 +49,6 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: removeButton
-            }
 
             HeaderType {
                 id: header

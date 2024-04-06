@@ -141,4 +141,7 @@ Button {
         ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
         ConnectionController.connectButtonClicked()
     }
+
+    Keys.onEnterPressed: this.clicked()
+    Keys.onReturnPressed: this.clicked()
 }

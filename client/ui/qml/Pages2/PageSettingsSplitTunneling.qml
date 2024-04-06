@@ -24,6 +24,11 @@ PageType {
     
     defaultActiveFocusItem: searchField.textField
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     property bool pageEnabled: {
         return !ConnectionController.isConnected && !isServerFromApi
     }
@@ -94,6 +99,8 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: switcher
         }
 
         RowLayout {
@@ -346,11 +353,6 @@ PageType {
 
             Keys.onTabPressed: lastItemTabClicked(focusItem)
         }
-
-        Item {
-            id: focusItem
-            KeyNavigation.tab: switcher
-        }
     }
 
     DrawerType2 {
@@ -468,6 +470,11 @@ PageType {
                 }
             }
 
+            Item {
+                id: focusItem2
+                KeyNavigation.tab: importSitesDrawerBackButton
+            }
+
             BackButtonType {
                 id: importSitesDrawerBackButton
 
@@ -475,6 +482,8 @@ PageType {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.topMargin: 16
+
+                KeyNavigation.tab: importSitesButton2
 
                 backButtonFunction: function() {
                     importSitesDrawer.close()
@@ -501,11 +510,6 @@ PageType {
                         Layout.margins: 16
 
                         headerText: qsTr("Import a list of sites")
-                    }
-
-                    Item {
-                        id: focusItem2
-                        KeyNavigation.tab: importSitesButton2
                     }
 
                     LabelWithButtonType {

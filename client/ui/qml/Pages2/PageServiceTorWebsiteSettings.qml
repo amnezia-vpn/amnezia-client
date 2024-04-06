@@ -26,8 +26,13 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -36,12 +41,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: websiteName.rightButton
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -53,11 +60,6 @@ PageType {
             anchors.right: parent.right
 
             spacing: 0
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: websiteName.rightButton
-            }
 
             HeaderType {
                 Layout.fillWidth: true

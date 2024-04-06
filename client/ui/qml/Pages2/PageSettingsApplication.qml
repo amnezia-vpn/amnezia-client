@@ -17,6 +17,7 @@ PageType {
 
     function getNextComponentInFocusChain(componentId) {
         const componentsList = [focusItem,
+                                backButton,
                                 switcher,
                                 switcherAutoStart,
                                 switcherAutoConnect,
@@ -38,13 +39,24 @@ PageType {
         }
 
         if (componentsList[nextIndex].visible) {
-            if ((nextIndex) >= 5) {
+            if ((nextIndex) >= 6) {
                 return componentsList[nextIndex].rightButton
             } else {
                 return componentsList[nextIndex]
             }
         } else {
             return getNextComponentInFocusChain(componentsList[nextIndex])
+        }
+    }
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: root.getNextComponentInFocusChain(focusItem)
+
+        onFocusChanged: {
+            if (focusItem.activeFocus) {
+                fl.contentY = 0
+            }
         }
     }
 
@@ -55,6 +67,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: root.getNextComponentInFocusChain(backButton)
     }
 
     FlickableType {
@@ -69,17 +83,6 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab:  root.getNextComponentInFocusChain(switcher)
-
-                onFocusChanged: {
-                    if (focusItem.activeFocus) {
-                        fl.contentY = 0
-                    }
-                }
-            }
 
             HeaderType {
                 Layout.fillWidth: true

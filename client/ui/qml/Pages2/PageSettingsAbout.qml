@@ -13,7 +13,18 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: image
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+
+        onFocusChanged: {
+            if (focusItem.activeFocus) {
+                fl.contentY = 0
+            }
+        }
+    }
 
     BackButtonType {
         id: backButton
@@ -22,6 +33,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: telegramButton
     }
 
     FlickableType {
@@ -47,12 +60,6 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.preferredWidth: 291
                 Layout.preferredHeight: 224
-
-                KeyNavigation.tab: telegramButton
-
-                onFocusChanged: {
-                    if (focus) { fl.ensureVisible(this) }
-                }
             }
 
             Header2TextType {

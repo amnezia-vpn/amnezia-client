@@ -22,7 +22,7 @@ PageType {
 
     Item {
         id: focusItem
-        KeyNavigation.tab: listView
+        KeyNavigation.tab: backButton
     }
 
     ColumnLayout {
@@ -35,6 +35,8 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listView
         }
 
         HeaderType {
@@ -130,7 +132,7 @@ PageType {
                                 implicitHeight: configContentDrawer.expandedHeight
 
                                 BackButtonType {
-                                    id: backButton
+                                    id: backButton1
 
                                     anchors.top: parent.top
                                     anchors.left: parent.left
@@ -143,7 +145,7 @@ PageType {
                                 }
 
                                 FlickableType {
-                                    anchors.top: backButton.bottom
+                                    anchors.top: backButton1.bottom
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.bottom: parent.bottom

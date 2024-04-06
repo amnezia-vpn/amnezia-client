@@ -196,8 +196,13 @@ Item {
                 target: menu
                 enabled: !GC.isMobile()
                 function onOpened() {
-                    listViewLoader.item.forceActiveFocus()
+                    focusItem.forceActiveFocus()
                 }
+            }
+
+            Item {
+                id: focusItem
+                KeyNavigation.tab: listViewLoader.item
             }
 
             ColumnLayout {

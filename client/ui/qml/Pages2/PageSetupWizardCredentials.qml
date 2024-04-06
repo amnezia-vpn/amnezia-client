@@ -14,6 +14,11 @@ PageType {
 
     defaultActiveFocusItem: hostname.textField
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -21,6 +26,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: hostname.textField
     }
 
     FlickableType {
@@ -127,11 +134,6 @@ PageType {
 
                     PageController.goToPage(PageEnum.PageSetupWizardEasy)
                 }
-            }
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: hostname.textField
             }
 
             LabelTextType {

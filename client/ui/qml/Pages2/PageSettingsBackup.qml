@@ -16,7 +16,7 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    defaultActiveFocusItem: firstActiveFocusItem
+    defaultActiveFocusItem: focusItem
 
     Connections {
         target: SettingsController
@@ -36,6 +36,11 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -43,6 +48,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: makeBackupButton
     }
 
     FlickableType {
@@ -77,11 +84,6 @@ PageType {
                                             "to AmneziaVPN. Keep this information in a secure place.")
 
                 iconPath: "qrc:/images/controls/alert-circle.svg"
-            }
-
-            Item {
-                id: firstActiveFocusItem
-                KeyNavigation.tab: makeBackupButton
             }
 
             BasicButtonType {

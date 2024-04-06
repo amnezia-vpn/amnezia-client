@@ -19,6 +19,11 @@ PageType {
 
     defaultActiveFocusItem: focusItem
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -26,6 +31,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: serverSelector
     }
 
     FlickableType {
@@ -60,11 +67,6 @@ PageType {
                 text: qsTr("We recommend that you use full access to the server only for your own additional devices.\n") +
                       qsTr("If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. ")
                 color: "#878B91"
-            }
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: serverSelector
             }
 
             DropDownType {
