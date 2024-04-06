@@ -533,7 +533,8 @@ void InstallController::removeAllContainers()
         emit removeAllContainersFinished(tr("All containers from server '%1' have been removed").arg(serverName));
         return;
     }
-    emit installationErrorOccurred(errorString(errorCode));
+
+    qDebug() << errorString(errorCode);
 }
 
 void InstallController::removeProcessedContainer()
