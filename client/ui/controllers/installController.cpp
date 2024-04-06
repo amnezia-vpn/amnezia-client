@@ -188,19 +188,24 @@ void InstallController::installServer(const DockerContainer container, const QMa
     VpnConfigurationsController vpnConfigurationController(m_settings);
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
         auto containerConfig = iterator.value();
-        auto errorCode =
-                vpnConfigurationController.createProtocolConfigForContainer(m_processedServerCredentials, iterator.key(), containerConfig);
-        if (errorCode) {
-            emit installationErrorOccurred(errorString(errorCode));
-            return;
-        }
-        containerConfigs.append(containerConfig);
 
-        errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
-                                                          QString("Admin [%1]").arg(QSysInfo::prettyProductName()));
-        if (errorCode) {
-            emit installationErrorOccurred(errorString(errorCode));
-            return;
+        if (ContainerProps::isSupportedByCurrentPlatform(container)) {
+            auto errorCode =
+                    vpnConfigurationController.createProtocolConfigForContainer(m_processedServerCredentials, iterator.key(), containerConfig);
+            if (errorCode) {
+                emit installationErrorOccurred(errorString(errorCode));
+                return;
+            }
+            containerConfigs.append(containerConfig);
+
+            errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
+                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()));
+            if (errorCode) {
+                emit installationErrorOccurred(errorString(errorCode));
+                return;
+            }
+        } else {
+            containerConfigs.append(containerConfig);
         }
     }
 
@@ -222,18 +227,23 @@ void InstallController::installContainer(const DockerContainer container, const 
         QJsonObject containerConfig = m_containersModel->getContainerConfig(iterator.key());
         if (containerConfig.isEmpty()) {
             containerConfig = iterator.value();
-            auto errorCode = vpnConfigurationController.createProtocolConfigForContainer(serverCredentials, iterator.key(), containerConfig);
-            if (errorCode) {
-                emit installationErrorOccurred(errorString(errorCode));
-                return;
-            }
-            m_serversModel->addContainerConfig(iterator.key(), containerConfig);
 
-            errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
-                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()));
-            if (errorCode) {
-                emit installationErrorOccurred(errorString(errorCode));
-                return;
+            if (ContainerProps::isSupportedByCurrentPlatform(container)) {
+                auto errorCode = vpnConfigurationController.createProtocolConfigForContainer(serverCredentials, iterator.key(), containerConfig);
+                if (errorCode) {
+                    emit installationErrorOccurred(errorString(errorCode));
+                    return;
+                }
+                m_serversModel->addContainerConfig(iterator.key(), containerConfig);
+
+                errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
+                                                                  QString("Admin [%1]").arg(QSysInfo::prettyProductName()));
+                if (errorCode) {
+                    emit installationErrorOccurred(errorString(errorCode));
+                    return;
+                }
+            } else {
+                m_serversModel->addContainerConfig(iterator.key(), containerConfig);
             }
 
             if (container != iterator.key()) { // skip the newly installed container
@@ -279,22 +289,28 @@ void InstallController::scanServerForInstalledContainers()
         VpnConfigurationsController vpnConfigurationController(m_settings);
 
         for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
-            QJsonObject containerConfig = m_containersModel->getContainerConfig(iterator.key());
+            auto container = iterator.key();
+            QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
             if (containerConfig.isEmpty()) {
                 containerConfig = iterator.value();
-                auto errorCode =
-                        vpnConfigurationController.createProtocolConfigForContainer(serverCredentials, iterator.key(), containerConfig);
-                if (errorCode) {
-                    emit installationErrorOccurred(errorString(errorCode));
-                    return;
-                }
-                m_serversModel->addContainerConfig(iterator.key(), containerConfig);
 
-                errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
-                                                                  QString("Admin [%1]").arg(QSysInfo::prettyProductName()));
-                if (errorCode) {
-                    emit installationErrorOccurred(errorString(errorCode));
-                    return;
+                if (ContainerProps::isSupportedByCurrentPlatform(container)) {
+                    auto errorCode =
+                            vpnConfigurationController.createProtocolConfigForContainer(serverCredentials, container, containerConfig);
+                    if (errorCode) {
+                        emit installationErrorOccurred(errorString(errorCode));
+                        return;
+                    }
+                    m_serversModel->addContainerConfig(container, containerConfig);
+
+                    errorCode = m_clientManagementModel->appendClient(container, serverCredentials, containerConfig,
+                                                                      QString("Admin [%1]").arg(QSysInfo::prettyProductName()));
+                    if (errorCode) {
+                        emit installationErrorOccurred(errorString(errorCode));
+                        return;
+                    }
+                } else {
+                    m_serversModel->addContainerConfig(container, containerConfig);
                 }
 
                 isInstalledContainerAddedToGui = true;
