@@ -3,10 +3,21 @@
 
 #include <QObject>
 
-#include "containers/containers_defs.h"
-#include "core/defs.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
+
+namespace
+{
+    enum class ConfigTypes {
+        Amnezia,
+        OpenVpn,
+        WireGuard,
+        Awg,
+        Xray,
+        Backup,
+        Invalid
+    };
+}
 
 class ImportController : public QObject
 {
@@ -36,6 +47,9 @@ public slots:
     static bool decodeQrCode(const QString &code);
 #endif
 
+    bool isNativeWireGuardConfig();
+    void processNativeWireGuardConfig();
+
 signals:
     void importFinished();
     void importErrorOccurred(const QString &errorMessage, bool goToPageHome);
@@ -59,6 +73,7 @@ private:
 
     QJsonObject m_config;
     QString m_configFileName;
+    ConfigTypes m_configType;
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     QMap<int, QByteArray> m_qrCodeChunks;

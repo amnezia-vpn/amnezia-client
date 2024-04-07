@@ -105,6 +105,15 @@ PageType {
                 }
             }
 
+            CheckBoxType {
+                id: cloakingCheckBox
+
+                visible: ImportController.isNativeWireGuardConfig()
+
+                Layout.fillWidth: true
+                text: qsTr("Activate protocol cloaking")
+            }
+
             WarningType {
                 Layout.topMargin: 16
                 Layout.fillWidth: true
@@ -152,6 +161,9 @@ PageType {
 
             text: qsTr("Connect")
             clickedFunc: function() {
+                if (cloakingCheckBox.checked) {
+                    ImportController.processNativeWireGuardConfig()
+                }
                 ImportController.importConfig()
             }
         }

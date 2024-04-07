@@ -232,6 +232,12 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
     json.insert(amnezia::config_key::responsePacketMagicHeader, wgConfig.value(amnezia::config_key::responsePacketMagicHeader));
     json.insert(amnezia::config_key::underloadPacketMagicHeader, wgConfig.value(amnezia::config_key::underloadPacketMagicHeader));
     json.insert(amnezia::config_key::transportPacketMagicHeader, wgConfig.value(amnezia::config_key::transportPacketMagicHeader));
+  } else if (!wgConfig.value(amnezia::config_key::junkPacketCount).isUndefined()
+             && !wgConfig.value(amnezia::config_key::junkPacketMinSize).isUndefined()
+             && !wgConfig.value(amnezia::config_key::junkPacketMaxSize).isUndefined()) {
+    json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
+    json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));
+    json.insert(amnezia::config_key::junkPacketMaxSize, wgConfig.value(amnezia::config_key::junkPacketMaxSize));
   }
 
   write(json);

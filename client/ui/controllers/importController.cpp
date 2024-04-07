@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QQuickItem>
 #include <QStandardPaths>
+#include <QRandomGenerator>
 
 #include "core/errorstrings.h"
 #ifdef Q_OS_ANDROID
@@ -15,15 +16,6 @@
 
 namespace
 {
-    enum class ConfigTypes {
-        Amnezia,
-        OpenVpn,
-        WireGuard,
-        Xray,
-        Backup,
-        Invalid
-    };
-
     ConfigTypes checkConfigFormat(const QString &config)
     {
         const QString openVpnConfigPatternCli = "client";
@@ -50,8 +42,7 @@ namespace
                    && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))
                    && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
             return ConfigTypes::OpenVpn;
-        } else if (config.contains(wireguardConfigPatternSectionInterface)
-                   && config.contains(wireguardConfigPatternSectionPeer)) {
+        } else if (config.contains(wireguardConfigPatternSectionInterface) && config.contains(wireguardConfigPatternSectionPeer)) {
             return ConfigTypes::WireGuard;
         } else if ((config.contains(xrayConfigPatternInbound)) && (config.contains(xrayConfigPatternOutbound))) {
             return ConfigTypes::Xray;
@@ -64,8 +55,7 @@ namespace
 #endif
 } // namespace
 
-ImportController::ImportController(const QSharedPointer<ServersModel> &serversModel,
-                                   const QSharedPointer<ContainersModel> &containersModel,
+ImportController::ImportController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                    const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
 {
@@ -92,25 +82,25 @@ bool ImportController::extractConfigFromFile(const QString &fileName)
 bool ImportController::extractConfigFromData(QString data)
 {
     QString config = data;
-    auto configFormat = checkConfigFormat(config);
-    if (configFormat == ConfigTypes::Invalid) {
+    m_configType = checkConfigFormat(config);
+    if (m_configType == ConfigTypes::Invalid) {
         data.replace("vpn://", "");
-        QByteArray ba =
-                QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+        QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
         QByteArray ba_uncompressed = qUncompress(ba);
         if (!ba_uncompressed.isEmpty()) {
             ba = ba_uncompressed;
         }
 
         config = ba;
-        configFormat = checkConfigFormat(config);
+        m_configType = checkConfigFormat(config);
     }
 
-    switch (configFormat) {
+    switch (m_configType) {
     case ConfigTypes::OpenVpn: {
         m_config = extractOpenVpnConfig(config);
         return m_config.empty() ? false : true;
     }
+    case ConfigTypes::Awg:
     case ConfigTypes::WireGuard: {
         m_config = extractWireGuardConfig(config);
         return m_config.empty() ? false : true;
@@ -164,6 +154,33 @@ QString ImportController::getConfig()
 QString ImportController::getConfigFileName()
 {
     return m_configFileName;
+}
+
+bool ImportController::isNativeWireGuardConfig()
+{
+    return m_configType == ConfigTypes::WireGuard;
+}
+
+void ImportController::processNativeWireGuardConfig()
+{
+    auto containers = m_config.value(config_key::containers).toArray();
+    if (!containers.isEmpty()) {
+        auto container = containers.at(0).toObject();
+        auto containerConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::WireGuard)).toObject();
+        auto protocolConfig = QJsonDocument::fromJson(containerConfig.value(config_key::last_config).toString().toUtf8()).object();
+
+        QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(3, 10));
+        QString junkPacketMinSize = QString::number(50);
+        QString junkPacketMaxSize = QString::number(1000);
+        protocolConfig[config_key::junkPacketCount] = junkPacketCount;
+        protocolConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
+        protocolConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
+
+        containerConfig[config_key::last_config] = QString(QJsonDocument(protocolConfig).toJson());
+        container["wireguard"] = containerConfig;
+        containers.replace(0, container);
+        m_config[config_key::containers] = containers;
+    }
 }
 
 void ImportController::importConfig()
@@ -279,8 +296,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     lastConfig[config_key::hostName] = hostName;
     lastConfig[config_key::port] = port.toInt();
 
-    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty()
-        && !configMap.value("PublicKey").isEmpty()) {
+    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty() && !configMap.value("PublicKey").isEmpty()) {
         lastConfig[config_key::client_priv_key] = configMap.value("PrivateKey");
         lastConfig[config_key::client_ip] = configMap.value("Address");
 
@@ -306,12 +322,9 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
 
     QString protocolName = "wireguard";
-    if (!configMap.value(config_key::junkPacketCount).isEmpty()
-        && !configMap.value(config_key::junkPacketMinSize).isEmpty()
-        && !configMap.value(config_key::junkPacketMaxSize).isEmpty()
-        && !configMap.value(config_key::initPacketJunkSize).isEmpty()
-        && !configMap.value(config_key::responsePacketJunkSize).isEmpty()
-        && !configMap.value(config_key::initPacketMagicHeader).isEmpty()
+    if (!configMap.value(config_key::junkPacketCount).isEmpty() && !configMap.value(config_key::junkPacketMinSize).isEmpty()
+        && !configMap.value(config_key::junkPacketMaxSize).isEmpty() && !configMap.value(config_key::initPacketJunkSize).isEmpty()
+        && !configMap.value(config_key::responsePacketJunkSize).isEmpty() && !configMap.value(config_key::initPacketMagicHeader).isEmpty()
         && !configMap.value(config_key::responsePacketMagicHeader).isEmpty()
         && !configMap.value(config_key::underloadPacketMagicHeader).isEmpty()
         && !configMap.value(config_key::transportPacketMagicHeader).isEmpty()) {
@@ -325,6 +338,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::underloadPacketMagicHeader] = configMap.value(config_key::underloadPacketMagicHeader);
         lastConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
         protocolName = "awg";
+        m_configType = ConfigTypes::Awg;
     }
 
     QJsonObject wireguardConfig;
