@@ -14,8 +14,8 @@ import "../Config"
 PageType {
     id: root
 
-    Component.onCompleted: PageController.enableTabBar(false)
-    Component.onDestruction: PageController.enableTabBar(true)
+    Component.onCompleted: PageController.disableTabBar(true)
+    Component.onDestruction: PageController.disableTabBar(false)
 
     SortFilterProxyModel {
         id: proxyServersModel

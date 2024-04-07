@@ -108,8 +108,8 @@ dependencies {
     implementation(project(":cloak"))
     implementation(libs.androidx.core)
     implementation(libs.androidx.activity)
-    implementation(libs.androidx.security.crypto)
     implementation(libs.kotlinx.coroutines)
     implementation(libs.bundles.androidx.camera)
     implementation(libs.google.mlkit)
+    implementation(libs.androidx.datastore)
 }

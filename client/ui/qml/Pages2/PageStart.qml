@@ -14,46 +14,38 @@ import "../Components"
 PageType {
     id: root
 
+    property bool isControlsDisabled: false
+    property bool isTabBarDisabled: false
+
     Connections {
         target: PageController
 
         function onGoToPageHome() {
             tabBar.setCurrentIndex(0)
             tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-
-            PageController.updateDrawerRootPage(PageEnum.PageHome)
         }
 
         function onGoToPageSettings() {
             tabBar.setCurrentIndex(2)
             tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
-
-            PageController.updateDrawerRootPage(PageEnum.PageSettings)
         }
 
         function onGoToPageViewConfig() {
             var pagePath = PageController.getPagePath(PageEnum.PageSetupWizardViewConfig)
             tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
-
-            PageController.updateDrawerRootPage(PageEnum.PageSetupWizardViewConfig)
         }
 
-        function onShowBusyIndicator(visible) {
-            busyIndicator.visible = visible
-            tabBarStackView.enabled = !visible
-            tabBar.enabled = !visible
+        function onDisableControls(disabled) {
+            isControlsDisabled = disabled
         }
 
-//        function onShowTopCloseButton(visible) {
-//            topCloseButton.visible = visible
-//        }
-
-        function onEnableTabBar(enabled) {
-            tabBar.enabled = enabled
+        function onDisableTabBar(disabled) {
+            isTabBarDisabled = disabled
         }
 
         function onClosePage() {
             if (tabBarStackView.depth <= 1) {
+                PageController.hideWindow()
                 return
             }
             tabBarStackView.pop()
@@ -61,19 +53,33 @@ PageType {
 
         function onGoToPage(page, slide) {
             var pagePath = PageController.getPagePath(page)
+
             if (slide) {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
             } else {
                 tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
             }
-
-            PageController.updateDrawerRootPage(page)
         }
 
         function onGoToStartPage() {
             connectionTypeSelection.close()
             while (tabBarStackView.depth > 1) {
                 tabBarStackView.pop()
+            }
+        }
+
+        function onEscapePressed() {
+            if (root.isControlsDisabled || root.isTabBarDisabled) {
+                return
+            }
+
+            var pageName = tabBarStackView.currentItem.objectName
+            if ((pageName === PageController.getPagePath(PageEnum.PageShare)) ||
+                    (pageName === PageController.getPagePath(PageEnum.PageSettings))) {
+                PageController.goToPageHome()
+                tabBar.previousIndex = 0
+            } else {
+                PageController.closePage()
             }
         }
     }
@@ -102,6 +108,10 @@ PageType {
             PageController.showNotificationMessage(message)
             PageController.closePage()
         }
+
+        function onCachedProfileCleared(message) {
+            PageController.showNotificationMessage(message)
+        }
     }
 
     Connections {
@@ -110,6 +120,30 @@ PageType {
         function onReconnectWithUpdatedContainer(message) {
             PageController.showNotificationMessage(message)
             PageController.closePage()
+        }
+
+        function onNoInstalledContainers() {
+            PageController.setTriggeredByConnectButton(true)
+
+            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
+            InstallController.setShouldCreateServer(false)
+            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+        }
+    }
+
+    Connections {
+        target: ImportController
+
+        function onImportErrorOccurred(errorMessage, goToPageHome) {
+            PageController.showErrorMessage(errorMessage)
+        }
+    }
+
+    Connections {
+        target: SettingsController
+
+        function onLoggingDisableByWatcher() {
+            PageController.showNotificationMessage(qsTr("Logging was disabled after 14 days, log files were deleted"))
         }
     }
 
@@ -124,26 +158,21 @@ PageType {
         width: parent.width
         height: root.height - tabBar.implicitHeight
 
+        enabled: !root.isControlsDisabled
+
         function goToTabBarPage(page) {
             connectionTypeSelection.close()
 
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
             tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
-
-            PageController.updateDrawerRootPage(page)
         }
 
         Component.onCompleted: {
             var pagePath = PageController.getPagePath(PageEnum.PageHome)
-            ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+            ServersModel.processedIndex = ServersModel.defaultIndex
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
-
-//        onWidthChanged: {
-//            topCloseButton.x = tabBarStackView.x + tabBarStackView.width -
-//                    topCloseButton.buttonWidth - topCloseButton.rightPadding
-//        }
     }
 
     TabBar {
@@ -159,6 +188,8 @@ PageType {
         bottomPadding: 8
         leftPadding: 96
         rightPadding: 96
+
+        enabled: !root.isControlsDisabled && !root.isTabBarDisabled
 
         background: Shape {
             width: parent.width
@@ -184,7 +215,7 @@ PageType {
             image: "qrc:/images/controls/home.svg"
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersModel.currentlyProcessedIndex = ServersModel.defaultIndex
+                ServersModel.processedIndex = ServersModel.defaultIndex
                 tabBar.previousIndex = 0
             }
         }
@@ -230,19 +261,6 @@ PageType {
             }
         }
     }
-
-    BusyIndicatorType {
-        id: busyIndicator
-        anchors.centerIn: parent
-        z: 1
-    }
-
-//    TopCloseButtonType {
-//        id: topCloseButton
-
-//        x: tabBarStackView.width - topCloseButton.buttonWidth - topCloseButton.rightPadding
-//        z: 1
-//    }
 
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection

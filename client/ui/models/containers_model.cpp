@@ -38,8 +38,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case EasySetupDescriptionRole: return ContainerProps::easySetupDescription(container);
     case EasySetupOrderRole: return ContainerProps::easySetupOrder(container);
     case IsInstalledRole: return m_containers.contains(container);
-    case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_currentlyProcessedContainerIndex);
-    case IsDefaultRole: return container == m_defaultContainerIndex;
+    case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_processedContainerIndex);
     case IsSupportedRole: return ContainerProps::isSupportedByCurrentPlatform(container);
     case IsShareableRole: return ContainerProps::isShareable(container);
     }
@@ -53,7 +52,7 @@ QVariant ContainersModel::data(const int index, int role) const
     return data(modelIndex, role);
 }
 
-void ContainersModel::updateModel(QJsonArray &containers)
+void ContainersModel::updateModel(const QJsonArray &containers)
 {
     beginResetModel();
     m_containers.clear();
@@ -64,31 +63,19 @@ void ContainersModel::updateModel(QJsonArray &containers)
     endResetModel();
 }
 
-void ContainersModel::setDefaultContainer(const int containerIndex)
+void ContainersModel::setProcessedContainerIndex(int index)
 {
-    m_defaultContainerIndex = static_cast<DockerContainer>(containerIndex);
-    emit dataChanged(index(containerIndex, 0), index(containerIndex, 0));
+    m_processedContainerIndex = index;
 }
 
-
-DockerContainer ContainersModel::getDefaultContainer()
+int ContainersModel::getProcessedContainerIndex()
 {
-    return m_defaultContainerIndex;
+    return m_processedContainerIndex;
 }
 
-void ContainersModel::setCurrentlyProcessedContainerIndex(int index)
+QString ContainersModel::getProcessedContainerName()
 {
-    m_currentlyProcessedContainerIndex = index;
-}
-
-int ContainersModel::getCurrentlyProcessedContainerIndex()
-{
-    return m_currentlyProcessedContainerIndex;
-}
-
-QString ContainersModel::getCurrentlyProcessedContainerName()
-{
-    return ContainerProps::containerHumanNames().value(static_cast<DockerContainer>(m_currentlyProcessedContainerIndex));
+    return ContainerProps::containerHumanNames().value(static_cast<DockerContainer>(m_processedContainerIndex));
 }
 
 QJsonObject ContainersModel::getContainerConfig(const int containerIndex)
@@ -96,18 +83,14 @@ QJsonObject ContainersModel::getContainerConfig(const int containerIndex)
     return qvariant_cast<QJsonObject>(data(index(containerIndex), ConfigRole));
 }
 
-bool ContainersModel::isAnyContainerInstalled()
+bool ContainersModel::isSupportedByCurrentPlatform(const int containerIndex)
 {
-    for (int row=0; row < rowCount(); row++) {
-        QModelIndex idx = this->index(row, 0);
+    return qvariant_cast<bool>(data(index(containerIndex), IsSupportedRole));
+}
 
-        if (this->data(idx, IsInstalledRole).toBool() &&
-            this->data(idx, ServiceTypeRole).toInt() == ServiceType::Vpn) {
-            return true;
-        }
-    }
-
-    return false;
+bool ContainersModel::isServiceContainer(const int containerIndex)
+{
+    return qvariant_cast<amnezia::ServiceType>(data(index(containerIndex), ServiceTypeRole) == ServiceType::Other);
 }
 
 QHash<int, QByteArray> ContainersModel::roleNames() const
@@ -127,7 +110,6 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
 
     roles[IsInstalledRole] = "isInstalled";
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
-    roles[IsDefaultRole] = "isDefault";
     roles[IsSupportedRole] = "isSupported";
     roles[IsShareableRole] = "isShareable";
     return roles;

@@ -15,6 +15,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: listview.currentItem.portTextField.textField
+
     ColumnLayout {
         id: backButton
 
@@ -41,7 +43,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+            enabled: ServersModel.isProcessedServerHasWriteAccess()
 
             ListView {
                 id: listview
@@ -57,6 +59,8 @@ PageType {
                 delegate: Item {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
+
+                    property alias portTextField: portTextField
 
                     ColumnLayout {
                         id: col
@@ -77,8 +81,12 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: portTextField
+
                             Layout.fillWidth: true
                             Layout.topMargin: 40
+
+                            enabled: isPortEditable
 
                             headerText: qsTr("Port")
                             textFieldText: port
@@ -90,6 +98,8 @@ PageType {
                                     port = textFieldText
                                 }
                             }
+
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         DropDownType {
@@ -97,8 +107,12 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 20
 
+                            enabled: isCipherEditable
+
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")
+
+                            drawerParent: root
 
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView
@@ -116,7 +130,7 @@ PageType {
                                 clickedFunction: function() {
                                     cipherDropDown.text = selectedText
                                     cipher = cipherDropDown.text
-                                    cipherDropDown.menuVisible = false
+                                    cipherDropDown.close()
                                 }
 
                                 Component.onCompleted: {
@@ -132,13 +146,17 @@ PageType {
                         }
 
                         BasicButtonType {
+                            id: saveRestartButton
+
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
-                            text: qsTr("Save and Restart Amnezia")
+                            enabled: isPortEditable | isCipherEditable
 
-                            onClicked: {
+                            text: qsTr("Save")
+
+                            clickedFunc: function() {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(ShadowSocksConfigModel.getConfig())

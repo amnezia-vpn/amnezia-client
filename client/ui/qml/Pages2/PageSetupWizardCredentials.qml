@@ -12,6 +12,8 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    defaultActiveFocusItem: hostname.textField
+
     BackButtonType {
         id: backButton
 
@@ -49,22 +51,30 @@ PageType {
 
                 Layout.fillWidth: true
                 headerText: qsTr("Server IP address [:port]")
-                textFieldPlaceholderText: qsTr("255.255.255.255:88")
+                textFieldPlaceholderText: qsTr("255.255.255.255:22")
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressPortRegExp()
                 }
 
-                onFocusChanged: {
-                    textField.text = textField.text.replace(/^\s+|\s+$/g, '');
+                textField.onFocusChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                 }
+
+                KeyNavigation.tab: username.textField
             }
 
             TextFieldWithHeaderType {
                 id: username
 
                 Layout.fillWidth: true
-                headerText: qsTr("Login to connect via SSH")
+                headerText: qsTr("SSH Username")
                 textFieldPlaceholderText: "root"
+
+                textField.onFocusChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                }
+
+                KeyNavigation.tab: secretData.textField
             }
 
             TextFieldWithHeaderType {
@@ -73,7 +83,7 @@ PageType {
                 property bool hidePassword: true
 
                 Layout.fillWidth: true
-                headerText: qsTr("Password / SSH private key")
+                headerText: qsTr("Password or SSH private key")
                 textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
                 buttonImageSource: textFieldText !== "" ? (hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg")
                                                         : ""
@@ -82,25 +92,29 @@ PageType {
                     hidePassword = !hidePassword
                 }
 
-                onFocusChanged: {
-                    textField.text = textField.text.replace(/^\s+|\s+$/g, '');
+                textField.onFocusChanged: {
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                 }
+
+                KeyNavigation.tab: continueButton
             }
 
             BasicButtonType {
+                id: continueButton
+
                 Layout.fillWidth: true
                 Layout.topMargin: 24
 
                 text: qsTr("Continue")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     forceActiveFocus()
                     if (!isCredentialsFilled()) {
                         return
                     }
 
                     InstallController.setShouldCreateServer(true)
-                    InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
+                    InstallController.setProcessedServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
 
                     PageController.showBusyIndicator(true)
                     var isConnectionOpened = InstallController.checkSshConnection()

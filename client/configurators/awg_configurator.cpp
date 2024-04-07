@@ -10,10 +10,10 @@ AwgConfigurator::AwgConfigurator(std::shared_ptr<Settings> settings, QObject *pa
 {
 }
 
-QString AwgConfigurator::genAwgConfig(const ServerCredentials &credentials, DockerContainer container,
-                                      const QJsonObject &containerConfig, QString &clientId, ErrorCode *errorCode)
+QString AwgConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                      const QJsonObject &containerConfig, ErrorCode errorCode)
 {
-    QString config = WireguardConfigurator::genWireguardConfig(credentials, container, containerConfig, clientId, errorCode);
+    QString config = WireguardConfigurator::createConfig(credentials, container, containerConfig, errorCode);
 
     QJsonObject jsonConfig = QJsonDocument::fromJson(config.toUtf8()).object();
     QString awgConfig = jsonConfig.value(config_key::config).toString();
@@ -41,6 +41,8 @@ QString AwgConfigurator::genAwgConfig(const ServerCredentials &credentials, Dock
     jsonConfig[config_key::responsePacketMagicHeader] = configMap.value(config_key::responsePacketMagicHeader);
     jsonConfig[config_key::underloadPacketMagicHeader] = configMap.value(config_key::underloadPacketMagicHeader);
     jsonConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
+    jsonConfig[config_key::mtu] = containerConfig.value(ProtocolProps::protoToString(Proto::Awg)).toObject().
+                                  value(config_key::mtu).toString(protocols::awg::defaultMtu);
 
     return QJsonDocument(jsonConfig).toJson();
 }

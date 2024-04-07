@@ -13,7 +13,10 @@ namespace LanguageSettings
         English,
         Russian,
         China_cn,
-        Persian
+        Ukrainian,
+        Persian,
+        Arabic,
+        Burmese
     };
     Q_ENUM_NS(AvailableLanguageEnum)
 
@@ -47,10 +50,12 @@ public:
 
     Q_PROPERTY(QString currentLanguageName READ getCurrentLanguageName NOTIFY translationsUpdated)
     Q_PROPERTY(int currentLanguageIndex READ getCurrentLanguageIndex NOTIFY translationsUpdated)
+    Q_PROPERTY(int lineHeightAppend READ getLineHeightAppend NOTIFY translationsUpdated)
 
 public slots:
     void changeLanguage(const LanguageSettings::AvailableLanguageEnum language);
     int getCurrentLanguageIndex();
+    int getLineHeightAppend();
     QString getCurrentLanguageName();
 
 signals:

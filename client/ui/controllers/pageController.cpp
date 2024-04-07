@@ -7,7 +7,8 @@
 #endif
 
 #ifdef Q_OS_ANDROID
-    #include "../../platforms/android/androidutils.h"
+    #include "platforms/android/android_controller.h"
+    #include "platforms/android/android_utils.h"
     #include <QJniObject>
 #endif
 #if defined Q_OS_MAC
@@ -74,10 +75,26 @@ void PageController::closeWindow()
 #endif
 }
 
+void PageController::hideWindow()
+{
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->minimizeApp();
+#endif
+}
+
 void PageController::keyPressEvent(Qt::Key key)
 {
     switch (key) {
-    case Qt::Key_Back: emit closePage();
+    case Qt::Key_Back:
+    case Qt::Key_Escape: {
+        if (m_drawerDepth) {
+            emit closeTopDrawer();
+            setDrawerDepth(getDrawerDepth() - 1);
+        } else {
+            emit escapePressed();
+        }
+        break;
+    }
     default: return;
     }
 }
@@ -118,42 +135,12 @@ void PageController::showOnStartup()
     }
 }
 
-void PageController::updateDrawerRootPage(PageLoader::PageEnum page)
-{
-    m_drawerLayer = 0;
-    m_currentRootPage = page;
-}
-
-void PageController::goToDrawerRootPage()
-{
-
-    m_drawerLayer = 0;
-
-    emit showTopCloseButton(false);
-    emit forceCloseDrawer();
-}
-
-void PageController::drawerOpen()
-{
-    m_drawerLayer = m_drawerLayer + 1;
-    emit showTopCloseButton(true);
-}
-
-void PageController::drawerClose()
-{
-    m_drawerLayer = m_drawerLayer -1;
-    if (m_drawerLayer <= 0) {
-        emit showTopCloseButton(false);
-        m_drawerLayer = 0;
-    }
-}
-
 bool PageController::isTriggeredByConnectButton()
 {
     return m_isTriggeredByConnectButton;
 }
 
-void PageController::setTriggeredBtConnectButton(bool trigger)
+void PageController::setTriggeredByConnectButton(bool trigger)
 {
     m_isTriggeredByConnectButton = trigger;
 }
@@ -161,4 +148,16 @@ void PageController::setTriggeredBtConnectButton(bool trigger)
 void PageController::closeApplication()
 {
     qApp->quit();
+}
+
+void PageController::setDrawerDepth(const int depth)
+{
+    if (depth >= 0) {
+        m_drawerDepth = depth;
+    }
+}
+
+int PageController::getDrawerDepth()
+{
+    return m_drawerDepth;
 }

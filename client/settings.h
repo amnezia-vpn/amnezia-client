@@ -29,11 +29,11 @@ public:
 
     QJsonArray serversArray() const
     {
-        return QJsonDocument::fromJson(m_settings.value("Servers/serversList").toByteArray()).array();
+        return QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
     }
     void setServersArray(const QJsonArray &servers)
     {
-        m_settings.setValue("Servers/serversList", QJsonDocument(servers).toJson());
+        setValue("Servers/serversList", QJsonDocument(servers).toJson());
     }
 
     // Servers section
@@ -45,11 +45,11 @@ public:
 
     int defaultServerIndex() const
     {
-        return m_settings.value("Servers/defaultServerIndex", 0).toInt();
+        return value("Servers/defaultServerIndex", 0).toInt();
     }
     void setDefaultServer(int index)
     {
-        m_settings.setValue("Servers/defaultServerIndex", index);
+        setValue("Servers/defaultServerIndex", index);
     }
     QJsonObject defaultServer() const
     {
@@ -78,27 +78,30 @@ public:
     // App settings section
     bool isAutoConnect() const
     {
-        return m_settings.value("Conf/autoConnect", false).toBool();
+        return value("Conf/autoConnect", false).toBool();
     }
     void setAutoConnect(bool enabled)
     {
-        m_settings.setValue("Conf/autoConnect", enabled);
+        setValue("Conf/autoConnect", enabled);
     }
 
     bool isStartMinimized() const
     {
-        return m_settings.value("Conf/startMinimized", false).toBool();
+        return value("Conf/startMinimized", false).toBool();
     }
     void setStartMinimized(bool enabled)
     {
-        m_settings.setValue("Conf/startMinimized", enabled);
+        setValue("Conf/startMinimized", enabled);
     }
 
     bool isSaveLogs() const
     {
-        return m_settings.value("Conf/saveLogs", false).toBool();
+        return value("Conf/saveLogs", false).toBool();
     }
     void setSaveLogs(bool enabled);
+
+    QDateTime getLogEnableDate();
+    void setLogEnableDate(QDateTime date);
 
     enum RouteMode {
         VpnAllSites,
@@ -110,15 +113,18 @@ public:
     QString routeModeString(RouteMode mode) const;
 
     RouteMode routeMode() const;
-    void setRouteMode(RouteMode mode) { m_settings.setValue("Conf/routeMode", mode); }
+    void setRouteMode(RouteMode mode) { setValue("Conf/routeMode", mode); }
+
+    bool getSitesSplitTunnelingEnabled() const;
+    void setSitesSplitTunnelingEnabled(bool enabled);
 
     QVariantMap vpnSites(RouteMode mode) const
     {
-        return m_settings.value("Conf/" + routeModeString(mode)).toMap();
+        return value("Conf/" + routeModeString(mode)).toMap();
     }
     void setVpnSites(RouteMode mode, const QVariantMap &sites)
     {
-        m_settings.setValue("Conf/" + routeModeString(mode), sites);
+        setValue("Conf/" + routeModeString(mode), sites);
         m_settings.sync();
     }
     bool addVpnSite(RouteMode mode, const QString &site, const QString &ip = "");
@@ -132,11 +138,11 @@ public:
 
     bool useAmneziaDns() const
     {
-        return m_settings.value("Conf/useAmneziaDns", true).toBool();
+        return value("Conf/useAmneziaDns", true).toBool();
     }
     void setUseAmneziaDns(bool enabled)
     {
-        m_settings.setValue("Conf/useAmneziaDns", enabled);
+        setValue("Conf/useAmneziaDns", enabled);
     }
 
     QString primaryDns() const;
@@ -145,13 +151,13 @@ public:
     // QString primaryDns() const { return m_primaryDns; }
     void setPrimaryDns(const QString &primaryDns)
     {
-        m_settings.setValue("Conf/primaryDns", primaryDns);
+        setValue("Conf/primaryDns", primaryDns);
     }
 
     // QString secondaryDns() const { return m_secondaryDns; }
     void setSecondaryDns(const QString &secondaryDns)
     {
-        m_settings.setValue("Conf/secondaryDns", secondaryDns);
+        setValue("Conf/secondaryDns", secondaryDns);
     }
 
     static const char cloudFlareNs1[];
@@ -171,29 +177,54 @@ public:
 
     QLocale getAppLanguage()
     {
-        return m_settings.value("Conf/appLanguage", QLocale()).toLocale();
+        return value("Conf/appLanguage", QLocale()).toLocale();
     };
     void setAppLanguage(QLocale locale)
     {
-        m_settings.setValue("Conf/appLanguage", locale);
+        setValue("Conf/appLanguage", locale);
     };
 
     bool isScreenshotsEnabled() const
     {
-        return m_settings.value("Conf/screenshotsEnabled", false).toBool();
+        return value("Conf/screenshotsEnabled", false).toBool();
     }
     void setScreenshotsEnabled(bool enabled)
     {
-        m_settings.setValue("Conf/screenshotsEnabled", enabled);
+        setValue("Conf/screenshotsEnabled", enabled);
+        emit screenshotsEnabledChanged(enabled);
     }
 
     void clearSettings();
 
+    enum AppsRouteMode {
+        VpnAllApps,
+        VpnOnlyForwardApps,
+        VpnAllExceptApps
+    };
+    Q_ENUM(AppsRouteMode)
+
+    QString appsRouteModeString(AppsRouteMode mode) const;
+
+    AppsRouteMode getAppsRouteMode() const;
+    void setAppsRouteMode(AppsRouteMode mode);
+
+    QVector<InstalledAppInfo> getVpnApps(AppsRouteMode mode) const;
+    void setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps);
+
+    bool getAppsSplitTunnelingEnabled() const;
+    void setAppsSplitTunnelingEnabled(bool enabled);
+
 signals:
-    void saveLogsChanged();
+    void saveLogsChanged(bool enabled);
+    void screenshotsEnabledChanged(bool enabled);
+    void serverRemoved(int serverIndex);
+    void settingsCleared();
 
 private:
-    SecureQSettings m_settings;
+    QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
+    void setValue(const QString &key, const QVariant &value);
+
+    mutable SecureQSettings m_settings;
 };
 
 #endif // SETTINGS_H

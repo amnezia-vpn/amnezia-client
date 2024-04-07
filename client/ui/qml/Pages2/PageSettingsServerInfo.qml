@@ -63,7 +63,7 @@ PageType {
 
                     headerText: name
                     descriptionText: {
-                        if (ServersModel.isCurrentlyProcessedServerHasWriteAccess()) {
+                        if (ServersModel.isProcessedServerHasWriteAccess()) {
                             return credentialsLogin + " · " + hostName
                         } else {
                             return hostName
@@ -71,29 +71,33 @@ PageType {
                     }
 
                     actionButtonFunction: function() {
-                        serverNameEditDrawer.visible = true
+                        serverNameEditDrawer.open()
                     }
                 }
 
-                DrawerType {
+                DrawerType2 {
                     id: serverNameEditDrawer
 
-                    width: root.width
-                    height: root.height * 0.35
+                    parent: root
 
-                    onVisibleChanged: {
-                        if (serverNameEditDrawer.visible) {
-                            serverName.textField.forceActiveFocus()
-                        }
-                    }
+                    anchors.fill: parent
+                    expandedHeight: root.height * 0.35
 
-                    ColumnLayout {
+                    expandedContent: ColumnLayout {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        anchors.topMargin: 16
+                        anchors.topMargin: 32
                         anchors.leftMargin: 16
                         anchors.rightMargin: 16
+
+                        Connections {
+                            target: serverNameEditDrawer
+                            enabled: !GC.isMobile()
+                            function onOpened() {
+                                serverName.textField.forceActiveFocus()
+                            }
+                        }
 
                         TextFieldWithHeaderType {
                             id: serverName
@@ -103,14 +107,18 @@ PageType {
                             textFieldText: name
                             textField.maximumLength: 30
                             checkEmptyText: true
+
+                            KeyNavigation.tab: saveButton
                         }
 
                         BasicButtonType {
+                            id: saveButton
+
                             Layout.fillWidth: true
 
                             text: qsTr("Save")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 if (serverName.textFieldText === "") {
                                     return
                                 }
@@ -118,7 +126,13 @@ PageType {
                                 if (serverName.textFieldText !== name) {
                                     name = serverName.textFieldText
                                 }
-                                serverNameEditDrawer.visible = false
+                                serverNameEditDrawer.close()
+                            }
+                        }
+
+                        Component.onCompleted: {
+                            if (header.itemAt(0) && !GC.isMobile()) {
+                                defaultActiveFocusItem = serverName.textField
                             }
                         }
                     }
@@ -149,7 +163,7 @@ PageType {
             }
             TabButtonType {
                 isSelected: tabBar.currentIndex === 2
-                text: qsTr("Data")
+                text: qsTr("Management")
             }
         }
 

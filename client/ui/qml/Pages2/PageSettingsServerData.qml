@@ -28,7 +28,7 @@ PageType {
             PageController.showErrorMessage(message)
         }
 
-        function onRemoveCurrentlyProcessedServerFinished(finishedMessage) {
+        function onRemoveProcessedServerFinished(finishedMessage) {
             if (!ServersModel.getServersCount()) {
                 PageController.replaceStartPage()
             } else {
@@ -38,12 +38,16 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
+        function onRebootProcessedServerFinished(finishedMessage) {
+            PageController.showNotificationMessage(finishedMessage)
+        }
+
         function onRemoveAllContainersFinished(finishedMessage) {
             PageController.closePage() // close deInstalling page
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onRemoveCurrentlyProcessedContainerFinished(finishedMessage) {
+        function onRemoveProcessedContainerFinished(finishedMessage) {
             PageController.closePage() // close deInstalling page
             PageController.closePage() // close page with remove button
             PageController.showNotificationMessage(finishedMessage)
@@ -60,8 +64,8 @@ PageType {
     Connections {
         target: ServersModel
 
-        function onCurrentlyProcessedServerIndexChanged() {
-            content.isServerWithWriteAccess = ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+        function onProcessedServerIndexChanged() {
+            content.isServerWithWriteAccess = ServersModel.isProcessedServerHasWriteAccess()
         }
     }
 
@@ -78,37 +82,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            property bool isServerWithWriteAccess: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
-
-            LabelWithButtonType {
-                visible: content.isServerWithWriteAccess
-                Layout.fillWidth: true
-
-                text: qsTr("Clear Amnezia cache")
-                descriptionText: qsTr("May be needed when changing other settings")
-
-                clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Clear cached profiles?")
-                    questionDrawer.descriptionText = qsTr("")
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
-
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
-                        PageController.showBusyIndicator(true)
-                        SettingsController.clearCachedProfiles()
-                        PageController.showBusyIndicator(false)
-                    }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
-                    }
-                    questionDrawer.visible = true
-                }
-            }
-
-            DividerType {
-                visible: content.isServerWithWriteAccess
-            }
+            property bool isServerWithWriteAccess: ServersModel.isProcessedServerHasWriteAccess()
 
             LabelWithButtonType {
                 visible: content.isServerWithWriteAccess
@@ -129,30 +103,63 @@ PageType {
             }
 
             LabelWithButtonType {
+                visible: content.isServerWithWriteAccess
+                Layout.fillWidth: true
+
+                text: qsTr("Reboot server")
+                textColor: "#EB5757"
+
+                clickedFunction: function() {
+                    var headerText = qsTr("Do you want to reboot the server?")
+                    var descriptionText = qsTr("The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.rebootProcessedServer()
+                            PageController.showBusyIndicator(false)
+                        }
+                    }
+                    var noButtonFunction = function() {
+                    }
+
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+            }
+
+            DividerType {
+                visible: content.isServerWithWriteAccess
+            }
+
+            LabelWithButtonType {
                 Layout.fillWidth: true
 
                 text: qsTr("Remove server from application")
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Remove server?")
-                    questionDrawer.descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
+                    var headerText = qsTr("Do you want to remove the server from application?")
+                    var descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
-                        PageController.showBusyIndicator(true)
+                    var yesButtonFunction = function() {
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            ConnectionController.closeConnection()
+                            PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.removeProcessedServer()
+                            PageController.showBusyIndicator(false)
                         }
-                        InstallController.removeCurrentlyProcessedServer()
-                        PageController.showBusyIndicator(false)
                     }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var noButtonFunction = function() {
                     }
-                    questionDrawer.visible = true
+
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
@@ -166,23 +173,23 @@ PageType {
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Clear server from Amnezia software?")
-                    questionDrawer.descriptionText = qsTr("All containers will be deleted on the server. This means that configuration files, keys and certificates will be deleted.")
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
+                    var headerText = qsTr("Do you want to clear server from Amnezia software?")
+                    var descriptionText = qsTr("All users whom you shared a connection with will no longer be able to connect to it.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
-                        PageController.goToPage(PageEnum.PageDeinstalling)
+                    var yesButtonFunction = function() {
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            ConnectionController.closeConnection()
+                            PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
+                        } else {
+                            PageController.goToPage(PageEnum.PageDeinstalling)
+                            InstallController.removeAllContainers()
                         }
-                        InstallController.removeAllContainers()
                     }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var noButtonFunction = function() {
                     }
-                    questionDrawer.visible = true
+
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
@@ -190,8 +197,37 @@ PageType {
                 visible: content.isServerWithWriteAccess
             }
 
-            QuestionDrawer {
-                id: questionDrawer
+            LabelWithButtonType {
+                visible: ServersModel.getProcessedServerData("isServerFromApi")
+                Layout.fillWidth: true
+
+                text: qsTr("Reset API config")
+                textColor: "#EB5757"
+
+                clickedFunction: function() {
+                    var headerText = qsTr("Do you want to reset API config?")
+                    var descriptionText = ""
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.removeApiConfig()
+                            PageController.showBusyIndicator(false)
+                        }
+                    }
+                    var noButtonFunction = function() {
+                    }
+                    
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+            }
+
+            DividerType {
+                visible: ServersModel.getProcessedServerData("isServerFromApi")
             }
         }
     }

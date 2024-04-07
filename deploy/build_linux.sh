@@ -36,7 +36,7 @@ QMAKE_STASH_FILE=$PROJECT_DIR/.qmake_stash
 
 # Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
-  QT_VERSION=5.15.2
+  QT_VERSION=6.6.2
   if [ -f /opt/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then
     QT_BIN_DIR=/opt/Qt/$QT_VERSION/gcc_64/bin
   elif [ -f $HOME/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then
@@ -83,6 +83,4 @@ ldd $CQTDEPLOYER_DIR/bin/binarycreator
 
 cp -r $PROJECT_DIR/deploy/installer $BUILD_DIR
 
-$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer
-
-
+$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer.bin

@@ -160,7 +160,6 @@
         <file>ui/qml/Components/SettingsContainersListView.qml</file>
         <file>ui/qml/Controls2/TextTypes/ListItemTitleType.qml</file>
         <file>ui/qml/Controls2/DividerType.qml</file>
-        <file>ui/qml/Controls2/DrawerType.qml</file>
         <file>ui/qml/Controls2/StackViewType.qml</file>
         <file>ui/qml/Pages2/PageSettings.qml</file>
         <file>images/controls/amnezia.svg</file>
@@ -199,6 +198,7 @@
         <file>ui/qml/Pages2/PageProtocolOpenVpnSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolShadowSocksSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolCloakSettings.qml</file>
+        <file>ui/qml/Pages2/PageProtocolXraySettings.qml</file>        
         <file>ui/qml/Pages2/PageProtocolRaw.qml</file>
         <file>ui/qml/Pages2/PageSettingsLogging.qml</file>
         <file>ui/qml/Pages2/PageServiceSftpSettings.qml</file>
@@ -225,5 +225,19 @@
         <file>ui/qml/Pages2/PageShareFullAccess.qml</file>
         <file>images/controls/close.svg</file>
         <file>images/controls/search.svg</file>
+        <file>server_scripts/xray/configure_container.sh</file>
+        <file>server_scripts/xray/Dockerfile</file>
+        <file>server_scripts/xray/run_container.sh</file>
+        <file>server_scripts/xray/start.sh</file>
+        <file>server_scripts/xray/template.json</file>
+        <file>ui/qml/Pages2/PageProtocolWireGuardSettings.qml</file>
+        <file>ui/qml/Components/HomeSplitTunnelingDrawer.qml</file>
+        <file>images/controls/split-tunneling.svg</file>
+        <file>ui/qml/Controls2/DrawerType2.qml</file>
+        <file>ui/qml/Pages2/PageSettingsAppSplitTunneling.qml</file>
+        <file>ui/qml/Components/InstalledAppsDrawer.qml</file>
+        <file>images/controls/alert-circle.svg</file>
+        <file>images/controls/file-check-2.svg</file>
+        <file>ui/qml/Controls2/WarningType.qml</file>
     </qresource>
 </RCC>

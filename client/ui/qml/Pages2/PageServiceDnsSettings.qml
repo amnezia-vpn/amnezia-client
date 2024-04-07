@@ -59,23 +59,28 @@ PageType {
                 Layout.topMargin: 24
                 width: parent.width
 
-                text: qsTr("Remove ") + ContainersModel.getCurrentlyProcessedContainerName()
+                text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getCurrentlyProcessedContainerName())
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
+                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
-                        PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeCurrentlyProcessedContainer()
+                    var yesButtonFunction = function() {
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
+                        && SettingsController.isAmneziaDnsEnabled()) {
+                            PageController.showNotificationMessage(qsTr("Cannot remove Amnezia DNS from running server"))
+                        } else
+                        {
+                            PageController.goToPage(PageEnum.PageDeinstalling)
+                            InstallController.removeProcessedContainer()
+                        }
                     }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var noButtonFunction = function() {
                     }
-                    questionDrawer.visible = true
+
+                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
 
                 MouseArea {
@@ -86,10 +91,6 @@ PageType {
             }
 
             DividerType {}
-
-            QuestionDrawer {
-                id: questionDrawer
-            }
         }
     }
 }

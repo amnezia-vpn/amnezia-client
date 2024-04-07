@@ -4,77 +4,109 @@
 #include <QMetaEnum>
 #include <QObject>
 
-namespace amnezia {
-
-constexpr const qint16 qrMagicCode = 1984;
-
-struct ServerCredentials
+namespace amnezia
 {
-    QString hostName;
-    QString userName;
-    QString secretData;
-    int port = 22;
 
-    bool isValid() const { return !hostName.isEmpty() && !userName.isEmpty() && !secretData.isEmpty() && port > 0; }
-};
+    constexpr const qint16 qrMagicCode = 1984;
 
-enum ErrorCode
-{
-    // General error codes
-    NoError = 0,
-    UnknownError,
-    InternalError,
-    NotImplementedError,
+    struct ServerCredentials
+    {
+        QString hostName;
+        QString userName;
+        QString secretData;
+        int port = 22;
 
-    // Server errors
-    ServerCheckFailed,
-    ServerPortAlreadyAllocatedError,
-    ServerContainerMissingError,
-    ServerDockerFailedError,
-    ServerCancelInstallation,
-    ServerUserNotInSudo,
-    ServerPacketManagerError,
+        bool isValid() const
+        {
+            return !hostName.isEmpty() && !userName.isEmpty() && !secretData.isEmpty() && port > 0;
+        }
+    };
 
-    // Ssh connection errors
-    SshRequestDeniedError, SshInterruptedError, SshInternalError,
-    SshPrivateKeyError, SshPrivateKeyFormatError, SshTimeoutError,
+    struct InstalledAppInfo {
+        QString appName;
+        QString packageName;
+        QString appPath;
 
-    // Ssh sftp errors
-    SshSftpEofError, SshSftpNoSuchFileError, SshSftpPermissionDeniedError,
-    SshSftpFailureError, SshSftpBadMessageError, SshSftpNoConnectionError,
-    SshSftpConnectionLostError, SshSftpOpUnsupportedError, SshSftpInvalidHandleError,
-    SshSftpNoSuchPathError, SshSftpFileAlreadyExistsError, SshSftpWriteProtectError,
-    SshSftpNoMediaError,
+        bool operator==(const InstalledAppInfo& other) const {
+            if (!packageName.isEmpty()) {
+                return packageName == other.packageName;
+            } else {
+                return appPath == other.appPath;
+            }
+        }
+    };
 
-    // Local errors
-    OpenVpnConfigMissing,
-    OpenVpnManagementServerError,
-    ConfigMissing,
+    enum ErrorCode {
+        // General error codes
+        NoError = 0,
+        UnknownError = 100,
+        InternalError = 101,
+        NotImplementedError = 102,
 
-    // Distro errors
-    OpenVpnExecutableMissing,
-    ShadowSocksExecutableMissing,
-    CloakExecutableMissing,
-    AmneziaServiceConnectionFailed,
-    ExecutableMissing,
+        // Server errors
+        ServerCheckFailed = 200,
+        ServerPortAlreadyAllocatedError = 201,
+        ServerContainerMissingError = 202,
+        ServerDockerFailedError = 203,
+        ServerCancelInstallation = 204,
+        ServerUserNotInSudo = 205,
+        ServerPacketManagerError = 206,
 
-    // VPN errors
-    OpenVpnAdaptersInUseError,
-    OpenVpnUnknownError,
-    OpenVpnTapAdapterError,
-    AddressPoolError,
+        // Ssh connection errors
+        SshRequestDeniedError = 300,
+        SshInterruptedError = 301,
+        SshInternalError = 302,
+        SshPrivateKeyError = 303,
+        SshPrivateKeyFormatError = 304,
+        SshTimeoutError = 305,
 
-    // 3rd party utils errors
-    OpenSslFailed,
-    ShadowSocksExecutableCrashed,
-    CloakExecutableCrashed,
+        // Ssh scp errors
+        SshScpFailureError = 400,
 
-    // import and install errors
-    ImportInvalidConfigError,
+        // Local errors
+        OpenVpnConfigMissing = 500,
+        OpenVpnManagementServerError = 501,
 
-    // Android errors
-    AndroidError
-};
+        // Distro errors
+        OpenVpnExecutableMissing = 600,
+        ShadowSocksExecutableMissing = 601,
+        CloakExecutableMissing = 602,
+        AmneziaServiceConnectionFailed = 603,
+        ExecutableMissing = 604,
+        XrayExecutableMissing = 605,
+        Tun2SockExecutableMissing = 606,        
+
+        // VPN errors
+        OpenVpnAdaptersInUseError = 700,
+        OpenVpnUnknownError = 701,
+        OpenVpnTapAdapterError = 702,
+        AddressPoolError = 703,
+
+        // 3rd party utils errors
+        OpenSslFailed = 800,
+        ShadowSocksExecutableCrashed = 801,
+        CloakExecutableCrashed = 802,
+        XrayExecutableCrashed = 803,
+        Tun2SockExecutableCrashed = 804,
+
+        // import and install errors
+        ImportInvalidConfigError = 900,
+
+        // Android errors
+        AndroidError = 1000,
+
+        // Api errors
+        ApiConfigDownloadError = 1100,
+        ApiConfigAlreadyAdded = 1101,
+
+        // QFile errors
+        OpenError = 1200,
+        ReadError = 1201,
+        PermissionsError = 1202,
+        UnspecifiedError = 1203,
+        FatalError = 1204,
+        AbortError = 1205
+    };
 
 } // namespace amnezia
 

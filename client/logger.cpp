@@ -18,6 +18,10 @@
 #include <core/ipcclient.h>
 #endif
 
+#ifdef Q_OS_IOS
+    #include <AmneziaVPN-Swift.h>
+#endif
+
 QFile Logger::m_file;
 QTextStream Logger::m_textStream;
 QString Logger::m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
@@ -29,7 +33,7 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
     }
 
     // Skip annoying messages from Qt
-    if (msg.startsWith("Unknown property") || msg.startsWith("Could not create pixmap") || msg.startsWith("Populating font")) {
+    if (msg.startsWith("Unknown property") || msg.startsWith("Could not create pixmap") || msg.startsWith("Populating font") || msg.startsWith("stale focus object")) {
         return;
     }
 
@@ -107,7 +111,14 @@ QString Logger::getLogFile()
     QFile file(userLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
-    return file.readAll();
+    QString qtLog = file.readAll();
+    
+#ifdef Q_OS_IOS
+    return QString().fromStdString(AmneziaVPN::swiftUpdateLogData(qtLog.toStdString()));
+#else
+    return qtLog;
+#endif
+
 }
 
 bool Logger::openLogsFolder()
@@ -146,7 +157,11 @@ void Logger::clearLogs()
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
     file.resize(0);
     file.close();
-
+    
+#ifdef Q_OS_IOS
+    AmneziaVPN::swiftDeleteLog();
+#endif
+    
     if (isLogActive) {
         init();
     }

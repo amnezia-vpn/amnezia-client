@@ -90,6 +90,27 @@ PageType {
                 Layout.fillWidth: true
                 Layout.margins: 16
 
+                text: qsTr("Auto connect")
+                descriptionText: qsTr("Connect to VPN on app start")
+
+                checked: SettingsController.isAutoConnectEnabled()
+                onCheckedChanged: {
+                    if (checked !== SettingsController.isAutoConnectEnabled()) {
+                        SettingsController.toggleAutoConnect(checked)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: !GC.isMobile()
+            }
+
+            SwitcherType {
+                visible: !GC.isMobile()
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
                 text: qsTr("Start minimized")
                 descriptionText: qsTr("Launch application minimized")
 
@@ -117,10 +138,6 @@ PageType {
                 }
             }
 
-            SelectLanguageDrawer {
-                id: selectLanguageDrawer
-            }
-
 
             DividerType {}
 
@@ -143,30 +160,38 @@ PageType {
 
                 text: qsTr("Reset settings and remove all data from the application")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                textColor: "#EB5757"
 
                 clickedFunction: function() {
-                    questionDrawer.headerText = qsTr("Reset settings and remove all data from the application?")
-                    questionDrawer.descriptionText = qsTr("All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.")
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
+                    var headerText = qsTr("Reset settings and remove all data from the application?")
+                    var descriptionText = qsTr("All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
-                        SettingsController.clearSettings()
-                        PageController.replaceStartPage()
+                    var yesButtonFunction = function() {
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot reset settings during active connection"))
+                        } else
+                        {
+                            SettingsController.clearSettings()
+                            PageController.replaceStartPage()
+                        }
                     }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var noButtonFunction = function() {
                     }
-                    questionDrawer.visible = true
+
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
             DividerType {}
-
-            QuestionDrawer {
-                id: questionDrawer
-            }
         }
+    }
+
+    SelectLanguageDrawer {
+        id: selectLanguageDrawer
+
+        width: root.width
+        height: root.height
     }
 }

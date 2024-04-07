@@ -14,7 +14,7 @@
 #include "settings.h"
 #include "vpnconnection.h"
 
-#include "configurators/vpn_configurator.h"
+#include "core/controllers/apiController.h"
 
 #include "ui/controllers/connectionController.h"
 #include "ui/controllers/exportController.h"
@@ -24,7 +24,7 @@
 #include "ui/controllers/settingsController.h"
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
-#include "ui/controllers/apiController.h"
+#include "ui/controllers/appSplitTunnelingController.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
@@ -36,11 +36,13 @@
 #include "ui/models/protocols/openvpnConfigModel.h"
 #include "ui/models/protocols/shadowsocksConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
+#include "ui/models/protocols/xrayConfigModel.h"
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/sites_model.h"
 #include "ui/models/clientManagementModel.h"
+#include "ui/models/appSplitTunnelingModel.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
@@ -83,7 +85,6 @@ private:
 
     QQmlApplicationEngine *m_engine {};
     std::shared_ptr<Settings> m_settings;
-    std::shared_ptr<VpnConfigurator> m_configurator;
 
     QSharedPointer<ContainerProps> m_containerProps;
     QSharedPointer<ProtocolProps> m_protocolProps;
@@ -92,15 +93,18 @@ private:
     QCommandLineParser m_parser;
 
     QSharedPointer<ContainersModel> m_containersModel;
+    QSharedPointer<ContainersModel> m_defaultServerContainersModel;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<ProtocolsModel> m_protocolsModel;
     QSharedPointer<SitesModel> m_sitesModel;
+    QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
 
     QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
     QScopedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;
     QScopedPointer<CloakConfigModel> m_cloakConfigModel;
+    QScopedPointer<XrayConfigModel> m_xrayConfigModel;    
     QScopedPointer<WireGuardConfigModel> m_wireGuardConfigModel;
     QScopedPointer<AwgConfigModel> m_awgConfigModel;
 #ifdef Q_OS_WINDOWS
@@ -121,7 +125,8 @@ private:
     QScopedPointer<SettingsController> m_settingsController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
-    QScopedPointer<ApiController> m_cloudController;
+    QScopedPointer<ApiController> m_apiController;
+    QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
 };
 
 #endif // AMNEZIA_APPLICATION_H

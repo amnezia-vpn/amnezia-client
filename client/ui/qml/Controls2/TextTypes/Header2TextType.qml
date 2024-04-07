@@ -1,7 +1,7 @@
 import QtQuick
 
 Text {
-    lineHeight: 30
+    lineHeight: 30 + LanguageModel.getLineHeightAppend()
     lineHeightMode: Text.FixedHeight
 
     color: "#D7D8DB"

@@ -10,12 +10,6 @@
 #include "../protocols/vpnprotocol.h"
 #import "ios_controller_wrapper.h"
 
-#import <NetworkExtension/NetworkExtension.h>
-#import <NetworkExtension/NETunnelProviderManager.h>
-#import <NetworkExtension/NEVPNManager.h>
-#import <NetworkExtension/NETunnelProviderSession.h>
-
-
 const char* Action::start = "start";
 const char* Action::restart = "restart";
 const char* Action::stop = "stop";
@@ -241,7 +235,6 @@ void IosController::checkStatus()
         m_rxBytes = rxBytes;
         m_txBytes = txBytes;
     });
-    
 }
 
 void IosController::vpnStatusDidChange(void *pNotification)
@@ -249,8 +242,107 @@ void IosController::vpnStatusDidChange(void *pNotification)
     NETunnelProviderSession *session = (NETunnelProviderSession *)pNotification;
 
     if (session /* && session == TunnelManager.session */ ) {
-       qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
-       emit connectionStateChanged(iosStatusToState(session.status));
+        qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
+
+        if (session.status == NEVPNStatusDisconnected) {
+            if (@available(iOS 16.0, *)) {
+                [session fetchLastDisconnectErrorWithCompletionHandler:^(NSError * _Nullable error) {
+                    if (error != nil) {
+                        qDebug() << "Disconnect error" << error.domain << error.code << error.localizedDescription;
+
+                        if ([error.domain isEqualToString:NEVPNConnectionErrorDomain]) {
+                            switch (error.code) {
+                                case NEVPNConnectionErrorOverslept:
+                                    qDebug() << "Disconnect error info" << "The VPN connection was terminated because the system slept for an extended period of time.";
+                                    break;
+                                case NEVPNConnectionErrorNoNetworkAvailable:
+                                    qDebug() << "Disconnect error info" << "The VPN connection could not be established because the system is not connected to a network.";
+                                    break;
+                                case NEVPNConnectionErrorUnrecoverableNetworkChange:
+                                    qDebug() << "Disconnect error info" << "The VPN connection was terminated because the network conditions changed in such a way that the VPN connection could not be maintained.";
+                                    break;
+                                case NEVPNConnectionErrorConfigurationFailed:
+                                    qDebug() << "Disconnect error info" << "The VPN connection could not be established because the configuration is invalid. ";
+                                    break;
+                                case NEVPNConnectionErrorServerAddressResolutionFailed:
+                                    qDebug() << "Disconnect error info" << "The address of the VPN server could not be determined.";
+                                    break;
+                                case NEVPNConnectionErrorServerNotResponding:
+                                    qDebug() << "Disconnect error info" << "Network communication with the VPN server has failed.";
+                                    break;
+                                case NEVPNConnectionErrorServerDead:
+                                    qDebug() << "Disconnect error info" << "The VPN server is no longer functioning.";
+                                    break;
+                                case NEVPNConnectionErrorAuthenticationFailed:
+                                    qDebug() << "Disconnect error info" << "The user credentials were rejected by the VPN server.";
+                                    break;
+                                case NEVPNConnectionErrorClientCertificateInvalid:
+                                    qDebug() << "Disconnect error info" << "The client certificate is invalid.";
+                                    break;
+                                case NEVPNConnectionErrorClientCertificateNotYetValid:
+                                    qDebug() << "Disconnect error info" << "The client certificate will not be valid until some future point in time.";
+                                    break;
+                                case NEVPNConnectionErrorClientCertificateExpired:
+                                    qDebug() << "Disconnect error info" << "The validity period of the client certificate has passed.";
+                                    break;
+                                case NEVPNConnectionErrorPluginFailed:
+                                    qDebug() << "Disconnect error info" << "The VPN plugin died unexpectedly.";
+                                    break;
+                                case NEVPNConnectionErrorConfigurationNotFound:
+                                    qDebug() << "Disconnect error info" << "The VPN configuration could not be found.";
+                                    break;
+                                case NEVPNConnectionErrorPluginDisabled:
+                                    qDebug() << "Disconnect error info" << "The VPN plugin could not be found or needed to be updated.";
+                                    break;
+                                case NEVPNConnectionErrorNegotiationFailed:
+                                    qDebug() << "Disconnect error info" << "The VPN protocol negotiation failed.";
+                                    break;
+                                case NEVPNConnectionErrorServerDisconnected:
+                                    qDebug() << "Disconnect error info" << "The VPN server terminated the connection.";
+                                    break;
+                                case NEVPNConnectionErrorServerCertificateInvalid:
+                                    qDebug() << "Disconnect error info" << "The server certificate is invalid.";
+                                    break;
+                                case NEVPNConnectionErrorServerCertificateNotYetValid:
+                                    qDebug() << "Disconnect error info" << "The server certificate will not be valid until some future point in time.";
+                                    break;
+                                case NEVPNConnectionErrorServerCertificateExpired:
+                                    qDebug() << "Disconnect error info" << "The validity period of the server certificate has passed.";
+                                    break;
+                                default:
+                                    qDebug() << "Disconnect error info" << "Unknown code.";
+                                    break;
+                            }
+                        }
+
+                        NSError *underlyingError = error.userInfo[@"NSUnderlyingError"];
+                        if (underlyingError != nil) {
+                            qDebug() << "Disconnect underlying error" << underlyingError.domain << underlyingError.code << underlyingError.localizedDescription;
+
+                            if ([underlyingError.domain isEqualToString:@"NEAgentErrorDomain"]) {
+                                switch (underlyingError.code) {
+                                    case 1:
+                                        qDebug() << "Disconnect underlying error" << "General. Use sysdiagnose.";
+                                        break;
+                                    case 2:
+                                        qDebug() << "Disconnect underlying error" << "Plug-in unavailable. Use sysdiagnose.";
+                                        break;
+                                    default:
+                                        qDebug() << "Disconnect underlying error" << "Unknown code. Use sysdiagnose.";
+                                        break;
+                                }
+                            }
+                        }
+                    } else {
+                        qDebug() << "Disconnect error is absent";
+                    }
+                }];
+            } else {
+                qDebug() << "Disconnect error is unavailable on iOS < 16.0";
+            }
+        }
+
+        emit connectionStateChanged(iosStatusToState(session.status));
     }
 }
 
@@ -264,7 +356,29 @@ bool IosController::setupOpenVPN()
     QJsonObject ovpn = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::OpenVpn)].toObject();
     QString ovpnConfig = ovpn[config_key::config].toString();
 
-    return startOpenVPN(ovpnConfig);
+    QJsonObject openVPNConfig {};
+    openVPNConfig.insert(config_key::config, ovpnConfig);
+
+    if (ovpn.contains(config_key::mtu)) {
+        openVPNConfig.insert(config_key::mtu, ovpn[config_key::mtu]);
+    } else {
+        openVPNConfig.insert(config_key::mtu, protocols::openvpn::defaultMtu);
+    }
+
+    openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+
+    QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
+
+    for(int index = 0; index < splitTunnelSites.count(); index++) {
+        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    }
+
+    openVPNConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
+
+    QJsonDocument openVPNConfigDoc(openVPNConfig);
+    QString openVPNConfigStr(openVPNConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startOpenVPN(openVPNConfigStr);
 }
 
 bool IosController::setupCloak()
@@ -301,25 +415,139 @@ bool IosController::setupCloak()
     ovpnConfig.append(cloakBase64);
     ovpnConfig.append("\n</cloak>\n");
 
-    return startOpenVPN(ovpnConfig);
+    QJsonObject openVPNConfig {};
+    openVPNConfig.insert(config_key::config, ovpnConfig);
+
+    if (ovpn.contains(config_key::mtu)) {
+        openVPNConfig.insert(config_key::mtu, ovpn[config_key::mtu]);
+    } else {
+        openVPNConfig.insert(config_key::mtu, protocols::openvpn::defaultMtu);
+    }
+
+    openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+
+    QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
+
+    for(int index = 0; index < splitTunnelSites.count(); index++) {
+        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    }
+
+    openVPNConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
+
+    QJsonDocument openVPNConfigDoc(openVPNConfig);
+    QString openVPNConfigStr(openVPNConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startOpenVPN(openVPNConfigStr);
 }
 
 bool IosController::setupWireGuard()
 {
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
 
-    QString wgConfig = config[config_key::config].toString();
-    
-    return startWireGuard(wgConfig);
+    QJsonObject wgConfig {};
+    wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
+    wgConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2]);
+
+    if (config.contains(config_key::mtu)) {
+        wgConfig.insert(config_key::mtu, config[config_key::mtu]);
+    } else {
+        wgConfig.insert(config_key::mtu, protocols::wireguard::defaultMtu);
+    }
+
+    wgConfig.insert(config_key::hostName, config[config_key::hostName]);
+    wgConfig.insert(config_key::port, config[config_key::port]);
+    wgConfig.insert(config_key::client_ip, config[config_key::client_ip]);
+    wgConfig.insert(config_key::client_priv_key, config[config_key::client_priv_key]);
+    wgConfig.insert(config_key::server_pub_key, config[config_key::server_pub_key]);
+    wgConfig.insert(config_key::psk_key, config[config_key::psk_key]);
+    wgConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+
+    QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
+
+    for(int index = 0; index < splitTunnelSites.count(); index++) {
+        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    }
+
+    wgConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
+
+    if (config.contains(config_key::allowed_ips) && config[config_key::allowed_ips].isArray()) {
+        wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
+    } else {
+        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
+        wgConfig.insert(config_key::allowed_ips, allowed_ips);
+    }
+
+    if (config.contains(config_key::persistent_keep_alive)) {
+        wgConfig.insert(config_key::persistent_keep_alive, config[config_key::persistent_keep_alive]);
+    } else {
+        wgConfig.insert(config_key::persistent_keep_alive, "25");
+    }
+
+    QJsonDocument wgConfigDoc(wgConfig);
+    QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startWireGuard(wgConfigDocStr);
 }
 
 bool IosController::setupAwg()
 {
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Awg)].toObject();
 
-    QString wgConfig = config[config_key::config].toString();
-    
-    return startWireGuard(wgConfig);
+    QJsonObject wgConfig {};
+    wgConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
+    wgConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2]);
+
+    if (config.contains(config_key::mtu)) {
+        wgConfig.insert(config_key::mtu, config[config_key::mtu]);
+    } else {
+        wgConfig.insert(config_key::mtu, protocols::awg::defaultMtu);
+    }
+
+    wgConfig.insert(config_key::hostName, config[config_key::hostName]);
+    wgConfig.insert(config_key::port, config[config_key::port]);
+    wgConfig.insert(config_key::client_ip, config[config_key::client_ip]);
+    wgConfig.insert(config_key::client_priv_key, config[config_key::client_priv_key]);
+    wgConfig.insert(config_key::server_pub_key, config[config_key::server_pub_key]);
+    wgConfig.insert(config_key::psk_key, config[config_key::psk_key]);
+    wgConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+
+    QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
+
+    for(int index = 0; index < splitTunnelSites.count(); index++) {
+        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    }
+
+    wgConfig.insert(config_key::splitTunnelSites, splitTunnelSites);
+
+    if (config.contains(config_key::allowed_ips) && config[config_key::allowed_ips].isArray()) {
+        wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
+    } else {
+        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
+        wgConfig.insert(config_key::allowed_ips, allowed_ips);
+    }
+
+    if (config.contains(config_key::persistent_keep_alive)) {
+        wgConfig.insert(config_key::persistent_keep_alive, config[config_key::persistent_keep_alive]);
+    } else {
+        wgConfig.insert(config_key::persistent_keep_alive, "25");
+    }
+
+    wgConfig.insert(config_key::initPacketMagicHeader, config[config_key::initPacketMagicHeader]);
+    wgConfig.insert(config_key::responsePacketMagicHeader, config[config_key::responsePacketMagicHeader]);
+    wgConfig.insert(config_key::underloadPacketMagicHeader, config[config_key::underloadPacketMagicHeader]);
+    wgConfig.insert(config_key::transportPacketMagicHeader, config[config_key::transportPacketMagicHeader]);
+
+    wgConfig.insert(config_key::initPacketJunkSize, config[config_key::initPacketJunkSize]);
+    wgConfig.insert(config_key::responsePacketJunkSize, config[config_key::responsePacketJunkSize]);
+
+    wgConfig.insert(config_key::junkPacketCount, config[config_key::junkPacketCount]);
+    wgConfig.insert(config_key::junkPacketMinSize, config[config_key::junkPacketMinSize]);
+    wgConfig.insert(config_key::junkPacketMaxSize, config[config_key::junkPacketMaxSize]);
+
+    QJsonDocument wgConfigDoc(wgConfig);
+    QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startWireGuard(wgConfigDocStr);
 }
 
 bool IosController::startOpenVPN(const QString &config)
@@ -352,15 +580,18 @@ bool IosController::startWireGuard(const QString &config)
 
 void IosController::startTunnel()
 {
+    NSString *protocolName = @"Unknown";
+
+    NETunnelProviderProtocol *tunnelProtocol = (NETunnelProviderProtocol *)m_currentTunnel.protocolConfiguration;
+    if (tunnelProtocol.providerConfiguration[@"wireguard"] != nil) {
+        protocolName = @"WireGuard";
+    } else if (tunnelProtocol.providerConfiguration[@"ovpn"] != nil) {
+        protocolName = @"OpenVPN";
+    }
+
     m_rxBytes = 0;
     m_txBytes = 0;
-    
-    int STT = m_rawConfig["splitTunnelType"].toInt();
-    QJsonArray splitTunnelSites = m_rawConfig["splitTunnelSites"].toArray();
-    QJsonDocument doc;
-    doc.setArray(splitTunnelSites);
-    QString STS(doc.toJson());
-    
+
     [m_currentTunnel setEnabled:YES];
 
     [m_currentTunnel saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
@@ -373,7 +604,7 @@ void IosController::startTunnel()
 
             [m_currentTunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
                     if (loadError) {
-                        qDebug() << "IosController::startOpenVPN : Connect OpenVPN Tunnel Load Error" << loadError.localizedDescription.UTF8String;
+                        qDebug().nospace() << "IosController::start" << protocolName << ": Connect " << protocolName << " Tunnel Load Error" << loadError.localizedDescription.UTF8String;
                         emit connectionStateChanged(Vpn::ConnectionState::Error);
                         return;
                     }
@@ -381,37 +612,19 @@ void IosController::startTunnel()
                     NSError *startError = nil;
                     qDebug() << iosStatusToState(m_currentTunnel.connection.status);
 
-
-                    NSString *actionKey = [NSString stringWithUTF8String:MessageKey::action];
-                    NSString *actionValue = [NSString stringWithUTF8String:Action::start];
-                    NSString *tunnelIdKey = [NSString stringWithUTF8String:MessageKey::tunnelId];
-                    NSString *tunnelIdValue = !m_tunnelId.isEmpty() ? m_tunnelId.toNSString() : @"";
-                    NSString *SplitTunnelTypeKey = [NSString stringWithUTF8String:MessageKey::SplitTunnelType];
-                    NSString *SplitTunnelTypeValue = [NSString stringWithFormat:@"%d",STT];
-                    NSString *SplitTunnelSitesKey = [NSString stringWithUTF8String:MessageKey::SplitTunnelSites];
-                    NSString *SplitTunnelSitesValue = STS.toNSString();
-                
-
-                    NSDictionary* message = @{actionKey: actionValue, tunnelIdKey: tunnelIdValue,
-                    SplitTunnelTypeKey: SplitTunnelTypeValue, SplitTunnelSitesKey: SplitTunnelSitesValue};
-                
-                    sendVpnExtensionMessage(message);
-
-
                     BOOL started = [m_currentTunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
 
                     if (!started || startError) {
-                        qDebug() << "IosController::startOpenVPN : Connect OpenVPN Tunnel Start Error"
+                        qDebug().nospace() << "IosController::start" << protocolName << " : Connect " << protocolName << " Tunnel Start Error"
                             << (startError ? startError.localizedDescription.UTF8String : "");
                         emit connectionStateChanged(Vpn::ConnectionState::Error);
                     } else {
-                        qDebug() << "IosController::startOpenVPN : Starting the tunnel succeeded";
+                        qDebug().nospace() << "IosController::start" << protocolName << " : Starting the tunnel succeeded";
                     }
             }];
         });
     }];
 }
-
 
 bool IosController::isOurManager(NETunnelProviderManager* manager) {
     NETunnelProviderProtocol* tunnelProto = (NETunnelProviderProtocol*)manager.protocolConfiguration;
@@ -474,7 +687,7 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
     NETunnelProviderSession *session = (NETunnelProviderSession *)m_currentTunnel.connection;
 
     NSError *sendError = nil;
-    
+
     if ([session respondsToSelector:@selector(sendProviderMessage:returnError:responseHandler:)]) {
         [session sendProviderMessage:data returnError:&sendError responseHandler:completionHandler];
     } else {

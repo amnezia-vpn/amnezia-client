@@ -16,6 +16,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: listview.currentItem.vpnAddressSubnetTextField.textField
+
     ColumnLayout {
         id: backButton
 
@@ -42,7 +44,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            enabled: ServersModel.isCurrentlyProcessedServerHasWriteAccess()
+            enabled: ServersModel.isProcessedServerHasWriteAccess()
 
             ListView {
                 id: listview
@@ -53,11 +55,13 @@ PageType {
                 clip: true
                 interactive: false
 
-                model: OpenVpnConfigModel
+                model: OpenVpnConfigModel             
 
                 delegate: Item {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
+
+                    property alias vpnAddressSubnetTextField: vpnAddressSubnetTextField
 
                     ColumnLayout {
                         id: col
@@ -78,10 +82,12 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: vpnAddressSubnetTextField
+
                             Layout.fillWidth: true
                             Layout.topMargin: 32
 
-                            headerText: qsTr("VPN Addresses Subnet")
+                            headerText: qsTr("VPN address subnet")
                             textFieldText: subnetAddress
 
                             textField.onEditingFinished: {
@@ -89,6 +95,8 @@ PageType {
                                     subnetAddress = textFieldText
                                 }
                             }
+
+                            KeyNavigation.tab: portTextField.enabled ? portTextField.textField : saveRestartButton
                         }
 
                         ParagraphTextType {
@@ -119,6 +127,8 @@ PageType {
                         }
 
                         TextFieldWithHeaderType {
+                            id: portTextField
+
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
@@ -134,6 +144,8 @@ PageType {
                                     port = textFieldText
                                 }
                             }
+
+                            KeyNavigation.tab: saveRestartButton
                         }
 
                         SwitcherType {
@@ -162,6 +174,8 @@ PageType {
                             descriptionText: qsTr("Hash")
                             headerText: qsTr("Hash")
 
+                            drawerParent: root
+
                             listView: ListViewWithRadioButtonType {
                                 id: hashListView
 
@@ -183,7 +197,7 @@ PageType {
                                 clickedFunction: function() {
                                     hashDropDown.text = selectedText
                                     hash = hashDropDown.text
-                                    hashDropDown.menuVisible = false
+                                    hashDropDown.close()
                                 }
 
                                 Component.onCompleted: {
@@ -208,6 +222,8 @@ PageType {
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")
 
+                            drawerParent: root
+
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView
 
@@ -229,7 +245,7 @@ PageType {
                                 clickedFunction: function() {
                                     cipherDropDown.text = selectedText
                                     cipher = cipherDropDown.text
-                                    cipherDropDown.menuVisible = false
+                                    cipherDropDown.close()
                                 }
 
                                 Component.onCompleted: {
@@ -350,45 +366,15 @@ PageType {
                         }
 
                         BasicButtonType {
-                            Layout.topMargin: 24
-                            Layout.leftMargin: -8
-                            implicitHeight: 32
+                            id: saveRestartButton
 
-                            visible: ContainersModel.getCurrentlyProcessedContainerIndex() === ContainerEnum.OpenVpn
-
-                            defaultColor: "transparent"
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                            textColor: "#EB5757"
-
-                            text: qsTr("Remove OpenVPN")
-
-                            onClicked: {
-                                questionDrawer.headerText = qsTr("Remove OpenVpn from server?")
-                                questionDrawer.descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
-                                questionDrawer.yesButtonText = qsTr("Continue")
-                                questionDrawer.noButtonText = qsTr("Cancel")
-
-                                questionDrawer.yesButtonFunction = function() {
-                                    questionDrawer.visible = false
-                                    PageController.goToPage(PageEnum.PageDeinstalling)
-                                    InstallController.removeCurrentlyProcessedContainer()
-                                }
-                                questionDrawer.noButtonFunction = function() {
-                                    questionDrawer.visible = false
-                                }
-                                questionDrawer.visible = true
-                            }
-                        }
-
-                        BasicButtonType {
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
-                            text: qsTr("Save and Restart Amnezia")
+                            text: qsTr("Save")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 forceActiveFocus()
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(OpenVpnConfigModel.getConfig())
@@ -397,10 +383,6 @@ PageType {
                     }
                 }
             }
-        }
-
-        QuestionDrawer {
-            id: questionDrawer
         }
     }
 }

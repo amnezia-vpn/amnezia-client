@@ -63,22 +63,18 @@ PageType {
             HeaderType {
                 Layout.fillWidth: true
 
-                headerText: qsTr("Backup")
+                headerText: qsTr("Back up your configuration")
+                descriptionText: qsTr("You can save your settings to a backup file to restore them the next time you install the application.")
             }
 
-            ListItemTitleType {
+            WarningType {
+                Layout.topMargin: 16
                 Layout.fillWidth: true
-                Layout.topMargin: 10
 
-                text: qsTr("Configuration backup")
-            }
+                textString: qsTr("The backup will contain your passwords and private keys for all servers added " +
+                                            "to AmneziaVPN. Keep this information in a secure place.")
 
-            CaptionTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: -12
-
-                text: qsTr("You can save your settings to a backup file to restore them the next time you install the application.")
-                color: "#878B91"
+                iconPath: "qrc:/images/controls/alert-circle.svg"
             }
 
             BasicButtonType {
@@ -88,7 +84,7 @@ PageType {
 
                 text: qsTr("Make a backup")
 
-                onClicked: {
+                clickedFunc: function() {
                     var fileName = ""
                     if (GC.isMobile()) {
                         fileName = "AmneziaVPN.backup"
@@ -121,7 +117,7 @@ PageType {
 
                 text: qsTr("Restore from backup")
 
-                onClicked: {
+                clickedFunc: function() {
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                                 qsTr("Backup files (*.backup)"))
                     if (filePath !== "") {
@@ -133,24 +129,24 @@ PageType {
     }
 
     function restoreBackup(filePath) {
-        questionDrawer.headerText = qsTr("Import settings from a backup file?")
-        questionDrawer.descriptionText = qsTr("All current settings will be reset");
-        questionDrawer.yesButtonText = qsTr("Continue")
-        questionDrawer.noButtonText = qsTr("Cancel")
+        var headerText = qsTr("Import settings from a backup file?")
+        var descriptionText = qsTr("All current settings will be reset");
+        var yesButtonText = qsTr("Continue")
+        var noButtonText = qsTr("Cancel")
 
-        questionDrawer.yesButtonFunction = function() {
-            questionDrawer.visible = false
-            PageController.showBusyIndicator(true)
-            SettingsController.restoreAppConfig(filePath)
-            PageController.showBusyIndicator(false)
+        var yesButtonFunction = function() {
+            if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                PageController.showNotificationMessage(qsTr("Cannot restore backup settings during active connection"))
+            } else
+            {
+                PageController.showBusyIndicator(true)
+                SettingsController.restoreAppConfig(filePath)
+                PageController.showBusyIndicator(false)
+            }
         }
-        questionDrawer.noButtonFunction = function() {
-            questionDrawer.visible = false
+        var noButtonFunction = function() {
         }
-        questionDrawer.visible = true
-    }
 
-    QuestionDrawer {
-        id: questionDrawer
+        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }
 }

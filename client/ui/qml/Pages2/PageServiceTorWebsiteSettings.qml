@@ -66,7 +66,7 @@ PageType {
 
                 text: qsTr("Website address")
                 descriptionText: {
-                    var containerIndex = ContainersModel.getCurrentlyProcessedContainerIndex()
+                    var containerIndex = ContainersModel.getProcessedContainerIndex()
                     var config = ContainersModel.getContainerConfig(containerIndex)
                     return config[ContainerProps.containerTypeToString(containerIndex)]["site"]
                 }
@@ -91,7 +91,7 @@ PageType {
 
                 onLinkActivated: Qt.openUrlExternally(link)
                 textFormat: Text.RichText
-                text: qsTr("Use <a href=\"https://www.torproject.org/download/\" style=\"color: #FBB26A;\">Tor Browser</a> to open this url.")
+                text: qsTr("Use <a href=\"https://www.torproject.org/download/\" style=\"color: #FBB26A;\">Tor Browser</a> to open this URL.")
             }
 
             ParagraphTextType {
@@ -100,7 +100,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("After installation it takes several minutes while your onion site will become available in the Tor Network.")
+                text: qsTr("After creating your onion site, it takes a few minutes for the Tor network to make it available for use.")
             }
 
             ParagraphTextType {
@@ -125,26 +125,21 @@ PageType {
 
                 text: qsTr("Remove website")
 
-                onClicked: {
-                    questionDrawer.headerText = qsTr("The site with all data will be removed from the tor network.")
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
+                clickedFunc: function() {
+                    var headerText = qsTr("The site with all data will be removed from the tor network.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var yesButtonFunction = function() {
                         PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeCurrentlyProcessedContainer()
+                        InstallController.removeProcessedContainer()
                     }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var noButtonFunction = function() {
                     }
-                    questionDrawer.visible = true
+
+                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-        }
-
-        QuestionDrawer {
-            id: questionDrawer
         }
     }
 }

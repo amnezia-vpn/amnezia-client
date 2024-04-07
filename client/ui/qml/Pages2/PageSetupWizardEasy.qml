@@ -112,17 +112,19 @@ PageType {
                                 var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
                                 containers.dockerContainer = dockerContainer
-                                containers.containerDefaultPort = ProtocolProps.defaultPort(defaultContainerProto)
+                                containers.containerDefaultPort = ProtocolProps.getPortForInstall(defaultContainerProto)
                                 containers.containerDefaultTransportProto = ProtocolProps.defaultTransportProto(defaultContainerProto)
                             }
                         }
                     }
+                }
 
-                    Component.onCompleted: {
-                        if (index === containers.currentIndex) {
-                            card.checked = true
-                            card.clicked()
-                        }
+                Component.onCompleted: {
+                    var item = containers.itemAtIndex(containers.currentIndex)
+                    if (item !== null) {
+                        var button = item.children[0].children[0]
+                        button.checked = true
+                        button.clicked()
                     }
                 }
             }
@@ -134,8 +136,7 @@ PageType {
             CardType {
                 implicitWidth: parent.width
 
-                headerText: qsTr("Set up a VPN yourself")
-                bodyText: qsTr("I want to choose a VPN protocol")
+                headerText: qsTr("Choose a VPN protocol")
 
                 ButtonGroup.group: buttonGroup
 
@@ -156,9 +157,9 @@ PageType {
 
                 text: qsTr("Continue")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     if (root.isEasySetup) {
-                        ContainersModel.setCurrentlyProcessedContainerIndex(containers.dockerContainer)
+                        ContainersModel.setProcessedContainerIndex(containers.dockerContainer)
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                         InstallController.install(containers.dockerContainer,
                                                   containers.containerDefaultPort,
@@ -185,18 +186,16 @@ PageType {
 
                 visible: {
                     if (PageController.isTriggeredByConnectButton()) {
-                        PageController.setTriggeredBtConnectButton(false)
-
-                        return ContainersModel.isAnyContainerInstalled()
+                        PageController.setTriggeredByConnectButton(false)
+                        return false
                     }
-
 
                     return  true
                 }
 
-                text: qsTr("Set up later")
+                text: qsTr("Skip setup")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                     InstallController.addEmptyServer()
                 }

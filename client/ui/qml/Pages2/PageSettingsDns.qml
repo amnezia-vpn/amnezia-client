@@ -13,6 +13,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: primaryDns.textField
+
     BackButtonType {
         id: backButton
 
@@ -27,6 +29,16 @@ PageType {
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.height
+
+        property var isServerFromApi: ServersModel.getDefaultServerData("isServerFromApi")
+
+        enabled: !isServerFromApi
+
+        Component.onCompleted: {
+            if (isServerFromApi) {
+                PageController.showNotificationMessage(qsTr("Default server does not support custom dns"))
+            }
+        }
 
         ColumnLayout {
             id: content
@@ -60,6 +72,8 @@ PageType {
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
+
+                KeyNavigation.tab: secondaryDns.textField
             }
 
             TextFieldWithHeaderType {
@@ -72,6 +86,8 @@ PageType {
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
+
+                KeyNavigation.tab: saveButton
             }
 
             BasicButtonType {
@@ -86,32 +102,33 @@ PageType {
 
                 text: qsTr("Restore default")
 
-                onClicked: function() {
-                    questionDrawer.headerText = qsTr("Restore default DNS settings?")
-                    questionDrawer.yesButtonText = qsTr("Continue")
-                    questionDrawer.noButtonText = qsTr("Cancel")
+                clickedFunc: function() {
+                    var headerText = qsTr("Restore default DNS settings?")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                    questionDrawer.yesButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var yesButtonFunction = function() {
                         SettingsController.primaryDns = "1.1.1.1"
                         primaryDns.textFieldText = SettingsController.primaryDns
                         SettingsController.secondaryDns = "1.0.0.1"
                         secondaryDns.textFieldText = SettingsController.secondaryDns
                         PageController.showNotificationMessage(qsTr("Settings have been reset"))
                     }
-                    questionDrawer.noButtonFunction = function() {
-                        questionDrawer.visible = false
+                    var noButtonFunction = function() {
                     }
-                    questionDrawer.visible = true
+
+                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
             BasicButtonType {
+                id: saveButton
+
                 Layout.fillWidth: true
 
                 text: qsTr("Save")
 
-                onClicked: function() {
+                clickedFunc: function() {
                     if (primaryDns.textFieldText !== SettingsController.primaryDns) {
                         SettingsController.primaryDns = primaryDns.textFieldText
                     }
@@ -122,8 +139,6 @@ PageType {
                 }
             }
         }
-        QuestionDrawer {
-            id: questionDrawer
-        }
     }
+
 }

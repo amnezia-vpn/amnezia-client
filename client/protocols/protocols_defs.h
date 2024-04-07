@@ -20,6 +20,7 @@ namespace amnezia
         constexpr char dns1[] = "dns1";
         constexpr char dns2[] = "dns2";
 
+        constexpr char serverIndex[] = "serverIndex";
         constexpr char description[] = "description";
         constexpr char name[] = "name";
         constexpr char cert[] = "cert";
@@ -44,7 +45,9 @@ namespace amnezia
         constexpr char server_priv_key[] = "server_priv_key";
         constexpr char server_pub_key[] = "server_pub_key";
         constexpr char psk_key[] = "psk_key";
+        constexpr char mtu[] = "mtu";
         constexpr char allowed_ips[] = "allowed_ips";
+        constexpr char persistent_keep_alive[] = "persistent_keep_alive";
 
         constexpr char client_ip[] = "client_ip"; // internal ip address
 
@@ -79,11 +82,19 @@ namespace amnezia
         constexpr char cloak[] = "cloak";
         constexpr char sftp[] = "sftp";
         constexpr char awg[] = "awg";
+        constexpr char xray[] = "xray";
 
         constexpr char configVersion[] = "config_version";
 
         constexpr char splitTunnelSites[] = "splitTunnelSites";
         constexpr char splitTunnelType[] = "splitTunnelType";
+
+        constexpr char splitTunnelApps[] = "splitTunnelApps";
+        constexpr char appSplitTunnelType[] = "appSplitTunnelType";
+
+        constexpr char crc[] = "crc";
+
+        constexpr char clientId[] = "clientId";
 
     }
 
@@ -100,6 +111,7 @@ namespace amnezia
             constexpr char defaultSubnetAddress[] = "10.8.0.0";
             constexpr char defaultSubnetMask[] = "255.255.255.0";
             constexpr char defaultSubnetCidr[] = "24";
+            constexpr char defaultMtu[] = "1500";
 
             constexpr char serverConfigPath[] = "/opt/amnezia/openvpn/server.conf";
             constexpr char caCertPath[] = "/opt/amnezia/openvpn/pki/ca.crt";
@@ -128,6 +140,20 @@ namespace amnezia
             constexpr char defaultCipher[] = "chacha20-ietf-poly1305";
         }
 
+        namespace xray
+        {
+            constexpr char serverConfigPath[] = "/opt/amnezia/xray/server.json";
+            constexpr char uuidPath[] = "/opt/amnezia/xray/xray_uuid.key";
+            constexpr char PublicKeyPath[] = "/opt/amnezia/xray/xray_public.key";
+            constexpr char PrivateKeyPath[] = "/opt/amnezia/xray/xray_private.key";
+            constexpr char shortidPath[] = "/opt/amnezia/xray/xray_short_id.key";
+            constexpr char defaultSite[] = "www.googletagmanager.com";
+
+            constexpr char defaultPort[] = "443";
+            constexpr char defaultLocalProxyPort[] = "10808";
+            constexpr char defaultLocalAddr[] = "10.33.0.2";
+        }
+
         namespace cloak
         {
             constexpr char ckPublicKeyPath[] = "/opt/amnezia/cloak/cloak_public.key";
@@ -136,7 +162,6 @@ namespace amnezia
             constexpr char defaultPort[] = "443";
             constexpr char defaultRedirSite[] = "tile.openstreetmap.org";
             constexpr char defaultCipher[] = "chacha20-poly1305";
-
         }
 
         namespace wireguard
@@ -146,6 +171,7 @@ namespace amnezia
             constexpr char defaultSubnetCidr[] = "24";
 
             constexpr char defaultPort[] = "51820";
+            constexpr char defaultMtu[] = "1420";
             constexpr char serverConfigPath[] = "/opt/amnezia/wireguard/wg0.conf";
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/wireguard/wireguard_server_public_key.key";
             constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
@@ -161,6 +187,7 @@ namespace amnezia
         namespace awg
         {
             constexpr char defaultPort[] = "55424";
+            constexpr char defaultMtu[] = "1420";
 
             constexpr char serverConfigPath[] = "/opt/amnezia/awg/wg0.conf";
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/awg/wireguard_server_public_key.key";
@@ -198,6 +225,7 @@ namespace amnezia
             Awg,
             Ikev2,
             L2tp,
+            Xray,
 
             // non-vpn
             TorWebSite,

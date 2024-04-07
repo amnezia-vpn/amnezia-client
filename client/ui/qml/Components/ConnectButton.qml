@@ -17,15 +17,15 @@ Button {
     implicitWidth: 190
     implicitHeight: 190
 
+    text: ConnectionController.connectionStateText
+
     Connections {
         target: ConnectionController
 
-        function onConnectionErrorOccurred(errorMessage) {
-            PageController.showErrorMessage(errorMessage)
+        function onPreparingConfig() {
+            PageController.showNotificationMessage(qsTr("Unable to disconnect during configuration preparation"))
         }
     }
-
-    text: ConnectionController.connectionStateText
 
 //    enabled: !ConnectionController.isConnectionInProgress
 
@@ -138,26 +138,7 @@ Button {
     }
 
     onClicked: {
-        if (!ApiController.updateServerConfigFromApi()) {
-            return
-        }
-
-        if (!ContainersModel.isAnyContainerInstalled()) {
-            PageController.setTriggeredBtConnectButton(true)
-
-            ServersModel.currentlyProcessedIndex = ServersModel.getDefaultServerIndex()
-            InstallController.setShouldCreateServer(false)
-            PageController.goToPage(PageEnum.PageSetupWizardEasy)
-
-            return
-        }
-
-        if (ConnectionController.isConnectionInProgress) {
-            ConnectionController.closeConnection()
-        } else if (ConnectionController.isConnected) {
-            ConnectionController.closeConnection()
-        } else {
-            ConnectionController.openConnection()
-        }
+        ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
+        ConnectionController.connectButtonClicked()
     }
 }

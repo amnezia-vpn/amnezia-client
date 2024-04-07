@@ -60,6 +60,11 @@ QString SystemController::getFileName(const QString &acceptLabel, const QString 
                                       const QString &selectedFile, const bool isSaveMode, const QString &defaultSuffix)
 {
     QString fileName;
+#ifdef Q_OS_ANDROID
+    Q_ASSERT(!isSaveMode);
+    return AndroidController::instance()->openFile(nameFilter);
+#endif
+
 #ifdef Q_OS_IOS
 
     MobileUtils mobileUtils;
@@ -87,11 +92,11 @@ QString SystemController::getFileName(const QString &acceptLabel, const QString 
 
     mainFileDialog->setProperty("acceptLabel", QVariant::fromValue(acceptLabel));
     mainFileDialog->setProperty("nameFilters", QVariant::fromValue(QStringList(nameFilter)));
-    if (!selectedFile.isEmpty()) {
-        mainFileDialog->setProperty("selectedFile", QVariant::fromValue(selectedFile));
-    }
-    mainFileDialog->setProperty("isSaveMode", QVariant::fromValue(isSaveMode));
     mainFileDialog->setProperty("defaultSuffix", QVariant::fromValue(defaultSuffix));
+    mainFileDialog->setProperty("isSaveMode", QVariant::fromValue(isSaveMode));
+    if (!selectedFile.isEmpty()) {
+        mainFileDialog->setProperty("selectedFile", QVariant::fromValue(QUrl(selectedFile)));
+    }
     QMetaObject::invokeMethod(mainFileDialog, "open");
 
     bool isFileDialogAccepted = false;
@@ -108,20 +113,6 @@ QString SystemController::getFileName(const QString &acceptLabel, const QString 
     }
 
     fileName = mainFileDialog->property("selectedFile").toString();
-
-#ifdef Q_OS_ANDROID
-    // patch for files containing spaces etc
-    const QString sep { "raw%3A%2F" };
-    if (fileName.startsWith("content://") && fileName.contains(sep)) {
-        QString contentUrl = fileName.split(sep).at(0);
-        QString rawUrl = fileName.split(sep).at(1);
-        rawUrl.replace(" ", "%20");
-        fileName = contentUrl + sep + rawUrl;
-    }
-
-    return fileName;
-#endif
-
     return QUrl(fileName).toLocalFile();
 }
 

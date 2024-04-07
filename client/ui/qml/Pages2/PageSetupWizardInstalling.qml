@@ -14,8 +14,8 @@ import "../Config"
 PageType {
     id: root
 
-    Component.onCompleted: PageController.enableTabBar(false)
-    Component.onDestruction: PageController.enableTabBar(true)
+    Component.onCompleted: PageController.disableTabBar(true)
+    Component.onDestruction: PageController.disableTabBar(false)
 
     property bool isTimerRunning: true
     property string progressBarText: qsTr("Usually it takes no more than 5 minutes")
@@ -25,8 +25,9 @@ PageType {
         target: InstallController
 
         function onInstallContainerFinished(finishedMessage, isServiceInstall) {
-            if (!ConnectionController.isConnected && !isServiceInstall) {
-                ServersModel.setDefaultContainer(ContainersModel.getCurrentlyProcessedContainerIndex())
+            var containerIndex = ContainersModel.getProcessedContainerIndex()
+            if (!ConnectionController.isConnected && !ContainersModel.isServiceContainer(containerIndex)) {
+                ServersModel.setDefaultContainer(ServersModel.processedIndex, containerIndex)
             }
 
             PageController.closePage() // close installing page
@@ -42,6 +43,7 @@ PageType {
         function onInstallServerFinished(finishedMessage) {
             if (!ConnectionController.isConnected) {
                 ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                ServersModel.processedIndex = ServersModel.defaultIndex
             }
 
             PageController.goToStartPage()
@@ -54,7 +56,7 @@ PageType {
 
         function onServerAlreadyExists(serverIndex) {
             PageController.goToStartPage()
-            ServersModel.currentlyProcessedIndex = serverIndex
+            ServersModel.processedIndex = serverIndex
             PageController.goToPage(PageEnum.PageSettingsServerInfo, false)
 
             PageController.showErrorMessage(qsTr("The server has already been added to the application"))
@@ -164,7 +166,7 @@ PageType {
 
                             text: qsTr("Cancel installation")
 
-                            onClicked: {
+                            clickedFunc: function() {
                                 InstallController.cancelInstallation()
                                 PageController.showBusyIndicator(true)
                             }

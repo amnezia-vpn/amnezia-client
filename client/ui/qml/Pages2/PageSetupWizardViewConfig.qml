@@ -18,14 +18,18 @@ PageType {
     Connections {
         target: ImportController
 
-        function onImportErrorOccurred(errorMessage) {
-            PageController.closePage()
-            PageController.showErrorMessage(errorMessage)
+        function onImportErrorOccurred(errorMessage, goToPageHome) {
+            if (goToPageHome) {
+                PageController.goToStartPage()
+            } else {
+                PageController.closePage()
+            }
         }
 
         function onImportFinished() {
             if (!ConnectionController.isConnected) {
                 ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                ServersModel.processedIndex = ServersModel.defaultIndex
             }
 
             PageController.goToStartPage()
@@ -70,7 +74,7 @@ PageType {
                 visible: fileName.text !== ""
 
                 Image {
-                    source: "qrc:/images/controls/file-cog-2.svg"
+                    source: "qrc:/images/controls/file-check-2.svg"
                 }
 
                 Header2TextType {
@@ -81,14 +85,6 @@ PageType {
                     text: ImportController.getConfigFileName()
                     wrapMode: Text.Wrap
                 }
-            }
-
-            CaptionTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-
-                text: qsTr("Do not use connection code from public sources. It could be created to intercept your data.")
-                color: "#878B91"
             }
 
             BasicButtonType {
@@ -104,9 +100,18 @@ PageType {
 
                 text: showContent ? qsTr("Collapse content") : qsTr("Show content")
 
-                onClicked: {
+                clickedFunc: function() {
                     showContent = !showContent
                 }
+            }
+
+            WarningType {
+                Layout.topMargin: 16
+                Layout.fillWidth: true
+
+                textString: qsTr("Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.")
+
+                iconPath: "qrc:/images/controls/alert-circle.svg"
             }
 
             Rectangle {
@@ -146,7 +151,7 @@ PageType {
             Layout.bottomMargin: 32
 
             text: qsTr("Connect")
-            onClicked: {
+            clickedFunc: function() {
                 ImportController.importConfig()
             }
         }

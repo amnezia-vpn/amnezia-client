@@ -15,6 +15,7 @@ ListView {
     id: menuContent
 
     property var rootWidth
+    property var selectedText
 
     width: rootWidth
     height: menuContent.contentItem.height
@@ -50,8 +51,8 @@ ListView {
                 imageSource: "qrc:/images/controls/download.svg"
                 showImage: !isInstalled
 
-                checkable: isInstalled && !ConnectionController.isConnected && isSupported
-                checked: isDefault
+                checkable: isInstalled && !ConnectionController.isConnected
+                checked: proxyDefaultServerContainersModel.mapToSource(index) === ServersModel.getDefaultServerData("defaultContainer")
 
                 onClicked: {
                     if (ConnectionController.isConnected && isInstalled) {
@@ -60,19 +61,13 @@ ListView {
                     }
 
                     if (checked) {
-                        ServersModel.setDefaultContainer(proxyContainersModel.mapToSource(index))
-
-                        containersDropDown.menuVisible = false
+                        containersDropDown.close()
+                        ServersModel.setDefaultContainer(ServersModel.defaultIndex, proxyDefaultServerContainersModel.mapToSource(index))
                     } else {
-                        if (!isSupported && isInstalled) {
-                            PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))
-                            return
-                        }
-
-                        ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(index))
+                        ContainersModel.setProcessedContainerIndex(proxyDefaultServerContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
-                        containersDropDown.menuVisible = false
+                        containersDropDown.close()
                     }
                 }
 

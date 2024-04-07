@@ -15,6 +15,15 @@ set(PACKAGES
     Core5Compat Concurrent LinguistTools
 )
 
+execute_process(
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  COMMAND git rev-parse --short HEAD
+  OUTPUT_VARIABLE GIT_COMMIT_HASH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
+
 if(IOS)
     set(PACKAGES ${PACKAGES} Multimedia)
 endif()
@@ -54,9 +63,12 @@ qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 set(CMAKE_AUTORCC ON)
 
 set(AMNEZIAVPN_TS_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru_RU.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_zh_CN.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_fa_IR.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ar_EG.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_my_MM.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_uk_UA.ts
 )
 
 file(GLOB_RECURSE AMNEZIAVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)
@@ -108,7 +120,9 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/core/errorstrings.h
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.h
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/apiController.h
     ${CMAKE_CURRENT_LIST_DIR}/core/controllers/serverController.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/vpnConfigurationController.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/qml_register_protocols.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.h
@@ -118,6 +132,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.h
 )
 
 # Mozilla headres
@@ -147,12 +162,15 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/core/errorstrings.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/apiController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/controllers/serverController.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/vpnConfigurationController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.cpp
 )
 
 # Mozilla sources
@@ -282,6 +300,7 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnovercloakprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/shadowsocksvpnprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/wireguardprotocol.h
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/xrayprotocol.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/awgprotocol.h
     )
 
@@ -293,6 +312,7 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
         ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnovercloakprotocol.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/shadowsocksvpnprotocol.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/wireguardprotocol.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/xrayprotocol.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/awgprotocol.cpp
     )
 endif()

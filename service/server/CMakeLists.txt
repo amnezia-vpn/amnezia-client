@@ -14,6 +14,7 @@ configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/vers
 
 set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/core/networkUtilities.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.h
@@ -26,6 +27,7 @@ set(HEADERS
 
 set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/core/networkUtilities.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.cpp
     ${CMAKE_CURRENT_LIST_DIR}/localserver.cpp
@@ -182,6 +184,7 @@ if(APPLE)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/macosdaemon.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/macosroutemonitor.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/wireguardutilsmacos.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/macosfirewall.h
     )
 
     set(SOURCES ${SOURCES}
@@ -195,6 +198,7 @@ if(APPLE)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/macosdaemon.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/macosroutemonitor.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/wireguardutilsmacos.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/macosfirewall.cpp
     )
 endif()
 
@@ -211,6 +215,7 @@ if(LINUX)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/dnsutilslinux.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/wireguardutilslinux.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxroutemonitor.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxfirewall.h        
     )
 
     set(SOURCES ${SOURCES}
@@ -223,6 +228,7 @@ if(LINUX)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxdaemon.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/wireguardutilslinux.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxroutemonitor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxfirewall.cpp
     )
 endif()
 

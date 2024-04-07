@@ -40,32 +40,28 @@ public:
     QVariant data(const int index, int role) const;
 
 public slots:
-    void updateModel(QJsonArray &containers);
+    void updateModel(const QJsonArray &containers);
 
-    DockerContainer getDefaultContainer();
-    void setDefaultContainer(const int containerIndex);
+    void setProcessedContainerIndex(int containerIndex);
+    int getProcessedContainerIndex();
 
-    void setCurrentlyProcessedContainerIndex(int containerIndex);
-    int getCurrentlyProcessedContainerIndex();
-
-    QString getCurrentlyProcessedContainerName();
+    QString getProcessedContainerName();
 
     QJsonObject getContainerConfig(const int containerIndex);
 
-    bool isAnyContainerInstalled();
+    bool isSupportedByCurrentPlatform(const int containerIndex);
+    bool isServiceContainer(const int containerIndex);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 signals:
-    void defaultContainerChanged();
     void containersModelUpdated();
 
 private:
     QMap<DockerContainer, QJsonObject> m_containers;
 
-    int m_currentlyProcessedContainerIndex;
-    DockerContainer m_defaultContainerIndex;
+    int m_processedContainerIndex;
 };
 
 #endif // CONTAINERS_MODEL_H

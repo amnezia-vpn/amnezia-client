@@ -10,15 +10,9 @@ const uint32_t S_IRWXU = 0644;
 #endif
 
 namespace libssh {
-    const QString libsshTimeoutError = "Timeout connecting to";
+    constexpr auto libsshTimeoutError{"Timeout connecting to"};
 
     std::function<QString()> Client::m_passphraseCallback;
-
-    Client::Client(QObject *parent) : QObject(parent)
-    { }
-
-    Client::~Client()
-    { }
 
     int Client::callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata)
     {
@@ -171,13 +165,13 @@ namespace libssh {
                     return ErrorCode::NoError;
                 };
 
-                auto error = readOutput(false);
-                if (error != ErrorCode::NoError) {
-                    return error;
+                auto errorCode = readOutput(false);
+                if (errorCode != ErrorCode::NoError) {
+                    return errorCode;
                 }
-                error = readOutput(true);
-                if (error != ErrorCode::NoError) {
-                    return error;
+                errorCode = readOutput(true);
+                if (errorCode != ErrorCode::NoError) {
+                    return errorCode;
                 }
             } else {
                 return closeChannel();
@@ -222,102 +216,79 @@ namespace libssh {
         return fromLibsshErrorCode();
     }
 
-    ErrorCode Client::sftpFileCopy(const SftpOverwriteMode overwriteMode, const std::string& localPath, const std::string& remotePath, const std::string& fileDesc)
+    ErrorCode Client::scpFileCopy(const ScpOverwriteMode overwriteMode, const QString& localPath, const QString& remotePath, const QString &fileDesc)
     {
-        m_sftpSession = sftp_new(m_session);
+        m_scpSession = ssh_scp_new(m_session, SSH_SCP_WRITE, remotePath.toStdString().c_str());
 
-        if (m_sftpSession == nullptr) {
-            return closeSftpSession();
+        if (m_scpSession == nullptr) {
+            return fromLibsshErrorCode();
         }
 
-        int result = sftp_init(m_sftpSession);
-
-        if (result != SSH_OK) {
-            return closeSftpSession();
+        if (ssh_scp_init(m_scpSession) != SSH_OK) {
+            auto errorCode = fromLibsshErrorCode();
+            closeScpSession();
+            return errorCode;
         }
 
         QFutureWatcher<ErrorCode> watcher;
-        connect(&watcher, &QFutureWatcher<ErrorCode>::finished, this, &Client::sftpFileCopyFinished);
-
+        connect(&watcher, &QFutureWatcher<ErrorCode>::finished, this, &Client::scpFileCopyFinished);
         QFuture<ErrorCode> future = QtConcurrent::run([this, overwriteMode, &localPath, &remotePath, &fileDesc]() {
-            int accessType = O_WRONLY | O_CREAT | overwriteMode;
-            sftp_file file;
-            const size_t bufferSize = 16384;
-            char buffer[bufferSize];
+            const int accessType = O_WRONLY | O_CREAT | overwriteMode;
+            const int localFileSize = QFileInfo(localPath).size();
 
-            file = sftp_open(m_sftpSession, remotePath.c_str(), accessType, S_IRWXU);
-
-            if (file == nullptr) {
-                return closeSftpSession();
+            int result = ssh_scp_push_file(m_scpSession, remotePath.toStdString().c_str(), localFileSize, accessType);
+            if (result != SSH_OK) {
+                return fromLibsshErrorCode();
             }
 
-            int localFileSize = std::filesystem::file_size(localPath);
-            int chunksCount = localFileSize / (bufferSize);
+            QFile fin(localPath);
 
-            std::ifstream fin(localPath, std::ios::binary | std::ios::in);
+            if (fin.open(QIODevice::ReadOnly)) {
+                constexpr size_t bufferSize = 16384;
+                int transferred = 0;
+                int currentChunkSize = bufferSize;
 
-            if (fin.is_open()) {
-                for (int currentChunkId = 0; currentChunkId < chunksCount; currentChunkId++) {
-                    fin.read(buffer, bufferSize);
+                while (transferred < localFileSize) {
 
-                    int bytesWritten = sftp_write(file, buffer, bufferSize);
-
-                    std::string chunk(buffer, bufferSize);
-
-                    if (bytesWritten != bufferSize) {
-                        fin.close();
-                        sftp_close(file);
-                        return closeSftpSession();
+                    // Last Chunk
+                    if ((localFileSize - transferred) < bufferSize) {
+                        currentChunkSize = localFileSize % bufferSize;
                     }
-                }
 
-                int lastChunkSize = localFileSize % (bufferSize);
-
-                if (lastChunkSize != 0) {
-                    fin.read(buffer, lastChunkSize);
-
-                    std::string chunk(buffer, lastChunkSize);
-
-                    int bytesWritten = sftp_write(file, buffer, lastChunkSize);
-
-                    if (bytesWritten != lastChunkSize) {
-                        fin.close();
-                        sftp_close(file);
-                        return closeSftpSession();
+                    QByteArray chunk = fin.read(currentChunkSize);
+                    if (chunk.size() != currentChunkSize) {
+                        return fromFileErrorCode(fin.error());
                     }
+
+                    result = ssh_scp_write(m_scpSession, chunk.data(), chunk.size());
+                    if (result != SSH_OK) {
+                        return fromLibsshErrorCode();
+                    }
+
+                    transferred += currentChunkSize;
                 }
             } else {
-                sftp_close(file);
-                return closeSftpSession();
+                return fromFileErrorCode(fin.error());
             }
 
-            fin.close();
-
-            int result = sftp_close(file);
-            if (result != SSH_OK) {
-                return closeSftpSession();
-            }
-
-            return closeSftpSession();
+            return ErrorCode::NoError;
         });
         watcher.setFuture(future);
 
         QEventLoop wait;
-        QObject::connect(this, &Client::sftpFileCopyFinished, &wait, &QEventLoop::quit);
+        QObject::connect(this, &Client::scpFileCopyFinished, &wait, &QEventLoop::quit);
         wait.exec();
 
+        closeScpSession();
         return watcher.result();
     }
 
-    ErrorCode Client::closeSftpSession()
+    void Client::closeScpSession()
     {
-        auto errorCode = fromLibsshSftpErrorCode(sftp_get_error(m_sftpSession));
-        if (m_sftpSession != nullptr) {
-            sftp_free(m_sftpSession);
-            m_sftpSession = nullptr;
+        if (m_scpSession != nullptr) {
+            ssh_scp_free(m_scpSession);
+            m_scpSession = nullptr;
         }
-        qCritical() << ssh_get_error(m_session);
-        return errorCode;
     }
 
     ErrorCode Client::fromLibsshErrorCode()
@@ -339,24 +310,17 @@ namespace libssh {
         default: return ErrorCode::SshInternalError;
         }
     }
-    ErrorCode Client::fromLibsshSftpErrorCode(int errorCode)
+
+    ErrorCode Client::fromFileErrorCode(QFileDevice::FileError fileError)
     {
-        switch (errorCode) {
-        case(SSH_FX_OK): return ErrorCode::NoError;
-        case(SSH_FX_EOF): return ErrorCode::SshSftpEofError;
-        case(SSH_FX_NO_SUCH_FILE): return ErrorCode::SshSftpNoSuchFileError;
-        case(SSH_FX_PERMISSION_DENIED): return ErrorCode::SshSftpPermissionDeniedError;
-        case(SSH_FX_FAILURE): return ErrorCode::SshSftpFailureError;
-        case(SSH_FX_BAD_MESSAGE): return ErrorCode::SshSftpBadMessageError;
-        case(SSH_FX_NO_CONNECTION): return ErrorCode::SshSftpNoConnectionError;
-        case(SSH_FX_CONNECTION_LOST): return ErrorCode::SshSftpConnectionLostError;
-        case(SSH_FX_OP_UNSUPPORTED): return ErrorCode::SshSftpOpUnsupportedError;
-        case(SSH_FX_INVALID_HANDLE): return ErrorCode::SshSftpInvalidHandleError;
-        case(SSH_FX_NO_SUCH_PATH): return ErrorCode::SshSftpNoSuchPathError;
-        case(SSH_FX_FILE_ALREADY_EXISTS): return ErrorCode::SshSftpFileAlreadyExistsError;
-        case(SSH_FX_WRITE_PROTECT): return ErrorCode::SshSftpWriteProtectError;
-        case(SSH_FX_NO_MEDIA): return ErrorCode::SshSftpNoMediaError;
-        default: return ErrorCode::SshSftpFailureError;
+        switch (fileError) {
+        case QFileDevice::NoError: return ErrorCode::NoError;
+        case QFileDevice::ReadError: return ErrorCode::ReadError;
+        case QFileDevice::OpenError: return ErrorCode::OpenError;
+        case QFileDevice::PermissionsError: return ErrorCode::PermissionsError;
+        case QFileDevice::FatalError: return ErrorCode::FatalError;
+        case QFileDevice::AbortError: return ErrorCode::AbortError;
+        default: return ErrorCode::UnspecifiedError;
         }
     }
 

@@ -11,6 +11,8 @@ import "../Config"
 PageType {
     id: root
 
+    property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
+
     BackButtonType {
         id: backButton
 
@@ -42,27 +44,6 @@ PageType {
             }
 
             SwitcherType {
-                visible: !GC.isMobile()
-
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                text: qsTr("Auto connect")
-                descriptionText: qsTr("Connect to VPN on app start")
-
-                checked: SettingsController.isAutoConnectEnabled()
-                onCheckedChanged: {
-                    if (checked !== SettingsController.isAutoConnectEnabled()) {
-                        SettingsController.toggleAutoConnect(checked)
-                    }
-                }
-            }
-
-            DividerType {
-                visible: !GC.isMobile()
-            }
-
-            SwitcherType {
                 Layout.fillWidth: true
                 Layout.margins: 16
 
@@ -83,7 +64,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("DNS servers")
-                descriptionText: qsTr("If AmneziaDNS is not used or installed")
+                descriptionText: qsTr("When AmneziaDNS is not used or installed")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
@@ -94,8 +75,6 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                visible: true
-
                 Layout.fillWidth: true
 
                 text: qsTr("Site-based split tunneling")
@@ -108,24 +87,25 @@ PageType {
             }
 
             DividerType {
-                visible: GC.isDesktop()
+                visible: root.isAppSplitTinnelingEnabled
             }
 
             LabelWithButtonType {
-                visible: false
+                visible: root.isAppSplitTinnelingEnabled
 
                 Layout.fillWidth: true
 
                 text: qsTr("App-based split tunneling")
-                descriptionText: qsTr("Allows you to use the VPN only for certain applications")
+                descriptionText: qsTr("Allows you to use the VPN only for certain Apps")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
                 }
             }
 
             DividerType {
-                visible: false
+                visible: root.isAppSplitTinnelingEnabled
             }
         }
     }

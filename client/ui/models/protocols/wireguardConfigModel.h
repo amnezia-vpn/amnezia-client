@@ -6,6 +6,18 @@
 
 #include "containers/containers_defs.h"
 
+struct WgConfig
+{
+    WgConfig(const QJsonObject &jsonConfig);
+
+    QString port;
+    QString mtu;
+
+    bool hasEqualServerSettings(const WgConfig &other) const;
+    bool hasEqualClientSettings(const WgConfig &other) const;
+
+};
+
 class WireGuardConfigModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -13,7 +25,7 @@ class WireGuardConfigModel : public QAbstractListModel
 public:
     enum Roles {
         PortRole = Qt::UserRole + 1,
-        CipherRole
+        MtuRole
     };
 
     explicit WireGuardConfigModel(QObject *parent = nullptr);

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="connecting">Подключение</string>
+    <string name="disconnecting">Отключение</string>
+    <string name="cancel">Отмена</string>
+    <string name="ok">ОК</string>
+    <string name="vpnGranted">VPN-подключение разрешено</string>
+    <string name="vpnDenied">VPN-подключение запрещено</string>
+    <string name="vpnSetupFailed">Ошибка настройки VPN</string>
+    <string name="vpnSetupFailedMessage">Чтобы подключиться к AmneziaVPN необходимо:\n\n- Разрешить приложению подключаться к сети VPN\n- Отключить функцию \"Постоянная VPN\" для всех остальных VPN-приложений в системных настройках VPN</string>
+    <string name="openVpnSettings">Открыть настройки VPN</string>
+</resources>

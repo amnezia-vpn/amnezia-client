@@ -5,6 +5,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import java.net.InetAddress
 import org.amnezia.vpn.util.net.InetNetwork
+import org.amnezia.vpn.util.net.IpRange
+import org.amnezia.vpn.util.net.IpRangeSet
 
 open class ProtocolConfig protected constructor(
     val addresses: Set<InetNetwork>,
@@ -12,6 +14,9 @@ open class ProtocolConfig protected constructor(
     val searchDomain: String?,
     val routes: Set<InetNetwork>,
     val excludedRoutes: Set<InetNetwork>,
+    val includedAddresses: Set<InetNetwork>,
+    val excludedAddresses: Set<InetNetwork>,
+    val includedApplications: Set<String>,
     val excludedApplications: Set<String>,
     val httpProxy: ProxyInfo?,
     val allowAllAF: Boolean,
@@ -25,6 +30,9 @@ open class ProtocolConfig protected constructor(
         builder.searchDomain,
         builder.routes,
         builder.excludedRoutes,
+        builder.includedAddresses,
+        builder.excludedAddresses,
+        builder.includedApplications,
         builder.excludedApplications,
         builder.httpProxy,
         builder.allowAllAF,
@@ -37,6 +45,9 @@ open class ProtocolConfig protected constructor(
         internal val dnsServers: MutableSet<InetAddress> = hashSetOf()
         internal val routes: MutableSet<InetNetwork> = hashSetOf()
         internal val excludedRoutes: MutableSet<InetNetwork> = hashSetOf()
+        internal val includedAddresses: MutableSet<InetNetwork> = hashSetOf()
+        internal val excludedAddresses: MutableSet<InetNetwork> = hashSetOf()
+        internal val includedApplications: MutableSet<String> = hashSetOf()
         internal val excludedApplications: MutableSet<String> = hashSetOf()
 
         internal var searchDomain: String? = null
@@ -71,11 +82,17 @@ open class ProtocolConfig protected constructor(
         fun removeRoute(route: InetNetwork) = apply { this.routes.remove(route) }
         fun clearRoutes() = apply { this.routes.clear() }
 
-        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         fun excludeRoute(route: InetNetwork) = apply { this.excludedRoutes += route }
-
-        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         fun excludeRoutes(routes: Collection<InetNetwork>) = apply { this.excludedRoutes += routes }
+
+        fun includeAddress(addr: InetNetwork) = apply { this.includedAddresses += addr }
+        fun includeAddresses(addresses: Collection<InetNetwork>) = apply { this.includedAddresses += addresses }
+
+        fun excludeAddress(addr: InetNetwork) = apply { this.excludedAddresses += addr }
+        fun excludeAddresses(addresses: Collection<InetNetwork>) = apply { this.excludedAddresses += addresses }
+
+        fun includeApplication(application: String) = apply { this.includedApplications += application }
+        fun includeApplications(applications: Collection<String>) = apply { this.includedApplications += applications }
 
         fun excludeApplication(application: String) = apply { this.excludedApplications += application }
         fun excludeApplications(applications: Collection<String>) = apply { this.excludedApplications += applications }
@@ -91,6 +108,49 @@ open class ProtocolConfig protected constructor(
 
         fun setMtu(mtu: Int) = apply { this.mtu = mtu }
 
+        private fun processSplitTunneling() {
+            if (includedAddresses.isNotEmpty() && excludedAddresses.isNotEmpty()) {
+                throw BadConfigException("Config contains addresses for inclusive and exclusive split tunneling at the same time")
+            }
+
+            if (includedAddresses.isNotEmpty()) {
+                // remove default routes, if any
+                removeRoute(InetNetwork("0.0.0.0", 0))
+                removeRoute(InetNetwork("::", 0))
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                    // for older versions of Android, add the default route to the excluded routes
+                    // to correctly build the excluded subnets list later
+                    excludeRoute(InetNetwork("0.0.0.0", 0))
+                }
+                addRoutes(includedAddresses)
+            } else if (excludedAddresses.isNotEmpty()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    // default routes are required for split tunneling in newer versions of Android
+                    addRoute(InetNetwork("0.0.0.0", 0))
+                    addRoute(InetNetwork("::", 0))
+                }
+                excludeRoutes(excludedAddresses)
+            }
+        }
+
+        private fun processExcludedRoutes() {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && excludedRoutes.isNotEmpty()) {
+                // todo: rewrite, taking into account the current routes
+                // for older versions of Android, build a list of subnets without excluded routes
+                // and add them to routes
+                val ipRangeSet = IpRangeSet()
+                ipRangeSet.remove(IpRange("127.0.0.0", 8))
+                excludedRoutes.forEach {
+                    ipRangeSet.remove(IpRange(it))
+                }
+                // remove default routes, if any
+                removeRoute(InetNetwork("0.0.0.0", 0))
+                removeRoute(InetNetwork("::", 0))
+                ipRangeSet.subnets().forEach(::addRoute)
+                addRoute(InetNetwork("2000::", 3))
+            }
+        }
+
         private fun validate() {
             val errorMessage = StringBuilder()
 
@@ -103,7 +163,13 @@ open class ProtocolConfig protected constructor(
             if (errorMessage.isNotEmpty()) throw BadConfigException(errorMessage.toString())
         }
 
-        open fun build(): ProtocolConfig = validate().run { ProtocolConfig(this@Builder) }
+        protected fun configBuild() {
+            processSplitTunneling()
+            processExcludedRoutes()
+            validate()
+        }
+
+        open fun build(): ProtocolConfig = configBuild().run { ProtocolConfig(this@Builder) }
     }
 
     companion object {

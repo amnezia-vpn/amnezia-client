@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <!-- Leave package attribute for androiddeployqt -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.amnezia.vpn"
     android:versionName="-- %%INSERT_VERSION_NAME%% --"
     android:versionCode="-- %%INSERT_VERSION_CODE%% --"
@@ -22,25 +24,26 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <!-- Enable when VPN-per-app mode will be implemented -->
-    <!-- <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/> -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
 
     <application
         android:name=".AmneziaApplication"
         android:label="-- %%INSERT_APP_NAME%% --"
         android:icon="@mipmap/icon"
         android:roundIcon="@mipmap/icon_round"
-        android:theme="@style/NoActionBar">
+        android:theme="@style/NoActionBar"
+        android:fullBackupContent="@xml/backup_content"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        tools:targetApi="s">
 
         <activity
             android:name=".AmneziaActivity"
             android:configChanges="uiMode|screenSize|smallestScreenSize|screenLayout|orientation|density
                 |fontScale|layoutDirection|locale|keyboard|keyboardHidden|navigation|mcc|mnc"
             android:launchMode="singleInstance"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true">
 
             <intent-filter>
@@ -51,6 +54,10 @@
             <intent-filter>
                 <action android:name="org.amnezia.vpn.IMPORT_CONFIG" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
             </intent-filter>
 
             <meta-data
@@ -134,14 +141,29 @@
             android:name=".AmneziaVpnService"
             android:process=":amneziaVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
-            android:foregroundServiceType="specialUse"
-            android:exported="false">
+            android:foregroundServiceType="systemExempted"
+            android:exported="false"
+            tools:ignore="ForegroundServicePermission">
 
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>
+        </service>
 
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="vpn" />
+        <service
+            android:name=".AmneziaTileService"
+            android:process=":amneziaTileService"
+            android:icon="@drawable/ic_amnezia_round"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
         </service>
 
         <provider
@@ -149,7 +171,7 @@
             android:authorities="org.amnezia.vpn.qtprovider"
             android:exported="false"
             android:grantUriPermissions="true">
-        <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/qtprovider_paths" />
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/qtprovider_paths" />
         </provider>
     </application>
 </manifest>

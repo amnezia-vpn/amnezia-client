@@ -15,6 +15,18 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    Connections {
+        target: SettingsController
+
+        function onLoggingStateChanged() {
+            if (SettingsController.isLoggingEnabled) {
+                var message = qsTr("Logging is enabled. Note that logs will be automatically \
+disabled after 14 days, and all log files will be deleted.")
+                PageController.showNotificationMessage(message)
+            }
+        }
+    }
+
     BackButtonType {
         id: backButton
 
@@ -45,6 +57,8 @@ PageType {
                 Layout.fillWidth: true
 
                 headerText: qsTr("Logging")
+                descriptionText: qsTr("Enabling this function will save application's logs automatically, " +
+                                      "By default, logging functionality is disabled. Enable log saving in case of application malfunction.")
             }
 
             SwitcherType {
@@ -66,7 +80,8 @@ PageType {
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignBaseline
-                    Layout.preferredWidth: root.width / 3
+                    Layout.preferredWidth: GC.isMobile() ? 0 : root.width / 3
+                    visible: !GC.isMobile()
 
                     ImageButtonType {
                         Layout.alignment: Qt.AlignHCenter
@@ -90,7 +105,7 @@ PageType {
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignBaseline
-                    Layout.preferredWidth: root.width / 3
+                    Layout.preferredWidth: root.width / ( GC.isMobile() ? 2 : 3 )
 
                     ImageButtonType {
                         Layout.alignment: Qt.AlignHCenter
@@ -131,7 +146,7 @@ PageType {
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignBaseline
-                    Layout.preferredWidth: root.width / 3
+                    Layout.preferredWidth: root.width / ( GC.isMobile() ? 2 : 3 )
 
                     ImageButtonType {
                         Layout.alignment: Qt.AlignHCenter
@@ -142,21 +157,20 @@ PageType {
                         image: "qrc:/images/controls/delete.svg"
 
                         onClicked: function() {
-                            questionDrawer.headerText = qsTr("Clear logs?")
-                            questionDrawer.yesButtonText = qsTr("Continue")
-                            questionDrawer.noButtonText = qsTr("Cancel")
+                            var headerText = qsTr("Clear logs?")
+                            var yesButtonText = qsTr("Continue")
+                            var noButtonText = qsTr("Cancel")
 
-                            questionDrawer.yesButtonFunction = function() {
-                                questionDrawer.visible = false
+                            var yesButtonFunction = function() {
                                 PageController.showBusyIndicator(true)
                                 SettingsController.clearLogs()
                                 PageController.showBusyIndicator(false)
                                 PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
                             }
-                            questionDrawer.noButtonFunction = function() {
-                                questionDrawer.visible = false
+                            var noButtonFunction = function() {
                             }
-                            questionDrawer.visible = true
+
+                            showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                         }
                     }
 
@@ -168,10 +182,6 @@ PageType {
                         color: "#D7D8DB"
                     }
                 }
-            }
-
-            QuestionDrawer {
-                id: questionDrawer
             }
         }
     }

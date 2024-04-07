@@ -4,6 +4,7 @@
 #include <QRandomGenerator>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QNetworkInterface>
 
 #include "logger.h"
 #include "openvpnprotocol.h"
@@ -25,7 +26,6 @@ OpenVpnProtocol::~OpenVpnProtocol()
 
 QString OpenVpnProtocol::defaultConfigFileName()
 {
-    // qDebug() << "OpenVpnProtocol::defaultConfigFileName" << defaultConfigPath() + QString("/%1.ovpn").arg(APPLICATION_NAME);
     return defaultConfigPath() + QString("/%1.ovpn").arg(APPLICATION_NAME);
 }
 
@@ -53,6 +53,11 @@ void OpenVpnProtocol::stop()
         QThread::msleep(10);
         m_managementServer.stop();
     }
+
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    IpcClient::Interface()->disableKillSwitch();
+#endif
+
     setConnectionState(Vpn::ConnectionState::Disconnected);
 }
 
@@ -85,13 +90,13 @@ void OpenVpnProtocol::killOpenVpnProcess()
 void OpenVpnProtocol::readOpenVpnConfiguration(const QJsonObject &configuration)
 {
     if (configuration.contains(ProtocolProps::key_proto_config_data(Proto::OpenVpn))) {
+        m_configData = configuration;
         QJsonObject jConfig = configuration.value(ProtocolProps::key_proto_config_data(Proto::OpenVpn)).toObject();
 
         m_configFile.open();
         m_configFile.write(jConfig.value(config_key::config).toString().toUtf8());
         m_configFile.close();
         m_configFileName = m_configFile.fileName();
-
         qDebug().noquote() << QString("Set config data") << m_configFileName;
     }
 }
@@ -138,18 +143,23 @@ uint OpenVpnProtocol::selectMgmtPort()
 
 void OpenVpnProtocol::updateRouteGateway(QString line)
 {
-    // TODO: fix for macos
-    line = line.split("ROUTE_GATEWAY", Qt::SkipEmptyParts).at(1);
-    if (!line.contains("/"))
-        return;
-    m_routeGateway = line.split("/", Qt::SkipEmptyParts).first();
-    m_routeGateway.replace(" ", "");
+    if (line.contains("net_route_v4_best_gw")) {
+        QStringList params = line.split(" ");
+        if (params.size() == 6) {
+            m_routeGateway = params.at(3);
+        }
+    } else {
+        line = line.split("ROUTE_GATEWAY", Qt::SkipEmptyParts).at(1);
+        if (!line.contains("/"))
+            return;
+        m_routeGateway = line.split("/", Qt::SkipEmptyParts).first();
+        m_routeGateway.replace(" ", "");
+    }
     qDebug() << "Set VPN route gateway" << m_routeGateway;
 }
 
 ErrorCode OpenVpnProtocol::start()
 {
-    // qDebug() << "Start OpenVPN connection";
     OpenVpnProtocol::stop();
 
     if (!QFileInfo::exists(Utils::openVpnExecPath())) {
@@ -184,9 +194,6 @@ ErrorCode OpenVpnProtocol::start()
     }
 #endif
 
-    //    QString vpnLogFileNamePath = Utils::systemLogPath() + "/openvpn.log";
-    //    Utils::createEmptyFile(vpnLogFileNamePath);
-
     uint mgmtPort = selectMgmtPort();
     qDebug() << "OpenVpnProtocol::start mgmt port selected:" << mgmtPort;
 
@@ -200,12 +207,11 @@ ErrorCode OpenVpnProtocol::start()
     m_openVpnProcess = IpcClient::CreatePrivilegedProcess();
 
     if (!m_openVpnProcess) {
-        // qWarning() << "IpcProcess replica is not created!";
         setLastError(ErrorCode::AmneziaServiceConnectionFailed);
         return ErrorCode::AmneziaServiceConnectionFailed;
     }
 
-    m_openVpnProcess->waitForSource(1000);
+    m_openVpnProcess->waitForSource(5000);
     if (!m_openVpnProcess->isInitialized()) {
         qWarning() << "IpcProcess replica is not connected!";
         setLastError(ErrorCode::AmneziaServiceConnectionFailed);
@@ -229,8 +235,6 @@ ErrorCode OpenVpnProtocol::start()
             [&]() { setConnectionState(Vpn::ConnectionState::Disconnected); });
 
     m_openVpnProcess->start();
-
-    // startTimeoutTimer();
 
     return ErrorCode::NoError;
 }
@@ -282,7 +286,7 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
             }
         }
 
-        if (line.contains("ROUTE_GATEWAY")) {
+        if (line.contains("ROUTE_GATEWAY") || line.contains("net_route_v4_best_gw")) {
             updateRouteGateway(line);
         }
 
@@ -320,14 +324,31 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
     // line looks like
     // PUSH: Received control message: 'PUSH_REPLY,route 10.8.0.1,topology net30,ping 10,ping-restart
     // 120,ifconfig 10.8.0.6 10.8.0.5,peer-id 0,cipher AES-256-GCM'
-
     QStringList params = line.split(",");
     for (const QString &l : params) {
         if (l.contains("ifconfig")) {
             if (l.split(" ").size() == 3) {
                 m_vpnLocalAddress = l.split(" ").at(1);
                 m_vpnGateway = l.split(" ").at(2);
-
+#ifdef Q_OS_WIN
+                QThread::msleep(300);
+                QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
+                for (int i = 0; i < netInterfaces.size(); i++) {
+                    for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
+                    {
+                        if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
+                            IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
+                            m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
+                            m_configData.insert("vpnGateway", m_vpnGateway);
+                            m_configData.insert("vpnServer", m_configData.value(amnezia::config_key::hostName).toString());
+                            IpcClient::Interface()->enablePeerTraffic(m_configData);
+                        }
+                    }
+                }
+#endif
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+                IpcClient::Interface()->enableKillSwitch(m_configData, 0);
+#endif
                 qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
             }
         }

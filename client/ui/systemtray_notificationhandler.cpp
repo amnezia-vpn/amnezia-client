@@ -67,7 +67,9 @@ void SystemTrayNotificationHandler::onTranslationsUpdated()
 void SystemTrayNotificationHandler::setTrayIcon(const QString &iconPath)
 {
     QIcon trayIconMask(QPixmap(iconPath).scaled(128,128));
+#ifndef Q_OS_MAC
     trayIconMask.setIsMask(true);
+#endif
     m_systemTrayIcon.setIcon(trayIconMask);
 }
 

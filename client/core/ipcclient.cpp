@@ -71,7 +71,7 @@ QSharedPointer<PrivilegedProcess> IpcClient::CreatePrivilegedProcess()
     }
 
     QRemoteObjectPendingReply<int> futureResult = Instance()->m_ipcClient->createPrivilegedProcess();
-    futureResult.waitForFinished(1000);
+    futureResult.waitForFinished(5000);
 
     int pid = futureResult.returnValue();
 

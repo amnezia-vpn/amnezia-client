@@ -12,24 +12,29 @@ import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Components"
+import "../Config"
 
 PageType {
     id: root
+
+    defaultActiveFocusItem: clientNameTextField.textField
 
     enum ConfigType {
         AmneziaConnection,
         OpenVpn,
         WireGuard,
+        Awg,
         ShadowSocks,
-        Cloak
+        Cloak,
+        Xray
     }
 
     signal revokeConfig(int index)
     onRevokeConfig: function(index) {
         PageController.showBusyIndicator(true)
         ExportController.revokeConfig(index,
-                                      ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                      ServersModel.getCurrentlyProcessedServerCredentials())
+                                      ContainersModel.getProcessedContainerIndex(),
+                                      ServersModel.getProcessedServerCredentials())
         PageController.showBusyIndicator(false)
         PageController.showNotificationMessage(qsTr("Config revoked"))
     }
@@ -41,14 +46,15 @@ PageType {
             shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
             shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
 
-            shareConnectionDrawer.needCloseButton = false
-
             shareConnectionDrawer.open()
             shareConnectionDrawer.contentVisible = false
             PageController.showBusyIndicator(true)
 
             switch (type) {
-            case PageShare.ConfigType.AmneziaConnection: ExportController.generateConnectionConfig(clientNameTextField.textFieldText); break;
+            case PageShare.ConfigType.AmneziaConnection: {
+                ExportController.generateConnectionConfig(clientNameTextField.textFieldText);
+                break;
+            }
             case PageShare.ConfigType.OpenVpn: {
                 ExportController.generateOpenVpnConfig(clientNameTextField.textFieldText)
                 shareConnectionDrawer.configCaption = qsTr("Save OpenVPN config")
@@ -61,6 +67,13 @@ PageType {
                 shareConnectionDrawer.configCaption = qsTr("Save WireGuard config")
                 shareConnectionDrawer.configExtension = ".conf"
                 shareConnectionDrawer.configFileName = "amnezia_for_wireguard"
+                break
+            }
+            case PageShare.ConfigType.Awg: {
+                ExportController.generateAwgConfig(clientNameTextField.textFieldText)
+                shareConnectionDrawer.configCaption = qsTr("Save AmneziaWG config")
+                shareConnectionDrawer.configExtension = ".conf"
+                shareConnectionDrawer.configFileName = "amnezia_for_awg"
                 break
             }
             case PageShare.ConfigType.ShadowSocks: {
@@ -77,14 +90,16 @@ PageType {
                 shareConnectionDrawer.configFileName = "amnezia_for_cloak"
                 break
             }
+            case PageShare.ConfigType.Xray: {
+                ExportController.generateXrayConfig()
+                shareConnectionDrawer.configCaption = qsTr("Save XRay config")
+                shareConnectionDrawer.configExtension = ".json"
+                shareConnectionDrawer.configFileName = "amnezia_for_xray"
+                break
+            }
             }
 
             PageController.showBusyIndicator(false)
-
-            shareConnectionDrawer.needCloseButton = true
-            PageController.showTopCloseButton(true)
-
-            shareConnectionDrawer.contentVisible = true
         }
 
         function onExportErrorOccurred(errorMessage) {
@@ -116,6 +131,11 @@ PageType {
         property var type: PageShare.ConfigType.WireGuard
     }
     QtObject {
+        id: awgConnectionFormat
+        property string name: qsTr("AmneziaWG native format")
+        property var type: PageShare.ConfigType.Awg
+    }
+    QtObject {
         id: shadowSocksConnectionFormat
         property string name: qsTr("ShadowSocks native format")
         property var type: PageShare.ConfigType.ShadowSocks
@@ -125,11 +145,16 @@ PageType {
         property string name: qsTr("Cloak native format")
         property var type: PageShare.ConfigType.Cloak
     }
+    QtObject {
+        id: xrayConnectionFormat
+        property string name: qsTr("XRay native format")
+        property var type: PageShare.ConfigType.Xray
+    }
 
     FlickableType {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        contentHeight: content.height + 10
 
         ColumnLayout {
             id: content
@@ -154,14 +179,15 @@ PageType {
                     shareFullAccessDrawer.open()
                 }
 
-                DrawerType {
+                DrawerType2 {
                     id: shareFullAccessDrawer
 
-                    width: root.width
-                    height: root.height * 0.45
+                    parent: root
 
+                    anchors.fill: parent
+                    expandedHeight: root.height * 0.45
 
-                    ColumnLayout {
+                    expandedContent: ColumnLayout {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -233,8 +259,8 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                                                         ServersModel.getCurrentlyProcessedServerCredentials())
+                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
+                                                                         ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -264,6 +290,8 @@ PageType {
                 textField.maximumLength: 20
 
                 checkEmptyText: true
+
+                KeyNavigation.tab: shareButton
             }
 
             DropDownType {
@@ -276,6 +304,7 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
+                drawerParent: root
 
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
@@ -293,6 +322,10 @@ PageType {
                             ValueFilter {
                                 roleName: "hasWriteAccess"
                                 value: true
+                            },
+                            ValueFilter {
+                                roleName: "hasInstalledContainers"
+                                value: true
                             }
                         ]
                     }
@@ -305,18 +338,22 @@ PageType {
                             serverSelector.severSelectorIndexChanged()
                         }
 
-                        serverSelector.menuVisible = false
+                        serverSelector.close()
                     }
 
                     Component.onCompleted: {
-                        serverSelectorListView.currentIndex = ServersModel.isDefaultServerHasWriteAccess() ?
-                                    proxyServersModel.mapFromSource(ServersModel.defaultIndex) : 0
+                        if (ServersModel.isDefaultServerHasWriteAccess() && ServersModel.getDefaultServerData("hasInstalledContainers")) {
+                            serverSelectorListView.currentIndex = proxyServersModel.mapFromSource(ServersModel.defaultIndex)
+                        } else {
+                            serverSelectorListView.currentIndex = 0
+                        }
+
                         serverSelectorListView.triggerCurrentItem()
                     }
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.currentlyProcessedIndex = proxyServersModel.mapToSource(currentIndex)
+                        ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
                     }
                 }
             }
@@ -328,6 +365,7 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.5
+                drawerParent: root
 
                 descriptionText: qsTr("Protocol")
                 headerText: qsTr("Protocol")
@@ -358,14 +396,15 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        protocolSelector.menuVisible = false
+                        protocolSelector.close()
                     }
 
                     Connections {
                         target: serverSelector
 
                         function onSeverSelectorIndexChanged() {
-                            protocolSelectorListView.currentIndex = proxyContainersModel.mapFromSource(ServersModel.getDefaultContainer())
+                            var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
+                            protocolSelectorListView.currentIndex = defaultContainer
                             protocolSelectorListView.triggerCurrentItem()
                         }
                     }
@@ -380,14 +419,14 @@ PageType {
 
                         protocolSelector.text = selectedText
 
-                        ContainersModel.setCurrentlyProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
+                        ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
 
                         fillConnectionTypeModel()
 
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                                                         ServersModel.getCurrentlyProcessedServerCredentials())
+                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
+                                                                         ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -401,6 +440,8 @@ PageType {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-wireguard")) {
                             root.connectionTypesModel.push(wireGuardConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-awg")) {
+                            root.connectionTypesModel.push(awgConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                             root.connectionTypesModel.push(shadowSocksConnectionFormat)
@@ -408,6 +449,8 @@ PageType {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                             root.connectionTypesModel.push(shadowSocksConnectionFormat)
                             root.connectionTypesModel.push(cloakConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-xray")) {
+                            root.connectionTypesModel.push(xrayConnectionFormat)
                         }
                     }
                 }
@@ -422,6 +465,7 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
+                drawerParent: root
 
                 visible: accessTypeSelector.currentIndex === 0
                 enabled: root.connectionTypesModel.length > 1
@@ -445,7 +489,7 @@ PageType {
                     clickedFunction: function() {
                         exportTypeSelector.text = selectedText
                         exportTypeSelector.currentIndex = currentIndex
-                        exportTypeSelector.menuVisible = false
+                        exportTypeSelector.close()
                     }
 
                     Component.onCompleted: {
@@ -455,13 +499,12 @@ PageType {
                 }
             }
 
-            ShareConnectionDrawer {
-                id: shareConnectionDrawer
-            }
-
             BasicButtonType {
+                id: shareButton
+
                 Layout.fillWidth: true
                 Layout.topMargin: 40
+                Layout.bottomMargin: 32
 
                 enabled: shareButtonEnabled
                 visible: accessTypeSelector.currentIndex === 0
@@ -469,7 +512,7 @@ PageType {
                 text: qsTr("Share")
                 imageSource: "qrc:/images/controls/share-2.svg"
 
-                onClicked: {
+                clickedFunc: function(){
                     if (clientNameTextField.textFieldText !== "") {
                         ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
                     }
@@ -560,13 +603,15 @@ PageType {
 
                         DividerType {}
 
-                        DrawerType {
+                        DrawerType2 {
                             id: clientInfoDrawer
 
-                            width: root.width
-                            height: root.height * 0.5
+                            parent: root
 
-                            ColumnLayout {
+                            anchors.fill: parent
+                            expandedHeight: root.height * 0.5
+
+                            expandedContent: ColumnLayout {
                                 anchors.top: parent.top
                                 anchors.left: parent.left
                                 anchors.right: parent.right
@@ -581,7 +626,7 @@ PageType {
                                     Layout.bottomMargin: 24
 
                                     headerText: clientName
-                                    descriptionText: serverSelector.text
+                                    descriptionText: qsTr("Creation date: ") + creationDate
                                 }
 
                                 BasicButtonType {
@@ -597,29 +642,33 @@ PageType {
 
                                     text: qsTr("Rename")
 
-                                    onClicked: function() {
+                                    clickedFunc: function() {
                                         clientNameEditDrawer.open()
                                     }
 
-                                    DrawerType {
+                                    DrawerType2 {
                                         id: clientNameEditDrawer
 
-                                        width: root.width
-                                        height: root.height * 0.35
+                                        parent: root
 
-                                        onVisibleChanged: {
-                                            if (clientNameEditDrawer.visible) {
-                                                clientNameEditor.textField.forceActiveFocus()
-                                            }
-                                        }
+                                        anchors.fill: parent
+                                        expandedHeight: root.height * 0.35
 
-                                        ColumnLayout {
+                                        expandedContent: ColumnLayout {
                                             anchors.top: parent.top
                                             anchors.left: parent.left
                                             anchors.right: parent.right
-                                            anchors.topMargin: 16
+                                            anchors.topMargin: 32
                                             anchors.leftMargin: 16
                                             anchors.rightMargin: 16
+
+                                            Connections {
+                                                target: clientNameEditDrawer
+                                                enabled: !GC.isMobile()
+                                                function onOpened() {
+                                                    clientNameEditor.textField.forceActiveFocus()
+                                                }
+                                            }
 
                                             TextFieldWithHeaderType {
                                                 id: clientNameEditor
@@ -628,14 +677,18 @@ PageType {
                                                 textFieldText: clientName
                                                 textField.maximumLength: 20
                                                 checkEmptyText: true
+
+                                                KeyNavigation.tab: saveButton
                                             }
 
                                             BasicButtonType {
+                                                id: saveButton
+
                                                 Layout.fillWidth: true
 
                                                 text: qsTr("Save")
 
-                                                onClicked: {
+                                                clickedFunc: function() {
                                                     if (clientNameEditor.textFieldText === "") {
                                                         return
                                                     }
@@ -644,8 +697,8 @@ PageType {
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(index,
                                                                                       clientNameEditor.textFieldText,
-                                                                                      ContainersModel.getCurrentlyProcessedContainerIndex(),
-                                                                                      ServersModel.getCurrentlyProcessedServerCredentials())
+                                                                                      ContainersModel.getProcessedContainerIndex(),
+                                                                                      ServersModel.getProcessedServerCredentials())
                                                         PageController.showBusyIndicator(false)
                                                         clientNameEditDrawer.close()
                                                     }
@@ -667,21 +720,20 @@ PageType {
 
                                     text: qsTr("Revoke")
 
-                                    onClicked: function() {
-                                        questionDrawer.headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
-                                        questionDrawer.descriptionText = qsTr("The user will no longer be able to connect to your server.")
-                                        questionDrawer.yesButtonText = qsTr("Continue")
-                                        questionDrawer.noButtonText = qsTr("Cancel")
+                                    clickedFunc: function() {
+                                        var headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
+                                        var descriptionText = qsTr("The user will no longer be able to connect to your server.")
+                                        var yesButtonText = qsTr("Continue")
+                                        var noButtonText = qsTr("Cancel")
 
-                                        questionDrawer.yesButtonFunction = function() {
-                                            questionDrawer.close()
+                                        var yesButtonFunction = function() {
                                             clientInfoDrawer.close()
                                             root.revokeConfig(index)
                                         }
-                                        questionDrawer.noButtonFunction = function() {
-                                            questionDrawer.close()
+                                        var noButtonFunction = function() {
                                         }
-                                        questionDrawer.open()
+
+                                        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                                     }
                                 }
                             }
@@ -689,12 +741,15 @@ PageType {
                     }
                 }
             }
-
-            QuestionDrawer {
-                id: questionDrawer
-            }
         }
     }
+
+    ShareConnectionDrawer {
+        id: shareConnectionDrawer
+
+        anchors.fill: parent
+    }
+
     MouseArea {
         anchors.fill: parent
         onPressed: function(mouse) {

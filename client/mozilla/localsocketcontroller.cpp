@@ -13,14 +13,10 @@
 #include <QJsonValue>
 #include <QStandardPaths>
 
-//#include "errorhandler.h"
 #include "ipaddress.h"
 #include "leakdetector.h"
 #include "logger.h"
-//#include "models/device.h"
-//#include "models/keys.h"
 #include "models/server.h"
-//#include "settingsholder.h"
 
 // How many times do we try to reconnect.
 constexpr int MAX_CONNECTION_RETRY = 10;
@@ -121,6 +117,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   int splitTunnelType = rawConfig.value("splitTunnelType").toInt();
   QJsonArray splitTunnelSites = rawConfig.value("splitTunnelSites").toArray();
 
+  int appSplitTunnelType = rawConfig.value(amnezia::config_key::appSplitTunnelType).toInt();
+  QJsonArray splitTunnelApps = rawConfig.value(amnezia::config_key::splitTunnelApps).toArray();
+
   QJsonObject wgConfig = rawConfig.value(protocolName + "_config_data").toObject();
 
   QJsonObject json;
@@ -128,13 +127,21 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::config_key::client_priv_key));
   json.insert("deviceIpv4Address", wgConfig.value(amnezia::config_key::client_ip));
-  json.insert("deviceIpv6Address", "dead::1");
+
+  // set up IPv6 unique-local-address, ULA, with "fd00::/8" prefix, not globally routable.
+  // this will be default IPv6 gateway, OS recognizes that IPv6 link is local and switches to IPv4.
+  // Otherwise some OSes (Linux) try IPv6 forever and hang. 
+  // https://en.wikipedia.org/wiki/Unique_local_address (RFC 4193)
+  // https://man7.org/linux/man-pages/man5/gai.conf.5.html
+  json.insert("deviceIpv6Address", "fd58:baa6:dead::1"); // simply "dead::1" is globally-routable, don't use it
+
   json.insert("serverPublicKey", wgConfig.value(amnezia::config_key::server_pub_key));
   json.insert("serverPskKey", wgConfig.value(amnezia::config_key::psk_key));
   json.insert("serverIpv4AddrIn", wgConfig.value(amnezia::config_key::hostName));
   //  json.insert("serverIpv6AddrIn", QJsonValue(hop.m_server.ipv6AddrIn()));
-  json.insert("serverPort", wgConfig.value(amnezia::config_key::port).toInt());
+  json.insert("deviceMTU", wgConfig.value(amnezia::config_key::mtu));
 
+  json.insert("serverPort", wgConfig.value(amnezia::config_key::port).toInt());
   json.insert("serverIpv4Gateway", wgConfig.value(amnezia::config_key::hostName));
   //  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
   json.insert("dnsServer", rawConfig.value(amnezia::config_key::dns1));
@@ -145,11 +152,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   QJsonArray defaultAllowedIP = QJsonArray::fromStringList(QString("0.0.0.0/0, ::/0").split(","));
 
   if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
-    // Use AllowedIP list from WG config bacouse of higer priority
-
+    // Use AllowedIP list from WG config because of higher priority
     for (auto v : plainAllowedIP) {
       QString ipRange = v.toString();
-      qDebug() << "ipRange " << ipRange;
       if (ipRange.split('/').size() > 1){
           QJsonObject range;
           range.insert("address", ipRange.split('/')[0]);
@@ -184,7 +189,6 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
       if (splitTunnelType == 1) {
           for (auto v : splitTunnelSites) {
               QString ipRange = v.toString();
-              qDebug() << "ipRange " << ipRange;
               if (ipRange.split('/').size() > 1){
                   QJsonObject range;
                   range.insert("address", ipRange.split('/')[0]);
@@ -216,12 +220,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   json.insert("excludedAddresses", jsExcludedAddresses);
 
-
-  //  QJsonArray splitTunnelApps;
-  //  for (const auto& uri : hop.m_vpnDisabledApps) {
-  //    splitTunnelApps.append(QJsonValue(uri));
-  //  }
-  //  json.insert("vpnDisabledApps", splitTunnelApps);
+  json.insert("vpnDisabledApps", splitTunnelApps);
   
   if (protocolName == amnezia::config_key::awg) {
     json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));

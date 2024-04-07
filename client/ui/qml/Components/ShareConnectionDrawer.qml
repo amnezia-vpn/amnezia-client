@@ -16,19 +16,18 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
-DrawerType {
+DrawerType2 {
     id: root
 
-    property alias headerText: header.headerText
-    property alias configContentHeaderText: configContentHeader.headerText
-    property alias contentVisible: content.visible
+    property string headerText
+    property string configContentHeaderText
+    property string contentVisible
 
     property string configExtension: ".vpn"
     property string configCaption: qsTr("Save AmneziaVPN config")
-    property string configFileName: "amnezia_config.vpn"
+    property string configFileName: "amnezia_config"
 
-    width: parent.width
-    height: parent.height * 0.9
+    expandedHeight: parent.height * 0.9
 
     onClosed: {
         configExtension = ".vpn"
@@ -36,8 +35,16 @@ DrawerType {
         configFileName = "amnezia_config"
     }
 
-    Item {
-        anchors.fill: parent
+    expandedContent: Item {
+        implicitHeight: root.expandedHeight
+
+        Connections {
+            target: root
+            enabled: !GC.isMobile()
+            function onOpened() {
+                header.forceActiveFocus()
+            }
+        }
 
         Header2Type {
             id: header
@@ -47,6 +54,10 @@ DrawerType {
             anchors.topMargin: 20
             anchors.leftMargin: 16
             anchors.rightMargin: 16
+
+            headerText: root.headerText
+
+            KeyNavigation.tab: shareButton
         }
 
         FlickableType {
@@ -64,14 +75,19 @@ DrawerType {
                 anchors.leftMargin: 16
                 anchors.rightMargin: 16
 
+                visible: root.contentVisible
+
                 BasicButtonType {
+                    id: shareButton
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
                     text: qsTr("Share")
                     imageSource: "qrc:/images/controls/share-2.svg"
 
-                    onClicked: {
+                    KeyNavigation.tab: copyConfigTextButton
+
+                    clickedFunc: function() {
                         var fileName = ""
                         if (GC.isMobile()) {
                             fileName = configFileName + configExtension
@@ -91,6 +107,7 @@ DrawerType {
                 }
 
                 BasicButtonType {
+                    id: copyConfigTextButton
                     Layout.fillWidth: true
                     Layout.topMargin: 8
 
@@ -104,19 +121,15 @@ DrawerType {
                     text: qsTr("Copy")
                     imageSource: "qrc:/images/controls/copy.svg"
 
-                    onClicked: {
-                        configText.selectAll()
-                        configText.copy()
-                        configText.select(0, 0)
-                        PageController.showNotificationMessage(qsTr("Copied"))
-                    }
+                    KeyNavigation.tab: copyNativeConfigStringButton.visible ? copyNativeConfigStringButton : showSettingsButton
                 }
 
                 BasicButtonType {
+                    id: copyNativeConfigStringButton
                     Layout.fillWidth: true
                     Layout.topMargin: 8
 
-                    visible: nativeConfigString.text !== ""
+                    visible: false
 
                     defaultColor: "transparent"
                     hoveredColor: Qt.rgba(1, 1, 1, 0.08)
@@ -128,15 +141,12 @@ DrawerType {
                     text: qsTr("Copy config string")
                     imageSource: "qrc:/images/controls/copy.svg"
 
-                    onClicked: {
-                        nativeConfigString.selectAll()
-                        nativeConfigString.copy()
-                        nativeConfigString.select(0, 0)
-                        PageController.showNotificationMessage(qsTr("Copied"))
-                    }
+                    KeyNavigation.tab: showSettingsButton
                 }
 
                 BasicButtonType {
+                    id: showSettingsButton
+
                     Layout.fillWidth: true
                     Layout.topMargin: 24
 
@@ -149,83 +159,119 @@ DrawerType {
 
                     text: qsTr("Show connection settings")
 
-                    onClicked: {
-                        configContentDrawer.visible = true
+                    clickedFunc: function() {
+                        configContentDrawer.open()
                     }
+
+                    KeyNavigation.tab: header
                 }
 
-                DrawerType {
+                DrawerType2 {
                     id: configContentDrawer
 
-                    width: parent.width
-                    height: parent.height * 0.9
+                    parent: root.parent
 
-                    BackButtonType {
-                        id: backButton
+                    anchors.fill: parent
+                    expandedHeight: parent.height * 0.9
 
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.topMargin: 16
+                    expandedContent: Item {
+                        id: configContentContainer
 
-                        backButtonFunction: function() {
-                            configContentDrawer.visible = false
+                        implicitHeight: configContentDrawer.expandedHeight
+
+                        Connections {
+                            target: copyNativeConfigStringButton
+                            function onClicked() {
+                                nativeConfigString.selectAll()
+                                nativeConfigString.copy()
+                                nativeConfigString.select(0, 0)
+                                PageController.showNotificationMessage(qsTr("Copied"))
+                            }
                         }
-                    }
 
-                    FlickableType {
-                        anchors.top: backButton.bottom
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        contentHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
-
-                        ColumnLayout {
-                            id: configContent
-
-                            anchors.fill: parent
-                            anchors.rightMargin: 16
-                            anchors.leftMargin: 16
-
-                            Header2Type {
-                                id: configContentHeader
-                                Layout.fillWidth: true
-                                Layout.topMargin: 16
+                        Connections {
+                            target: copyConfigTextButton
+                            function onClicked() {
+                                configText.selectAll()
+                                configText.copy()
+                                configText.select(0, 0)
+                                PageController.showNotificationMessage(qsTr("Copied"))
                             }
+                        }
 
-                            TextField {
-                                id: nativeConfigString
-                                visible: false
-                                text: ExportController.nativeConfigString
+                        BackButtonType {
+                            id: backButton
+
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.topMargin: 16
+
+                            backButtonFunction: function() {
+                                configContentDrawer.close()
                             }
+                        }
 
-                            TextArea {
-                                id: configText
+                        FlickableType {
+                            anchors.top: backButton.bottom
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            contentHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
 
-                                Layout.fillWidth: true
-                                Layout.topMargin: 16
-                                Layout.bottomMargin: 16
+                            ColumnLayout {
+                                id: configContent
 
-                                padding: 0
-                                leftPadding: 0
-                                height: 24
+                                anchors.fill: parent
+                                anchors.rightMargin: 16
+                                anchors.leftMargin: 16
 
-                                readOnly: true
+                                Header2Type {
+                                    id: configContentHeader
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: 16
 
-                                color: "#D7D8DB"
-                                selectionColor:  "#633303"
-                                selectedTextColor: "#D7D8DB"
+                                    headerText: root.configContentHeaderText
+                                }
 
-                                font.pixelSize: 16
-                                font.weight: Font.Medium
-                                font.family: "PT Root UI VF"
+                                TextField {
+                                    id: nativeConfigString
+                                    visible: false
+                                    text: ExportController.nativeConfigString
 
-                                text: ExportController.config
+                                    onTextChanged: {
+                                        copyNativeConfigStringButton.visible = nativeConfigString.text !== ""
+                                    }
+                                }
 
-                                wrapMode: Text.Wrap
+                                TextArea {
+                                    id: configText
 
-                                background: Rectangle {
-                                    color: "transparent"
+                                    Layout.fillWidth: true
+                                    Layout.topMargin: 16
+                                    Layout.bottomMargin: 16
+
+                                    padding: 0
+                                    leftPadding: 0
+                                    height: 24
+
+                                    readOnly: true
+
+                                    color: "#D7D8DB"
+                                    selectionColor:  "#633303"
+                                    selectedTextColor: "#D7D8DB"
+
+                                    font.pixelSize: 16
+                                    font.weight: Font.Medium
+                                    font.family: "PT Root UI VF"
+
+                                    text: ExportController.config
+
+                                    wrapMode: Text.Wrap
+
+                                    background: Rectangle {
+                                        color: "transparent"
+                                    }
                                 }
                             }
                         }
@@ -233,6 +279,8 @@ DrawerType {
                 }
 
                 Rectangle {
+                    id: qrCodeContainer
+
                     Layout.fillWidth: true
                     Layout.preferredHeight: width
                     Layout.topMargin: 20

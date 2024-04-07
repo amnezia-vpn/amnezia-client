@@ -14,6 +14,7 @@ class ClientManagementModel : public QAbstractListModel
 public:
     enum Roles {
         ClientNameRole = Qt::UserRole + 1,
+        CreationDateRole
     };
 
     ClientManagementModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -23,19 +24,27 @@ public:
 
 public slots:
     ErrorCode updateModel(DockerContainer container, ServerCredentials credentials);
+    ErrorCode appendClient(const DockerContainer container, const ServerCredentials &credentials, const QJsonObject &containerConfig,
+                           const QString &clientName);
     ErrorCode appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
                            ServerCredentials credentials);
-    ErrorCode renameClient(const int row, const QString &userName, const DockerContainer container,
-                           ServerCredentials credentials);
-    ErrorCode revokeClient(const int index, const DockerContainer container, ServerCredentials credentials);
+    ErrorCode renameClient(const int row, const QString &userName, const DockerContainer container, ServerCredentials credentials,
+                           bool addTimeStamp = false);
+    ErrorCode revokeClient(const int index, const DockerContainer container, ServerCredentials credentials, const int serverIndex);
+    ErrorCode revokeClient(const QJsonObject &containerConfig, const DockerContainer container, ServerCredentials credentials, const int serverIndex);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
+signals:
+    void adminConfigRevoked(const DockerContainer container);
+
 private:
     bool isClientExists(const QString &clientId);
 
-    ErrorCode revokeOpenVpn(const int row, const DockerContainer container, ServerCredentials credentials);
+    void migration(const QByteArray &clientsTableString);
+
+    ErrorCode revokeOpenVpn(const int row, const DockerContainer container, ServerCredentials credentials, const int serverIndex);
     ErrorCode revokeWireGuard(const int row, const DockerContainer container, ServerCredentials credentials);
 
     ErrorCode getOpenVpnClients(ServerController &serverController, DockerContainer container, ServerCredentials credentials, int &count);
