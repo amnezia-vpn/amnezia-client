@@ -34,6 +34,7 @@
         android:label="-- %%INSERT_APP_NAME%% --"
         android:icon="@mipmap/icon"
         android:roundIcon="@mipmap/icon_round"
+        android:banner="@mipmap/ic_banner"
         android:theme="@style/NoActionBar"
         android:fullBackupContent="@xml/backup_content"
         android:dataExtractionRules="@xml/data_extraction_rules"
