@@ -15,10 +15,17 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.portTextField.textField
+    defaultActiveFocusItem: listview.currentItem.focusItemId.enabled ?
+                                listview.currentItem.focusItemId.textField :
+                                focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
 
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -27,12 +34,16 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listview.currentItem.focusItemId.enabled ?
+                                   listview.currentItem.focusItemId.textField :
+                                   focusItem
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -60,7 +71,11 @@ PageType {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
-                    property alias portTextField: portTextField
+                    property var focusItemId: portTextField.enabled ?
+                                                    portTextField :
+                                                    cipherDropDown.enabled ?
+                                                        cipherDropDown :
+                                                        saveRestartButton
 
                     ColumnLayout {
                         id: col
@@ -73,11 +88,6 @@ PageType {
                         anchors.rightMargin: 16
 
                         spacing: 0
-
-                        Item {
-                            id: focusItem
-                            KeyNavigation.tab: portTextField.textField
-                        }
 
                         HeaderType {
                             Layout.fillWidth: true

@@ -20,6 +20,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     QtObject {
         id: routeMode
         property int allApps: 0
@@ -52,6 +54,11 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
         id: header
 
@@ -62,6 +69,8 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: switcher
         }
 
         RowLayout {
@@ -77,6 +86,10 @@ PageType {
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
+
+                KeyNavigation.tab: selector.enabled ?
+                                       selector :
+                                       searchField.textField
 
                 checked: AppSplitTunnelingModel.isTunnelingEnabled
                 onToggled: {                    
@@ -100,6 +113,8 @@ PageType {
             headerText: qsTr("Mode")
 
             enabled: Qt.platform.os === "android"
+
+            KeyNavigation.tab: searchField.textField
 
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
@@ -228,6 +243,9 @@ PageType {
 
             textFieldPlaceholderText: qsTr("application name")
             buttonImageSource: "qrc:/images/controls/plus.svg"
+
+            Keys.onTabPressed: lastItemTabClicked(focusItem)
+            rightButtonClickedOnEnter: true
 
             clickedFunc: function() {
                 searchField.focus = false

@@ -18,8 +18,18 @@ PageType {
 
     defaultActiveFocusItem: listview.currentItem.portTextField.textField
 
+    Item {
+        id: focusItem
+        onFocusChanged: {
+            if (activeFocus) {
+                fl.ensureVisible(focusItem)
+            }
+        }
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -28,12 +38,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listview.currentItem.portTextField.textField
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -47,8 +59,6 @@ PageType {
             enabled: ServersModel.isProcessedServerHasWriteAccess()
 
             ListView {
-
-
                 id: listview
 
                 width: parent.width
@@ -79,16 +89,6 @@ PageType {
 
                         spacing: 0
 
-                        Item {
-                            id: focusItem
-                            onFocusChanged: {
-                                if (activeFocus) {
-                                    fl.ensureVisible(focusItem)
-                                }
-                            }
-                            KeyNavigation.tab: portTextField.textField
-                        }
-
                         HeaderType {
                             Layout.fillWidth: true
 
@@ -114,7 +114,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            KeyNavigation.tab: junkPacketCountTextField.textField
+                            KeyNavigation.tab: mtuTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -135,6 +135,7 @@ PageType {
                                 }
                             }
                             checkEmptyText: true
+                            KeyNavigation.tab: junkPacketCountTextField.textField
                         }
 
                         TextFieldWithHeaderType {

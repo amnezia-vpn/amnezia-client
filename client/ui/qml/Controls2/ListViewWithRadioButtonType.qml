@@ -27,19 +27,43 @@ ListView {
     interactive: false
 
     property FlickableType parentFlickable
+    property var lastItemTabClicked
+
+    property int currentFocusIndex: 0
+
     activeFocusOnTab: true
-    focus: true
-    Keys.onTabPressed: {
-        if (currentIndex < this.count - 1) {
-            this.incrementCurrentIndex()
-        } else {
-            this.currentIndex = 0
+    onActiveFocusChanged: {
+        if (activeFocus) {
+            this.currentFocusIndex = 0
+            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
         }
     }
 
-    onCurrentIndexChanged: {
+    Keys.onTabPressed: {
+        if (currentFocusIndex < this.count - 1) {
+            currentFocusIndex += 1
+        } else {
+            currentFocusIndex = 0
+        }
+        this.itemAtIndex(currentFocusIndex).forceActiveFocus()
+    }
+
+    Item {
+        id: focusItem
+        Keys.onTabPressed: {
+            root.forceActiveFocus()
+        }
+    }
+
+    onVisibleChanged: {
+        if (visible) {
+            focusItem.forceActiveFocus()
+        }
+    }
+
+    onCurrentFocusIndexChanged: {
         if (parentFlickable) {
-            parentFlickable.ensureVisible(this.currentItem)
+            parentFlickable.ensureVisible(this.itemAtIndex(currentFocusIndex))
         }
     }
 
@@ -57,6 +81,12 @@ ListView {
         implicitWidth: rootWidth
         implicitHeight: content.implicitHeight
 
+        onActiveFocusChanged: {
+            if (activeFocus) {
+                radioButton.forceActiveFocus()
+            }
+        }
+
         ColumnLayout {
             id: content
 
@@ -71,10 +101,16 @@ ListView {
                 hoverEnabled: true
 
                 indicator: Rectangle {
-                    anchors.fill: parent
+                    width: parent.width - 1
+                    height: parent.height
                     color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
+                    border.color: radioButton.focus ? "#D7D8DB" : "transparent"
+                    border.width: radioButton.focus ? 1 : 0
 
                     Behavior on color {
+                        PropertyAnimation { duration: 200 }
+                    }
+                    Behavior on border.color {
                         PropertyAnimation { duration: 200 }
                     }
 

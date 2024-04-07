@@ -101,9 +101,9 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
                 }
 
-            Keys.onTabPressed: splitTunnelingButton2.visible ?
-                                   splitTunnelingButton2.forceActiveFocus() :
-                                   lastItemTabClicked()
+                Keys.onTabPressed: splitTunnelingButton2.visible ?
+                                       splitTunnelingButton2.forceActiveFocus() :
+                                       lastItemTabClicked()
             }
 
             DividerType {

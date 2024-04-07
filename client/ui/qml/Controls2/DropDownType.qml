@@ -202,7 +202,7 @@ Item {
 
             Item {
                 id: focusItem
-                KeyNavigation.tab: listViewLoader.item
+                KeyNavigation.tab: backButton
             }
 
             ColumnLayout {
@@ -214,10 +214,10 @@ Item {
                 anchors.topMargin: 16
 
                 BackButtonType {
+                    id: backButton
                     backButtonImage: root.headerBackButtonImage
-                    backButtonFunction: function() {
-                        menu.close()
-                    }
+                    backButtonFunction: function() { menu.close() }
+                    KeyNavigation.tab: listViewLoader.item
                 }
             }
 
@@ -252,6 +252,9 @@ Item {
 
                         onLoaded: {
                             listViewLoader.item.parentFlickable = flickable
+                            listViewLoader.item.lastItemTabClicked = function() {
+                                focusItem.forceActiveFocus()
+                            }
                         }
                     }
                 }

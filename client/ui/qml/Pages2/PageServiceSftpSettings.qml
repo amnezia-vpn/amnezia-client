@@ -306,7 +306,7 @@ PageType {
                             textColor: "#EB5757"
 
                             parentFlickable: fl
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
+                            Keys.onTabPressed: lastItemTabClicked()
 
                             text: qsTr("Remove SFTP and all data stored there")
 

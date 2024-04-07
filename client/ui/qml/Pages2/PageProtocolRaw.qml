@@ -131,6 +131,19 @@ PageType {
                             expandedContent: Item {
                                 implicitHeight: configContentDrawer.expandedHeight
 
+                                Connections {
+                                    target: configContentDrawer
+                                    enabled: !GC.isMobile()
+                                    function onOpened() {
+                                        focusItem1.forceActiveFocus()
+                                    }
+                                }
+
+                                Item {
+                                    id: focusItem1
+                                    KeyNavigation.tab: backButton1
+                                }
+
                                 BackButtonType {
                                     id: backButton1
 
@@ -142,6 +155,8 @@ PageType {
                                     backButtonFunction: function() {
                                         configContentDrawer.close()
                                     }
+
+                                    KeyNavigation.tab: focusItem1
                                 }
 
                                 FlickableType {
@@ -222,7 +237,9 @@ PageType {
                         InstallController.removeProcessedContainer()
                     }
                     var noButtonFunction = function() {
-                        focusItem.forceActiveFocus()
+                        if (!GC.isMobile()) {
+                            focusItem.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

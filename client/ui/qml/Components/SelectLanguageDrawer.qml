@@ -22,12 +22,17 @@ DrawerType2 {
             target: root
             enabled: !GC.isMobile()
             function onOpened() {
-                listView.forceActiveFocus()
+                focusItem.forceActiveFocus()
             }
         }
 
+        Item {
+            id: focusItem
+            KeyNavigation.tab: backButton
+        }
+
         ColumnLayout {
-            id: backButton
+            id: backButtonLayout
 
             anchors.top: parent.top
             anchors.left: parent.left
@@ -35,15 +40,15 @@ DrawerType2 {
             anchors.topMargin: 16
 
             BackButtonType {
+                id: backButton
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
-                backButtonFunction: function() {
-                    root.close()
-                }
+                backButtonFunction: function() { root.close() }
+                KeyNavigation.tab: listView
             }
         }
 
         FlickableType {
-            anchors.top: backButton.bottom
+            anchors.top: backButtonLayout.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
@@ -80,19 +85,49 @@ DrawerType2 {
                         id: buttonGroup
                     }
 
+                    property int currentFocusIndex: 0
+
                     activeFocusOnTab: true
-                    focus: true
+                    onActiveFocusChanged: {
+                        if (activeFocus) {
+                            this.currentFocusIndex = 0
+                            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
+                        }
+                    }
+
                     Keys.onTabPressed: {
-                        if (currentIndex < this.count - 1) {
-                            this.incrementCurrentIndex()
+                        if (currentFocusIndex < this.count - 1) {
+                            currentFocusIndex += 1
+                            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
                         } else {
-                            this.currentIndex = 0
+                            listViewFocusItem.forceActiveFocus()
+                            focusItem.forceActiveFocus()
+                        }
+                    }
+
+                    Item {
+                        id: listViewFocusItem
+                        Keys.onTabPressed: {
+                            root.forceActiveFocus()
+                        }
+                    }
+
+                    onVisibleChanged: {
+                        if (visible) {
+                            listViewFocusItem.forceActiveFocus()
+                            focusItem.forceActiveFocus()
                         }
                     }
 
                     delegate: Item {
                         implicitWidth: root.width
                         implicitHeight: delegateContent.implicitHeight
+
+                        onActiveFocusChanged: {
+                            if (activeFocus) {
+                                radioButton.forceActiveFocus()
+                            }
+                        }
 
                         ColumnLayout {
                             id: delegateContent
@@ -108,10 +143,16 @@ DrawerType2 {
                                 hoverEnabled: true
 
                                 indicator: Rectangle {
-                                    anchors.fill: parent
+                                    width: parent.width - 1
+                                    height: parent.height
                                     color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
+                                    border.color: radioButton.focus ? "#D7D8DB" : "transparent"
+                                    border.width: radioButton.focus ? 1 : 0
 
                                     Behavior on color {
+                                        PropertyAnimation { duration: 200 }
+                                    }
+                                    Behavior on border.color {
                                         PropertyAnimation { duration: 200 }
                                     }
                                 }

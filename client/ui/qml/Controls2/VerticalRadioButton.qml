@@ -58,6 +58,10 @@ RadioButton {
             PropertyAnimation { duration: 200 }
         }
 
+        Behavior on border.color {
+            PropertyAnimation { duration: 200 }
+        }
+
         Image {
             source: {
                 if (showImage) {

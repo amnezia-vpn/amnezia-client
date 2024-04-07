@@ -26,25 +26,44 @@ ListView {
     interactive: false
 
     property FlickableType parentFlickable
+    property var lastItemTabClicked
+
+    property int currentFocusIndex: 0
+
     activeFocusOnTab: true
-    focus: true
+    onActiveFocusChanged: {
+        if (activeFocus) {
+            this.currentFocusIndex = 0
+            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
+        }
+    }
+
     Keys.onTabPressed: {
-        if (currentIndex < menuContent.count - 1) {
-            menuContent.incrementCurrentIndex()
+        if (currentFocusIndex < this.count - 1) {
+            currentFocusIndex += 1
+            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
         } else {
-            menuContent.currentIndex = 0
+            currentFocusIndex = 0
+            if (lastItemTabClicked && typeof lastItemTabClicked === "function") {
+                lastItemTabClicked()
+            }
         }
     }
 
     onVisibleChanged: {
-        if (visible) {
-            menuContent.currentIndex = 0
-        }
+         if (visible) {
+             currentFocusIndex = 0
+             focusItem.forceActiveFocus()
+         }
+     }
+
+    Item {
+        id: focusItem
     }
 
-    onCurrentIndexChanged: {
+    onCurrentFocusIndexChanged: {
         if (parentFlickable) {
-            parentFlickable.ensureVisible(menuContent.currentItem)
+            parentFlickable.ensureVisible(this.itemAtIndex(currentFocusIndex))
         }
     }
 

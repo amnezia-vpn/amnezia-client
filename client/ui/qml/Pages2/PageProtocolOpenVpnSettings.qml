@@ -18,8 +18,18 @@ PageType {
 
     defaultActiveFocusItem: listview.currentItem.vpnAddressSubnetTextField.textField
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+        onActiveFocusChanged: {
+            if (activeFocus) {
+                fl.ensureVisible(focusItem)
+            }
+        }
+    }
+
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -28,12 +38,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listview.currentItem.vpnAddressSubnetTextField.textField
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -74,16 +86,6 @@ PageType {
                         anchors.rightMargin: 16
 
                         spacing: 0
-
-                        Item {
-                            id: focusItem
-                            KeyNavigation.tab: vpnAddressSubnetTextField.textField
-                            onActiveFocusChanged: {
-                                if (activeFocus) {
-                                    fl.ensureVisible(focusItem)
-                                }
-                            }
-                        }
 
                         HeaderType {
                             Layout.fillWidth: true
@@ -393,8 +395,6 @@ PageType {
                             parentFlickable: fl
                             KeyNavigation.tab: additionalServerCommandsTextArea.visible ?
                                                additionalServerCommandsTextArea.textArea :
-                                               removeOpenVpnButton.visible ?
-                                               removeOpenVpnButton :
                                                saveRestartButton
 
                             checked: additionalServerCommands !== ""
