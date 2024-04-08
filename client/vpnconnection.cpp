@@ -68,15 +68,11 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                 QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
                 QString dns2 = m_vpnConfiguration.value(config_key::dns2).toString();
 
-                qDebug() << NetworkUtilities::ipAddressFromIpWithSubnet(dns1);
-
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 
                 if (m_settings->getSitesSplitTunnelingEnabled()) {
-                    if (m_settings->routeMode() != Settings::VpnAllSites) {
-                        IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
+                    IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                         // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
-                    }
                     if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
                         QTimer::singleShot(1000, m_vpnProtocol.data(),
                                            [this]() { addSitesRoutes(m_vpnProtocol->vpnGateway(), m_settings->routeMode()); });
@@ -317,7 +313,7 @@ void VpnConnection::appendSplitTunnelingConfig()
             sitesJsonArray.append(site);
         }
 
-        // Allow traffic to Amezia DNS
+        // Allow traffic to Amnezia DNS
         if (routeMode == Settings::VpnOnlyForwardSites) {
             sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
             sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
