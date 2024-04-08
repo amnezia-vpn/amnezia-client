@@ -175,6 +175,12 @@ void ImportController::processNativeWireGuardConfig()
         protocolConfig[config_key::junkPacketCount] = junkPacketCount;
         protocolConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
         protocolConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
+        protocolConfig[config_key::initPacketJunkSize] = "0";
+        protocolConfig[config_key::responsePacketJunkSize] = "0";
+        protocolConfig[config_key::initPacketMagicHeader] = "1";
+        protocolConfig[config_key::responsePacketMagicHeader] = "2";
+        protocolConfig[config_key::underloadPacketMagicHeader] = "3";
+        protocolConfig[config_key::transportPacketMagicHeader] = "4";
 
         containerConfig[config_key::last_config] = QString(QJsonDocument(protocolConfig).toJson());
         container["wireguard"] = containerConfig;
