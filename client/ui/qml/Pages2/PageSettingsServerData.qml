@@ -47,7 +47,7 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onRemoveCurrentlyProcessedContainerFinished(finishedMessage) {
+        function onRemoveProcessedContainerFinished(finishedMessage) {
             PageController.closePage() // close deInstalling page
             PageController.closePage() // close page with remove button
             PageController.showNotificationMessage(finishedMessage)
@@ -88,35 +88,6 @@ PageType {
                 visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
-                text: qsTr("Clear Amnezia cache")
-                descriptionText: qsTr("May be needed when changing other settings")
-
-                clickedFunction: function() {
-                    var headerText = qsTr("Clear cached profiles?")
-                    var descriptionText = qsTr("")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        PageController.showBusyIndicator(true)
-                        SettingsController.clearCachedProfiles()
-                        PageController.showBusyIndicator(false)
-                    }
-                    var noButtonFunction = function() {
-                    }
-
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                }
-            }
-
-            DividerType {
-                visible: content.isServerWithWriteAccess
-            }
-
-            LabelWithButtonType {
-                visible: content.isServerWithWriteAccess
-                Layout.fillWidth: true
-
                 text: qsTr("Check the server for previously installed Amnezia services")
                 descriptionText: qsTr("Add them to the application if they were not displayed")
 
@@ -145,12 +116,13 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        PageController.showBusyIndicator(true)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            ConnectionController.closeConnection()
+                            PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.rebootProcessedServer()
+                            PageController.showBusyIndicator(false)
                         }
-                        InstallController.rebootProcessedServer()
-                        PageController.showBusyIndicator(false)
                     }
                     var noButtonFunction = function() {
                     }
@@ -176,12 +148,13 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        PageController.showBusyIndicator(true)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            ConnectionController.closeConnection()
+                            PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.removeProcessedServer()
+                            PageController.showBusyIndicator(false)
                         }
-                        InstallController.removeProcessedServer()
-                        PageController.showBusyIndicator(false)
                     }
                     var noButtonFunction = function() {
                     }
@@ -206,11 +179,12 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        PageController.goToPage(PageEnum.PageDeinstalling)
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            ConnectionController.closeConnection()
+                            PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
+                        } else {
+                            PageController.goToPage(PageEnum.PageDeinstalling)
+                            InstallController.removeAllContainers()
                         }
-                        InstallController.removeAllContainers()
                     }
                     var noButtonFunction = function() {
                     }
@@ -237,9 +211,13 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        PageController.showBusyIndicator(true)
-                        ApiController.clearApiConfig()
-                        PageController.showBusyIndicator(false)
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.removeApiConfig()
+                            PageController.showBusyIndicator(false)
+                        }
                     }
                     var noButtonFunction = function() {
                     }

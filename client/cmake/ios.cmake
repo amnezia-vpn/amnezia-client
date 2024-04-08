@@ -113,11 +113,13 @@ target_sources(${PROJECT} PRIVATE
 target_sources(${PROJECT} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 
 set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 
 add_subdirectory(ios/networkextension)

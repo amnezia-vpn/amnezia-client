@@ -115,6 +115,9 @@ public:
     RouteMode routeMode() const;
     void setRouteMode(RouteMode mode) { setValue("Conf/routeMode", mode); }
 
+    bool getSitesSplitTunnelingEnabled() const;
+    void setSitesSplitTunnelingEnabled(bool enabled);
+
     QVariantMap vpnSites(RouteMode mode) const
     {
         return value("Conf/" + routeModeString(mode)).toMap();
@@ -207,6 +210,9 @@ public:
 
     QVector<InstalledAppInfo> getVpnApps(AppsRouteMode mode) const;
     void setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps);
+
+    bool getAppsSplitTunnelingEnabled() const;
+    void setAppsSplitTunnelingEnabled(bool enabled);
 
 signals:
     void saveLogsChanged(bool enabled);

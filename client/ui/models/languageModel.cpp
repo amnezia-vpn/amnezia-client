@@ -43,6 +43,7 @@ QString LanguageModel::getLocalLanguageName(const LanguageSettings::AvailableLan
     switch (language) {
     case LanguageSettings::AvailableLanguageEnum::English: strLanguage = "English"; break;
     case LanguageSettings::AvailableLanguageEnum::Russian: strLanguage = "Русский"; break;
+    case LanguageSettings::AvailableLanguageEnum::Ukrainian: strLanguage = "Українська"; break;
     case LanguageSettings::AvailableLanguageEnum::China_cn: strLanguage = "\347\256\200\344\275\223\344\270\255\346\226\207"; break;
     case LanguageSettings::AvailableLanguageEnum::Persian: strLanguage = "فارسی"; break;
     case LanguageSettings::AvailableLanguageEnum::Arabic: strLanguage = "العربية"; break;
@@ -60,6 +61,7 @@ void LanguageModel::changeLanguage(const LanguageSettings::AvailableLanguageEnum
     case LanguageSettings::AvailableLanguageEnum::English: emit updateTranslations(QLocale::English); break;
     case LanguageSettings::AvailableLanguageEnum::Russian: emit updateTranslations(QLocale::Russian); break;
     case LanguageSettings::AvailableLanguageEnum::China_cn: emit updateTranslations(QLocale::Chinese); break;
+    case LanguageSettings::AvailableLanguageEnum::Ukrainian: emit updateTranslations(QLocale::Ukrainian); break;
     case LanguageSettings::AvailableLanguageEnum::Persian: emit updateTranslations(QLocale::Persian); break;
     case LanguageSettings::AvailableLanguageEnum::Arabic: emit updateTranslations(QLocale::Arabic); break;
     case LanguageSettings::AvailableLanguageEnum::Burmese: emit updateTranslations(QLocale::Burmese); break;
@@ -74,6 +76,7 @@ int LanguageModel::getCurrentLanguageIndex()
     case QLocale::English: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     case QLocale::Russian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Russian); break;
     case QLocale::Chinese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::China_cn); break;
+    case QLocale::Ukrainian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Ukrainian); break;
     case QLocale::Persian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Persian); break;
     case QLocale::Arabic: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Arabic); break;
     case QLocale::Burmese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Burmese); break;

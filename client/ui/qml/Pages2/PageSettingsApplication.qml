@@ -169,8 +169,13 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        SettingsController.clearSettings()
-                        PageController.replaceStartPage()
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot reset settings during active connection"))
+                        } else
+                        {
+                            SettingsController.clearSettings()
+                            PageController.replaceStartPage()
+                        }
                     }
                     var noButtonFunction = function() {
                     }

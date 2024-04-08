@@ -63,7 +63,7 @@ void WireGuardConfigModel::updateModel(const QJsonObject &config)
 
 QJsonObject WireGuardConfigModel::getConfig()
 {
-    const WgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject());
+    const WgConfig oldConfig(m_fullConfig.value(config_key::wireguard).toObject());
     const WgConfig newConfig(m_protocolConfig);
 
     if (!oldConfig.hasEqualServerSettings(newConfig)) {

@@ -5,6 +5,8 @@ import QtQuick.Layouts
 import "../Controls2"
 import "../Controls2/TextTypes"
 
+import SortFilterProxyModel 0.2
+
 import InstalledAppsModel 1.0
 
 DrawerType2 {
@@ -34,7 +36,7 @@ DrawerType2 {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.bottom: addButton.top
+            anchors.bottom: searchField.top
             anchors.topMargin: 16
 
             BackButtonType {
@@ -66,7 +68,15 @@ DrawerType2 {
                 clip: true
                 interactive: true
 
-                model: installedAppsModel
+                model: SortFilterProxyModel {
+                    id: proxyInstalledAppsModel
+                    sourceModel: installedAppsModel
+                    filters: RegExpFilter {
+                        roleName: "appName"
+                        pattern: ".*" + searchField.textField.text + ".*"
+                        caseSensitivity: Qt.CaseInsensitive
+                    }
+                }
 
                 ScrollBar.vertical: ScrollBar {
                     id: scrollBar
@@ -93,7 +103,7 @@ DrawerType2 {
                                 text: appName
 
                                 onCheckedChanged: {
-                                    listView.model.selectedStateChanged(index, checked)
+                                    installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
                                 }
                             }
 
@@ -113,6 +123,21 @@ DrawerType2 {
             }
         }
 
+        TextFieldWithHeaderType {
+            id: searchField
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: addButton.top
+            anchors.bottomMargin: 16
+            anchors.rightMargin: 16
+            anchors.leftMargin: 16
+
+            backgroundColor: "#2C2D30"
+
+            textFieldPlaceholderText: qsTr("application name")
+        }
+
         BasicButtonType {
             id: addButton
 
@@ -127,7 +152,7 @@ DrawerType2 {
 
             clickedFunc: function() {
                 PageController.showBusyIndicator(true)
-                AppSplitTunnelingController.addApps(listView.model.getSelectedAppsInfo())
+                AppSplitTunnelingController.addApps(installedAppsModel.getSelectedAppsInfo())
                 PageController.showBusyIndicator(false)
                 root.close()
             }

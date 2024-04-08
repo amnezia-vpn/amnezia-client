@@ -1,14 +1,17 @@
 #include "servers_model.h"
 
 #include "core/controllers/serverController.h"
+#include "core/networkUtilities.h"
 
-ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent)
-    : m_settings(settings), QAbstractListModel(parent)
+ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
+    m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
+
     connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerNameChanged);
 
     connect(this, &ServersModel::defaultServerIndexChanged, this, [this](const int serverIndex) {
-        auto defaultContainer = ContainerProps::containerFromString(m_servers.at(serverIndex).toObject().value(config_key::defaultContainer).toString());
+        auto defaultContainer =
+                ContainerProps::containerFromString(m_servers.at(serverIndex).toObject().value(config_key::defaultContainer).toString());
         emit ServersModel::defaultServerDefaultContainerChanged(defaultContainer);
         emit ServersModel::defaultServerNameChanged();
         updateDefaultServerContainersModel();
@@ -28,10 +31,15 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
     }
 
     QJsonObject server = m_servers.at(index.row()).toObject();
+    const auto configVersion = server.value(config_key::configVersion).toInt();
 
     switch (role) {
     case NameRole: {
-        server.insert(config_key::description, value.toString());
+        if (configVersion) {
+            server.insert(config_key::name, value.toString());
+        } else {
+            server.insert(config_key::description, value.toString());
+        }
         m_settings->editServer(index.row(), server);
         m_servers.replace(index.row(), server);
         if (index.row() == m_defaultServerIndex) {
@@ -336,9 +344,9 @@ void ServersModel::updateDefaultServerContainersModel()
     emit defaultServerContainersUpdated(containers);
 }
 
-QJsonObject ServersModel::getDefaultServerConfig()
+QJsonObject ServersModel::getServerConfig(const int serverIndex)
 {
-    return m_servers.at(m_defaultServerIndex).toObject();
+    return m_servers.at(serverIndex).toObject();
 }
 
 void ServersModel::reloadDefaultServerContainerConfig()
@@ -378,7 +386,8 @@ void ServersModel::updateContainerConfig(const int containerIndex, const QJsonOb
     server.insert(config_key::containers, containers);
 
     auto defaultContainer = server.value(config_key::defaultContainer).toString();
-    if ((ContainerProps::containerFromString(defaultContainer) == DockerContainer::None || ContainerProps::containerService(container) != ServiceType::Other)) {
+    if ((ContainerProps::containerFromString(defaultContainer) == DockerContainer::None
+         || ContainerProps::containerService(container) != ServiceType::Other)) {
         server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
     }
 
@@ -396,7 +405,9 @@ void ServersModel::addContainerConfig(const int containerIndex, const QJsonObjec
     server.insert(config_key::containers, containers);
 
     auto defaultContainer = server.value(config_key::defaultContainer).toString();
-    if ((ContainerProps::containerFromString(defaultContainer) == DockerContainer::None || ContainerProps::containerService(container) != ServiceType::Other)) {
+    if (ContainerProps::containerFromString(defaultContainer) == DockerContainer::None
+         && ContainerProps::containerService(container) != ServiceType::Other
+         && ContainerProps::isSupportedByCurrentPlatform(container)) {
         server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
     }
 
@@ -408,7 +419,7 @@ void ServersModel::setDefaultContainer(const int serverIndex, const int containe
     auto container = static_cast<DockerContainer>(containerIndex);
     QJsonObject s = m_servers.at(serverIndex).toObject();
     s.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
-    editServer(s, serverIndex); //check
+    editServer(s, serverIndex); // check
 }
 
 const QString ServersModel::getDefaultServerDefaultContainerName()
@@ -420,8 +431,7 @@ const QString ServersModel::getDefaultServerDefaultContainerName()
 ErrorCode ServersModel::removeAllContainers()
 {
     ServerController serverController(m_settings);
-    ErrorCode errorCode =
-            serverController.removeAllContainers(m_settings->serverCredentials(m_processedServerIndex));
+    ErrorCode errorCode = serverController.removeAllContainers(m_settings->serverCredentials(m_processedServerIndex));
 
     if (errorCode == ErrorCode::NoError) {
         QJsonObject s = m_servers.at(m_processedServerIndex).toObject();
@@ -468,7 +478,8 @@ ErrorCode ServersModel::removeContainer(const int containerIndex)
             if (containers.empty()) {
                 defaultContainer = DockerContainer::None;
             } else {
-                defaultContainer = ContainerProps::containerFromString(containers.begin()->toObject().value(config_key::container).toString());
+                defaultContainer =
+                        ContainerProps::containerFromString(containers.begin()->toObject().value(config_key::container).toString());
             }
             server.insert(config_key::defaultContainer, ContainerProps::containerToString(defaultContainer));
         }
@@ -478,24 +489,9 @@ ErrorCode ServersModel::removeContainer(const int containerIndex)
     return errorCode;
 }
 
-void ServersModel::clearCachedProfiles()
-{
-    const auto &containers = m_settings->containers(m_processedServerIndex);
-    for (DockerContainer container : containers.keys()) {
-        m_settings->clearLastConnectionConfig(m_processedServerIndex, container);
-    }
-
-    m_servers.replace(m_processedServerIndex, m_settings->server(m_processedServerIndex));
-    if (m_processedServerIndex == m_defaultServerIndex) {
-        updateDefaultServerContainersModel();
-    }
-    updateContainersModel();
-}
-
 void ServersModel::clearCachedProfile(const DockerContainer container)
 {
     m_settings->clearLastConnectionConfig(m_processedServerIndex, container);
-
     m_servers.replace(m_processedServerIndex, m_settings->server(m_processedServerIndex));
     if (m_processedServerIndex == m_defaultServerIndex) {
         updateDefaultServerContainersModel();
@@ -513,6 +509,36 @@ bool ServersModel::isAmneziaDnsContainerInstalled(const int serverIndex) const
         }
     }
     return false;
+}
+
+QPair<QString, QString> ServersModel::getDnsPair(int serverIndex)
+{
+    QPair<QString, QString> dns;
+
+    const QJsonObject &server = m_servers.at(m_processedServerIndex).toObject();
+    const auto containers = server.value(config_key::containers).toArray();
+    bool isDnsContainerInstalled = false;
+    for (const QJsonValue &container : containers) {
+        if (ContainerProps::containerFromString(container.toObject().value(config_key::container).toString()) == DockerContainer::Dns) {
+            isDnsContainerInstalled = true;
+        }
+    }
+
+    dns.first = server.value(config_key::dns1).toString();
+    dns.second = server.value(config_key::dns2).toString();
+
+    if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
+        if (m_isAmneziaDnsEnabled && isDnsContainerInstalled) {
+            dns.first = protocols::dns::amneziaDnsIp;
+        } else
+            dns.first = m_settings->primaryDns();
+    }
+    if (dns.second.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.second)) {
+        dns.second = m_settings->secondaryDns();
+    }
+
+    qDebug() << "VpnConfigurator::getDnsForConfig" << dns.first << dns.second;
+    return dns;
 }
 
 QStringList ServersModel::getAllInstalledServicesName(const int serverIndex)
@@ -598,7 +624,8 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
 
     if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
         return !(protocolConfig.value(config_key::last_config).toString().contains("AllowedIPs = 0.0.0.0/0, ::/0"));
-    } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn || defaultContainer == DockerContainer::ShadowSocks) {
+    } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn
+               || defaultContainer == DockerContainer::ShadowSocks) {
         return !(protocolConfig.value(config_key::last_config).toString().contains("redirect-gateway"));
     }
 

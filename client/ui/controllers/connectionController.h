@@ -2,6 +2,7 @@
 #define CONNECTIONCONTROLLER_H
 
 #include "protocols/vpnprotocol.h"
+#include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
 #include "vpnconnection.h"
@@ -19,7 +20,9 @@ public:
 
     explicit ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                   const QSharedPointer<ContainersModel> &containersModel,
-                                  const QSharedPointer<VpnConnection> &vpnConnection, QObject *parent = nullptr);
+                                  const QSharedPointer<ClientManagementModel> &clientManagementModel,
+                                  const QSharedPointer<VpnConnection> &vpnConnection,
+                                  const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
     ~ConnectionController() = default;
 
@@ -34,7 +37,7 @@ public:
     Q_INVOKABLE QVector<quint64> getTimes() const;
 
 public slots:
-    void toggleConnection(bool skipConnectionInProgressCheck);
+    void toggleConnection();
 
     void openConnection();
     void closeConnection();
@@ -46,9 +49,12 @@ public slots:
 
     void onTranslationsUpdated();
 
+    ErrorCode updateProtocolConfig(const DockerContainer container, const ServerCredentials &credentials,
+                                   QJsonObject &containerConfig);
+
 signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
-                      const QJsonObject &containerConfig);
+                      const QJsonObject &vpnConfiguration);
     void disconnectFromVpn();
     void connectionStateChanged();
 
@@ -58,13 +64,20 @@ signals:
 
     void noInstalledContainers();
 
+    void connectButtonClicked();
+    void preparingConfig();
+
 private:
     Vpn::ConnectionState getCurrentConnectionState();
+    bool isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
+    QSharedPointer<ClientManagementModel> m_clientManagementModel;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
+
+    std::shared_ptr<Settings> m_settings;
 
     bool m_isConnected = false;
     bool m_isConnectionInProgress = false;

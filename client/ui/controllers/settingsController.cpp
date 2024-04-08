@@ -153,12 +153,6 @@ void SettingsController::clearSettings()
 #endif
 }
 
-void SettingsController::clearCachedProfiles()
-{
-    m_serversModel->clearCachedProfiles();
-    emit changeSettingsFinished(tr("Cached profiles cleared"));
-}
-
 bool SettingsController::isAutoConnectEnabled()
 {
     return m_settings->isAutoConnect();

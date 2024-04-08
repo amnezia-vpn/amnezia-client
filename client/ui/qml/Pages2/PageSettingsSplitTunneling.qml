@@ -24,9 +24,7 @@ PageType {
     
     defaultActiveFocusItem: searchField.textField
 
-    property bool pageEnabled: {
-        return !ConnectionController.isConnected && !isServerFromApi
-    }
+    property bool pageEnabled
 
     Component.onCompleted: {
         if (ConnectionController.isConnected) {

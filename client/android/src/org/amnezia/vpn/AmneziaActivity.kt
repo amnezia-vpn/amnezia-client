@@ -406,25 +406,29 @@ class AmneziaActivity : QtActivity() {
         Log.v(TAG, "Open file with filter: $filter")
 
         val mimeTypes = if (!filter.isNullOrEmpty()) {
-            val extensionRegex = "\\*\\.[a-z .]+".toRegex(IGNORE_CASE)
+            val extensionRegex = "\\*\\.([a-z0-9]+)".toRegex(IGNORE_CASE)
             val mime = MimeTypeMap.getSingleton()
             extensionRegex.findAll(filter).map {
-                mime.getMimeTypeFromExtension(it.value.drop(2))
-            }.filterNotNull().toSet()
+                it.groups[1]?.value?.let { mime.getMimeTypeFromExtension(it) } ?: "*/*"
+            }.toSet()
         } else emptySet()
 
         Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             Log.v(TAG, "File mimyType filter: $mimeTypes")
-            when (mimeTypes.size) {
-                1 -> type = mimeTypes.first()
+            if ("*/*" in mimeTypes) {
+                type = "*/*"
+            } else {
+                when (mimeTypes.size) {
+                    1 -> type = mimeTypes.first()
 
-                in 2..Int.MAX_VALUE -> {
-                    type = "*/*"
-                    putExtra(EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+                    in 2..Int.MAX_VALUE -> {
+                        type = "*/*"
+                        putExtra(EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+                    }
+
+                    else -> type = "*/*"
                 }
-
-                else -> type = "*/*"
             }
         }.also {
             startActivityForResult(it, OPEN_FILE_ACTION_CODE)
