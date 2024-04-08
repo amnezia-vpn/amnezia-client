@@ -7,6 +7,10 @@ AppSplitTunnelingModel::AppSplitTunnelingModel(std::shared_ptr<Settings> setting
 {
     m_isSplitTunnelingEnabled = m_settings->getAppsSplitTunnelingEnabled();
     m_currentRouteMode = m_settings->getAppsRouteMode();
+    if (m_currentRouteMode == Settings::VpnAllApps) { // for old split tunneling configs
+        m_settings->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(Settings::VpnAllExceptApps));
+        m_currentRouteMode = Settings::VpnAllExceptApps;
+    }
     m_apps = m_settings->getVpnApps(m_currentRouteMode);
 }
 
