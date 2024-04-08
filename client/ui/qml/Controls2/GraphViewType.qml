@@ -14,7 +14,7 @@ ChartView {
     margins.left: 0
     margins.right: 0
     antialiasing: true
-
+    enabled: false
 
     property bool shouldUpdate: SystemController.appHasFocus
 
