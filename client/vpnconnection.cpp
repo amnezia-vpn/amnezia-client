@@ -68,8 +68,6 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                 QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
                 QString dns2 = m_vpnConfiguration.value(config_key::dns2).toString();
 
-                qDebug() << NetworkUtilities::ipAddressFromIpWithSubnet(dns1);
-
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 
                 if (m_settings->getSitesSplitTunnelingEnabled()) {
