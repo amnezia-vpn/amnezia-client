@@ -510,8 +510,15 @@ void InstallController::rebootProcessedServer()
     int serverIndex = m_serversModel->getProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
-    m_serversModel->rebootServer();
-    emit rebootProcessedServerFinished(tr("Server '%1' was rebooted").arg(serverName));
+    const auto errorCode = m_serversModel->rebootServer();
+    if (errorCode == ErrorCode::NoError)
+    {
+        emit rebootProcessedServerFinished(tr("Server '%1' was rebooted").arg(serverName));
+    }
+    else
+    {
+        emit installationErrorOccurred(errorString(errorCode));
+    }
 }
 
 void InstallController::removeProcessedServer()
