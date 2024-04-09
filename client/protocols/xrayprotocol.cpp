@@ -142,7 +142,6 @@ ErrorCode XrayProtocol::startTun2Sock()
             QThread::msleep(5000);
             IpcClient::Interface()->createTun("utun22", amnezia::protocols::xray::defaultLocalAddr);
             IpcClient::Interface()->updateResolvers("utun22", dnsAddr);
-            IpcClient::Interface()->enableKillSwitch(m_configData, 0);
 #endif
 #ifdef Q_OS_WINDOWS
             QThread::msleep(15000);
@@ -151,7 +150,11 @@ ErrorCode XrayProtocol::startTun2Sock()
             QThread::msleep(1000);
             IpcClient::Interface()->createTun("tun2", amnezia::protocols::xray::defaultLocalAddr);
             IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
-            IpcClient::Interface()->enableKillSwitch(m_configData, 0);
+#endif
+#if defined(Q_OS_LINUX) || defined(Q_OS_LINUX)
+            if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
+                IpcClient::Interface()->enableKillSwitch(m_configData, 0);
+            }
 #endif
             if (m_routeMode == 0) {
                 IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
@@ -166,7 +169,9 @@ ErrorCode XrayProtocol::startTun2Sock()
                 for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
                 {
                     if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
-                        IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
+                        if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
+                            IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
+                        }
                         m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
                         m_configData.insert("vpnGateway", m_vpnGateway);
                         m_configData.insert("vpnServer", m_remoteAddress);

@@ -237,15 +237,17 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     m_remoteAddress = credentials.hostName;
     emit connectionStateChanged(Vpn::ConnectionState::Connecting);
 
+    m_vpnConfiguration = vpnConfiguration;
+
 #ifdef AMNEZIA_DESKTOP
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
     }
+    appendKillSwitchConfig();
 #endif
 
-    m_vpnConfiguration = vpnConfiguration;
     appendSplitTunnelingConfig();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
@@ -280,6 +282,11 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(Vpn::ConnectionState)), this,
             SLOT(onConnectionStateChanged(Vpn::ConnectionState)));
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
+}
+
+void VpnConnection::appendKillSwitchConfig()
+{
+    m_vpnConfiguration.insert(config_key::killSwitchOption, QVariant(m_settings->isKillSwitchEnabled()).toString());
 }
 
 void VpnConnection::appendSplitTunnelingConfig()
