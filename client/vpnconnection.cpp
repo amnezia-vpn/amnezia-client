@@ -70,7 +70,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 
-                if (m_settings->getSitesSplitTunnelingEnabled()) {
+                if (m_settings->isSitesSplitTunnelingEnabled()) {
                     IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                         // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
                     if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
@@ -89,7 +89,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
         } else if (state == Vpn::ConnectionState::Error) {
             IpcClient::Interface()->flushDns();
 
-            if (m_settings->getSitesSplitTunnelingEnabled()) {
+            if (m_settings->isSitesSplitTunnelingEnabled()) {
                 if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
                     IpcClient::Interface()->clearSavedRoutes();
                 }
@@ -305,7 +305,7 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     Settings::RouteMode routeMode = Settings::RouteMode::VpnAllSites;
     QJsonArray sitesJsonArray;
-    if (m_settings->getSitesSplitTunnelingEnabled()) {
+    if (m_settings->isSitesSplitTunnelingEnabled()) {
         routeMode = m_settings->routeMode();
 
         auto sites = m_settings->getVpnIps(routeMode);
@@ -325,7 +325,7 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     Settings::AppsRouteMode appsRouteMode = Settings::AppsRouteMode::VpnAllApps;
     QJsonArray appsJsonArray;
-    if (m_settings->getAppsSplitTunnelingEnabled()) {
+    if (m_settings->isAppsSplitTunnelingEnabled()) {
         appsRouteMode = m_settings->getAppsRouteMode();
 
         auto apps = m_settings->getVpnApps(appsRouteMode);

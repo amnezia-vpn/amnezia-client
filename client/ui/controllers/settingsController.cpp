@@ -220,3 +220,13 @@ void SettingsController::checkIfNeedDisableLogs()
         emit loggingDisableByWatcher();
     }
 }
+
+bool SettingsController::isKillSwitchEnabled()
+{
+    return m_settings->isKillSwitchEnabled();
+}
+
+void SettingsController::toggleKillSwitch(bool enable)
+{
+    m_settings->setKillSwitchEnabled(enable);
+}

@@ -107,6 +107,23 @@ PageType {
             DividerType {
                 visible: root.isAppSplitTinnelingEnabled
             }
+
+            SwitcherType {
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("KillSwitch")
+                descriptionText: qsTr("If AmneziaDNS is installed on the server")
+
+                checked: SettingsController.isKillSwitchEnabled()
+                onCheckedChanged: {
+                    if (checked !== SettingsController.isKillSwitchEnabled()) {
+                        SettingsController.toggleKillSwitch(checked)
+                    }
+                }
+            }
+
+            DividerType {}
         }
     }
 }

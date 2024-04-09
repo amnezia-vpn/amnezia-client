@@ -256,7 +256,7 @@ Settings::RouteMode Settings::routeMode() const
     return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt());
 }
 
-bool Settings::getSitesSplitTunnelingEnabled() const
+bool Settings::isSitesSplitTunnelingEnabled() const
 {
     return value("Conf/sitesSplitTunnelingEnabled", false).toBool();
 }
@@ -413,7 +413,7 @@ void Settings::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &a
     m_settings.sync();
 }
 
-bool Settings::getAppsSplitTunnelingEnabled() const
+bool Settings::isAppsSplitTunnelingEnabled() const
 {
     return value("Conf/appsSplitTunnelingEnabled", false).toBool();
 }
@@ -421,6 +421,16 @@ bool Settings::getAppsSplitTunnelingEnabled() const
 void Settings::setAppsSplitTunnelingEnabled(bool enabled)
 {
     setValue("Conf/appsSplitTunnelingEnabled", enabled);
+}
+
+bool Settings::isKillSwitchEnabled()
+{
+    return value("Conf/killSwitchEnabled", false).toBool();
+}
+
+void Settings::setKillSwitchEnabled(bool enabled)
+{
+    setValue("Conf/killSwitchEnabled", enabled);
 }
 
 ServerCredentials Settings::defaultServerCredentials() const
