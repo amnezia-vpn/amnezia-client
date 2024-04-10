@@ -116,10 +116,12 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
   m_luid = luid.Value;
   m_routeMonitor.setLuid(luid.Value);
 
-  // Enable the windows firewall
-  NET_IFINDEX ifindex;
-  ConvertInterfaceLuidToIndex(&luid, &ifindex);
-  WindowsFirewall::instance()->enableKillSwitch(ifindex);
+  if (config.m_killSwitchEnabled) {
+    // Enable the windows firewall
+    NET_IFINDEX ifindex;
+    ConvertInterfaceLuidToIndex(&luid, &ifindex);
+    WindowsFirewall::instance()->enableKillSwitch(ifindex);
+  }
 
   logger.debug() << "Registration completed";
   return true;

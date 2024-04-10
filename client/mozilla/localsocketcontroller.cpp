@@ -221,7 +221,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("excludedAddresses", jsExcludedAddresses);
 
   json.insert("vpnDisabledApps", splitTunnelApps);
-  
+
+  json.insert(amnezia::config_key::killSwitchOption, rawConfig.value(amnezia::config_key::killSwitchOption));
+
   if (protocolName == amnezia::config_key::awg) {
     json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
     json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));
