@@ -2,7 +2,7 @@ import Foundation
 import NetworkExtension
 
 public func removeVPNC(_ vpncName: std.string) {
-  let vpncName = String(vpncName)
+  let vpncName = String(describing: vpncName)
 
   Task {
     await getManagers()?.first { manager in
