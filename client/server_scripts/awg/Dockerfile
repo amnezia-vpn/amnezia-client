@@ -1,4 +1,4 @@
-FROM amneziavpn/amneziawg-go:latest
+FROM amneziavpn/amneziawg-go:0.2.4
 
 LABEL maintainer="AmneziaVPN"
 
