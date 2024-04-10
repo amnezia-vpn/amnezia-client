@@ -9,7 +9,7 @@
 #include <QTextDocument>
 #include <QTimer>
 #include <QTranslator>
-
+#include <QUuid>
 #include <QQuickItem>
 
 #include "logger.h"
@@ -91,6 +91,10 @@ void AmneziaApplication::init()
     initModels();
     loadTranslator();
     initControllers();
+
+    if (m_settings->getInstallationUuid().isEmpty()) {
+        m_settings->setInstallationUuid(QUuid::createUuid().toString());
+    }
 
 #ifdef Q_OS_ANDROID
     if (!AndroidController::initLogging()) {

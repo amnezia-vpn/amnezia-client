@@ -214,6 +214,9 @@ public:
     bool getAppsSplitTunnelingEnabled() const;
     void setAppsSplitTunnelingEnabled(bool enabled);
 
+    QString getInstallationUuid() const;
+    void setInstallationUuid(const QString &uuid);
+
 signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);

@@ -361,7 +361,9 @@ QString Settings::secondaryDns() const
 
 void Settings::clearSettings()
 {
+    auto uuid = getInstallationUuid();
     m_settings.clearSettings();
+    setInstallationUuid(uuid);
     emit settingsCleared();
 }
 
@@ -421,6 +423,16 @@ bool Settings::getAppsSplitTunnelingEnabled() const
 void Settings::setAppsSplitTunnelingEnabled(bool enabled)
 {
     setValue("Conf/appsSplitTunnelingEnabled", enabled);
+}
+
+QString Settings::getInstallationUuid() const
+{
+    return value("Conf/installationUuid", "").toString();
+}
+
+void Settings::setInstallationUuid(const QString &uuid)
+{
+    setValue("Conf/installationUuid", uuid);
 }
 
 ServerCredentials Settings::defaultServerCredentials() const
