@@ -86,6 +86,9 @@ struct WGConfig: Decodable {
     AllowedIPs = \(allowedIPs.joined(separator: ", "))
     Endpoint = \(hostName):\(port)
     PersistentKeepalive = \(persistentKeepAlive)
+
+    SplitTunnelType = \(splitTunnelType)
+    SplitTunnelSites = \(splitTunnelSites.joined(separator: ", "))
     """
   }
 }
