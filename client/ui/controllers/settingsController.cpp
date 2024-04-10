@@ -78,6 +78,9 @@ void SettingsController::toggleLogging(bool enable)
 #endif
     if (enable == true) {
         checkIfNeedDisableLogs();
+        
+        qInfo().noquote() << QString("Logging has enabled on %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
+        qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
     }
     emit loggingStateChanged();
 }
