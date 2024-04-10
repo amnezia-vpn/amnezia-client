@@ -139,9 +139,10 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
   QByteArray pskKey =
       QByteArray::fromBase64(qPrintable(config.m_serverPskKey));
 
-  // Enable the windows firewall for this peer.
-  WindowsFirewall::instance()->enablePeerTraffic(config);
-
+  if (config.m_killSwitchEnabled) {
+    // Enable the windows firewall for this peer.
+    WindowsFirewall::instance()->enablePeerTraffic(config);
+  }
   logger.debug() << "Configuring peer" << publicKey.toHex()
                  << "via" << config.m_serverIpv4AddrIn;
 
