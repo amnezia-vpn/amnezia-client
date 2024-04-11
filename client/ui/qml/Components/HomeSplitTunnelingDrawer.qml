@@ -76,8 +76,6 @@ DrawerType2 {
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            enabled: !ServersModel.isDefaultServerDefaultContainerHasSplitTunneling || !ServersModel.getDefaultServerData("isServerFromApi")
-
             text: qsTr("Site-based split tunneling")
             descriptionText: enabled && SitesModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"

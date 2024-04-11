@@ -213,7 +213,7 @@ PageType {
 
                     Header1TextType {
                         id: collapsedButtonHeader
-                        Layout.maximumWidth: drawer.isCollapsed ? drawer.width - 48 - 18 - 12 : drawer.width// todo
+                        Layout.maximumWidth: drawer.width - 48 - 18 - 12
 
                         maximumLineCount: 2
                         elide: Qt.ElideRight

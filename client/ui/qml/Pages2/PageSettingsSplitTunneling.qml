@@ -29,9 +29,7 @@ PageType {
         KeyNavigation.tab: backButton
     }
 
-    property bool pageEnabled: {
-        return !ConnectionController.isConnected && !isServerFromApi
-    }
+    property bool pageEnabled
 
     Component.onCompleted: {
         if (ConnectionController.isConnected) {

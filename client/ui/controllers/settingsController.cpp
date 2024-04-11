@@ -18,12 +18,14 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
                                        const QSharedPointer<ContainersModel> &containersModel,
                                        const QSharedPointer<LanguageModel> &languageModel,
                                        const QSharedPointer<SitesModel> &sitesModel,
+                                       const QSharedPointer<AppSplitTunnelingModel> &appSplitTunnelingModel,
                                        const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_languageModel(languageModel),
       m_sitesModel(sitesModel),
+      m_appSplitTunnelingModel(appSplitTunnelingModel),
       m_settings(settings)
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
@@ -144,7 +146,12 @@ void SettingsController::clearSettings()
     m_serversModel->resetModel();
     m_languageModel->changeLanguage(
             static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
-    m_sitesModel->setRouteMode(Settings::RouteMode::VpnAllSites);
+
+    m_sitesModel->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
+    m_sitesModel->toggleSplitTunneling(false);
+
+    m_appSplitTunnelingModel->setRouteMode(Settings::AppsRouteMode::VpnAllExceptApps);
+    m_appSplitTunnelingModel->toggleSplitTunneling(false);
 
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 

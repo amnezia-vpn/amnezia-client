@@ -149,9 +149,14 @@ PageType {
         var noButtonText = qsTr("Cancel")
 
         var yesButtonFunction = function() {
-            PageController.showBusyIndicator(true)
-            SettingsController.restoreAppConfig(filePath)
-            PageController.showBusyIndicator(false)
+            if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                PageController.showNotificationMessage(qsTr("Cannot restore backup settings during active connection"))
+            } else
+            {
+                PageController.showBusyIndicator(true)
+                SettingsController.restoreAppConfig(filePath)
+                PageController.showBusyIndicator(false)
+            }
         }
         var noButtonFunction = function() {
         }

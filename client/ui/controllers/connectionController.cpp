@@ -62,6 +62,11 @@ void ConnectionController::openConnection()
     DockerContainer container =
             qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
 
+    if (!m_containersModel->isSupportedByCurrentPlatform(container)) {
+        emit connectionErrorOccurred(tr("The selected protocol is not supported on the current platform"));
+        return;
+    }
+
     if (container == DockerContainer::None) {
         emit connectionErrorOccurred(tr("VPN Protocols is not installed.\n Please install VPN container at first"));
         return;

@@ -182,8 +182,14 @@ PageType {
                 var noButtonText = qsTr("Cancel")
 
                 var yesButtonFunction = function() {
-                    PageController.goToPage(PageEnum.PageDeinstalling)
-                    InstallController.removeProcessedContainer()
+                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
+                    && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                        PageController.showNotificationMessage(qsTr("Cannot remove active container"))
+                    } else
+                    {
+                        PageController.goToPage(PageEnum.PageDeinstalling)
+                        InstallController.removeProcessedContainer()
+                    }
                 }
                 var noButtonFunction = function() {
                     if (!GC.isMobile()) {

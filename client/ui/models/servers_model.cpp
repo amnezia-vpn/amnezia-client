@@ -31,10 +31,15 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
     }
 
     QJsonObject server = m_servers.at(index.row()).toObject();
+    const auto configVersion = server.value(config_key::configVersion).toInt();
 
     switch (role) {
     case NameRole: {
-        server.insert(config_key::description, value.toString());
+        if (configVersion) {
+            server.insert(config_key::name, value.toString());
+        } else {
+            server.insert(config_key::description, value.toString());
+        }
         m_settings->editServer(index.row(), server);
         m_servers.replace(index.row(), server);
         if (index.row() == m_defaultServerIndex) {
@@ -400,8 +405,9 @@ void ServersModel::addContainerConfig(const int containerIndex, const QJsonObjec
     server.insert(config_key::containers, containers);
 
     auto defaultContainer = server.value(config_key::defaultContainer).toString();
-    if ((ContainerProps::containerFromString(defaultContainer) == DockerContainer::None
-         || ContainerProps::containerService(container) != ServiceType::Other)) {
+    if (ContainerProps::containerFromString(defaultContainer) == DockerContainer::None
+         && ContainerProps::containerService(container) != ServiceType::Other
+         && ContainerProps::isSupportedByCurrentPlatform(container)) {
         server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
     }
 

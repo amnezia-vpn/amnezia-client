@@ -424,6 +424,8 @@ bool IosController::setupCloak()
         openVPNConfig.insert(config_key::mtu, protocols::openvpn::defaultMtu);
     }
 
+    openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
+
     QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
 
     for(int index = 0; index < splitTunnelSites.count(); index++) {
