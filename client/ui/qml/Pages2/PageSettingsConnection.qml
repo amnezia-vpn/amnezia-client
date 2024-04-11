@@ -116,9 +116,15 @@ PageType {
                 descriptionText: qsTr("If AmneziaDNS is installed on the server")
 
                 checked: SettingsController.isKillSwitchEnabled()
+                checkable: !ConnectionController.isConnected
                 onCheckedChanged: {
                     if (checked !== SettingsController.isKillSwitchEnabled()) {
                         SettingsController.toggleKillSwitch(checked)
+                    }
+                }
+                onClicked: {
+                    if (!checkable) {
+                        PageController.showNotificationMessage(qsTr("Cannot change killSwitch settings during active connection"))
                     }
                 }
             }

@@ -135,10 +135,9 @@ PageType {
         var noButtonText = qsTr("Cancel")
 
         var yesButtonFunction = function() {
-            if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+            if (ConnectionController.isConnected) {
                 PageController.showNotificationMessage(qsTr("Cannot restore backup settings during active connection"))
-            } else
-            {
+            } else {
                 PageController.showBusyIndicator(true)
                 SettingsController.restoreAppConfig(filePath)
                 PageController.showBusyIndicator(false)

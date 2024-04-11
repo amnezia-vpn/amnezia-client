@@ -423,9 +423,9 @@ void Settings::setAppsSplitTunnelingEnabled(bool enabled)
     setValue("Conf/appsSplitTunnelingEnabled", enabled);
 }
 
-bool Settings::isKillSwitchEnabled()
+bool Settings::isKillSwitchEnabled() const
 {
-    return value("Conf/killSwitchEnabled", false).toBool();
+    return value("Conf/killSwitchEnabled", true).toBool();
 }
 
 void Settings::setKillSwitchEnabled(bool enabled)

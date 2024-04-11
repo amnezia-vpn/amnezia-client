@@ -214,7 +214,7 @@ public:
     bool isAppsSplitTunnelingEnabled() const;
     void setAppsSplitTunnelingEnabled(bool enabled);
 
-    bool isKillSwitchEnabled();
+    bool isKillSwitchEnabled() const;
     void setKillSwitchEnabled(bool enabled);
 
 signals:
