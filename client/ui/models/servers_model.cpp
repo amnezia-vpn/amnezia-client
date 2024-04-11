@@ -384,13 +384,6 @@ void ServersModel::updateContainerConfig(const int containerIndex, const QJsonOb
     }
 
     server.insert(config_key::containers, containers);
-
-    auto defaultContainer = server.value(config_key::defaultContainer).toString();
-    if ((ContainerProps::containerFromString(defaultContainer) == DockerContainer::None
-         || ContainerProps::containerService(container) != ServiceType::Other)) {
-        server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
-    }
-
     editServer(server, m_processedServerIndex);
 }
 
