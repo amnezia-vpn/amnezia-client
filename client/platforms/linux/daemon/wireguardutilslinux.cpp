@@ -119,24 +119,25 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     if (err != 0) {
         logger.error() << "Interface configuration failed:" << strerror(err);
     } else {
-        FirewallParams params { };
-        params.dnsServers.append(config.m_dnsServer);
-        if (config.m_allowedIPAddressRanges.at(0).toString() == "0.0.0.0/0"){
-            params.blockAll = true;
-            if (config.m_excludedAddresses.size()) {
-                params.allowNets = true;
-                foreach (auto net, config.m_excludedAddresses) {
-                    params.allowAddrs.append(net.toUtf8());
+        if (config.m_killSwitchEnabled) {
+            FirewallParams params { };
+            params.dnsServers.append(config.m_dnsServer);
+            if (config.m_allowedIPAddressRanges.at(0).toString() == "0.0.0.0/0"){
+                params.blockAll = true;
+                if (config.m_excludedAddresses.size()) {
+                    params.allowNets = true;
+                    foreach (auto net, config.m_excludedAddresses) {
+                        params.allowAddrs.append(net.toUtf8());
+                    }
+                }
+            } else {
+                params.blockNets = true;
+                foreach (auto net, config.m_allowedIPAddressRanges) {
+                    params.blockAddrs.append(net.toString());
                 }
             }
-        } else {
-            params.blockNets = true;
-            foreach (auto net, config.m_allowedIPAddressRanges) {
-                params.blockAddrs.append(net.toString());
-            }
+            applyFirewallRules(params);
         }
-
-        applyFirewallRules(params);
     }
 
     return (err == 0);

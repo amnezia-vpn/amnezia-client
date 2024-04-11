@@ -373,6 +373,8 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
     return false;
   }
 
+  config.m_killSwitchEnabled = QVariant(obj.value("killSwitchOption").toString()).toBool();
+
   if (!obj.value("Jc").isNull() && !obj.value("Jmin").isNull() 
   && !obj.value("Jmax").isNull() && !obj.value("S1").isNull() 
   && !obj.value("S2").isNull() && !obj.value("H1").isNull() 

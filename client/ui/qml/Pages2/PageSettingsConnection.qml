@@ -113,7 +113,7 @@ PageType {
                 Layout.margins: 16
 
                 text: qsTr("KillSwitch")
-                descriptionText: qsTr("If AmneziaDNS is installed on the server")
+                descriptionText: qsTr("Disables your internet if your encrypted VPN connection drops out for any reason.")
 
                 checked: SettingsController.isKillSwitchEnabled()
                 checkable: !ConnectionController.isConnected
@@ -129,7 +129,9 @@ PageType {
                 }
             }
 
-            DividerType {}
+            DividerType {
+                visible: GC.isDesktop()
+            }
         }
     }
 }
