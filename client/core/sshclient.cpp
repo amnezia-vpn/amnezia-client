@@ -23,6 +23,13 @@ namespace libssh {
 
     ErrorCode Client::connectToHost(const ServerCredentials &credentials)
     {
+        if (m_session != nullptr) {
+            if (!ssh_is_connected(m_session)) {
+                ssh_free(m_session);
+                m_session = nullptr;
+            }
+        }
+
         if (m_session == nullptr) {
             m_session = ssh_new();
 

@@ -8,26 +8,26 @@
 #include "core/controllers/serverController.h"
 #include "core/scripts_registry.h"
 
-XrayConfigurator::XrayConfigurator(std::shared_ptr<Settings> settings, QObject *parent) : ConfiguratorBase(settings, parent)
+XrayConfigurator::XrayConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
+    : ConfiguratorBase(settings, serverController, parent)
 {
 }
 
 QString XrayConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
                                        ErrorCode errorCode)
 {
-    ServerController serverController(m_settings);
-
-    QString config = serverController.replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, container),
-                                                  serverController.genVarsForScript(credentials, container, containerConfig));
+    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, container),
+                                                     m_serverController->genVarsForScript(credentials, container, containerConfig));
 
     QString xrayPublicKey =
-            serverController.getTextFileFromContainer(container, credentials, amnezia::protocols::xray::PublicKeyPath, errorCode);
+            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::PublicKeyPath, errorCode);
     xrayPublicKey.replace("\n", "");
 
-    QString xrayUuid = serverController.getTextFileFromContainer(container, credentials, amnezia::protocols::xray::uuidPath, errorCode);
+    QString xrayUuid = m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::uuidPath, errorCode);
     xrayUuid.replace("\n", "");
 
-    QString xrayShortId = serverController.getTextFileFromContainer(container, credentials, amnezia::protocols::xray::shortidPath, errorCode);
+    QString xrayShortId =
+            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::shortidPath, errorCode);
     xrayShortId.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {

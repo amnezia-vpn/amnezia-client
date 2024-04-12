@@ -37,14 +37,14 @@ public slots:
 
     void removeApiConfig();
 
-    void clearCachedProfile();
+    void clearCachedProfile(QSharedPointer<ServerController> serverController = nullptr);
 
     QRegularExpression ipAddressPortRegExp();
     QRegularExpression ipAddressRegExp();
 
     void mountSftpDrive(const QString &port, const QString &password, const QString &username);
 
-    bool checkSshConnection();
+    bool checkSshConnection(QSharedPointer<ServerController> serverController = nullptr);
 
     void setEncryptedPassphrase(QString passphrase);
 
@@ -79,12 +79,15 @@ signals:
 
 private:
     void installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
-                       const ServerCredentials &serverCredentials, QString &finishMessage);
+                       const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
+                       QString &finishMessage);
     void installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
-                          const ServerCredentials &serverCredentials, QString &finishMessage);
+                          const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
+                          QString &finishMessage);
     bool isServerAlreadyExists();
 
-    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, QJsonObject> &installedContainers);
+    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController,
+                                            QMap<DockerContainer, QJsonObject> &installedContainers);
     bool isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
 
     QSharedPointer<ServersModel> m_serversModel;
