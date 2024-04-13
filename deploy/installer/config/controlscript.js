@@ -83,7 +83,7 @@ function appProcessIsRunning()
             }
         }
     } else {
-        return checkProcessIsRunning("pgrep -x '" + appName() + "'")
+        return checkProcessIsRunning("\"pgrep -x '" + appName() + "'\"")
     }
 
     return false;
