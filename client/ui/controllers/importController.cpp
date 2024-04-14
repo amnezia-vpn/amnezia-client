@@ -39,19 +39,23 @@ namespace
         const QString xrayConfigPatternOutbound = "outbounds";
 
         const QString amneziaConfigPattern = "containers";
+        const QString amneziaConfigPatternHostName = "hostName";
+        const QString amneziaConfigPatternUserName = "userName";
+        const QString amneziaConfigPatternPassword = "password";
         const QString amneziaFreeConfigPattern = "api_key";
         const QString backupPattern = "Servers/serversList";
 
         if (config.contains(backupPattern)) {
             return ConfigTypes::Backup;
-        } else if (config.contains(amneziaConfigPattern) || config.contains(amneziaFreeConfigPattern)) {
+        } else if (config.contains(amneziaConfigPattern) || config.contains(amneziaFreeConfigPattern)
+                   || (config.contains(amneziaConfigPatternHostName) && config.contains(amneziaConfigPatternUserName)
+                       && config.contains(amneziaConfigPatternPassword))) {
             return ConfigTypes::Amnezia;
         } else if (config.contains(openVpnConfigPatternCli)
                    && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))
                    && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
             return ConfigTypes::OpenVpn;
-        } else if (config.contains(wireguardConfigPatternSectionInterface)
-                   && config.contains(wireguardConfigPatternSectionPeer)) {
+        } else if (config.contains(wireguardConfigPatternSectionInterface) && config.contains(wireguardConfigPatternSectionPeer)) {
             return ConfigTypes::WireGuard;
         } else if ((config.contains(xrayConfigPatternInbound)) && (config.contains(xrayConfigPatternOutbound))) {
             return ConfigTypes::Xray;
@@ -64,8 +68,7 @@ namespace
 #endif
 } // namespace
 
-ImportController::ImportController(const QSharedPointer<ServersModel> &serversModel,
-                                   const QSharedPointer<ContainersModel> &containersModel,
+ImportController::ImportController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                    const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
 {
@@ -95,8 +98,7 @@ bool ImportController::extractConfigFromData(QString data)
     auto configFormat = checkConfigFormat(config);
     if (configFormat == ConfigTypes::Invalid) {
         data.replace("vpn://", "");
-        QByteArray ba =
-                QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+        QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
         QByteArray ba_uncompressed = qUncompress(ba);
         if (!ba_uncompressed.isEmpty()) {
             ba = ba_uncompressed;
@@ -279,8 +281,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     lastConfig[config_key::hostName] = hostName;
     lastConfig[config_key::port] = port.toInt();
 
-    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty()
-        && !configMap.value("PublicKey").isEmpty()) {
+    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty() && !configMap.value("PublicKey").isEmpty()) {
         lastConfig[config_key::client_priv_key] = configMap.value("PrivateKey");
         lastConfig[config_key::client_ip] = configMap.value("Address");
 
@@ -306,12 +307,9 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
 
     QString protocolName = "wireguard";
-    if (!configMap.value(config_key::junkPacketCount).isEmpty()
-        && !configMap.value(config_key::junkPacketMinSize).isEmpty()
-        && !configMap.value(config_key::junkPacketMaxSize).isEmpty()
-        && !configMap.value(config_key::initPacketJunkSize).isEmpty()
-        && !configMap.value(config_key::responsePacketJunkSize).isEmpty()
-        && !configMap.value(config_key::initPacketMagicHeader).isEmpty()
+    if (!configMap.value(config_key::junkPacketCount).isEmpty() && !configMap.value(config_key::junkPacketMinSize).isEmpty()
+        && !configMap.value(config_key::junkPacketMaxSize).isEmpty() && !configMap.value(config_key::initPacketJunkSize).isEmpty()
+        && !configMap.value(config_key::responsePacketJunkSize).isEmpty() && !configMap.value(config_key::initPacketMagicHeader).isEmpty()
         && !configMap.value(config_key::responsePacketMagicHeader).isEmpty()
         && !configMap.value(config_key::underloadPacketMagicHeader).isEmpty()
         && !configMap.value(config_key::transportPacketMagicHeader).isEmpty()) {
