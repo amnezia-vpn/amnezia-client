@@ -575,7 +575,6 @@ void InstallController::removeApiConfig()
         .arg(serverConfig[config_key::vpnproto].toString());
 
     AmneziaVPN::removeVPNC(vpncName.toStdString());
-    sleep(3);
 #endif
 
     serverConfig.remove(config_key::dns1);
