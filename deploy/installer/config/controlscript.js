@@ -93,8 +93,9 @@ function checkProcessIsRunning(arg)
 {
     var cmdArgs = ["-c", arg];
     var result = installer.execute("/bin/bash", cmdArgs);
-    var resultArg1  = Number(result[0])
-    if (resultArg1 >= 3) {
+    var lines = result[0].trim().split(/\n+/);
+    var resultArg1 = Number(lines[0])
+    if (resultArg1 >= 2) {
         return true;
     }
     return false;
