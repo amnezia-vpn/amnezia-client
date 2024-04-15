@@ -136,7 +136,6 @@ PageType {
                             textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                console.log("1")
                                 if (textFieldText === "") {
                                     textFieldText = "0"
                                 }
@@ -332,6 +331,20 @@ PageType {
                             text: qsTr("Save")
 
                             onClicked: {
+                                if (AwgConfigModel.isHeadersEqual(underloadPacketMagicHeaderTextField.textField.text,
+                                                                  transportPacketMagicHeaderTextField.textField.text,
+                                                                  responsePacketMagicHeaderTextField.textField.text,
+                                                                  initPacketMagicHeaderTextField.textField.text)) {
+                                    PageController.showErrorMessage(qsTr("The values of the H1-H4 fields must be unique"))
+                                    return
+                                }
+
+                                if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
+                                                                     parseInt(responsePacketJunkSizeTextField.textField.text))) {
+                                    PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)"))
+                                    return
+                                }
+
                                 var headerText = qsTr("Save settings?")
                                 var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                                 var yesButtonText = qsTr("Continue")
