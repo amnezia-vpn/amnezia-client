@@ -98,7 +98,7 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 QSet<QString> headersValue;
                 while (headersValue.size() != 4) {
                     auto max = (std::numeric_limits<qint32>::max)();
-                    headersValue.insert(QString::number(QRandomGenerator::global()->bounded(1, max)));
+                    headersValue.insert(QString::number(QRandomGenerator::global()->bounded(5, max)));
                 }
 
                 auto headersValueList = headersValue.values();
