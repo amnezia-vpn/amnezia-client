@@ -16,6 +16,11 @@ struct Log {
 
   private static let appGroupID = "group.org.amnezia.AmneziaVPN"
 
+  static let appLogURL = {
+    let sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)!
+    return sharedContainerURL.appendingPathComponent("app.log", isDirectory: false)
+  }()
+
   static let neLogURL = {
     let sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)!
     return sharedContainerURL.appendingPathComponent("ne.log", isDirectory: false)
@@ -70,7 +75,11 @@ struct Log {
   }
 
   static func log(_ type: OSLogType, title: String = "", message: String, url: URL = neLogURL) {
+    NSLog("\(title) \(message)")
+
     guard isLoggingEnabled else { return }
+
+    osLog.log(level: type, "\(title) \(message)")
 
     let date = Date()
     let level = Record.Level(from: type)
@@ -106,4 +115,8 @@ extension Log: CustomStringConvertible {
       }
       .joined(separator: "\n")
   }
+}
+
+func log(_ type: OSLogType, title: String = "", message: String) {
+  Log.log(type, title: "App: \(title)", message: message, url: Log.appLogURL)
 }

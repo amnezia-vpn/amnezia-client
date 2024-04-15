@@ -16,6 +16,10 @@
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 
+#ifdef Q_OS_IOS
+    #include <AmneziaVPN-Swift.h>
+#endif
+
 namespace
 {
     Logger logger("ServerController");
@@ -563,6 +567,15 @@ void InstallController::removeProcessedContainer()
 void InstallController::removeApiConfig()
 {
     auto serverConfig = m_serversModel->getServerConfig(m_serversModel->getDefaultServerIndex());
+
+#ifdef Q_OS_IOS
+    QString vpncName = QString("%1 (%2) %3")
+        .arg(serverConfig[config_key::description].toString())
+        .arg(serverConfig[config_key::hostName].toString())
+        .arg(serverConfig[config_key::vpnproto].toString());
+
+    AmneziaVPN::removeVPNC(vpncName.toStdString());
+#endif
 
     serverConfig.remove(config_key::dns1);
     serverConfig.remove(config_key::dns2);

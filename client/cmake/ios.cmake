@@ -108,6 +108,7 @@ target_sources(${PROJECT} PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/ScreenProtection.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/VPNCController.swift
 )
 
 target_sources(${PROJECT} PRIVATE
