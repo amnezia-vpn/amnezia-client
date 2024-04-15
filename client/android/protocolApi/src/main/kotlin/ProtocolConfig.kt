@@ -139,7 +139,10 @@ open class ProtocolConfig protected constructor(
                 // for older versions of Android, build a list of subnets without excluded routes
                 // and add them to routes
                 val ipRangeSet = IpRangeSet()
+                ipRangeSet.add(IpRange("0.0.0.0", 0))
+                ipRangeSet.add(IpRange("::", 0))
                 ipRangeSet.remove(IpRange("127.0.0.0", 8))
+                ipRangeSet.remove(IpRange("::1", 128))
                 excludedRoutes.forEach {
                     ipRangeSet.remove(IpRange(it))
                 }
@@ -147,7 +150,6 @@ open class ProtocolConfig protected constructor(
                 removeRoute(InetNetwork("0.0.0.0", 0))
                 removeRoute(InetNetwork("::", 0))
                 ipRangeSet.subnets().forEach(::addRoute)
-                addRoute(InetNetwork("2000::", 3))
             }
         }
 

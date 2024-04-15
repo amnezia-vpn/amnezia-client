@@ -39,8 +39,24 @@ private val parseNumericAddressCompat: (String) -> InetAddress =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         InetAddresses::parseNumericAddress
     } else {
-        val m = InetAddress::class.java.getMethod("parseNumericAddress", String::class.java)
-        fun(address: String): InetAddress {
-            return m.invoke(null, address) as InetAddress
+        try {
+            val m = InetAddress::class.java.getMethod("parseNumericAddress", String::class.java)
+            fun(address: String): InetAddress {
+                return m.invoke(null, address) as InetAddress
+            }
+        } catch (_: NoSuchMethodException) {
+            fun(address: String): InetAddress {
+                return InetAddress.getByName(address)
+            }
         }
+    }
+
+internal fun convertIpv6ToCanonicalForm(ipv6: String): String = ipv6
+    .replace("((?:(?:^|:)0+\\b){2,}):?(?!\\S*\\b\\1:0+\\b)(\\S*)".toRegex(), "::$2")
+
+internal val InetAddress.ip: String
+    get() = if (this is Inet4Address) {
+        hostAddress!!
+    } else {
+        convertIpv6ToCanonicalForm(hostAddress!!)
     }
