@@ -214,8 +214,7 @@ public:
     bool getAppsSplitTunnelingEnabled() const;
     void setAppsSplitTunnelingEnabled(bool enabled);
 
-    QString getInstallationUuid() const;
-    void setInstallationUuid(const QString &uuid);
+    QString getInstallationUuid(const bool needCreate);
 
 signals:
     void saveLogsChanged(bool enabled);
@@ -226,6 +225,8 @@ signals:
 private:
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void setValue(const QString &key, const QVariant &value);
+
+    void setInstallationUuid(const QString &uuid);
 
     mutable SecureQSettings m_settings;
 };
