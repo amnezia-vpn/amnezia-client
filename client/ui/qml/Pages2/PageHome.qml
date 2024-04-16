@@ -401,6 +401,17 @@ PageType {
                     }
                 }
 
+                onFocusItemIndexChanged: {
+                    const focusedElement = serversMenuContent.itemAtIndex(focusItemIndex)
+                    if (focusedElement) {
+                        if (focusedElement.y + focusedElement.height > serversMenuContent.height) {
+                            serversMenuContent.contentY = focusedElement.y + focusedElement.height - serversMenuContent.height
+                        } else {
+                            serversMenuContent.contentY = 0
+                        }
+                    }
+                }
+
                 Keys.onUpPressed: scrollBar.decrease()
                 Keys.onDownPressed: scrollBar.increase()
 
@@ -501,6 +512,7 @@ PageType {
                                         serversMenuContent.itemAtIndex(serversMenuContent.focusItemIndex).forceActiveFocus()
                                     } else {
                                         focusItem1.forceActiveFocus()
+                                        serversMenuContent.contentY = 0
                                     }
                                 }
                                 Keys.onEnterPressed: serverInfoButton.clicked()
