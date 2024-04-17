@@ -35,7 +35,7 @@ public slots:
     void removeAllContainers();
     void removeProcessedContainer();
 
-    void removeApiConfig();
+    void removeApiConfig(const int serverIndex);
 
     void clearCachedProfile();
 

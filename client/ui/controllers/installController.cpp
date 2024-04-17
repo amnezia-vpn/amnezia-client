@@ -564,9 +564,9 @@ void InstallController::removeProcessedContainer()
     emit installationErrorOccurred(errorString(errorCode));
 }
 
-void InstallController::removeApiConfig()
+void InstallController::removeApiConfig(const int serverIndex)
 {
-    auto serverConfig = m_serversModel->getServerConfig(m_serversModel->getDefaultServerIndex());
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
 
 #ifdef Q_OS_IOS
     QString vpncName = QString("%1 (%2) %3")
@@ -584,7 +584,7 @@ void InstallController::removeApiConfig()
 
     serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
 
-    m_serversModel->editServer(serverConfig, m_serversModel->getDefaultServerIndex());
+    m_serversModel->editServer(serverConfig, serverIndex);
 }
 
 void InstallController::clearCachedProfile()
