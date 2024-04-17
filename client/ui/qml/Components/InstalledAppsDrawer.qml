@@ -101,7 +101,7 @@ DrawerType2 {
                                 Layout.fillWidth: true
 
                                 text: appName
-
+                                checked: isAppSelected
                                 onCheckedChanged: {
                                     installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
                                 }
