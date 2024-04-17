@@ -170,6 +170,10 @@ PageType {
             id: tabBar
 
             Layout.fillWidth: true
+
+            currentIndex: (ServersModel.getProcessedServerData("isServerFromApi")
+                           && !ServersModel.getProcessedServerData("hasInstalledContainers")) ? 2 : 0
+
             background: Rectangle {
                 color: "transparent"
             }

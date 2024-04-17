@@ -16,6 +16,10 @@
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 
+#ifdef Q_OS_IOS
+    #include <AmneziaVPN-Swift.h>
+#endif
+
 namespace
 {
     Logger logger("ServerController");
@@ -85,14 +89,20 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(3, 10));
                 QString junkPacketMinSize = QString::number(50);
                 QString junkPacketMaxSize = QString::number(1000);
-                QString initPacketJunkSize = QString::number(QRandomGenerator::global()->bounded(15, 150));
-                QString responsePacketJunkSize = QString::number(QRandomGenerator::global()->bounded(15, 150));
+
+                int s1 = QRandomGenerator::global()->bounded(15, 150);
+                int s2 = QRandomGenerator::global()->bounded(15, 150);
+                while (s1 + AwgConstant::messageInitiationSize == s2 + AwgConstant::messageResponseSize) {
+                    s2 = QRandomGenerator::global()->bounded(15, 150);
+                }
+
+                QString initPacketJunkSize = QString::number(s1);
+                QString responsePacketJunkSize = QString::number(s2);
 
                 QSet<QString> headersValue;
                 while (headersValue.size() != 4) {
-
                     auto max = (std::numeric_limits<qint32>::max)();
-                    headersValue.insert(QString::number(QRandomGenerator::global()->bounded(1, max)));
+                    headersValue.insert(QString::number(QRandomGenerator::global()->bounded(5, max)));
                 }
 
                 auto headersValueList = headersValue.values();
@@ -560,9 +570,18 @@ void InstallController::removeProcessedContainer()
     emit installationErrorOccurred(errorString(errorCode));
 }
 
-void InstallController::removeApiConfig()
+void InstallController::removeApiConfig(const int serverIndex)
 {
-    auto serverConfig = m_serversModel->getServerConfig(m_serversModel->getDefaultServerIndex());
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+
+#ifdef Q_OS_IOS
+    QString vpncName = QString("%1 (%2) %3")
+        .arg(serverConfig[config_key::description].toString())
+        .arg(serverConfig[config_key::hostName].toString())
+        .arg(serverConfig[config_key::vpnproto].toString());
+
+    AmneziaVPN::removeVPNC(vpncName.toStdString());
+#endif
 
     serverConfig.remove(config_key::dns1);
     serverConfig.remove(config_key::dns2);
@@ -571,7 +590,7 @@ void InstallController::removeApiConfig()
 
     serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
 
-    m_serversModel->editServer(serverConfig, m_serversModel->getDefaultServerIndex());
+    m_serversModel->editServer(serverConfig, serverIndex);
 }
 
 void InstallController::clearCachedProfile()

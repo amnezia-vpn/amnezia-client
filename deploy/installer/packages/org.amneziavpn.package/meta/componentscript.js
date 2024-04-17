@@ -88,8 +88,9 @@ Component.prototype.createOperations = function()
         component.addElevatedOperation("Execute",
                                        ["sc", "create", serviceName(), "binpath=", pu_path + serviceName() + ".exe",
                                         "start=", "auto", "depend=", "BFE/nsi"],
-                                       "UNDOEXECUTE", "cmd", "/c", pu_path + "post_uninstall.cmd");
-
+                                        "UNDOEXECUTE", "cmd", "/c", pu_path + "post_uninstall.cmd");
+										
+        component.addElevatedOperation("Execute", "cmd", "/c", pu_path + "post_install.cmd");
     } else if (runningOnMacOS()) {
         component.addElevatedOperation("Execute", "@TargetDir@/post_install.sh", "UNDOEXECUTE", "@TargetDir@/post_uninstall.sh");
     } else if (runningOnLinux()) {
