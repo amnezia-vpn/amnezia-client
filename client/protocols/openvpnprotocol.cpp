@@ -336,6 +336,7 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                 for (int i = 0; i < netInterfaces.size(); i++) {
                     for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
                     {
+                        // killSwitch toggle
                         if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
                             if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
                                 IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
@@ -349,6 +350,7 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                 }
 #endif
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+                // killSwitch toggle
                 if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
                     IpcClient::Interface()->enableKillSwitch(m_configData, 0);
                 }

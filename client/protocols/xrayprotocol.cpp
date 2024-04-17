@@ -152,6 +152,7 @@ ErrorCode XrayProtocol::startTun2Sock()
             IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
 #endif
 #if defined(Q_OS_LINUX) || defined(Q_OS_LINUX)
+            // killSwitch toggle
             if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
                 IpcClient::Interface()->enableKillSwitch(m_configData, 0);
             }
@@ -168,6 +169,7 @@ ErrorCode XrayProtocol::startTun2Sock()
             for (int i = 0; i < netInterfaces.size(); i++) {
                 for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
                 {
+                    // killSwitch toggle
                     if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
                         if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
                             IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
