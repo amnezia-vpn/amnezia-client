@@ -215,7 +215,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            InstallController.removeApiConfig()
+                            InstallController.removeApiConfig(ServersModel.processedIndex)
                             PageController.showBusyIndicator(false)
                         }
                     }
