@@ -135,7 +135,6 @@ bool Utils::isBackgroundServicesEnabled()
 #if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
     return Utils::processIsRunning(SERVICE_NAME);
 #endif
-
     return true;
 }
 

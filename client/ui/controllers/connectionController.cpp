@@ -39,7 +39,7 @@ void ConnectionController::openConnection()
 #if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
     if (!Utils::isBackgroundServicesEnabled())
     {
-        emit connectionErrorOccurred(tr("Permissions error: Background services forbidden. Please check your settings"));
+        emit connectionErrorOccurred(errorString(ErrorCode::AmneziaServiceNotRunning));
         return;
     }
 #endif
