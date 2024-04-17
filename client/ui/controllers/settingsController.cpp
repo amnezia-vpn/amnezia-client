@@ -18,12 +18,14 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
                                        const QSharedPointer<ContainersModel> &containersModel,
                                        const QSharedPointer<LanguageModel> &languageModel,
                                        const QSharedPointer<SitesModel> &sitesModel,
+                                       const QSharedPointer<AppSplitTunnelingModel> &appSplitTunnelingModel,
                                        const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_languageModel(languageModel),
       m_sitesModel(sitesModel),
+      m_appSplitTunnelingModel(appSplitTunnelingModel),
       m_settings(settings)
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
@@ -76,6 +78,9 @@ void SettingsController::toggleLogging(bool enable)
 #endif
     if (enable == true) {
         checkIfNeedDisableLogs();
+        
+        qInfo().noquote() << QString("Logging has enabled on %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
+        qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
     }
     emit loggingStateChanged();
 }
@@ -144,19 +149,18 @@ void SettingsController::clearSettings()
     m_serversModel->resetModel();
     m_languageModel->changeLanguage(
             static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
-    m_sitesModel->setRouteMode(Settings::RouteMode::VpnAllSites);
+
+    m_sitesModel->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
+    m_sitesModel->toggleSplitTunneling(false);
+
+    m_appSplitTunnelingModel->setRouteMode(Settings::AppsRouteMode::VpnAllExceptApps);
+    m_appSplitTunnelingModel->toggleSplitTunneling(false);
 
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
 #ifdef Q_OS_IOS
     AmneziaVPN::clearSettings();
 #endif
-}
-
-void SettingsController::clearCachedProfiles()
-{
-    m_serversModel->clearCachedProfiles();
-    emit changeSettingsFinished(tr("Cached profiles cleared"));
 }
 
 bool SettingsController::isAutoConnectEnabled()

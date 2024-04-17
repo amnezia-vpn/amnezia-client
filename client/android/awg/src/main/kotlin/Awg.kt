@@ -66,6 +66,7 @@ class Awg : Wireguard() {
         return AwgConfig.build {
             configWireguard(configData, configDataJson)
             configSplitTunneling(config)
+            configAppSplitTunneling(config)
             configData["Jc"]?.let { setJc(it.toInt()) }
             configData["Jmin"]?.let { setJmin(it.toInt()) }
             configData["Jmax"]?.let { setJmax(it.toInt()) }

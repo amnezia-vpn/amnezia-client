@@ -1,5 +1,8 @@
 #include "containers_defs.h"
 
+#include "QJsonObject"
+#include "QJsonDocument"
+
 QDebug operator<<(QDebug debug, const amnezia::DockerContainer &c)
 {
     QDebugStateSaver saver(debug);
@@ -362,4 +365,14 @@ bool ContainerProps::isShareable(DockerContainer container)
     case DockerContainer::Sftp: return false;
     default: return true;
     }
+}
+
+QJsonObject ContainerProps::getProtocolConfigFromContainer(const Proto protocol, const QJsonObject &containerConfig)
+{
+    QString protocolConfigString = containerConfig.value(ProtocolProps::protoToString(protocol))
+                                           .toObject()
+                                           .value(config_key::last_config)
+                                           .toString();
+
+    return QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 }

@@ -7,6 +7,7 @@ import android.content.Intent.EXTRA_MIME_TYPES
 import android.content.Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import android.net.VpnService
 import android.os.Bundle
@@ -24,12 +25,15 @@ import androidx.core.content.ContextCompat
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.text.RegexOption.IGNORE_CASE
+import AppListProvider
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
@@ -402,25 +406,29 @@ class AmneziaActivity : QtActivity() {
         Log.v(TAG, "Open file with filter: $filter")
 
         val mimeTypes = if (!filter.isNullOrEmpty()) {
-            val extensionRegex = "\\*\\.[a-z .]+".toRegex(IGNORE_CASE)
+            val extensionRegex = "\\*\\.([a-z0-9]+)".toRegex(IGNORE_CASE)
             val mime = MimeTypeMap.getSingleton()
             extensionRegex.findAll(filter).map {
-                mime.getMimeTypeFromExtension(it.value.drop(2))
-            }.filterNotNull().toSet()
+                it.groups[1]?.value?.let { mime.getMimeTypeFromExtension(it) } ?: "*/*"
+            }.toSet()
         } else emptySet()
 
         Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             Log.v(TAG, "File mimyType filter: $mimeTypes")
-            when (mimeTypes.size) {
-                1 -> type = mimeTypes.first()
+            if ("*/*" in mimeTypes) {
+                type = "*/*"
+            } else {
+                when (mimeTypes.size) {
+                    1 -> type = mimeTypes.first()
 
-                in 2..Int.MAX_VALUE -> {
-                    type = "*/*"
-                    putExtra(EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+                    in 2..Int.MAX_VALUE -> {
+                        type = "*/*"
+                        putExtra(EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+                    }
+
+                    else -> type = "*/*"
                 }
-
-                else -> type = "*/*"
             }
         }.also {
             startActivityForResult(it, OPEN_FILE_ACTION_CODE)
@@ -475,5 +483,33 @@ class AmneziaActivity : QtActivity() {
             val flag = if (enabled) 0 else LayoutParams.FLAG_SECURE
             window.setFlags(flag, LayoutParams.FLAG_SECURE)
         }
+    }
+
+    @Suppress("unused")
+    fun minimizeApp() {
+        Log.v(TAG, "Minimize application")
+        mainScope.launch {
+            moveTaskToBack(false)
+        }
+    }
+
+    @Suppress("unused")
+    fun getAppList(): String {
+        Log.v(TAG, "Get app list")
+        var appList = ""
+        runBlocking {
+            mainScope.launch {
+                withContext(Dispatchers.IO) {
+                    appList = AppListProvider.getAppList(packageManager, packageName)
+                }
+            }.join()
+        }
+        return appList
+    }
+
+    @Suppress("unused")
+    fun getAppIcon(packageName: String, width: Int, height: Int): Bitmap {
+        Log.v(TAG, "Get app icon: $packageName")
+        return AppListProvider.getAppIcon(packageManager, packageName, width, height)
     }
 }

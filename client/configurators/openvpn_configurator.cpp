@@ -14,9 +14,9 @@
 #endif
 
 #include "containers/containers_defs.h"
+#include "core/controllers/serverController.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
-#include "core/controllers/serverController.h"
 #include "settings.h"
 #include "utilities.h"
 
@@ -31,59 +31,51 @@ OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings, QOb
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
                                                                               DockerContainer container,
-                                                                              ErrorCode *errorCode)
+                                                                              ErrorCode errorCode)
 {
     OpenVpnConfigurator::ConnectionData connData = OpenVpnConfigurator::createCertRequest();
     connData.host = credentials.hostName;
 
     if (connData.privKey.isEmpty() || connData.request.isEmpty()) {
-        if (errorCode)
-            *errorCode = ErrorCode::OpenSslFailed;
+        errorCode = ErrorCode::OpenSslFailed;
         return connData;
     }
 
     QString reqFileName = QString("%1/%2.req").arg(amnezia::protocols::openvpn::clientsDirPath).arg(connData.clientId);
 
     ServerController serverController(m_settings);
-    ErrorCode e = serverController.uploadTextFileToContainer(container, credentials, connData.request, reqFileName);
-    if (e) {
-        if (errorCode)
-            *errorCode = e;
+    errorCode = serverController.uploadTextFileToContainer(container, credentials, connData.request, reqFileName);
+    if (errorCode != ErrorCode::NoError) {
         return connData;
     }
 
-    e = signCert(container, credentials, connData.clientId);
-    if (e) {
-        if (errorCode)
-            *errorCode = e;
+    errorCode = signCert(container, credentials, connData.clientId);
+    if (errorCode != ErrorCode::NoError) {
         return connData;
     }
 
     connData.caCert = serverController.getTextFileFromContainer(container, credentials,
-                                                                amnezia::protocols::openvpn::caCertPath, &e);
+                                                                amnezia::protocols::openvpn::caCertPath, errorCode);
     connData.clientCert = serverController.getTextFileFromContainer(
             container, credentials,
-            QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath).arg(connData.clientId), &e);
+            QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath).arg(connData.clientId), errorCode);
 
-    if (e) {
-        if (errorCode)
-            *errorCode = e;
+    if (errorCode != ErrorCode::NoError) {
         return connData;
     }
 
     connData.taKey = serverController.getTextFileFromContainer(container, credentials,
-                                                               amnezia::protocols::openvpn::taKeyPath, &e);
+                                                               amnezia::protocols::openvpn::taKeyPath, errorCode);
 
     if (connData.caCert.isEmpty() || connData.clientCert.isEmpty() || connData.taKey.isEmpty()) {
-        if (errorCode)
-            *errorCode = ErrorCode::SshScpFailureError;
+        errorCode = ErrorCode::SshScpFailureError;
     }
 
     return connData;
 }
 
-QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
-                                              const QJsonObject &containerConfig, QString &clientId, ErrorCode *errorCode)
+QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                          const QJsonObject &containerConfig, ErrorCode errorCode)
 {
     ServerController serverController(m_settings);
     QString config =
@@ -91,7 +83,7 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
                                          serverController.genVarsForScript(credentials, container, containerConfig));
 
     ConnectionData connData = prepareOpenVpnConfig(credentials, container, errorCode);
-    if (errorCode && *errorCode) {
+    if (errorCode != ErrorCode::NoError) {
         return "";
     }
 
@@ -113,34 +105,35 @@ QString OpenVpnConfigurator::genOpenVpnConfig(const ServerCredentials &credentia
     QJsonObject jConfig;
     jConfig[config_key::config] = config;
 
-    clientId = connData.clientId;
+    jConfig[config_key::clientId] = connData.clientId;
 
     return QJsonDocument(jConfig).toJson();
 }
 
-QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig, const int serverIndex)
+QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                            QString &protocolConfigString)
 {
-    QJsonObject json = QJsonDocument::fromJson(jsonConfig.toUtf8()).object();
+    processConfigWithDnsSettings(dns, protocolConfigString);
+
+    QJsonObject json = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
     QString config = json[config_key::config].toString();
 
-    if (!m_settings->server(serverIndex).value(config_key::configVersion).toInt()) {
+    if (!isApiConfig) {
         QRegularExpression regex("redirect-gateway.*");
         config.replace(regex, "");
 
-        if (m_settings->routeMode() == Settings::VpnAllSites) {
+        if (!m_settings->getSitesSplitTunnelingEnabled()) {
             config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
             // Prevent ipv6 leak
             config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
             config.append("block-ipv6\n");
-        }
-        if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+        } else if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
 
             // no redirect-gateway
-        }
-        if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
-    #ifndef Q_OS_ANDROID
+        } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
+#ifndef Q_OS_ANDROID
             config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
-    #endif
+#endif
             // Prevent ipv6 leak
             config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
             config.append("block-ipv6\n");
@@ -164,9 +157,12 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(QString jsonConfig, 
     return QJsonDocument(json).toJson();
 }
 
-QString OpenVpnConfigurator::processConfigWithExportSettings(QString jsonConfig)
+QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                             QString &protocolConfigString)
 {
-    QJsonObject json = QJsonDocument::fromJson(jsonConfig.toUtf8()).object();
+    processConfigWithDnsSettings(dns, protocolConfigString);
+
+    QJsonObject json = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
     QString config = json[config_key::config].toString();
 
     QRegularExpression regex("redirect-gateway.*");

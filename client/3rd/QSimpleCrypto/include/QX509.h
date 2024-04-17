@@ -72,7 +72,7 @@ namespace QSimpleCrypto
         /// \param notAfter - X509 end date.
         /// \return Returns OpenSSL X509 structure or nullptr, if error happened. Returned value must be cleaned up with 'X509_free' to avoid memory leak.
         ///
-        X509* generateSelfSignedCertificate(const RSA* rsa, const QMap<QByteArray, QByteArray>& additionalData,
+        X509* generateSelfSignedCertificate(RSA* rsa, const QMap<QByteArray, QByteArray>& additionalData,
             const QByteArray& certificateFileName = "", const EVP_MD* md = EVP_sha512(),
             const long& serialNumber = 1, const long& version = x509LastVersion,
             const long& notBefore = 0, const long& notAfter = oneYear);

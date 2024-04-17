@@ -159,7 +159,7 @@ PageType {
 
                 clickedFunc: function() {
                     if (root.isEasySetup) {
-                        ContainersModel.setCurrentlyProcessedContainerIndex(containers.dockerContainer)
+                        ContainersModel.setProcessedContainerIndex(containers.dockerContainer)
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                         InstallController.install(containers.dockerContainer,
                                                   containers.containerDefaultPort,

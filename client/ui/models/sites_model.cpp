@@ -3,13 +3,11 @@
 SitesModel::SitesModel(std::shared_ptr<Settings> settings, QObject *parent)
     : QAbstractListModel(parent), m_settings(settings)
 {
-    auto routeMode = m_settings->routeMode();
-    if (routeMode == Settings::RouteMode::VpnAllSites) {
-        m_isSplitTunnelingEnabled = false;
-        m_currentRouteMode = Settings::RouteMode::VpnOnlyForwardSites;
-    } else {
-        m_isSplitTunnelingEnabled = true;
-        m_currentRouteMode = routeMode;
+    m_isSplitTunnelingEnabled = m_settings->getSitesSplitTunnelingEnabled();
+    m_currentRouteMode = m_settings->routeMode();
+    if (m_currentRouteMode == Settings::VpnAllSites) { // for old split tunneling configs
+        m_settings->setRouteMode(static_cast<Settings::RouteMode>(Settings::VpnOnlyForwardSites));
+        m_currentRouteMode = Settings::VpnOnlyForwardSites;
     }
     fillSites();
 }
@@ -107,11 +105,7 @@ bool SitesModel::isSplitTunnelingEnabled()
 
 void SitesModel::toggleSplitTunneling(bool enabled)
 {
-    if (enabled) {
-        setRouteMode(m_currentRouteMode);
-    } else {
-        m_settings->setRouteMode(Settings::RouteMode::VpnAllSites);
-    }
+    m_settings->setSitesSplitTunnelingEnabled(enabled);
     m_isSplitTunnelingEnabled = enabled;
     emit splitTunnelingToggled();
 }

@@ -82,7 +82,7 @@ PageType {
                 leftImageColor: "transparent"
                 borderWidth: 0
 
-                property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled ||
+                property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled || AppSplitTunnelingModel.isTunnelingEnabled ||
                                                        (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
 
                 text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
@@ -107,131 +107,128 @@ PageType {
         id: drawer
         anchors.fill: parent
 
-        collapsedContent:  ColumnLayout {
-            DividerType {
-                Layout.topMargin: 10
-                Layout.fillWidth: false
-                Layout.preferredWidth: 20
-                Layout.preferredHeight: 2
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+        collapsedContent:  Item {
+            implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
+            Component.onCompleted: {
+                drawer.expandedHeight = implicitHeight
             }
+            ColumnLayout {
+                id: collapsed
 
-            RowLayout {
-                Layout.topMargin: 14
-                Layout.leftMargin: 24
-                Layout.rightMargin: 24
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                anchors.left: parent.left
+                anchors.right: parent.right
 
-                spacing: 0
-
-                Connections {
-                    target: drawer
-                    function onEntered() {
-                        collapsedButtonChevron.backgroundColor = collapsedButtonChevron.hoveredColor
-                        collapsedButtonHeader.opacity = 0.8
-                    }
-
-                    function onExited() {
-                        collapsedButtonChevron.backgroundColor = collapsedButtonChevron.defaultColor
-                        collapsedButtonHeader.opacity = 1
-                    }
-
-                    function onPressed(pressed, entered) {
-                        collapsedButtonChevron.backgroundColor = pressed ? collapsedButtonChevron.pressedColor : entered ? collapsedButtonChevron.hoveredColor : collapsedButtonChevron.defaultColor
-                        collapsedButtonHeader.opacity = 0.7
-                    }
+                Component.onCompleted: {
+                    drawer.collapsedHeight = collapsed.implicitHeight
                 }
 
-                Header1TextType {
-                    id: collapsedButtonHeader
-                    Layout.maximumWidth: drawer.width - 48 - 18 - 12 // todo
-
-                    maximumLineCount: 2
-                    elide: Qt.ElideRight
-
-                    text: ServersModel.defaultServerName
-                    horizontalAlignment: Qt.AlignHCenter
-
-                    Behavior on opacity {
-                        PropertyAnimation { duration: 200 }
-                    }
+                DividerType {
+                    Layout.topMargin: 10
+                    Layout.fillWidth: false
+                    Layout.preferredWidth: 20
+                    Layout.preferredHeight: 2
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 }
 
-                ImageButtonType {
-                    id: collapsedButtonChevron
+                RowLayout {
+                    Layout.topMargin: 14
+                    Layout.leftMargin: 24
+                    Layout.rightMargin: 24
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-                    Layout.leftMargin: 8
+                    spacing: 0
 
-                    hoverEnabled: false
-                    image: "qrc:/images/controls/chevron-down.svg"
-                    imageColor: "#d7d8db"
+                    Connections {
+                        target: drawer
+                        function onEntered() {
+                            if (drawer.isCollapsed) {
+                                collapsedButtonChevron.backgroundColor = collapsedButtonChevron.hoveredColor
+                                collapsedButtonHeader.opacity = 0.8
+                            } else {
+                                collapsedButtonHeader.opacity = 1
+                            }
+                        }
 
-                    icon.width: 18
-                    icon.height: 18
-                    backgroundRadius: 16
-                    horizontalPadding: 4
-                    topPadding: 4
-                    bottomPadding: 3
+                        function onExited() {
+                            if (drawer.isCollapsed) {
+                                collapsedButtonChevron.backgroundColor = collapsedButtonChevron.defaultColor
+                                collapsedButtonHeader.opacity = 1
+                            } else {
+                                collapsedButtonHeader.opacity = 1
+                            }
+                        }
 
-                    onClicked: {
-                        if (drawer.isCollapsed) {
-                            drawer.open()
+                        function onPressed(pressed, entered) {
+                            if (drawer.isCollapsed) {
+                                collapsedButtonChevron.backgroundColor = pressed ? collapsedButtonChevron.pressedColor : entered ? collapsedButtonChevron.hoveredColor : collapsedButtonChevron.defaultColor
+                                collapsedButtonHeader.opacity = 0.7
+                            } else {
+                                collapsedButtonHeader.opacity = 1
+                            }
+                        }
+                    }
+
+                    Header1TextType {
+                        id: collapsedButtonHeader
+                        Layout.maximumWidth: drawer.width - 48 - 18 - 12
+
+                        maximumLineCount: 2
+                        elide: Qt.ElideRight
+
+                        text: ServersModel.defaultServerName
+                        horizontalAlignment: Qt.AlignHCenter
+
+                        Behavior on opacity {
+                            PropertyAnimation { duration: 200 }
+                        }
+                    }
+
+                    ImageButtonType {
+                        id: collapsedButtonChevron
+
+                        Layout.leftMargin: 8
+
+                        visible: drawer.isCollapsed
+
+                        hoverEnabled: false
+                        image: "qrc:/images/controls/chevron-down.svg"
+                        imageColor: "#d7d8db"
+
+                        icon.width: 18
+                        icon.height: 18
+                        backgroundRadius: 16
+                        horizontalPadding: 4
+                        topPadding: 4
+                        bottomPadding: 3
+
+                        onClicked: {
+                            if (drawer.isCollapsed) {
+                                drawer.open()
+                            }
                         }
                     }
                 }
-            }
 
-            LabelTextType {
-                id: collapsedServerMenuDescription
-                Layout.bottomMargin: 44
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                text: ServersModel.defaultServerDescriptionCollapsed
-            }
-        }
-        expandedContent: Item {
-            id: serverMenuContainer
-
-            implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
-
-            Component.onCompleted: {
-                drawer.expandedHeight = serverMenuContainer.implicitHeight
+                LabelTextType {
+                    id: collapsedServerMenuDescription
+                    Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 89 : 44
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                    text: drawer.isCollapsed ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
+                }
             }
 
             ColumnLayout {
                 id: serversMenuHeader
 
-                anchors.top: parent.top
+                anchors.top: collapsed.bottom
                 anchors.right: parent.right
                 anchors.left: parent.left
-
-
-                Header1TextType {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 14
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-
-                    text: ServersModel.defaultServerName
-                    horizontalAlignment: Qt.AlignHCenter
-                    maximumLineCount: 2
-                    elide: Qt.ElideRight
-                }
-
-                LabelTextType {
-                    id: expandedServersMenuDescription
-                    Layout.bottomMargin: ServersModel.isDefaultServerFromApi ? 69 : 24
-                    Layout.fillWidth: true
-                    horizontalAlignment: Qt.AlignHCenter
-                    verticalAlignment: Qt.AlignVCenter
-                    text: ServersModel.defaultServerDescriptionExpanded
-                }
 
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     spacing: 8
 
                     visible: !ServersModel.isDefaultServerFromApi
-                    onVisibleChanged: expandedServersMenuDescription.Layout
 
                     DropDownType {
                         id: containersDropDown
@@ -298,7 +295,6 @@ PageType {
                     headerText: qsTr("Servers")
                 }
             }
-
 
             ButtonGroup {
                 id: serversRadioButtonGroup
