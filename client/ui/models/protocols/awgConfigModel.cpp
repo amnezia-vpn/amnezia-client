@@ -129,6 +129,16 @@ QJsonObject AwgConfigModel::getConfig()
     return m_fullConfig;
 }
 
+bool AwgConfigModel::isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4)
+{
+    return (h1 == h2) || (h1 == h3) || (h1 == h4) || (h2 == h3) || (h2 == h4) || (h3 == h4);
+}
+
+bool AwgConfigModel::isPacketSizeEqual(const int s1, const int s2)
+{
+    return (AwgConstant::messageInitiationSize + s1 == AwgConstant::messageResponseSize + s2);
+}
+
 QHash<int, QByteArray> AwgConfigModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
