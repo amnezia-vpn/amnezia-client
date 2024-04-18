@@ -175,6 +175,9 @@ PageType {
                         pattern: ".*" + searchField.textField.text + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
+                    sorters: [
+                        RoleSorter { roleName: "appPath"; sortOrder: Qt.AscendingOrder }
+                    ]
                 }
 
                 clip: true
