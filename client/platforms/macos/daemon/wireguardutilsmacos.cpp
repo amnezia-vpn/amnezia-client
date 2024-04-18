@@ -101,15 +101,31 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   out << "private_key=" << QString(privateKey.toHex()) << "\n";
   out << "replace_peers=true\n";
 
-  if (config.m_junkPacketCount != "") {
+  if (!config.m_junkPacketCount.isEmpty()) {
     out << "jc=" << config.m_junkPacketCount << "\n";
+  }
+  if (!config.m_junkPacketMinSize.isEmpty()) {
     out << "jmin=" << config.m_junkPacketMinSize << "\n";
+  }
+  if (!config.m_junkPacketMaxSize.isEmpty()) {
     out << "jmax=" << config.m_junkPacketMaxSize << "\n";
+  }
+  if (!config.m_initPacketJunkSize.isEmpty()) {
     out << "s1=" << config.m_initPacketJunkSize << "\n";
+  }
+  if (!config.m_responsePacketJunkSize.isEmpty()) {
     out << "s2=" << config.m_responsePacketJunkSize << "\n";
+  }
+  if (!config.m_initPacketMagicHeader.isEmpty()) {
     out << "h1=" << config.m_initPacketMagicHeader << "\n";
+  }
+  if (!config.m_responsePacketMagicHeader.isEmpty()) {
     out << "h2=" << config.m_responsePacketMagicHeader << "\n";
+  }
+  if (!config.m_underloadPacketMagicHeader.isEmpty()) {
     out << "h3=" << config.m_underloadPacketMagicHeader << "\n";
+  }
+  if (!config.m_transportPacketMagicHeader.isEmpty()) {
     out << "h4=" << config.m_transportPacketMagicHeader << "\n";
   }
 
