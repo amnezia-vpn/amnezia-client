@@ -12,7 +12,7 @@ class VpnConfigurationsController : public QObject
 {
     Q_OBJECT
 public:
-    explicit VpnConfigurationsController(const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+    explicit VpnConfigurationsController(const std::shared_ptr<Settings> &settings, QSharedPointer<ServerController> serverController, QObject *parent = nullptr);
 
 public slots:
     ErrorCode createProtocolConfigForContainer(const ServerCredentials &credentials, const DockerContainer container,
@@ -30,6 +30,7 @@ private:
     QScopedPointer<ConfiguratorBase> createConfigurator(const Proto protocol);
 
     std::shared_ptr<Settings> m_settings;
+    QSharedPointer<ServerController> m_serverController;
 };
 
 #endif // VPNCONFIGIRATIONSCONTROLLER_H
