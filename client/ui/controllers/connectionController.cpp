@@ -42,7 +42,7 @@ void ConnectionController::openConnection()
     if (serverConfig.value(config_key::configVersion).toInt()
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         ApiController apiController;
-        errorCode = apiController.updateServerConfigFromApi(serverConfig);
+        errorCode = apiController.updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverConfig);
         if (errorCode != ErrorCode::NoError) {
             emit connectionErrorOccurred(errorString(errorCode));
             return;
