@@ -9,11 +9,15 @@ Item {
     property string actionButtonImage
     property var actionButtonFunction
 
+    property alias actionButton: headerActionButton
+
     property string headerText
     property int headerTextMaximumLineCount: 2
     property int headerTextElide: Qt.ElideRight
 
     property string descriptionText
+
+    focus: true
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
@@ -65,6 +69,18 @@ Item {
             color: "#878B91"
 
             visible: root.descriptionText !== ""
+        }
+    }
+
+    Keys.onEnterPressed: {
+        if (actionButtonFunction && typeof actionButtonFunction === "function") {
+            actionButtonFunction()
+        }
+    }
+
+    Keys.onReturnPressed: {
+        if (actionButtonFunction && typeof actionButtonFunction === "function") {
+            actionButtonFunction()
         }
     }
 }

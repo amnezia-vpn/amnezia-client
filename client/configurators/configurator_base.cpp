@@ -1,7 +1,7 @@
 #include "configurator_base.h"
 
-ConfiguratorBase::ConfiguratorBase(std::shared_ptr<Settings> settings, QObject *parent)
-    : QObject { parent }, m_settings(settings)
+ConfiguratorBase::ConfiguratorBase(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
+    : QObject { parent }, m_settings(settings), m_serverController(serverController)
 {
 }
 

@@ -5,7 +5,6 @@
 #include <QNetworkReply>
 #include <QtConcurrent>
 
-#include "core/errorstrings.h"
 #include "configurators/wireguard_configurator.h"
 
 namespace
@@ -20,6 +19,7 @@ namespace
         constexpr char certificate[] = "certificate";
         constexpr char publicKey[] = "public_key";
         constexpr char protocol[] = "protocol";
+        constexpr char uuid[] = "installation_uuid";
     }
 }
 
@@ -64,11 +64,11 @@ QJsonObject ApiController::fillApiPayload(const QString &protocol, const ApiCont
     return obj;
 }
 
-ErrorCode ApiController::updateServerConfigFromApi(QJsonObject &serverConfig)
+ErrorCode ApiController::updateServerConfigFromApi(const QString &installationUuid, QJsonObject &serverConfig)
 {
     QFutureWatcher<ErrorCode> watcher;
 
-    QFuture<ErrorCode> future = QtConcurrent::run([this, &serverConfig]() {
+    QFuture<ErrorCode> future = QtConcurrent::run([this, &serverConfig, &installationUuid]() {
         auto containerConfig = serverConfig.value(config_key::containers).toArray();
 
         if (serverConfig.value(config_key::configVersion).toInt()) {
@@ -86,7 +86,10 @@ ErrorCode ApiController::updateServerConfigFromApi(QJsonObject &serverConfig)
 
             auto apiPayloadData = generateApiPayloadData(protocol);
 
-            QByteArray requestBody = QJsonDocument(fillApiPayload(protocol, apiPayloadData)).toJson();
+            auto apiPayload = fillApiPayload(protocol, apiPayloadData);
+            apiPayload[configKey::uuid] = installationUuid;
+
+            QByteArray requestBody = QJsonDocument(apiPayload).toJson();
 
             QScopedPointer<QNetworkReply> reply;
             reply.reset(manager.post(request, requestBody));

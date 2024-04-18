@@ -6,6 +6,11 @@
 
 #include "containers/containers_defs.h"
 
+namespace AwgConstant {
+    const int messageInitiationSize = 148;
+    const int messageResponseSize = 92;
+}
+
 struct AwgConfig
 {
     AwgConfig(const QJsonObject &jsonConfig);
@@ -56,6 +61,9 @@ public:
 public slots:
     void updateModel(const QJsonObject &config);
     QJsonObject getConfig();
+
+    bool isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4);
+    bool isPacketSizeEqual(const int s1, const int s2);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

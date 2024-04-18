@@ -18,6 +18,13 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
         id: header
 
@@ -28,6 +35,8 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listView
         }
 
         HeaderType {
@@ -55,15 +64,28 @@ PageType {
             anchors.topMargin: 32
 
             ListView {
+                id: listView
                 width: parent.width
                 height: contentItem.height
                 clip: true
                 interactive: false
                 model: ProtocolsModel
 
+                activeFocusOnTab: true
+                focus: true
+
+                onActiveFocusChanged: {
+                    if (focus) {
+                        listView.currentIndex = 0
+                        listView.currentItem.focusItem.forceActiveFocus()
+                    }
+                }
+
                 delegate: Item {
                     implicitWidth: parent.width
                     implicitHeight: delegateContent.implicitHeight
+
+                    property alias focusItem: button
 
                     ColumnLayout {
                         id: delegateContent
@@ -81,6 +103,8 @@ PageType {
                                 configContentDrawer.open()
                             }
 
+                            KeyNavigation.tab: removeButton
+
                             MouseArea {
                                 anchors.fill: button
                                 cursorShape: Qt.PointingHandCursor
@@ -95,14 +119,33 @@ PageType {
 
                             expandedHeight: root.height * 0.9
 
+                            onClosed: {
+                                if (!GC.isMobile()) {
+                                    defaultActiveFocusItem.forceActiveFocus()
+                                }
+                            }
+
                             parent: root
                             anchors.fill: parent
 
                             expandedContent: Item {
                                 implicitHeight: configContentDrawer.expandedHeight
 
+                                Connections {
+                                    target: configContentDrawer
+                                    enabled: !GC.isMobile()
+                                    function onOpened() {
+                                        focusItem1.forceActiveFocus()
+                                    }
+                                }
+
+                                Item {
+                                    id: focusItem1
+                                    KeyNavigation.tab: backButton1
+                                }
+
                                 BackButtonType {
-                                    id: backButton
+                                    id: backButton1
 
                                     anchors.top: parent.top
                                     anchors.left: parent.left
@@ -112,10 +155,12 @@ PageType {
                                     backButtonFunction: function() {
                                         configContentDrawer.close()
                                     }
+
+                                    KeyNavigation.tab: focusItem1
                                 }
 
                                 FlickableType {
-                                    anchors.top: backButton.bottom
+                                    anchors.top: backButton1.bottom
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.bottom: parent.bottom
@@ -180,6 +225,7 @@ PageType {
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: "#EB5757"
 
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                     var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
@@ -191,6 +237,9 @@ PageType {
                         InstallController.removeProcessedContainer()
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            focusItem.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

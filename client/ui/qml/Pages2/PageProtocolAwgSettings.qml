@@ -18,8 +18,18 @@ PageType {
 
     defaultActiveFocusItem: listview.currentItem.portTextField.textField
 
+    Item {
+        id: focusItem
+        onFocusChanged: {
+            if (activeFocus) {
+                fl.ensureVisible(focusItem)
+            }
+        }
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -28,12 +38,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listview.currentItem.portTextField.textField
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -47,8 +59,6 @@ PageType {
             enabled: ServersModel.isProcessedServerHasWriteAccess()
 
             ListView {
-
-
                 id: listview
 
                 width: parent.width
@@ -94,6 +104,7 @@ PageType {
                             textFieldText: port
                             textField.maximumLength: 5
                             textField.validator: IntValidator { bottom: 1; top: 65535 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== port) {
@@ -103,7 +114,7 @@ PageType {
 
                             checkEmptyText: true
 
-                            KeyNavigation.tab: junkPacketCountTextField.textField
+                            KeyNavigation.tab: mtuTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -124,6 +135,7 @@ PageType {
                                 }
                             }
                             checkEmptyText: true
+                            KeyNavigation.tab: junkPacketCountTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -134,9 +146,9 @@ PageType {
                             headerText: "Jc - Junk packet count"
                             textFieldText: junkPacketCount
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                console.log("1")
                                 if (textFieldText === "") {
                                     textFieldText = "0"
                                 }
@@ -159,6 +171,7 @@ PageType {
                             headerText: "Jmin - Junk packet minimum size"
                             textFieldText: junkPacketMinSize
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== junkPacketMinSize) {
@@ -179,6 +192,7 @@ PageType {
                             headerText: "Jmax - Junk packet maximum size"
                             textFieldText: junkPacketMaxSize
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== junkPacketMaxSize) {
@@ -199,6 +213,7 @@ PageType {
                             headerText: "S1 - Init packet junk size"
                             textFieldText: initPacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== initPacketJunkSize) {
@@ -219,6 +234,7 @@ PageType {
                             headerText: "S2 - Response packet junk size"
                             textFieldText: responsePacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== responsePacketJunkSize) {
@@ -239,6 +255,7 @@ PageType {
                             headerText: "H1 - Init packet magic header"
                             textFieldText: initPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== initPacketMagicHeader) {
@@ -259,6 +276,7 @@ PageType {
                             headerText: "H2 - Response packet magic header"
                             textFieldText: responsePacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== responsePacketMagicHeader) {
@@ -279,6 +297,7 @@ PageType {
                             headerText: "H4 - Transport packet magic header"
                             textFieldText: transportPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== transportPacketMagicHeader) {
@@ -295,6 +314,7 @@ PageType {
                             id: underloadPacketMagicHeaderTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+                            parentFlickable: fl
 
                             headerText: "H3 - Underload packet magic header"
                             textFieldText: underloadPacketMagicHeader
@@ -313,6 +333,7 @@ PageType {
 
                         BasicButtonType {
                             id: saveRestartButton
+                            parentFlickable: fl
 
                             Layout.fillWidth: true
                             Layout.topMargin: 24
@@ -331,7 +352,23 @@ PageType {
 
                             text: qsTr("Save")
 
-                            onClicked: {
+                            Keys.onTabPressed: lastItemTabClicked(focusItem)
+
+                            clickedFunc: function() {
+                                if (AwgConfigModel.isHeadersEqual(underloadPacketMagicHeaderTextField.textField.text,
+                                                                  transportPacketMagicHeaderTextField.textField.text,
+                                                                  responsePacketMagicHeaderTextField.textField.text,
+                                                                  initPacketMagicHeaderTextField.textField.text)) {
+                                    PageController.showErrorMessage(qsTr("The values of the H1-H4 fields must be unique"))
+                                    return
+                                }
+
+                                if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
+                                                                     parseInt(responsePacketJunkSizeTextField.textField.text))) {
+                                    PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)"))
+                                    return
+                                }
+
                                 var headerText = qsTr("Save settings?")
                                 var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                                 var yesButtonText = qsTr("Continue")
@@ -339,10 +376,19 @@ PageType {
 
                                 var yesButtonFunction = function() {
                                     forceActiveFocus()
+
+                                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                        PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                        return
+                                    }
+
                                     PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                     InstallController.updateContainer(AwgConfigModel.getConfig())
                                 }
                                 var noButtonFunction = function() {
+                                    if (!GC.isMobile()) {
+                                        saveRestartButton.forceActiveFocus()
+                                    }
                                 }
                                 showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }

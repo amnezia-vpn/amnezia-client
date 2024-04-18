@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 
 #include "settings.h"
+#include "core/controllers/serverController.h"
 
 class ServersModel : public QAbstractListModel
 {
@@ -88,9 +89,9 @@ public slots:
 
     void clearCachedProfile(const DockerContainer container);
 
-    ErrorCode removeContainer(const int containerIndex);
-    ErrorCode removeAllContainers();
-    ErrorCode rebootServer();
+    ErrorCode removeContainer(const QSharedPointer<ServerController> &serverController, const int containerIndex);
+    ErrorCode removeAllContainers(const QSharedPointer<ServerController> &serverController);
+    ErrorCode rebootServer(const QSharedPointer<ServerController> &serverController);
 
     void setDefaultContainer(const int serverIndex, const int containerIndex);
 
