@@ -13,7 +13,7 @@ public:
     explicit ApiController(QObject *parent = nullptr);
 
 public slots:
-    ErrorCode updateServerConfigFromApi(QJsonObject &serverConfig);
+    ErrorCode updateServerConfigFromApi(const QString &installationUuid, QJsonObject &serverConfig);
 
 private:
     struct ApiPayloadData {

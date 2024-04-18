@@ -31,12 +31,17 @@ namespace
         const QString xrayConfigPatternOutbound = "outbounds";
 
         const QString amneziaConfigPattern = "containers";
+        const QString amneziaConfigPatternHostName = "hostName";
+        const QString amneziaConfigPatternUserName = "userName";
+        const QString amneziaConfigPatternPassword = "password";
         const QString amneziaFreeConfigPattern = "api_key";
         const QString backupPattern = "Servers/serversList";
 
         if (config.contains(backupPattern)) {
             return ConfigTypes::Backup;
-        } else if (config.contains(amneziaConfigPattern) || config.contains(amneziaFreeConfigPattern)) {
+        } else if (config.contains(amneziaConfigPattern) || config.contains(amneziaFreeConfigPattern)
+                   || (config.contains(amneziaConfigPatternHostName) && config.contains(amneziaConfigPatternUserName)
+                       && config.contains(amneziaConfigPatternPassword))) {
             return ConfigTypes::Amnezia;
         } else if (config.contains(openVpnConfigPatternCli)
                    && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))

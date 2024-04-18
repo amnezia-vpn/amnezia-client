@@ -15,6 +15,24 @@ PageType {
 
     property bool showContent: false
 
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
+    BackButtonType {
+        id: backButton
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.topMargin: 20
+
+        KeyNavigation.tab: showContentButton
+    }
+
     Connections {
         target: ImportController
 
@@ -37,15 +55,6 @@ PageType {
                 PageController.replaceStartPage()
             }
         }
-    }
-
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20
     }
 
     FlickableType {
@@ -88,6 +97,7 @@ PageType {
             }
 
             BasicButtonType {
+                id: showContentButton
                 Layout.topMargin: 16
                 Layout.leftMargin: -8
                 implicitHeight: 32
@@ -99,6 +109,7 @@ PageType {
                 textColor: "#FBB26A"
 
                 text: showContent ? qsTr("Collapse content") : qsTr("Show content")
+                KeyNavigation.tab: connectButton
 
                 clickedFunc: function() {
                     showContent = !showContent
@@ -147,15 +158,16 @@ PageType {
     }
 
     ColumnLayout {
-        id: connectButton
-
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.rightMargin: 16
         anchors.leftMargin: 16
 
+        Keys.onTabPressed: lastItemTabClicked(focusItem)
+
         BasicButtonType {
+            id: connectButton
             Layout.fillWidth: true
             Layout.bottomMargin: 32
 

@@ -11,7 +11,7 @@ class OpenVpnConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    OpenVpnConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    OpenVpnConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent = nullptr);
 
     struct ConnectionData
     {

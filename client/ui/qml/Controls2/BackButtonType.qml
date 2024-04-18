@@ -13,6 +13,12 @@ Item {
 
     visible: backButtonImage !== ""
 
+    onActiveFocusChanged: {
+        if (activeFocus) {
+            backButton.forceActiveFocus()
+        }
+    }
+
     RowLayout {
         id: content
 
@@ -20,6 +26,7 @@ Item {
         anchors.leftMargin: 8
 
         ImageButtonType {
+            id: backButton
             image: backButtonImage
             imageColor: "#D7D8DB"
 
@@ -42,4 +49,7 @@ Item {
             color: "transparent"
         }
     }
+
+    Keys.onEnterPressed: backButton.clicked()
+    Keys.onReturnPressed: backButton.clicked()
 }

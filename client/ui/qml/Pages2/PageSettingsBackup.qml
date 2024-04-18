@@ -16,6 +16,8 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     Connections {
         target: SettingsController
 
@@ -34,6 +36,11 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -41,6 +48,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: makeBackupButton
     }
 
     FlickableType {
@@ -102,9 +111,12 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Backup file saved"))
                     }
                 }
+
+                KeyNavigation.tab: restoreBackupButton
             }
 
             BasicButtonType {
+                id: restoreBackupButton
                 Layout.fillWidth: true
                 Layout.topMargin: -8
 
@@ -124,6 +136,8 @@ PageType {
                         restoreBackup(filePath)
                     }
                 }
+
+                Keys.onTabPressed: lastItemTabClicked()
             }
         }
     }
@@ -135,9 +149,14 @@ PageType {
         var noButtonText = qsTr("Cancel")
 
         var yesButtonFunction = function() {
-            PageController.showBusyIndicator(true)
-            SettingsController.restoreAppConfig(filePath)
-            PageController.showBusyIndicator(false)
+            if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                PageController.showNotificationMessage(qsTr("Cannot restore backup settings during active connection"))
+            } else
+            {
+                PageController.showBusyIndicator(true)
+                SettingsController.restoreAppConfig(filePath)
+                PageController.showBusyIndicator(false)
+            }
         }
         var noButtonFunction = function() {
         }
