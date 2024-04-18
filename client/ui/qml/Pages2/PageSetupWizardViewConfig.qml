@@ -116,6 +116,15 @@ PageType {
                 }
             }
 
+            CheckBoxType {
+                id: cloakingCheckBox
+
+                visible: ImportController.isNativeWireGuardConfig()
+
+                Layout.fillWidth: true
+                text: qsTr("Enable WireGuard obfuscation. It may be useful if WireGuard is blocked on your provider.")
+            }
+
             WarningType {
                 Layout.topMargin: 16
                 Layout.fillWidth: true
@@ -164,6 +173,9 @@ PageType {
 
             text: qsTr("Connect")
             clickedFunc: function() {
+                if (cloakingCheckBox.checked) {
+                    ImportController.processNativeWireGuardConfig()
+                }
                 ImportController.importConfig()
             }
         }
