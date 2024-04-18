@@ -5,6 +5,8 @@ import QtQuick.Layouts
 import "../Controls2"
 import "../Controls2/TextTypes"
 
+import "../Config"
+
 DrawerType2 {
     id: root
 
@@ -29,6 +31,14 @@ DrawerType2 {
             root.expandedHeight = content.implicitHeight + 32
         }
 
+        Connections {
+            target: root
+            enabled: !GC.isMobile()
+            function onOpened() {
+                focusItem.forceActiveFocus()
+            }
+        }
+
         Header2TextType {
             Layout.fillWidth: true
             Layout.topMargin: 16
@@ -47,7 +57,13 @@ DrawerType2 {
             text: descriptionText
         }
 
+        Item {
+            id: focusItem
+            KeyNavigation.tab: yesButton
+        }
+
         BasicButtonType {
+            id: yesButton
             Layout.fillWidth: true
             Layout.topMargin: 16
             Layout.rightMargin: 16
@@ -60,9 +76,12 @@ DrawerType2 {
                     yesButtonFunction()
                 }
             }
+
+            KeyNavigation.tab: noButton
         }
 
         BasicButtonType {
+            id: noButton
             Layout.fillWidth: true
             Layout.rightMargin: 16
             Layout.leftMargin: 16
@@ -81,6 +100,8 @@ DrawerType2 {
                     noButtonFunction()
                 }
             }
+
+            KeyNavigation.tab: focusItem
         }
     }
 }

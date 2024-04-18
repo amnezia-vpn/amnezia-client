@@ -18,6 +18,13 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
         id: header
 
@@ -28,6 +35,8 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: protocols
         }
 
         HeaderType {
@@ -47,7 +56,28 @@ PageType {
             interactive: true
             model: ProtocolsModel
 
+            property int currentFocusIndex: 0
+
+            activeFocusOnTab: true
+            onActiveFocusChanged: {
+                if (activeFocus) {
+                    this.currentFocusIndex = 0
+                    protocols.itemAtIndex(currentFocusIndex).focusItem.forceActiveFocus()
+                }
+            }
+
+            Keys.onTabPressed: {
+                if (currentFocusIndex < this.count - 1) {
+                    currentFocusIndex += 1
+                    protocols.itemAtIndex(currentFocusIndex).focusItem.forceActiveFocus()
+                } else {
+                    clearCacheButton.forceActiveFocus()
+                }
+            }
+
             delegate: Item {
+                property var focusItem: button.rightButton
+
                 implicitWidth: protocols.width
                 implicitHeight: delegateContent.implicitHeight
 
@@ -95,6 +125,7 @@ PageType {
             Layout.fillWidth: true
 
             visible: ServersModel.isProcessedServerHasWriteAccess()
+            KeyNavigation.tab: removeButton
 
             text: qsTr("Clear %1 profile").arg(ContainersModel.getProcessedContainerName())
 
@@ -116,6 +147,9 @@ PageType {
                     PageController.showBusyIndicator(false)
                 }
                 var noButtonFunction = function() {
+                    if (!GC.isMobile()) {
+                        focusItem.forceActiveFocus()
+                    }
                 }
 
                 showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -142,6 +176,7 @@ PageType {
             Layout.fillWidth: true
 
             visible: ServersModel.isProcessedServerHasWriteAccess()
+            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
             text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
             textColor: "#EB5757"
@@ -163,6 +198,9 @@ PageType {
                     }
                 }
                 var noButtonFunction = function() {
+                    if (!GC.isMobile()) {
+                        focusItem.forceActiveFocus()
+                    }
                 }
 
                 showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -184,3 +222,4 @@ PageType {
         }
     }
 }
+

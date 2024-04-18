@@ -19,6 +19,7 @@ RadioButton {
     property string checkedBorderColor: "#FBB26A"
     property string defaultBodredColor: "transparent"
     property string checkedDisabledBorderColor: "#84603D"
+    property string borderFocusedColor: "#D7D8DB"
     property int borderWidth: 0
 
     implicitWidth: content.implicitWidth
@@ -47,6 +48,8 @@ RadioButton {
                     return root.pressedBorderColor
                 } else if (root.checked) {
                     return root.checkedBorderColor
+                } else if (root.activeFocus) {
+                    return root.borderFocusedColor
                 }
                 return root.defaultBodredColor
             } else {
@@ -58,7 +61,7 @@ RadioButton {
         }
 
         border.width: {
-            if(root.checked) {
+            if(root.checked || root.activeFocus) {
                 return 1
             }
             return root.pressed ? 1 : 0
@@ -96,5 +99,13 @@ RadioButton {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         enabled: false
+    }
+
+    Keys.onEnterPressed: {
+        this.clicked()
+    }
+
+    Keys.onReturnPressed: {
+        this.clicked()
     }
 }

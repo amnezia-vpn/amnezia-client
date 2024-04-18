@@ -15,10 +15,17 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.portTextField.textField
+    defaultActiveFocusItem: listview.currentItem.focusItemId.enabled ?
+                                listview.currentItem.focusItemId.textField :
+                                focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
 
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -27,12 +34,16 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listview.currentItem.focusItemId.enabled ?
+                                   listview.currentItem.focusItemId.textField :
+                                   focusItem
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -60,7 +71,11 @@ PageType {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
-                    property alias portTextField: portTextField
+                    property var focusItemId: portTextField.enabled ?
+                                                    portTextField :
+                                                    cipherDropDown.enabled ?
+                                                        cipherDropDown :
+                                                        saveRestartButton
 
                     ColumnLayout {
                         id: col
@@ -99,7 +114,7 @@ PageType {
                                 }
                             }
 
-                            KeyNavigation.tab: saveRestartButton
+                            KeyNavigation.tab: cipherDropDown
                         }
 
                         DropDownType {
@@ -113,6 +128,7 @@ PageType {
                             headerText: qsTr("Cipher")
 
                             drawerParent: root
+                            KeyNavigation.tab: saveRestartButton
 
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView
@@ -155,6 +171,7 @@ PageType {
                             enabled: isPortEditable | isCipherEditable
 
                             text: qsTr("Save")
+                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()

@@ -11,6 +11,28 @@ Item {
 
     property var defaultActiveFocusItem: null
 
+    onVisibleChanged: {
+        if (visible && !GC.isMobile()) {
+            timer.start()
+        }
+    }
+
+    function lastItemTabClicked(focusItem) {
+        if (GC.isMobile()) {
+            return
+        }
+
+        if (focusItem) {
+            focusItem.forceActiveFocus()
+            PageController.forceTabBarActiveFocus()
+        } else {
+            if (defaultActiveFocusItem) {
+                defaultActiveFocusItem.forceActiveFocus()
+            }
+            PageController.forceTabBarActiveFocus()
+        }
+    }
+
 //    MouseArea {
 //        id: globalMouseArea
 //        z: 99

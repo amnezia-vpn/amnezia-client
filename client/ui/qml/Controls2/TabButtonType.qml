@@ -10,17 +10,24 @@ TabButton {
 
     property string textColor: "#D7D8DB"
 
+    property string borderFocusedColor: "#D7D8DB"
+    property int borderFocusedWidth: 1
+
     property bool isSelected: false
 
     implicitHeight: 48
 
     hoverEnabled: true
+    focusPolicy: Qt.TabFocus
 
     background: Rectangle {
         id: background
 
         anchors.fill: parent
         color: "transparent"
+
+        border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
+        border.width: root.activeFocus ? root.borderFocusedWidth : 0
 
         Rectangle {
             width: parent.width
