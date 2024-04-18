@@ -141,7 +141,7 @@ PageType {
             }
         }
 
-        collapsedContent:  Item {
+        collapsedContent: Item {
             implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
             Component.onCompleted: {
                 drawer.expandedHeight = implicitHeight

@@ -136,6 +136,12 @@ PageType {
                 var noButtonText = qsTr("Cancel")
 
                 var yesButtonFunction = function() {
+                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                        var message = qsTr("Unable to clear %1 profile while there is an active connection").arg(ContainersModel.getProcessedContainerName())
+                        PageController.showNotificationMessage(message)
+                        return
+                    }
+
                     PageController.showBusyIndicator(true)
                     InstallController.clearCachedProfile()
                     PageController.showBusyIndicator(false)
