@@ -376,6 +376,12 @@ PageType {
 
                             clickedFunc: function() {
                                 forceActiveFocus()
+
+                                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                    return
+                                }
+
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(OpenVpnConfigModel.getConfig())
                             }
