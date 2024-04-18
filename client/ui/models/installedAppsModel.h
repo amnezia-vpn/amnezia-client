@@ -1,18 +1,19 @@
 #ifndef INSTALLEDAPPSMODEL_H
 #define INSTALLEDAPPSMODEL_H
 
-#include <QJsonArray>
 #include <QAbstractListModel>
+#include <QJsonArray>
 
-class InstalledAppsModel: public QAbstractListModel
+class InstalledAppsModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
     enum Roles {
-        AppNameRole= Qt::UserRole + 1,
+        AppNameRole = Qt::UserRole + 1,
         PackageNameRole,
-        AppIconRole
+        AppIconRole,
+        IsAppSelectedRole
     };
 
     explicit InstalledAppsModel(QObject *parent = nullptr);
@@ -22,7 +23,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void selectedStateChanged(const int index,  const bool selected);
+    void selectedStateChanged(const int index, const bool selected);
     QVector<QPair<QString, QString>> getSelectedAppsInfo();
 
     void updateModel();
