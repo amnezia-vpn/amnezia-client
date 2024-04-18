@@ -122,7 +122,7 @@ PageType {
                 visible: ImportController.isNativeWireGuardConfig()
 
                 Layout.fillWidth: true
-                text: qsTr("Activate protocol cloaking")
+                text: qsTr("Enable WireGuard obfuscation. It may be useful if WireGuard is blocked on your provider.")
             }
 
             WarningType {
