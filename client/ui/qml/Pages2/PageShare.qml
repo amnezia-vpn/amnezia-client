@@ -791,7 +791,8 @@ PageType {
                                     Layout.bottomMargin: 24
 
                                     headerText: clientName
-                                    descriptionText: qsTr("Creation date: ") + creationDate
+                                    descriptionText: qsTr("Creation date: %1\nLatest handshake: %2\nData transfered: %3")
+                                        .arg(creationDate).arg(latestHandshake).arg(transferedData)
                                 }
 
                                 Item {

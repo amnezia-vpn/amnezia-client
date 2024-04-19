@@ -17,6 +17,8 @@ namespace
         constexpr char container[] = "container";
         constexpr char userData[] = "userData";
         constexpr char creationDate[] = "creationDate";
+        constexpr char latestHandshake[] = "latestHandshake";
+        constexpr char transferedData[] = "transferedData";
     }
 }
 
@@ -43,6 +45,8 @@ QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case ClientNameRole: return userData.value(configKey::clientName).toString();
     case CreationDateRole: return userData.value(configKey::creationDate).toString();
+    case LatestHandshakeRole: return userData.value(configKey::latestHandshake).toString();
+    case TransferedDataRole: return userData.value(configKey::transferedData).toString();
     }
 
     return QVariant();
@@ -109,6 +113,36 @@ ErrorCode ClientManagementModel::updateModel(const DockerContainer container, co
             if (error != ErrorCode::NoError) {
                 logger.error() << "Failed to upload the clientsTable file to the server";
             }
+        }
+    }
+
+    std::vector<WgShowData> data;
+    wgShow(container, credentials, serverController, data);
+
+    for (const auto &client : data)
+    {
+        int i = 0;
+        for (const auto &it : std::as_const(m_clientsTable))
+        {
+            if (it.isObject()) {
+                QJsonObject obj = it.toObject();
+                if (obj.contains(configKey::clientId) && obj[configKey::clientId].toString() == client.clientId) {
+                  QJsonObject userData = obj[configKey::userData].toObject();
+
+                  if (!client.latestHandshake.isEmpty()) {
+                    userData[configKey::latestHandshake] = client.latestHandshake;
+                  }
+
+                  if (!client.transferedData.isEmpty()) {
+                    userData[configKey::transferedData] = client.transferedData;
+                  }
+
+                  obj[configKey::userData] = userData;
+                  m_clientsTable.replace(i, obj);
+                  break;
+                }
+            }
+            ++i;
         }
     }
 
@@ -192,6 +226,58 @@ ErrorCode ClientManagementModel::getWireGuardClients(const DockerContainer conta
             count++;
         }
     }
+    return error;
+}
+
+ErrorCode ClientManagementModel::wgShow(const DockerContainer container, const ServerCredentials &credentials,
+                 const QSharedPointer<ServerController> &serverController, std::vector<WgShowData> &data)
+{
+    if (container != DockerContainer::WireGuard && container != DockerContainer::Awg)
+    {
+        return ErrorCode::NoError;
+    }
+
+    ErrorCode error = ErrorCode::NoError;
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+      stdOut += data + "\n";
+      return ErrorCode::NoError;
+    };
+
+    const QString command = QString("sudo docker exec -i $CONTAINER_NAME bash -c '%1'").arg("wg show all");
+
+    QString script = serverController->replaceVars(command, serverController->genVarsForScript(credentials, container));
+    error = serverController->runScript(credentials, script, cbReadStdOut);
+    if (error != ErrorCode::NoError) {
+        logger.error() << "Failed to execute wg show command";
+        return error;
+    }
+
+    if (stdOut.isEmpty())
+    {
+        return error;
+    }
+
+    const auto getStrValue = [](const auto str)
+    {
+      return str.mid(str.indexOf(":") + 1).trimmed();
+    };
+
+    const auto parts = stdOut.split('\n');
+    const auto peerList = parts.filter("peer:");
+    const auto latestHandshakeList = parts.filter("latest handshake:");
+    const auto transferedDataList = parts.filter("transfer:");
+
+    if (latestHandshakeList.isEmpty() || transferedDataList.isEmpty() || peerList.isEmpty())
+    {
+        return error;
+    }
+
+    for (int i = 0; i < peerList.size(); ++i)
+    {
+        data.push_back({getStrValue(peerList[i]), getStrValue(latestHandshakeList[i]), getStrValue(transferedDataList[i])});
+    }
+
     return error;
 }
 
@@ -486,5 +572,7 @@ QHash<int, QByteArray> ClientManagementModel::roleNames() const
     QHash<int, QByteArray> roles;
     roles[ClientNameRole] = "clientName";
     roles[CreationDateRole] = "creationDate";
+    roles[LatestHandshakeRole] = "latestHandshake";
+    roles[TransferedDataRole] = "transferedData";
     return roles;
 }
