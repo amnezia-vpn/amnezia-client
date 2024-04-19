@@ -11,7 +11,7 @@ class Ikev2Configurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    Ikev2Configurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    Ikev2Configurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent = nullptr);
 
     struct ConnectionData {
         QByteArray clientCert; // p12 client cert

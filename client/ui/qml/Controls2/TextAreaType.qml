@@ -19,6 +19,15 @@ Rectangle {
     border.color: getBorderColor(borderNormalColor)
     radius: 16
 
+    property FlickableType parentFlickable: null
+    onFocusChanged: {
+        if (root.activeFocus) {
+            if (root.parentFlickable) {
+                root.parentFlickable.ensureVisible(root)
+            }
+        }
+    }
+
     MouseArea {
         id: parentMouse
         anchors.fill: parent

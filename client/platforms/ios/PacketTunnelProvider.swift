@@ -200,3 +200,46 @@ extension WireGuardLogLevel {
     }
   }
 }
+
+extension NEProviderStopReason: CustomStringConvertible {
+  public var description: String {
+    switch self {
+    case .none:
+      return "No specific reason"
+    case .userInitiated:
+      return "The user stopped the NE"
+    case .providerFailed:
+      return "The NE failed to function correctly"
+    case .noNetworkAvailable:
+      return "No network connectivity is currently available"
+    case .unrecoverableNetworkChange:
+      return "The device’s network connectivity changed"
+    case .providerDisabled:
+      return "The NE was disabled"
+    case .authenticationCanceled:
+      return "The authentication process was canceled"
+    case .configurationFailed:
+      return "The VPNC is invalid"
+    case .idleTimeout:
+      return "The session timed out"
+    case .configurationDisabled:
+      return "The VPNC was disabled"
+    case .configurationRemoved:
+      return "The VPNC was removed"
+    case .superceded:
+      return "VPNC was superceded by a higher-priority VPNC"
+    case .userLogout:
+      return "The user logged out"
+    case .userSwitch:
+      return "The current console user changed"
+    case .connectionFailed:
+      return "The connection failed"
+    case .sleep:
+      return "A stop reason indicating the VPNC enabled disconnect on sleep and the device went to sleep"
+    case .appUpdate:
+      return "appUpdat"
+    @unknown default:
+      return "@unknown default"
+    }
+  }
+}
