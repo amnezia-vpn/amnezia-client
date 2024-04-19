@@ -230,7 +230,8 @@ namespace amnezia
             // non-vpn
             TorWebSite,
             Dns,
-            Sftp
+            Sftp,
+            Socks5Proxy
         };
         Q_ENUM_NS(Proto)
 
