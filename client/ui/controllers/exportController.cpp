@@ -345,7 +345,7 @@ void ExportController::renameClient(const int row, const QString &clientName, co
 
 QList<QString> ExportController::generateQrCodeImageSeries(const QByteArray &data)
 {
-    double k = 850;
+    double k = 750;
 
     quint8 chunksCount = std::ceil(data.size() / k);
     QList<QString> chunks;
