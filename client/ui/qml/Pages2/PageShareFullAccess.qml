@@ -112,7 +112,7 @@ PageType {
 
                         shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
                         shareConnectionDrawer.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
-                        // serverSelector.close()
+                        serverSelector.close()
                     }
 
                     Component.onCompleted: {
