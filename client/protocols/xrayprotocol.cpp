@@ -151,7 +151,7 @@ ErrorCode XrayProtocol::startTun2Sock()
             IpcClient::Interface()->createTun("tun2", amnezia::protocols::xray::defaultLocalAddr);
             IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
 #endif
-#if defined(Q_OS_LINUX) || defined(Q_OS_LINUX)
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
             // killSwitch toggle
             if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
                 IpcClient::Interface()->enableKillSwitch(m_configData, 0);
@@ -207,6 +207,7 @@ void XrayProtocol::stop()
 {
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     IpcClient::Interface()->disableKillSwitch();
+    IpcClient::Interface()->StartRoutingIpv6();
 #endif
     qDebug() << "XrayProtocol::stop()";
     m_xrayProcess.terminate();
