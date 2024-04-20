@@ -219,9 +219,10 @@ Item {
                 }
             }
 
-            LabelButtonTypeMouseArea {
-                id: rightImageMouseArea
-                enabled: eyeImage.visible
+            Loader {
+                anchors.fill: parent
+                sourceComponent: rightImageMouseArea
+                property bool mouseAreaEnabled: eyeImage.visible
             }
         }
     }
@@ -237,7 +238,53 @@ Item {
         }
     }
 
-    LabelButtonTypeMouseArea {
-        enabled: !rightImageMouseArea.enabled
+    Loader {
+        anchors.fill: parent
+        sourceComponent: rightImageMouseArea
+        property bool mouseAreaEnabled: !eyeImage.visible
+    }
+
+    Component {
+        id: rightImageMouseArea
+
+        MouseArea {
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: root.enabled
+
+            enabled: mouseAreaEnabled
+
+            onEntered: {
+                if (rightImageSource) {
+                    rightImageBackground.color = rightImage.hoveredColor
+                } else if (leftImageSource) {
+                    leftImageBackground.color = rightImage.hoveredColor
+                }
+                root.textOpacity = 0.8
+            }
+
+            onExited: {
+                if (rightImageSource) {
+                    rightImageBackground.color = rightImage.defaultColor
+                } else if (leftImageSource) {
+                    leftImageBackground.color = rightImage.defaultColor
+                }
+                root.textOpacity = 1
+            }
+
+            onPressedChanged: {
+                if (rightImageSource) {
+                    rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
+                } else if (leftImageSource) {
+                    leftImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
+                }
+                root.textOpacity = 0.7
+            }
+
+            onClicked: {
+                if (clickedFunction && typeof clickedFunction === "function") {
+                    clickedFunction()
+                }
+            }
+        }
     }
 }
