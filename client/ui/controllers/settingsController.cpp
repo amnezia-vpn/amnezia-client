@@ -77,8 +77,6 @@ void SettingsController::toggleLogging(bool enable)
     AmneziaVPN::toggleLogging(enable);
 #endif
     if (enable == true) {
-        checkIfNeedDisableLogs();
-        
         qInfo().noquote() << QString("Logging has enabled on %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
         qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
     }
@@ -216,10 +214,12 @@ bool SettingsController::isCameraPresent()
 
 void SettingsController::checkIfNeedDisableLogs()
 {
-    m_loggingDisableDate = m_settings->getLogEnableDate().addDays(14);
-    if (m_loggingDisableDate <= QDateTime::currentDateTime()) {
-        toggleLogging(false);
-        clearLogs();
-        emit loggingDisableByWatcher();
+    if (m_settings->isSaveLogs()) {
+        m_loggingDisableDate = m_settings->getLogEnableDate().addDays(14);
+        if (m_loggingDisableDate <= QDateTime::currentDateTime()) {
+            toggleLogging(false);
+            clearLogs();
+            emit loggingDisableByWatcher();
+        }
     }
 }
