@@ -2182,7 +2182,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="116"/>
-        <source>OpenVpn native format</source>
+        <source>OpenVPN native format</source>
         <translation>OpenVPN原生格式</translation>
     </message>
     <message>

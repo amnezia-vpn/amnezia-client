@@ -1987,7 +1987,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <name>PageShare</name>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="116"/>
-        <source>OpenVpn native format</source>
+        <source>OpenVPN native format</source>
         <translation>OpenVpn မူရင်းဖောမတ်</translation>
     </message>
     <message>

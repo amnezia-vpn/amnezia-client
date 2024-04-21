@@ -2104,7 +2104,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="116"/>
-        <source>OpenVpn native format</source>
+        <source>OpenVPN native format</source>
         <translation>تنسيق OpenVpn الاصلي</translation>
     </message>
     <message>
@@ -3330,7 +3330,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="313"/>
-        <source>Medium or High</source>
+        <source>High</source>
         <translation>متوسط او عالي</translation>
     </message>
     <message>
