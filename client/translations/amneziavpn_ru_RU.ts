@@ -589,8 +589,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="384"/>
-        <source>Remove OpenVpn from server?</source>
-        <translation>Удалить OpenVpn с сервера?</translation>
+        <source>Remove OpenVPN from server?</source>
+        <translation>Удалить OpenVPN с сервера?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="385"/>

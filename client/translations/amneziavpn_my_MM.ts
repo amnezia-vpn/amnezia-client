@@ -589,7 +589,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="384"/>
-        <source>Remove OpenVpn from server?</source>
+        <source>Remove OpenVPN from server?</source>
         <translation>AmneziaWG ကို ဆာဗာမှ ဖယ်ရှားမည်လား?</translation>
     </message>
     <message>
@@ -1988,7 +1988,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="116"/>
         <source>OpenVPN native format</source>
-        <translation>OpenVpn မူရင်းဖောမတ်</translation>
+        <translation>OpenVPN မူရင်းဖောမတ်</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="121"/>

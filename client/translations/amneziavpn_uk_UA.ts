@@ -692,7 +692,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Видалити OpenVPN</translation>
     </message>
     <message>
-        <source>Remove OpenVpn from server?</source>
+        <source>Remove OpenVPN from server?</source>
         <translation type="vanished">Видалити OpenVPN з серверу?</translation>
     </message>
     <message>
