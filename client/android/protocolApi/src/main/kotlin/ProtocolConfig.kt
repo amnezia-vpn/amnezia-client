@@ -137,7 +137,8 @@ open class ProtocolConfig protected constructor(
 
         private fun processRoutes() {
             // replace ::/0 as it may cause LAN connection issues
-            if (routes.removeIf { it.include && it.inetNetwork == InetNetwork("::", 0) }) {
+            val ipv6DefaultRoute = InetNetwork("::", 0)
+            if (routes.removeIf { it.include && it.inetNetwork == ipv6DefaultRoute }) {
                 prependRoutes {
                     addRoute(InetNetwork("2000::", 3))
                 }
@@ -155,8 +156,13 @@ open class ProtocolConfig protected constructor(
                 routes.clear()
                 ipRangeSet.subnets().forEach(::addRoute)
             }
-            // filter ipv4 loopback addresses
-            routes.removeIf { it.include && it.inetNetwork.address.address[0] == 127.toByte() }
+            // filter ipv4 and ipv6 loopback addresses
+            val ipv6Loopback = InetNetwork("::1", 128)
+            routes.removeIf {
+                it.include &&
+                    if (it.inetNetwork.isIpv4) it.inetNetwork.address.address[0] == 127.toByte()
+                    else it.inetNetwork == ipv6Loopback
+            }
         }
 
         private fun validate() {
