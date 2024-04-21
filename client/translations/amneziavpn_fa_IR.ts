@@ -3234,7 +3234,7 @@ For more detailed information, you can
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="313"/>
-        <source>Medium or High</source>
+        <source>High</source>
         <translation>متوسط یا بالا</translation>
     </message>
     <message>
