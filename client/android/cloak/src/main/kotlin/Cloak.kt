@@ -3,9 +3,6 @@ package org.amnezia.vpn.protocol.cloak
 import android.util.Base64
 import net.openvpn.ovpn3.ClientAPI_Config
 import org.amnezia.vpn.protocol.openvpn.OpenVpn
-import org.amnezia.vpn.protocol.openvpn.OpenVpnConfig
-import org.amnezia.vpn.util.net.InetNetwork
-import org.amnezia.vpn.util.net.parseInetAddress
 import org.json.JSONObject
 
 /**
@@ -52,13 +49,6 @@ class Cloak : OpenVpn() {
         openVpnConfig.usePluggableTransports = true
         openVpnConfig.content = configStr
         return openVpnConfig
-    }
-
-    override fun configPluggableTransport(configBuilder: OpenVpnConfig.Builder, config: JSONObject) {
-        // exclude remote server ip from vpn routes
-        val remoteServer = config.getString("hostName")
-        val remoteServerAddress = InetNetwork(parseInetAddress(remoteServer))
-        configBuilder.excludeRoute(remoteServerAddress)
     }
 
     private fun checkCloakJson(cloakConfigJson: JSONObject): JSONObject {
