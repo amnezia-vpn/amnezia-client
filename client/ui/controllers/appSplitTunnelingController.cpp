@@ -29,7 +29,6 @@ void AppSplitTunnelingController::addApp(const QString &appPath)
 
 void AppSplitTunnelingController::addApps(QVector<QPair<QString, QString>> apps)
 {
-    qDebug() << apps;
     for (const auto &app : apps) {
         InstalledAppInfo appInfo { app.first, app.second, "" };
 
