@@ -18,7 +18,8 @@ namespace
         constexpr char userData[] = "userData";
         constexpr char creationDate[] = "creationDate";
         constexpr char latestHandshake[] = "latestHandshake";
-        constexpr char transferedData[] = "transferedData";
+        constexpr char dataReceived[] = "dataReceived";
+        constexpr char dataSent[] = "dataSent";
     }
 }
 
@@ -46,7 +47,8 @@ QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
     case ClientNameRole: return userData.value(configKey::clientName).toString();
     case CreationDateRole: return userData.value(configKey::creationDate).toString();
     case LatestHandshakeRole: return userData.value(configKey::latestHandshake).toString();
-    case TransferedDataRole: return userData.value(configKey::transferedData).toString();
+    case DataReceivedRole: return userData.value(configKey::dataReceived).toString();
+    case DataSentRole: return userData.value(configKey::dataSent).toString();
     }
 
     return QVariant();
@@ -133,8 +135,12 @@ ErrorCode ClientManagementModel::updateModel(const DockerContainer container, co
                     userData[configKey::latestHandshake] = client.latestHandshake;
                   }
 
-                  if (!client.transferedData.isEmpty()) {
-                    userData[configKey::transferedData] = client.transferedData;
+                  if (!client.dataReceived .isEmpty()) {
+                    userData[configKey::dataReceived] = client.dataReceived;
+                  }
+
+                  if (!client.dataSent.isEmpty()) {
+                    userData[configKey::dataSent] = client.dataSent;
                   }
 
                   obj[configKey::userData] = userData;
@@ -266,16 +272,34 @@ ErrorCode ClientManagementModel::wgShow(const DockerContainer container, const S
     const auto parts = stdOut.split('\n');
     const auto peerList = parts.filter("peer:");
     const auto latestHandshakeList = parts.filter("latest handshake:");
-    const auto transferedDataList = parts.filter("transfer:");
+    const auto transferredDataList = parts.filter("transfer:");
 
-    if (latestHandshakeList.isEmpty() || transferedDataList.isEmpty() || peerList.isEmpty())
+    if (latestHandshakeList.isEmpty() || transferredDataList.isEmpty() || peerList.isEmpty())
     {
         return error;
     }
 
     for (int i = 0; i < peerList.size(); ++i)
     {
-        data.push_back({getStrValue(peerList[i]), getStrValue(latestHandshakeList[i]), getStrValue(transferedDataList[i])});
+        const auto transferredData = getStrValue(transferredDataList[i]).split(",");
+        auto latestHandshake = getStrValue(latestHandshakeList[i]);
+        auto bytesReceived = transferredData.front().trimmed();
+        auto bytesSent = transferredData.back().trimmed();
+
+        // can be hour or hours
+        // maybe better to do it with regex
+        latestHandshake.replace(" hours", "h");
+        latestHandshake.replace(" minutes", "m");
+        latestHandshake.replace(" seconds", "s");
+
+        latestHandshake.replace(" hour", "h");
+        latestHandshake.replace(" minute", "m");
+        latestHandshake.replace(" second", "s");
+
+        bytesReceived.chop(QStringLiteral(" received").length());
+        bytesSent.chop(QStringLiteral(" sent").length());
+
+        data.push_back({getStrValue(peerList[i]), latestHandshake, bytesReceived, bytesSent});
     }
 
     return error;
@@ -573,6 +597,7 @@ QHash<int, QByteArray> ClientManagementModel::roleNames() const
     roles[ClientNameRole] = "clientName";
     roles[CreationDateRole] = "creationDate";
     roles[LatestHandshakeRole] = "latestHandshake";
-    roles[TransferedDataRole] = "transferedData";
+    roles[DataReceivedRole] = "dataReceived";
+    roles[DataSentRole] = "dataSent";
     return roles;
 }

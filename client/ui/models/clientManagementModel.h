@@ -16,14 +16,16 @@ class ClientManagementModel : public QAbstractListModel
         ClientNameRole = Qt::UserRole + 1,
         CreationDateRole,
         LatestHandshakeRole,
-        TransferedDataRole,
+        DataReceivedRole,
+        DataSentRole
     };
 
     struct WgShowData
     {
         QString clientId;
         QString latestHandshake;
-        QString transferedData;
+        QString dataReceived;
+        QString dataSent;
     };
 
     ClientManagementModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
