@@ -11,6 +11,7 @@
 #include "core/controllers/apiController.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/errorstrings.h"
+#include "version.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ContainersModel> &containersModel,
@@ -36,8 +37,8 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
-#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
-    if (!Utils::isBackgroundServicesEnabled())
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (!Utils::processIsRunning(SERVICE_NAME))
     {
         emit connectionErrorOccurred(errorString(ErrorCode::AmneziaServiceNotRunning));
         return;

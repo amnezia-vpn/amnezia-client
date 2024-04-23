@@ -25,8 +25,6 @@ public:
     static bool processIsRunning(const QString &fileName);
     static void killProcessByName(const QString &name);
 
-    static bool isBackgroundServicesEnabled();
-
     static QString openVpnExecPath();
     static QString wireguardExecPath();
     static QString certUtilPath();

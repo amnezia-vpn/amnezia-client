@@ -128,16 +128,6 @@ void Utils::killProcessByName(const QString &name)
 #endif
 }
 
-// just check if background process alive
-// the process dead if allow in the background permission disabled
-bool Utils::isBackgroundServicesEnabled()
-{
-#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
-    return Utils::processIsRunning(SERVICE_NAME);
-#endif
-    return true;
-}
-
 QString Utils::openVpnExecPath()
 {
 #ifdef Q_OS_WIN
