@@ -133,7 +133,7 @@ int ProtocolProps::defaultPort(Proto p)
     case Proto::TorWebSite: return -1;
     case Proto::Dns: return 53;
     case Proto::Sftp: return 222;
-    case Proto::Socks5Proxy: return 1080;
+    case Proto::Socks5Proxy: return 38080;
     default: return -1;
     }
 }

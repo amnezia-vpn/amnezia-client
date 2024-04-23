@@ -376,6 +376,12 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
             return true;
     }
 
+    if (container == DockerContainer::Socks5Proxy) {
+        if (oldProtoConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort)
+            != newProtoConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort))
+            return true;
+    }
+
     return false;
 }
 
@@ -511,6 +517,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &amneziaWireguarConfig = config.value(ProtocolProps::protoToString(Proto::Awg)).toObject();
     const QJsonObject &xrayConfig = config.value(ProtocolProps::protoToString(Proto::Xray)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
+    const QJsonObject &socks5ProxyConfig = config.value(ProtocolProps::protoToString(Proto::Socks5Proxy)).toObject();
 
     Vars vars;
 
@@ -607,6 +614,9 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::responsePacketMagicHeader).toString() } });
     vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
     vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
+
+    // Socks5 proxy vars
+    vars.append({ { "$SOCKS5_PROXY_PORT", socks5ProxyConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort) } });
 
     QString serverIp = NetworkUtilities::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {

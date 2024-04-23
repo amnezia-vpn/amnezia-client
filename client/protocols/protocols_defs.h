@@ -83,6 +83,7 @@ namespace amnezia
         constexpr char sftp[] = "sftp";
         constexpr char awg[] = "awg";
         constexpr char xray[] = "xray";
+        constexpr char socks5proxy[] = "socks5proxy";
 
         constexpr char configVersion[] = "config_version";
 
@@ -202,6 +203,11 @@ namespace amnezia
             constexpr char defaultResponsePacketMagicHeader[] = "3288052141";
             constexpr char defaultTransportPacketMagicHeader[] = "2528465083";
             constexpr char defaultUnderloadPacketMagicHeader[] = "1766607858";
+        }
+
+        namespace socks5Proxy
+        {
+            constexpr char defaultPort[] = "38080";
         }
 
     } // namespace protocols

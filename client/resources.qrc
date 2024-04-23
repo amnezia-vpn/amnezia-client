@@ -243,5 +243,6 @@
         <file>server_scripts/socks5_proxy/run_container.sh</file>
         <file>server_scripts/socks5_proxy/Dockerfile</file>
         <file>server_scripts/socks5_proxy/configure_container.sh</file>
+        <file>server_scripts/socks5_proxy/start.sh</file>
     </qresource>
 </RCC>

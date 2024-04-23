@@ -548,6 +548,8 @@ QStringList ServersModel::getAllInstalledServicesName(const int serverIndex)
                 servicesName.append("SFTP");
             } else if (container == DockerContainer::TorWebSite) {
                 servicesName.append("TOR");
+            } else if (container == DockerContainer::Socks5Proxy) {
+                servicesName.append("SOCKS5");
             }
         }
     }

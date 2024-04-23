@@ -604,6 +604,10 @@ void InstallController::clearCachedProfile(QSharedPointer<ServerController> serv
 
     int serverIndex = m_serversModel->getProcessedServerIndex();
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());
+    if (ContainerProps::containerService(container) == ServiceType::Other) {
+        return;
+    }
+
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     ServerCredentials serverCredentials =
             qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));

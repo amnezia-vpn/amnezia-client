@@ -111,46 +111,46 @@ PageType {
                             }
                         }
 
-                        KeyNavigation.tab: usernameTextField.textField
+                        KeyNavigation.tab: removeButton //usernameTextField.textField
                     }
 
-                    TextFieldWithHeaderType {
-                        id: usernameTextField
+//                    TextFieldWithHeaderType {
+//                        id: usernameTextField
 
-                        Layout.fillWidth: true
-                        Layout.topMargin: 16
-                        parentFlickable: fl
+//                        Layout.fillWidth: true
+//                        Layout.topMargin: 16
+//                        parentFlickable: fl
 
-                        headerText: qsTr("Username")
-                        textFieldText: username
+//                        headerText: qsTr("Username")
+//                        textFieldText: username
 
-                        textField.onEditingFinished: {
-                            if (textFieldText !== port) {
-                                port = textFieldText
-                            }
-                        }
+//                        textField.onEditingFinished: {
+//                            if (textFieldText !== port) {
+//                                port = textFieldText
+//                            }
+//                        }
 
-                        KeyNavigation.tab: passwordTextField.textField
-                    }
+//                        KeyNavigation.tab: passwordTextField.textField
+//                    }
 
-                    TextFieldWithHeaderType {
-                        id: passwordTextField
+//                    TextFieldWithHeaderType {
+//                        id: passwordTextField
 
-                        Layout.fillWidth: true
-                        Layout.topMargin: 16
-                        parentFlickable: fl
+//                        Layout.fillWidth: true
+//                        Layout.topMargin: 16
+//                        parentFlickable: fl
 
-                        headerText: qsTr("Password")
-                        textFieldText: password
+//                        headerText: qsTr("Password")
+//                        textFieldText: password
 
-                        textField.onEditingFinished: {
-                            if (textFieldText !== port) {
-                                port = textFieldText
-                            }
-                        }
+//                        textField.onEditingFinished: {
+//                            if (textFieldText !== password) {
+//                                password = textFieldText
+//                            }
+//                        }
 
-                        KeyNavigation.tab: removeButton
-                    }
+//                        KeyNavigation.tab: removeButton
+//                    }
 
                     BasicButtonType {
                         id: removeButton
@@ -166,10 +166,10 @@ PageType {
 
                         text: qsTr("Remove SOCKS5 proxy server")
 
-                        Keys.onTabPressed: lastItemTabClicked(focusItem)
+                        KeyNavigation.tab: saveRestartButton
 
                         clickedFunc: function() {
-                            var headerText = qsTr("The site with all data will be removed from the tor network.")
+                            var headerText = qsTr("All users with whom you shared a server will no longer be able to connect to it.")
                             var yesButtonText = qsTr("Continue")
                             var noButtonText = qsTr("Cancel")
 
@@ -184,6 +184,24 @@ PageType {
                             }
 
                             showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                        }
+                    }
+
+                    BasicButtonType {
+                        id: saveRestartButton
+
+                        Layout.fillWidth: true
+                        Layout.topMargin: 24
+                        Layout.bottomMargin: 24
+
+                        text: qsTr("Save")
+                        Keys.onTabPressed: lastItemTabClicked(focusItem)
+
+                        clickedFunc: function() {
+                            forceActiveFocus()
+
+                            PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                            InstallController.updateContainer(Socks5ProxyConfigModel.getConfig())
                         }
                     }
                 }
