@@ -46,5 +46,29 @@
 
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<true/>
+
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>conf</string>
+				<string>vpn</string>
+				<string>ovpn</string>
+				<string>backup</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>AmneziaVPN configuration file</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.amnezia.AmneziaVPN.amnezia-config</string>
+				<string>org.amnezia.AmneziaVPN.wireguard-config</string>
+				<string>org.amnezia.AmneziaVPN.openvpn-config</string>
+				<string>org.amnezia.AmneziaVPN.backup-config</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
