@@ -293,6 +293,23 @@ QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
     return m_engine;
 }
 
+#ifdef Q_OS_MACOS
+bool AmneziaApplication::event(QEvent *event)
+{
+    if (event->type() == QEvent::FileOpen) {
+        QFileOpenEvent *openEvent = static_cast<QFileOpenEvent *>(event);
+        const QUrl url = openEvent->url();
+        if (url.isLocalFile()) {
+            m_pageController->replaceStartPage();
+            m_importController->extractConfigFromFile(url.toLocalFile());
+            m_pageController->goToPageViewConfig();
+        }
+    }
+
+    return QApplication::event(event);
+}
+#endif
+
 void AmneziaApplication::initModels()
 {
     m_containersModel.reset(new ContainersModel(this));

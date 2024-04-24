@@ -5,6 +5,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QThread>
+#include <QFileOpenEvent>
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     #include <QGuiApplication>
 #else
@@ -73,6 +74,10 @@ public:
     bool parseCommands();
 
     QQmlApplicationEngine *qmlEngine() const;
+
+#ifdef Q_OS_MACOS
+    bool event(QEvent *event) override;
+#endif
 
 signals:
     void translationsUpdated();
