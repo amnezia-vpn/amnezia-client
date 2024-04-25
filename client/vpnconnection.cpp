@@ -70,7 +70,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 
-                if (m_settings->getSitesSplitTunnelingEnabled()) {
+                if (m_settings->isSitesSplitTunnelingEnabled()) {
                     IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                         // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
                     if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
@@ -89,7 +89,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
         } else if (state == Vpn::ConnectionState::Error) {
             IpcClient::Interface()->flushDns();
 
-            if (m_settings->getSitesSplitTunnelingEnabled()) {
+            if (m_settings->isSitesSplitTunnelingEnabled()) {
                 if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
                     IpcClient::Interface()->clearSavedRoutes();
                 }
@@ -237,15 +237,17 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     m_remoteAddress = credentials.hostName;
     emit connectionStateChanged(Vpn::ConnectionState::Connecting);
 
+    m_vpnConfiguration = vpnConfiguration;
+
 #ifdef AMNEZIA_DESKTOP
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
     }
+    appendKillSwitchConfig();
 #endif
 
-    m_vpnConfiguration = vpnConfiguration;
     appendSplitTunnelingConfig();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
@@ -282,6 +284,11 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
 }
 
+void VpnConnection::appendKillSwitchConfig()
+{
+    m_vpnConfiguration.insert(config_key::killSwitchOption, QVariant(m_settings->isKillSwitchEnabled()).toString());
+}
+
 void VpnConnection::appendSplitTunnelingConfig()
 {
     if (m_vpnConfiguration.value(config_key::configVersion).toInt()) {
@@ -305,7 +312,7 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     Settings::RouteMode routeMode = Settings::RouteMode::VpnAllSites;
     QJsonArray sitesJsonArray;
-    if (m_settings->getSitesSplitTunnelingEnabled()) {
+    if (m_settings->isSitesSplitTunnelingEnabled()) {
         routeMode = m_settings->routeMode();
 
         auto sites = m_settings->getVpnIps(routeMode);
@@ -325,7 +332,7 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     Settings::AppsRouteMode appsRouteMode = Settings::AppsRouteMode::VpnAllApps;
     QJsonArray appsJsonArray;
-    if (m_settings->getAppsSplitTunnelingEnabled()) {
+    if (m_settings->isAppsSplitTunnelingEnabled()) {
         appsRouteMode = m_settings->getAppsRouteMode();
 
         auto apps = m_settings->getVpnApps(appsRouteMode);

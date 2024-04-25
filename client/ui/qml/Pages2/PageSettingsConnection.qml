@@ -130,6 +130,31 @@ PageType {
             DividerType {
                 visible: root.isAppSplitTinnelingEnabled
             }
+
+            SwitcherType {
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("KillSwitch")
+                descriptionText: qsTr("Disables your internet if your encrypted VPN connection drops out for any reason.")
+
+                checked: SettingsController.isKillSwitchEnabled()
+                checkable: !ConnectionController.isConnected
+                onCheckedChanged: {
+                    if (checked !== SettingsController.isKillSwitchEnabled()) {
+                        SettingsController.toggleKillSwitch(checked)
+                    }
+                }
+                onClicked: {
+                    if (!checkable) {
+                        PageController.showNotificationMessage(qsTr("Cannot change killSwitch settings during active connection"))
+                    }
+                }
+            }
+
+            DividerType {
+                visible: GC.isDesktop()
+            }
         }
     }
 }
