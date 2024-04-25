@@ -792,11 +792,44 @@ PageType {
 
                                 Header2Type {
                                     Layout.fillWidth: true
-                                    Layout.bottomMargin: 24
 
                                     headerText: clientName
-                                    descriptionText: qsTr("Creation date: %1\nLatest handshake: %2\nData received: %3\nData sent: %4")
-                                        .arg(creationDate).arg(latestHandshake).arg(dataReceived).arg(dataSent)
+                                }
+
+                                ColumnLayout
+                                {
+                                    id: textColumn
+                                    property var textColor: "#878B91"
+                                    Layout.bottomMargin: 24
+                                    Layout.fillWidth: true
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: creationDate
+
+                                        text: qsTr("Creation date: %1").arg(creationDate)
+                                    }
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: latestHandshake
+
+                                        text: qsTr("Latest handshake: %1").arg(latestHandshake)
+                                    }
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: dataReceived
+
+                                        text: qsTr("Data received: %1").arg(dataReceived)
+                                    }
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: dataSent
+
+                                        text: qsTr("Data sent: %1").arg(dataSent)
+                                    }
                                 }
 
                                 Item {
