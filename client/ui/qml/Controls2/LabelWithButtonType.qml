@@ -3,7 +3,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import "TextTypes"
-import "../Components"
 
 Item {
     id: root
@@ -34,6 +33,45 @@ Item {
 
     implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
     implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        hoverEnabled: root.enabled
+
+        onEntered: {
+            if (rightImageSource) {
+                rightImageBackground.color = rightImage.hoveredColor
+            } else if (leftImageSource) {
+                leftImageBackground.color = rightImage.hoveredColor
+            }
+            root.textOpacity = 0.8
+        }
+
+        onExited: {
+            if (rightImageSource) {
+                rightImageBackground.color = rightImage.defaultColor
+            } else if (leftImageSource) {
+                leftImageBackground.color = rightImage.defaultColor
+            }
+            root.textOpacity = 1
+        }
+
+        onPressedChanged: {
+            if (rightImageSource) {
+                rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
+            } else if (leftImageSource) {
+                leftImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
+            }
+            root.textOpacity = 0.7
+        }
+
+        onClicked: {
+            if (clickedFunction && typeof clickedFunction === "function") {
+                clickedFunction()
+            }
+        }
+    }
 
     RowLayout {
         id: content
@@ -146,7 +184,7 @@ Item {
             implicitWidth: 40
             implicitHeight: 40
 
-            hoverEnabled: false
+            hoverEnabled: true
             image: buttonImageSource
             imageColor: rightImageColor
 
@@ -163,35 +201,8 @@ Item {
                 }
             }
 
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                hoverEnabled: root.enabled
-
-                onEntered: {
-                    if (buttonImageSource) {
-                        eyeImageBackground.color = rightImage.hoveredColor
-                    }
-                    root.textOpacity = 0.8
-                }
-
-                onExited: {
-                    if (buttonImageSource) {
-                        eyeImageBackground.color = rightImage.defaultColor
-                    }
-                    root.textOpacity = 1
-                }
-
-                onPressedChanged: {
-                    if (buttonImageSource) {
-                        eyeImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
-                    }
-                    root.textOpacity = 0.7
-                }
-
-                onClicked: {
-                    hideDescription = !hideDescription
-                }
+            onClicked: {
+                hideDescription = !hideDescription
             }
         }
 
@@ -219,11 +230,6 @@ Item {
                 }
             }
 
-            Loader {
-                anchors.fill: parent
-                sourceComponent: rightImageMouseArea
-                property bool mouseAreaEnabled: eyeImage.visible
-            }
         }
     }
 
@@ -235,56 +241,6 @@ Item {
 
         Behavior on color {
             PropertyAnimation { duration: 200 }
-        }
-    }
-
-    Loader {
-        anchors.fill: parent
-        sourceComponent: rightImageMouseArea
-        property bool mouseAreaEnabled: !eyeImage.visible
-    }
-
-    Component {
-        id: rightImageMouseArea
-
-        MouseArea {
-            cursorShape: Qt.PointingHandCursor
-            hoverEnabled: root.enabled
-
-            enabled: mouseAreaEnabled
-
-            onEntered: {
-                if (rightImageSource) {
-                    rightImageBackground.color = rightImage.hoveredColor
-                } else if (leftImageSource) {
-                    leftImageBackground.color = rightImage.hoveredColor
-                }
-                root.textOpacity = 0.8
-            }
-
-            onExited: {
-                if (rightImageSource) {
-                    rightImageBackground.color = rightImage.defaultColor
-                } else if (leftImageSource) {
-                    leftImageBackground.color = rightImage.defaultColor
-                }
-                root.textOpacity = 1
-            }
-
-            onPressedChanged: {
-                if (rightImageSource) {
-                    rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
-                } else if (leftImageSource) {
-                    leftImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
-                }
-                root.textOpacity = 0.7
-            }
-
-            onClicked: {
-                if (clickedFunction && typeof clickedFunction === "function") {
-                    clickedFunction()
-                }
-            }
         }
     }
 }
