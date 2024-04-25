@@ -511,7 +511,7 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun getAppIcon(packageName: String, width: Int, height: Int): Bitmap {
-        Log.v(TAG, "Get app icon: $packageName")
+        Log.v(TAG, "Get app icon")
         return AppListProvider.getAppIcon(packageManager, packageName, width, height)
     }
 }
