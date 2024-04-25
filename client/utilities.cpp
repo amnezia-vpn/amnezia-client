@@ -6,6 +6,8 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include <QUrl>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 #include "utilities.h"
 #include "version.h"
@@ -21,6 +23,50 @@ QString Utils::getRandomString(int len)
         randomString.append(nextChar);
     }
     return randomString;
+}
+
+QString Utils::VerifyJsonString(const QString &source)
+{
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(source.toUtf8(), &error);
+    Q_UNUSED(doc)
+
+    if (error.error == QJsonParseError::NoError) {
+        return "";
+    } else {
+        qDebug() << "WARNING: Json parse returns: " + error.errorString();
+        return error.errorString();
+    }
+}
+
+QJsonObject Utils::JsonFromString(const QString &string)
+{
+    auto removeComment = string.trimmed();
+    if (removeComment != string.trimmed()) {
+        qDebug() << "Some comments have been removed from the json.";
+    }
+    QJsonDocument doc = QJsonDocument::fromJson(removeComment.toUtf8());
+    return doc.object();
+}
+
+QString Utils::SafeBase64Decode(QString string)
+{
+    QByteArray ba = string.replace(QChar('-'), QChar('+')).replace(QChar('_'), QChar('/')).toUtf8();
+    return QByteArray::fromBase64(ba, QByteArray::Base64Option::OmitTrailingEquals);
+}
+
+QString Utils::JsonToString(const QJsonObject &json, QJsonDocument::JsonFormat format)
+{
+    QJsonDocument doc;
+    doc.setObject(json);
+    return doc.toJson(format);
+}
+
+QString Utils::JsonToString(const QJsonArray &array, QJsonDocument::JsonFormat format)
+{
+    QJsonDocument doc;
+    doc.setArray(array);
+    return doc.toJson(format);
 }
 
 QString Utils::systemLogPath()

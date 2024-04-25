@@ -5,7 +5,10 @@
 #include <QQuickItem>
 #include <QStandardPaths>
 #include <QRandomGenerator>
+#include <QUrlQuery>
 
+#include "utilities.h"
+#include "core/serialization/serialization.h"
 #include "core/errorstrings.h"
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
@@ -87,6 +90,44 @@ bool ImportController::extractConfigFromFile(const QString &fileName)
 bool ImportController::extractConfigFromData(QString data)
 {
     QString config = data;
+    QString prefix;
+    QString errormsg;
+
+    if (config.startsWith("vless://")) {
+        m_config = extractXrayConfig(Utils::JsonToString(serialization::vless::Deserialize(config, &prefix, &errormsg),
+                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        return m_config.empty() ? false : true;
+    }
+
+    if (config.startsWith("vmess://") && config.contains("@")) {
+        m_config = extractXrayConfig(Utils::JsonToString(serialization::vmess_new::Deserialize(config, &prefix, &errormsg),
+                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        return m_config.empty() ? false : true;
+    }
+
+    if (config.startsWith("vmess://")) {
+        m_config = extractXrayConfig(Utils::JsonToString(serialization::vmess::Deserialize(config, &prefix, &errormsg),
+                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        return m_config.empty() ? false : true;
+    }
+
+    if (config.startsWith("ss://") && !config.contains("plugin=")) {
+        m_config = extractXrayConfig(Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg),
+                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        return m_config.empty() ? false : true;
+    }
+
+    if (config.startsWith("ssd://")) {
+        QStringList tmp;
+        QList<std::pair<QString, QJsonObject>> servers = serialization::ssd::Deserialize(config, &prefix, &tmp);
+
+        // Took only first config from list
+        if (!servers.isEmpty()) {
+            m_config = extractXrayConfig(servers.first().first);
+        }
+        return m_config.empty() ? false : true;
+    }
+
     m_configType = checkConfigFormat(config);
     if (m_configType == ConfigTypes::Invalid) {
         data.replace("vpn://", "");
@@ -384,7 +425,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     return config;
 }
 
-QJsonObject ImportController::extractXrayConfig(const QString &data)
+QJsonObject ImportController::extractXrayConfig(const QString &data, const QString &description)
 {
     QJsonParseError parserErr;
     QJsonDocument jsonConf = QJsonDocument::fromJson(data.toLocal8Bit(), &parserErr);
@@ -413,8 +454,11 @@ QJsonObject ImportController::extractXrayConfig(const QString &data)
     QJsonObject config;
     config[config_key::containers] = arr;
     config[config_key::defaultContainer] = "amnezia-xray";
-    config[config_key::description] = m_settings->nextAvailableServerName();
-
+    if (description.isEmpty()) {
+        config[config_key::description] = m_settings->nextAvailableServerName();
+    } else {
+        config[config_key::description] = description;
+    }
     config[config_key::hostName] = hostName;
 
     return config;
