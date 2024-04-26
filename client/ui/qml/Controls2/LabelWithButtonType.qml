@@ -21,6 +21,7 @@ Item {
     property bool isLeftImageHoverEnabled: true //todo separete this qml file to 3
 
     property alias rightButton: rightImage
+    property alias eyeButton: eyeImage
     property FlickableType parentFlickable
 
     property string textColor: "#d7d8db"
@@ -229,6 +230,14 @@ Item {
             onClicked: {
                 hideDescription = !hideDescription
             }
+
+            Keys.onEnterPressed: {
+                clicked()
+            }
+
+            Keys.onReturnPressed: {
+                clicked()
+            }
         }
 
         ImageButtonType {
@@ -254,7 +263,11 @@ Item {
                     PropertyAnimation { duration: 200 }
                 }
             }
-
+            onClicked: {
+                if (clickedFunction && typeof clickedFunction === "function") {
+                    clickedFunction()
+                }
+            }
         }
     }
 

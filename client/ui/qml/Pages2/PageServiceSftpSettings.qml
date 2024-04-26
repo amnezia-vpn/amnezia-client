@@ -159,7 +159,7 @@ PageType {
                             descriptionOnTop: true
 
                             parentFlickable: fl
-                            KeyNavigation.tab: passwordLabel.rightButton
+                            KeyNavigation.tab: passwordLabel.eyeButton
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
                             rightImageColor: "#D7D8DB"
@@ -183,7 +183,8 @@ PageType {
                             descriptionOnTop: true
 
                             parentFlickable: fl
-                            Keys.onTabPressed: {
+                            eyeButton.KeyNavigation.tab: passwordLabel.rightButton
+                            rightButton.Keys.onTabPressed: {
                                 if (mountButton.visible) {
                                     mountButton.forceActiveFocus()
                                 } else {
