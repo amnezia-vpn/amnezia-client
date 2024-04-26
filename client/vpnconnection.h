@@ -94,6 +94,7 @@ private:
    void createProtocolConnections();
 
    void appendSplitTunnelingConfig();
+   void appendKillSwitchConfig();
 };
 
 #endif // VPNCONNECTION_H

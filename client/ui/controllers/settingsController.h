@@ -63,6 +63,9 @@ public slots:
 
     bool isCameraPresent();
 
+    bool isKillSwitchEnabled();
+    void toggleKillSwitch(bool enable);
+
 signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();
