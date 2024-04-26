@@ -112,6 +112,7 @@ ErrorCode XrayProtocol::startTun2Sock()
 
     m_t2sProcess->setProgram(PermittedProcess::Tun2Socks);
 #ifdef Q_OS_WIN
+    m_configData.insert("inetAdapterIndex", NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress)));
     QStringList arguments({"-device", "tun://tun2", "-proxy", XrayConStr, "-tun-post-up",
                            QString("cmd /c netsh interface ip set address name=\"tun2\" static %1 255.255.255.255").arg(amnezia::protocols::xray::defaultLocalAddr)});
 #endif
@@ -141,7 +142,6 @@ ErrorCode XrayProtocol::startTun2Sock()
             QThread::msleep(5000);
             IpcClient::Interface()->createTun("utun22", amnezia::protocols::xray::defaultLocalAddr);
             IpcClient::Interface()->updateResolvers("utun22", dnsAddr);
-            IpcClient::Interface()->enableKillSwitch(m_configData, 0);
 #endif
 #ifdef Q_OS_WINDOWS
             QThread::msleep(15000);
@@ -150,7 +150,12 @@ ErrorCode XrayProtocol::startTun2Sock()
             QThread::msleep(1000);
             IpcClient::Interface()->createTun("tun2", amnezia::protocols::xray::defaultLocalAddr);
             IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
-            IpcClient::Interface()->enableKillSwitch(m_configData, 0);
+#endif
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+            // killSwitch toggle
+            if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
+                IpcClient::Interface()->enableKillSwitch(m_configData, 0);
+            }
 #endif
             if (m_routeMode == 0) {
                 IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
@@ -164,9 +169,14 @@ ErrorCode XrayProtocol::startTun2Sock()
             for (int i = 0; i < netInterfaces.size(); i++) {
                 for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
                 {
+                    // killSwitch toggle
                     if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
-                        IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
+                        if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
+                            IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
+                        }
+                        m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
                         m_configData.insert("vpnGateway", m_vpnGateway);
+                        m_configData.insert("vpnServer", m_remoteAddress);
                         IpcClient::Interface()->enablePeerTraffic(m_configData);
                     }
                 }
@@ -197,6 +207,7 @@ void XrayProtocol::stop()
 {
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     IpcClient::Interface()->disableKillSwitch();
+    IpcClient::Interface()->StartRoutingIpv6();
 #endif
     qDebug() << "XrayProtocol::stop()";
     m_xrayProcess.terminate();

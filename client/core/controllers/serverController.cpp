@@ -23,14 +23,13 @@
 #include <thread>
 
 #include "containers/containers_defs.h"
-#include "logger.h"
+#include "core/networkUtilities.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
-#include "core/networkUtilities.h"
+#include "logger.h"
 #include "settings.h"
 #include "utilities.h"
-
-#include <configurators/vpn_configurator.h>
+#include "vpnConfigurationController.h"
 
 namespace
 {
@@ -96,10 +95,9 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
     return ErrorCode::NoError;
 }
 
-ErrorCode
-ServerController::runContainerScript(const ServerCredentials &credentials, DockerContainer container, QString script,
-                                     const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut,
-                                     const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr)
+ErrorCode ServerController::runContainerScript(const ServerCredentials &credentials, DockerContainer container, QString script,
+                                               const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut,
+                                               const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr)
 {
     QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
     Logger::appendSshLog("Run container script for " + ContainerProps::containerToString(container) + ":\n" + script);
@@ -117,9 +115,8 @@ ServerController::runContainerScript(const ServerCredentials &credentials, Docke
     return e;
 }
 
-ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                      const QString &file, const QString &path,
-                                                      libssh::ScpOverwriteMode overwriteMode)
+ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container, const ServerCredentials &credentials, const QString &file,
+                                                      const QString &path, libssh::ScpOverwriteMode overwriteMode)
 {
     ErrorCode e = ErrorCode::NoError;
     QString tmpFileName = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
@@ -157,12 +154,10 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
         if (e)
             return e;
 
-        e = runScript(
-                credentials,
-                replaceVars(
-                        QString("sudo docker exec -i $CONTAINER_NAME sh -c \"cat %1 >> %2\"").arg(tmpFileName).arg(path),
-                        genVarsForScript(credentials, container)),
-                cbReadStd, cbReadStd);
+        e = runScript(credentials,
+                      replaceVars(QString("sudo docker exec -i $CONTAINER_NAME sh -c \"cat %1 >> %2\"").arg(tmpFileName).arg(path),
+                                  genVarsForScript(credentials, container)),
+                      cbReadStd, cbReadStd);
 
         if (e)
             return e;
@@ -173,21 +168,17 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
         return ErrorCode::ServerContainerMissingError;
     }
 
-    runScript(credentials, 
-              replaceVars(QString("sudo shred -u %1").arg(tmpFileName), genVarsForScript(credentials, container)));
+    runScript(credentials, replaceVars(QString("sudo shred -u %1").arg(tmpFileName), genVarsForScript(credentials, container)));
     return e;
 }
 
-QByteArray ServerController::getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                                      const QString &path, ErrorCode *errorCode)
+QByteArray ServerController::getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials, const QString &path,
+                                                      ErrorCode errorCode)
 {
 
-    if (errorCode)
-        *errorCode = ErrorCode::NoError;
+    errorCode = ErrorCode::NoError;
 
-    QString script = QString("sudo docker exec -i %1 sh -c \"xxd -p \'%2\'\"")
-                             .arg(ContainerProps::containerToString(container))
-                             .arg(path);
+    QString script = QString("sudo docker exec -i %1 sh -c \"xxd -p \'%2\'\"").arg(ContainerProps::containerToString(container)).arg(path);
 
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -195,12 +186,12 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
         return ErrorCode::NoError;
     };
 
-    *errorCode = runScript(credentials, script, cbReadStdOut);
+    errorCode = runScript(credentials, script, cbReadStdOut);
     return QByteArray::fromHex(stdOut.toUtf8());
 }
 
-ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data,
-                                             const QString &remotePath, libssh::ScpOverwriteMode overwriteMode)
+ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
+                                             libssh::ScpOverwriteMode overwriteMode)
 {
     auto error = m_sshClient.connectToHost(credentials);
     if (error != ErrorCode::NoError) {
@@ -246,12 +237,10 @@ ErrorCode ServerController::removeAllContainers(const ServerCredentials &credent
 ErrorCode ServerController::removeContainer(const ServerCredentials &credentials, DockerContainer container)
 {
     return runScript(credentials,
-                     replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
-                                 genVarsForScript(credentials, container)));
+                     replaceVars(amnezia::scriptData(SharedScriptType::remove_container), genVarsForScript(credentials, container)));
 }
 
-ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container,
-                                           QJsonObject &config, bool isUpdate)
+ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config, bool isUpdate)
 {
     qDebug().noquote() << "ServerController::setupContainer" << ContainerProps::containerToString(container);
     ErrorCode e = ErrorCode::NoError;
@@ -311,12 +300,11 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     return startupContainerWorker(credentials, container, config);
 }
 
-ErrorCode ServerController::updateContainer(const ServerCredentials &credentials, DockerContainer container,
-                                            const QJsonObject &oldConfig, QJsonObject &newConfig)
+ErrorCode ServerController::updateContainer(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &oldConfig,
+                                            QJsonObject &newConfig)
 {
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
-    qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is"
-             << reinstallRequired;
+    qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequired;
 
     if (reinstallRequired) {
         return setupContainer(credentials, container, newConfig, true);
@@ -329,8 +317,7 @@ ErrorCode ServerController::updateContainer(const ServerCredentials &credentials
     }
 }
 
-bool ServerController::isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig,
-                                                    const QJsonObject &newConfig)
+bool ServerController::isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
 
@@ -361,7 +348,7 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
 
     if (container == DockerContainer::Awg) {
         if ((oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
+             != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
             || (oldProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount)
                 != newProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount))
             || (oldProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize)
@@ -383,7 +370,7 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
             return true;
     }
 
-    if (container == DockerContainer::WireGuard){
+    if (container == DockerContainer::WireGuard) {
         if (oldProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)
             != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort))
             return true;
@@ -409,8 +396,7 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
     };
 
     ErrorCode error =
-            runScript(credentials,
-                      replaceVars(amnezia::scriptData(SharedScriptType::install_docker), genVarsForScript(credentials)),
+            runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::install_docker), genVarsForScript(credentials)),
                       cbReadStdOut, cbReadStdErr);
 
     qDebug().noquote() << "ServerController::installDockerWorker" << stdOut;
@@ -422,17 +408,13 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
     return error;
 }
 
-ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container,
-                                              const QJsonObject &config)
+ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     // create folder on host
-    return runScript(
-            credentials,
-            replaceVars(amnezia::scriptData(SharedScriptType::prepare_host), genVarsForScript(credentials, container)));
+    return runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::prepare_host), genVarsForScript(credentials, container)));
 }
 
-ErrorCode ServerController::buildContainerWorker(const ServerCredentials &credentials, DockerContainer container,
-                                                 const QJsonObject &config)
+ErrorCode ServerController::buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     ErrorCode e = uploadFileToHost(credentials, amnezia::scriptData(ProtocolScriptType::dockerfile, container).toUtf8(),
                                    amnezia::server::getDockerfileFolder(container) + "/Dockerfile");
@@ -447,8 +429,7 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
     };
 
     e = runScript(credentials,
-                  replaceVars(amnezia::scriptData(SharedScriptType::build_container),
-                              genVarsForScript(credentials, container, config)),
+                  replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
                   cbReadStdOut);
     if (e)
         return e;
@@ -456,8 +437,7 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
     return e;
 }
 
-ErrorCode ServerController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container,
-                                               QJsonObject &config)
+ErrorCode ServerController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -480,8 +460,7 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
     return e;
 }
 
-ErrorCode ServerController::configureContainerWorker(const ServerCredentials &credentials, DockerContainer container,
-                                                     QJsonObject &config)
+ErrorCode ServerController::configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -498,13 +477,12 @@ ErrorCode ServerController::configureContainerWorker(const ServerCredentials &cr
                                                  genVarsForScript(credentials, container, config)),
                                      cbReadStdOut, cbReadStdErr);
 
-    m_configurator->updateContainerConfigAfterInstallation(container, config, stdOut);
+    VpnConfigurationsController::updateContainerConfigAfterInstallation(container, config, stdOut);
 
     return e;
 }
 
-ErrorCode ServerController::startupContainerWorker(const ServerCredentials &credentials, DockerContainer container,
-                                                   const QJsonObject &config)
+ErrorCode ServerController::startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     QString script = amnezia::scriptData(ProtocolScriptType::container_startup, container);
 
@@ -512,8 +490,7 @@ ErrorCode ServerController::startupContainerWorker(const ServerCredentials &cred
         return ErrorCode::NoError;
     }
 
-    ErrorCode e = uploadTextFileToContainer(container, credentials,
-                                            replaceVars(script, genVarsForScript(credentials, container, config)),
+    ErrorCode e = uploadTextFileToContainer(container, credentials, replaceVars(script, genVarsForScript(credentials, container, config)),
                                             "/opt/amnezia/start.sh");
     if (e)
         return e;
@@ -524,8 +501,8 @@ ErrorCode ServerController::startupContainerWorker(const ServerCredentials &cred
                                  genVarsForScript(credentials, container, config)));
 }
 
-ServerController::Vars ServerController::genVarsForScript(const ServerCredentials &credentials,
-                                                          DockerContainer container, const QJsonObject &config)
+ServerController::Vars ServerController::genVarsForScript(const ServerCredentials &credentials, DockerContainer container,
+                                                          const QJsonObject &config)
 {
     const QJsonObject &openvpnConfig = config.value(ProtocolProps::protoToString(Proto::OpenVpn)).toObject();
     const QJsonObject &cloakConfig = config.value(ProtocolProps::protoToString(Proto::Cloak)).toObject();
@@ -540,24 +517,19 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$REMOTE_HOST", credentials.hostName } });
 
     // OpenVPN vars
-    vars.append(
-            { { "$OPENVPN_SUBNET_IP",
-                openvpnConfig.value(config_key::subnet_address).toString(protocols::openvpn::defaultSubnetAddress) } });
-    vars.append({ { "$OPENVPN_SUBNET_CIDR",
-                    openvpnConfig.value(config_key::subnet_cidr).toString(protocols::openvpn::defaultSubnetCidr) } });
-    vars.append({ { "$OPENVPN_SUBNET_MASK",
-                    openvpnConfig.value(config_key::subnet_mask).toString(protocols::openvpn::defaultSubnetMask) } });
+    vars.append({ { "$OPENVPN_SUBNET_IP",
+                    openvpnConfig.value(config_key::subnet_address).toString(protocols::openvpn::defaultSubnetAddress) } });
+    vars.append({ { "$OPENVPN_SUBNET_CIDR", openvpnConfig.value(config_key::subnet_cidr).toString(protocols::openvpn::defaultSubnetCidr) } });
+    vars.append({ { "$OPENVPN_SUBNET_MASK", openvpnConfig.value(config_key::subnet_mask).toString(protocols::openvpn::defaultSubnetMask) } });
 
     vars.append({ { "$OPENVPN_PORT", openvpnConfig.value(config_key::port).toString(protocols::openvpn::defaultPort) } });
-    vars.append(
-            { { "$OPENVPN_TRANSPORT_PROTO",
-                openvpnConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto) } });
+    vars.append({ { "$OPENVPN_TRANSPORT_PROTO",
+                    openvpnConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto) } });
 
     bool isNcpDisabled = openvpnConfig.value(config_key::ncp_disable).toBool(protocols::openvpn::defaultNcpDisable);
     vars.append({ { "$OPENVPN_NCP_DISABLE", isNcpDisabled ? protocols::openvpn::ncpDisableString : "" } });
 
-    vars.append({ { "$OPENVPN_CIPHER",
-                    openvpnConfig.value(config_key::cipher).toString(protocols::openvpn::defaultCipher) } });
+    vars.append({ { "$OPENVPN_CIPHER", openvpnConfig.value(config_key::cipher).toString(protocols::openvpn::defaultCipher) } });
     vars.append({ { "$OPENVPN_HASH", openvpnConfig.value(config_key::hash).toString(protocols::openvpn::defaultHash) } });
 
     bool isTlsAuth = openvpnConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth);
@@ -568,43 +540,35 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     }
 
     vars.append({ { "$OPENVPN_ADDITIONAL_CLIENT_CONFIG",
-                    openvpnConfig.value(config_key::additional_client_config)
-                            .toString(protocols::openvpn::defaultAdditionalClientConfig) } });
+                    openvpnConfig.value(config_key::additional_client_config).toString(protocols::openvpn::defaultAdditionalClientConfig) } });
     vars.append({ { "$OPENVPN_ADDITIONAL_SERVER_CONFIG",
-                    openvpnConfig.value(config_key::additional_server_config)
-                            .toString(protocols::openvpn::defaultAdditionalServerConfig) } });
+                    openvpnConfig.value(config_key::additional_server_config).toString(protocols::openvpn::defaultAdditionalServerConfig) } });
 
     // ShadowSocks vars
-    vars.append({ { "$SHADOWSOCKS_SERVER_PORT",
-                    ssConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort) } });
+    vars.append({ { "$SHADOWSOCKS_SERVER_PORT", ssConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort) } });
     vars.append({ { "$SHADOWSOCKS_LOCAL_PORT",
                     ssConfig.value(config_key::local_port).toString(protocols::shadowsocks::defaultLocalProxyPort) } });
-    vars.append({ { "$SHADOWSOCKS_CIPHER",
-                    ssConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher) } });
+    vars.append({ { "$SHADOWSOCKS_CIPHER", ssConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher) } });
 
     vars.append({ { "$CONTAINER_NAME", ContainerProps::containerToString(container) } });
     vars.append({ { "$DOCKERFILE_FOLDER", "/opt/amnezia/" + ContainerProps::containerToString(container) } });
 
     // Cloak vars
     vars.append({ { "$CLOAK_SERVER_PORT", cloakConfig.value(config_key::port).toString(protocols::cloak::defaultPort) } });
-    vars.append({ { "$FAKE_WEB_SITE_ADDRESS",
-                    cloakConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite) } });
+    vars.append({ { "$FAKE_WEB_SITE_ADDRESS", cloakConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite) } });
 
     // Xray vars
-    vars.append({ { "$XRAY_SITE_NAME",
-                  xrayConfig.value(config_key::site).toString(protocols::xray::defaultSite) } });
+    vars.append({ { "$XRAY_SITE_NAME", xrayConfig.value(config_key::site).toString(protocols::xray::defaultSite) } });
 
     // Wireguard vars
-    vars.append(
-            { { "$WIREGUARD_SUBNET_IP",
-                wireguarConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress) } });
+    vars.append({ { "$WIREGUARD_SUBNET_IP",
+                    wireguarConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress) } });
     vars.append({ { "$WIREGUARD_SUBNET_CIDR",
                     wireguarConfig.value(config_key::subnet_cidr).toString(protocols::wireguard::defaultSubnetCidr) } });
     vars.append({ { "$WIREGUARD_SUBNET_MASK",
                     wireguarConfig.value(config_key::subnet_mask).toString(protocols::wireguard::defaultSubnetMask) } });
 
-    vars.append({ { "$WIREGUARD_SERVER_PORT",
-                    wireguarConfig.value(config_key::port).toString(protocols::wireguard::defaultPort) } });
+    vars.append({ { "$WIREGUARD_SERVER_PORT", wireguarConfig.value(config_key::port).toString(protocols::wireguard::defaultPort) } });
 
     // IPsec vars
     vars.append({ { "$IPSEC_VPN_L2TP_NET", "192.168.42.0/24" } });
@@ -627,30 +591,22 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$SECONDARY_SERVER_DNS", m_settings->secondaryDns() } });
 
     // Sftp vars
-    vars.append(
-            { { "$SFTP_PORT",
-                sftpConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Proto::Sftp))) } });
+    vars.append({ { "$SFTP_PORT", sftpConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Proto::Sftp))) } });
     vars.append({ { "$SFTP_USER", sftpConfig.value(config_key::userName).toString() } });
     vars.append({ { "$SFTP_PASSWORD", sftpConfig.value(config_key::password).toString() } });
 
     // Amnezia wireguard vars
-    vars.append({ { "$AWG_SERVER_PORT",
-                    amneziaWireguarConfig.value(config_key::port).toString(protocols::awg::defaultPort) } });
+    vars.append({ { "$AWG_SERVER_PORT", amneziaWireguarConfig.value(config_key::port).toString(protocols::awg::defaultPort) } });
 
     vars.append({ { "$JUNK_PACKET_COUNT", amneziaWireguarConfig.value(config_key::junkPacketCount).toString() } });
     vars.append({ { "$JUNK_PACKET_MIN_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMinSize).toString() } });
     vars.append({ { "$JUNK_PACKET_MAX_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMaxSize).toString() } });
     vars.append({ { "$INIT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::initPacketJunkSize).toString() } });
-    vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE",
-                    amneziaWireguarConfig.value(config_key::responsePacketJunkSize).toString() } });
-    vars.append({ { "$INIT_PACKET_MAGIC_HEADER",
-                    amneziaWireguarConfig.value(config_key::initPacketMagicHeader).toString() } });
-    vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER",
-                    amneziaWireguarConfig.value(config_key::responsePacketMagicHeader).toString() } });
-    vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER",
-                    amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
-    vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER",
-                    amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
+    vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::responsePacketJunkSize).toString() } });
+    vars.append({ { "$INIT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::initPacketMagicHeader).toString() } });
+    vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::responsePacketMagicHeader).toString() } });
+    vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
+    vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
 
     QString serverIp = NetworkUtilities::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {
@@ -662,7 +618,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     return vars;
 }
 
-QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode *errorCode)
+QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode errorCode)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -674,11 +630,7 @@ QString ServerController::checkSshConnection(const ServerCredentials &credential
         return ErrorCode::NoError;
     };
 
-    ErrorCode e =
-            runScript(credentials, amnezia::scriptData(SharedScriptType::check_connection), cbReadStdOut, cbReadStdErr);
-
-    if (errorCode)
-        *errorCode = e;
+    errorCode = runScript(credentials, amnezia::scriptData(SharedScriptType::check_connection), cbReadStdOut, cbReadStdErr);
 
     return stdOut;
 }
@@ -690,9 +642,7 @@ void ServerController::cancelInstallation()
 
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)
 {
-    return runScript(
-            credentials,
-            replaceVars(amnezia::scriptData(SharedScriptType::setup_host_firewall), genVarsForScript(credentials)));
+    return runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::setup_host_firewall), genVarsForScript(credentials)));
 }
 
 QString ServerController::replaceVars(const QString &script, const Vars &vars)
@@ -704,8 +654,7 @@ QString ServerController::replaceVars(const QString &script, const Vars &vars)
     return s;
 }
 
-ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credentials, DockerContainer container,
-                                             const QJsonObject &config)
+ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     if (container == DockerContainer::Dns) {
         return ErrorCode::NoError;
@@ -728,15 +677,12 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     QStringList fixedPorts = ContainerProps::fixedPortsForContainer(container);
 
     QString defaultPort("%1");
-    QString port =
-            containerConfig.value(config_key::port).toString(defaultPort.arg(ProtocolProps::defaultPort(protocol)));
-    QString defaultTransportProto =
-            ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
+    QString port = containerConfig.value(config_key::port).toString(defaultPort.arg(ProtocolProps::defaultPort(protocol)));
+    QString defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
     QString transportProto = containerConfig.value(config_key::transport_proto).toString(defaultTransportProto);
 
     // TODO reimplement with netstat
-    QString script =
-            QString("which lsof &>/dev/null || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);
+    QString script = QString("which lsof &>/dev/null || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);
     for (auto &port : fixedPorts) {
         script = script.append("|:%1").arg(port);
     }
@@ -746,8 +692,7 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         script = script.append(" | grep LISTEN");
     }
 
-    ErrorCode errorCode = runScript(credentials, replaceVars(script, genVarsForScript(credentials, container)),
-                                    cbReadStdOut, cbReadStdErr);
+    ErrorCode errorCode = runScript(credentials, replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -775,8 +720,7 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
     };
 
     const QString scriptData = amnezia::scriptData(SharedScriptType::check_user_in_sudo);
-    ErrorCode error =
-            runScript(credentials, replaceVars(scriptData, genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
+    ErrorCode error = runScript(credentials, replaceVars(scriptData, genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
     if (!stdOut.contains("sudo"))
         return ErrorCode::ServerUserNotInSudo;
@@ -806,9 +750,7 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
                 return ErrorCode::ServerCancelInstallation;
             }
             stdOut.clear();
-            runScript(credentials,
-                      replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
-                                  genVarsForScript(credentials)),
+            runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy), genVarsForScript(credentials)),
                       cbReadStdOut, cbReadStdErr);
 
             if (stdOut.contains("Packet manager not found"))
@@ -837,147 +779,6 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
     emit serverIsBusy(false);
 
     return future.result();
-}
-
-ErrorCode ServerController::getAlreadyInstalledContainers(const ServerCredentials &credentials,
-                                                          QMap<DockerContainer, QJsonObject> &installedContainers)
-{
-    QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
-        stdOut += data + "\n";
-        return ErrorCode::NoError;
-    };
-    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
-        stdOut += data + "\n";
-        return ErrorCode::NoError;
-    };
-
-    QString script = QString("sudo docker ps --format '{{.Names}} {{.Ports}}'");
-
-    ErrorCode errorCode = runScript(credentials, script, cbReadStdOut, cbReadStdErr);
-    if (errorCode != ErrorCode::NoError) {
-        return errorCode;
-    }
-
-    auto containersInfo = stdOut.split("\n");
-    for (auto &containerInfo : containersInfo) {
-        if (containerInfo.isEmpty()) {
-            continue;
-        }
-        const static QRegularExpression containerAndPortRegExp("(amnezia[-a-z]*).*?:([0-9]*)->[0-9]*/(udp|tcp).*");
-        QRegularExpressionMatch containerAndPortMatch = containerAndPortRegExp.match(containerInfo);
-        if (containerAndPortMatch.hasMatch()) {
-            QString name = containerAndPortMatch.captured(1);
-            QString port = containerAndPortMatch.captured(2);
-            QString transportProto = containerAndPortMatch.captured(3);
-            DockerContainer container = ContainerProps::containerFromString(name);
-
-            QJsonObject config;
-            Proto mainProto = ContainerProps::defaultProtocol(container);
-            for (auto protocol : ContainerProps::protocolsForContainer(container)) {
-                QJsonObject containerConfig;
-                if (protocol == mainProto) {
-                    containerConfig.insert(config_key::port, port);
-                    containerConfig.insert(config_key::transport_proto, transportProto);
-
-                    if (protocol == Proto::Awg) {
-                        QString serverConfig = getTextFileFromContainer(container, credentials, protocols::awg::serverConfigPath, &errorCode);
-
-                        QMap<QString, QString> serverConfigMap;
-                        auto serverConfigLines = serverConfig.split("\n");
-                        for (auto &line : serverConfigLines) {
-                            auto trimmedLine = line.trimmed();
-                            if (trimmedLine.startsWith("[") && trimmedLine.endsWith("]")) {
-                                continue;
-                            } else {
-                                QStringList parts = trimmedLine.split(" = ");
-                                if (parts.count() == 2) {
-                                    serverConfigMap.insert(parts[0].trimmed(), parts[1].trimmed());
-                                }
-                            }
-                        }
-
-                        containerConfig[config_key::junkPacketCount] = serverConfigMap.value(config_key::junkPacketCount);
-                        containerConfig[config_key::junkPacketMinSize] = serverConfigMap.value(config_key::junkPacketMinSize);
-                        containerConfig[config_key::junkPacketMaxSize] = serverConfigMap.value(config_key::junkPacketMaxSize);
-                        containerConfig[config_key::initPacketJunkSize] = serverConfigMap.value(config_key::initPacketJunkSize);
-                        containerConfig[config_key::responsePacketJunkSize] = serverConfigMap.value(config_key::responsePacketJunkSize);
-                        containerConfig[config_key::initPacketMagicHeader] = serverConfigMap.value(config_key::initPacketMagicHeader);
-                        containerConfig[config_key::responsePacketMagicHeader] = serverConfigMap.value(config_key::responsePacketMagicHeader);
-                        containerConfig[config_key::underloadPacketMagicHeader] = serverConfigMap.value(config_key::underloadPacketMagicHeader);
-                        containerConfig[config_key::transportPacketMagicHeader] = serverConfigMap.value(config_key::transportPacketMagicHeader);
-                    } else if (protocol == Proto::Sftp) {
-                        stdOut.clear();
-                        script = QString("sudo docker inspect --format '{{.Config.Cmd}}' %1").arg(name);
-
-                        ErrorCode errorCode = runScript(credentials, script, cbReadStdOut, cbReadStdErr);
-                        if (errorCode != ErrorCode::NoError) {
-                            return errorCode;
-                        }
-
-                        auto sftpInfo = stdOut.split(":");
-                        if (sftpInfo.size() < 2) {
-                            logger.error() << "Key parameters for the sftp container are missing";
-                            continue;
-                        }
-                        auto userName = sftpInfo.at(0);
-                        userName = userName.remove(0, 1);
-                        auto password = sftpInfo.at(1);
-
-                        containerConfig.insert(config_key::userName, userName);
-                        containerConfig.insert(config_key::password, password);
-                    }
-
-                    config.insert(config_key::container, ContainerProps::containerToString(container));
-                }
-                config.insert(ProtocolProps::protoToString(protocol), containerConfig);
-            }
-            installedContainers.insert(container, config);
-        }
-        const static QRegularExpression torOrDnsRegExp("(amnezia-(?:torwebsite|dns)).*?([0-9]*)/(udp|tcp).*");
-        QRegularExpressionMatch torOrDnsRegMatch = torOrDnsRegExp.match(containerInfo);
-        if (torOrDnsRegMatch.hasMatch()) {
-            QString name = torOrDnsRegMatch.captured(1);
-            QString port = torOrDnsRegMatch.captured(2);
-            QString transportProto = torOrDnsRegMatch.captured(3);
-            DockerContainer container = ContainerProps::containerFromString(name);
-
-            QJsonObject config;
-            Proto mainProto = ContainerProps::defaultProtocol(container);
-            for (auto protocol : ContainerProps::protocolsForContainer(container)) {
-                QJsonObject containerConfig;
-                if (protocol == mainProto) {
-                    containerConfig.insert(config_key::port, port);
-                    containerConfig.insert(config_key::transport_proto, transportProto);
-
-                    if (protocol == Proto::TorWebSite) {
-                        stdOut.clear();
-                        script = QString("sudo docker exec -i %1 sh -c 'cat /var/lib/tor/hidden_service/hostname'").arg(name);
-
-                        ErrorCode errorCode = runScript(credentials, script, cbReadStdOut, cbReadStdErr);
-                        if (errorCode != ErrorCode::NoError) {
-                            return errorCode;
-                        }
-
-                        if (stdOut.isEmpty()) {
-                            logger.error() << "Key parameters for the tor container are missing";
-                            continue;
-                        }
-
-                        QString onion = stdOut;
-                        onion.replace("\n", "");
-                        containerConfig.insert(config_key::site, onion);
-                    }
-
-                    config.insert(config_key::container, ContainerProps::containerToString(container));
-                }
-                config.insert(ProtocolProps::protoToString(protocol), containerConfig);
-            }
-            installedContainers.insert(container, config);
-        }
-    }
-
-    return ErrorCode::NoError;
 }
 
 ErrorCode ServerController::getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey,

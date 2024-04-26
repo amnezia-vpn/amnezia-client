@@ -13,9 +13,11 @@ namespace LanguageSettings
         English,
         Russian,
         China_cn,
+        Ukrainian,
         Persian,
         Arabic,
-        Burmese
+        Burmese,
+        Urdu
     };
     Q_ENUM_NS(AvailableLanguageEnum)
 

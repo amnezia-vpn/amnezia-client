@@ -256,6 +256,16 @@ Settings::RouteMode Settings::routeMode() const
     return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt());
 }
 
+bool Settings::isSitesSplitTunnelingEnabled() const
+{
+    return value("Conf/sitesSplitTunnelingEnabled", false).toBool();
+}
+
+void Settings::setSitesSplitTunnelingEnabled(bool enabled)
+{
+    setValue("Conf/sitesSplitTunnelingEnabled", enabled);
+}
+
 bool Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
 {
     QVariantMap sites = vpnSites(mode);
@@ -351,8 +361,93 @@ QString Settings::secondaryDns() const
 
 void Settings::clearSettings()
 {
+    auto uuid = getInstallationUuid(false);
     m_settings.clearSettings();
+    setInstallationUuid(uuid);
     emit settingsCleared();
+}
+
+QString Settings::appsRouteModeString(AppsRouteMode mode) const
+{
+    switch (mode) {
+    case VpnAllApps: return "AllApps";
+    case VpnOnlyForwardApps: return "ForwardApps";
+    case VpnAllExceptApps: return "ExceptApps";
+    }
+}
+
+Settings::AppsRouteMode Settings::getAppsRouteMode() const
+{
+    return static_cast<AppsRouteMode>(value("Conf/appsRouteMode", 0).toInt());
+}
+
+void Settings::setAppsRouteMode(AppsRouteMode mode)
+{
+    setValue("Conf/appsRouteMode", mode);
+}
+
+QVector<InstalledAppInfo> Settings::getVpnApps(AppsRouteMode mode) const
+{
+    QVector<InstalledAppInfo> apps;
+    auto appsArray = value("Conf/" + appsRouteModeString(mode)).toJsonArray();
+    for (const auto &app : appsArray) {
+        InstalledAppInfo appInfo;
+        appInfo.appName = app.toObject().value("appName").toString();
+        appInfo.packageName = app.toObject().value("packageName").toString();
+        appInfo.appPath = app.toObject().value("appPath").toString();
+
+        apps.push_back(appInfo);
+    }
+    return apps;
+}
+
+void Settings::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps)
+{
+    QJsonArray appsArray;
+    for (const auto &app : apps) {
+        QJsonObject appInfo;
+        appInfo.insert("appName", app.appName);
+        appInfo.insert("packageName", app.packageName);
+        appInfo.insert("appPath", app.appPath);
+        appsArray.push_back(appInfo);
+    }
+    setValue("Conf/" + appsRouteModeString(mode), appsArray);
+    m_settings.sync();
+}
+
+bool Settings::isAppsSplitTunnelingEnabled() const
+{
+    return value("Conf/appsSplitTunnelingEnabled", false).toBool();
+}
+
+void Settings::setAppsSplitTunnelingEnabled(bool enabled)
+{
+    setValue("Conf/appsSplitTunnelingEnabled", enabled);
+}
+
+bool Settings::isKillSwitchEnabled() const
+{
+    return value("Conf/killSwitchEnabled", true).toBool();
+}
+
+void Settings::setKillSwitchEnabled(bool enabled)
+{
+    setValue("Conf/killSwitchEnabled", enabled);
+}
+
+QString Settings::getInstallationUuid(const bool needCreate)
+{
+    auto uuid = value("Conf/installationUuid", "").toString();
+    if (needCreate && uuid.isEmpty()) {
+        uuid = QUuid::createUuid().toString();
+        setInstallationUuid(uuid);
+    }
+    return uuid;
+}
+
+void Settings::setInstallationUuid(const QString &uuid)
+{
+    setValue("Conf/installationUuid", uuid);
 }
 
 ServerCredentials Settings::defaultServerCredentials() const

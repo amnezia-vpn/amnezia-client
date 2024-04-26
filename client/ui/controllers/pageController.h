@@ -29,6 +29,7 @@ namespace PageLoader
         PageSettingsAbout,
         PageSettingsLogging,
         PageSettingsSplitTunneling,
+        PageSettingsAppSplitTunneling,
 
         PageServiceSftpSettings,
         PageServiceTorWebsiteSettings,
@@ -121,6 +122,9 @@ signals:
 
     void escapePressed();
     void closeTopDrawer();
+
+    void forceTabBarActiveFocus();
+    void forceStackActiveFocus();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

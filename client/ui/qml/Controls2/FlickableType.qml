@@ -5,6 +5,14 @@ import "../Config"
 Flickable {
     id: fl
 
+    function ensureVisible(item) {
+        if (item.y < fl.contentY) {
+            fl.contentY = item.y
+        } else if (item.y + item.height > fl.contentY + fl.height) {
+            fl.contentY = item.y + item.height - fl.height + 40 // 40 is a bottom margin
+        }
+    }
+
     clip: true
     width: parent.width
 

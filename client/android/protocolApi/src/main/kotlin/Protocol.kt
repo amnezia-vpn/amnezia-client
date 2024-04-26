@@ -64,6 +64,22 @@ abstract class Protocol {
         }
     }
 
+    protected fun ProtocolConfig.Builder.configAppSplitTunneling(config: JSONObject) {
+        val splitTunnelType = config.optInt("appSplitTunnelType")
+        if (splitTunnelType == SPLIT_TUNNEL_DISABLE) return
+        val splitTunnelApps = config.getJSONArray("splitTunnelApps")
+        val appHandlerFunc = when (splitTunnelType) {
+            SPLIT_TUNNEL_INCLUDE -> ::includeApplication
+            SPLIT_TUNNEL_EXCLUDE -> ::excludeApplication
+
+            else -> throw BadConfigException("Unexpected value of the 'appSplitTunnelType' parameter: $splitTunnelType")
+        }
+
+        for (i in 0 until splitTunnelApps.length()) {
+            appHandlerFunc(splitTunnelApps.getString(i))
+        }
+    }
+
     protected open fun buildVpnInterface(config: ProtocolConfig, vpnBuilder: Builder) {
         vpnBuilder.setSession(VPN_SESSION_NAME)
 
@@ -101,8 +117,13 @@ abstract class Protocol {
             }
         }
 
+        for (app in config.includedApplications) {
+            Log.d(TAG, "addAllowedApplication")
+            vpnBuilder.addAllowedApplication(app)
+        }
+
         for (app in config.excludedApplications) {
-            Log.d(TAG, "addDisallowedApplication: $app")
+            Log.d(TAG, "addDisallowedApplication")
             vpnBuilder.addDisallowedApplication(app)
         }
 

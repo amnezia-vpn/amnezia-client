@@ -20,11 +20,17 @@ Item {
     property string leftImageSource
     property bool isLeftImageHoverEnabled: true //todo separete this qml file to 3
 
+    property alias rightButton: rightImage
+    property FlickableType parentFlickable
+
     property string textColor: "#d7d8db"
     property string textDisabledColor: "#878B91"
     property string descriptionColor: "#878B91"
     property string descriptionDisabledColor: "#494B50"
     property real textOpacity: 1.0
+
+    property string borderFocusedColor: "#D7D8DB"
+    property int borderFocusedWidth: 1
 
     property string rightImageColor: "#d7d8db"
 
@@ -33,6 +39,25 @@ Item {
 
     implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
     implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
+
+    onFocusChanged: {
+        if (root.activeFocus) {
+            if (root.parentFlickable) {
+                root.parentFlickable.ensureVisible(root)
+            }
+        }
+    }
+
+    Connections {
+        target: rightImage
+        function onFocusChanged() {
+            if (rightImage.activeFocus) {
+                if (root.parentFlickable) {
+                    root.parentFlickable.ensureVisible(root)
+                }
+            }
+        }
+    }
 
     MouseArea {
         anchors.fill: parent
@@ -238,9 +263,24 @@ Item {
         anchors.fill: root
         color: "transparent"
 
+        border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
+        border.width: root.activeFocus ? root.borderFocusedWidth : 0
+
 
         Behavior on color {
             PropertyAnimation { duration: 200 }
+        }
+    }
+
+    Keys.onEnterPressed: {
+        if (clickedFunction && typeof clickedFunction === "function") {
+            clickedFunction()
+        }
+    }
+
+    Keys.onReturnPressed: {
+        if (clickedFunction && typeof clickedFunction === "function") {
+            clickedFunction()
         }
     }
 }

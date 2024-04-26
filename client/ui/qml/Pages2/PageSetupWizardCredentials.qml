@@ -14,6 +14,11 @@ PageType {
 
     defaultActiveFocusItem: hostname.textField
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -21,6 +26,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: hostname.textField
     }
 
     FlickableType {
@@ -107,6 +114,8 @@ PageType {
 
                 text: qsTr("Continue")
 
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
+
                 clickedFunc: function() {
                     forceActiveFocus()
                     if (!isCredentialsFilled()) {
@@ -114,7 +123,7 @@ PageType {
                     }
 
                     InstallController.setShouldCreateServer(true)
-                    InstallController.setCurrentlyInstalledServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
+                    InstallController.setProcessedServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
 
                     PageController.showBusyIndicator(true)
                     var isConnectionOpened = InstallController.checkSshConnection()

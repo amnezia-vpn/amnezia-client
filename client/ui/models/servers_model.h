@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 
 #include "settings.h"
+#include "core/controllers/serverController.h"
 
 class ServersModel : public QAbstractListModel
 {
@@ -80,24 +81,24 @@ public slots:
     void editServer(const QJsonObject &server, const int serverIndex);
     void removeServer();
 
-    QJsonObject getDefaultServerConfig();
+    QJsonObject getServerConfig(const int serverIndex);
 
     void reloadDefaultServerContainerConfig();
     void updateContainerConfig(const int containerIndex, const QJsonObject config);
     void addContainerConfig(const int containerIndex, const QJsonObject config);
 
-    void clearCachedProfiles();
     void clearCachedProfile(const DockerContainer container);
 
-    ErrorCode removeContainer(const int containerIndex);
-    ErrorCode removeAllContainers();
-    ErrorCode rebootServer();
+    ErrorCode removeContainer(const QSharedPointer<ServerController> &serverController, const int containerIndex);
+    ErrorCode removeAllContainers(const QSharedPointer<ServerController> &serverController);
+    ErrorCode rebootServer(const QSharedPointer<ServerController> &serverController);
 
     void setDefaultContainer(const int serverIndex, const int containerIndex);
 
     QStringList getAllInstalledServicesName(const int serverIndex);
 
     void toggleAmneziaDns(bool enabled);
+    QPair<QString, QString> getDnsPair(const int serverIndex);
 
     bool isServerFromApiAlreadyExists(const quint16 crc);
 

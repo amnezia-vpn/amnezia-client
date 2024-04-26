@@ -12,9 +12,17 @@ import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Components"
+import "../Config"
 
 PageType {
     id: root
+
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
 
     BackButtonType {
         id: backButton
@@ -23,6 +31,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: serverSelector
     }
 
     FlickableType {
@@ -74,6 +84,8 @@ PageType {
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
 
+                KeyNavigation.tab: shareButton
+
                 listView: ListViewWithRadioButtonType {
                     id: serverSelectorListView
 
@@ -117,11 +129,14 @@ PageType {
             }
 
             BasicButtonType {
+                id: shareButton
                 Layout.fillWidth: true
                 Layout.topMargin: 40
 
                 text: qsTr("Share")
                 imageSource: "qrc:/images/controls/share-2.svg"
+
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunc: function() {
                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
@@ -149,5 +164,10 @@ PageType {
         id: shareConnectionDrawer
 
         anchors.fill: parent
+        onClosed: {
+            if (!GC.isMobile()) {
+                focusItem.forceActiveFocus()
+            }
+        }
     }
 }

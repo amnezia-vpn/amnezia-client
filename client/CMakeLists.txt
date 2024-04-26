@@ -68,6 +68,8 @@ set(AMNEZIAVPN_TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_fa_IR.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ar_EG.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_my_MM.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_uk_UA.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ur_PK.ts
 )
 
 file(GLOB_RECURSE AMNEZIAVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)
@@ -119,7 +121,9 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/core/errorstrings.h
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.h
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/apiController.h
     ${CMAKE_CURRENT_LIST_DIR}/core/controllers/serverController.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/vpnConfigurationController.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/qml_register_protocols.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.h
@@ -159,7 +163,9 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/core/errorstrings.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/apiController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/controllers/serverController.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/vpnConfigurationController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp

@@ -26,6 +26,47 @@ ListView {
     clip: true
     interactive: false
 
+    property FlickableType parentFlickable
+    property var lastItemTabClicked
+
+    property int currentFocusIndex: 0
+
+    activeFocusOnTab: true
+    onActiveFocusChanged: {
+        if (activeFocus) {
+            this.currentFocusIndex = 0
+            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
+        }
+    }
+
+    Keys.onTabPressed: {
+        if (currentFocusIndex < this.count - 1) {
+            currentFocusIndex += 1
+        } else {
+            currentFocusIndex = 0
+        }
+        this.itemAtIndex(currentFocusIndex).forceActiveFocus()
+    }
+
+    Item {
+        id: focusItem
+        Keys.onTabPressed: {
+            root.forceActiveFocus()
+        }
+    }
+
+    onVisibleChanged: {
+        if (visible) {
+            focusItem.forceActiveFocus()
+        }
+    }
+
+    onCurrentFocusIndexChanged: {
+        if (parentFlickable) {
+            parentFlickable.ensureVisible(this.itemAtIndex(currentFocusIndex))
+        }
+    }
+
     ButtonGroup {
         id: buttonGroup
     }
@@ -39,6 +80,12 @@ ListView {
     delegate: Item {
         implicitWidth: rootWidth
         implicitHeight: content.implicitHeight
+
+        onActiveFocusChanged: {
+            if (activeFocus) {
+                radioButton.forceActiveFocus()
+            }
+        }
 
         ColumnLayout {
             id: content
@@ -54,10 +101,16 @@ ListView {
                 hoverEnabled: true
 
                 indicator: Rectangle {
-                    anchors.fill: parent
+                    width: parent.width - 1
+                    height: parent.height
                     color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
+                    border.color: radioButton.focus ? "#D7D8DB" : "transparent"
+                    border.width: radioButton.focus ? 1 : 0
 
                     Behavior on color {
+                        PropertyAnimation { duration: 200 }
+                    }
+                    Behavior on border.color {
                         PropertyAnimation { duration: 200 }
                     }
 
@@ -116,6 +169,14 @@ ListView {
             if (root.currentIndex === index) {
                 root.selectedText = name
             }
+        }
+
+        Keys.onReturnPressed: {
+            radioButton.clicked()
+        }
+
+        Keys.onEnterPressed: {
+            radioButton.clicked()
         }
     }
 }
