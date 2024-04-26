@@ -161,8 +161,11 @@ QJsonObject Deserialize(const QString &vmessStr, QString *alias, QString *errMes
     vnextArray.append(server.toJson());
     vConf["vnext"] = vnextArray;
     auto outbound = outbounds::GenerateOutboundEntry(OUTBOUND_TAG_PROXY, "vmess", vConf, stream.toJson());
+    QJsonObject inbound = inbounds::GenerateInboundEntry();
+
     //
     root["outbounds"] = QJsonArray{ outbound };
+    root["inbound"] = QJsonArray{ inbound };
     return root;
 }
 

@@ -48,6 +48,11 @@ namespace amnezia::serialization
                                        const QJsonObject &mux = {},       //
                                        const QString &sendThrough = "0.0.0.0");
     } // namespace outbounds
+
+    namespace inbounds
+    {
+        QJsonObject GenerateInboundEntry();
+    }
 }
 
 #endif // SERIALIZATION_H

@@ -332,7 +332,9 @@ QJsonObject Deserialize(const QString &vmessStr, QString *alias, QString *errMes
     QJsonObject vConf;
     vConf["vnext"] = QJsonArray{ serv.toJson() };
     const auto outbound = outbounds::GenerateOutboundEntry(OUTBOUND_TAG_PROXY, "vmess", vConf, streaming.toJson());
+    QJsonObject inbound = inbounds::GenerateInboundEntry();
     root["outbounds"] = QJsonArray{ outbound };
+    root["inbounds"] = QJsonArray{ inbound };
     // If previous alias is empty, just the PS is needed, else, append a "_"
     *alias = alias->trimmed().isEmpty() ? ps : *alias + "_" + ps;
     return root;

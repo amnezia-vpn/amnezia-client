@@ -45,6 +45,7 @@ QJsonObject GenerateFreedomOUT(const QString &domainStrategy, const QString &red
     JADD(domainStrategy, redirect)
     return root;
 }
+
 QJsonObject GenerateBlackHoleOUT(bool useHTTP)
 {
     QJsonObject root;
@@ -53,7 +54,6 @@ QJsonObject GenerateBlackHoleOUT(bool useHTTP)
     root.insert("response", resp);
     return root;
 }
-
 
 QJsonObject GenerateShadowSocksServerOUT(const QString &address, int port, const QString &method, const QString &password)
 {

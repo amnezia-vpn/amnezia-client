@@ -223,8 +223,10 @@ QList<std::pair<QString, QJsonObject>> Deserialize(const QString &uri, QString *
         // appending to the total list
         QJsonObject root;
         QJsonArray outbounds;
+        QJsonObject inbound = inbounds::GenerateInboundEntry();
         outbounds.append(outbounds::GenerateOutboundEntry(OUTBOUND_TAG_PROXY, "shadowsocks", outbounds::GenerateShadowSocksOUT({ ssObject }), {}));
         root["outbounds"] = outbounds;
+        root["inbounds"] = QJsonArray{ inbound };
         serverList.append({ finalName, root });
     }
 

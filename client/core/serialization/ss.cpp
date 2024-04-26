@@ -120,6 +120,8 @@ QJsonObject Deserialize(const QString &ssUri, QString *alias, QString *errMessag
     QJsonArray outbounds;
     outbounds.append(outbounds::GenerateOutboundEntry(OUTBOUND_TAG_PROXY, "shadowsocks", outbounds::GenerateShadowSocksOUT({ server }), {}));
     JADD(outbounds)
+    QJsonObject inbound = inbounds::GenerateInboundEntry();
+    root["inbounds"] = QJsonArray{ inbound };
     *alias = alias->isEmpty() ? d_name : *alias + "_" + d_name;
     return root;
 }

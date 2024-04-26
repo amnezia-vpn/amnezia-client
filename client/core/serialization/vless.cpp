@@ -218,8 +218,9 @@ QJsonObject Deserialize(const QString &str, QString *alias, QString *errMessage)
     // assembling config
     QJsonObject root;
     outbound["streamSettings"] = stream;
+    QJsonObject inbound = inbounds::GenerateInboundEntry();
     root["outbounds"] = QJsonArray{ outbound };
-
+    root["inbounds"] = QJsonArray { inbound };
     return root;
 }
 } // namespace amnezia::serialization::vless
