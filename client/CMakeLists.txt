@@ -174,6 +174,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/outbound.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/inbound.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/ss.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/ssd.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vless.cpp
