@@ -18,6 +18,9 @@ Switch {
     property string defaultIndicatorColor: "transparent"
     property string checkedDisabledIndicatorColor: "#402102"
 
+    property string borderFocusedColor: "#D7D8DB"
+    property int borderFocusedWidth: 1
+
     property string checkedIndicatorBorderColor: "#633303"
     property string defaultIndicatorBorderColor: "#494B50"
     property string checkedDisabledIndicatorBorderColor: "#402102"
@@ -31,6 +34,16 @@ Switch {
     property string defaultIndicatorBackgroundColor: "transparent"
 
     hoverEnabled: enabled ? true : false
+    focusPolicy: Qt.TabFocus
+
+    property FlickableType parentFlickable: null
+    onFocusChanged: {
+        if (root.activeFocus) {
+            if (root.parentFlickable) {
+                root.parentFlickable.ensureVisible(root)
+            }
+        }
+    }
 
     indicator: Rectangle {
         id: switcher
@@ -44,8 +57,9 @@ Switch {
         radius: 16
         color: root.checked ? (root.enabled ? root.checkedIndicatorColor : root.checkedDisabledIndicatorColor)
                             : root.defaultIndicatorColor
-        border.color: root.checked ? (root.enabled ? root.checkedIndicatorBorderColor : root.checkedDisabledIndicatorBorderColor)
-                                   : root.defaultIndicatorBorderColor
+
+        border.color: root.activeFocus ? root.borderFocusedColor : (root.checked ? (root.enabled ? root.checkedIndicatorBorderColor : root.checkedDisabledIndicatorBorderColor)
+                            : root.defaultIndicatorBorderColor)
 
         Behavior on color {
             PropertyAnimation { duration: 200 }
@@ -113,5 +127,15 @@ Switch {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         enabled: false
+    }
+
+    Keys.onEnterPressed: {
+        root.checked = !root.checked
+        root.checkedChanged()
+    }
+
+    Keys.onReturnPressed: {
+        root.checked = !root.checked
+        root.checkedChanged()
     }
 }

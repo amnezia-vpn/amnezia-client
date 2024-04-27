@@ -13,6 +13,8 @@ import "../Config"
 PageType {
     id: root
 
+    defaultActiveFocusItem: header
+
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -29,15 +31,19 @@ PageType {
             spacing: 0
 
             HeaderType {
+                id: header
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
                 headerText: qsTr("Settings")
+
+                KeyNavigation.tab: account.rightButton
             }
 
             LabelWithButtonType {
+                id: account
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
@@ -48,11 +54,14 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsServersList)
                 }
+
+                KeyNavigation.tab: connection.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: connection
                 Layout.fillWidth: true
 
                 text: qsTr("Connection")
@@ -62,11 +71,14 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsConnection)
                 }
+
+                KeyNavigation.tab: application.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: application
                 Layout.fillWidth: true
 
                 text: qsTr("Application")
@@ -76,11 +88,14 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsApplication)
                 }
+
+                KeyNavigation.tab: backup.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: backup
                 Layout.fillWidth: true
 
                 text: qsTr("Backup")
@@ -90,6 +105,8 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsBackup)
                 }
+
+                KeyNavigation.tab: about.rightButton
             }
 
             DividerType {}
@@ -105,18 +122,23 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsAbout)
                 }
+                KeyNavigation.tab: close
+
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: close
                 visible: GC.isDesktop()
                 Layout.fillWidth: true
                 Layout.preferredHeight: about.height
 
                 text: qsTr("Close application")
                 leftImageSource: "qrc:/images/controls/x-circle.svg"
-                isLeftImageHoverEnabled: false
+                isLeftImageHoverEnabled: false                
+
+                Keys.onTabPressed: lastItemTabClicked(header)
 
                 clickedFunction: function() {
                     PageController.closeApplication()

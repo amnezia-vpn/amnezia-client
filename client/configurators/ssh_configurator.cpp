@@ -17,8 +17,8 @@
 #include "core/server_defs.h"
 #include "utilities.h"
 
-SshConfigurator::SshConfigurator(std::shared_ptr<Settings> settings, QObject *parent)
-    : ConfiguratorBase(settings, parent)
+SshConfigurator::SshConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
+    : ConfiguratorBase(settings, serverController, parent)
 {
 }
 
@@ -82,8 +82,7 @@ void SshConfigurator::openSshTerminal(const ServerCredentials &credentials)
         //        p->setNativeArguments(QString("%1@%2")
         //            .arg(credentials.userName).arg(credentials.hostName).arg(credentials.secretData));
     } else {
-        p->setNativeArguments(
-                QString("%1@%2 -pw %3").arg(credentials.userName).arg(credentials.hostName).arg(credentials.secretData));
+        p->setNativeArguments(QString("%1@%2 -pw %3").arg(credentials.userName).arg(credentials.hostName).arg(credentials.secretData));
     }
     #else
     p->setProgram("/bin/bash");

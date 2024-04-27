@@ -25,6 +25,14 @@ Popup {
         color: Qt.rgba(14/255, 14/255, 17/255, 0.8)
     }
 
+    onOpened: {
+        focusItem.forceActiveFocus()
+    }
+
+    onClosed: {
+        PageController.forceStackActiveFocus()
+    }
+
     background: Rectangle {
         anchors.fill: parent
 
@@ -52,7 +60,13 @@ Popup {
                 text: root.text
             }
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: closeButton
+            }
+
             BasicButtonType {
+                id: closeButton
                 visible: closeButtonVisible
 
                 implicitHeight: 32
@@ -66,6 +80,8 @@ Popup {
                 borderWidth: 0
 
                 text: qsTr("Close")
+                KeyNavigation.tab: focusItem
+
                 clickedFunc: function() {
                     root.close()
                 }

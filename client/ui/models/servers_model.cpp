@@ -384,13 +384,6 @@ void ServersModel::updateContainerConfig(const int containerIndex, const QJsonOb
     }
 
     server.insert(config_key::containers, containers);
-
-    auto defaultContainer = server.value(config_key::defaultContainer).toString();
-    if ((ContainerProps::containerFromString(defaultContainer) == DockerContainer::None
-         || ContainerProps::containerService(container) != ServiceType::Other)) {
-        server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
-    }
-
     editServer(server, m_processedServerIndex);
 }
 
@@ -428,10 +421,10 @@ const QString ServersModel::getDefaultServerDefaultContainerName()
     return ContainerProps::containerHumanNames().value(defaultContainer);
 }
 
-ErrorCode ServersModel::removeAllContainers()
+ErrorCode ServersModel::removeAllContainers(const QSharedPointer<ServerController> &serverController)
 {
-    ServerController serverController(m_settings);
-    ErrorCode errorCode = serverController.removeAllContainers(m_settings->serverCredentials(m_processedServerIndex));
+
+    ErrorCode errorCode = serverController->removeAllContainers(m_settings->serverCredentials(m_processedServerIndex));
 
     if (errorCode == ErrorCode::NoError) {
         QJsonObject s = m_servers.at(m_processedServerIndex).toObject();
@@ -443,22 +436,22 @@ ErrorCode ServersModel::removeAllContainers()
     return errorCode;
 }
 
-ErrorCode ServersModel::rebootServer()
+ErrorCode ServersModel::rebootServer(const QSharedPointer<ServerController> &serverController)
 {
-    ServerController serverController(m_settings);
+
     auto credentials = m_settings->serverCredentials(m_processedServerIndex);
 
-    ErrorCode errorCode = serverController.rebootServer(credentials);
+    ErrorCode errorCode = serverController->rebootServer(credentials);
     return errorCode;
 }
 
-ErrorCode ServersModel::removeContainer(const int containerIndex)
+ErrorCode ServersModel::removeContainer(const QSharedPointer<ServerController> &serverController, const int containerIndex)
 {
-    ServerController serverController(m_settings);
+
     auto credentials = m_settings->serverCredentials(m_processedServerIndex);
     auto dockerContainer = static_cast<DockerContainer>(containerIndex);
 
-    ErrorCode errorCode = serverController.removeContainer(credentials, dockerContainer);
+    ErrorCode errorCode = serverController->removeContainer(credentials, dockerContainer);
 
     if (errorCode == ErrorCode::NoError) {
         QJsonObject server = m_servers.at(m_processedServerIndex).toObject();

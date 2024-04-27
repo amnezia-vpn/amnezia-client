@@ -9,7 +9,6 @@
 #include <QTextDocument>
 #include <QTimer>
 #include <QTranslator>
-
 #include <QQuickItem>
 
 #include "logger.h"

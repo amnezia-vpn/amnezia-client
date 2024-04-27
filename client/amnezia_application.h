@@ -14,8 +14,6 @@
 #include "settings.h"
 #include "vpnconnection.h"
 
-#include "core/controllers/apiController.h"
-
 #include "ui/controllers/connectionController.h"
 #include "ui/controllers/exportController.h"
 #include "ui/controllers/importController.h"
@@ -125,7 +123,6 @@ private:
     QScopedPointer<SettingsController> m_settingsController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
-    QScopedPointer<ApiController> m_apiController;
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
 };
 

@@ -49,8 +49,24 @@ Button {
                 verticalOffset: 0
                 radius: 10
                 samples: 25
-                color: "#FBB26A"
+                color: root.activeFocus ? "#D7D8DB" : "#FBB26A"
                 source: backgroundCircle
+            }
+
+            ShapePath {
+                fillColor: "transparent"
+                strokeColor: "#D7D8DB"
+                strokeWidth: root.activeFocus ? 1 : 0
+                capStyle: ShapePath.RoundCap
+
+                PathAngleArc {
+                    centerX: backgroundCircle.width / 2
+                    centerY: backgroundCircle.height / 2
+                    radiusX: 94
+                    radiusY: 94
+                    startAngle: 0
+                    sweepAngle: 360
+                }
             }
 
             ShapePath {
@@ -64,14 +80,14 @@ Button {
                         return defaultButtonColor
                     }
                 }
-                strokeWidth: 3
+                strokeWidth: root.activeFocus ? 2 : 3
                 capStyle: ShapePath.RoundCap
 
                 PathAngleArc {
                     centerX: backgroundCircle.width / 2
                     centerY: backgroundCircle.height / 2
-                    radiusX: 93
-                    radiusY: 93
+                    radiusX: 93 - (root.activeFocus ? 2 : 0)
+                    radiusY: 93 - (root.activeFocus ? 2 : 0)
                     startAngle: 0
                     sweepAngle: 360
                 }
@@ -141,4 +157,7 @@ Button {
         ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
         ConnectionController.connectButtonClicked()
     }
+
+    Keys.onEnterPressed: this.clicked()
+    Keys.onReturnPressed: this.clicked()
 }

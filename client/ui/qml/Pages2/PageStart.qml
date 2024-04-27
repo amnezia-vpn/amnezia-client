@@ -14,6 +14,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: homeTabButton
+
     property bool isControlsDisabled: false
     property bool isTabBarDisabled: false
 
@@ -81,6 +83,16 @@ PageType {
             } else {
                 PageController.closePage()
             }
+        }
+
+        function onForceTabBarActiveFocus() {
+            homeTabButton.focus = true
+            tabBar.forceActiveFocus()
+        }
+
+        function onForceStackActiveFocus() {
+            homeTabButton.focus = true
+            tabBarStackView.forceActiveFocus()
         }
     }
 
@@ -211,13 +223,19 @@ PageType {
         }
 
         TabImageButtonType {
+            id: homeTabButton
             isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
-            onClicked: {
+            clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
                 ServersModel.processedIndex = ServersModel.defaultIndex
+                tabBar.currentIndex = 0
                 tabBar.previousIndex = 0
             }
+
+            KeyNavigation.tab: shareTabButton
+            Keys.onEnterPressed: this.clicked()
+            Keys.onReturnPressed: this.clicked()
         }
 
         TabImageButtonType {
@@ -238,27 +256,37 @@ PageType {
 
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"
-            onClicked: {
+            clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageShare)
+                tabBar.currentIndex = 1
                 tabBar.previousIndex = 1
             }
+
+            KeyNavigation.tab: settingsTabButton
         }
 
         TabImageButtonType {
+            id: settingsTabButton
             isSelected: tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
-            onClicked: {
+            clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
+                tabBar.currentIndex = 2
                 tabBar.previousIndex = 2
             }
+
+            KeyNavigation.tab: plusTabButton
         }
 
         TabImageButtonType {
+            id: plusTabButton
             isSelected: tabBar.currentIndex === 3
             image: "qrc:/images/controls/plus.svg"
-            onClicked: {
+            clickedFunc: function () {
                 connectionTypeSelection.open()
             }
+
+            Keys.onTabPressed: PageController.forceStackActiveFocus()
         }
     }
 
@@ -266,6 +294,7 @@ PageType {
         id: connectionTypeSelection
 
         onAboutToHide: {
+            PageController.forceTabBarActiveFocus()
             tabBar.setCurrentIndex(tabBar.previousIndex)
         }
     }

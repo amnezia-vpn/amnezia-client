@@ -453,7 +453,7 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun setSaveLogs(enabled: Boolean) {
-        Log.d(TAG, "Set save logs: $enabled")
+        Log.v(TAG, "Set save logs: $enabled")
         mainScope.launch {
             Log.saveLogs = enabled
             vpnServiceMessenger.send {
@@ -473,7 +473,9 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun clearLogs() {
         Log.v(TAG, "Clear logs")
-        Log.clearLogs()
+        mainScope.launch {
+            Log.clearLogs()
+        }
     }
 
     @Suppress("unused")
@@ -509,7 +511,7 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun getAppIcon(packageName: String, width: Int, height: Int): Bitmap {
-        Log.v(TAG, "Get app icon: $packageName")
+        Log.v(TAG, "Get app icon")
         return AppListProvider.getAppIcon(packageManager, packageName, width, height)
     }
 }
