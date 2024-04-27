@@ -279,6 +279,24 @@ ErrorCode ClientManagementModel::wgShow(const DockerContainer container, const S
         return error;
     }
 
+    const auto changeHandshakeFormat = [](QString & latestHandshake)
+    {
+      const std::vector<std::pair<QString, QString>> replaceMap = {
+          {" days", "d"},
+          {" hours", "h"},
+          {" minutes", "m"},
+          {" seconds", "s"},
+          {" day", "d"},
+          {" hour", "h"},
+          {" minute", "m"},
+          {" second", "s"}};
+
+      for (const auto & item : replaceMap)
+      {
+        latestHandshake.replace(item.first, item.second);
+      }
+    };
+
     for (int i = 0; i < peerList.size(); ++i)
     {
         const auto transferredData = getStrValue(transferredDataList[i]).split(",");
@@ -286,15 +304,7 @@ ErrorCode ClientManagementModel::wgShow(const DockerContainer container, const S
         auto bytesReceived = transferredData.front().trimmed();
         auto bytesSent = transferredData.back().trimmed();
 
-        // can be hour or hours
-        // maybe better to do it with regex
-        latestHandshake.replace(" hours", "h");
-        latestHandshake.replace(" minutes", "m");
-        latestHandshake.replace(" seconds", "s");
-
-        latestHandshake.replace(" hour", "h");
-        latestHandshake.replace(" minute", "m");
-        latestHandshake.replace(" second", "s");
+        changeHandshakeFormat(latestHandshake);
 
         bytesReceived.chop(QStringLiteral(" received").length());
         bytesSent.chop(QStringLiteral(" sent").length());
