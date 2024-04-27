@@ -205,8 +205,13 @@ QJsonObject Deserialize(const QString &str, QString *alias, QString *errMessage)
     if (hasALPN)
     {
         const auto alpnRaw = QUrl::fromPercentEncoding(query.queryItemValue("alpn").toUtf8());
-        const auto alpnArray = QJsonArray::fromStringList(alpnRaw.split(","));
-        QJsonIO::SetValue(stream, alpnArray, { tlsKey, "alpn" });
+        QStringList aplnElems = alpnRaw.split(",");
+        // h2 protocol is not supported by xray
+        aplnElems.removeAll("h2");
+        if (!aplnElems.isEmpty()) {
+            const auto alpnArray = QJsonArray::fromStringList(aplnElems);
+            QJsonIO::SetValue(stream, alpnArray, { tlsKey, "alpn" });
+        }
     }
     // xtls-specific
     if (security == "xtls")
