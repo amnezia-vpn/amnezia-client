@@ -118,7 +118,7 @@ QList<std::pair<QString, QJsonObject>> Deserialize(const QString &uri, QString *
     const auto decodeError = Utils::VerifyJsonString(decodedJSON);
     if (!decodeError.isEmpty())
     {
-        *logList << QObject::tr("Invalid ssd link: json parse failed: ") % decodeError;
+        *logList << QObject::tr("Invalid ssd link: json parse failed");
         return {};
     }
 
