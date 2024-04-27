@@ -799,13 +799,13 @@ PageType {
                                 ColumnLayout
                                 {
                                     id: textColumn
-                                    property var textColor: "#878B91"
+                                    property string textColor: "#878B91"
                                     Layout.bottomMargin: 24
-                                    Layout.fillWidth: true
 
                                     ParagraphTextType {
                                         color: textColumn.textColor
                                         visible: creationDate
+                                        Layout.fillWidth: true
 
                                         text: qsTr("Creation date: %1").arg(creationDate)
                                     }
@@ -813,6 +813,7 @@ PageType {
                                     ParagraphTextType {
                                         color: textColumn.textColor
                                         visible: latestHandshake
+                                        Layout.fillWidth: true
 
                                         text: qsTr("Latest handshake: %1").arg(latestHandshake)
                                     }
@@ -820,6 +821,7 @@ PageType {
                                     ParagraphTextType {
                                         color: textColumn.textColor
                                         visible: dataReceived
+                                        Layout.fillWidth: true
 
                                         text: qsTr("Data received: %1").arg(dataReceived)
                                     }
@@ -827,6 +829,7 @@ PageType {
                                     ParagraphTextType {
                                         color: textColumn.textColor
                                         visible: dataSent
+                                        Layout.fillWidth: true
 
                                         text: qsTr("Data sent: %1").arg(dataSent)
                                     }
