@@ -38,7 +38,7 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 void ConnectionController::openConnection()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    if (!Utils::processIsRunning(SERVICE_NAME))
+    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false)))
     {
         emit connectionErrorOccurred(errorString(ErrorCode::AmneziaServiceNotRunning));
         return;

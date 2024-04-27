@@ -107,7 +107,7 @@ bool Utils::processIsRunning(const QString &fileName)
 #else
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
-    process.start("pgrep", QStringList({ fileName }));
+    process.start("pgrep", QStringList({ "-f", fileName }));
     process.waitForFinished();
     if (process.exitStatus() == QProcess::NormalExit) {
         return (process.readAll().toUInt() > 0);
