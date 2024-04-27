@@ -11,7 +11,7 @@ class ClientManagementModel : public QAbstractListModel
 {
     Q_OBJECT
 
-  public:
+public:
     enum Roles {
         ClientNameRole = Qt::UserRole + 1,
         CreationDateRole,
