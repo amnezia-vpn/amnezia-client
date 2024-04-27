@@ -48,6 +48,7 @@ QString LanguageModel::getLocalLanguageName(const LanguageSettings::AvailableLan
     case LanguageSettings::AvailableLanguageEnum::Persian: strLanguage = "فارسی"; break;
     case LanguageSettings::AvailableLanguageEnum::Arabic: strLanguage = "العربية"; break;
     case LanguageSettings::AvailableLanguageEnum::Burmese: strLanguage = "မြန်မာဘာသာ"; break;
+    case LanguageSettings::AvailableLanguageEnum::Urdu: strLanguage = "اُرْدُوْ"; break;
     default:
         break;
     }
@@ -65,6 +66,7 @@ void LanguageModel::changeLanguage(const LanguageSettings::AvailableLanguageEnum
     case LanguageSettings::AvailableLanguageEnum::Persian: emit updateTranslations(QLocale::Persian); break;
     case LanguageSettings::AvailableLanguageEnum::Arabic: emit updateTranslations(QLocale::Arabic); break;
     case LanguageSettings::AvailableLanguageEnum::Burmese: emit updateTranslations(QLocale::Burmese); break;
+    case LanguageSettings::AvailableLanguageEnum::Urdu: emit updateTranslations(QLocale::Urdu); break;
     default: emit updateTranslations(QLocale::English); break;
     }
 }
@@ -80,6 +82,7 @@ int LanguageModel::getCurrentLanguageIndex()
     case QLocale::Persian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Persian); break;
     case QLocale::Arabic: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Arabic); break;
     case QLocale::Burmese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Burmese); break;
+    case QLocale::Urdu: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Urdu); break;
     default: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     }
 }

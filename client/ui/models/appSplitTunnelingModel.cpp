@@ -5,7 +5,7 @@
 AppSplitTunnelingModel::AppSplitTunnelingModel(std::shared_ptr<Settings> settings, QObject *parent)
     : QAbstractListModel(parent), m_settings(settings)
 {
-    m_isSplitTunnelingEnabled = m_settings->getAppsSplitTunnelingEnabled();
+    m_isSplitTunnelingEnabled = m_settings->isAppsSplitTunnelingEnabled();
     m_currentRouteMode = m_settings->getAppsRouteMode();
     if (m_currentRouteMode == Settings::VpnAllApps) { // for old split tunneling configs
         m_settings->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(Settings::VpnAllExceptApps));
@@ -48,7 +48,6 @@ bool AppSplitTunnelingModel::addApp(const InstalledAppInfo &appInfo)
     m_settings->setVpnApps(m_currentRouteMode, m_apps);
     endInsertRows();
 
-    qDebug() << "app added " << appInfo.appName;
     return true;
 }
 

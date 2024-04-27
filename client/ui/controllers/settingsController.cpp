@@ -223,3 +223,13 @@ void SettingsController::checkIfNeedDisableLogs()
         }
     }
 }
+
+bool SettingsController::isKillSwitchEnabled()
+{
+    return m_settings->isKillSwitchEnabled();
+}
+
+void SettingsController::toggleKillSwitch(bool enable)
+{
+    m_settings->setKillSwitchEnabled(enable);
+}

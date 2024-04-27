@@ -118,12 +118,12 @@ abstract class Protocol {
         }
 
         for (app in config.includedApplications) {
-            Log.d(TAG, "addAllowedApplication: $app")
+            Log.d(TAG, "addAllowedApplication")
             vpnBuilder.addAllowedApplication(app)
         }
 
         for (app in config.excludedApplications) {
-            Log.d(TAG, "addDisallowedApplication: $app")
+            Log.d(TAG, "addDisallowedApplication")
             vpnBuilder.addDisallowedApplication(app)
         }
 
