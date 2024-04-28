@@ -2731,7 +2731,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="39"/>
         <source>OpenVPN executable missing</source>
-        <translation>OpenVPN executeable مفقود</translation>
+        <translation>OpenVPN executable مفقود</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="40"/>
