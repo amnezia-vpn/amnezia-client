@@ -157,7 +157,15 @@ PageType {
         }
     }
 
+    Rectangle {
+        anchors.fill: columnContent
+        anchors.bottomMargin: -24
+        color: "#0E0E11"
+        opacity: 0.8
+    }
+
     ColumnLayout {
+        id: columnContent
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
