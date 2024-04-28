@@ -304,31 +304,29 @@ void VpnConnection::appendSplitTunnelingConfig()
 
                 m_vpnConfiguration.insert(config_key::splitTunnelType, Settings::RouteMode::VpnOnlyForwardSites);
                 m_vpnConfiguration.insert(config_key::splitTunnelSites, allowedIpsJsonArray);
-
-                return;
             }
         }
-    }
+    } else {
+        Settings::RouteMode routeMode = Settings::RouteMode::VpnAllSites;
+        QJsonArray sitesJsonArray;
+        if (m_settings->isSitesSplitTunnelingEnabled()) {
+            routeMode = m_settings->routeMode();
 
-    Settings::RouteMode routeMode = Settings::RouteMode::VpnAllSites;
-    QJsonArray sitesJsonArray;
-    if (m_settings->isSitesSplitTunnelingEnabled()) {
-        routeMode = m_settings->routeMode();
+            auto sites = m_settings->getVpnIps(routeMode);
+            for (const auto &site : sites) {
+                sitesJsonArray.append(site);
+            }
 
-        auto sites = m_settings->getVpnIps(routeMode);
-        for (const auto &site : sites) {
-            sitesJsonArray.append(site);
+            // Allow traffic to Amnezia DNS
+            if (routeMode == Settings::VpnOnlyForwardSites) {
+                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
+                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
+            }
         }
 
-        // Allow traffic to Amnezia DNS
-        if (routeMode == Settings::VpnOnlyForwardSites) {
-            sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
-            sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
-        }
+        m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
+        m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
     }
-
-    m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
-    m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
 
     Settings::AppsRouteMode appsRouteMode = Settings::AppsRouteMode::VpnAllApps;
     QJsonArray appsJsonArray;
