@@ -589,7 +589,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="384"/>
-        <source>Remove OpenVpn from server?</source>
+        <source>Remove OpenVPN from server?</source>
         <translation>آیا میخواهید OpenVPN از سرور حذف شود؟</translation>
     </message>
     <message>
@@ -1986,7 +1986,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <name>PageShare</name>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="116"/>
-        <source>OpenVpn native format</source>
+        <source>OpenVPN native format</source>
         <translation>فرمت OpenVPN</translation>
     </message>
     <message>

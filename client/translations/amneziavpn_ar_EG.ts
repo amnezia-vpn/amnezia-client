@@ -613,7 +613,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="384"/>
-        <source>Remove OpenVpn from server?</source>
+        <source>Remove OpenVPN from server?</source>
         <translation>احذف OpenVPN من الخادم?</translation>
     </message>
     <message>
@@ -2104,8 +2104,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="116"/>
-        <source>OpenVpn native format</source>
-        <translation>تنسيق OpenVpn الاصلي</translation>
+        <source>OpenVPN native format</source>
+        <translation>تنسيق OpenVPN الاصلي</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="121"/>
@@ -2716,7 +2716,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="35"/>
         <source>OpenVPN config missing</source>
-        <translation>OpenVpn تكوين مفقود</translation>
+        <translation>OpenVPN تكوين مفقود</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="32"/>
@@ -2726,12 +2726,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="36"/>
         <source>OpenVPN management server error</source>
-        <translation>OpenVpn خطأ في إدارة الخادم</translation>
+        <translation>OpenVPN خطأ في إدارة الخادم</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="39"/>
         <source>OpenVPN executable missing</source>
-        <translation>OpenVpn executeable مفقود</translation>
+        <translation>OpenVPN executable مفقود</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="40"/>
@@ -2968,7 +2968,7 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * Recognised by DPI analysis systems and therefore susceptible to blocking
 * Can operate over both TCP and UDP network protocols.</source>
         <translation>يبقا OpenVPN كأحد اشهر بروتوكولات VPN و التي تم اختبارها عبر الزمن.
-ينشأ بروتوكول امان مميز, يستفيد من SSL/TLS للتشفير و تغير المفاتيح. واكثر من ذلك, OpenVpn يدعم تعدد طرق المصادقة يجعلة متعدد الاستخدامات وقابلة للتكيف, تلبية مجموعة واسعة من الأجهزة وأنظمة التشغيل. بسبب طبيعتة مفتوحة المصدر, يستفيد OpenVPN  من التدقيق الشامل من قبل المجتمع العالمي, مما يعزز أمنها باستمرار. مع توازن قوي بين الأداء والأمان والتوافق, يظل OpenVPN الخيار الأفضل للأفراد والشركات المهتمين بالخصوصية على حدٍ سواء.
+ينشأ بروتوكول امان مميز, يستفيد من SSL/TLS للتشفير و تغير المفاتيح. واكثر من ذلك, OpenVPN يدعم تعدد طرق المصادقة يجعلة متعدد الاستخدامات وقابلة للتكيف, تلبية مجموعة واسعة من الأجهزة وأنظمة التشغيل. بسبب طبيعتة مفتوحة المصدر, يستفيد OpenVPN  من التدقيق الشامل من قبل المجتمع العالمي, مما يعزز أمنها باستمرار. مع توازن قوي بين الأداء والأمان والتوافق, يظل OpenVPN الخيار الأفضل للأفراد والشركات المهتمين بالخصوصية على حدٍ سواء.
 
 * مٌتاح في AmneziaVPN عبر جميع المنصات
 * استهلاك طاقة عادي علي اجهزة المحمول

@@ -611,7 +611,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="384"/>
-        <source>Remove OpenVpn from server?</source>
+        <source>Remove OpenVPN from server?</source>
         <translation>从服务器移除OpenVPN吗?</translation>
     </message>
     <message>
@@ -2182,7 +2182,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="116"/>
-        <source>OpenVpn native format</source>
+        <source>OpenVPN native format</source>
         <translation>OpenVPN原生格式</translation>
     </message>
     <message>
@@ -3216,12 +3216,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation type="vanished">OpenVPN容器</translation>
     </message>
     <message>
-        <source>Container with OpenVpn and ShadowSocks</source>
-        <translation type="vanished">含 OpenVpn 和 ShadowSocks 的容器</translation>
+        <source>Container with OpenVPN and ShadowSocks</source>
+        <translation type="vanished">含 OpenVPN 和 ShadowSocks 的容器</translation>
     </message>
     <message>
-        <source>Container with OpenVpn and ShadowSocks protocols configured with traffic masking by Cloak plugin</source>
-        <translation type="vanished">含 OpenVpn 和 ShadowSocks 协议的容器，通过 Cloak 插件配置混淆流量</translation>
+        <source>Container with OpenVPN and ShadowSocks protocols configured with traffic masking by Cloak plugin</source>
+        <translation type="vanished">含 OpenVPN 和 ShadowSocks 协议的容器，通过 Cloak 插件配置混淆流量</translation>
     </message>
     <message>
         <source>WireGuard container</source>
