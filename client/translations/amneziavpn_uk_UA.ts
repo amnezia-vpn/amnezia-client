@@ -3627,8 +3627,8 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="333"/>
-        <source>Medium or High</source>
-        <translation>Середній або високий</translation>
+        <source>High</source>
+        <translation>Високий</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="334"/>
