@@ -3330,7 +3330,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="313"/>
-        <source>Medium or High</source>
+        <source>High</source>
         <translation>متوسط او عالي</translation>
     </message>
     <message>
