@@ -136,7 +136,7 @@ PageType {
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 48
 
                 implicitHeight: configContent.implicitHeight
 
