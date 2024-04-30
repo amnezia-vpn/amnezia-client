@@ -3,8 +3,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QQuickItem>
-#include <QStandardPaths>
 #include <QRandomGenerator>
+#include <QStandardPaths>
 
 #include "core/errorstrings.h"
 #ifdef Q_OS_ANDROID
@@ -103,7 +103,11 @@ bool ImportController::extractConfigFromData(QString data)
     switch (m_configType) {
     case ConfigTypes::OpenVpn: {
         m_config = extractOpenVpnConfig(config);
-        return m_config.empty() ? false : true;
+        if (!m_config.empty()) {
+            checkForMaliciousStrings(m_config);
+            return true;
+        }
+        return false;
     }
     case ConfigTypes::Awg:
     case ConfigTypes::WireGuard: {
@@ -116,7 +120,11 @@ bool ImportController::extractConfigFromData(QString data)
     }
     case ConfigTypes::Amnezia: {
         m_config = QJsonDocument::fromJson(config.toUtf8()).object();
-        return m_config.empty() ? false : true;
+        if (!m_config.empty()) {
+            checkForMaliciousStrings(m_config);
+            return true;
+        }
+        return false;
     }
     case ConfigTypes::Backup: {
         if (!m_serversModel->getServersCount()) {
@@ -159,6 +167,11 @@ QString ImportController::getConfig()
 QString ImportController::getConfigFileName()
 {
     return m_configFileName;
+}
+
+QString ImportController::getMaliciousWarningText()
+{
+    return m_maliciousWarningText;
 }
 
 bool ImportController::isNativeWireGuardConfig()
@@ -223,6 +236,7 @@ void ImportController::importConfig()
 
     m_config = {};
     m_configFileName.clear();
+    m_maliciousWarningText.clear();
 }
 
 QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
@@ -526,3 +540,43 @@ QString ImportController::getQrCodeScanProgressString()
     return tr("Scanned %1 of %2.").arg(m_receivedQrCodeChunksCount).arg(m_totalQrCodeChunksCount);
 }
 #endif
+
+void ImportController::checkForMaliciousStrings(const QJsonObject &serverConfig)
+{
+    const QJsonArray &containers = serverConfig[config_key::containers].toArray();
+    for (const QJsonValue &container : containers) {
+        auto containerConfig = container.toObject();
+        auto containerName = containerConfig[config_key::container].toString();
+        if ((containerName == ContainerProps::containerToString(DockerContainer::OpenVpn))
+            || (containerName == ContainerProps::containerToString(DockerContainer::Cloak))
+            || (containerName == ContainerProps::containerToString(DockerContainer::ShadowSocks))) {
+            QString protocolConfig =
+                    containerConfig[ProtocolProps::protoToString(Proto::OpenVpn)].toObject()[config_key::last_config].toString();
+            QString protocolConfigJson = QJsonDocument::fromJson(protocolConfig.toUtf8()).object()[config_key::config].toString();
+
+            const QRegularExpression regExp { "(\\w+-\\w+|\\w+)" };
+            const size_t dangerousTagsMaxCount = 3;
+
+            // https://github.com/OpenVPN/openvpn/blob/master/doc/man-sections/script-options.rst
+            QStringList dangerousTags {
+                "up", "tls-verify", "ipchange", "client-connect", "route-up", "route-pre-down", "client-disconnect", "down", "learn-address", "auth-user-pass-verify"
+            };
+
+            QStringList maliciousStrings;
+            QStringList lines = protocolConfigJson.replace("\r", "").split("\n");
+            for (const QString &l : lines) {
+                QRegularExpressionMatch match = regExp.match(l);
+                if (dangerousTags.contains(match.captured(0))) {
+                    maliciousStrings << l;
+                }
+            }
+
+            if (maliciousStrings.size() >= dangerousTagsMaxCount) {
+                m_maliciousWarningText = tr("In the imported configuration, potentially dangerous lines were found:");
+                for (const auto &string : maliciousStrings) {
+                    m_maliciousWarningText.push_back(QString("<br><i>%1</i>").arg(string));
+                }
+            }
+        }
+    }
+}
