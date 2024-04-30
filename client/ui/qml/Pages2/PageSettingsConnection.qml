@@ -132,6 +132,8 @@ PageType {
             }
 
             SwitcherType {
+                visible: !GC.isMobile()
+
                 Layout.fillWidth: true
                 Layout.margins: 16
 

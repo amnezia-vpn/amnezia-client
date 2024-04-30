@@ -34,6 +34,7 @@ public slots:
     bool extractConfigFromQr(const QByteArray &data);
     QString getConfig();
     QString getConfigFileName();
+    QString getMaliciousWarningText();
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void startDecodingQr();
@@ -63,6 +64,8 @@ private:
     QJsonObject extractWireGuardConfig(const QString &data);
     QJsonObject extractXrayConfig(const QString &data, const QString &description = "");
 
+    void checkForMaliciousStrings(const QJsonObject &protocolConfig);
+
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void stopDecodingQr();
 #endif
@@ -74,6 +77,7 @@ private:
     QJsonObject m_config;
     QString m_configFileName;
     ConfigTypes m_configType;
+    QString m_maliciousWarningText;
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     QMap<int, QByteArray> m_qrCodeChunks;
