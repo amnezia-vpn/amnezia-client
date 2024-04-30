@@ -18,6 +18,7 @@
 #include <QFileInfo>
 #include <QNetworkInterface>
 #include <QScopeGuard>
+#include <QThread>
 
 namespace {
 Logger logger("WindowsSplitTunnel");
@@ -29,6 +30,9 @@ WindowsSplitTunnel::WindowsSplitTunnel(QObject* parent) : QObject(parent) {
     uninstallDriver();
     return;
   }
+
+  m_tries = 0;
+
   if (!isInstalled()) {
     logger.debug() << "Driver is not Installed, doing so";
     auto handle = installDriver();
@@ -59,10 +63,10 @@ void WindowsSplitTunnel::initDriver() {
   m_driver = CreateFileW(DRIVER_SYMLINK, GENERIC_READ | GENERIC_WRITE, 0,
                          nullptr, OPEN_EXISTING, 0, nullptr);
   ;
-
-  if (m_driver == INVALID_HANDLE_VALUE) {
+  if (m_driver == INVALID_HANDLE_VALUE && m_tries < 500) {
     WindowsUtils::windowsLog("Failed to open Driver: ");
-
+    m_tries++;
+    Sleep(100);
     // If the handle is not present, try again after the serivce has started;
     auto driver_manager = WindowsServiceManager(DRIVER_SERVICE_NAME);
     QObject::connect(&driver_manager, &WindowsServiceManager::serviceStarted,
