@@ -55,6 +55,7 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecond
 #endif
 
     m_settings = std::shared_ptr<Settings>(new Settings);
+    m_nam = new QNetworkAccessManager(this);
 }
 
 AmneziaApplication::~AmneziaApplication()

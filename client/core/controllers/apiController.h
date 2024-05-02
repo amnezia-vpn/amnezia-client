@@ -5,17 +5,22 @@
 
 #include "configurators/openvpn_configurator.h"
 
+class ConnectionController;
+
 class ApiController : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit ApiController(QObject *parent = nullptr);
+    explicit ApiController(ConnectionController *connectionController);
 
 public slots:
-    ErrorCode updateServerConfigFromApi(const QString &installationUuid, QJsonObject &serverConfig);
+    void updateServerConfigFromApi(const QString &installationUuid, const QJsonObject &serverConfig,
+                                   const std::function<void(bool updateConfig, QJsonObject config)> &cb);
 
 private:
+    ConnectionController *m_connectionController;
+
     struct ApiPayloadData {
         OpenVpnConfigurator::ConnectionData certRequest;
 
