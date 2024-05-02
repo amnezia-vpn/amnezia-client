@@ -112,6 +112,7 @@ bool ImportController::extractConfigFromData(QString data)
     }
 
     if (config.startsWith("ss://") && !config.contains("plugin=")) {
+        m_configType = ConfigTypes::ShadowSocks;
         m_config = extractXrayConfig(Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg),
                                                          QJsonDocument::JsonFormat::Compact), prefix);
         return m_config.empty() ? false : true;
@@ -120,7 +121,7 @@ bool ImportController::extractConfigFromData(QString data)
     if (config.startsWith("ssd://")) {
         QStringList tmp;
         QList<std::pair<QString, QJsonObject>> servers = serialization::ssd::Deserialize(config, &prefix, &tmp);
-
+        m_configType = ConfigTypes::ShadowSocks;
         // Took only first config from list
         if (!servers.isEmpty()) {
             m_config = extractXrayConfig(servers.first().first);
@@ -467,7 +468,12 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, const QStri
 
     QJsonObject config;
     config[config_key::containers] = arr;
-    config[config_key::defaultContainer] = "amnezia-xray";
+
+    if (m_configType == ConfigTypes::ShadowSocks) {
+        config[config_key::defaultContainer] = "amnezia-ssxray";
+    } else {
+       config[config_key::defaultContainer] = "amnezia-xray";
+    }
     if (description.isEmpty()) {
         config[config_key::description] = m_settings->nextAvailableServerName();
     } else {
