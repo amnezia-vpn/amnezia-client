@@ -94,18 +94,21 @@ bool ImportController::extractConfigFromData(QString data)
     QString errormsg;
 
     if (config.startsWith("vless://")) {
+        m_configType = ConfigTypes::Xray;
         m_config = extractXrayConfig(Utils::JsonToString(serialization::vless::Deserialize(config, &prefix, &errormsg),
                                                          QJsonDocument::JsonFormat::Compact), prefix);
         return m_config.empty() ? false : true;
     }
 
     if (config.startsWith("vmess://") && config.contains("@")) {
+        m_configType = ConfigTypes::Xray;
         m_config = extractXrayConfig(Utils::JsonToString(serialization::vmess_new::Deserialize(config, &prefix, &errormsg),
                                                          QJsonDocument::JsonFormat::Compact), prefix);
         return m_config.empty() ? false : true;
     }
 
     if (config.startsWith("vmess://")) {
+        m_configType = ConfigTypes::Xray;
         m_config = extractXrayConfig(Utils::JsonToString(serialization::vmess::Deserialize(config, &prefix, &errormsg),
                                                          QJsonDocument::JsonFormat::Compact), prefix);
         return m_config.empty() ? false : true;
