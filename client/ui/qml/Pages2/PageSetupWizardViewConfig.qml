@@ -150,7 +150,7 @@ PageType {
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 48
 
                 implicitHeight: configContent.implicitHeight
 
@@ -173,7 +173,15 @@ PageType {
         }
     }
 
+    Rectangle {
+        anchors.fill: columnContent
+        anchors.bottomMargin: -24
+        color: "#0E0E11"
+        opacity: 0.8
+    }
+
     ColumnLayout {
+        id: columnContent
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
