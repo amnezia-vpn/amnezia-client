@@ -96,7 +96,6 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
     case Proto::Awg: return ServiceType::Vpn;
     case Proto::Ikev2: return ServiceType::Vpn;
     case Proto::Xray: return ServiceType::Vpn;
-    case Proto::SSXray: return ServiceType::Vpn;
 
     case Proto::TorWebSite: return ServiceType::Other;
     case Proto::Dns: return ServiceType::Other;
