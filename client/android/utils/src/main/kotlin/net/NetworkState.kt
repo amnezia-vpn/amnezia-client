@@ -10,6 +10,7 @@ import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.Handler
+import androidx.core.content.getSystemService
 import kotlin.LazyThreadSafetyMode.NONE
 import org.amnezia.vpn.util.Log
 
@@ -28,7 +29,7 @@ class NetworkState(
     }
 
     private val connectivityManager: ConnectivityManager by lazy(NONE) {
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        context.getSystemService<ConnectivityManager>()!!
     }
 
     private val networkRequest: NetworkRequest by lazy(NONE) {

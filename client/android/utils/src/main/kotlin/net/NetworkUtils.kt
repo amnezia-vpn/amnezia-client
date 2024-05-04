@@ -5,12 +5,13 @@ import android.net.ConnectivityManager
 import android.net.InetAddresses
 import android.net.NetworkCapabilities
 import android.os.Build
+import androidx.core.content.getSystemService
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
 
 fun getLocalNetworks(context: Context, ipv6: Boolean): List<InetNetwork> {
-    val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
+    val connectivityManager = context.getSystemService<ConnectivityManager>()!!
     connectivityManager.activeNetwork?.let { network ->
         val netCapabilities = connectivityManager.getNetworkCapabilities(network)
         val linkProperties = connectivityManager.getLinkProperties(network)

@@ -19,6 +19,7 @@ import android.os.Process
 import androidx.annotation.MainThread
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.getSystemService
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -494,9 +495,8 @@ class AmneziaVpnService : VpnService() {
 
     companion object {
         fun isRunning(context: Context): Boolean =
-            (context.getSystemService(ACTIVITY_SERVICE) as ActivityManager)
-                .runningAppProcesses.any {
-                    it.processName == PROCESS_NAME && it.importance <= IMPORTANCE_FOREGROUND_SERVICE
-                }
+            context.getSystemService<ActivityManager>()!!.runningAppProcesses.any {
+                it.processName == PROCESS_NAME && it.importance <= IMPORTANCE_FOREGROUND_SERVICE
+            }
     }
 }
