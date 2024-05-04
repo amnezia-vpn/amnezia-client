@@ -162,6 +162,10 @@ void IpcServer::cleanUp()
     Logger::cleanUp();
 }
 
+void IpcServer::clearLogs() {
+    Logger::clearLogs();
+}
+
 bool IpcServer::createTun(const QString &dev, const QString &subnet)
 {
     return Router::createTun(dev, subnet);

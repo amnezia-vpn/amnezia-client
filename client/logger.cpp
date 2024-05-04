@@ -95,6 +95,29 @@ void Logger::deInit()
     m_file.close();
 }
 
+bool Logger::setServiceLogsEnabled(bool enabled) {
+#ifdef AMNEZIA_DESKTOP
+    IpcClient *m_IpcClient = new IpcClient;
+
+    if (!m_IpcClient->isSocketConnected()) {
+        if (!IpcClient::init(m_IpcClient)) {
+            qWarning() << "Error occurred when init IPC client";
+            return false;
+        }
+    }
+
+    if (m_IpcClient->Interface()) {
+        m_IpcClient->Interface()->setLogsEnabled(enabled);
+    }
+    else {
+        qWarning() << "Error occurred setting up service logs";
+        return false;
+    }
+#endif
+
+    return true;
+}
+
 QString Logger::userLogsDir()
 {
     return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/log";
@@ -137,7 +160,9 @@ bool Logger::openLogsFolder()
 bool Logger::openServiceLogsFolder()
 {
     QString path = Utils::systemLogPath();
+#ifdef Q_OS_WIN
     path = "file:///" + path;
+#endif
     QDesktopServices::openUrl(QUrl::fromLocalFile(path));
     return true;
 }
@@ -180,8 +205,7 @@ void Logger::clearServiceLogs()
     }
 
     if (m_IpcClient->Interface()) {
-        m_IpcClient->Interface()->setLogsEnabled(false);
-        m_IpcClient->Interface()->cleanUp();
+        m_IpcClient->Interface()->clearLogs();
     }
     else {
         qWarning() << "Error occurred cleaning up service logs";
