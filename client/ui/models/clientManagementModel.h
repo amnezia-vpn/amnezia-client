@@ -14,7 +14,18 @@ class ClientManagementModel : public QAbstractListModel
 public:
     enum Roles {
         ClientNameRole = Qt::UserRole + 1,
-        CreationDateRole
+        CreationDateRole,
+        LatestHandshakeRole,
+        DataReceivedRole,
+        DataSentRole
+    };
+
+    struct WgShowData
+    {
+        QString clientId;
+        QString latestHandshake;
+        QString dataReceived;
+        QString dataSent;
     };
 
     ClientManagementModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -56,6 +67,9 @@ private:
                                 const QSharedPointer<ServerController> &serverController, int &count);
     ErrorCode getWireGuardClients(const DockerContainer container, const ServerCredentials &credentials,
                                   const QSharedPointer<ServerController> &serverController, int &count);
+
+    ErrorCode wgShow(const DockerContainer container, const ServerCredentials &credentials,
+                     const QSharedPointer<ServerController> &serverController, std::vector<WgShowData> &data);
 
     QJsonArray m_clientsTable;
 

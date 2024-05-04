@@ -101,9 +101,15 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
                 }
 
-                Keys.onTabPressed: splitTunnelingButton2.visible ?
-                                       splitTunnelingButton2.forceActiveFocus() :
-                                       lastItemTabClicked()
+                Keys.onTabPressed: {
+                    if (splitTunnelingButton2.visible) {
+                        return splitTunnelingButton2.rightButton.forceActiveFocus()
+                    } else if (killSwitchSwitcher.visible) {
+                        return killSwitchSwitcher.forceActiveFocus()
+                    } else {
+                        lastItemTabClicked()
+                    }
+                }
             }
 
             DividerType {
@@ -124,11 +130,47 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
                 }
 
-                Keys.onTabPressed: lastItemTabClicked()
+                Keys.onTabPressed: {
+                    if (killSwitchSwitcher.visible) {
+                        return killSwitchSwitcher.forceActiveFocus()
+                    } else {
+                        lastItemTabClicked()
+                    }
+                }
             }
 
             DividerType {
                 visible: root.isAppSplitTinnelingEnabled
+            }
+
+            SwitcherType {
+                id: killSwitchSwitcher
+                visible: !GC.isMobile()
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("KillSwitch")
+                descriptionText: qsTr("Disables your internet if your encrypted VPN connection drops out for any reason.")
+
+                checked: SettingsController.isKillSwitchEnabled()
+                checkable: !ConnectionController.isConnected
+                onCheckedChanged: {
+                    if (checked !== SettingsController.isKillSwitchEnabled()) {
+                        SettingsController.toggleKillSwitch(checked)
+                    }
+                }
+                onClicked: {
+                    if (!checkable) {
+                        PageController.showNotificationMessage(qsTr("Cannot change killSwitch settings during active connection"))
+                    }
+                }
+
+                Keys.onTabPressed: lastItemTabClicked()
+            }
+
+            DividerType {
+                visible: GC.isDesktop()
             }
         }
     }

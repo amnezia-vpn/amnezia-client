@@ -364,7 +364,11 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
         config.m_vpnDisabledApps.append(i.toString());
     }
 
-    WindowsFirewall::instance()->enablePeerTraffic(config);
+    // killSwitch toggle
+    if (QVariant(configStr.value(amnezia::config_key::killSwitchOption).toString()).toBool()) {
+        WindowsFirewall::instance()->enablePeerTraffic(config);
+    }
+
     WindowsDaemon::instance()->prepareActivation(config, inetAdapterIndex);
     WindowsDaemon::instance()->activateSplitTunnel(config, vpnAdapterIndex);
     return true;
