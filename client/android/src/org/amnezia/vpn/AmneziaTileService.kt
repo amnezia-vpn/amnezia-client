@@ -230,7 +230,7 @@ class AmneziaTileService : TileService() {
         val tile = qsTile ?: return
         tile.apply {
             label = vpnState.serverName ?: DEFAULT_TILE_LABEL
-            when (vpnState.protocolState) {
+            when (val protocolState = vpnState.protocolState) {
                 CONNECTED -> {
                     state = Tile.STATE_ACTIVE
                     subtitleCompat = null
@@ -241,14 +241,9 @@ class AmneziaTileService : TileService() {
                     subtitleCompat = null
                 }
 
-                CONNECTING, RECONNECTING -> {
+                CONNECTING, DISCONNECTING, RECONNECTING -> {
                     state = Tile.STATE_UNAVAILABLE
-                    subtitleCompat = resources.getString(R.string.connecting)
-                }
-
-                DISCONNECTING -> {
-                    state = Tile.STATE_UNAVAILABLE
-                    subtitleCompat = resources.getString(R.string.disconnecting)
+                    subtitleCompat = getString(protocolState)
                 }
             }
             updateTile()

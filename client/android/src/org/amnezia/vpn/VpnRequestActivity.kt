@@ -3,9 +3,7 @@ package org.amnezia.vpn
 import android.app.AlertDialog
 import android.app.KeyguardManager
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.net.VpnService
@@ -33,11 +31,9 @@ class VpnRequestActivity : ComponentActivity() {
         val requestIntent = VpnService.prepare(applicationContext)
         if (requestIntent != null) {
             if (getSystemService<KeyguardManager>()!!.isKeyguardLocked) {
-                userPresentReceiver = object : BroadcastReceiver() {
-                    override fun onReceive(context: Context?, intent: Intent?) =
-                        requestLauncher.launch(requestIntent)
+                userPresentReceiver = registerBroadcastReceiver(Intent.ACTION_USER_PRESENT) {
+                    requestLauncher.launch(requestIntent)
                 }
-                registerReceiver(userPresentReceiver, IntentFilter(Intent.ACTION_USER_PRESENT))
             } else {
                 requestLauncher.launch(requestIntent)
             }
@@ -49,9 +45,7 @@ class VpnRequestActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        userPresentReceiver?.let {
-            unregisterReceiver(it)
-        }
+        unregisterBroadcastReceiver(userPresentReceiver)
         super.onDestroy()
     }
 
