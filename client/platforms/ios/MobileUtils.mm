@@ -3,7 +3,9 @@
 #include <UIKit/UIKit.h>
 #include <Security/Security.h>
 
+#include <QDebug>
 #include <QEventLoop>
+#include <QString>
 
 static UIViewController* getViewController() {
     NSArray *windows = [[UIApplication sharedApplication]windows];
@@ -106,4 +108,19 @@ QString MobileUtils::openFile() {
     wait.exec();
     
     return filePath;
+}
+
+void MobileUtils::fetchUrl(const QString &urlString) {
+    NSURL *url = [NSURL URLWithString:urlString.toNSString()];
+    NSURLSession *session = [NSURLSession sharedSession];
+    NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (error) {
+            qDebug() << "MobileUtils::fetchUrl error:" << error.localizedDescription;
+        } else {
+            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+            QString responseBody = QString::fromUtf8((const char*)data.bytes, data.length);
+            qDebug() << "MobileUtils::fetchUrl server response:" << httpResponse.statusCode << "\n\n" <<responseBody;
+        }
+    }];
+    [task resume];
 }

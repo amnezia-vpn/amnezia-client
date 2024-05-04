@@ -82,6 +82,10 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
         QString endpoint = serverConfig.value(configKey::apiEdnpoint).toString();
         request.setUrl(endpoint);
 
+#ifdef Q_OS_IOS
+        m_mobileUtils.fetchUrl(endpoint);
+#endif
+
         QString protocol = serverConfig.value(configKey::protocol).toString();
 
         ApiPayloadData apiPayloadData = generateApiPayloadData(protocol);

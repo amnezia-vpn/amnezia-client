@@ -5,6 +5,10 @@
 
 #include "configurators/openvpn_configurator.h"
 
+#ifdef Q_OS_IOS
+#include "platforms/ios/MobileUtils.h"
+#endif
+
 class ConnectionController;
 
 class ApiController : public QObject
@@ -20,6 +24,7 @@ public slots:
 
 private:
     ConnectionController *m_connectionController;
+    MobileUtils m_mobileUtils;
 
     struct ApiPayloadData {
         OpenVpnConfigurator::ConnectionData certRequest;
