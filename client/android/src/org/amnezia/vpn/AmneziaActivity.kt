@@ -1,5 +1,6 @@
 package org.amnezia.vpn
 
+import android.Manifest
 import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Intent
@@ -10,6 +11,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -21,6 +23,7 @@ import android.view.WindowManager.LayoutParams
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.annotation.MainThread
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
@@ -38,6 +41,7 @@ import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
 import org.amnezia.vpn.util.Log
+import org.amnezia.vpn.util.Prefs
 import org.qtproject.qt.android.bindings.QtActivity
 
 private const val TAG = "AmneziaActivity"
@@ -46,6 +50,9 @@ const val ACTIVITY_MESSENGER_NAME = "Activity"
 private const val CHECK_VPN_PERMISSION_ACTION_CODE = 1
 private const val CREATE_FILE_ACTION_CODE = 2
 private const val OPEN_FILE_ACTION_CODE = 3
+private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
+
+private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 
 class AmneziaActivity : QtActivity() {
 
@@ -55,7 +62,9 @@ class AmneziaActivity : QtActivity() {
     private var isServiceConnected = false
     private var isInBoundState = false
     private lateinit var vpnServiceMessenger: IpcMessenger
-    private var tmpFileContentToSave: String = ""
+
+    private val actionResultHandlers = mutableMapOf<Int, ActivityResultHandler>()
+    private val permissionRequestHandlers = mutableMapOf<Int, PermissionRequestHandler>()
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -135,10 +144,6 @@ class AmneziaActivity : QtActivity() {
         }
     }
 
-    private data class CheckVpnPermissionCallbacks(val onSuccess: () -> Unit, val onFail: () -> Unit)
-
-    private var checkVpnPermissionCallbacks: CheckVpnPermissionCallbacks? = null
-
     /**
      * Activity overloaded methods
      */
@@ -198,45 +203,35 @@ class AmneziaActivity : QtActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            CREATE_FILE_ACTION_CODE -> {
-                when (resultCode) {
-                    RESULT_OK -> {
-                        data?.data?.let { uri ->
-                            alterDocument(uri)
-                        }
-                    }
-                }
+        actionResultHandlers[requestCode]?.let { handler ->
+            when (resultCode) {
+                RESULT_OK -> handler.onSuccess(data)
+                else -> handler.onFail(data)
             }
+            handler.onAny(data)
+            actionResultHandlers.remove(requestCode)
+        } ?: super.onActivityResult(requestCode, resultCode, data)
+    }
 
-            OPEN_FILE_ACTION_CODE -> {
-                when (resultCode) {
-                    RESULT_OK -> data?.data?.toString() ?: ""
-                    else -> ""
-                }.let { uri ->
-                    QtAndroidController.onFileOpened(uri)
-                }
+    private fun startActivityForResult(intent: Intent, requestCode: Int, handler: ActivityResultHandler) {
+        actionResultHandlers[requestCode] = handler
+        startActivityForResult(intent, requestCode)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        permissionRequestHandlers[requestCode]?.let { handler ->
+            if (grantResults.isNotEmpty()) {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) handler.onSuccess()
+                else handler.onFail()
             }
+            handler.onAny()
+            permissionRequestHandlers.remove(requestCode)
+        } ?: super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 
-            CHECK_VPN_PERMISSION_ACTION_CODE -> {
-                when (resultCode) {
-                    RESULT_OK -> {
-                        Log.d(TAG, "Vpn permission granted")
-                        Toast.makeText(this, resources.getText(R.string.vpnGranted), Toast.LENGTH_LONG).show()
-                        checkVpnPermissionCallbacks?.run { onSuccess() }
-                    }
-
-                    else -> {
-                        Log.w(TAG, "Vpn permission denied, resultCode: $resultCode")
-                        showOnVpnPermissionRejectDialog()
-                        checkVpnPermissionCallbacks?.run { onFail() }
-                    }
-                }
-                checkVpnPermissionCallbacks = null
-            }
-
-            else -> super.onActivityResult(requestCode, resultCode, data)
-        }
+    private fun requestPermission(permission: String, requestCode: Int, handler: PermissionRequestHandler) {
+        permissionRequestHandlers[requestCode] = handler
+        requestPermissions(arrayOf(permission), requestCode)
     }
 
     /**
@@ -268,22 +263,22 @@ class AmneziaActivity : QtActivity() {
     /**
      * Methods of starting and stopping VpnService
      */
-    private fun checkVpnPermissionAndStart(vpnConfig: String) {
-        checkVpnPermission(
-            onSuccess = { startVpn(vpnConfig) },
-            onFail = QtAndroidController::onVpnPermissionRejected
-        )
-    }
-
-    @MainThread
-    private fun checkVpnPermission(onSuccess: () -> Unit, onFail: () -> Unit) {
+    private fun checkVpnPermission(onPermissionGranted: () -> Unit) {
         Log.d(TAG, "Check VPN permission")
-        VpnService.prepare(applicationContext)?.let {
-            checkVpnPermissionCallbacks = CheckVpnPermissionCallbacks(onSuccess, onFail)
-            startActivityForResult(it, CHECK_VPN_PERMISSION_ACTION_CODE)
-            return
-        }
-        onSuccess()
+        VpnService.prepare(applicationContext)?.let { intent ->
+            startActivityForResult(intent, CHECK_VPN_PERMISSION_ACTION_CODE, ActivityResultHandler(
+                onSuccess = {
+                    Log.d(TAG, "Vpn permission granted")
+                    Toast.makeText(this@AmneziaActivity, resources.getText(R.string.vpnGranted), Toast.LENGTH_LONG).show()
+                    onPermissionGranted()
+                },
+                onFail = {
+                    Log.w(TAG, "Vpn permission denied")
+                    showOnVpnPermissionRejectDialog()
+                    QtAndroidController.onVpnPermissionRejected()
+                }
+            ))
+        } ?: onPermissionGranted()
     }
 
     private fun showOnVpnPermissionRejectDialog() {
@@ -293,6 +288,45 @@ class AmneziaActivity : QtActivity() {
             .setNegativeButton(R.string.ok) { _, _ -> }
             .setPositiveButton(R.string.openVpnSettings) { _, _ ->
                 startActivity(Intent(Settings.ACTION_VPN_SETTINGS))
+            }
+            .show()
+    }
+
+    private fun checkNotificationPermission(onChecked: () -> Unit) {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_DENIED &&
+            !Prefs.load<Boolean>(PREFS_NOTIFICATION_PERMISSION_ASKED)
+        ) {
+            showNotificationPermissionDialog(onChecked)
+        } else {
+            onChecked()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun showNotificationPermissionDialog(onChecked: () -> Unit) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.notificationDialogTitle)
+            .setMessage(R.string.notificationDialogMessage)
+            .setNegativeButton(R.string.no) { _, _ ->
+                Prefs.save(PREFS_NOTIFICATION_PERMISSION_ASKED, true)
+                onChecked()
+            }
+            .setPositiveButton(R.string.yes) { _, _ ->
+                val saveAsked: () -> Unit = {
+                    Prefs.save(PREFS_NOTIFICATION_PERMISSION_ASKED, true)
+                }
+                requestPermission(
+                    Manifest.permission.POST_NOTIFICATIONS,
+                    CHECK_NOTIFICATION_PERMISSION_ACTION_CODE,
+                    PermissionRequestHandler(
+                        onSuccess = saveAsked,
+                        onFail = saveAsked,
+                        onAny = onChecked
+                    )
+                )
             }
             .show()
     }
@@ -332,16 +366,14 @@ class AmneziaActivity : QtActivity() {
     }
 
     // saving file
-    private fun alterDocument(uri: Uri) {
+    private fun alterDocument(uri: Uri, data: String) {
         try {
             contentResolver.openOutputStream(uri)?.use { os ->
-                os.bufferedWriter().use { it.write(tmpFileContentToSave) }
+                os.bufferedWriter().use { it.write(data) }
             }
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
-        tmpFileContentToSave = ""
     }
 
     /**
@@ -357,7 +389,11 @@ class AmneziaActivity : QtActivity() {
     fun start(vpnConfig: String) {
         Log.v(TAG, "Start VPN")
         mainScope.launch {
-            checkVpnPermissionAndStart(vpnConfig)
+            checkVpnPermission {
+                checkNotificationPermission {
+                    startVpn(vpnConfig)
+                }
+            }
         }
     }
 
@@ -389,14 +425,18 @@ class AmneziaActivity : QtActivity() {
     fun saveFile(fileName: String, data: String) {
         Log.d(TAG, "Save file $fileName")
         mainScope.launch {
-            tmpFileContentToSave = data
-
             Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "text/*"
                 putExtra(Intent.EXTRA_TITLE, fileName)
             }.also {
-                startActivityForResult(it, CREATE_FILE_ACTION_CODE)
+                startActivityForResult(it, CREATE_FILE_ACTION_CODE, ActivityResultHandler(
+                    onSuccess = {
+                        it?.data?.let { uri ->
+                            alterDocument(uri, data)
+                        }
+                    }
+                ))
             }
         }
     }
@@ -431,7 +471,13 @@ class AmneziaActivity : QtActivity() {
                 }
             }
         }.also {
-            startActivityForResult(it, OPEN_FILE_ACTION_CODE)
+            startActivityForResult(it, OPEN_FILE_ACTION_CODE, ActivityResultHandler(
+                onSuccess = {
+                    it?.data?.toString()?.let { uri ->
+                        QtAndroidController.onFileOpened(uri)
+                    }
+                }
+            ))
         }
     }
 
@@ -515,3 +561,15 @@ class AmneziaActivity : QtActivity() {
         return AppListProvider.getAppIcon(packageManager, packageName, width, height)
     }
 }
+
+private class ActivityResultHandler(
+    val onSuccess: (data: Intent?) -> Unit = {},
+    val onFail: (data: Intent?) -> Unit = {},
+    val onAny: (data: Intent?) -> Unit = {}
+)
+
+private class PermissionRequestHandler(
+    val onSuccess: () -> Unit = {},
+    val onFail: () -> Unit = {},
+    val onAny: () -> Unit = {}
+)
