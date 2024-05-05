@@ -1,2 +1,0 @@
-versionName=4.4.0.0
-versionCode=44000
