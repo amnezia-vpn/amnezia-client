@@ -1,0 +1,3 @@
+What's Changed:
+* API support for AmneziaWG protocol
+* KillSwitch for Windows/MacOS/Linux for all VPN protocols
