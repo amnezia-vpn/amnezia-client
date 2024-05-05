@@ -17,7 +17,7 @@ public:
 public slots:
     bool shareText(const QStringList &filesToSend);
     QString openFile();
-    void fetchUrl(const QString &urlString);
+    void requestInetAccess();
     
 signals:
     void finished();

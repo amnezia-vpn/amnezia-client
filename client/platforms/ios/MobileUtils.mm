@@ -110,16 +110,21 @@ QString MobileUtils::openFile() {
     return filePath;
 }
 
-void MobileUtils::fetchUrl(const QString &urlString) {
-    NSURL *url = [NSURL URLWithString:urlString.toNSString()];
+void MobileUtils::requestInetAccess() {
+    NSURL *url = [NSURL URLWithString:@"http://captive.apple.com/generate_204"];
+    if (url) {
+        qDebug() << "MobileUtils::requestInetAccess URL error";
+        return;
+    }
+
     NSURLSession *session = [NSURLSession sharedSession];
     NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error) {
-            qDebug() << "MobileUtils::fetchUrl error:" << error.localizedDescription;
+            qDebug() << "MobileUtils::requestInetAccess error:" << error.localizedDescription;
         } else {
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
             QString responseBody = QString::fromUtf8((const char*)data.bytes, data.length);
-            qDebug() << "MobileUtils::fetchUrl server response:" << httpResponse.statusCode << "\n\n" <<responseBody;
+            qDebug() << "MobileUtils::requestInetAccess server response:" << httpResponse.statusCode << "\n\n" <<responseBody;
         }
     }];
     [task resume];

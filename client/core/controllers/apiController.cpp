@@ -71,6 +71,11 @@ QJsonObject ApiController::fillApiPayload(const QString &protocol, const ApiCont
 void ApiController::updateServerConfigFromApi(const QString &installationUuid, const QJsonObject &serverConfig,
                                               const std::function<void (bool updateConfig, QJsonObject config)> &cb)
 {
+#ifdef Q_OS_IOS
+    m_mobileUtils.requestInetAccess();
+    QThread::msleep(10);
+#endif
+
     auto containerConfig = serverConfig.value(config_key::containers).toArray();
 
     if (serverConfig.value(config_key::configVersion).toInt()) {
@@ -81,10 +86,6 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
                              "Api-Key " + serverConfig.value(configKey::accessToken).toString().toUtf8());
         QString endpoint = serverConfig.value(configKey::apiEdnpoint).toString();
         request.setUrl(endpoint);
-
-#ifdef Q_OS_IOS
-        m_mobileUtils.fetchUrl(endpoint);
-#endif
 
         QString protocol = serverConfig.value(configKey::protocol).toString();
 
