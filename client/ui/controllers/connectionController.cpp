@@ -16,7 +16,7 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
                                            const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
                                            QObject *parent)
     : QObject(parent),
-      apiController(this),
+      m_apiController(this),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_clientManagementModel(clientManagementModel),
@@ -89,7 +89,7 @@ void ConnectionController::openConnection()
 
     if (serverConfig.value(config_key::configVersion).toInt()
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        apiController.updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverConfig, cb_connect);
+        m_apiController.updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverConfig, cb_connect);
     }
     else {
         cb_connect(false, serverConfig);
