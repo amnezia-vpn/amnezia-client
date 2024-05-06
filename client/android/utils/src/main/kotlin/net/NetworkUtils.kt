@@ -6,6 +6,7 @@ import android.net.InetAddresses
 import android.net.NetworkCapabilities
 import android.os.Build
 import androidx.core.content.getSystemService
+import java.lang.reflect.InvocationTargetException
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
@@ -42,6 +43,10 @@ private val parseNumericAddressCompat: (String) -> InetAddress =
     } else {
         val m = InetAddress::class.java.getMethod("parseNumericAddress", String::class.java)
         fun(address: String): InetAddress {
-            return m.invoke(null, address) as InetAddress
+            try {
+                return m.invoke(null, address) as InetAddress
+            } catch (e: InvocationTargetException) {
+                throw e.cause ?: e
+            }
         }
     }
