@@ -359,7 +359,12 @@ class AmneziaActivity : QtActivity() {
         Intent(this, AmneziaVpnService::class.java).apply {
             putExtra(MSG_VPN_CONFIG, vpnConfig)
         }.also {
-            ContextCompat.startForegroundService(this, it)
+            try {
+                ContextCompat.startForegroundService(this, it)
+            } catch (e: SecurityException) {
+                Log.e(TAG, "Failed to start AmneziaVpnService: $e")
+                QtAndroidController.onServiceError()
+            }
         }
     }
 

@@ -188,11 +188,16 @@ class AmneziaTileService : TileService() {
             true
         }
 
-    private fun startVpnService() =
-        ContextCompat.startForegroundService(
-            applicationContext,
-            Intent(this, AmneziaVpnService::class.java)
-        )
+    private fun startVpnService() {
+        try {
+            ContextCompat.startForegroundService(
+                applicationContext,
+                Intent(this, AmneziaVpnService::class.java)
+            )
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Failed to start AmneziaVpnService: $e")
+        }
+    }
 
     private fun connectToVpn() = vpnServiceMessenger.send(Action.CONNECT)
 
