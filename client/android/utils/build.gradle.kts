@@ -18,5 +18,6 @@ android {
 
 dependencies {
     implementation(libs.androidx.core)
+    implementation(libs.kotlinx.coroutines)
     implementation(libs.androidx.security.crypto)
 }
