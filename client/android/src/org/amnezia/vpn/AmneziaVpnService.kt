@@ -2,6 +2,7 @@ package org.amnezia.vpn
 
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -105,6 +106,7 @@ class AmneziaVpnService : VpnService() {
     private lateinit var networkState: NetworkState
     private lateinit var trafficStats: TrafficStats
     private var disconnectReceiver: BroadcastReceiver? = null
+    private var notificationStateReceiver: BroadcastReceiver? = null
     private var screenOnReceiver: BroadcastReceiver? = null
     private var screenOffReceiver: BroadcastReceiver? = null
     private val clientMessengers = ConcurrentHashMap<Messenger, IpcMessenger>()
@@ -291,7 +293,28 @@ class AmneziaVpnService : VpnService() {
             disconnect()
         }
 
+        notificationStateReceiver = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            registerBroadcastReceiver(
+                arrayOf(
+                    NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED,
+                    NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED
+                )
+            ) {
+                Log.d(TAG, "Notification state changed: $it")
+                if (it?.getBooleanExtra(NotificationManager.EXTRA_BLOCKED_STATE, false) == false) {
+                    registerScreenStateBroadcastReceivers()
+                } else {
+                    unregisterScreenStateBroadcastReceivers()
+                }
+            }
+        } else null
+
+        registerScreenStateBroadcastReceivers()
+    }
+
+    private fun registerScreenStateBroadcastReceivers() {
         if (serviceNotification.isNotificationEnabled()) {
+            Log.d(TAG, "Register screen state broadcast receivers")
             screenOnReceiver = registerBroadcastReceiver(Intent.ACTION_SCREEN_ON) {
                 if (isConnected && serviceNotification.isNotificationEnabled()) startTrafficStatsUpdateJob()
             }
@@ -302,11 +325,21 @@ class AmneziaVpnService : VpnService() {
         }
     }
 
+    private fun unregisterScreenStateBroadcastReceivers() {
+        Log.d(TAG, "Unregister screen state broadcast receivers")
+        unregisterBroadcastReceiver(screenOnReceiver)
+        unregisterBroadcastReceiver(screenOffReceiver)
+        screenOnReceiver = null
+        screenOffReceiver = null
+    }
+
     private fun unregisterBroadcastReceivers() {
         Log.d(TAG, "Unregister broadcast receivers")
         unregisterBroadcastReceiver(disconnectReceiver)
-        unregisterBroadcastReceiver(screenOnReceiver)
-        unregisterBroadcastReceiver(screenOffReceiver)
+        unregisterBroadcastReceiver(notificationStateReceiver)
+        unregisterScreenStateBroadcastReceivers()
+        disconnectReceiver = null
+        notificationStateReceiver = null
     }
 
     /**

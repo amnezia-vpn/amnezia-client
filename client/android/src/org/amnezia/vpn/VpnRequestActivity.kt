@@ -46,6 +46,7 @@ class VpnRequestActivity : ComponentActivity() {
 
     override fun onDestroy() {
         unregisterBroadcastReceiver(userPresentReceiver)
+        userPresentReceiver = null
         super.onDestroy()
     }
 

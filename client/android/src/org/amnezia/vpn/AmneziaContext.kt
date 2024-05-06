@@ -28,14 +28,27 @@ fun Context.getString(state: ProtocolState): String =
 fun Context.registerBroadcastReceiver(
     action: String,
     @RegisterReceiverFlags flags: Int = ContextCompat.RECEIVER_EXPORTED,
-    onReceive: () -> Unit
+    onReceive: (Intent?) -> Unit
+): BroadcastReceiver = registerBroadcastReceiver(arrayOf(action), flags, onReceive)
+
+fun Context.registerBroadcastReceiver(
+    actions: Array<String>,
+    @RegisterReceiverFlags flags: Int = ContextCompat.RECEIVER_EXPORTED,
+    onReceive: (Intent?) -> Unit
 ): BroadcastReceiver =
     object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            onReceive()
+            onReceive(intent)
         }
     }.also {
-        ContextCompat.registerReceiver(this, it, IntentFilter(action), flags)
+        ContextCompat.registerReceiver(
+            this,
+            it,
+            IntentFilter().apply {
+                actions.forEach(::addAction)
+            },
+            flags
+        )
     }
 
 fun Context.unregisterBroadcastReceiver(receiver: BroadcastReceiver?) {
