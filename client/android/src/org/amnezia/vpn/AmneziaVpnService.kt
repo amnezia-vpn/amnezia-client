@@ -285,7 +285,9 @@ class AmneziaVpnService : VpnService() {
     }
 
     private fun registerBroadcastReceivers() {
+        Log.d(TAG, "Register broadcast receivers")
         disconnectReceiver = registerBroadcastReceiver(ACTION_DISCONNECT, ContextCompat.RECEIVER_NOT_EXPORTED) {
+            Log.d(TAG, "Broadcast request received: $ACTION_DISCONNECT")
             disconnect()
         }
 
@@ -301,6 +303,7 @@ class AmneziaVpnService : VpnService() {
     }
 
     private fun unregisterBroadcastReceivers() {
+        Log.d(TAG, "Unregister broadcast receivers")
         unregisterBroadcastReceiver(disconnectReceiver)
         unregisterBroadcastReceiver(screenOnReceiver)
         unregisterBroadcastReceiver(screenOffReceiver)
@@ -384,6 +387,7 @@ class AmneziaVpnService : VpnService() {
             serviceNotification.isNotificationEnabled() &&
             getSystemService<PowerManager>()?.isInteractive != false
         ) {
+            Log.d(TAG, "Launch traffic stats update")
             trafficStats.reset()
             startTrafficStatsUpdateJob()
         }
@@ -392,6 +396,7 @@ class AmneziaVpnService : VpnService() {
     @MainThread
     private fun startTrafficStatsUpdateJob() {
         if (trafficStatsUpdateJob == null && trafficStats.isSupported()) {
+            Log.d(TAG, "Start traffic stats update")
             trafficStatsUpdateJob = mainScope.launch {
                 while (true) {
                     trafficStats.getSpeed().let { speed ->
@@ -407,6 +412,7 @@ class AmneziaVpnService : VpnService() {
 
     @MainThread
     private fun stopTrafficStatsUpdateJob() {
+        Log.d(TAG, "Stop traffic stats update")
         trafficStatsUpdateJob?.cancel()
         trafficStatsUpdateJob = null
     }
@@ -531,6 +537,7 @@ class AmneziaVpnService : VpnService() {
     private fun saveServerData(config: JSONObject?) {
         serverName = config?.opt("description") as String?
         serverIndex = config?.opt("serverIndex") as Int? ?: -1
+        Log.d(TAG, "Save server data: ($serverIndex, $serverName)")
         Prefs.save(PREFS_SERVER_NAME, serverName)
         Prefs.save(PREFS_SERVER_INDEX, serverIndex)
     }
@@ -538,6 +545,7 @@ class AmneziaVpnService : VpnService() {
     private fun loadServerData() {
         serverName = Prefs.load<String>(PREFS_SERVER_NAME).ifBlank { null }
         if (serverName != null) serverIndex = Prefs.load(PREFS_SERVER_INDEX)
+        Log.d(TAG, "Load server data: ($serverIndex, $serverName)")
     }
 
     private fun checkPermission(): Boolean =

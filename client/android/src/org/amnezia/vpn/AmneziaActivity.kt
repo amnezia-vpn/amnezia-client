@@ -9,7 +9,6 @@ import android.content.Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.net.Uri
 import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
@@ -203,6 +202,7 @@ class AmneziaActivity : QtActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d(TAG, "Process activity result, code: $requestCode, resultCode: $resultCode, data: $data")
         actionResultHandlers[requestCode]?.let { handler ->
             when (resultCode) {
                 RESULT_OK -> handler.onSuccess(data)
@@ -219,6 +219,8 @@ class AmneziaActivity : QtActivity() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        Log.d(TAG, "Process permission result, code: $requestCode, " +
+                "permissions: ${permissions.contentToString()}, results: ${grantResults.contentToString()}")
         permissionRequestHandlers[requestCode]?.let { handler ->
             if (grantResults.isNotEmpty()) {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) handler.onSuccess()
@@ -293,6 +295,7 @@ class AmneziaActivity : QtActivity() {
     }
 
     private fun checkNotificationPermission(onChecked: () -> Unit) {
+        Log.d(TAG, "Check notification permission")
         if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==

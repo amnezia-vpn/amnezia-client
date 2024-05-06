@@ -17,7 +17,10 @@ import androidx.core.app.NotificationManagerCompat
 import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
+import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.net.TrafficStats.TrafficData
+
+private const val TAG = "ServiceNotification"
 
 private const val OLD_NOTIFICATION_CHANNEL_ID: String = "org.amnezia.vpn.notification"
 private const val NOTIFICATION_CHANNEL_ID: String = "org.amnezia.vpn.notifications"
@@ -54,6 +57,8 @@ class ServiceNotification(private val context: Context) {
     fun buildNotification(serverName: String?, state: ProtocolState): Notification {
         val speedString = if (state == CONNECTED) zeroSpeed else null
 
+        Log.d(TAG, "Build notification: $serverName, $state")
+
         return notificationBuilder
             .setSmallIcon(R.drawable.ic_amnezia_round)
             .setContentTitle(serverName ?: "AmneziaVPN")
@@ -88,6 +93,7 @@ class ServiceNotification(private val context: Context) {
     @SuppressLint("MissingPermission")
     fun updateNotification(serverName: String?, state: ProtocolState) {
         if (isPermissionGranted()) {
+            Log.d(TAG, "Update notification: $serverName, $state")
             notificationManager.notify(NOTIFICATION_ID, buildNotification(serverName, state))
         }
     }
@@ -95,6 +101,7 @@ class ServiceNotification(private val context: Context) {
     @SuppressLint("MissingPermission")
     fun updateSpeed(speed: TrafficData) {
         if (isPermissionGranted()) {
+            Log.v(TAG, "Update notification speed: $speed")
             notificationManager.notify(NOTIFICATION_ID, buildNotification(speed))
         }
     }
