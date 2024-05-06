@@ -265,6 +265,7 @@ class AmneziaActivity : QtActivity() {
     /**
      * Methods of starting and stopping VpnService
      */
+    @MainThread
     private fun checkVpnPermission(onPermissionGranted: () -> Unit) {
         Log.d(TAG, "Check VPN permission")
         VpnService.prepare(applicationContext)?.let { intent ->
@@ -277,7 +278,10 @@ class AmneziaActivity : QtActivity() {
                 onFail = {
                     Log.w(TAG, "Vpn permission denied")
                     showOnVpnPermissionRejectDialog()
-                    QtAndroidController.onVpnPermissionRejected()
+                    mainScope.launch {
+                        qtInitialized.await()
+                        QtAndroidController.onVpnPermissionRejected()
+                    }
                 }
             ))
         } ?: onPermissionGranted()
@@ -368,20 +372,10 @@ class AmneziaActivity : QtActivity() {
         }
     }
 
+    @MainThread
     private fun disconnectFromVpn() {
         Log.d(TAG, "Disconnect from VPN")
         vpnServiceMessenger.send(Action.DISCONNECT)
-    }
-
-    // saving file
-    private fun alterDocument(uri: Uri, data: String) {
-        try {
-            contentResolver.openOutputStream(uri)?.use { os ->
-                os.bufferedWriter().use { it.write(data) }
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
     }
 
     /**
@@ -441,7 +435,15 @@ class AmneziaActivity : QtActivity() {
                 startActivityForResult(it, CREATE_FILE_ACTION_CODE, ActivityResultHandler(
                     onSuccess = {
                         it?.data?.let { uri ->
-                            alterDocument(uri, data)
+                            Log.d(TAG, "Save file to $uri")
+                            try {
+                                contentResolver.openOutputStream(uri)?.use { os ->
+                                    os.bufferedWriter().use { it.write(data) }
+                                }
+                            } catch (e: IOException) {
+                                Log.e(TAG, "Failed to save file $uri: $e")
+                                // todo: send error to Qt
+                            }
                         }
                     }
                 ))
@@ -452,40 +454,44 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun openFile(filter: String?) {
         Log.v(TAG, "Open file with filter: $filter")
+        mainScope.launch {
+            val mimeTypes = if (!filter.isNullOrEmpty()) {
+                val extensionRegex = "\\*\\.([a-z0-9]+)".toRegex(IGNORE_CASE)
+                val mime = MimeTypeMap.getSingleton()
+                extensionRegex.findAll(filter).map {
+                    it.groups[1]?.value?.let { mime.getMimeTypeFromExtension(it) } ?: "*/*"
+                }.toSet()
+            } else emptySet()
 
-        val mimeTypes = if (!filter.isNullOrEmpty()) {
-            val extensionRegex = "\\*\\.([a-z0-9]+)".toRegex(IGNORE_CASE)
-            val mime = MimeTypeMap.getSingleton()
-            extensionRegex.findAll(filter).map {
-                it.groups[1]?.value?.let { mime.getMimeTypeFromExtension(it) } ?: "*/*"
-            }.toSet()
-        } else emptySet()
+            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                Log.v(TAG, "File mimyType filter: $mimeTypes")
+                if ("*/*" in mimeTypes) {
+                    type = "*/*"
+                } else {
+                    when (mimeTypes.size) {
+                        1 -> type = mimeTypes.first()
 
-        Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            Log.v(TAG, "File mimyType filter: $mimeTypes")
-            if ("*/*" in mimeTypes) {
-                type = "*/*"
-            } else {
-                when (mimeTypes.size) {
-                    1 -> type = mimeTypes.first()
+                        in 2..Int.MAX_VALUE -> {
+                            type = "*/*"
+                            putExtra(EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+                        }
 
-                    in 2..Int.MAX_VALUE -> {
-                        type = "*/*"
-                        putExtra(EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+                        else -> type = "*/*"
                     }
-
-                    else -> type = "*/*"
                 }
+            }.also {
+                startActivityForResult(it, OPEN_FILE_ACTION_CODE, ActivityResultHandler(
+                    onSuccess = {
+                        val uri = it?.data?.toString() ?: ""
+                        Log.d(TAG, "Open file: $uri")
+                        mainScope.launch {
+                            qtInitialized.await()
+                            QtAndroidController.onFileOpened(uri)
+                        }
+                    }
+                ))
             }
-        }.also {
-            startActivityForResult(it, OPEN_FILE_ACTION_CODE, ActivityResultHandler(
-                onSuccess = {
-                    it?.data?.toString()?.let { uri ->
-                        QtAndroidController.onFileOpened(uri)
-                    }
-                }
-            ))
         }
     }
 
