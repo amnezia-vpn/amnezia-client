@@ -521,11 +521,6 @@ class AmneziaActivity : QtActivity() {
     }
 
     @Suppress("unused")
-    fun setNotificationText(title: String, message: String, timerSec: Int) {
-        Log.v(TAG, "Set notification text")
-    }
-
-    @Suppress("unused")
     fun isCameraPresent(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
 
     @Suppress("unused")

@@ -32,7 +32,6 @@ public:
     ErrorCode start(const QJsonObject &vpnConfig);
     void stop();
     void resetLastServer(int serverIndex);
-    void setNotificationText(const QString &title, const QString &message, int timerSec);
     void saveFile(const QString &fileName, const QString &data);
     QString openFile(const QString &filter);
     bool isCameraPresent();

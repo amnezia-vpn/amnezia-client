@@ -174,14 +174,6 @@ QString AndroidController::openFile(const QString &filter)
     return fileName;
 }
 
-void AndroidController::setNotificationText(const QString &title, const QString &message, int timerSec)
-{
-    callActivityMethod("setNotificationText", "(Ljava/lang/String;Ljava/lang/String;I)V",
-                       QJniObject::fromString(title).object<jstring>(),
-                       QJniObject::fromString(message).object<jstring>(),
-                       (jint) timerSec);
-}
-
 bool AndroidController::isCameraPresent()
 {
     return callActivityMethod<jboolean>("isCameraPresent", "()Z");
