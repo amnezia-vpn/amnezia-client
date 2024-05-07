@@ -30,6 +30,9 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
     checkIfNeedDisableLogs();
+#ifdef Q_OS_ANDROID
+    connect(AndroidController::instance(), &AndroidController::notificationPermissionGranted, this, &SettingsController::onNotificationPermissionGranted);
+#endif
 }
 
 void SettingsController::toggleAmneziaDns(bool enable)
@@ -232,4 +235,20 @@ bool SettingsController::isKillSwitchEnabled()
 void SettingsController::toggleKillSwitch(bool enable)
 {
     m_settings->setKillSwitchEnabled(enable);
+}
+
+bool SettingsController::isNotificationPermissionGranted()
+{
+#ifdef Q_OS_ANDROID
+    return AndroidController::instance()->isNotificationPermissionGranted();
+#elif
+    return true;
+#endif
+}
+
+void SettingsController::requestNotificationPermission()
+{
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->requestNotificationPermission();
+#endif
 }

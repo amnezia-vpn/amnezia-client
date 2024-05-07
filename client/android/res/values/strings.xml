@@ -19,5 +19,5 @@
 
     <string name="notificationChannelDescription">AmneziaVPN service notification</string>
     <string name="notificationDialogTitle">AmneziaVPN service</string>
-    <string name="notificationDialogMessage">Display the service state in the status bar?</string>
+    <string name="notificationDialogMessage">Display the VPN state in the status bar?</string>
 </resources>

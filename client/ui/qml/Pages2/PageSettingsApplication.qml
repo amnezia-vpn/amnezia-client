@@ -23,6 +23,7 @@ PageType {
                                 switcherAutoConnect,
                                 switcherStartMinimized,
                                 labelWithButtonLanguage,
+                                labelWithButtonNotification,
                                 labelWithButtonLogging,
                                 labelWithButtonReset,
                              ]
@@ -199,7 +200,7 @@ PageType {
                 descriptionText: LanguageModel.currentLanguageName
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                KeyNavigation.tab: root.getNextComponentInFocusChain(labelWithButtonLanguage)
+                KeyNavigation.tab: root.getNextComponentInFocusChain(labelWithButtonNotification)
                 parentFlickable: fl
 
                 clickedFunction: function() {
@@ -207,8 +208,28 @@ PageType {
                 }
             }
 
-
             DividerType {}
+
+            LabelWithButtonType {
+                id: labelWithButtonNotification
+                visible: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted
+                Layout.fillWidth: true
+
+                text: qsTr("Enable notifications")
+                descriptionText: qsTr("Enable notifications to display the VPN state in the status bar")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                KeyNavigation.tab: root.getNextComponentInFocusChain(labelWithButtonLogging)
+                parentFlickable: fl
+
+                clickedFunction: function() {
+                    SettingsController.requestNotificationPermission()
+                }
+            }
+
+            DividerType {
+                visible: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted
+            }
 
             LabelWithButtonType {
                 id: labelWithButtonLogging

@@ -301,9 +301,7 @@ class AmneziaActivity : QtActivity() {
     private fun checkNotificationPermission(onChecked: () -> Unit) {
         Log.d(TAG, "Check notification permission")
         if (
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-            PackageManager.PERMISSION_DENIED &&
+            !isNotificationPermissionGranted() &&
             !Prefs.load<Boolean>(PREFS_NOTIFICATION_PERMISSION_ASKED)
         ) {
             showNotificationPermissionDialog(onChecked)
@@ -573,6 +571,25 @@ class AmneziaActivity : QtActivity() {
     fun getAppIcon(packageName: String, width: Int, height: Int): Bitmap {
         Log.v(TAG, "Get app icon: $packageName")
         return AppListProvider.getAppIcon(packageManager, packageName, width, height)
+    }
+
+    @Suppress("unused")
+    fun isNotificationPermissionGranted(): Boolean = applicationContext.isNotificationPermissionGranted()
+
+    @Suppress("unused")
+    fun requestNotificationPermission() {
+        requestPermission(
+            Manifest.permission.POST_NOTIFICATIONS,
+            CHECK_NOTIFICATION_PERMISSION_ACTION_CODE,
+            PermissionRequestHandler(
+                onSuccess = {
+                    mainScope.launch {
+                        qtInitialized.await()
+                        QtAndroidController.onNotificationPermissionGranted()
+                    }
+                }
+            )
+        )
     }
 }
 

@@ -93,6 +93,7 @@ bool AndroidController::initialize()
         {"onServiceDisconnected", "()V", reinterpret_cast<void *>(onServiceDisconnected)},
         {"onServiceError", "()V", reinterpret_cast<void *>(onServiceError)},
         {"onVpnPermissionRejected", "()V", reinterpret_cast<void *>(onVpnPermissionRejected)},
+        {"onNotificationPermissionGranted", "()V", reinterpret_cast<void *>(onNotificationPermissionGranted)},
         {"onVpnStateChanged", "(I)V", reinterpret_cast<void *>(onVpnStateChanged)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
@@ -257,6 +258,16 @@ QPixmap AndroidController::getAppIcon(const QString &package, QSize *size, const
     return QPixmap::fromImage(image);
 }
 
+bool AndroidController::isNotificationPermissionGranted()
+{
+    return callActivityMethod<jboolean>("isNotificationPermissionGranted", "()Z");
+}
+
+void AndroidController::requestNotificationPermission()
+{
+    callActivityMethod("requestNotificationPermission", "()V");
+}
+
 // Moving log processing to the Android side
 jclass AndroidController::log;
 jmethodID AndroidController::logDebug;
@@ -407,6 +418,15 @@ void AndroidController::onVpnPermissionRejected(JNIEnv *env, jobject thiz)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->vpnPermissionRejected();
+}
+
+// static
+void AndroidController::onNotificationPermissionGranted(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->notificationPermissionGranted();
 }
 
 // static

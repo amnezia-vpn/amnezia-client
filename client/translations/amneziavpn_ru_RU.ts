@@ -1088,7 +1088,17 @@ Already installed containers were found on the server. All installed containers 
         <translation>Язык</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="218"/>
+        <source>Enable notifications</source>
+        <translation>Включить уведомления</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="219"/>
+        <source>Enable notifications to display the VPN state in the status bar</source>
+        <translation>Включить уведомления для отображения статуса VPN в строке состояния</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="238"/>
         <source>Logging</source>
         <translation>Логирование</translation>
     </message>

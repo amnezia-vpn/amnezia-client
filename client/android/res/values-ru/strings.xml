@@ -19,5 +19,5 @@
 
     <string name="notificationChannelDescription">Уведомления сервиса AmneziaVPN</string>
     <string name="notificationDialogTitle">Сервис AmneziaVPN</string>
-    <string name="notificationDialogMessage">Отображать статус сервиса в строке состояния?</string>
+    <string name="notificationDialogMessage">Отображать статус VPN в строке состояния?</string>
 </resources>
