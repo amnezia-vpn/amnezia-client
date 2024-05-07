@@ -3,11 +3,16 @@ package org.amnezia.vpn.util.net
 import java.net.InetAddress
 
 @OptIn(ExperimentalUnsignedTypes::class)
-class IpAddress private constructor(private val address: UByteArray) : Comparable<IpAddress> {
+internal class IpAddress private constructor(private val address: UByteArray) : Comparable<IpAddress> {
 
     val size: Int = address.size
     val lastIndex: Int = address.lastIndex
     val maxMask: Int = size * 8
+
+    @OptIn(ExperimentalStdlibApi::class)
+    val hexFormat: HexFormat by lazy {
+        HexFormat { number.removeLeadingZeros = true }
+    }
 
     constructor(inetAddress: InetAddress) : this(inetAddress.address.asUByteArray())
 
@@ -43,6 +48,8 @@ class IpAddress private constructor(private val address: UByteArray) : Comparabl
         return copy
     }
 
+    fun isMinIp(): Boolean = address.all { it == 0x00u.toUByte() }
+
     fun isMaxIp(): Boolean = address.all { it == 0xffu.toUByte() }
 
     override fun compareTo(other: IpAddress): Int {
@@ -74,12 +81,14 @@ class IpAddress private constructor(private val address: UByteArray) : Comparabl
     private fun toIpv6String(): String {
         val sb = StringBuilder()
         var i = 0
+        var block: Int
         while (i < size) {
-            sb.append(address[i++].toHexString())
-            sb.append(address[i++].toHexString())
+            block = address[i++].toInt() shl 8
+            block += address[i++].toInt()
+            sb.append(block.toHexString(hexFormat))
             sb.append(':')
         }
         sb.deleteAt(sb.lastIndex)
-        return sb.toString()
+        return convertIpv6ToCanonicalForm(sb.toString())
     }
 }
