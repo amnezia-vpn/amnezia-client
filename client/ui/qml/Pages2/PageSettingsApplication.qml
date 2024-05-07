@@ -15,44 +15,9 @@ PageType {
 
     defaultActiveFocusItem: focusItem
 
-    function getNextComponentInFocusChain(componentId) {
-        const componentsList = [focusItem,
-                                backButton,
-                                switcher,
-                                switcherAutoStart,
-                                switcherAutoConnect,
-                                switcherStartMinimized,
-                                labelWithButtonLanguage,
-                                labelWithButtonNotification,
-                                labelWithButtonLogging,
-                                labelWithButtonReset,
-                             ]
-
-        const idx = componentsList.indexOf(componentId)
-
-        if (idx === -1) {
-            return null
-        }
-
-        let nextIndex = idx + 1
-        if (nextIndex >= componentsList.length) {
-            nextIndex = 0
-        }
-
-        if (componentsList[nextIndex].visible) {
-            if ((nextIndex) >= 6) {
-                return componentsList[nextIndex].rightButton
-            } else {
-                return componentsList[nextIndex]
-            }
-        } else {
-            return getNextComponentInFocusChain(componentsList[nextIndex])
-        }
-    }
-
     Item {
         id: focusItem
-        KeyNavigation.tab: root.getNextComponentInFocusChain(focusItem)
+        KeyNavigation.tab: backButton
 
         onFocusChanged: {
             if (focusItem.activeFocus) {
@@ -69,7 +34,7 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20
 
-        KeyNavigation.tab: root.getNextComponentInFocusChain(backButton)
+        KeyNavigation.tab: GC.isMobile() ? switcher : switcherAutoStart
     }
 
     FlickableType {
@@ -109,7 +74,7 @@ PageType {
                     }
                 }
 
-                KeyNavigation.tab: root.getNextComponentInFocusChain(switcher)
+                KeyNavigation.tab: labelWithButtonLanguage.rightButton
                 parentFlickable: fl
             }
 
@@ -127,7 +92,7 @@ PageType {
                 text: qsTr("Auto start")
                 descriptionText: qsTr("Launch the application every time the device is starts")
 
-                KeyNavigation.tab: root.getNextComponentInFocusChain(switcherAutoStart)
+                KeyNavigation.tab: switcherAutoConnect
                 parentFlickable: fl
 
                 checked: SettingsController.isAutoStartEnabled()
@@ -152,7 +117,7 @@ PageType {
                 text: qsTr("Auto connect")
                 descriptionText: qsTr("Connect to VPN on app start")
 
-                KeyNavigation.tab: root.getNextComponentInFocusChain(switcherAutoConnect)
+                KeyNavigation.tab: switcherStartMinimized
                 parentFlickable: fl
 
                 checked: SettingsController.isAutoConnectEnabled()
@@ -177,7 +142,7 @@ PageType {
                 text: qsTr("Start minimized")
                 descriptionText: qsTr("Launch application minimized")
 
-                KeyNavigation.tab: root.getNextComponentInFocusChain(switcherStartMinimized)
+                KeyNavigation.tab: labelWithButtonLanguage.rightButton
                 parentFlickable: fl
 
                 checked: SettingsController.isStartMinimizedEnabled()
@@ -200,7 +165,7 @@ PageType {
                 descriptionText: LanguageModel.currentLanguageName
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                KeyNavigation.tab: root.getNextComponentInFocusChain(labelWithButtonNotification)
+                KeyNavigation.tab: labelWithButtonNotification.rightButton
                 parentFlickable: fl
 
                 clickedFunction: function() {
@@ -219,7 +184,7 @@ PageType {
                 descriptionText: qsTr("Enable notifications to show the VPN state in the status bar")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                KeyNavigation.tab: root.getNextComponentInFocusChain(labelWithButtonLogging)
+                KeyNavigation.tab: labelWithButtonLogging.rightButton
                 parentFlickable: fl
 
                 clickedFunction: function() {
@@ -239,7 +204,7 @@ PageType {
                 descriptionText: SettingsController.isLoggingEnabled ? qsTr("Enabled") : qsTr("Disabled")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                KeyNavigation.tab: root.getNextComponentInFocusChain(labelWithButtonLogging)
+                KeyNavigation.tab: labelWithButtonReset.rightButton
                 parentFlickable: fl
 
                 clickedFunction: function() {

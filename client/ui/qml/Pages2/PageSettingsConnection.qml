@@ -101,9 +101,15 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
                 }
 
-                Keys.onTabPressed: splitTunnelingButton2.visible ?
-                                       splitTunnelingButton2.forceActiveFocus() :
-                                       lastItemTabClicked()
+                Keys.onTabPressed: {
+                    if (splitTunnelingButton2.visible) {
+                        return splitTunnelingButton2.rightButton.forceActiveFocus()
+                    } else if (killSwitchSwitcher.visible) {
+                        return killSwitchSwitcher.forceActiveFocus()
+                    } else {
+                        lastItemTabClicked()
+                    }
+                }
             }
 
             DividerType {
@@ -124,7 +130,13 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
                 }
 
-                Keys.onTabPressed: lastItemTabClicked()
+                Keys.onTabPressed: {
+                    if (killSwitchSwitcher.visible) {
+                        return killSwitchSwitcher.forceActiveFocus()
+                    } else {
+                        lastItemTabClicked()
+                    }
+                }
             }
 
             DividerType {
@@ -132,6 +144,9 @@ PageType {
             }
 
             SwitcherType {
+                id: killSwitchSwitcher
+                visible: !GC.isMobile()
+
                 Layout.fillWidth: true
                 Layout.margins: 16
 
@@ -150,6 +165,8 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Cannot change killSwitch settings during active connection"))
                     }
                 }
+
+                Keys.onTabPressed: lastItemTabClicked()
             }
 
             DividerType {

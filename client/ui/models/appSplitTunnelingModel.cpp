@@ -48,7 +48,6 @@ bool AppSplitTunnelingModel::addApp(const InstalledAppInfo &appInfo)
     m_settings->setVpnApps(m_currentRouteMode, m_apps);
     endInsertRows();
 
-    qDebug() << "app added " << appInfo.appName;
     return true;
 }
 

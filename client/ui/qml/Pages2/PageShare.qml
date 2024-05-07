@@ -122,7 +122,7 @@ PageType {
     }
     QtObject {
         id: openVpnConnectionFormat
-        property string name: qsTr("OpenVpn native format")
+        property string name: qsTr("OpenVPN native format")
         property var type: PageShare.ConfigType.OpenVpn
     }
     QtObject {
@@ -766,9 +766,9 @@ PageType {
                             }
 
                             anchors.fill: parent
-                            expandedHeight: root.height * 0.5
 
                             expandedContent: ColumnLayout {
+                                id: expandedContent
                                 anchors.top: parent.top
                                 anchors.left: parent.left
                                 anchors.right: parent.right
@@ -777,6 +777,10 @@ PageType {
                                 anchors.rightMargin: 16
 
                                 spacing: 8
+
+                                onImplicitHeightChanged: {
+                                    clientInfoDrawer.expandedHeight = expandedContent.implicitHeight + 32
+                                }
 
                                 Connections {
                                     target: clientInfoDrawer
@@ -788,10 +792,47 @@ PageType {
 
                                 Header2Type {
                                     Layout.fillWidth: true
-                                    Layout.bottomMargin: 24
 
                                     headerText: clientName
-                                    descriptionText: qsTr("Creation date: ") + creationDate
+                                }
+
+                                ColumnLayout
+                                {
+                                    id: textColumn
+                                    property string textColor: "#878B91"
+                                    Layout.bottomMargin: 24
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: creationDate
+                                        Layout.fillWidth: true
+
+                                        text: qsTr("Creation date: %1").arg(creationDate)
+                                    }
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: latestHandshake
+                                        Layout.fillWidth: true
+
+                                        text: qsTr("Latest handshake: %1").arg(latestHandshake)
+                                    }
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: dataReceived
+                                        Layout.fillWidth: true
+
+                                        text: qsTr("Data received: %1").arg(dataReceived)
+                                    }
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: dataSent
+                                        Layout.fillWidth: true
+
+                                        text: qsTr("Data sent: %1").arg(dataSent)
+                                    }
                                 }
 
                                 Item {
