@@ -93,7 +93,7 @@ bool AndroidController::initialize()
         {"onServiceDisconnected", "()V", reinterpret_cast<void *>(onServiceDisconnected)},
         {"onServiceError", "()V", reinterpret_cast<void *>(onServiceError)},
         {"onVpnPermissionRejected", "()V", reinterpret_cast<void *>(onVpnPermissionRejected)},
-        {"onNotificationPermissionGranted", "()V", reinterpret_cast<void *>(onNotificationPermissionGranted)},
+        {"onNotificationStateChanged", "()V", reinterpret_cast<void *>(onNotificationStateChanged)},
         {"onVpnStateChanged", "(I)V", reinterpret_cast<void *>(onVpnStateChanged)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
@@ -421,12 +421,12 @@ void AndroidController::onVpnPermissionRejected(JNIEnv *env, jobject thiz)
 }
 
 // static
-void AndroidController::onNotificationPermissionGranted(JNIEnv *env, jobject thiz)
+void AndroidController::onNotificationStateChanged(JNIEnv *env, jobject thiz)
 {
     Q_UNUSED(env);
     Q_UNUSED(thiz);
 
-    emit AndroidController::instance()->notificationPermissionGranted();
+    emit AndroidController::instance()->notificationStateChanged();
 }
 
 // static

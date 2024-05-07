@@ -19,5 +19,8 @@
 
     <string name="notificationChannelDescription">AmneziaVPN service notification</string>
     <string name="notificationDialogTitle">AmneziaVPN service</string>
-    <string name="notificationDialogMessage">Display the VPN state in the status bar?</string>
+    <string name="notificationDialogMessage">Show the VPN state in the status bar?</string>
+    <string name="notificationSettingsDialogTitle">Notification settings</string>
+    <string name="notificationSettingsDialogMessage">To show notifications, you must enable notifications in the system settings</string>
+    <string name="openNotificationSettings">Open notification settings</string>
 </resources>

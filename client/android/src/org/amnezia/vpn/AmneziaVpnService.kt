@@ -170,6 +170,10 @@ class AmneziaVpnService : VpnService() {
                         }
                     }
 
+                    Action.NOTIFICATION_PERMISSION_GRANTED -> {
+                        enableNotification()
+                    }
+
                     Action.SET_SAVE_LOGS -> {
                         Log.saveLogs = msg.data.getBoolean(MSG_SAVE_LOGS)
                     }
@@ -300,11 +304,12 @@ class AmneziaVpnService : VpnService() {
                     NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED
                 )
             ) {
-                Log.d(TAG, "Notification state changed: $it")
-                if (it?.getBooleanExtra(NotificationManager.EXTRA_BLOCKED_STATE, false) == false) {
-                    registerScreenStateBroadcastReceivers()
+                val state = it?.getBooleanExtra(NotificationManager.EXTRA_BLOCKED_STATE, false)
+                Log.d(TAG, "Notification state changed: ${it?.action}, blocked = $state")
+                if (state == false) {
+                    enableNotification()
                 } else {
-                    unregisterScreenStateBroadcastReceivers()
+                    disableNotification()
                 }
             }
         } else null
@@ -412,6 +417,19 @@ class AmneziaVpnService : VpnService() {
     private fun stopSendingStatistics() {
         statisticsSendingJob?.cancel()
     } */
+
+    @MainThread
+    private fun enableNotification() {
+        registerScreenStateBroadcastReceivers()
+        serviceNotification.updateNotification(serverName, protocolState.value)
+        launchTrafficStatsUpdate()
+    }
+
+    @MainThread
+    private fun disableNotification() {
+        unregisterScreenStateBroadcastReceivers()
+        stopTrafficStatsUpdateJob()
+    }
 
     @MainThread
     private fun launchTrafficStatsUpdate() {

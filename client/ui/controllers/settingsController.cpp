@@ -31,7 +31,7 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
     checkIfNeedDisableLogs();
 #ifdef Q_OS_ANDROID
-    connect(AndroidController::instance(), &AndroidController::notificationPermissionGranted, this, &SettingsController::onNotificationPermissionGranted);
+    connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this, &SettingsController::onNotificationStateChanged);
 #endif
 }
 

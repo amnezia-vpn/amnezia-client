@@ -101,7 +101,7 @@ class ServiceNotification(private val context: Context) {
     @SuppressLint("MissingPermission")
     fun updateSpeed(speed: TrafficData) {
         if (context.isNotificationPermissionGranted()) {
-            Log.v(TAG, "Update notification speed: $speed")
+            Log.v(TAG, "Update notification speed: (${speed.rx}, ${speed.tx})")
             notificationManager.notify(NOTIFICATION_ID, buildNotification(speed))
         }
     }

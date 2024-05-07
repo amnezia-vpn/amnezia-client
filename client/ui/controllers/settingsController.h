@@ -23,7 +23,7 @@ public:
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
     Q_PROPERTY(QString secondaryDns READ getSecondaryDns WRITE setSecondaryDns NOTIFY secondaryDnsChanged)
     Q_PROPERTY(bool isLoggingEnabled READ isLoggingEnabled WRITE toggleLogging NOTIFY loggingStateChanged)
-    Q_PROPERTY(bool isNotificationPermissionGranted READ isNotificationPermissionGranted NOTIFY onNotificationPermissionGranted)
+    Q_PROPERTY(bool isNotificationPermissionGranted READ isNotificationPermissionGranted NOTIFY onNotificationStateChanged)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -87,7 +87,7 @@ signals:
 
     void loggingDisableByWatcher();
 
-    void onNotificationPermissionGranted();
+    void onNotificationStateChanged();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

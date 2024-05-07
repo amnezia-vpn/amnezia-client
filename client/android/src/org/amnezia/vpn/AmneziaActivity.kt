@@ -2,6 +2,8 @@ package org.amnezia.vpn
 
 import android.Manifest
 import android.app.AlertDialog
+import android.app.NotificationManager
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Intent
 import android.content.Intent.EXTRA_MIME_TYPES
@@ -60,6 +62,7 @@ class AmneziaActivity : QtActivity() {
     private var isWaitingStatus = true
     private var isServiceConnected = false
     private var isInBoundState = false
+    private var notificationStateReceiver: BroadcastReceiver? = null
     private lateinit var vpnServiceMessenger: IpcMessenger
 
     private val actionResultHandlers = mutableMapOf<Int, ActivityResultHandler>()
@@ -157,7 +160,28 @@ class AmneziaActivity : QtActivity() {
                 doBindService()
             }
         )
+        registerBroadcastReceivers()
         intent?.let(::processIntent)
+    }
+
+    private fun registerBroadcastReceivers() {
+        notificationStateReceiver = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            registerBroadcastReceiver(
+                arrayOf(
+                    NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED,
+                    NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED
+                )
+            ) {
+                Log.d(
+                    TAG, "Notification state changed: ${it?.action}, blocked = " +
+                        "${it?.getBooleanExtra(NotificationManager.EXTRA_BLOCKED_STATE, false)}"
+                )
+                mainScope.launch {
+                    qtInitialized.await()
+                    QtAndroidController.onNotificationStateChanged()
+                }
+            }
+        } else null
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -197,12 +221,15 @@ class AmneziaActivity : QtActivity() {
 
     override fun onDestroy() {
         Log.d(TAG, "Destroy Amnezia activity")
+        unregisterBroadcastReceiver(notificationStateReceiver)
+        notificationStateReceiver = null
         mainScope.cancel()
         super.onDestroy()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.d(TAG, "Process activity result, code: $requestCode, resultCode: $resultCode, data: $data")
+        Log.d(TAG, "Process activity result, code: ${actionCodeToString(requestCode)}, " +
+                "resultCode: $resultCode, data: $data")
         actionResultHandlers[requestCode]?.let { handler ->
             when (resultCode) {
                 RESULT_OK -> handler.onSuccess(data)
@@ -219,7 +246,7 @@ class AmneziaActivity : QtActivity() {
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        Log.d(TAG, "Process permission result, code: $requestCode, " +
+        Log.d(TAG, "Process permission result, code: ${actionCodeToString(requestCode)}, " +
                 "permissions: ${permissions.contentToString()}, results: ${grantResults.contentToString()}")
         permissionRequestHandlers[requestCode]?.let { handler ->
             if (grantResults.isNotEmpty()) {
@@ -578,18 +605,59 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun requestNotificationPermission() {
+        val shouldShowPreRequest = shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
         requestPermission(
             Manifest.permission.POST_NOTIFICATIONS,
             CHECK_NOTIFICATION_PERMISSION_ACTION_CODE,
             PermissionRequestHandler(
                 onSuccess = {
                     mainScope.launch {
+                        Prefs.save(PREFS_NOTIFICATION_PERMISSION_ASKED, true)
+                        vpnServiceMessenger.send(Action.NOTIFICATION_PERMISSION_GRANTED)
                         qtInitialized.await()
-                        QtAndroidController.onNotificationPermissionGranted()
+                        QtAndroidController.onNotificationStateChanged()
+                    }
+                },
+                onFail = {
+                    if (!Prefs.load<Boolean>(PREFS_NOTIFICATION_PERMISSION_ASKED)) {
+                        Prefs.save(PREFS_NOTIFICATION_PERMISSION_ASKED, true)
+                    } else {
+                        val shouldShowPostRequest =
+                            shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+                        if (!shouldShowPreRequest && !shouldShowPostRequest) {
+                            showNotificationSettingsDialog()
+                        }
                     }
                 }
             )
         )
+    }
+
+    private fun showNotificationSettingsDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.notificationSettingsDialogTitle)
+            .setMessage(R.string.notificationSettingsDialogMessage)
+            .setNegativeButton(R.string.cancel) { _, _ -> }
+            .setPositiveButton(R.string.openNotificationSettings) { _, _ ->
+                startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                })
+            }
+            .show()
+    }
+
+    /**
+     * Utils methods
+     */
+    companion object {
+        private fun actionCodeToString(actionCode: Int): String =
+            when (actionCode) {
+                CHECK_VPN_PERMISSION_ACTION_CODE -> "CHECK_VPN_PERMISSION"
+                CREATE_FILE_ACTION_CODE -> "CREATE_FILE"
+                OPEN_FILE_ACTION_CODE -> "OPEN_FILE"
+                CHECK_NOTIFICATION_PERMISSION_ACTION_CODE -> "CHECK_NOTIFICATION_PERMISSION"
+                else -> actionCode.toString()
+            }
     }
 }
 

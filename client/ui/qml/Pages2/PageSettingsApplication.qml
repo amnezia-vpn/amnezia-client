@@ -216,7 +216,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Enable notifications")
-                descriptionText: qsTr("Enable notifications to display the VPN state in the status bar")
+                descriptionText: qsTr("Enable notifications to show the VPN state in the status bar")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 KeyNavigation.tab: root.getNextComponentInFocusChain(labelWithButtonLogging)

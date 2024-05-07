@@ -56,7 +56,7 @@ signals:
     void serviceDisconnected();
     void serviceError();
     void vpnPermissionRejected();
-    void notificationPermissionGranted();
+    void notificationStateChanged();
     void vpnStateChanged(ConnectionState state);
     void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void fileOpened(QString uri);
@@ -84,7 +84,7 @@ private:
     static void onServiceDisconnected(JNIEnv *env, jobject thiz);
     static void onServiceError(JNIEnv *env, jobject thiz);
     static void onVpnPermissionRejected(JNIEnv *env, jobject thiz);
-    static void onNotificationPermissionGranted(JNIEnv *env, jobject thiz);
+    static void onNotificationStateChanged(JNIEnv *env, jobject thiz);
     static void onVpnStateChanged(JNIEnv *env, jobject thiz, jint stateCode);
     static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz, jstring data);
