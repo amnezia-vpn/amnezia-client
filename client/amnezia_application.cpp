@@ -150,7 +150,7 @@ void AmneziaApplication::init()
 
     connect(m_notificationHandler.get(), &NotificationHandler::raiseRequested, m_pageController.get(), &PageController::raiseMainWindow);
     connect(m_notificationHandler.get(), &NotificationHandler::connectRequested, m_connectionController.get(),
-            &ConnectionController::openConnection);
+            static_cast<void (ConnectionController::*)()>(&ConnectionController::openConnection));
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
             &ConnectionController::closeConnection);
     connect(this, &AmneziaApplication::translationsUpdated, m_notificationHandler.get(), &NotificationHandler::onTranslationsUpdated);

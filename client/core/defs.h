@@ -98,6 +98,9 @@ namespace amnezia
         // Api errors
         ApiConfigDownloadError = 1100,
         ApiConfigAlreadyAdded = 1101,
+        ApiConfigEmptyError = 1102,
+        ApiConfigTimeoutError = 1103,
+        ApiConfigSslError = 1104,
 
         // QFile errors
         OpenError = 1200,

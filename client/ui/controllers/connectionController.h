@@ -61,6 +61,8 @@ private:
     Vpn::ConnectionState getCurrentConnectionState();
     bool isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container);
 
+    void openConnection(const bool updateConfig, const QJsonObject &config, const int serverIndex);
+
     ApiController m_apiController;
 
     QSharedPointer<ServersModel> m_serversModel;

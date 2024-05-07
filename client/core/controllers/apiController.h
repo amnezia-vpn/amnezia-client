@@ -6,27 +6,26 @@
 #include "configurators/openvpn_configurator.h"
 
 #ifdef Q_OS_IOS
-#include "platforms/ios/MobileUtils.h"
+    #include "platforms/ios/ios_controller.h"
 #endif
-
-class ConnectionController;
 
 class ApiController : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit ApiController(ConnectionController *connectionController);
+    explicit ApiController(QObject *parent = nullptr);
 
 public slots:
-    void updateServerConfigFromApi(const QString &installationUuid, const QJsonObject &serverConfig,
-                                   const std::function<void(bool updateConfig, QJsonObject config)> &cb);
+    void updateServerConfigFromApi(const QString &installationUuid, const int serverIndex, QJsonObject serverConfig);
+
+signals:
+    void errorOccurred(const QString &errorMessage);
+    void configUpdated(const bool updateConfig, const QJsonObject &config, const int serverIndex);
 
 private:
-    ConnectionController *m_connectionController;
-    MobileUtils m_mobileUtils;
-
-    struct ApiPayloadData {
+    struct ApiPayloadData
+    {
         OpenVpnConfigurator::ConnectionData certRequest;
 
         QString wireGuardClientPrivKey;
