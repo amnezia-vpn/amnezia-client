@@ -241,7 +241,7 @@ bool SettingsController::isNotificationPermissionGranted()
 {
 #ifdef Q_OS_ANDROID
     return AndroidController::instance()->isNotificationPermissionGranted();
-#elif
+#else
     return true;
 #endif
 }
