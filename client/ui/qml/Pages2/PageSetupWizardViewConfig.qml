@@ -129,6 +129,20 @@ PageType {
                 Layout.topMargin: 16
                 Layout.fillWidth: true
 
+                textString: ImportController.getMaliciousWarningText()
+                textFormat: Qt.RichText
+                visible: textString !== ""
+
+                iconPath: "qrc:/images/controls/alert-circle.svg"
+
+                textColor: "#EB5757"
+                imageColor: "#EB5757"
+            }
+
+            WarningType {
+                Layout.topMargin: 16
+                Layout.fillWidth: true
+
                 textString: qsTr("Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.")
 
                 iconPath: "qrc:/images/controls/alert-circle.svg"
@@ -136,7 +150,7 @@ PageType {
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 48
 
                 implicitHeight: configContent.implicitHeight
 
@@ -151,13 +165,23 @@ PageType {
                     anchors.fill: parent
                     anchors.margins: 16
 
+                    wrapMode: Text.Wrap
+
                     text: ImportController.getConfig()
                 }
             }
         }
     }
 
+    Rectangle {
+        anchors.fill: columnContent
+        anchors.bottomMargin: -24
+        color: "#0E0E11"
+        opacity: 0.8
+    }
+
     ColumnLayout {
+        id: columnContent
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right

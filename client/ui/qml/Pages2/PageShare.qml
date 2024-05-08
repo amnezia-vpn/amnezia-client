@@ -122,7 +122,7 @@ PageType {
     }
     QtObject {
         id: openVpnConnectionFormat
-        property string name: qsTr("OpenVpn native format")
+        property string name: qsTr("OpenVPN native format")
         property var type: PageShare.ConfigType.OpenVpn
     }
     QtObject {

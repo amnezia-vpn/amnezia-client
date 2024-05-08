@@ -158,6 +158,7 @@ class WindowsSplitTunnel final : public QObject {
   constexpr static const auto MV_SERVICE_NAME = L"MullvadVPN";
   DRIVER_STATE getState();
 
+  int m_tries;
   // Initializes the WFP Sublayer
   bool initSublayer();
 
