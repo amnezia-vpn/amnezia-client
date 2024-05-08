@@ -124,8 +124,27 @@ QByteArray SecureQSettings::backupAppConfig() const
 {
     QJsonObject cfg;
 
+    const auto needToBackup = [this](const auto &key) {
+      for (const auto &item : m_fieldsToBackup)
+      {
+        if (key == "Conf/installationUuid")
+        {
+          return false;
+        }
+
+        if (key.startsWith(item))
+        {
+            return true;
+        }
+      }
+
+      return false;
+    };
+
     for (const QString &key : m_settings.allKeys()) {
-        if (key == "Conf/installationUuid") {
+
+        if (!needToBackup(key))
+        {
             continue;
         }
 
