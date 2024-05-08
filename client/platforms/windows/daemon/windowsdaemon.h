@@ -38,7 +38,6 @@ class WindowsDaemon final : public Daemon {
     Inactive,
   };
 
-  State m_state = Inactive;
   int m_inetAdapterIndex = -1;
 
   WireguardUtilsWindows* m_wgutils = nullptr;

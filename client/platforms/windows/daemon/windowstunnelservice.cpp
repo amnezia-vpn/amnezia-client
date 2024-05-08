@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "WindowsTunnelService.h"
+#include "windowstunnelservice.h"
 
 #include <Windows.h>
 
@@ -30,10 +30,20 @@ static bool waitForServiceStatus(SC_HANDLE service, DWORD expectedStatus);
 
 WindowsTunnelService::WindowsTunnelService(QObject* parent) : QObject(parent) {
   MZ_COUNT_CTOR(WindowsTunnelService);
+  logger.debug() << "WindowsTunnelService created.";
 
   m_scm = OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
   if (m_scm == nullptr) {
     WindowsUtils::windowsLog("Failed to open SCManager");
+  }
+
+  // Is the service already running? Terminate it.
+  SC_HANDLE service =
+      OpenService((SC_HANDLE)m_scm, TUNNEL_SERVICE_NAME, SERVICE_ALL_ACCESS);
+  if (service != nullptr) {
+    logger.info() << "Tunnel already exists. Terminating it.";
+    stopAndDeleteTunnelService(service);
+    CloseServiceHandle(service);
   }
 
   connect(&m_timer, &QTimer::timeout, this, &WindowsTunnelService::timeout);
