@@ -114,6 +114,13 @@ bool ImportController::extractConfigFromData(QString data)
         return m_config.empty() ? false : true;
     }
 
+    if (config.startsWith("trojan://")) {
+        m_configType = ConfigTypes::Xray;
+        m_config = extractXrayConfig(Utils::JsonToString(serialization::trojan::Deserialize(config, &prefix, &errormsg),
+                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        return m_config.empty() ? false : true;
+    }
+
     if (config.startsWith("ss://") && !config.contains("plugin=")) {
         m_configType = ConfigTypes::ShadowSocks;
         m_config = extractXrayConfig(Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg),

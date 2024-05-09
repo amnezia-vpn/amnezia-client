@@ -252,6 +252,17 @@ struct StreamSettingsObject
                         F(tcpSettings, tlsSettings, xtlsSettings, kcpSettings, wsSettings, httpSettings, dsSettings, quicSettings, grpcSettings))
 };
 
+//
+// Trojan Server
+struct TrojanServerObject
+{
+    QString address;
+    QString password;
+    int port;
+    JSONSTRUCT_COMPARE(TrojanServerObject, address, password)
+    JSONSTRUCT_REGISTER(TrojanServerObject, F(address, port, password))
+};
+
 
 }
 #endif //TRANSFER_H

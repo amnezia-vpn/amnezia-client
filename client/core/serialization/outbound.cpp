@@ -96,5 +96,27 @@ QJsonObject GenerateOutboundEntry(const QString &tag, const QString &protocol, c
     JADD(sendThrough, protocol, settings, tag, streamSettings, mux)
     return root;
 }
+
+QJsonObject GenerateTrojanOUT(const QList<TrojanServerObject> &_servers)
+{
+    QJsonObject root;
+    QJsonArray x;
+
+    for (const auto &server : _servers)
+    {
+        x.append(GenerateTrojanServerOUT(server.address, server.port, server.password));
+    }
+
+    root.insert("servers", x);
+    return root;
+}
+
+QJsonObject GenerateTrojanServerOUT(const QString &address, int port, const QString &password)
+{
+    QJsonObject root;
+    JADD(address, port, password)
+    return root;
+}
+
 } // namespace amnezia::serialization::outbounds
 
