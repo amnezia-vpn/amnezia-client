@@ -7,45 +7,50 @@
 
 #include <QElapsedTimer>
 #include <QMap>
-#include <QObject>
+#include <QNetworkInformation>
+
 
 class NetworkWatcherImpl;
 
 // This class watches for network changes to detect unsecured wifi.
 class NetworkWatcher final : public QObject {
-  Q_OBJECT
-  Q_DISABLE_COPY_MOVE(NetworkWatcher)
+    Q_OBJECT
+    Q_DISABLE_COPY_MOVE(NetworkWatcher)
 
- public:
-  NetworkWatcher();
-  ~NetworkWatcher();
+public:
+    NetworkWatcher();
+    ~NetworkWatcher();
 
-  void initialize();
+    void initialize();
 
-  // public for the inspector.
-  void unsecuredNetwork(const QString& networkName, const QString& networkId);
+    // Public for the Inspector.
+    void unsecuredNetwork(const QString& networkName, const QString& networkId);
+    // Used for the Inspector. simulateOffline = true to mock being disconnected,
+    // false to restore.
+    void simulateDisconnection(bool simulatedDisconnection);
 
-  QString getCurrentTransport();
+    QNetworkInformation::Reachability getReachability();
 
- signals:
-  void networkChange();
+signals:
+    void networkChange();
 
- private:
-  void settingsChanged();
+private:
+    void settingsChanged();
 
- // void notificationClicked(NotificationHandler::Message message);
+private:
+    bool m_active = false;
+    bool m_reportUnsecuredNetwork = false;
 
- private:
-  bool m_active = false;
-  bool m_reportUnsecuredNetwork = false;
+    // Platform-specific implementation.
+    NetworkWatcherImpl* m_impl = nullptr;
 
-  // Platform-specific implementation.
-  NetworkWatcherImpl* m_impl = nullptr;
+    QMap<QString, QElapsedTimer> m_networks;
 
-  QMap<QString, QElapsedTimer> m_networks;
+    // This is used to connect NotificationHandler lazily.
+    bool m_firstNotification = true;
 
-  // This is used to connect NotificationHandler lazily.
-  bool m_firstNotification = true;
+    // Used to simulate network disconnection in the Inspector
+    bool m_simulatedDisconnection = false;
 };
 
 #endif  // NETWORKWATCHER_H

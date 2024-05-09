@@ -328,7 +328,7 @@ bool ContainerProps::isEasySetupContainer(DockerContainer container)
     switch (container) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::Awg: return true;
-    case DockerContainer::Cloak: return true;
+    // case DockerContainer::Cloak: return true;
     default: return false;
     }
 }
@@ -337,8 +337,8 @@ QString ContainerProps::easySetupHeader(DockerContainer container)
 {
     switch (container) {
     case DockerContainer::WireGuard: return tr("Low");
-    case DockerContainer::Awg: return tr("Medium or High");
-    case DockerContainer::Cloak: return tr("Extreme");
+    case DockerContainer::Awg: return tr("High");
+    // case DockerContainer::Cloak: return tr("Extreme");
     default: return "";
     }
 }
@@ -348,8 +348,8 @@ QString ContainerProps::easySetupDescription(DockerContainer container)
     switch (container) {
     case DockerContainer::WireGuard: return tr("I just want to increase the level of my privacy.");
     case DockerContainer::Awg: return tr("I want to bypass censorship. This option recommended in most cases.");
-    case DockerContainer::Cloak:
-        return tr("Most VPN protocols are blocked. Recommended if other options are not working.");
+    // case DockerContainer::Cloak:
+    //     return tr("Most VPN protocols are blocked. Recommended if other options are not working.");
     default: return "";
     }
 }
@@ -359,7 +359,7 @@ int ContainerProps::easySetupOrder(DockerContainer container)
     switch (container) {
     case DockerContainer::WireGuard: return 3;
     case DockerContainer::Awg: return 2;
-    case DockerContainer::Cloak: return 1;
+    // case DockerContainer::Cloak: return 1;
     default: return 0;
     }
 }

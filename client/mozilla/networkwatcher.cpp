@@ -171,9 +171,15 @@ void NetworkWatcher::unsecuredNetwork(const QString& networkName,
 }
 
 
-QString NetworkWatcher::getCurrentTransport() {
-  auto type = m_impl->getTransportType();
-  QMetaEnum metaEnum = QMetaEnum::fromType<NetworkWatcherImpl::TransportType>();
-  return QString(metaEnum.valueToKey(type))
-      .remove("TransportType_", Qt::CaseSensitive);
+QNetworkInformation::Reachability NetworkWatcher::getReachability() {
+  if (m_simulatedDisconnection) {
+    return QNetworkInformation::Reachability::Disconnected;
+  } else if (QNetworkInformation::instance()) {
+    return QNetworkInformation::instance()->reachability();
+  }
+  return QNetworkInformation::Reachability::Unknown;
+}
+
+void NetworkWatcher::simulateDisconnection(bool simulatedDisconnection) {
+  m_simulatedDisconnection = simulatedDisconnection;
 }

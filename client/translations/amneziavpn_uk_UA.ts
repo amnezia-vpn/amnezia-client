@@ -692,7 +692,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Видалити OpenVPN</translation>
     </message>
     <message>
-        <source>Remove OpenVpn from server?</source>
+        <source>Remove OpenVPN from server?</source>
         <translation type="vanished">Видалити OpenVPN з серверу?</translation>
     </message>
     <message>
@@ -1176,12 +1176,12 @@ Already installed containers were found on the server. All installed containers 
     <name>PageSettingsAppSplitTunneling</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="37"/>
-        <source>Only the Apps listed here will be accessed through the VPN</source>
+        <source>Only the apps from the list should have access via VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="42"/>
-        <source>Apps from the list should not be accessed via VPN</source>
+        <source>Apps from the list should not have access via VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2301,7 +2301,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <name>PageShare</name>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="125"/>
-        <source>OpenVpn native format</source>
+        <source>OpenVPN native format</source>
         <translation>OpenVPN нативний формат</translation>
     </message>
     <message>
@@ -3627,8 +3627,8 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="333"/>
-        <source>Medium or High</source>
-        <translation>Середній або високий</translation>
+        <source>High</source>
+        <translation>Високий</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="334"/>

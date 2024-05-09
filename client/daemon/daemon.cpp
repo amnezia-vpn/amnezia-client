@@ -248,8 +248,9 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
 
   GETVALUE("privateKey", config.m_privateKey, String);
   GETVALUE("serverPublicKey", config.m_serverPublicKey, String);
-  GETVALUE("serverPskKey", config.m_serverPskKey, String);
   GETVALUE("serverPort", config.m_serverPort, Double);
+
+  config.m_serverPskKey = obj.value("serverPskKey").toString();
 
   if (!obj.contains("deviceMTU") || obj.value("deviceMTU").toString().toInt() == 0)
   {
@@ -372,6 +373,8 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!parseStringList(obj, "vpnDisabledApps", config.m_vpnDisabledApps)) {
     return false;
   }
+
+  config.m_killSwitchEnabled = QVariant(obj.value("killSwitchOption").toString()).toBool();
 
   if (!obj.value("Jc").isNull()) {
     config.m_junkPacketCount = obj.value("Jc").toString();
