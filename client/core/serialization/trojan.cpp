@@ -73,6 +73,9 @@ QJsonObject Deserialize(const QString &trojanUri, QString *alias, QString *errMe
     QJsonArray outbounds;
     outbounds.append(outbounds::GenerateOutboundEntry(OUTBOUND_TAG_PROXY, "trojan", outbounds::GenerateTrojanOUT({ server }), {}));
     JADD(outbounds)
+    QJsonObject inbound = inbounds::GenerateInboundEntry();
+    root["inbounds"] = QJsonArray { inbound };
+
     *alias = alias->isEmpty() ? d_name : *alias + "_" + d_name;
     return root;
 }
