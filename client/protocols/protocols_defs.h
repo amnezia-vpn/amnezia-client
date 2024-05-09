@@ -208,6 +208,8 @@ namespace amnezia
         namespace socks5Proxy
         {
             constexpr char defaultPort[] = "38080";
+
+            constexpr char proxyConfigPath[] = "/usr/local/3proxy/conf/3proxy.cfg";
         }
 
     } // namespace protocols

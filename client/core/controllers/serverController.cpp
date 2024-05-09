@@ -106,7 +106,7 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     if (e)
         return e;
 
-    QString runner = QString("sudo docker exec -i $CONTAINER_NAME bash %1 ").arg(fileName);
+    QString runner = QString("sudo docker exec -i $CONTAINER_NAME sh %1 ").arg(fileName);
     e = runScript(credentials, replaceVars(runner, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
 
     QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);
@@ -377,9 +377,7 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
     }
 
     if (container == DockerContainer::Socks5Proxy) {
-        if (oldProtoConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort))
-            return true;
+        return true;
     }
 
     return false;
@@ -617,6 +615,11 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
     // Socks5 proxy vars
     vars.append({ { "$SOCKS5_PROXY_PORT", socks5ProxyConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort) } });
+    auto username =  socks5ProxyConfig.value(config_key:: userName).toString();
+    auto password = socks5ProxyConfig.value(config_key::password).toString();
+    QString socks5user = (!username.isEmpty() && !password.isEmpty()) ? QString("users %1:CL:%2").arg(username, password) : "";
+    vars.append({ { "$SOCKS5_USER",  socks5user } });
+    vars.append({ { "$SOCKS5_AUTH_TYPE",  socks5user.isEmpty() ? "none" : "strong" } });
 
     QString serverIp = NetworkUtilities::getIPAddress(credentials.hostName);
     if (!serverIp.isEmpty()) {

@@ -20,6 +20,8 @@ bool Socks5ProxyConfigModel::setData(const QModelIndex &index, const QVariant &v
 
     switch (role) {
     case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
+    case Roles::UserNameRole: m_protocolConfig.insert(config_key::userName, value.toString()); break;
+    case Roles::PasswordRole: m_protocolConfig.insert(config_key::password, value.toString()); break;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -35,7 +37,7 @@ QVariant Socks5ProxyConfigModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString();
     case Roles::UserNameRole:
-        return m_protocolConfig.value(config_key::userName).toString(protocols::sftp::defaultUserName);
+        return m_protocolConfig.value(config_key::userName).toString();
     case Roles::PasswordRole: return m_protocolConfig.value(config_key::password).toString();
     }
 

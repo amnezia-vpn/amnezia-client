@@ -1,9 +1,6 @@
-FROM snail007/goproxy:latest
+FROM 3proxy/3proxy:latest
 
 LABEL maintainer="AmneziaVPN" 
-
-#Install required packages
-RUN apk add --no-cache bash
 
 RUN mkdir -p /opt/amnezia
 RUN echo -e "#!/bin/bash\ntail -f /dev/null" > /opt/amnezia/start.sh

@@ -363,7 +363,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
         if (containerInfo.isEmpty()) {
             continue;
         }
-        const static QRegularExpression containerAndPortRegExp("(amnezia[-a-z]*).*?:([0-9]*)->[0-9]*/(udp|tcp).*");
+        const static QRegularExpression containerAndPortRegExp("(amnezia[-a-z0-9]*).*?:([0-9]*)->[0-9]*/(udp|tcp).*");
         QRegularExpressionMatch containerAndPortMatch = containerAndPortRegExp.match(containerInfo);
         if (containerAndPortMatch.hasMatch()) {
             QString name = containerAndPortMatch.captured(1);
@@ -428,6 +428,20 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
                         containerConfig.insert(config_key::userName, userName);
                         containerConfig.insert(config_key::password, password);
+                    } else if (protocol == Proto::Socks5Proxy) {
+                        QString proxyConfig = serverController->getTextFileFromContainer(container, credentials,
+                                                                                          protocols::socks5Proxy::proxyConfigPath, errorCode);
+
+                        const static QRegularExpression usernameAndPasswordRegExp("users (\\w+):CL:(\\w+)");
+                        QRegularExpressionMatch usernameAndPasswordMatch = usernameAndPasswordRegExp.match(proxyConfig);
+
+                        if (usernameAndPasswordMatch.hasMatch()) {
+                            QString userName = usernameAndPasswordMatch.captured(1);
+                            QString password = usernameAndPasswordMatch.captured(2);
+
+                            containerConfig.insert(config_key::userName, userName);
+                            containerConfig.insert(config_key::password, password);
+                        }
                     }
 
                     config.insert(config_key::container, ContainerProps::containerToString(container));

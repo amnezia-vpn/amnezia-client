@@ -111,46 +111,46 @@ PageType {
                             }
                         }
 
-                        KeyNavigation.tab: removeButton //usernameTextField.textField
+                        KeyNavigation.tab: usernameTextField.textField
                     }
 
-//                    TextFieldWithHeaderType {
-//                        id: usernameTextField
+                    TextFieldWithHeaderType {
+                        id: usernameTextField
 
-//                        Layout.fillWidth: true
-//                        Layout.topMargin: 16
-//                        parentFlickable: fl
+                        Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        parentFlickable: fl
 
-//                        headerText: qsTr("Username")
-//                        textFieldText: username
+                        headerText: qsTr("Username")
+                        textFieldText: username
 
-//                        textField.onEditingFinished: {
-//                            if (textFieldText !== port) {
-//                                port = textFieldText
-//                            }
-//                        }
+                        textField.onEditingFinished: {
+                            if (textFieldText !== username) {
+                                username = textFieldText
+                            }
+                        }
 
-//                        KeyNavigation.tab: passwordTextField.textField
-//                    }
+                        KeyNavigation.tab: passwordTextField.textField
+                    }
 
-//                    TextFieldWithHeaderType {
-//                        id: passwordTextField
+                    TextFieldWithHeaderType {
+                        id: passwordTextField
 
-//                        Layout.fillWidth: true
-//                        Layout.topMargin: 16
-//                        parentFlickable: fl
+                        Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        parentFlickable: fl
 
-//                        headerText: qsTr("Password")
-//                        textFieldText: password
+                        headerText: qsTr("Password")
+                        textFieldText: password
 
-//                        textField.onEditingFinished: {
-//                            if (textFieldText !== password) {
-//                                password = textFieldText
-//                            }
-//                        }
+                        textField.onEditingFinished: {
+                            if (textFieldText !== password) {
+                                password = textFieldText
+                            }
+                        }
 
-//                        KeyNavigation.tab: removeButton
-//                    }
+                        KeyNavigation.tab: removeButton
+                    }
 
                     BasicButtonType {
                         id: removeButton
