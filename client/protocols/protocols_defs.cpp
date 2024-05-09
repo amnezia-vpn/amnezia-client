@@ -89,6 +89,8 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
 {
     switch (p) {
     case Proto::Any: return ServiceType::None;
+    case Proto::SSXray: return ServiceType::None;
+
     case Proto::OpenVpn: return ServiceType::Vpn;
     case Proto::Cloak: return ServiceType::Vpn;
     case Proto::ShadowSocks: return ServiceType::Vpn;
