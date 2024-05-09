@@ -22,11 +22,6 @@ class LinuxNetworkWatcher final : public NetworkWatcherImpl {
 
   void start() override;
 
-  NetworkWatcherImpl::TransportType getTransportType() {
-    // TODO: Find out how to do that on linux generally. (VPN-2382)
-    return NetworkWatcherImpl::TransportType_Unknown;
-  };
-
  signals:
   void checkDevicesInThread();
 
