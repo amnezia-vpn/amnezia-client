@@ -180,6 +180,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/ss.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/ssd.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vless.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/trojan.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess_new.cpp
 )
