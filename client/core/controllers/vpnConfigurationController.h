@@ -21,7 +21,7 @@ public slots:
                                          const DockerContainer container, const QJsonObject &containerConfig, const Proto protocol,
                                          QString &protocolConfigString);
     QJsonObject createVpnConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
-                                       const QJsonObject &containerConfig, const DockerContainer container, ErrorCode errorCode);
+                                       const QJsonObject &containerConfig, const DockerContainer container, ErrorCode &errorCode);
 
     static void updateContainerConfigAfterInstallation(const DockerContainer container, QJsonObject &containerConfig, const QString &stdOut);
 signals:

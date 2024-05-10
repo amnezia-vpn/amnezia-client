@@ -9,7 +9,7 @@ AwgConfigurator::AwgConfigurator(std::shared_ptr<Settings> settings, const QShar
 }
 
 QString AwgConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                                      ErrorCode errorCode)
+                                      ErrorCode &errorCode)
 {
     QString config = WireguardConfigurator::createConfig(credentials, container, containerConfig, errorCode);
 
