@@ -42,6 +42,7 @@ namespace amnezia
         UnknownError = 100,
         InternalError = 101,
         NotImplementedError = 102,
+        AmneziaServiceNotRunning = 103,
 
         // Server errors
         ServerCheckFailed = 200,
