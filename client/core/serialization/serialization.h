@@ -37,7 +37,7 @@ namespace amnezia::serialization
     namespace trojan
     {
         QJsonObject Deserialize(const QString &trojan, QString *alias, QString *errMessage);
-        const QString Serialize(const TrojanServerObject &server, const QString &alias);
+        const QString Serialize(const TrojanObject &server, const QString &alias);
     } // namespace trojan
 
     namespace outbounds
@@ -47,7 +47,7 @@ namespace amnezia::serialization
         QJsonObject GenerateShadowSocksOUT(const QList<ShadowSocksServerObject> &servers);
         QJsonObject GenerateShadowSocksServerOUT(const QString &address, int port, const QString &method, const QString &password);
         QJsonObject GenerateHTTPSOCKSOut(const QString &address, int port, bool useAuth, const QString &username, const QString &password);
-        QJsonObject GenerateTrojanOUT(const QList<TrojanServerObject> &servers);
+        QJsonObject GenerateTrojanOUT(const QList<TrojanObject> &servers);
         QJsonObject GenerateTrojanServerOUT(const QString &address, int port, const QString &password);
         QJsonObject GenerateOutboundEntry(const QString &tag,                //
                                        const QString &protocol,           //

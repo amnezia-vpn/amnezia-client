@@ -97,7 +97,7 @@ QJsonObject GenerateOutboundEntry(const QString &tag, const QString &protocol, c
     return root;
 }
 
-QJsonObject GenerateTrojanOUT(const QList<TrojanServerObject> &_servers)
+QJsonObject GenerateTrojanOUT(const QList<TrojanObject> &_servers)
 {
     QJsonObject root;
     QJsonArray x;
