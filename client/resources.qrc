@@ -11,16 +11,6 @@
         <file>images/tray/default.png</file>
         <file>images/tray/error.png</file>
         <file>images/arrow_left.png</file>
-        <file>fonts/Lato-Black.ttf</file>
-        <file>fonts/Lato-BlackItalic.ttf</file>
-        <file>fonts/Lato-Bold.ttf</file>
-        <file>fonts/Lato-BoldItalic.ttf</file>
-        <file>fonts/Lato-Italic.ttf</file>
-        <file>fonts/Lato-Light.ttf</file>
-        <file>fonts/Lato-LightItalic.ttf</file>
-        <file>fonts/Lato-Regular.ttf</file>
-        <file>fonts/Lato-Thin.ttf</file>
-        <file>fonts/Lato-ThinItalic.ttf</file>
         <file>images/AmneziaVPN.png</file>
         <file>images/share.png</file>
         <file>server_scripts/remove_container.sh</file>
@@ -95,7 +85,6 @@
         <file>server_scripts/check_user_in_sudo.sh</file>
         <file>ui/qml/Controls2/BasicButtonType.qml</file>
         <file>ui/qml/Controls2/TextFieldWithHeaderType.qml</file>
-        <file>fonts/pt-root-ui_vf.ttf</file>
         <file>ui/qml/Controls2/LabelWithButtonType.qml</file>
         <file>images/controls/arrow-right.svg</file>
         <file>images/controls/chevron-right.svg</file>
@@ -198,7 +187,7 @@
         <file>ui/qml/Pages2/PageProtocolOpenVpnSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolShadowSocksSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolCloakSettings.qml</file>
-        <file>ui/qml/Pages2/PageProtocolXraySettings.qml</file>        
+        <file>ui/qml/Pages2/PageProtocolXraySettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolRaw.qml</file>
         <file>ui/qml/Pages2/PageSettingsLogging.qml</file>
         <file>ui/qml/Pages2/PageServiceSftpSettings.qml</file>
@@ -239,5 +228,6 @@
         <file>images/controls/alert-circle.svg</file>
         <file>images/controls/file-check-2.svg</file>
         <file>ui/qml/Controls2/WarningType.qml</file>
+        <file>fonts/NotoSans.ttf</file>
     </qresource>
 </RCC>

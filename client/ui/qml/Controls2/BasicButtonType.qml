@@ -30,6 +30,8 @@ Button {
 
     property var clickedFunc
 
+    property alias buttonTextLabel: buttonText
+
     implicitHeight: 56
 
     hoverEnabled: true
@@ -138,6 +140,8 @@ Button {
             }
 
             ButtonTextType {
+                id: buttonText
+
                 color: textColor
                 text: root.text
                 visible: root.text === "" ? false : true

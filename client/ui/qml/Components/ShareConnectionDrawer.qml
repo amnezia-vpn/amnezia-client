@@ -287,7 +287,7 @@ DrawerType2 {
 
                                     font.pixelSize: 16
                                     font.weight: Font.Medium
-                                    font.family: "PT Root UI VF"
+                                    font.family: "Noto Sans"
 
                                     text: ExportController.config
 

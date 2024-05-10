@@ -84,6 +84,9 @@ PageType {
 
             BasicButtonType {
                 id: splitTunnelingButton
+
+                property bool isItemWidthMoreThanParentWidth: false//splitTunnelingButton.implicitWidth > parent.width
+
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                 Layout.bottomMargin: 34
                 leftPadding: 16
@@ -98,6 +101,10 @@ PageType {
                 textColor: "#878B91"
                 leftImageColor: "transparent"
                 borderWidth: 0
+
+                buttonTextLabel.lineHeight: 20
+                buttonTextLabel.font.pixelSize: 14
+                buttonTextLabel.font.weight: 500
 
                 property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled || AppSplitTunnelingModel.isTunnelingEnabled ||
                                                        (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))

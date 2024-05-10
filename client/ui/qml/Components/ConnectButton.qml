@@ -142,7 +142,7 @@ Button {
     contentItem: Text {
         height: 24
 
-        font.family: "PT Root UI VF"
+        font.family: "Noto Sans"
         font.weight: 700
         font.pixelSize: 20
 
