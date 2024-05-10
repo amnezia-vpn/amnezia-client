@@ -32,6 +32,11 @@ private const val DISCONNECT_REQUEST_CODE = 2
 
 class ServiceNotification(private val context: Context) {
 
+    private val upDownSymbols = when (Build.BRAND) {
+        "Infinix" -> '˅' to '˄'
+        else -> '↓' to '↑'
+    }
+
     private val notificationManager = NotificationManagerCompat.from(context)
 
     private val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
@@ -110,7 +115,7 @@ class ServiceNotification(private val context: Context) {
         if (traffic == TrafficData.ZERO) zeroSpeed
         else formatSpeedString(traffic.rxString, traffic.txString)
 
-    private fun formatSpeedString(rx: String, tx: String) = "↓ $rx  ↑ $tx"
+    private fun formatSpeedString(rx: String, tx: String) = with(upDownSymbols) { "$first $rx  $second $tx" }
 
     private fun getAction(state: ProtocolState): Action? {
         return when (state) {
