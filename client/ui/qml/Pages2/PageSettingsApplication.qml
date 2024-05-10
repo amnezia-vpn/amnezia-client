@@ -74,7 +74,8 @@ PageType {
                     }
                 }
 
-                KeyNavigation.tab: labelWithButtonNotification.rightButton
+                KeyNavigation.tab: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted ?
+                    labelWithButtonNotification.rightButton : labelWithButtonLanguage.rightButton
                 parentFlickable: fl
             }
 
