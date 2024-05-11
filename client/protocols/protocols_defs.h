@@ -83,6 +83,7 @@ namespace amnezia
         constexpr char sftp[] = "sftp";
         constexpr char awg[] = "awg";
         constexpr char xray[] = "xray";
+        constexpr char ssxray[] = "ssxray";
 
         constexpr char configVersion[] = "config_version";
 

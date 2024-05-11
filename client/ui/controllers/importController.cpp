@@ -462,8 +462,13 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, const QStri
     lastConfig[config_key::isThirdPartyConfig] = true;
 
     QJsonObject containers;
-    containers.insert(config_key::container, QJsonValue("amnezia-xray"));
-    containers.insert(config_key::xray, QJsonValue(lastConfig));
+    if (m_configType == ConfigTypes::ShadowSocks) {
+        containers.insert(config_key::ssxray, QJsonValue(lastConfig));
+        containers.insert(config_key::container, QJsonValue("amnezia-ssxray"));
+    } else {
+        containers.insert(config_key::container, QJsonValue("amnezia-xray"));
+        containers.insert(config_key::xray, QJsonValue(lastConfig));
+    }
 
     QJsonArray arr;
     arr.push_back(containers);
