@@ -26,7 +26,9 @@
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
-#include "ui/notificationhandler.h"
+#ifndef Q_OS_ANDROID
+    #include "ui/notificationhandler.h"
+#endif
 #ifdef Q_OS_WINDOWS
     #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
@@ -113,7 +115,9 @@ private:
 
     QSharedPointer<VpnConnection> m_vpnConnection;
     QThread m_vpnConnectionThread;
+#ifndef Q_OS_ANDROID
     QScopedPointer<NotificationHandler> m_notificationHandler;
+#endif
 
     QScopedPointer<ConnectionController> m_connectionController;
     QScopedPointer<PageController> m_pageController;

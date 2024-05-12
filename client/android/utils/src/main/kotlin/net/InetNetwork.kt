@@ -9,7 +9,11 @@ data class InetNetwork(val address: InetAddress, val mask: Int) {
 
     constructor(address: InetAddress) : this(address, address.maxPrefixLength)
 
-    override fun toString(): String = "${address.hostAddress}/$mask"
+    val isIpv4: Boolean = address is Inet4Address
+    val isIpv6: Boolean
+        get() = !isIpv4
+
+    override fun toString(): String = "${address.ip}/$mask"
 
     companion object {
         fun parse(data: String): InetNetwork {
