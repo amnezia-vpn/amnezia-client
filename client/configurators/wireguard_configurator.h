@@ -27,7 +27,7 @@ public:
     };
 
     QString createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                         ErrorCode errorCode);
+                         ErrorCode &errorCode);
 
     QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig, QString &protocolConfigString);
     QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig, QString &protocolConfigString);
@@ -36,7 +36,7 @@ public:
 
 private:
     ConnectionData prepareWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
-                                          const QJsonObject &containerConfig, ErrorCode errorCode);
+                                          const QJsonObject &containerConfig, ErrorCode &errorCode);
 
     bool m_isAwg;
     QString m_serverConfigPath;

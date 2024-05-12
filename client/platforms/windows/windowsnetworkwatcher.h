@@ -17,8 +17,6 @@ class WindowsNetworkWatcher final : public NetworkWatcherImpl {
 
   void initialize() override;
 
-  NetworkWatcherImpl::TransportType getTransportType() override;
-
  private:
   static void wlanCallback(PWLAN_NOTIFICATION_DATA data, PVOID context);
 

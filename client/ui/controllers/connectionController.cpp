@@ -7,9 +7,11 @@
 #endif
 #include <QtConcurrent>
 
+#include "utilities.h"
 #include "core/controllers/apiController.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/errorstrings.h"
+#include "version.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ContainersModel> &containersModel,
@@ -32,6 +34,14 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
+    {
+        emit connectionErrorOccurred(errorString(ErrorCode::AmneziaServiceNotRunning));
+        return;
+    }
+#endif
+
     int serverIndex = m_serversModel->getDefaultServerIndex();
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
 

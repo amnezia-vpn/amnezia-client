@@ -19,9 +19,14 @@ class WindowsCommons final {
 
   // Returns the Interface Index of the VPN Adapter
   static int VPNAdapterIndex();
-
+  // Returns the Interface Index that could Route to dst
+  static int AdapterIndexTo(const QHostAddress& dst);
   // Returns the Path of the Current process
   static QString getCurrentPath();
+
+ private:
+  static QString getTunnelLogFilePath();
+  static QString getProgramFilesPath();
 };
 
 #endif  // WINDOWSCOMMONS_H

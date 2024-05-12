@@ -14,7 +14,7 @@ XrayConfigurator::XrayConfigurator(std::shared_ptr<Settings> settings, const QSh
 }
 
 QString XrayConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                                       ErrorCode errorCode)
+                                       ErrorCode &errorCode)
 {
     QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, container),
                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));

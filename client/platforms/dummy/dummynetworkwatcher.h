@@ -8,15 +8,11 @@
 #include "networkwatcherimpl.h"
 
 class DummyNetworkWatcher final : public NetworkWatcherImpl {
- public:
-  DummyNetworkWatcher(QObject* parent);
-  ~DummyNetworkWatcher();
+public:
+    DummyNetworkWatcher(QObject* parent);
+    ~DummyNetworkWatcher();
 
-  void initialize() override;
-
-  NetworkWatcherImpl::TransportType getTransportType() override {
-    return TransportType_Other;
-  };
+    void initialize() override;
 };
 
 #endif  // DUMMYNETWORKWATCHER_H
