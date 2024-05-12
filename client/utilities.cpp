@@ -76,7 +76,7 @@ QString Utils::usrExecutable(const QString &baseName)
         return ("/usr/bin/" + baseName);
 }
 
-bool Utils::processIsRunning(const QString &fileName)
+bool Utils::processIsRunning(const QString &fileName, const bool fullFlag)
 {
 #ifdef Q_OS_WIN
     QProcess process;
@@ -107,10 +107,14 @@ bool Utils::processIsRunning(const QString &fileName)
 #else
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
-    process.start("pgrep", QStringList({ fileName }));
+    process.start("pgrep", QStringList({ fullFlag ? "-f" : "", fileName }));
     process.waitForFinished();
     if (process.exitStatus() == QProcess::NormalExit) {
-        return (process.readAll().toUInt() > 0);
+        if (fullFlag) {
+            return (process.readLine().toUInt() > 0);
+        } else {
+            return (process.readAll().toUInt() > 0);
+        }
     }
     return false;
 #endif

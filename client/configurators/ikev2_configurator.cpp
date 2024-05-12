@@ -20,7 +20,7 @@ Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, const Q
 }
 
 Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const ServerCredentials &credentials, DockerContainer container,
-                                                                        ErrorCode errorCode)
+                                                                        ErrorCode &errorCode)
 {
     Ikev2Configurator::ConnectionData connData;
     connData.host = credentials.hostName;
@@ -55,7 +55,7 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
 }
 
 QString Ikev2Configurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                                        ErrorCode errorCode)
+                                        ErrorCode &errorCode)
 {
     Q_UNUSED(containerConfig)
 

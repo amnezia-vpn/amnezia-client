@@ -11,6 +11,7 @@ QString errorString(ErrorCode code) {
     case(NoError): errorMessage = QObject::tr("No error"); break;
     case(UnknownError): errorMessage = QObject::tr("Unknown Error"); break;
     case(NotImplementedError): errorMessage = QObject::tr("Function not implemented"); break;
+    case(AmneziaServiceNotRunning): errorMessage = QObject::tr("Background service is not running"); break;
 
     // Server errors
     case(ServerCheckFailed): errorMessage = QObject::tr("Server check failed"); break;
