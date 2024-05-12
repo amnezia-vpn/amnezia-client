@@ -114,7 +114,7 @@ void WindowsRouteMonitor::updateValidInterfaces(int family) {
 void WindowsRouteMonitor::updateExclusionRoute(MIB_IPFORWARD_ROW2* data,
                                                void* ptable) {
   PMIB_IPFORWARD_TABLE2 table = reinterpret_cast<PMIB_IPFORWARD_TABLE2>(ptable);
-  SOCKADDR_INET nexthop = {0};
+  SOCKADDR_INET nexthop = {};
   quint64 bestLuid = 0;
   int bestMatch = -1;
   ULONG bestMetric = ULONG_MAX;

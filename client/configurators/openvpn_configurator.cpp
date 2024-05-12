@@ -31,7 +31,7 @@ OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings, con
 }
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
-                                                                              DockerContainer container, ErrorCode errorCode)
+                                                                              DockerContainer container, ErrorCode &errorCode)
 {
     OpenVpnConfigurator::ConnectionData connData = OpenVpnConfigurator::createCertRequest();
     connData.host = credentials.hostName;
@@ -72,7 +72,7 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
 }
 
 QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                          const QJsonObject &containerConfig, ErrorCode errorCode)
+                                          const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
     QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::openvpn_template, container),
                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));

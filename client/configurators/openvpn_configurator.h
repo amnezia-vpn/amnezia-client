@@ -25,7 +25,7 @@ public:
     };
 
     QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode errorCode);
+                         const QJsonObject &containerConfig, ErrorCode &errorCode);
 
     QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
                                            QString &protocolConfigString);
@@ -36,7 +36,7 @@ public:
 
 private:
     ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
-                                        ErrorCode errorCode);
+                                        ErrorCode &errorCode);
     ErrorCode signCert(DockerContainer container, const ServerCredentials &credentials, QString clientId);
 };
 

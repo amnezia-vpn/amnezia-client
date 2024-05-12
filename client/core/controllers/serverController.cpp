@@ -173,7 +173,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 }
 
 QByteArray ServerController::getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials, const QString &path,
-                                                      ErrorCode errorCode)
+                                                      ErrorCode &errorCode)
 {
 
     errorCode = ErrorCode::NoError;
@@ -618,7 +618,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     return vars;
 }
 
-QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode errorCode)
+QString ServerController::checkSshConnection(const ServerCredentials &credentials, ErrorCode &errorCode)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {

@@ -95,6 +95,11 @@ void MacosRouteMonitor::handleRtmDelete(const struct rt_msghdr* rtm,
       !(rtm->rtm_addrs & RTA_NETMASK) || (addrlist.count() < 3)) {
     return;
   }
+  // Ignore interface-scoped routes, we want to find the default route to the
+  // internet in the global scope.
+  if (rtm->rtm_flags & RTF_IFSCOPE) {
+    return;
+  }
 
   // Check for a default route, which should have a netmask of zero.
   const struct sockaddr* sa =
@@ -154,6 +159,11 @@ void MacosRouteMonitor::handleRtmUpdate(const struct rt_msghdr* rtm,
   // We expect all useful routes to contain a destination, netmask and gateway.
   if (!(rtm->rtm_addrs & RTA_DST) || !(rtm->rtm_addrs & RTA_GATEWAY) ||
       !(rtm->rtm_addrs & RTA_NETMASK) || (addrlist.count() < 3)) {
+    return;
+  }
+  // Ignore interface-scoped routes, we want to find the default route to the
+  // internet in the global scope.
+  if (rtm->rtm_flags & RTF_IFSCOPE) {
     return;
   }
   // Ignore route changes that we caused, or routes on the tunnel interface.

@@ -39,7 +39,7 @@ Logger logger("tunnel.dll");
 
 WindowsTunnelLogger::WindowsTunnelLogger(const QString& filename,
                                          QObject* parent)
-    : QObject(parent), m_logfile(filename, this), m_timer(this) {
+    : QObject(parent), m_timer(this), m_logfile(filename, this) {
   MZ_COUNT_CTOR(WindowsTunnelLogger);
 
   m_startTime = QDateTime::currentMSecsSinceEpoch() * 1000000;
