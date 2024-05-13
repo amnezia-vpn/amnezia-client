@@ -164,7 +164,7 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     case Proto::Any: return TransportProto::Udp;
     case Proto::OpenVpn: return TransportProto::Udp;
     case Proto::Cloak: return TransportProto::Tcp;
-    case Proto::ShadowSocks: return TransportProto::Tcp;
+    case Proto::ShadowSocks: return TransportProto::TcpAndUdp;
     case Proto::WireGuard: return TransportProto::Udp;
     case Proto::Awg: return TransportProto::Udp;
     case Proto::Ikev2: return TransportProto::Udp;

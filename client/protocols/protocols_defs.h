@@ -215,7 +215,8 @@ namespace amnezia
 
         enum TransportProto {
             Udp,
-            Tcp
+            Tcp,
+            TcpAndUdp
         };
         Q_ENUM_NS(TransportProto)
 
