@@ -1,5 +1,6 @@
 #include "errorstrings.h"
 #include "utils/converter.h"
+#include "amnezia_application.h"
 
 using namespace amnezia;
 
@@ -76,7 +77,8 @@ QString errorString(ErrorCode code) {
         errorMessage = QObject::tr("Internal error"); break;
     }
 
-    const auto errorUrl = QStringLiteral("https://docs.amnezia.org/troubleshooting/error-codes/#error-%1-%2").arg(static_cast<int>(code)).arg(utils::enumToString(code).toLower());
+    const auto baseUrl = amnApp->languageModel()->getDocsLocalizedEndpoint();
+    const auto errorUrl = QStringLiteral("%1/troubleshooting/error-codes/#error-%2-%3").arg(baseUrl).arg(static_cast<int>(code)).arg(utils::enumToString(code).toLower());
     return QObject::tr("<a href=\"%1\" style=\"color: #FBB26A;\">ErrorCode: %2</a>.%3").arg(errorUrl).arg(static_cast<int>(code)).arg(errorMessage);
 }
 

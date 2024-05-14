@@ -78,7 +78,9 @@ public:
     QQmlApplicationEngine *qmlEngine() const;
     QNetworkAccessManager *manager() { return m_nam; }
 
-signals:
+    QSharedPointer<LanguageModel> languageModel();
+
+        signals:
     void translationsUpdated();
 
 private:

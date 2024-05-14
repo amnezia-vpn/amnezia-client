@@ -59,6 +59,7 @@ public slots:
     int getCurrentLanguageIndex();
     int getLineHeightAppend();
     QString getCurrentLanguageName();
+    QString getDocsLocalizedEndpoint();
 
 signals:
     void updateTranslations(const QLocale &locale);
