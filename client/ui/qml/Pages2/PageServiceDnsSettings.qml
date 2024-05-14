@@ -103,8 +103,6 @@ PageType {
                     enabled: false
                 }
             }
-
-            DividerType {}
         }
     }
 }

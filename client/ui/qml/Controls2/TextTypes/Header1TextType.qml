@@ -5,10 +5,10 @@ Text {
     lineHeightMode: Text.FixedHeight
 
     color: "#D7D8DB"
-    font.pixelSize: 36
+    font.pixelSize: 34
     font.weight: 700
     font.family: "Noto Sans"
-    font.letterSpacing: -1.08
+    font.letterSpacing: -1.0
 
     wrapMode: Text.WordWrap
 }

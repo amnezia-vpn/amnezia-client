@@ -93,20 +93,11 @@ ListView {
                             PageController.goToPage(PageEnum.PageProtocolRaw)
                             break
                         }
-                        case ContainerEnum.Sftp: {
-                            SftpConfigModel.updateModel(config)
-                            PageController.goToPage(PageEnum.PageServiceSftpSettings)
-                            break
-                        }
-                        case ContainerEnum.TorWebSite: {
-                            PageController.goToPage(PageEnum.PageServiceTorWebsiteSettings)
-                            break
-                        }
                         case ContainerEnum.Dns: {
                             PageController.goToPage(PageEnum.PageServiceDnsSettings)
                             break
                         }
-                        default: { // go to the settings page of the container with multiple protocols
+                        default: {
                             ProtocolsModel.updateModel(config)
                             PageController.goToPage(PageEnum.PageSettingsServerProtocol)
                         }

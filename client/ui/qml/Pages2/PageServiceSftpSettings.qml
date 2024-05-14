@@ -73,7 +73,7 @@ PageType {
 
                 onFocusChanged: {
                     if (focus) {
-                        listview.currentItem.focusItem.forceActiveFocus()
+                        listview.currentItem.listViewFocusItem.forceActiveFocus()
                     }
                 }
 
@@ -81,7 +81,7 @@ PageType {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
-                    property alias focusItem: hostLabel.rightButton
+                    property alias listViewFocusItem: hostLabel.rightButton
 
                     ColumnLayout {
                         id: col
@@ -232,7 +232,7 @@ PageType {
                                 PageController.showBusyIndicator(true)
                                 InstallController.mountSftpDrive(port, password, username)
                                 PageController.showBusyIndicator(false)
-                                }
+                            }
                         }
 
                         ParagraphTextType {
@@ -289,46 +289,10 @@ PageType {
                             text: qsTr("Detailed instructions")
 
                             parentFlickable: fl
-                            KeyNavigation.tab: removeButton
+                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
 //                                Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
-                            }
-                        }
-
-                        BasicButtonType {
-                            id: removeButton
-                            Layout.topMargin: 24
-                            Layout.bottomMargin: 16
-                            Layout.leftMargin: 8
-                            implicitHeight: 32
-
-                            defaultColor: "transparent"
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                            textColor: "#EB5757"
-
-                            parentFlickable: fl
-                            Keys.onTabPressed: lastItemTabClicked()
-
-                            text: qsTr("Remove SFTP and all data stored there")
-
-                            clickedFunc: function() {
-                                var headerText = qsTr("Remove SFTP and all data stored there?")
-                                var yesButtonText = qsTr("Continue")
-                                var noButtonText = qsTr("Cancel")
-
-                                var yesButtonFunction = function() {
-                                    PageController.goToPage(PageEnum.PageDeinstalling)
-                                    InstallController.removeProcessedContainer()
-                                }
-                                var noButtonFunction = function() {
-                                    if (!GC.isMobile()) {
-                                        removeButton.forceActiveFocus()
-                                    }
-                                }
-
-                                showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
                         }
                     }

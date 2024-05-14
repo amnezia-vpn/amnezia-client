@@ -200,7 +200,7 @@ PageType {
                     parent: root
 
                     anchors.fill: parent
-                    expandedHeight: root.height * 0.45
+                    expandedHeight: root.height
                     onClosed: {
                         if (!GC.isMobile()) {
                             clientNameTextField.textField.forceActiveFocus()
@@ -208,12 +208,17 @@ PageType {
                     }
 
                     expandedContent: ColumnLayout {
+                        id: shareFullAccessDrawerContent
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.topMargin: 16
 
                         spacing: 0
+
+                        onImplicitHeightChanged: {
+                            shareFullAccessDrawer.expandedHeight = shareFullAccessDrawerContent.implicitHeight + 32
+                        }
 
                         Connections {
                             target: shareFullAccessDrawer

@@ -85,8 +85,6 @@ PageType {
             BasicButtonType {
                 id: splitTunnelingButton
 
-                property bool isItemWidthMoreThanParentWidth: false//splitTunnelingButton.implicitWidth > parent.width
-
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                 Layout.bottomMargin: 34
                 leftPadding: 16

@@ -18,6 +18,8 @@ import "../Components"
 PageType {
     id: root
 
+    property bool isClearCacheVisible: ServersModel.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ContainersModel.getProcessedContainerIndex())
+
     defaultActiveFocusItem: focusItem
 
     Item {
@@ -102,6 +104,7 @@ PageType {
                             case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                            case ProtocolEnum.Sftp: SftpConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             }
                             PageController.goToPage(protocolPage);
@@ -124,7 +127,7 @@ PageType {
 
             Layout.fillWidth: true
 
-            visible: ServersModel.isProcessedServerHasWriteAccess()
+            visible: root.isClearCacheVisible
             KeyNavigation.tab: removeButton
 
             text: qsTr("Clear %1 profile").arg(ContainersModel.getProcessedContainerName())
@@ -167,7 +170,7 @@ PageType {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            visible: ServersModel.isProcessedServerHasWriteAccess()
+            visible: root.isClearCacheVisible
         }
 
         LabelWithButtonType {
