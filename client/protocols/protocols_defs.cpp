@@ -111,6 +111,7 @@ int ProtocolProps::getPortForInstall(Proto p)
     case WireGuard:
     case ShadowSocks:
     case OpenVpn:
+    case Socks5Proxy:
         return QRandomGenerator::global()->bounded(30000, 50000);
     default:
         return defaultPort(p);

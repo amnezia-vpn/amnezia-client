@@ -176,7 +176,7 @@ PageType {
 
                         parentFlickable: fl
                         eyeButton.KeyNavigation.tab: passwordLabel.rightButton
-                        rightButton.KeyNavigation.tab: removeButton
+                        rightButton.KeyNavigation.tab: changeSettingsButton
 
                         rightImageSource: "qrc:/images/controls/copy.svg"
                         rightImageColor: "#D7D8DB"
@@ -325,41 +325,6 @@ PageType {
                                     changeSettingsDrawer.close()
                                 }
                             }
-                        }
-                    }
-
-                    BasicButtonType {
-                        id: removeButton
-                        Layout.topMargin: 24
-                        Layout.bottomMargin: 16
-                        Layout.leftMargin: 8
-                        implicitHeight: 32
-
-                        defaultColor: "transparent"
-                        hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                        pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                        textColor: "#EB5757"
-
-                        text: qsTr("Remove SOCKS5 proxy server")
-
-                        KeyNavigation.tab: changeSettingsButton
-
-                        clickedFunc: function() {
-                            var headerText = qsTr("All users with whom you shared a server will no longer be able to connect to it.")
-                            var yesButtonText = qsTr("Continue")
-                            var noButtonText = qsTr("Cancel")
-
-                            var yesButtonFunction = function() {
-                                PageController.goToPage(PageEnum.PageDeinstalling)
-                                InstallController.removeProcessedContainer()
-                            }
-                            var noButtonFunction = function() {
-                                if (!GC.isMobile()) {
-                                    removeButton.forceActiveFocus()
-                                }
-                            }
-
-                            showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                         }
                     }
 

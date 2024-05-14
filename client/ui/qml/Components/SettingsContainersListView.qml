@@ -106,11 +106,6 @@ ListView {
                             PageController.goToPage(PageEnum.PageServiceDnsSettings)
                             break
                         }
-                        case ContainerEnum.Socks5Proxy: {
-                            Socks5ProxyConfigModel.updateModel(config)
-                            PageController.goToPage(PageEnum.PageServiceSocksProxySettings)
-                            break
-                        }
                         default: { // go to the settings page of the container with multiple protocols
                             ProtocolsModel.updateModel(config)
                             PageController.goToPage(PageEnum.PageSettingsServerProtocol)
