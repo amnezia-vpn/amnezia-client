@@ -12,7 +12,8 @@ class WireguardConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    WireguardConfigurator(std::shared_ptr<Settings> settings, bool isAwg, QObject *parent = nullptr);
+    WireguardConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, bool isAwg,
+                          QObject *parent = nullptr);
 
     struct ConnectionData
     {
@@ -25,19 +26,17 @@ public:
         QString port;
     };
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode errorCode);
+    QString createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
+                         ErrorCode &errorCode);
 
-    QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                           QString &protocolConfigString);
-    QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                            QString &protocolConfigString);
+    QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig, QString &protocolConfigString);
+    QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig, QString &protocolConfigString);
 
     static ConnectionData genClientKeys();
 
 private:
     ConnectionData prepareWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
-                                          const QJsonObject &containerConfig, ErrorCode errorCode);
+                                          const QJsonObject &containerConfig, ErrorCode &errorCode);
 
     bool m_isAwg;
     QString m_serverConfigPath;

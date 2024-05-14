@@ -11,7 +11,7 @@ class SshConfigurator : ConfiguratorBase
 {
     Q_OBJECT
 public:
-    SshConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    SshConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent = nullptr);
 
     QProcessEnvironment prepareEnv();
     QString convertOpenSShKey(const QString &key);

@@ -25,19 +25,18 @@ public:
     ErrorCode rebootServer(const ServerCredentials &credentials);
     ErrorCode removeAllContainers(const ServerCredentials &credentials);
     ErrorCode removeContainer(const ServerCredentials &credentials, DockerContainer container);
-    ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config,
-                             bool isUpdate = false);
-    ErrorCode updateContainer(const ServerCredentials &credentials, DockerContainer container,
-                              const QJsonObject &oldConfig, QJsonObject &newConfig);
+    ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config, bool isUpdate = false);
+    ErrorCode updateContainer(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &oldConfig,
+                              QJsonObject &newConfig);
 
     ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container,
                                      const QJsonObject &config = QJsonObject());
 
-    ErrorCode uploadTextFileToContainer(
-            DockerContainer container, const ServerCredentials &credentials, const QString &file, const QString &path,
-            libssh::ScpOverwriteMode overwriteMode = libssh::ScpOverwriteMode::ScpOverwriteExisting);
-    QByteArray getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials,
-                                        const QString &path, ErrorCode errorCode);
+    ErrorCode uploadTextFileToContainer(DockerContainer container, const ServerCredentials &credentials, const QString &file,
+                                        const QString &path,
+                                        libssh::ScpOverwriteMode overwriteMode = libssh::ScpOverwriteMode::ScpOverwriteExisting);
+    QByteArray getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials, const QString &path,
+                                        ErrorCode &errorCode);
 
     QString replaceVars(const QString &script, const Vars &vars);
     Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None,
@@ -47,12 +46,11 @@ public:
                         const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut = nullptr,
                         const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr = nullptr);
 
-    ErrorCode
-    runContainerScript(const ServerCredentials &credentials, DockerContainer container, QString script,
-                       const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut = nullptr,
-                       const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr = nullptr);
+    ErrorCode runContainerScript(const ServerCredentials &credentials, DockerContainer container, QString script,
+                                 const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut = nullptr,
+                                 const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr = nullptr);
 
-    QString checkSshConnection(const ServerCredentials &credentials, ErrorCode errorCode);
+    QString checkSshConnection(const ServerCredentials &credentials, ErrorCode &errorCode);
 
     void cancelInstallation();
 
@@ -61,18 +59,14 @@ public:
 
 private:
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
-    ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container,
-                                const QJsonObject &config = QJsonObject());
+    ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
     ErrorCode buildContainerWorker(const ServerCredentials &credentials, DockerContainer container,
                                    const QJsonObject &config = QJsonObject());
     ErrorCode runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
-    ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container,
-                                       QJsonObject &config);
+    ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config);
 
-    ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container,
-                               const QJsonObject &config);
-    bool isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig,
-                                      const QJsonObject &newConfig);
+    ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config);
+    bool isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
     ErrorCode isUserInSudo(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, DockerContainer container);
 

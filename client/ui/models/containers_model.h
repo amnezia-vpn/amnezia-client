@@ -49,6 +49,9 @@ public slots:
 
     QJsonObject getContainerConfig(const int containerIndex);
 
+    bool isSupportedByCurrentPlatform(const int containerIndex);
+    bool isServiceContainer(const int containerIndex);
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 

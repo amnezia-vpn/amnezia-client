@@ -37,6 +37,9 @@ QVariant InstalledAppsModel::data(const QModelIndex &index, int role) const
     case PackageNameRole: {
         return m_installedApps.at(index.row()).toObject().value("package");
     }
+    case IsAppSelectedRole: {
+        return m_selectedAppIndexes.contains(index.row());
+    }
     }
 
     return QVariant();
@@ -64,6 +67,7 @@ QVector<QPair<QString, QString>> InstalledAppsModel::getSelectedAppsInfo()
         appsInfo.push_back({ appName, packageName });
     }
 
+    m_selectedAppIndexes.clear();
     return appsInfo;
 }
 
@@ -92,5 +96,6 @@ QHash<int, QByteArray> InstalledAppsModel::roleNames() const
     roles[AppNameRole] = "appName";
     roles[AppIconRole] = "appIcon";
     roles[PackageNameRole] = "packageName";
+    roles[IsAppSelectedRole] = "isAppSelected";
     return roles;
 }

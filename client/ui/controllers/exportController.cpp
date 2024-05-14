@@ -95,10 +95,11 @@ void ExportController::generateConnectionConfig(const QString &clientName)
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
-    VpnConfigurationsController vpnConfigurationController(m_settings);
+    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
     ErrorCode errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig);
 
-    errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig, clientName);
+    errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig, clientName, serverController);
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorString(errorCode));
         return;
@@ -138,10 +139,10 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));
 
-    VpnConfigurationsController vpnConfigurationController(m_settings);
+    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
 
     QString protocolConfigString;
-
     ErrorCode errorCode = vpnConfigurationController.createProtocolConfigString(isApiConfig, dns, credentials, container, containerConfig,
                                                                                 protocol, protocolConfigString);
     if (errorCode != ErrorCode::NoError) {
@@ -152,7 +153,7 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
 
     if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg) {
         auto clientId = jsonNativeConfig.value(config_key::clientId).toString();
-        errorCode = m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
+        errorCode = m_clientManagementModel->appendClient(clientId, clientName, container, credentials, serverController);
     }
     return errorCode;
 }
@@ -316,7 +317,8 @@ void ExportController::exportConfig(const QString &fileName)
 
 void ExportController::updateClientManagementModel(const DockerContainer container, ServerCredentials credentials)
 {
-    ErrorCode errorCode = m_clientManagementModel->updateModel(container, credentials);
+    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+    ErrorCode errorCode = m_clientManagementModel->updateModel(container, credentials, serverController);
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorString(errorCode));
     }
@@ -324,7 +326,9 @@ void ExportController::updateClientManagementModel(const DockerContainer contain
 
 void ExportController::revokeConfig(const int row, const DockerContainer container, ServerCredentials credentials)
 {
-    ErrorCode errorCode = m_clientManagementModel->revokeClient(row, container, credentials, m_serversModel->getProcessedServerIndex());
+    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+    ErrorCode errorCode =
+            m_clientManagementModel->revokeClient(row, container, credentials, m_serversModel->getProcessedServerIndex(), serverController);
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorString(errorCode));
     }
@@ -332,7 +336,8 @@ void ExportController::revokeConfig(const int row, const DockerContainer contain
 
 void ExportController::renameClient(const int row, const QString &clientName, const DockerContainer container, ServerCredentials credentials)
 {
-    ErrorCode errorCode = m_clientManagementModel->renameClient(row, clientName, container, credentials);
+    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+    ErrorCode errorCode = m_clientManagementModel->renameClient(row, clientName, container, credentials, serverController);
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorString(errorCode));
     }

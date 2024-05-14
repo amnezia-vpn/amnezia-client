@@ -17,11 +17,55 @@ ListView {
     property var rootWidth
     property var selectedText
 
+    property bool a: true
+
     width: rootWidth
     height: menuContent.contentItem.height
 
     clip: true
     interactive: false
+
+    property FlickableType parentFlickable
+    property var lastItemTabClicked
+
+    property int currentFocusIndex: 0
+
+    activeFocusOnTab: true
+    onActiveFocusChanged: {
+        if (activeFocus) {
+            this.currentFocusIndex = 0
+            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
+        }
+    }
+
+    Keys.onTabPressed: {
+        if (currentFocusIndex < this.count - 1) {
+            currentFocusIndex += 1
+            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
+        } else {
+            currentFocusIndex = 0
+            if (lastItemTabClicked && typeof lastItemTabClicked === "function") {
+                lastItemTabClicked()
+            }
+        }
+    }
+
+    onVisibleChanged: {
+         if (visible) {
+             currentFocusIndex = 0
+             focusItem.forceActiveFocus()
+         }
+     }
+
+    Item {
+        id: focusItem
+    }
+
+    onCurrentFocusIndexChanged: {
+        if (parentFlickable) {
+            parentFlickable.ensureVisible(this.itemAtIndex(currentFocusIndex))
+        }
+    }
 
     ButtonGroup {
         id: containersRadioButtonGroup
@@ -30,6 +74,12 @@ ListView {
     delegate: Item {
         implicitWidth: rootWidth
         implicitHeight: content.implicitHeight
+
+        onActiveFocusChanged: {
+            if (activeFocus) {
+                containerRadioButton.forceActiveFocus()
+            }
+        }
 
         ColumnLayout {
             id: content
@@ -51,7 +101,7 @@ ListView {
                 imageSource: "qrc:/images/controls/download.svg"
                 showImage: !isInstalled
 
-                checkable: isInstalled && !ConnectionController.isConnected && isSupported
+                checkable: isInstalled && !ConnectionController.isConnected
                 checked: proxyDefaultServerContainersModel.mapToSource(index) === ServersModel.getDefaultServerData("defaultContainer")
 
                 onClicked: {
@@ -64,11 +114,6 @@ ListView {
                         containersDropDown.close()
                         ServersModel.setDefaultContainer(ServersModel.defaultIndex, proxyDefaultServerContainersModel.mapToSource(index))
                     } else {
-                        if (!isSupported && isInstalled) {
-                            PageController.showErrorMessage(qsTr("The selected protocol is not supported on the current platform"))
-                            return
-                        }
-
                         ContainersModel.setProcessedContainerIndex(proxyDefaultServerContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
@@ -80,6 +125,19 @@ ListView {
                     anchors.fill: containerRadioButton
                     cursorShape: Qt.PointingHandCursor
                     enabled: false
+                }
+
+                Keys.onEnterPressed: {
+                    if (checkable) {
+                        checked = true
+                    }
+                    containerRadioButton.clicked()
+                }
+                Keys.onReturnPressed: {
+                    if (checkable) {
+                        checked = true
+                    }
+                    containerRadioButton.clicked()
                 }
             }
 

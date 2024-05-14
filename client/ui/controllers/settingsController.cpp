@@ -18,16 +18,21 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
                                        const QSharedPointer<ContainersModel> &containersModel,
                                        const QSharedPointer<LanguageModel> &languageModel,
                                        const QSharedPointer<SitesModel> &sitesModel,
+                                       const QSharedPointer<AppSplitTunnelingModel> &appSplitTunnelingModel,
                                        const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_languageModel(languageModel),
       m_sitesModel(sitesModel),
+      m_appSplitTunnelingModel(appSplitTunnelingModel),
       m_settings(settings)
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
     checkIfNeedDisableLogs();
+#ifdef Q_OS_ANDROID
+    connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this, &SettingsController::onNotificationStateChanged);
+#endif
 }
 
 void SettingsController::toggleAmneziaDns(bool enable)
@@ -75,7 +80,8 @@ void SettingsController::toggleLogging(bool enable)
     AmneziaVPN::toggleLogging(enable);
 #endif
     if (enable == true) {
-        checkIfNeedDisableLogs();
+        qInfo().noquote() << QString("Logging has enabled on %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
+        qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
     }
     emit loggingStateChanged();
 }
@@ -144,7 +150,12 @@ void SettingsController::clearSettings()
     m_serversModel->resetModel();
     m_languageModel->changeLanguage(
             static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
-    m_sitesModel->setRouteMode(Settings::RouteMode::VpnAllSites);
+
+    m_sitesModel->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
+    m_sitesModel->toggleSplitTunneling(false);
+
+    m_appSplitTunnelingModel->setRouteMode(Settings::AppsRouteMode::VpnAllExceptApps);
+    m_appSplitTunnelingModel->toggleSplitTunneling(false);
 
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
@@ -206,10 +217,38 @@ bool SettingsController::isCameraPresent()
 
 void SettingsController::checkIfNeedDisableLogs()
 {
-    m_loggingDisableDate = m_settings->getLogEnableDate().addDays(14);
-    if (m_loggingDisableDate <= QDateTime::currentDateTime()) {
-        toggleLogging(false);
-        clearLogs();
-        emit loggingDisableByWatcher();
+    if (m_settings->isSaveLogs()) {
+        m_loggingDisableDate = m_settings->getLogEnableDate().addDays(14);
+        if (m_loggingDisableDate <= QDateTime::currentDateTime()) {
+            toggleLogging(false);
+            clearLogs();
+            emit loggingDisableByWatcher();
+        }
     }
+}
+
+bool SettingsController::isKillSwitchEnabled()
+{
+    return m_settings->isKillSwitchEnabled();
+}
+
+void SettingsController::toggleKillSwitch(bool enable)
+{
+    m_settings->setKillSwitchEnabled(enable);
+}
+
+bool SettingsController::isNotificationPermissionGranted()
+{
+#ifdef Q_OS_ANDROID
+    return AndroidController::instance()->isNotificationPermissionGranted();
+#else
+    return true;
+#endif
+}
+
+void SettingsController::requestNotificationPermission()
+{
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->requestNotificationPermission();
+#endif
 }

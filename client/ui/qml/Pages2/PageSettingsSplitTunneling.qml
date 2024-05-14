@@ -24,9 +24,12 @@ PageType {
     
     defaultActiveFocusItem: searchField.textField
 
-    property bool pageEnabled: {
-        return !ConnectionController.isConnected && !isServerFromApi
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
     }
+
+    property bool pageEnabled
 
     Component.onCompleted: {
         if (ConnectionController.isConnected) {
@@ -94,6 +97,8 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: switcher
         }
 
         RowLayout {
@@ -114,11 +119,17 @@ PageType {
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
 
-                checked: SitesModel.isTunnelingEnabled
-                onToggled: {                    
-                    SitesModel.toggleSplitTunneling(checked)
+                function onToggledFunc() {
+                    SitesModel.toggleSplitTunneling(this.checked)
                     selector.text = root.routeModesModel[getRouteModesModelIndex()].name
                 }
+
+                checked: SitesModel.isTunnelingEnabled
+                onToggled: { onToggledFunc() }
+                Keys.onEnterPressed: { onToggledFunc() }
+                Keys.onReturnPressed: { onToggledFunc() }
+
+                KeyNavigation.tab: selector
             }
         }
 
@@ -167,10 +178,17 @@ PageType {
                     }
                 }
             }
+
+            KeyNavigation.tab: {
+                return sites.count > 0 ?
+                            sites :
+                            searchField.textField
+            }
         }
     }
 
     FlickableType {
+        id: fl
         anchors.top: header.bottom
         anchors.topMargin: 16
         contentHeight: col.implicitHeight + addSiteButton.implicitHeight + addSiteButton.anchors.bottomMargin + addSiteButton.anchors.topMargin
@@ -210,9 +228,28 @@ PageType {
                 clip: true
                 interactive: false
 
+                activeFocusOnTab: true
+                focus: true
+                Keys.onTabPressed: {
+                    if (currentIndex < this.count - 1) {
+                        this.incrementCurrentIndex()
+                    } else {
+                        currentIndex = 0
+                        searchField.textField.forceActiveFocus()
+                    }
+
+                    fl.ensureVisible(currentItem)
+                }
+
                 delegate: Item {
                     implicitWidth: sites.width
                     implicitHeight: delegateContent.implicitHeight
+
+                    onActiveFocusChanged: {
+                        if (activeFocus) {
+                            site.rightButton.forceActiveFocus()
+                        }
+                    }
 
                     ColumnLayout {
                         id: delegateContent
@@ -222,6 +259,7 @@ PageType {
                         anchors.right: parent.right
 
                         LabelWithButtonType {
+                            id: site
                             Layout.fillWidth: true
 
                             text: url
@@ -236,8 +274,14 @@ PageType {
 
                                 var yesButtonFunction = function() {
                                     SitesController.removeSite(proxySitesModel.mapToSource(index))
+                                    if (!GC.isMobile()) {
+                                        site.rightButton.forceActiveFocus()
+                                    }
                                 }
                                 var noButtonFunction = function() {
+                                    if (!GC.isMobile()) {
+                                        site.rightButton.forceActiveFocus()
+                                    }
                                 }
 
                                 showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -248,6 +292,7 @@ PageType {
                     }
                 }
             }
+
         }
     }
 
@@ -275,9 +320,11 @@ PageType {
             id: searchField
 
             Layout.fillWidth: true
+            rightButtonClickedOnEnter: true
 
             textFieldPlaceholderText: qsTr("website or IP")
             buttonImageSource: "qrc:/images/controls/plus.svg"
+            KeyNavigation.tab: GC.isMobile() ? focusItem : addSiteButtonImage
 
             clickedFunc: function() {
                 PageController.showBusyIndicator(true)
@@ -288,6 +335,7 @@ PageType {
         }
 
         ImageButtonType {
+            id: addSiteButtonImage
             implicitWidth: 56
             implicitHeight: 56
 
@@ -297,6 +345,11 @@ PageType {
             onClicked: function () {
                 moreActionsDrawer.open()
             }
+
+            Keys.onReturnPressed: addSiteButtonImage.clicked()
+            Keys.onEnterPressed: addSiteButtonImage.clicked()
+
+            Keys.onTabPressed: lastItemTabClicked(focusItem)
         }
     }
 
@@ -306,12 +359,37 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.4375
 
+        onClosed: {
+            if (root.defaultActiveFocusItem && !GC.isMobile()) {
+                root.defaultActiveFocusItem.forceActiveFocus()
+            }
+        }
+
         expandedContent: ColumnLayout {
             id: moreActionsDrawerContent
 
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+
+            Connections {
+                target: moreActionsDrawer
+
+                function onOpened() {
+                    focusItem1.forceActiveFocus()
+                }
+
+                function onActiveFocusChanged() {
+                    if (!GC.isMobile()) {
+                        focusItem1.forceActiveFocus()
+                    }
+                }
+            }
+
+            Item {
+                id: focusItem1
+                KeyNavigation.tab: importSitesButton.rightButton
+            }
 
             Header2Type {
                 Layout.fillWidth: true
@@ -321,6 +399,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: importSitesButton
                 Layout.fillWidth: true
 
                 text: qsTr("Import")
@@ -329,13 +408,18 @@ PageType {
                 clickedFunction: function() {
                     importSitesDrawer.open()
                 }
+
+                KeyNavigation.tab: exportSitesButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: exportSitesButton
                 Layout.fillWidth: true
                 text: qsTr("Save site list")
+
+                KeyNavigation.tab: focusItem1
 
                 clickedFunction: function() {
                     var fileName = ""
@@ -367,8 +451,27 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.4375
 
+        onClosed: {
+            if (!GC.isMobile()) {
+                moreActionsDrawer.forceActiveFocus()
+            }
+        }
+
         expandedContent: Item {
             implicitHeight: importSitesDrawer.expandedHeight
+
+            Connections {
+                target: importSitesDrawer
+                enabled: !GC.isMobile()
+                function onOpened() {
+                    focusItem2.forceActiveFocus()
+                }
+            }
+
+            Item {
+                id: focusItem2
+                KeyNavigation.tab: importSitesDrawerBackButton
+            }
 
             BackButtonType {
                 id: importSitesDrawerBackButton
@@ -377,6 +480,8 @@ PageType {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.topMargin: 16
+
+                KeyNavigation.tab: importSitesButton2
 
                 backButtonFunction: function() {
                     importSitesDrawer.close()
@@ -406,9 +511,11 @@ PageType {
                     }
 
                     LabelWithButtonType {
+                        id: importSitesButton2
                         Layout.fillWidth: true
 
                         text: qsTr("Replace site list")
+                        KeyNavigation.tab: importSitesButton3
 
                         clickedFunction: function() {
                             var fileName = SystemController.getFileName(qsTr("Open sites file"),
@@ -422,8 +529,10 @@ PageType {
                     DividerType {}
 
                     LabelWithButtonType {
+                        id: importSitesButton3
                         Layout.fillWidth: true
                         text: qsTr("Add imported sites to existing ones")
+                        KeyNavigation.tab: focusItem2
 
                         clickedFunction: function() {
                             var fileName = SystemController.getFileName(qsTr("Open sites file"),

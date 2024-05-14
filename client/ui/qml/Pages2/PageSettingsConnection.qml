@@ -11,7 +11,14 @@ import "../Config"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
 
     BackButtonType {
         id: backButton
@@ -20,6 +27,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: amneziaDnsSwitch
     }
 
     FlickableType {
@@ -44,6 +53,7 @@ PageType {
             }
 
             SwitcherType {
+                id: amneziaDnsSwitch
                 Layout.fillWidth: true
                 Layout.margins: 16
 
@@ -56,11 +66,14 @@ PageType {
                         SettingsController.toggleAmneziaDns(checked)
                     }
                 }
+
+                KeyNavigation.tab: dnsServersButton.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: dnsServersButton
                 Layout.fillWidth: true
 
                 text: qsTr("DNS servers")
@@ -70,11 +83,14 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsDns)
                 }
+
+                KeyNavigation.tab: splitTunnelingButton.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
+                id: splitTunnelingButton
                 Layout.fillWidth: true
 
                 text: qsTr("Site-based split tunneling")
@@ -84,6 +100,16 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
                 }
+
+                Keys.onTabPressed: {
+                    if (splitTunnelingButton2.visible) {
+                        return splitTunnelingButton2.rightButton.forceActiveFocus()
+                    } else if (killSwitchSwitcher.visible) {
+                        return killSwitchSwitcher.forceActiveFocus()
+                    } else {
+                        lastItemTabClicked()
+                    }
+                }
             }
 
             DividerType {
@@ -91,6 +117,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: splitTunnelingButton2
                 visible: root.isAppSplitTinnelingEnabled
 
                 Layout.fillWidth: true
@@ -102,10 +129,48 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
                 }
+
+                Keys.onTabPressed: {
+                    if (killSwitchSwitcher.visible) {
+                        return killSwitchSwitcher.forceActiveFocus()
+                    } else {
+                        lastItemTabClicked()
+                    }
+                }
             }
 
             DividerType {
                 visible: root.isAppSplitTinnelingEnabled
+            }
+
+            SwitcherType {
+                id: killSwitchSwitcher
+                visible: !GC.isMobile()
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("KillSwitch")
+                descriptionText: qsTr("Disables your internet if your encrypted VPN connection drops out for any reason.")
+
+                checked: SettingsController.isKillSwitchEnabled()
+                checkable: !ConnectionController.isConnected
+                onCheckedChanged: {
+                    if (checked !== SettingsController.isKillSwitchEnabled()) {
+                        SettingsController.toggleKillSwitch(checked)
+                    }
+                }
+                onClicked: {
+                    if (!checkable) {
+                        PageController.showNotificationMessage(qsTr("Cannot change killSwitch settings during active connection"))
+                    }
+                }
+
+                Keys.onTabPressed: lastItemTabClicked()
+            }
+
+            DividerType {
+                visible: GC.isDesktop()
             }
         }
     }

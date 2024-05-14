@@ -9,18 +9,18 @@
 #include <QUuid>
 
 #include "containers/containers_defs.h"
+#include "core/controllers/serverController.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
-#include "core/controllers/serverController.h"
 #include "utilities.h"
 
-Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, QObject *parent)
-    : ConfiguratorBase(settings, parent)
+Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
+    : ConfiguratorBase(settings, serverController, parent)
 {
 }
 
-Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const ServerCredentials &credentials,
-                                                                        DockerContainer container, ErrorCode errorCode)
+Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const ServerCredentials &credentials, DockerContainer container,
+                                                                        ErrorCode &errorCode)
 {
     Ikev2Configurator::ConnectionData connData;
     connData.host = credentials.hostName;
@@ -39,18 +39,14 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
                                        "--extKeyUsage serverAuth,clientAuth -8 \"%1\"")
                                        .arg(connData.clientId);
 
-    ServerController serverController(m_settings);
-    errorCode = serverController.runContainerScript(credentials, container, scriptCreateCert);
+    errorCode = m_serverController->runContainerScript(credentials, container, scriptCreateCert);
 
-    QString scriptExportCert = QString("pk12util -W \"%1\" -d sql:/etc/ipsec.d -n \"%2\" -o \"%3\"")
-                                       .arg(connData.password)
-                                       .arg(connData.clientId)
-                                       .arg(certFileName);
-    errorCode = serverController.runContainerScript(credentials, container, scriptExportCert);
+    QString scriptExportCert =
+            QString("pk12util -W \"%1\" -d sql:/etc/ipsec.d -n \"%2\" -o \"%3\"").arg(connData.password).arg(connData.clientId).arg(certFileName);
+    errorCode = m_serverController->runContainerScript(credentials, container, scriptExportCert);
 
-    connData.clientCert = serverController.getTextFileFromContainer(container, credentials, certFileName, errorCode);
-    connData.caCert =
-            serverController.getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", errorCode);
+    connData.clientCert = m_serverController->getTextFileFromContainer(container, credentials, certFileName, errorCode);
+    connData.caCert = m_serverController->getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", errorCode);
 
     qDebug() << "Ikev2Configurator::ConnectionData client cert size:" << connData.clientCert.size();
     qDebug() << "Ikev2Configurator::ConnectionData ca cert size:" << connData.caCert.size();
@@ -58,8 +54,8 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
     return connData;
 }
 
-QString Ikev2Configurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                        const QJsonObject &containerConfig, ErrorCode errorCode)
+QString Ikev2Configurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
+                                        ErrorCode &errorCode)
 {
     Q_UNUSED(containerConfig)
 

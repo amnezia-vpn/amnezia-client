@@ -589,8 +589,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="384"/>
-        <source>Remove OpenVpn from server?</source>
-        <translation>Удалить OpenVpn с сервера?</translation>
+        <source>Remove OpenVPN from server?</source>
+        <translation>Удалить OpenVPN с сервера?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="385"/>
@@ -1088,7 +1088,17 @@ Already installed containers were found on the server. All installed containers 
         <translation>Язык</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="218"/>
+        <source>Enable notifications</source>
+        <translation>Включить уведомления</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="219"/>
+        <source>Enable notifications to show the VPN state in the status bar</source>
+        <translation>Включить уведомления для отображения статуса VPN в строке состояния</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="238"/>
         <source>Logging</source>
         <translation>Логирование</translation>
     </message>
@@ -1725,6 +1735,14 @@ Already installed containers were found on the server. All installed containers 
     </message>
 </context>
 <context>
+    <name>PageSettingsAppSplitTunneling</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="26"/>
+        <source>Cannot change split tunneling settings during active connection</source>
+        <translation>Невозможно изменить настройки раздельного туннелирования при включенном VPN</translation>
+    </message>
+</context>
+<context>
     <name>PageSetupWizardConfigSource</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="50"/>
@@ -2087,7 +2105,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <name>PageShare</name>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="116"/>
-        <source>OpenVpn native format</source>
+        <source>OpenVPN native format</source>
         <translation>OpenVPN нативный формат</translation>
     </message>
     <message>
@@ -2876,7 +2894,23 @@ If there is a extreme level of Internet censorship in your region, we advise you
 * Not recognised by DPI analysis systems
 * Works over TCP network protocol, 443 port.
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Это связка протокола OpenVPN и плагина Cloak, разработанная специально для защиты от блокировки.
+
+OpenVPN обеспечивает безопасное VPN-соединение, шифруя весь интернет-трафик между клиентом и сервером.
+
+Cloak защищает OpenVPN от обнаружения и блокировки.
+
+Cloak изменяет метаданные пакетов таким образом, что полностью маскирует VPN-трафик под обычный веб-трафик, а также защищает VPN от обнаружения с помощью Active Probing. Это делает его очень защищенным от обнаружения
+
+Сразу после получения первого пакета данных Cloak устанавливает подлинность входящего соединения. Если аутентификация не проходит, плагин маскирует сервер под фальшивый сайт, и ваш VPN становится невидимым для систем анализа.
+
+Если в вашем регионе наблюдается жесткая интернет-цензура, мы советуем вам уже при первом подключении использовать только OpenVPN через Cloak.
+
+* Доступен в AmneziaVPN на всех платформах
+* Высокое энергопотребление на мобильных устройствах
+* Гибкие настройки
+* Не распознается системами DPI-анализа
+* Работает по сетевому протоколу TCP, порт 443.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="174"/>
@@ -2889,7 +2923,15 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
 * Works over UDP network protocol.</source>
-        <translation type="unfinished"></translation>
+        <translation>Относительно новый и популярный VPN-протокол с простой архитектурой.
+WireGuard обеспечивает стабильное VPN-соединение и высокую производительность на всех устройствах. Он использует строго заданные настройки шифрования. WireGuard по сравнению с OpenVPN имеет меньшую задержку и лучшую пропускную способность при передаче данных.
+WireGuard очень уязвим для блокировки из-за характерных сигнатур пакетов. В отличие от некоторых других VPN-протоколов, использующих методы обфускации, последовательные сигнатуры пакетов WireGuard легче идентифицируются и, следовательно, могут блокироваться современными Deep Packet Inspection (DPI) системами и другими инструментами для сетевого мониторинга.
+
+* Доступен в AmneziaVPN на всех платформах
+* Низкое энергопотребление
+* Минимальная конфигурация
+* Легко распознается системами DPI-анализа, поддается блокировке
+* Работает по сетевому протоколу UDP</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="203"/>
@@ -2950,16 +2992,21 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="115"/>
+        <source>XRay with REALITY - Suitable for countries with the highest level of internet censorship. Traffic masking as web traffic at the TLS level, and protection against detection by active probing methods.</source>
+        <translation>XRay с REALITY - подойдет для стран с самым высоким уровнем цензуры в Интернете. Маскировка трафика под веб-трафик на уровне TLS и защита от обнаружения активными методами прослушивания.</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="121"/>
         <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
         <translation>IKEv2 Современный стабильный протокол, немного быстрее других восстанавливает соединение после потери сигнала. Имеет нативную поддержку последних версиий Android и iOS.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="118"/>
+        <location filename="../containers/containers_defs.cpp" line="124"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
         <translation>Разверните сайт на WordPress в сети Tor в два клика.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="120"/>
+        <location filename="../containers/containers_defs.cpp" line="126"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
         <translation>Замените DNS-сервер на Amnezia DNS. Это повысит уровень конфиденциальности.</translation>
     </message>
@@ -2998,6 +3045,17 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * Настраиваемый протокол шифрования
 * Обнаруживается некоторыми DPI-системами
 * Работает по сетевому протоколу TCP.</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="203"/>
+        <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
+    It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data.
+    This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations.
+    Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
+        <translation>Протокол REALITY, новаторская разработка создателей XRay, специально разработан для противодействия самым строгим мерам интернет-цензуры благодаря новому подходу к обходу.
+    Он уникальным образом идентифицирует цензоров на этапе TLS рукопожатия, беспрепятственно работая в качестве прокси для реальных клиентов и перенаправляя цензоров на сайты, такие как google.com, тем самым представляя подлинный TLS сертификат и данные.
+    Эта передовая способность отличает REALITY от аналогичных технологий благодаря способности маскировать веб-трафик так, как будто он поступает со случайных, легитимных сайтов, без необходимости специальной настройки.
+    В отличие от более старых протоколов, таких как VMess, VLESS и XTLS-Vision, технология распознавания REALITY &quot;друг или враг&quot; на этапе рукопожатия TLS повышает надежность и обходит обнаружение сложными системами DPI, которые используют методы активного прослушивания. Это делает REALITY эффективным решением для поддержания свободы интернета в странах с жесткой цензурой.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="217"/>
@@ -3395,8 +3453,8 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="313"/>
-        <source>Medium or High</source>
-        <translation>Средний или Высокий</translation>
+        <source>High</source>
+        <translation>Высокий</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="314"/>

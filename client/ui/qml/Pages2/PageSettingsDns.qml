@@ -15,6 +15,11 @@ PageType {
 
     defaultActiveFocusItem: primaryDns.textField
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -22,6 +27,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: root.defaultActiveFocusItem
     }
 
     FlickableType {
@@ -87,10 +94,11 @@ PageType {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
 
-                KeyNavigation.tab: saveButton
+                KeyNavigation.tab: restoreDefaultButton
             }
 
             BasicButtonType {
+                id: restoreDefaultButton
                 Layout.fillWidth: true
 
                 defaultColor: "transparent"
@@ -113,12 +121,21 @@ PageType {
                         SettingsController.secondaryDns = "1.0.0.1"
                         secondaryDns.textFieldText = SettingsController.secondaryDns
                         PageController.showNotificationMessage(qsTr("Settings have been reset"))
+
+                        if (!GC.isMobile()) {
+                            defaultActiveFocusItem.forceActiveFocus()
+                        }
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            defaultActiveFocusItem.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
+
+                KeyNavigation.tab: saveButton
             }
 
             BasicButtonType {
@@ -137,6 +154,8 @@ PageType {
                     }
                     PageController.showNotificationMessage(qsTr("Settings saved"))
                 }
+
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
             }
         }
     }

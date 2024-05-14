@@ -121,6 +121,9 @@ DrawerType2 {
                     text: qsTr("Copy")
                     imageSource: "qrc:/images/controls/copy.svg"
 
+                    Keys.onReturnPressed: { copyConfigTextButton.clicked() }
+                    Keys.onEnterPressed: { copyConfigTextButton.clicked() }
+
                     KeyNavigation.tab: copyNativeConfigStringButton.visible ? copyNativeConfigStringButton : showSettingsButton
                 }
 
@@ -174,10 +177,29 @@ DrawerType2 {
                     anchors.fill: parent
                     expandedHeight: parent.height * 0.9
 
+                    onClosed: {
+                        if (!GC.isMobile()) {
+                            header.forceActiveFocus()
+                        }
+                    }
+
                     expandedContent: Item {
                         id: configContentContainer
 
                         implicitHeight: configContentDrawer.expandedHeight
+
+                        Connections {
+                            target: configContentDrawer
+                            enabled: !GC.isMobile()
+                            function onOpened() {
+                                focusItem.forceActiveFocus()
+                            }
+                        }
+
+                        Item {
+                            id: focusItem
+                            KeyNavigation.tab: backButton
+                        }
 
                         Connections {
                             target: copyNativeConfigStringButton
@@ -196,6 +218,7 @@ DrawerType2 {
                                 configText.copy()
                                 configText.select(0, 0)
                                 PageController.showNotificationMessage(qsTr("Copied"))
+                                header.forceActiveFocus()
                             }
                         }
 
@@ -207,9 +230,9 @@ DrawerType2 {
                             anchors.right: parent.right
                             anchors.topMargin: 16
 
-                            backButtonFunction: function() {
-                                configContentDrawer.close()
-                            }
+                            backButtonFunction: function() { configContentDrawer.close() }
+
+                            KeyNavigation.tab: focusItem
                         }
 
                         FlickableType {
@@ -256,6 +279,7 @@ DrawerType2 {
                                     height: 24
 
                                     readOnly: true
+                                    activeFocusOnTab: false
 
                                     color: "#D7D8DB"
                                     selectionColor:  "#633303"
