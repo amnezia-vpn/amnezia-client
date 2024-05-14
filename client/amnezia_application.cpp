@@ -291,6 +291,11 @@ bool AmneziaApplication::parseCommands()
     return true;
 }
 
+QSharedPointer<LanguageModel> AmneziaApplication::languageModel()
+{
+    return m_languageModel;
+}
+
 QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
 {
     return m_engine;

@@ -90,6 +90,21 @@ int LanguageModel::getCurrentLanguageIndex()
     }
 }
 
+QString LanguageModel::getDocsLocalizedEndpoint()
+{
+    QString baseUrl = "https://docs.amnezia.org";
+    auto locale = m_settings->getAppLanguage();
+    switch (locale.language()) {
+    case QLocale::Russian:
+        baseUrl += "/ru";
+        break;
+    default:
+        break;
+    }
+
+    return baseUrl;
+}
+
 int LanguageModel::getLineHeightAppend()
 {
     int langIndex = getCurrentLanguageIndex();
