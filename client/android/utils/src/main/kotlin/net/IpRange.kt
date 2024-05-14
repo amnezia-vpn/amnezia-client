@@ -2,13 +2,23 @@ package org.amnezia.vpn.util.net
 
 import java.net.InetAddress
 
-class IpRange(private val start: IpAddress, private val end: IpAddress) : Comparable<IpRange> {
+class IpRange internal constructor(
+    internal val start: IpAddress,
+    internal val end: IpAddress
+) : Comparable<IpRange> {
 
     init {
-        if (start > end) throw IllegalArgumentException("Start IP: $start is greater then end IP: $end")
+        if (start.size != end.size) {
+            throw IllegalArgumentException(
+                "Unable to create a range between IPv4 and IPv6 addresses (start IP: [$start], end IP: [$end])"
+            )
+        }
+        if (start > end) throw IllegalArgumentException("Start IP: [$start] is greater then end IP: [$end]")
     }
 
     private constructor(addresses: Pair<IpAddress, IpAddress>) : this(addresses.first, addresses.second)
+
+    internal constructor(ipAddress: IpAddress) : this(ipAddress, ipAddress)
 
     constructor(inetAddress: InetAddress, mask: Int) : this(from(inetAddress, mask))
 
@@ -21,6 +31,13 @@ class IpRange(private val start: IpAddress, private val end: IpAddress) : Compar
 
     private fun isIntersect(other: IpRange): Boolean =
         (start <= other.end) && (end >= other.start)
+
+    operator fun plus(other: IpRange): IpRange? {
+        if (start > other.end && !start.isMinIp() && start.dec() == other.end) return IpRange(other.start, end)
+        if (end < other.start && !end.isMaxIp() && end.inc() == other.start) return IpRange(start, other.end)
+        if (!isIntersect(other)) return null
+        return IpRange(minOf(start, other.start), maxOf(end, other.end))
+    }
 
     operator fun minus(other: IpRange): List<IpRange>? {
         if (this in other) return emptyList()
@@ -94,9 +111,7 @@ class IpRange(private val start: IpAddress, private val end: IpAddress) : Compar
         return result
     }
 
-    override fun toString(): String {
-        return "$start - $end"
-    }
+    override fun toString(): String = if (start == end) "<$start>" else "<$start - $end>"
 
     companion object {
         private fun from(inetAddress: InetAddress, mask: Int): Pair<IpAddress, IpAddress> {
