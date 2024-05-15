@@ -144,19 +144,7 @@ bool ImportController::extractConfigFromData(QString data)
 
 bool ImportController::extractConfigFromQr(const QByteArray &data)
 {
-    QJsonObject dataObj = QJsonDocument::fromJson(data).object();
-    if (!dataObj.isEmpty()) {
-        m_config = dataObj;
-        return true;
-    }
-
-    QByteArray ba_uncompressed = qUncompress(data);
-    if (!ba_uncompressed.isEmpty()) {
-        m_config = QJsonDocument::fromJson(ba_uncompressed).object();
-        return true;
-    }
-
-    return false;
+    return extractConfigFromData(data.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals));
 }
 
 QString ImportController::getConfig()
@@ -519,7 +507,7 @@ bool ImportController::parseQrCodeChunk(const QString &code)
             }
         }
     } else {
-        bool ok = extractConfigFromQr(ba);
+        bool ok = extractConfigFromQr(code.toUtf8());
         if (ok) {
             m_isQrCodeProcessed = false;
             qDebug() << "stopDecodingQr";
