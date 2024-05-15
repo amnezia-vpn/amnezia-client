@@ -17,12 +17,19 @@ Rectangle {
     color: "#1C1D21"
     radius: 16
 
+    onFocusChanged: {
+        if (focus) {
+            udpButton.forceActiveFocus()
+        }
+    }
+
     RowLayout {
         id: transportProtoButtonGroup
 
         spacing: 0
 
         HorizontalRadioButton {
+            id: udpButton
             checked: root.currentIndex === 0
 
             hoverEnabled: root.enabled
@@ -30,12 +37,15 @@ Rectangle {
             implicitWidth: (rootWidth - 32) / 2
             text: "UDP"
 
+            KeyNavigation.tab: tcpButton
+
             onClicked: {
                 root.currentIndex = 0
             }
         }
 
         HorizontalRadioButton {
+            id: tcpButton
             checked: root.currentIndex === 1
 
             hoverEnabled: root.enabled

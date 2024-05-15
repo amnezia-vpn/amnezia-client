@@ -27,8 +27,8 @@ class DnsUtilsWindows final : public DnsUtils {
   quint64 m_luid = 0;
   DWORD (*m_setInterfaceDnsSettingsProcAddr)(GUID, const void*) = nullptr;
 
-  bool updateResolversWin32(const QList<QHostAddress>& resolvers);
-  bool updateResolversNetsh(const QList<QHostAddress>& resolvers);
+  bool updateResolversWin32(GUID, const QList<QHostAddress>& resolvers);
+  bool updateResolversNetsh(int ifindex, const QList<QHostAddress>& resolvers);
 };
 
 #endif  // DNSUTILSWINDOWS_H

@@ -336,8 +336,11 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                 for (int i = 0; i < netInterfaces.size(); i++) {
                     for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
                     {
+                        // killSwitch toggle
                         if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
-                            IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
+                            if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
+                                IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
+                            }
                             m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
                             m_configData.insert("vpnGateway", m_vpnGateway);
                             m_configData.insert("vpnServer", m_configData.value(amnezia::config_key::hostName).toString());
@@ -347,7 +350,10 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                 }
 #endif
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-                IpcClient::Interface()->enableKillSwitch(m_configData, 0);
+                // killSwitch toggle
+                if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
+                    IpcClient::Interface()->enableKillSwitch(m_configData, 0);
+                }
 #endif
                 qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
             }

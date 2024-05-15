@@ -188,11 +188,16 @@ class AmneziaTileService : TileService() {
             true
         }
 
-    private fun startVpnService() =
-        ContextCompat.startForegroundService(
-            applicationContext,
-            Intent(this, AmneziaVpnService::class.java)
-        )
+    private fun startVpnService() {
+        try {
+            ContextCompat.startForegroundService(
+                applicationContext,
+                Intent(this, AmneziaVpnService::class.java)
+            )
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Failed to start AmneziaVpnService: $e")
+        }
+    }
 
     private fun connectToVpn() = vpnServiceMessenger.send(Action.CONNECT)
 
@@ -230,7 +235,7 @@ class AmneziaTileService : TileService() {
         val tile = qsTile ?: return
         tile.apply {
             label = vpnState.serverName ?: DEFAULT_TILE_LABEL
-            when (vpnState.protocolState) {
+            when (val protocolState = vpnState.protocolState) {
                 CONNECTED -> {
                     state = Tile.STATE_ACTIVE
                     subtitleCompat = null
@@ -241,14 +246,9 @@ class AmneziaTileService : TileService() {
                     subtitleCompat = null
                 }
 
-                CONNECTING, RECONNECTING -> {
+                CONNECTING, DISCONNECTING, RECONNECTING -> {
                     state = Tile.STATE_UNAVAILABLE
-                    subtitleCompat = resources.getString(R.string.connecting)
-                }
-
-                DISCONNECTING -> {
-                    state = Tile.STATE_UNAVAILABLE
-                    subtitleCompat = resources.getString(R.string.disconnecting)
+                    subtitleCompat = getString(protocolState)
                 }
             }
             updateTile()

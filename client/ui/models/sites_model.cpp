@@ -3,8 +3,12 @@
 SitesModel::SitesModel(std::shared_ptr<Settings> settings, QObject *parent)
     : QAbstractListModel(parent), m_settings(settings)
 {
-    m_isSplitTunnelingEnabled = m_settings->getSitesSplitTunnelingEnabled();
+    m_isSplitTunnelingEnabled = m_settings->isSitesSplitTunnelingEnabled();
     m_currentRouteMode = m_settings->routeMode();
+    if (m_currentRouteMode == Settings::VpnAllSites) { // for old split tunneling configs
+        m_settings->setRouteMode(static_cast<Settings::RouteMode>(Settings::VpnOnlyForwardSites));
+        m_currentRouteMode = Settings::VpnOnlyForwardSites;
+    }
     fillSites();
 }
 

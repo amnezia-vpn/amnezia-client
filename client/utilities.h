@@ -22,7 +22,7 @@ public:
     static bool createEmptyFile(const QString &path);
     static bool initializePath(const QString &path);
 
-    static bool processIsRunning(const QString &fileName);
+    static bool processIsRunning(const QString &fileName, const bool fullFlag = false);
     static void killProcessByName(const QString &name);
 
     static QString openVpnExecPath();

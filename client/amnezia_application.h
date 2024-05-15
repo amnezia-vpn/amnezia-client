@@ -10,8 +10,6 @@
 #include "settings.h"
 #include "vpnconnection.h"
 
-#include "core/controllers/apiController.h"
-
 #include "ui/controllers/connectionController.h"
 #include "ui/controllers/exportController.h"
 #include "ui/controllers/importController.h"
@@ -24,7 +22,9 @@
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
-#include "ui/notificationhandler.h"
+#ifndef Q_OS_ANDROID
+    #include "ui/notificationhandler.h"
+#endif
 #ifdef Q_OS_WINDOWS
     #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
@@ -111,7 +111,9 @@ private:
 
     QSharedPointer<VpnConnection> m_vpnConnection;
     QThread m_vpnConnectionThread;
+#ifndef Q_OS_ANDROID
     QScopedPointer<NotificationHandler> m_notificationHandler;
+#endif
 
     QScopedPointer<ConnectionController> m_connectionController;
     QScopedPointer<PageController> m_pageController;
@@ -121,7 +123,6 @@ private:
     QScopedPointer<SettingsController> m_settingsController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
-    QScopedPointer<ApiController> m_apiController;
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
 };
 

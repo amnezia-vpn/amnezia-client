@@ -248,8 +248,9 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
 
   GETVALUE("privateKey", config.m_privateKey, String);
   GETVALUE("serverPublicKey", config.m_serverPublicKey, String);
-  GETVALUE("serverPskKey", config.m_serverPskKey, String);
   GETVALUE("serverPort", config.m_serverPort, Double);
+
+  config.m_serverPskKey = obj.value("serverPskKey").toString();
 
   if (!obj.contains("deviceMTU") || obj.value("deviceMTU").toString().toInt() == 0)
   {
@@ -373,19 +374,33 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
     return false;
   }
 
-  if (!obj.value("Jc").isNull() && !obj.value("Jmin").isNull() 
-  && !obj.value("Jmax").isNull() && !obj.value("S1").isNull() 
-  && !obj.value("S2").isNull() && !obj.value("H1").isNull() 
-  && !obj.value("H2").isNull() && !obj.value("H3").isNull() 
-  && !obj.value("H4").isNull()) {
+  config.m_killSwitchEnabled = QVariant(obj.value("killSwitchOption").toString()).toBool();
+
+  if (!obj.value("Jc").isNull()) {
     config.m_junkPacketCount = obj.value("Jc").toString();
+  }
+  if (!obj.value("Jmin").isNull()) {
     config.m_junkPacketMinSize = obj.value("Jmin").toString();
+  }
+  if (!obj.value("Jmax").isNull()) {
     config.m_junkPacketMaxSize = obj.value("Jmax").toString();
+  }
+  if (!obj.value("S1").isNull()) {
     config.m_initPacketJunkSize = obj.value("S1").toString();
+  }
+  if (!obj.value("S2").isNull()) {
     config.m_responsePacketJunkSize = obj.value("S2").toString();
+  }
+  if (!obj.value("H1").isNull()) {
     config.m_initPacketMagicHeader = obj.value("H1").toString();
+  }
+  if (!obj.value("H2").isNull()) {
     config.m_responsePacketMagicHeader = obj.value("H2").toString();
+  }
+  if (!obj.value("H3").isNull()) {
     config.m_underloadPacketMagicHeader = obj.value("H3").toString();
+  }
+  if (!obj.value("H4").isNull()) {
     config.m_transportPacketMagicHeader = obj.value("H4").toString();
   }
 

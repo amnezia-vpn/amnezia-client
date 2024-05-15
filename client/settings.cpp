@@ -256,7 +256,7 @@ Settings::RouteMode Settings::routeMode() const
     return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt());
 }
 
-bool Settings::getSitesSplitTunnelingEnabled() const
+bool Settings::isSitesSplitTunnelingEnabled() const
 {
     return value("Conf/sitesSplitTunnelingEnabled", false).toBool();
 }
@@ -361,7 +361,9 @@ QString Settings::secondaryDns() const
 
 void Settings::clearSettings()
 {
+    auto uuid = getInstallationUuid(false);
     m_settings.clearSettings();
+    setInstallationUuid(uuid);
     emit settingsCleared();
 }
 
@@ -413,7 +415,7 @@ void Settings::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &a
     m_settings.sync();
 }
 
-bool Settings::getAppsSplitTunnelingEnabled() const
+bool Settings::isAppsSplitTunnelingEnabled() const
 {
     return value("Conf/appsSplitTunnelingEnabled", false).toBool();
 }
@@ -421,6 +423,31 @@ bool Settings::getAppsSplitTunnelingEnabled() const
 void Settings::setAppsSplitTunnelingEnabled(bool enabled)
 {
     setValue("Conf/appsSplitTunnelingEnabled", enabled);
+}
+
+bool Settings::isKillSwitchEnabled() const
+{
+    return value("Conf/killSwitchEnabled", true).toBool();
+}
+
+void Settings::setKillSwitchEnabled(bool enabled)
+{
+    setValue("Conf/killSwitchEnabled", enabled);
+}
+
+QString Settings::getInstallationUuid(const bool needCreate)
+{
+    auto uuid = value("Conf/installationUuid", "").toString();
+    if (needCreate && uuid.isEmpty()) {
+        uuid = QUuid::createUuid().toString();
+        setInstallationUuid(uuid);
+    }
+    return uuid;
+}
+
+void Settings::setInstallationUuid(const QString &uuid)
+{
+    setValue("Conf/installationUuid", uuid);
 }
 
 ServerCredentials Settings::defaultServerCredentials() const

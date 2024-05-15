@@ -3,10 +3,21 @@
 
 #include <QObject>
 
-#include "containers/containers_defs.h"
-#include "core/defs.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
+
+namespace
+{
+    enum class ConfigTypes {
+        Amnezia,
+        OpenVpn,
+        WireGuard,
+        Awg,
+        Xray,
+        Backup,
+        Invalid
+    };
+}
 
 class ImportController : public QObject
 {
@@ -23,6 +34,7 @@ public slots:
     bool extractConfigFromQr(const QByteArray &data);
     QString getConfig();
     QString getConfigFileName();
+    QString getMaliciousWarningText();
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void startDecodingQr();
@@ -35,6 +47,9 @@ public slots:
 #if defined Q_OS_ANDROID
     static bool decodeQrCode(const QString &code);
 #endif
+
+    bool isNativeWireGuardConfig();
+    void processNativeWireGuardConfig();
 
 signals:
     void importFinished();
@@ -49,6 +64,8 @@ private:
     QJsonObject extractWireGuardConfig(const QString &data);
     QJsonObject extractXrayConfig(const QString &data);
 
+    void checkForMaliciousStrings(const QJsonObject &protocolConfig);
+
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void stopDecodingQr();
 #endif
@@ -59,6 +76,8 @@ private:
 
     QJsonObject m_config;
     QString m_configFileName;
+    ConfigTypes m_configType;
+    QString m_maliciousWarningText;
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     QMap<int, QByteArray> m_qrCodeChunks;

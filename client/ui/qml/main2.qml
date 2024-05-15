@@ -37,7 +37,8 @@ Window  {
     StackViewType {
         id: rootStackView
 
-        anchors.fill: parent
+        width: root.width
+        height: root.height
         focus: true
 
         Component.onCompleted: {

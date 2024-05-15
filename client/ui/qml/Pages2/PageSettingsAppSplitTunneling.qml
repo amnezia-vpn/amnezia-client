@@ -20,6 +20,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     property bool pageEnabled
 
     Component.onCompleted: {
@@ -45,12 +47,12 @@ PageType {
 
     QtObject {
         id: onlyForwardApps
-        property string name: qsTr("Only the Apps listed here will be accessed through the VPN")
+        property string name: qsTr("Only the apps from the list should have access via VPN")
         property int type: routeMode.onlyForwardApps
     }
     QtObject {
         id: allExceptApps
-        property string name: qsTr("Apps from the list should not be accessed via VPN")
+        property string name: qsTr("Apps from the list should not have access via VPN")
         property int type: routeMode.allExceptApps
     }
 
@@ -63,6 +65,11 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
         id: header
 
@@ -73,6 +80,8 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: switcher
         }
 
         RowLayout {
@@ -92,6 +101,10 @@ PageType {
                 Layout.rightMargin: 16
 
                 enabled: root.pageEnabled
+
+                KeyNavigation.tab: selector.enabled ?
+                                       selector :
+                                       searchField.textField
 
                 checked: AppSplitTunnelingModel.isTunnelingEnabled
                 onToggled: {                    
@@ -115,6 +128,8 @@ PageType {
             headerText: qsTr("Mode")
 
             enabled: Qt.platform.os === "android" && root.pageEnabled
+
+            KeyNavigation.tab: searchField.textField
 
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
@@ -175,6 +190,9 @@ PageType {
                         pattern: ".*" + searchField.textField.text + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
+                    sorters: [
+                        RoleSorter { roleName: "appPath"; sortOrder: Qt.AscendingOrder }
+                    ]
                 }
 
                 clip: true
@@ -247,6 +265,9 @@ PageType {
 
             textFieldPlaceholderText: qsTr("application name")
             buttonImageSource: "qrc:/images/controls/plus.svg"
+
+            Keys.onTabPressed: lastItemTabClicked(focusItem)
+            rightButtonClickedOnEnter: true
 
             clickedFunc: function() {
                 searchField.focus = false

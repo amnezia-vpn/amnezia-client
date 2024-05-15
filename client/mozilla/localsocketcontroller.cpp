@@ -221,8 +221,28 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("excludedAddresses", jsExcludedAddresses);
 
   json.insert("vpnDisabledApps", splitTunnelApps);
-  
+
+  json.insert(amnezia::config_key::killSwitchOption, rawConfig.value(amnezia::config_key::killSwitchOption));
+
   if (protocolName == amnezia::config_key::awg) {
+    json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
+    json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));
+    json.insert(amnezia::config_key::junkPacketMaxSize, wgConfig.value(amnezia::config_key::junkPacketMaxSize));
+    json.insert(amnezia::config_key::initPacketJunkSize, wgConfig.value(amnezia::config_key::initPacketJunkSize));
+    json.insert(amnezia::config_key::responsePacketJunkSize, wgConfig.value(amnezia::config_key::responsePacketJunkSize));
+    json.insert(amnezia::config_key::initPacketMagicHeader, wgConfig.value(amnezia::config_key::initPacketMagicHeader));
+    json.insert(amnezia::config_key::responsePacketMagicHeader, wgConfig.value(amnezia::config_key::responsePacketMagicHeader));
+    json.insert(amnezia::config_key::underloadPacketMagicHeader, wgConfig.value(amnezia::config_key::underloadPacketMagicHeader));
+    json.insert(amnezia::config_key::transportPacketMagicHeader, wgConfig.value(amnezia::config_key::transportPacketMagicHeader));
+  } else if (!wgConfig.value(amnezia::config_key::junkPacketCount).isUndefined()
+             && !wgConfig.value(amnezia::config_key::junkPacketMinSize).isUndefined()
+             && !wgConfig.value(amnezia::config_key::junkPacketMaxSize).isUndefined()
+             && !wgConfig.value(amnezia::config_key::initPacketJunkSize).isUndefined()
+             && !wgConfig.value(amnezia::config_key::responsePacketJunkSize).isUndefined()
+             && !wgConfig.value(amnezia::config_key::initPacketMagicHeader).isUndefined()
+             && !wgConfig.value(amnezia::config_key::responsePacketMagicHeader).isUndefined()
+             && !wgConfig.value(amnezia::config_key::underloadPacketMagicHeader).isUndefined()
+             && !wgConfig.value(amnezia::config_key::transportPacketMagicHeader).isUndefined()) {
     json.insert(amnezia::config_key::junkPacketCount, wgConfig.value(amnezia::config_key::junkPacketCount));
     json.insert(amnezia::config_key::junkPacketMinSize, wgConfig.value(amnezia::config_key::junkPacketMinSize));
     json.insert(amnezia::config_key::junkPacketMaxSize, wgConfig.value(amnezia::config_key::junkPacketMaxSize));

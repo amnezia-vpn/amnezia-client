@@ -9,10 +9,10 @@ class AwgConfigurator : public WireguardConfigurator
 {
     Q_OBJECT
 public:
-    AwgConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    AwgConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent = nullptr);
 
     QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode errorCode);
+                         const QJsonObject &containerConfig, ErrorCode &errorCode);
 };
 
 #endif // AWGCONFIGURATOR_H

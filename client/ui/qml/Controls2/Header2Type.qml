@@ -9,6 +9,8 @@ Item {
     property string actionButtonImage
     property var actionButtonFunction
 
+    property alias actionButton: headerActionButton
+
     property string headerText
     property string descriptionText
 
@@ -58,6 +60,18 @@ Item {
             color: "#878B91"
 
             visible: root.descriptionText !== ""
+        }
+    }
+
+    Keys.onEnterPressed: {
+        if (actionButtonFunction && typeof actionButtonFunction === "function") {
+            actionButtonFunction()
+        }
+    }
+
+    Keys.onReturnPressed: {
+        if (actionButtonFunction && typeof actionButtonFunction === "function") {
+            actionButtonFunction()
         }
     }
 }

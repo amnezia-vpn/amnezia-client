@@ -94,6 +94,8 @@ extension PacketTunnelProvider {
   }
 
   func stopOpenVPN(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
+    ovpnLog(.info, message: "Stopping tunnel: reason: \(reason.description)")
+
     stopHandler = completionHandler
     if vpnReachability.isTracking {
       vpnReachability.stopTracking()

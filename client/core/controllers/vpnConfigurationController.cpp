@@ -8,21 +8,22 @@
 #include "configurators/wireguard_configurator.h"
 #include "configurators/xray_configurator.h"
 
-VpnConfigurationsController::VpnConfigurationsController(const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject { parent }, m_settings(settings)
+VpnConfigurationsController::VpnConfigurationsController(const std::shared_ptr<Settings> &settings,
+                                                         QSharedPointer<ServerController> serverController, QObject *parent)
+    : QObject { parent }, m_settings(settings), m_serverController(serverController)
 {
 }
 
 QScopedPointer<ConfiguratorBase> VpnConfigurationsController::createConfigurator(const Proto protocol)
 {
     switch (protocol) {
-    case Proto::OpenVpn: return QScopedPointer<ConfiguratorBase>(new OpenVpnConfigurator(m_settings));
-    case Proto::ShadowSocks: return QScopedPointer<ConfiguratorBase>(new ShadowSocksConfigurator(m_settings));
-    case Proto::Cloak: return QScopedPointer<ConfiguratorBase>(new CloakConfigurator(m_settings));
-    case Proto::WireGuard: return QScopedPointer<ConfiguratorBase>(new WireguardConfigurator(m_settings, false));
-    case Proto::Awg: return QScopedPointer<ConfiguratorBase>(new AwgConfigurator(m_settings));
-    case Proto::Ikev2: return QScopedPointer<ConfiguratorBase>(new Ikev2Configurator(m_settings));
-    case Proto::Xray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(m_settings));
+    case Proto::OpenVpn: return QScopedPointer<ConfiguratorBase>(new OpenVpnConfigurator(m_settings, m_serverController));
+    case Proto::ShadowSocks: return QScopedPointer<ConfiguratorBase>(new ShadowSocksConfigurator(m_settings, m_serverController));
+    case Proto::Cloak: return QScopedPointer<ConfiguratorBase>(new CloakConfigurator(m_settings, m_serverController));
+    case Proto::WireGuard: return QScopedPointer<ConfiguratorBase>(new WireguardConfigurator(m_settings, m_serverController, false));
+    case Proto::Awg: return QScopedPointer<ConfiguratorBase>(new AwgConfigurator(m_settings, m_serverController));
+    case Proto::Ikev2: return QScopedPointer<ConfiguratorBase>(new Ikev2Configurator(m_settings, m_serverController));
+    case Proto::Xray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(m_settings, m_serverController));
     default: return QScopedPointer<ConfiguratorBase>();
     }
 }
@@ -76,7 +77,7 @@ ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isA
 
 QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
                                                                 const QJsonObject &containerConfig, const DockerContainer container,
-                                                                ErrorCode errorCode)
+                                                                ErrorCode &errorCode)
 {
     QJsonObject vpnConfiguration {};
 

@@ -89,9 +89,11 @@ bool IosController::initialize()
 
 
             for (NETunnelProviderManager *manager in managers) {
+                qDebug() << "IosController::initialize : VPNC: " << manager.localizedDescription;
+
                 if (manager.connection.status == NEVPNStatusConnected) {
                     m_currentTunnel = manager;
-                    qDebug() << "IosController::initialize : VPN already connected";
+                    qDebug() << "IosController::initialize : VPN already connected with" << manager.localizedDescription;
                     emit connectionStateChanged(Vpn::ConnectionState::Connected);
                     break;
 
@@ -138,7 +140,7 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
     [NETunnelProviderManager loadAllFromPreferencesWithCompletionHandler:^(NSArray<NETunnelProviderManager *> * _Nullable managers, NSError * _Nullable error) {
         @try {
             if (error) {
-                qDebug() << "IosController::connectVpn : Error:" << [error.localizedDescription UTF8String];
+                qDebug() << "IosController::connectVpn : VPNC: loadAllFromPreferences error:" << [error.localizedDescription UTF8String];
                 emit connectionStateChanged(Vpn::ConnectionState::Error);
                 ok = false;
                 return;
@@ -151,7 +153,7 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
             for (NETunnelProviderManager *manager in managers) {
                 if ([manager.localizedDescription isEqualToString:tunnelName.toNSString()]) {
                     m_currentTunnel = manager;
-                    qDebug() << "IosController::connectVpn : Using existing tunnel";
+                    qDebug() << "IosController::connectVpn : Using existing tunnel:" << manager.localizedDescription;
                     if (manager.connection.status == NEVPNStatusConnected) {
                         emit connectionStateChanged(Vpn::ConnectionState::Connected);
                         return;
@@ -162,10 +164,10 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
             }
 
             if (!m_currentTunnel) {
-                qDebug() << "IosController::connectVpn : Creating new tunnel";
                 isNewTunnelCreated = true;
                 m_currentTunnel = [[NETunnelProviderManager alloc] init];
                 m_currentTunnel.localizedDescription = [NSString stringWithUTF8String:tunnelName.toStdString().c_str()];
+                qDebug() << "IosController::connectVpn : Creating new tunnel" << m_currentTunnel.localizedDescription;
             }
 
         }
@@ -598,13 +600,14 @@ void IosController::startTunnel()
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
             if (saveError) {
+                qDebug().nospace() << "IosController::startTunnel" << protocolName << ": Connect " << protocolName << " Tunnel Save Error" << saveError.localizedDescription.UTF8String;
                 emit connectionStateChanged(Vpn::ConnectionState::Error);
                 return;
             }
 
             [m_currentTunnel loadFromPreferencesWithCompletionHandler:^(NSError *loadError) {
                     if (loadError) {
-                        qDebug().nospace() << "IosController::start" << protocolName << ": Connect " << protocolName << " Tunnel Load Error" << loadError.localizedDescription.UTF8String;
+                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << ": Connect " << protocolName << " Tunnel Load Error" << loadError.localizedDescription.UTF8String;
                         emit connectionStateChanged(Vpn::ConnectionState::Error);
                         return;
                     }
@@ -615,11 +618,11 @@ void IosController::startTunnel()
                     BOOL started = [m_currentTunnel.connection startVPNTunnelWithOptions:nil andReturnError:&startError];
 
                     if (!started || startError) {
-                        qDebug().nospace() << "IosController::start" << protocolName << " : Connect " << protocolName << " Tunnel Start Error"
+                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << " : Connect " << protocolName << " Tunnel Start Error"
                             << (startError ? startError.localizedDescription.UTF8String : "");
                         emit connectionStateChanged(Vpn::ConnectionState::Error);
                     } else {
-                        qDebug().nospace() << "IosController::start" << protocolName << " : Starting the tunnel succeeded";
+                        qDebug().nospace() << "IosController::startTunnel :" << m_currentTunnel.localizedDescription << protocolName << " : Starting the tunnel succeeded";
                     }
             }];
         });
