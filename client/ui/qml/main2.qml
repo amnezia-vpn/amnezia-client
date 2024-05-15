@@ -28,6 +28,10 @@ Window  {
         PageController.closeWindow()
     }
 
+    onActiveChanged: {
+        SystemController.appHasFocus = active
+    }
+
     title: "AmneziaVPN"
 
     StackViewType {

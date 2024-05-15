@@ -528,7 +528,6 @@ bool Daemon::switchServer(const InterfaceConfig& config) {
 QJsonObject Daemon::getStatus() {
   Q_ASSERT(wgutils() != nullptr);
   QJsonObject json;
-  logger.debug() << "Status request";
 
   if (!wgutils()->interfaceExists() || m_connections.isEmpty()) {
     json.insert("connected", QJsonValue(false));

@@ -261,9 +261,14 @@ PageType {
 
                 LabelTextType {
                     id: collapsedServerMenuDescription
-                    Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 89 : 44
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     text: drawer.isCollapsed ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
+                }
+
+                GraphViewType {
+                    Layout.minimumHeight: 50
+                    Layout.bottomMargin: drawer.isCollapsed ? 24 : ServersModel.isDefaultServerFromApi ? 69 : 24
+                    Layout.fillWidth: true
                 }
             }
 

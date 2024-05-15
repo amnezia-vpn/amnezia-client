@@ -21,7 +21,8 @@ public:
 
     ErrorCode start() override;
     void stop() override;
-
+    void statusUpdated(const QString& serverIpv4Gateway, const QString& deviceIpv4Address,
+                       uint64_t txBytes, uint64_t rxBytes);
     ErrorCode startMzImpl();
     ErrorCode stopMzImpl();
 
