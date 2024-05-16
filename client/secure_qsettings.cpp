@@ -1,5 +1,4 @@
 #include "secure_qsettings.h"
-#include "platforms/ios/MobileUtils.h"
 
 #include "QAead.h"
 #include "QBlockCipher.h"
