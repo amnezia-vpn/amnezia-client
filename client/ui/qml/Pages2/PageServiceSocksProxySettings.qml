@@ -320,6 +320,18 @@ PageType {
                                 clickedFunc: function() {
                                     forceActiveFocus()
 
+                                    if (!portTextField.textField.acceptableInput) {
+                                        portTextField.errorText = qsTr("The port must be in the range of 1 to 65535")
+                                        return
+                                    }
+                                    if (usernameTextField.textFieldText && passwordTextField.textFieldText === "") {
+                                        passwordTextField.errorText = qsTr("Password cannot be empty")
+                                        return
+                                    } else if (usernameTextField.textFieldText === "" && passwordTextField.textFieldText) {
+                                        usernameTextField.errorText = qsTr("Username cannot be empty")
+                                        return
+                                    }
+
                                     PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                                     InstallController.updateContainer(Socks5ProxyConfigModel.getConfig())
                                     changeSettingsDrawer.close()
@@ -343,9 +355,6 @@ PageType {
                         clickedFunc: function() {
                             forceActiveFocus()
                             changeSettingsDrawer.open()
-
-//                            PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-//                            InstallController.updateContainer(Socks5ProxyConfigModel.getConfig())
                         }
                     }
                 }
