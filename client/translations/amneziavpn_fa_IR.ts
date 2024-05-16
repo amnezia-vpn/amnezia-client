@@ -2850,8 +2850,8 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="115"/>
-        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>پروتکل IKEv2 پروتکلی پایدار و مدرن که مقداری سریعتر از سایر پروتکل‎هاست. بعد از قطع سیگنال دوباره اتصال را بازیابی می‎کند. به صورت پیش‎فرض بر روی آخرین نسخه دستگاه‎های اندروید و iOS پیشتیبانی می‎شود.</translation>
+        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
+        <translation>پروتکل IKEv2 پروتکلی پایدار و مدرن که مقداری سریعتر از سایر پروتکل‎هاست. بعد از قطع سیگنال دوباره اتصال را بازیابی می‎کند.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="118"/>
