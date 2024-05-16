@@ -7,6 +7,7 @@
 
 #include "amnezia_application.h"
 #include "configurators/wireguard_configurator.h"
+#include "version.h"
 #include "core/errorstrings.h"
 
 namespace
@@ -21,7 +22,10 @@ namespace
         constexpr char certificate[] = "certificate";
         constexpr char publicKey[] = "public_key";
         constexpr char protocol[] = "protocol";
+
         constexpr char uuid[] = "installation_uuid";
+        constexpr char osVersion[] = "os_version";
+        constexpr char appVersion[] = "app_version";
     }
 }
 
@@ -62,6 +66,10 @@ QJsonObject ApiController::fillApiPayload(const QString &protocol, const ApiCont
     } else if (protocol == configKey::awg) {
         obj[configKey::publicKey] = apiPayloadData.wireGuardClientPubKey;
     }
+
+    obj[configKey::osVersion] = QSysInfo::prettyProductName();
+    obj[configKey::appVersion] = QString(APP_VERSION);
+
     return obj;
 }
 
