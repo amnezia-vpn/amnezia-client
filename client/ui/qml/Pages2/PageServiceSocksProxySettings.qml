@@ -206,6 +206,10 @@ PageType {
                         }
 
                         expandedContent: ColumnLayout {
+                            property string tempPort: port
+                            property string tempUsername: username
+                            property string tempPassword: password
+
                             anchors.top: parent.top
                             anchors.left: parent.left
                             anchors.right: parent.right
@@ -219,6 +223,17 @@ PageType {
                                 enabled: !GC.isMobile()
                                 function onOpened() {
                                     drawerFocusItem.forceActiveFocus()
+                                    tempPort = port
+                                    tempUsername = username
+                                    tempPassword = password
+                                }
+                                function onClosed() {
+                                    port = tempPort
+                                    username = tempUsername
+                                    password = tempPassword
+                                    portTextField.textFieldText = port
+                                    usernameTextField.textFieldText = username
+                                    passwordTextField.textFieldText = password
                                 }
                             }
 
@@ -334,6 +349,9 @@ PageType {
 
                                     PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                                     InstallController.updateContainer(Socks5ProxyConfigModel.getConfig())
+                                    tempPort = portTextField.textFieldText
+                                    tempUsername = usernameTextField.textFieldText
+                                    tempPassword = passwordTextField.textFieldText
                                     changeSettingsDrawer.close()
                                 }
                             }
