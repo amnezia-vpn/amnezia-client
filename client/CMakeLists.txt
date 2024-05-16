@@ -151,7 +151,6 @@ include_directories(mozilla/models)
 
 if(NOT IOS)
     set(HEADERS ${HEADERS}
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
     )
 endif()
@@ -193,7 +192,6 @@ endif()
 
 if(NOT IOS)
     set(SOURCES ${SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
     )
 endif()

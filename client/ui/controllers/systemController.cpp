@@ -15,7 +15,7 @@
 #endif
 
 #ifdef Q_OS_IOS
-    #include "platforms/ios/MobileUtils.h"
+    #include "platforms/ios/ios_controller.h"
     #include <CoreFoundation/CoreFoundation.h>
 #endif
 
@@ -46,9 +46,8 @@ void SystemController::saveFile(QString fileName, const QString &data)
 #ifdef Q_OS_IOS
     QStringList filesToSend;
     filesToSend.append(fileUrl.toString());
-    MobileUtils mobileUtils;
     // todo check if save successful
-    mobileUtils.shareText(filesToSend);
+    IosController::Instance()->shareText(filesToSend);
     return;
 #else
     QFileInfo fi(fileName);
@@ -67,8 +66,7 @@ QString SystemController::getFileName(const QString &acceptLabel, const QString 
 
 #ifdef Q_OS_IOS
 
-    MobileUtils mobileUtils;
-    fileName = mobileUtils.openFile();
+    fileName = IosController::Instance()->openFile();
     if (fileName.isEmpty()) {
         return fileName;
     }
