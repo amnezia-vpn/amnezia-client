@@ -14,7 +14,7 @@ ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> setti
 }
 
 QString ShadowSocksConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                              const QJsonObject &containerConfig, ErrorCode errorCode)
+                                              const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
     QString ssKey =
             m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::shadowsocks::ssKeyPath, errorCode);

@@ -37,16 +37,6 @@ void IOSNetworkWatcher::initialize() {
   //TODO IMPL FOR AMNEZIA
 }
 
-NetworkWatcherImpl::TransportType IOSNetworkWatcher::getTransportType() {
-  //TODO IMPL FOR AMNEZIA
-
-  if (m_observableConnection != nil) {
-    return m_currentVPNTransport;
-  }
-  // If we don't have an open tunnel-observer, m_currentVPNTransport is probably wrong.
-  return NetworkWatcherImpl::TransportType_Unknown;
-}
-
 NetworkWatcherImpl::TransportType IOSNetworkWatcher::toTransportType(nw_path_t path) {
   if (path == nil) {
     return NetworkWatcherImpl::TransportType_Unknown;

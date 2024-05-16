@@ -143,6 +143,7 @@ void AmneziaApplication::init()
     connect(m_settings.get(), &Settings::screenshotsEnabledChanged, [](bool enabled) { AmneziaVPN::toggleScreenshots(enabled); });
 #endif
 
+#ifndef Q_OS_ANDROID
     m_notificationHandler.reset(NotificationHandler::create(nullptr));
 
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, m_notificationHandler.get(),
@@ -154,6 +155,7 @@ void AmneziaApplication::init()
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
             &ConnectionController::closeConnection);
     connect(this, &AmneziaApplication::translationsUpdated, m_notificationHandler.get(), &NotificationHandler::onTranslationsUpdated);
+#endif
 
     m_engine->load(url);
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));

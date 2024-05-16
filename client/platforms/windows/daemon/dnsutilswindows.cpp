@@ -4,8 +4,11 @@
 
 #include "dnsutilswindows.h"
 
+#include <WS2tcpip.h>
 #include <iphlpapi.h>
 #include <windows.h>
+#include <winsock2.h>
+#include <ws2ipdef.h>
 
 #include <QProcess>
 #include <QTextStream>
@@ -39,30 +42,27 @@ DnsUtilsWindows::~DnsUtilsWindows() {
 
 bool DnsUtilsWindows::updateResolvers(const QString& ifname,
                                       const QList<QHostAddress>& resolvers) {
-  NET_LUID luid;
-  if (ConvertInterfaceAliasToLuid((wchar_t*)ifname.utf16(), &luid) != 0) {
+  MIB_IF_ROW2 entry;
+  if (ConvertInterfaceAliasToLuid((wchar_t*)ifname.utf16(),
+                                  &entry.InterfaceLuid) != 0) {
     logger.error() << "Failed to resolve LUID for" << ifname;
     return false;
   }
-  m_luid = luid.Value;
+  if (GetIfEntry2(&entry) != NO_ERROR) {
+    logger.error() << "Failed to resolve interface for" << ifname;
+    return false;
+  }
+  m_luid = entry.InterfaceLuid.Value;
 
   logger.debug() << "Configuring DNS for" << ifname;
   if (m_setInterfaceDnsSettingsProcAddr == nullptr) {
-    return updateResolversNetsh(resolvers);
+    return updateResolversNetsh(entry.InterfaceIndex, resolvers);
   }
-  return updateResolversWin32(resolvers);
+  return updateResolversWin32(entry.InterfaceGuid, resolvers);
 }
 
 bool DnsUtilsWindows::updateResolversWin32(
-    const QList<QHostAddress>& resolvers) {
-  GUID guid;
-  NET_LUID luid;
-  luid.Value = m_luid;
-  if (ConvertInterfaceLuidToGuid(&luid, &guid) != NO_ERROR) {
-    logger.error() << "Failed to resolve GUID";
-    return false;
-  }
-
+    GUID guid, const QList<QHostAddress>& resolvers) {
   QStringList v4resolvers;
   QStringList v6resolvers;
   for (const QHostAddress& addr : resolvers) {
@@ -113,16 +113,8 @@ constexpr const char* netshAddTemplate =
     "interface %1 add dnsservers name=%2 address=%3 validate=no\r\n";
 
 bool DnsUtilsWindows::updateResolversNetsh(
-    const QList<QHostAddress>& resolvers) {
+    int ifindex, const QList<QHostAddress>& resolvers) {
   QProcess netsh;
-  NET_LUID luid;
-  NET_IFINDEX ifindex;
-  luid.Value = m_luid;
-  if (ConvertInterfaceLuidToIndex(&luid, &ifindex) != NO_ERROR) {
-    logger.error() << "Failed to resolve GUID";
-    return false;
-  }
-
   netsh.setProgram("netsh");
   netsh.start();
   if (!netsh.waitForStarted(WINDOWS_NETSH_TIMEOUT_MSEC)) {
@@ -166,12 +158,26 @@ bool DnsUtilsWindows::updateResolversNetsh(
 
 bool DnsUtilsWindows::restoreResolvers() {
   if (m_luid == 0) {
+    // If the DNS hasn't been configured, there is nothing to restore.
     return true;
+  }
+
+  MIB_IF_ROW2 entry;
+  DWORD error;
+  entry.InterfaceLuid.Value = m_luid;
+  error = GetIfEntry2(&entry);
+  if (error == ERROR_FILE_NOT_FOUND) {
+    // If the interface no longer exists, there is nothing to restore.
+    return true;
+  }
+  if (error != NO_ERROR) {
+    logger.error() << "Failed to resolve interface entry:" << error;
+    return false;
   }
 
   QList<QHostAddress> empty;
   if (m_setInterfaceDnsSettingsProcAddr == nullptr) {
-    return updateResolversNetsh(empty);
+    return updateResolversNetsh(entry.InterfaceIndex, empty);
   }
-  return updateResolversWin32(empty);
+  return updateResolversWin32(entry.InterfaceGuid, empty);
 }

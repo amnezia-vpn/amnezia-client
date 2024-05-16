@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.datastore.core.MultiProcessDataStoreFactory
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStoreFile
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
@@ -59,7 +61,8 @@ private class VpnStateSerializer : Serializer<VpnState> {
 
     override suspend fun readFrom(input: InputStream): VpnState {
         return withContext(Dispatchers.IO) {
-            ObjectInputStream(input).use {
+            val bios = ByteArrayInputStream(input.readBytes())
+            ObjectInputStream(bios).use {
                 it.readObject() as VpnState
             }
         }
@@ -67,9 +70,11 @@ private class VpnStateSerializer : Serializer<VpnState> {
 
     override suspend fun writeTo(t: VpnState, output: OutputStream) {
         withContext(Dispatchers.IO) {
-            ObjectOutputStream(output).use {
+            val baos = ByteArrayOutputStream()
+            ObjectOutputStream(baos).use {
                 it.writeObject(t)
             }
+            output.write(baos.toByteArray())
         }
     }
 }

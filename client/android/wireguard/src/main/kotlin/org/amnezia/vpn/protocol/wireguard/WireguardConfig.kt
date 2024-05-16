@@ -37,8 +37,8 @@ open class WireguardConfig protected constructor(
 
     open fun appendPeerLine(sb: StringBuilder) = with(sb) {
         appendLine("public_key=$publicKeyHex")
-        routes.forEach { route ->
-            appendLine("allowed_ip=$route")
+        routes.filter { it.include }.forEach { route ->
+            appendLine("allowed_ip=${route.inetNetwork}")
         }
         appendLine("endpoint=$endpoint")
         if (persistentKeepalive != 0)

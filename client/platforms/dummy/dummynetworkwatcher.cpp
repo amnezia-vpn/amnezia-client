@@ -8,11 +8,11 @@
 
 DummyNetworkWatcher::DummyNetworkWatcher(QObject* parent)
     : NetworkWatcherImpl(parent) {
-  MZ_COUNT_CTOR(DummyNetworkWatcher);
+    MZ_COUNT_CTOR(DummyNetworkWatcher);
 }
 
 DummyNetworkWatcher::~DummyNetworkWatcher() {
-  MZ_COUNT_DTOR(DummyNetworkWatcher);
+    MZ_COUNT_DTOR(DummyNetworkWatcher);
 }
 
 void DummyNetworkWatcher::initialize() {}

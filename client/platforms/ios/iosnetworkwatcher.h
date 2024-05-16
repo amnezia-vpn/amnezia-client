@@ -15,7 +15,6 @@ class IOSNetworkWatcher : public NetworkWatcherImpl {
   ~IOSNetworkWatcher();
 
   void initialize() override;
-  NetworkWatcherImpl::TransportType getTransportType() override;
 
  private:
   NetworkWatcherImpl::TransportType toTransportType(nw_path_t path);
