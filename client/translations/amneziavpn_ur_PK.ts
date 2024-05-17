@@ -2947,8 +2947,8 @@ For more detailed information, you can
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="124"/>
-        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>IKEv2 - جدید مستحکم پروٹوکول، دوسروں کے مقابلے میں تھوڑا تیز، سگنل ضائع ہونے کے بعد کنکشن بحال کرتا ہے۔ اسے اینڈرائیڈ اور آئی او ایس کے تازہ ترین ورژنز پر مقامی حمایت حاصل ہے۔</translation>
+        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
+        <translation>IKEv2 - جدید مستحکم پروٹوکول، دوسروں کے مقابلے میں تھوڑا تیز، سگنل ضائع ہونے کے بعد کنکشن بحال کرتا ہے۔</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="127"/>
