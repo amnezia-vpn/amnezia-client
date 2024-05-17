@@ -176,7 +176,7 @@ namespace amnezia
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
             constexpr char defaultMtu[] = "1280";
-#elif
+#else
             constexpr char defaultMtu[] = "1376";
 #endif
             constexpr char serverConfigPath[] = "/opt/amnezia/wireguard/wg0.conf";
@@ -196,7 +196,7 @@ namespace amnezia
             constexpr char defaultPort[] = "55424";
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
             constexpr char defaultMtu[] = "1280";
-#elif
+#else
             constexpr char defaultMtu[] = "1376";
 #endif
 
