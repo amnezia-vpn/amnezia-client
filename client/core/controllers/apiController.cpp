@@ -67,7 +67,7 @@ QJsonObject ApiController::fillApiPayload(const QString &protocol, const ApiCont
         obj[configKey::publicKey] = apiPayloadData.wireGuardClientPubKey;
     }
 
-    obj[configKey::osVersion] = QSysInfo::prettyProductName();
+    obj[configKey::osVersion] = QSysInfo::productType();
     obj[configKey::appVersion] = QString(APP_VERSION);
 
     return obj;
