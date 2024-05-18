@@ -7,6 +7,7 @@
 #include "configurators/shadowsocks_configurator.h"
 #include "configurators/wireguard_configurator.h"
 #include "configurators/xray_configurator.h"
+#include "core/networkUtilities.h"
 
 VpnConfigurationsController::VpnConfigurationsController(const std::shared_ptr<Settings> &settings,
                                                          QSharedPointer<ServerController> serverController, QObject *parent)
@@ -99,7 +100,10 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
         protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
 
         QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
-        vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+        if (container == DockerContainer::Awg || container == DockerContainer::WireGuard) {
+            vpnConfigData[config_key::hostName] = NetworkUtilities::getIPAddress(vpnConfigData.value(config_key::hostName).toString());
+        }
+
         vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
     }
 
