@@ -76,9 +76,9 @@ PageType {
     Connections {
         target: InstallController
 
-        function onInstallationErrorOccurred(errorMessage) {
+        function onInstallationErrorOccurred(error) {
             PageController.showBusyIndicator(false)
-            PageController.showErrorMessage(errorMessage)
+            PageController.showErrorMessage(error)
 
             var currentPageName = stackView.currentItem.objectName
 
@@ -97,8 +97,8 @@ PageType {
             PageController.showBusyIndicator(false)
         }
 
-        function onImportErrorOccurred(errorMessage, goToPageHome) {
-            PageController.showErrorMessage(errorMessage)
+        function onImportErrorOccurred(error, goToPageHome) {
+            PageController.showErrorMessage(error)
         }
     }
 

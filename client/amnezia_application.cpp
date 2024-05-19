@@ -291,11 +291,6 @@ bool AmneziaApplication::parseCommands()
     return true;
 }
 
-QSharedPointer<LanguageModel> AmneziaApplication::languageModel()
-{
-    return m_languageModel;
-}
-
 QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
 {
     return m_engine;
@@ -368,16 +363,22 @@ void AmneziaApplication::initControllers()
             new ConnectionController(m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_settings));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
-    connect(m_connectionController.get(), &ConnectionController::connectionErrorOccurred, this, [this](const QString &errorMessage) {
+    connect(m_connectionController.get(), qOverload<const QString &>(&ConnectionController::connectionErrorOccurred), this, [this](const QString &errorMessage) {
         emit m_pageController->showErrorMessage(errorMessage);
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
     });
+
+    connect(m_connectionController.get(), qOverload<ErrorCode>(&ConnectionController::connectionErrorOccurred), this, [this](ErrorCode errorCode) {
+      emit m_pageController->showErrorMessage(errorCode);
+      emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+    });
+
     connect(m_connectionController.get(), &ConnectionController::connectButtonClicked, m_connectionController.get(),
             &ConnectionController::toggleConnection, Qt::QueuedConnection);
 
     connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
 
-    m_pageController.reset(new PageController(m_serversModel, m_settings));
+    m_pageController.reset(new PageController(m_serversModel, m_settings, m_languageModel));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
 
     m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_settings));
