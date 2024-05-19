@@ -1,6 +1,4 @@
 #include "errorstrings.h"
-#include "utils/converter.h"
-#include "amnezia_application.h"
 
 using namespace amnezia;
 
@@ -62,8 +60,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiConfigEmptyError): errorMessage = QObject::tr("In the response from the server, an empty config was received"); break;
     case (ErrorCode::ApiConfigSslError): errorMessage = QObject::tr("SSL error occurred"); break;
     case (ErrorCode::ApiConfigTimeoutError): errorMessage = QObject::tr("Server response timeout on api request"); break;
-
-
+      
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;
     case(ErrorCode::ReadError): errorMessage = QObject::tr("QFile error: An error occurred when reading from the file"); break;
@@ -77,9 +74,7 @@ QString errorString(ErrorCode code) {
         errorMessage = QObject::tr("Internal error"); break;
     }
 
-    const auto baseUrl = amnApp->languageModel()->getDocsLocalizedEndpoint();
-    const auto errorUrl = QStringLiteral("%1/troubleshooting/error-codes/#error-%2-%3").arg(baseUrl).arg(static_cast<int>(code)).arg(utils::enumToString(code).toLower());
-    return QObject::tr("<a href=\"%1\" style=\"color: #FBB26A;\">ErrorCode: %2</a>.%3").arg(errorUrl).arg(static_cast<int>(code)).arg(errorMessage);
+    return QObject::tr("ErrorCode: %1. ").arg(code) + errorMessage;
 }
 
 QDebug operator<<(QDebug debug, const ErrorCode &e)

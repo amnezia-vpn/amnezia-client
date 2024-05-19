@@ -90,7 +90,7 @@ int LanguageModel::getCurrentLanguageIndex()
     }
 }
 
-QString LanguageModel::getDocsLocalizedEndpoint()
+QString LanguageModel::getDocsEndpoint()
 {
     QString baseUrl = "https://docs.amnezia.org";
     auto locale = m_settings->getAppLanguage();

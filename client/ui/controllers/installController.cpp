@@ -9,7 +9,6 @@
 
 #include "core/controllers/serverController.h"
 #include "core/controllers/vpnConfigurationController.h"
-#include "core/errorstrings.h"
 #include "core/networkUtilities.h"
 #include "logger.h"
 #include "ui/models/protocols/awgConfigModel.h"
@@ -149,7 +148,7 @@ void InstallController::install(DockerContainer container, int port, TransportPr
     QMap<DockerContainer, QJsonObject> installedContainers;
     ErrorCode errorCode = getAlreadyInstalledContainers(serverCredentials, serverController, installedContainers);
     if (errorCode) {
-        emit installationErrorOccurred(errorString(errorCode));
+        emit installationErrorOccurred(errorCode);
         return;
     }
 
@@ -158,7 +157,7 @@ void InstallController::install(DockerContainer container, int port, TransportPr
     if (!installedContainers.contains(container)) {
         errorCode = serverController->setupContainer(serverCredentials, container, config);
         if (errorCode) {
-            emit installationErrorOccurred(errorString(errorCode));
+            emit installationErrorOccurred(errorCode);
             return;
         }
 
@@ -169,7 +168,7 @@ void InstallController::install(DockerContainer container, int port, TransportPr
     }
 
     if (errorCode) {
-        emit installationErrorOccurred(errorString(errorCode));
+        emit installationErrorOccurred(errorCode);
         return;
     }
 
@@ -204,7 +203,7 @@ void InstallController::installServer(const DockerContainer container, const QMa
             auto errorCode = vpnConfigurationController.createProtocolConfigForContainer(m_processedServerCredentials, iterator.key(),
                                                                                          containerConfig);
             if (errorCode) {
-                emit installationErrorOccurred(errorString(errorCode));
+                emit installationErrorOccurred(errorCode);
                 return;
             }
             containerConfigs.append(containerConfig);
@@ -212,7 +211,7 @@ void InstallController::installServer(const DockerContainer container, const QMa
             errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
                                                               QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
             if (errorCode) {
-                emit installationErrorOccurred(errorString(errorCode));
+                emit installationErrorOccurred(errorCode);
                 return;
             }
         } else {
@@ -244,7 +243,7 @@ void InstallController::installContainer(const DockerContainer container, const 
                 auto errorCode =
                         vpnConfigurationController.createProtocolConfigForContainer(serverCredentials, iterator.key(), containerConfig);
                 if (errorCode) {
-                    emit installationErrorOccurred(errorString(errorCode));
+                    emit installationErrorOccurred(errorCode);
                     return;
                 }
                 m_serversModel->addContainerConfig(iterator.key(), containerConfig);
@@ -252,7 +251,7 @@ void InstallController::installContainer(const DockerContainer container, const 
                 errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
                                                                   QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
                 if (errorCode) {
-                    emit installationErrorOccurred(errorString(errorCode));
+                    emit installationErrorOccurred(errorCode);
                     return;
                 }
             } else {
@@ -310,7 +309,7 @@ void InstallController::scanServerForInstalledContainers()
                     auto errorCode =
                             vpnConfigurationController.createProtocolConfigForContainer(serverCredentials, container, containerConfig);
                     if (errorCode) {
-                        emit installationErrorOccurred(errorString(errorCode));
+                        emit installationErrorOccurred(errorCode);
                         return;
                     }
                     m_serversModel->addContainerConfig(container, containerConfig);
@@ -319,7 +318,7 @@ void InstallController::scanServerForInstalledContainers()
                                                                       QString("Admin [%1]").arg(QSysInfo::prettyProductName()),
                                                                       serverController);
                     if (errorCode) {
-                        emit installationErrorOccurred(errorString(errorCode));
+                        emit installationErrorOccurred(errorCode);
                         return;
                     }
                 } else {
@@ -334,7 +333,7 @@ void InstallController::scanServerForInstalledContainers()
         return;
     }
 
-    emit installationErrorOccurred(errorString(errorCode));
+    emit installationErrorOccurred(errorCode);
 }
 
 ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentials &credentials,
@@ -515,7 +514,7 @@ void InstallController::updateContainer(QJsonObject config)
         return;
     }
 
-    emit installationErrorOccurred(errorString(errorCode));
+    emit installationErrorOccurred(errorCode);
 }
 
 void InstallController::rebootProcessedServer()
@@ -528,7 +527,7 @@ void InstallController::rebootProcessedServer()
     if (errorCode == ErrorCode::NoError) {
         emit rebootProcessedServerFinished(tr("Server '%1' was rebooted").arg(serverName));
     } else {
-        emit installationErrorOccurred(errorString(errorCode));
+        emit installationErrorOccurred(errorCode);
     }
 }
 
@@ -552,7 +551,7 @@ void InstallController::removeAllContainers()
         emit removeAllContainersFinished(tr("All containers from server '%1' have been removed").arg(serverName));
         return;
     }
-    emit installationErrorOccurred(errorString(errorCode));
+    emit installationErrorOccurred(errorCode);
 }
 
 void InstallController::removeProcessedContainer()
@@ -570,7 +569,7 @@ void InstallController::removeProcessedContainer()
         emit removeProcessedContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
         return;
     }
-    emit installationErrorOccurred(errorString(errorCode));
+    emit installationErrorOccurred(errorCode);
 }
 
 void InstallController::removeApiConfig(const int serverIndex)
@@ -738,7 +737,7 @@ bool InstallController::checkSshConnection(QSharedPointer<ServerController> serv
         if (errorCode == ErrorCode::NoError) {
             m_processedServerCredentials.secretData = decryptedPrivateKey;
         } else {
-            emit installationErrorOccurred(errorString(errorCode));
+            emit installationErrorOccurred(errorCode);
             return false;
         }
     }
@@ -747,7 +746,7 @@ bool InstallController::checkSshConnection(QSharedPointer<ServerController> serv
     output = serverController->checkSshConnection(m_processedServerCredentials, errorCode);
 
     if (errorCode != ErrorCode::NoError) {
-        emit installationErrorOccurred(errorString(errorCode));
+        emit installationErrorOccurred(errorCode);
         return false;
     } else {
         if (output.contains(tr("Please login as the user"))) {

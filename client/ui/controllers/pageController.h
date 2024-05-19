@@ -4,7 +4,9 @@
 #include <QObject>
 #include <QQmlEngine>
 
+#include "core/defs.h"
 #include "ui/models/servers_model.h"
+#include "ui/models/languageModel.h"
 
 namespace PageLoader
 {
@@ -70,7 +72,7 @@ class PageController : public QObject
     Q_OBJECT
 public:
     explicit PageController(const QSharedPointer<ServersModel> &serversModel, const std::shared_ptr<Settings> &settings,
-                            QObject *parent = nullptr);
+                          const QSharedPointer<LanguageModel> & languageModel,QObject *parent = nullptr);
 
 public slots:
     QString getInitialPage();
@@ -93,6 +95,9 @@ public slots:
     void setDrawerDepth(const int depth);
     int getDrawerDepth();
 
+  private slots:
+    void onShowErrorMessage(amnezia::ErrorCode errorCode);
+
 signals:
     void goToPage(PageLoader::PageEnum page, bool slide = true);
     void goToStartPage();
@@ -107,6 +112,7 @@ signals:
     void restorePageHomeState(bool isContainerInstalled = false);
     void replaceStartPage();
 
+    void showErrorMessage(amnezia::ErrorCode);
     void showErrorMessage(const QString &errorMessage);
     void showNotificationMessage(const QString &message);
 
@@ -130,6 +136,8 @@ private:
     QSharedPointer<ServersModel> m_serversModel;
 
     std::shared_ptr<Settings> m_settings;
+
+    QSharedPointer<LanguageModel> m_languageModel;
 
     bool m_isTriggeredByConnectButton;
 

@@ -8,7 +8,6 @@
 #include <QtConcurrent>
 
 #include "core/controllers/vpnConfigurationController.h"
-#include "core/errorstrings.h"
 #include "version.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
@@ -30,7 +29,7 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
     connect(&m_apiController, &ApiController::configUpdated, this,
             static_cast<void (ConnectionController::*)(const bool, const QJsonObject &, const int)>(&ConnectionController::openConnection));
-    connect(&m_apiController, &ApiController::errorOccurred, this, &ConnectionController::connectionErrorOccurred);
+    connect(&m_apiController, qOverload<ErrorCode>(&ApiController::errorOccurred), this, qOverload<ErrorCode>(&ConnectionController::connectionErrorOccurred));
 
     m_state = Vpn::ConnectionState::Disconnected;
 }
@@ -40,8 +39,8 @@ void ConnectionController::openConnection()
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
     {
-        emit connectionErrorOccurred(errorString(ErrorCode::AmneziaServiceNotRunning));
-        return;
+      emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
+      return;
     }
 #endif
 
@@ -52,9 +51,9 @@ void ConnectionController::openConnection()
 
     if (serverConfig.value(config_key::configVersion).toInt()
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        m_apiController.updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverIndex, serverConfig);
+      m_apiController.updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverIndex, serverConfig);
     } else {
-        openConnection(false, serverConfig, serverIndex);
+      openConnection(false, serverConfig, serverIndex);
     }
 }
 
@@ -63,9 +62,9 @@ void ConnectionController::closeConnection()
     emit disconnectFromVpn();
 }
 
-QString ConnectionController::getLastConnectionError()
+ErrorCode ConnectionController::getLastConnectionError()
 {
-    return errorString(m_vpnConnection->lastError());
+    return m_vpnConnection->lastError();
 }
 
 void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
@@ -218,7 +217,7 @@ void ConnectionController::openConnection(const bool updateConfig, const QJsonOb
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
     ErrorCode errorCode = updateProtocolConfig(container, credentials, containerConfig, serverController);
     if (errorCode != ErrorCode::NoError) {
-        emit connectionErrorOccurred(errorString(errorCode));
+        emit connectionErrorOccurred(errorCode);
         return;
     }
 
