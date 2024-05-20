@@ -43,10 +43,13 @@ QString LanguageModel::getLocalLanguageName(const LanguageSettings::AvailableLan
     switch (language) {
     case LanguageSettings::AvailableLanguageEnum::English: strLanguage = "English"; break;
     case LanguageSettings::AvailableLanguageEnum::Russian: strLanguage = "Русский"; break;
+    case LanguageSettings::AvailableLanguageEnum::Ukrainian: strLanguage = "Українська"; break;
     case LanguageSettings::AvailableLanguageEnum::China_cn: strLanguage = "\347\256\200\344\275\223\344\270\255\346\226\207"; break;
     case LanguageSettings::AvailableLanguageEnum::Persian: strLanguage = "فارسی"; break;
     case LanguageSettings::AvailableLanguageEnum::Arabic: strLanguage = "العربية"; break;
     case LanguageSettings::AvailableLanguageEnum::Burmese: strLanguage = "မြန်မာဘာသာ"; break;
+    case LanguageSettings::AvailableLanguageEnum::Urdu: strLanguage = "اُرْدُوْ"; break;
+    case LanguageSettings::AvailableLanguageEnum::Hindi: strLanguage = "हिन्दी"; break;
     default:
         break;
     }
@@ -60,9 +63,12 @@ void LanguageModel::changeLanguage(const LanguageSettings::AvailableLanguageEnum
     case LanguageSettings::AvailableLanguageEnum::English: emit updateTranslations(QLocale::English); break;
     case LanguageSettings::AvailableLanguageEnum::Russian: emit updateTranslations(QLocale::Russian); break;
     case LanguageSettings::AvailableLanguageEnum::China_cn: emit updateTranslations(QLocale::Chinese); break;
+    case LanguageSettings::AvailableLanguageEnum::Ukrainian: emit updateTranslations(QLocale::Ukrainian); break;
     case LanguageSettings::AvailableLanguageEnum::Persian: emit updateTranslations(QLocale::Persian); break;
     case LanguageSettings::AvailableLanguageEnum::Arabic: emit updateTranslations(QLocale::Arabic); break;
     case LanguageSettings::AvailableLanguageEnum::Burmese: emit updateTranslations(QLocale::Burmese); break;
+    case LanguageSettings::AvailableLanguageEnum::Urdu: emit updateTranslations(QLocale::Urdu); break;
+    case LanguageSettings::AvailableLanguageEnum::Hindi: emit updateTranslations(QLocale::Hindi); break;
     default: emit updateTranslations(QLocale::English); break;
     }
 }
@@ -74,10 +80,22 @@ int LanguageModel::getCurrentLanguageIndex()
     case QLocale::English: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     case QLocale::Russian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Russian); break;
     case QLocale::Chinese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::China_cn); break;
+    case QLocale::Ukrainian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Ukrainian); break;
     case QLocale::Persian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Persian); break;
     case QLocale::Arabic: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Arabic); break;
     case QLocale::Burmese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Burmese); break;
+    case QLocale::Urdu: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Urdu); break;
+    case QLocale::Hindi: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Hindi); break;
     default: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
+    }
+}
+
+int LanguageModel::getLineHeightAppend()
+{
+    int langIndex = getCurrentLanguageIndex();
+    switch (langIndex) {
+    case 5: return 10; break; // Burmese
+    default: return 0; break;
     }
 }
 

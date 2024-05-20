@@ -46,7 +46,6 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/MobileUtils.mm
 )
 
 
@@ -108,16 +107,19 @@ target_sources(${PROJECT} PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/ScreenProtection.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/VPNCController.swift
 )
 
 target_sources(${PROJECT} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 
 set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 
 add_subdirectory(ios/networkextension)

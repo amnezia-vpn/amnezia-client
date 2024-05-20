@@ -12,10 +12,10 @@ open class ProtocolConfig protected constructor(
     val addresses: Set<InetNetwork>,
     val dnsServers: Set<InetAddress>,
     val searchDomain: String?,
-    val routes: Set<InetNetwork>,
-    val excludedRoutes: Set<InetNetwork>,
+    val routes: Set<Route>,
     val includedAddresses: Set<InetNetwork>,
     val excludedAddresses: Set<InetNetwork>,
+    val includedApplications: Set<String>,
     val excludedApplications: Set<String>,
     val httpProxy: ProxyInfo?,
     val allowAllAF: Boolean,
@@ -28,9 +28,9 @@ open class ProtocolConfig protected constructor(
         builder.dnsServers,
         builder.searchDomain,
         builder.routes,
-        builder.excludedRoutes,
         builder.includedAddresses,
         builder.excludedAddresses,
+        builder.includedApplications,
         builder.excludedApplications,
         builder.httpProxy,
         builder.allowAllAF,
@@ -41,10 +41,10 @@ open class ProtocolConfig protected constructor(
     open class Builder(blockingMode: Boolean) {
         internal val addresses: MutableSet<InetNetwork> = hashSetOf()
         internal val dnsServers: MutableSet<InetAddress> = hashSetOf()
-        internal val routes: MutableSet<InetNetwork> = hashSetOf()
-        internal val excludedRoutes: MutableSet<InetNetwork> = hashSetOf()
+        internal val routes: MutableSet<Route> = mutableSetOf()
         internal val includedAddresses: MutableSet<InetNetwork> = hashSetOf()
         internal val excludedAddresses: MutableSet<InetNetwork> = hashSetOf()
+        internal val includedApplications: MutableSet<String> = hashSetOf()
         internal val excludedApplications: MutableSet<String> = hashSetOf()
 
         internal var searchDomain: String? = null
@@ -74,19 +74,30 @@ open class ProtocolConfig protected constructor(
 
         fun setSearchDomain(domain: String) = apply { this.searchDomain = domain }
 
-        fun addRoute(route: InetNetwork) = apply { this.routes += route }
-        fun addRoutes(routes: Collection<InetNetwork>) = apply { this.routes += routes }
-        fun removeRoute(route: InetNetwork) = apply { this.routes.remove(route) }
+        fun addRoute(route: InetNetwork) = apply { this.routes += Route(route, true) }
+        fun addRoutes(routes: Collection<InetNetwork>) = apply { this.routes += routes.map { Route(it, true) } }
+
+        fun excludeRoute(route: InetNetwork) = apply { this.routes += Route(route, false) }
+        fun excludeRoutes(routes: Collection<InetNetwork>) = apply { this.routes += routes.map { Route(it, false) } }
+
+        fun removeRoute(route: InetNetwork) = apply { this.routes.removeIf { it.inetNetwork == route } }
         fun clearRoutes() = apply { this.routes.clear() }
 
-        fun excludeRoute(route: InetNetwork) = apply { this.excludedRoutes += route }
-        fun excludeRoutes(routes: Collection<InetNetwork>) = apply { this.excludedRoutes += routes }
+        fun prependRoutes(block: Builder.() -> Unit) = apply {
+            val savedRoutes = mutableListOf<Route>().apply { addAll(routes) }
+            routes.clear()
+            block()
+            routes.addAll(savedRoutes)
+        }
 
         fun includeAddress(addr: InetNetwork) = apply { this.includedAddresses += addr }
         fun includeAddresses(addresses: Collection<InetNetwork>) = apply { this.includedAddresses += addresses }
 
         fun excludeAddress(addr: InetNetwork) = apply { this.excludedAddresses += addr }
         fun excludeAddresses(addresses: Collection<InetNetwork>) = apply { this.excludedAddresses += addresses }
+
+        fun includeApplication(application: String) = apply { this.includedApplications += application }
+        fun includeApplications(applications: Collection<String>) = apply { this.includedApplications += applications }
 
         fun excludeApplication(application: String) = apply { this.excludedApplications += application }
         fun excludeApplications(applications: Collection<String>) = apply { this.excludedApplications += applications }
@@ -111,37 +122,46 @@ open class ProtocolConfig protected constructor(
                 // remove default routes, if any
                 removeRoute(InetNetwork("0.0.0.0", 0))
                 removeRoute(InetNetwork("::", 0))
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                    // for older versions of Android, add the default route to the excluded routes
-                    // to correctly build the excluded subnets list later
-                    excludeRoute(InetNetwork("0.0.0.0", 0))
+                removeRoute(InetNetwork("2000::", 3))
+                prependRoutes {
+                    addRoutes(includedAddresses)
                 }
-                addRoutes(includedAddresses)
             } else if (excludedAddresses.isNotEmpty()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    // default routes are required for split tunneling in newer versions of Android
+                prependRoutes {
                     addRoute(InetNetwork("0.0.0.0", 0))
-                    addRoute(InetNetwork("::", 0))
+                    addRoute(InetNetwork("2000::", 3))
+                    excludeRoutes(excludedAddresses)
                 }
-                excludeRoutes(excludedAddresses)
             }
         }
 
-        private fun processExcludedRoutes() {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && excludedRoutes.isNotEmpty()) {
-                // todo: rewrite, taking into account the current routes
-                // for older versions of Android, build a list of subnets without excluded routes
-                // and add them to routes
-                val ipRangeSet = IpRangeSet()
-                ipRangeSet.remove(IpRange("127.0.0.0", 8))
-                excludedRoutes.forEach {
-                    ipRangeSet.remove(IpRange(it))
+        private fun processRoutes() {
+            // replace ::/0 as it may cause LAN connection issues
+            val ipv6DefaultRoute = InetNetwork("::", 0)
+            if (routes.removeIf { it.include && it.inetNetwork == ipv6DefaultRoute }) {
+                prependRoutes {
+                    addRoute(InetNetwork("2000::", 3))
                 }
-                // remove default routes, if any
-                removeRoute(InetNetwork("0.0.0.0", 0))
-                removeRoute(InetNetwork("::", 0))
+            }
+            // for older versions of Android, build a list of subnets without excluded routes
+            // and add them to routes
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && routes.any { !it.include }) {
+                val ipRangeSet = IpRangeSet()
+                routes.forEach {
+                    if (it.include) ipRangeSet.add(IpRange(it.inetNetwork))
+                    else ipRangeSet.remove(IpRange(it.inetNetwork))
+                }
+                ipRangeSet.remove(IpRange("127.0.0.0", 8))
+                ipRangeSet.remove(IpRange("::1", 128))
+                routes.clear()
                 ipRangeSet.subnets().forEach(::addRoute)
-                addRoute(InetNetwork("2000::", 3))
+            }
+            // filter ipv4 and ipv6 loopback addresses
+            val ipv6Loopback = InetNetwork("::1", 128)
+            routes.removeIf {
+                it.include &&
+                    if (it.inetNetwork.isIpv4) it.inetNetwork.address.address[0] == 127.toByte()
+                    else it.inetNetwork == ipv6Loopback
             }
         }
 
@@ -159,7 +179,7 @@ open class ProtocolConfig protected constructor(
 
         protected fun configBuild() {
             processSplitTunneling()
-            processExcludedRoutes()
+            processRoutes()
             validate()
         }
 
@@ -171,3 +191,5 @@ open class ProtocolConfig protected constructor(
             Builder(blockingMode).apply(block).build()
     }
 }
+
+data class Route(val inetNetwork: InetNetwork, val include: Boolean)

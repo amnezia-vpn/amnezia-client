@@ -20,7 +20,8 @@ class WindowsDaemon final : public Daemon {
   WindowsDaemon();
   ~WindowsDaemon();
 
-  void prepareActivation(const InterfaceConfig& config) override;
+  void prepareActivation(const InterfaceConfig& config, int inetAdapterIndex = 0) override;
+  void activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex = 0) override;
 
  protected:
   bool run(Op op, const InterfaceConfig& config) override;
@@ -37,7 +38,6 @@ class WindowsDaemon final : public Daemon {
     Inactive,
   };
 
-  State m_state = Inactive;
   int m_inetAdapterIndex = -1;
 
   WireguardUtilsWindows* m_wgutils = nullptr;

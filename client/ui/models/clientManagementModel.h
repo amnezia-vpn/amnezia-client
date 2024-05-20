@@ -14,7 +14,18 @@ class ClientManagementModel : public QAbstractListModel
 public:
     enum Roles {
         ClientNameRole = Qt::UserRole + 1,
-        CreationDateRole
+        CreationDateRole,
+        LatestHandshakeRole,
+        DataReceivedRole,
+        DataSentRole
+    };
+
+    struct WgShowData
+    {
+        QString clientId;
+        QString latestHandshake;
+        QString dataReceived;
+        QString dataSent;
     };
 
     ClientManagementModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -23,12 +34,18 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    ErrorCode updateModel(DockerContainer container, ServerCredentials credentials);
+    ErrorCode updateModel(const DockerContainer container, const ServerCredentials &credentials,
+                          const QSharedPointer<ServerController> &serverController);
+    ErrorCode appendClient(const DockerContainer container, const ServerCredentials &credentials, const QJsonObject &containerConfig,
+                           const QString &clientName, const QSharedPointer<ServerController> &serverController);
     ErrorCode appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
-                           ServerCredentials credentials);
-    ErrorCode renameClient(const int row, const QString &userName, const DockerContainer container,
-                           ServerCredentials credentials, bool addTimeStamp = false);
-    ErrorCode revokeClient(const int index, const DockerContainer container, ServerCredentials credentials, const int serverIndex);
+                           const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController);
+    ErrorCode renameClient(const int row, const QString &userName, const DockerContainer container, const ServerCredentials &credentials,
+                           const QSharedPointer<ServerController> &serverController, bool addTimeStamp = false);
+    ErrorCode revokeClient(const int index, const DockerContainer container, const ServerCredentials &credentials, const int serverIndex,
+                           const QSharedPointer<ServerController> &serverController);
+    ErrorCode revokeClient(const QJsonObject &containerConfig, const DockerContainer container, const ServerCredentials &credentials,
+                           const int serverIndex, const QSharedPointer<ServerController> &serverController);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -41,11 +58,18 @@ private:
 
     void migration(const QByteArray &clientsTableString);
 
-    ErrorCode revokeOpenVpn(const int row, const DockerContainer container, ServerCredentials credentials, const int serverIndex);
-    ErrorCode revokeWireGuard(const int row, const DockerContainer container, ServerCredentials credentials);
+    ErrorCode revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials, const int serverIndex,
+                            const QSharedPointer<ServerController> &serverController);
+    ErrorCode revokeWireGuard(const int row, const DockerContainer container, const ServerCredentials &credentials,
+                              const QSharedPointer<ServerController> &serverController);
 
-    ErrorCode getOpenVpnClients(ServerController &serverController, DockerContainer container, ServerCredentials credentials, int &count);
-    ErrorCode getWireGuardClients(ServerController &serverController, DockerContainer container, ServerCredentials credentials, int &count);
+    ErrorCode getOpenVpnClients(const DockerContainer container, const ServerCredentials &credentials,
+                                const QSharedPointer<ServerController> &serverController, int &count);
+    ErrorCode getWireGuardClients(const DockerContainer container, const ServerCredentials &credentials,
+                                  const QSharedPointer<ServerController> &serverController, int &count);
+
+    ErrorCode wgShow(const DockerContainer container, const ServerCredentials &credentials,
+                     const QSharedPointer<ServerController> &serverController, std::vector<WgShowData> &data);
 
     QJsonArray m_clientsTable;
 

@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import "TextTypes"
+import "../Config"
 
 Item {
     id: root
@@ -27,6 +28,9 @@ Item {
     property string rootButtonBackgroundHoveredColor: "#1C1D21"
     property string rootButtonBackgroundPressedColor: "#1C1D21"
 
+    property string borderFocusedColor: "#D7D8DB"
+    property int borderFocusedWidth: 1
+
     property string rootButtonHoveredBorderColor: "#494B50"
     property string rootButtonDefaultBorderColor: "#2C2D30"
     property string rootButtonPressedBorderColor: "#D7D8DB"
@@ -42,44 +46,70 @@ Item {
     signal open
     signal close
 
+    function popupClosedFunc() {
+        if (!GC.isMobile()) {
+            this.forceActiveFocus()
+        }
+    }
+
+    property var parentFlickable
+    onFocusChanged: {
+        if (root.activeFocus) {
+            if (root.parentFlickable) {
+                root.parentFlickable.ensureVisible(root)
+            }
+        }
+    }
+
     implicitWidth: rootButtonContent.implicitWidth
     implicitHeight: rootButtonContent.implicitHeight
 
     onOpen: {
         menu.open()
-        rootButtonBackground.border.color = rootButtonPressedBorderColor
     }
 
     onClose: {
         menu.close()
-        rootButtonBackground.border.color = rootButtonDefaultBorderColor
-    }
-
-    onEnabledChanged: {
-        if (enabled) {
-            rootButtonBackground.color = rootButtonBackgroundColor
-            rootButtonBackground.border.color = rootButtonDefaultBorderColor
-        } else {
-            rootButtonBackground.color = "transparent"
-            rootButtonBackground.border.color = rootButtonHoveredBorderColor
-        }
     }
 
     Rectangle {
-        id: rootButtonBackground
+        id: focusBorder
+
+        color: "transparent"
+        border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
+        border.width: root.activeFocus ? root.borderFocusedWidth : 0
         anchors.fill: rootButtonContent
-
         radius: 16
-        color: root.enabled ? rootButtonBackgroundColor : "transparent"
-        border.color: root.enabled ? rootButtonDefaultBorderColor : rootButtonHoveredBorderColor
-        border.width: 1
 
-        Behavior on border.color {
-            PropertyAnimation { duration: 200 }
-        }
 
-        Behavior on color {
-            PropertyAnimation { duration: 200 }
+        Rectangle {
+            id: rootButtonBackground
+
+            anchors.fill: focusBorder
+            anchors.margins: root.activeFocus ? 2 : 0
+            radius: root.activeFocus ? 14 : 16
+
+            color: {
+                if (root.enabled) {
+                    if (root.pressed) {
+                        return root.rootButtonBackgroundPressedColor
+                    }
+                    return root.hovered ? root.rootButtonBackgroundHoveredColor : root.rootButtonBackgroundColor
+                } else {
+                    return "transparent"
+                }
+            }
+
+            border.color: rootButtonDefaultBorderColor
+            border.width: 1
+
+            Behavior on border.color {
+                PropertyAnimation { duration: 200 }
+            }
+
+            Behavior on color {
+                PropertyAnimation { duration: 200 }
+            }
         }
     }
 
@@ -107,6 +137,7 @@ Item {
             }
 
             ButtonTextType {
+                id: buttonText
                 Layout.fillWidth: true
 
                 horizontalAlignment: Text.AlignLeft
@@ -136,26 +167,6 @@ Item {
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: root.enabled ? true : false
 
-        onEntered: {
-            if (menu.isClosed) {
-                rootButtonBackground.border.color = rootButtonHoveredBorderColor
-                rootButtonBackground.color = rootButtonBackgroundHoveredColor
-            }
-        }
-
-        onExited: {
-            if (menu.isClosed) {
-                rootButtonBackground.border.color = rootButtonDefaultBorderColor
-                rootButtonBackground.color = rootButtonBackgroundColor
-            }
-        }
-
-        onPressed: {
-            if (menu.isClosed) {
-                rootButtonBackground.color = pressed ? rootButtonBackgroundPressedColor : entered ? rootButtonHoveredBorderColor : rootButtonDefaultBorderColor
-            }
-        }
-
         onClicked: {
             if (rootButtonClickedFunction && typeof rootButtonClickedFunction === "function") {
                 rootButtonClickedFunction()
@@ -173,10 +184,26 @@ Item {
         anchors.fill: parent
         expandedHeight: drawerParent.height * drawerHeight
 
+        onClosed: {
+            root.popupClosedFunc()
+        }
+
         expandedContent: Item {
             id: container
-
             implicitHeight: menu.expandedHeight
+
+            Connections {
+                target: menu
+                enabled: !GC.isMobile()
+                function onOpened() {
+                    focusItem.forceActiveFocus()
+                }
+            }
+
+            Item {
+                id: focusItem
+                KeyNavigation.tab: backButton
+            }
 
             ColumnLayout {
                 id: header
@@ -187,14 +214,15 @@ Item {
                 anchors.topMargin: 16
 
                 BackButtonType {
+                    id: backButton
                     backButtonImage: root.headerBackButtonImage
-                    backButtonFunction: function() {
-                        menu.close()
-                    }
+                    backButtonFunction: function() { menu.close() }
+                    KeyNavigation.tab: listViewLoader.item
                 }
             }
 
             FlickableType {
+                id: flickable
                 anchors.top: header.bottom
                 anchors.topMargin: 16
                 contentHeight: col.implicitHeight
@@ -221,9 +249,28 @@ Item {
                     Loader {
                         id: listViewLoader
                         sourceComponent: root.listView
+
+                        onLoaded: {
+                            listViewLoader.item.parentFlickable = flickable
+                            listViewLoader.item.lastItemTabClicked = function() {
+                                focusItem.forceActiveFocus()
+                            }
+                        }
                     }
                 }
             }
+        }
+    }
+
+    Keys.onEnterPressed: {
+        if (menu.isClosed) {
+            menu.open()
+        }
+    }
+
+    Keys.onReturnPressed: {
+        if (menu.isClosed) {
+            menu.open()
         }
     }
 }

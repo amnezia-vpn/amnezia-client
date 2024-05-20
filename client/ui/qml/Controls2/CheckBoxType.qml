@@ -23,6 +23,8 @@ CheckBox {
     property string checkedBorderColor: "#FBB26A"
     property string checkedBorderDisabledColor: "#402102"
 
+    property string borderFocusedColor: "#D7D8DB"
+
     property string checkedImageColor: "#FBB26A"
     property string pressedImageColor: "#A85809"
     property string defaultImageColor: "transparent"
@@ -30,7 +32,24 @@ CheckBox {
 
     property string imageSource: "qrc:/images/controls/check.svg"
 
+    property var parentFlickable
+    onFocusChanged: {
+        if (root.activeFocus) {
+            if (root.parentFlickable) {
+                root.parentFlickable.ensureVisible(root)
+            }
+        }
+    }
+
     hoverEnabled: enabled ? true : false
+    focusPolicy: Qt.NoFocus
+
+    background: Rectangle {
+        color: "transparent"
+        border.color: root.focus ? borderFocusedColor : "transparent"
+        border.width: 1
+        radius: 16
+    }
 
     indicator: Rectangle {
         id: background
@@ -59,7 +78,11 @@ CheckBox {
             width: 24
             height: 24
             color: "transparent"
-            border.color: root.checked ? (root.enabled ? checkedBorderColor : checkedBorderDisabledColor) : defaultBorderColor
+            border.color: root.checked ?
+                              (root.enabled ?
+                                   checkedBorderColor :
+                                   checkedBorderDisabledColor) :
+                              defaultBorderColor
             border.width: 1
             radius: 4
 
@@ -90,11 +113,11 @@ CheckBox {
     }
 
     contentItem: Item {
-        implicitWidth: content.implicitWidth
-        implicitHeight: content.implicitHeight
-
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.leftMargin: 8 + background.width
+
+        implicitHeight: content.implicitHeight
 
         ColumnLayout {
             id: content
@@ -130,6 +153,16 @@ CheckBox {
         cursorShape: Qt.PointingHandCursor
         enabled: false
     }
+
+
+    Keys.onEnterPressed: {
+        root.checked = !root.checked
+    }
+
+    Keys.onReturnPressed: {
+        root.checked = !root.checked
+    }
+
 }
 
 

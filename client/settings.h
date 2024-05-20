@@ -100,6 +100,9 @@ public:
     }
     void setSaveLogs(bool enabled);
 
+    QDateTime getLogEnableDate();
+    void setLogEnableDate(QDateTime date);
+
     enum RouteMode {
         VpnAllSites,
         VpnOnlyForwardSites,
@@ -111,6 +114,9 @@ public:
 
     RouteMode routeMode() const;
     void setRouteMode(RouteMode mode) { setValue("Conf/routeMode", mode); }
+
+    bool isSitesSplitTunnelingEnabled() const;
+    void setSitesSplitTunnelingEnabled(bool enabled);
 
     QVariantMap vpnSites(RouteMode mode) const
     {
@@ -190,6 +196,28 @@ public:
 
     void clearSettings();
 
+    enum AppsRouteMode {
+        VpnAllApps,
+        VpnOnlyForwardApps,
+        VpnAllExceptApps
+    };
+    Q_ENUM(AppsRouteMode)
+
+    QString appsRouteModeString(AppsRouteMode mode) const;
+
+    AppsRouteMode getAppsRouteMode() const;
+    void setAppsRouteMode(AppsRouteMode mode);
+
+    QVector<InstalledAppInfo> getVpnApps(AppsRouteMode mode) const;
+    void setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps);
+
+    bool isAppsSplitTunnelingEnabled() const;
+    void setAppsSplitTunnelingEnabled(bool enabled);
+
+    bool isKillSwitchEnabled() const;
+    void setKillSwitchEnabled(bool enabled);
+    QString getInstallationUuid(const bool needCreate);
+
 signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);
@@ -199,6 +227,8 @@ signals:
 private:
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void setValue(const QString &key, const QVariant &value);
+
+    void setInstallationUuid(const QString &uuid);
 
     mutable SecureQSettings m_settings;
 };

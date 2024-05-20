@@ -22,9 +22,44 @@ ListView {
     clip: true
     interactive: false
 
+    activeFocusOnTab: true
+    Keys.onTabPressed: {
+        if (currentIndex < this.count - 1) {
+            this.incrementCurrentIndex()
+        } else {
+            currentIndex = 0
+            lastItemTabClickedSignal()
+        }
+    }
+
+    onCurrentIndexChanged: {
+        if (visible) {
+            if (fl.contentHeight > fl.height) {
+                var item = this.currentItem
+                if (item.y < fl.height) {
+                    fl.contentY = item.y
+                } else if (item.y + item.height > fl.contentY + fl.height) {
+                    fl.contentY = item.y + item.height - fl.height
+                }
+            }
+        }
+    }
+
+    onVisibleChanged: {
+        if (visible) {
+            this.currentIndex = 0
+        }
+    }
+
     delegate: Item {
         implicitWidth: root.width
         implicitHeight: delegateContent.implicitHeight
+
+        onActiveFocusChanged: {
+            if (activeFocus) {
+                containerRadioButton.rightButton.forceActiveFocus()
+            }
+        }
 
         ColumnLayout {
             id: delegateContent
@@ -32,6 +67,7 @@ ListView {
             anchors.fill: parent
 
             LabelWithButtonType {
+                id: containerRadioButton
                 implicitWidth: parent.width
 
                 text: name
@@ -41,7 +77,7 @@ ListView {
                 clickedFunction: function() {
                     if (isInstalled) {
                         var containerIndex = root.model.mapToSource(index)
-                        ContainersModel.setCurrentlyProcessedContainerIndex(containerIndex)
+                        ContainersModel.setProcessedContainerIndex(containerIndex)
 
                         if (serviceType !== ProtocolEnum.Other) {
                             if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
@@ -52,21 +88,6 @@ ListView {
                         }
 
                         switch (containerIndex) {
-                        case ContainerEnum.OpenVpn: {
-                            OpenVpnConfigModel.updateModel(config)
-                            PageController.goToPage(PageEnum.PageProtocolOpenVpnSettings)
-                            break
-                        }
-                        case ContainerEnum.WireGuard: {
-                            WireGuardConfigModel.updateModel(config)
-                            PageController.goToPage(PageEnum.PageProtocolWireGuardSettings)
-                            break
-                        }
-                        case ContainerEnum.Awg: {
-                            AwgConfigModel.updateModel(config)
-                            PageController.goToPage(PageEnum.PageProtocolAwgSettings)
-                            break
-                        }
                         case ContainerEnum.Ipsec: {
                             ProtocolsModel.updateModel(config)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
@@ -92,7 +113,7 @@ ListView {
                         }
 
                     } else {
-                        ContainersModel.setCurrentlyProcessedContainerIndex(root.model.mapToSource(index))
+                        ContainersModel.setProcessedContainerIndex(root.model.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                     }

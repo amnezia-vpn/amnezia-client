@@ -9,14 +9,15 @@
 #include <QTextDocument>
 #include <QTimer>
 #include <QTranslator>
-
 #include <QQuickItem>
 
 #include "logger.h"
+#include "ui/models/installedAppsModel.h"
 #include "version.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
 #if defined(Q_OS_ANDROID)
+    #include "core/installedAppsImageProvider.h"
     #include "platforms/android/android_controller.h"
 #endif
 
@@ -30,8 +31,8 @@
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
 AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv)
 #else
-AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecondary, SingleApplication::Options options,
-                                       int timeout, const QString &userData)
+AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecondary, SingleApplication::Options options, int timeout,
+                                       const QString &userData)
     : SingleApplication(argc, argv, allowSecondary, options, timeout, userData)
 #endif
 {
@@ -44,16 +45,17 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecond
         s.setValue("permFixed", true);
     }
 
-    QString configLoc1 = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first() + "/"
-            + ORGANIZATION_NAME + "/" + APPLICATION_NAME + ".conf";
+    QString configLoc1 = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first() + "/" + ORGANIZATION_NAME + "/"
+            + APPLICATION_NAME + ".conf";
     QFile::setPermissions(configLoc1, QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 
-    QString configLoc2 = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first() + "/"
-            + ORGANIZATION_NAME + "/" + APPLICATION_NAME + "/" + APPLICATION_NAME + ".conf";
+    QString configLoc2 = QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first() + "/" + ORGANIZATION_NAME + "/"
+            + APPLICATION_NAME + "/" + APPLICATION_NAME + ".conf";
     QFile::setPermissions(configLoc2, QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 #endif
 
     m_settings = std::shared_ptr<Settings>(new Settings);
+    m_nam = new QNetworkAccessManager(this);
 }
 
 AmneziaApplication::~AmneziaApplication()
@@ -82,8 +84,7 @@ void AmneziaApplication::init()
 
     m_engine->rootContext()->setContextProperty("Debug", &Logger::Instance());
 
-    m_configurator = std::shared_ptr<VpnConfigurator>(new VpnConfigurator(m_settings, this));
-    m_vpnConnection.reset(new VpnConnection(m_settings, m_configurator));
+    m_vpnConnection.reset(new VpnConnection(m_settings));
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
 
@@ -96,25 +97,20 @@ void AmneziaApplication::init()
         qFatal("Android logging initialization failed");
     }
     AndroidController::instance()->setSaveLogs(m_settings->isSaveLogs());
-    connect(m_settings.get(), &Settings::saveLogsChanged,
-            AndroidController::instance(), &AndroidController::setSaveLogs);
+    connect(m_settings.get(), &Settings::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
 
     AndroidController::instance()->setScreenshotsEnabled(m_settings->isScreenshotsEnabled());
-    connect(m_settings.get(), &Settings::screenshotsEnabledChanged,
-            AndroidController::instance(), &AndroidController::setScreenshotsEnabled);
+    connect(m_settings.get(), &Settings::screenshotsEnabledChanged, AndroidController::instance(), &AndroidController::setScreenshotsEnabled);
 
-    connect(m_settings.get(), &Settings::serverRemoved,
-            AndroidController::instance(), &AndroidController::resetLastServer);
+    connect(m_settings.get(), &Settings::serverRemoved, AndroidController::instance(), &AndroidController::resetLastServer);
 
-    connect(m_settings.get(), &Settings::settingsCleared,
-            [](){ AndroidController::instance()->resetLastServer(-1); });
+    connect(m_settings.get(), &Settings::settingsCleared, []() { AndroidController::instance()->resetLastServer(-1); });
 
-    connect(AndroidController::instance(), &AndroidController::initConnectionState, this,
-            [this](Vpn::ConnectionState state) {
-                m_connectionController->onConnectionStateChanged(state);
-                if (m_vpnConnection)
-                    m_vpnConnection->restoreConnection();
-            });
+    connect(AndroidController::instance(), &AndroidController::initConnectionState, this, [this](Vpn::ConnectionState state) {
+        m_connectionController->onConnectionStateChanged(state);
+        if (m_vpnConnection)
+            m_vpnConnection->restoreConnection();
+    });
     if (!AndroidController::instance()->initialize()) {
         qFatal("Android controller initialization failed");
     }
@@ -124,6 +120,8 @@ void AmneziaApplication::init()
         m_importController->extractConfigFromData(data);
         m_pageController->goToPageViewConfig();
     });
+
+    m_engine->addImageProvider(QLatin1String("installedAppImage"), new InstalledAppsImageProvider);
 #endif
 
 #ifdef Q_OS_IOS
@@ -140,28 +138,24 @@ void AmneziaApplication::init()
         m_settingsController->importBackupFromOutside(filePath);
     });
 
-    QTimer::singleShot(0, this, [this](){
-        AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled());
-    });
+    QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled()); });
 
-    connect(m_settings.get(), &Settings::screenshotsEnabledChanged, [](bool enabled) {
-        AmneziaVPN::toggleScreenshots(enabled);
-    });
+    connect(m_settings.get(), &Settings::screenshotsEnabledChanged, [](bool enabled) { AmneziaVPN::toggleScreenshots(enabled); });
 #endif
 
+#ifndef Q_OS_ANDROID
     m_notificationHandler.reset(NotificationHandler::create(nullptr));
 
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, m_notificationHandler.get(),
             &NotificationHandler::setConnectionState);
 
-    connect(m_notificationHandler.get(), &NotificationHandler::raiseRequested, m_pageController.get(),
-            &PageController::raiseMainWindow);
+    connect(m_notificationHandler.get(), &NotificationHandler::raiseRequested, m_pageController.get(), &PageController::raiseMainWindow);
     connect(m_notificationHandler.get(), &NotificationHandler::connectRequested, m_connectionController.get(),
-            &ConnectionController::openConnection);
+            static_cast<void (ConnectionController::*)()>(&ConnectionController::openConnection));
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
             &ConnectionController::closeConnection);
-    connect(this, &AmneziaApplication::translationsUpdated, m_notificationHandler.get(),
-            &NotificationHandler::onTranslationsUpdated);
+    connect(this, &AmneziaApplication::translationsUpdated, m_notificationHandler.get(), &NotificationHandler::onTranslationsUpdated);
+#endif
 
     m_engine->load(url);
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
@@ -234,7 +228,8 @@ void AmneziaApplication::registerTypes()
     qmlRegisterSingletonType(QUrl("qrc:/ui/qml/Filters/ContainersModelFilters.qml"), "ContainersModelFilters", 1, 0,
                              "ContainersModelFilters");
 
-    //
+    qmlRegisterType<InstalledAppsModel>("InstalledAppsModel", 1, 0, "InstalledAppsModel");
+
     Vpn::declareQmlVpnConnectionStateEnum();
     PageLoader::declareQmlPageEnum();
 }
@@ -311,8 +306,7 @@ void AmneziaApplication::initModels()
 
     m_serversModel.reset(new ServersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
-    connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(),
-            &ContainersModel::updateModel);
+    connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(), &ContainersModel::updateModel);
     connect(m_serversModel.get(), &ServersModel::defaultServerContainersUpdated, m_defaultServerContainersModel.get(),
             &ContainersModel::updateModel);
     m_serversModel->resetModel();
@@ -324,6 +318,9 @@ void AmneziaApplication::initModels()
 
     m_sitesModel.reset(new SitesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
+
+    m_appSplitTunnelingModel.reset(new AppSplitTunnelingModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("AppSplitTunnelingModel", m_appSplitTunnelingModel.get());
 
     m_protocolsModel.reset(new ProtocolsModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
@@ -343,6 +340,9 @@ void AmneziaApplication::initModels()
     m_awgConfigModel.reset(new AwgConfigModel(this));
     m_engine->rootContext()->setContextProperty("AwgConfigModel", m_awgConfigModel.get());
 
+    m_xrayConfigModel.reset(new XrayConfigModel(this));
+    m_engine->rootContext()->setContextProperty("XrayConfigModel", m_xrayConfigModel.get());
+
 #ifdef Q_OS_WINDOWS
     m_ikev2ConfigModel.reset(new Ikev2ConfigModel(this));
     m_engine->rootContext()->setContextProperty("Ikev2ConfigModel", m_ikev2ConfigModel.get());
@@ -355,28 +355,27 @@ void AmneziaApplication::initModels()
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
     connect(m_clientManagementModel.get(), &ClientManagementModel::adminConfigRevoked, m_serversModel.get(),
             &ServersModel::clearCachedProfile);
-
-    connect(m_configurator.get(), &VpnConfigurator::newVpnConfigCreated, this,
-            [this](const QString &clientId, const QString &clientName, const DockerContainer container,
-                   ServerCredentials credentials) {
-                m_serversModel->reloadDefaultServerContainerConfig();
-                m_clientManagementModel->appendClient(clientId, clientName, container, credentials);
-                emit m_configurator->clientModelUpdated();
-            });
 }
 
 void AmneziaApplication::initControllers()
 {
-    m_connectionController.reset(new ConnectionController(m_serversModel, m_containersModel, m_vpnConnection));
+    m_connectionController.reset(
+            new ConnectionController(m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_settings));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
-    connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(),
-            &ConnectionController::onTranslationsUpdated);
+    connect(m_connectionController.get(), &ConnectionController::connectionErrorOccurred, this, [this](const QString &errorMessage) {
+        emit m_pageController->showErrorMessage(errorMessage);
+        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+    });
+    connect(m_connectionController.get(), &ConnectionController::connectButtonClicked, m_connectionController.get(),
+            &ConnectionController::toggleConnection, Qt::QueuedConnection);
+
+    connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
 
     m_pageController.reset(new PageController(m_serversModel, m_settings));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
 
-    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_settings));
+    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_settings));
     m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
     connect(m_installController.get(), &InstallController::passphraseRequestStarted, m_pageController.get(),
             &PageController::showPassphraseRequestDrawer);
@@ -388,36 +387,23 @@ void AmneziaApplication::initControllers()
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_clientManagementModel,
-                                                  m_settings, m_configurator));
+    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_clientManagementModel, m_settings));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
     m_settingsController.reset(
-            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_settings));
+            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
     if (m_settingsController->isAutoConnectEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
     }
-    connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled, m_serversModel.get(),
-            &ServersModel::toggleAmneziaDns);
+    connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled, m_serversModel.get(), &ServersModel::toggleAmneziaDns);
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
 
+    m_appSplitTunnelingController.reset(new AppSplitTunnelingController(m_settings, m_appSplitTunnelingModel));
+    m_engine->rootContext()->setContextProperty("AppSplitTunnelingController", m_appSplitTunnelingController.get());
+
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
-
-    m_apiController.reset(new ApiController(m_serversModel, m_containersModel));
-    m_engine->rootContext()->setContextProperty("ApiController", m_apiController.get());
-    connect(m_apiController.get(), &ApiController::updateStarted, this,
-            [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Connecting); });
-    connect(m_apiController.get(), &ApiController::errorOccurred, this, [this](const QString &errorMessage) {
-        if (m_connectionController->isConnectionInProgress()) {
-            emit m_pageController->showErrorMessage(errorMessage);
-        }
-
-        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-    });
-    connect(m_apiController.get(), &ApiController::updateFinished, m_connectionController.get(),
-            &ConnectionController::toggleConnection);
 }

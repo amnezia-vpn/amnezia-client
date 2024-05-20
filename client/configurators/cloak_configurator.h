@@ -7,14 +7,14 @@
 
 using namespace amnezia;
 
-class CloakConfigurator : ConfiguratorBase
+class CloakConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    CloakConfigurator(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    CloakConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent = nullptr);
 
-    QString genCloakConfig(const ServerCredentials &credentials, DockerContainer container,
-        const QJsonObject &containerConfig, ErrorCode *errorCode = nullptr);
+    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
+                         const QJsonObject &containerConfig, ErrorCode &errorCode);
 };
 
 #endif // CLOAK_CONFIGURATOR_H

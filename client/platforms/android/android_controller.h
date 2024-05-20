@@ -2,6 +2,7 @@
 #define ANDROID_CONTROLLER_H
 
 #include <QJniObject>
+#include <QPixmap>
 
 #include "protocols/vpnprotocol.h"
 
@@ -31,7 +32,6 @@ public:
     ErrorCode start(const QJsonObject &vpnConfig);
     void stop();
     void resetLastServer(int serverIndex);
-    void setNotificationText(const QString &title, const QString &message, int timerSec);
     void saveFile(const QString &fileName, const QString &data);
     QString openFile(const QString &filter);
     bool isCameraPresent();
@@ -40,6 +40,11 @@ public:
     void exportLogsFile(const QString &fileName);
     void clearLogs();
     void setScreenshotsEnabled(bool enabled);
+    void minimizeApp();
+    QJsonArray getAppList();
+    QPixmap getAppIcon(const QString &package, QSize *size, const QSize &requestedSize);
+    bool isNotificationPermissionGranted();
+    void requestNotificationPermission();
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
@@ -50,6 +55,7 @@ signals:
     void serviceDisconnected();
     void serviceError();
     void vpnPermissionRejected();
+    void notificationStateChanged();
     void vpnStateChanged(ConnectionState state);
     void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void fileOpened(QString uri);
@@ -77,6 +83,7 @@ private:
     static void onServiceDisconnected(JNIEnv *env, jobject thiz);
     static void onServiceError(JNIEnv *env, jobject thiz);
     static void onVpnPermissionRejected(JNIEnv *env, jobject thiz);
+    static void onNotificationStateChanged(JNIEnv *env, jobject thiz);
     static void onVpnStateChanged(JNIEnv *env, jobject thiz, jint stateCode);
     static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz, jstring data);

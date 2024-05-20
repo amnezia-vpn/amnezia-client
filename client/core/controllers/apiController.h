@@ -4,29 +4,28 @@
 #include <QObject>
 
 #include "configurators/openvpn_configurator.h"
-#include "ui/models/containers_model.h"
-#include "ui/models/servers_model.h"
+
+#ifdef Q_OS_IOS
+    #include "platforms/ios/ios_controller.h"
+#endif
 
 class ApiController : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit ApiController(const QSharedPointer<ServersModel> &serversModel,
-                           const QSharedPointer<ContainersModel> &containersModel, QObject *parent = nullptr);
+    explicit ApiController(QObject *parent = nullptr);
 
 public slots:
-    void updateServerConfigFromApi();
-
-    void clearApiConfig();
+    void updateServerConfigFromApi(const QString &installationUuid, const int serverIndex, QJsonObject serverConfig);
 
 signals:
-    void updateStarted();
-    void updateFinished(bool isConfigUpdateStarted);
     void errorOccurred(const QString &errorMessage);
+    void configUpdated(const bool updateConfig, const QJsonObject &config, const int serverIndex);
 
 private:
-    struct ApiPayloadData {
+    struct ApiPayloadData
+    {
         OpenVpnConfigurator::ConnectionData certRequest;
 
         QString wireGuardClientPrivKey;
@@ -36,11 +35,6 @@ private:
     ApiPayloadData generateApiPayloadData(const QString &protocol);
     QJsonObject fillApiPayload(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData);
     void processApiConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, QString &config);
-
-    QSharedPointer<ServersModel> m_serversModel;
-    QSharedPointer<ContainersModel> m_containersModel;
-
-    bool m_isConfigUpdateStarted = false;
 };
 
 #endif // APICONTROLLER_H

@@ -15,10 +15,17 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.portTextField.textField
+    defaultActiveFocusItem: listview.currentItem.focusItemId.enabled ?
+                                listview.currentItem.focusItemId.textField :
+                                focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
 
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -27,12 +34,16 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listview.currentItem.focusItemId.enabled ?
+                                   listview.currentItem.focusItemId.textField :
+                                   focusItem
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -60,7 +71,11 @@ PageType {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
-                    property alias portTextField: portTextField
+                    property var focusItemId: portTextField.enabled ?
+                                                    portTextField :
+                                                    cipherDropDown.enabled ?
+                                                        cipherDropDown :
+                                                        saveRestartButton
 
                     ColumnLayout {
                         id: col
@@ -86,6 +101,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
+                            enabled: isPortEditable
+
                             headerText: qsTr("Port")
                             textFieldText: port
                             textField.maximumLength: 5
@@ -97,7 +114,7 @@ PageType {
                                 }
                             }
 
-                            KeyNavigation.tab: saveRestartButton
+                            KeyNavigation.tab: cipherDropDown
                         }
 
                         DropDownType {
@@ -105,10 +122,13 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 20
 
+                            enabled: isCipherEditable
+
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")
 
                             drawerParent: root
+                            KeyNavigation.tab: saveRestartButton
 
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView
@@ -148,10 +168,19 @@ PageType {
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
+                            enabled: isPortEditable | isCipherEditable
+
                             text: qsTr("Save")
+                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()
+
+                                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                    return
+                                }
+
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(ShadowSocksConfigModel.getConfig())
                             }

@@ -37,6 +37,8 @@ QVariant ShadowSocksConfigModel::data(const QModelIndex &index, int role) const
     case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort);
     case Roles::CipherRole:
         return m_protocolConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher);
+    case Roles::IsPortEditableRole: return m_container == DockerContainer::ShadowSocks ? true : false;
+    case Roles::IsCipherEditableRole: return m_container == DockerContainer::ShadowSocks ? true : false;
     }
 
     return QVariant();
@@ -71,6 +73,8 @@ QHash<int, QByteArray> ShadowSocksConfigModel::roleNames() const
 
     roles[PortRole] = "port";
     roles[CipherRole] = "cipher";
+    roles[IsPortEditableRole] = "isPortEditable";
+    roles[IsCipherEditableRole] = "isCipherEditable";
 
     return roles;
 }

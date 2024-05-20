@@ -15,9 +15,14 @@ Item {
 
     property var clickedFunction
 
+    property string buttonImageSource
     property string rightImageSource
     property string leftImageSource
     property bool isLeftImageHoverEnabled: true //todo separete this qml file to 3
+
+    property alias rightButton: rightImage
+    property alias eyeButton: eyeImage
+    property FlickableType parentFlickable
 
     property string textColor: "#d7d8db"
     property string textDisabledColor: "#878B91"
@@ -25,12 +30,74 @@ Item {
     property string descriptionDisabledColor: "#494B50"
     property real textOpacity: 1.0
 
+    property string borderFocusedColor: "#D7D8DB"
+    property int borderFocusedWidth: 1
+
     property string rightImageColor: "#d7d8db"
 
     property bool descriptionOnTop: false
+    property bool hideDescription: true
 
     implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
     implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
+
+    onFocusChanged: {
+        if (root.activeFocus) {
+            if (root.parentFlickable) {
+                root.parentFlickable.ensureVisible(root)
+            }
+        }
+    }
+
+    Connections {
+        target: rightImage
+        function onFocusChanged() {
+            if (rightImage.activeFocus) {
+                if (root.parentFlickable) {
+                    root.parentFlickable.ensureVisible(root)
+                }
+            }
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        hoverEnabled: root.enabled
+
+        onEntered: {
+            if (rightImageSource) {
+                rightImageBackground.color = rightImage.hoveredColor
+            } else if (leftImageSource) {
+                leftImageBackground.color = rightImage.hoveredColor
+            }
+            root.textOpacity = 0.8
+        }
+
+        onExited: {
+            if (rightImageSource) {
+                rightImageBackground.color = rightImage.defaultColor
+            } else if (leftImageSource) {
+                leftImageBackground.color = rightImage.defaultColor
+            }
+            root.textOpacity = 1
+        }
+
+        onPressedChanged: {
+            if (rightImageSource) {
+                rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
+            } else if (leftImageSource) {
+                leftImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
+            }
+            root.textOpacity = 0.7
+        }
+
+        onClicked: {
+            if (clickedFunction && typeof clickedFunction === "function") {
+                clickedFunction()
+            }
+        }
+    }
 
     RowLayout {
         id: content
@@ -104,7 +171,7 @@ Item {
             CaptionTextType {
                 id: description
 
-                text: root.descriptionText
+                text: (eyeImage.visible && hideDescription) ? replaceWithAsterisks(root.descriptionText) : root.descriptionText
                 color: {
                     if (root.enabled) {
                         return root.descriptionOnTop ? root.textColor : root.descriptionColor
@@ -129,6 +196,47 @@ Item {
                 Behavior on opacity {
                     PropertyAnimation { duration: 200 }
                 }
+
+                function replaceWithAsterisks(input) {
+                    return '*'.repeat(input.length)
+                }
+            }
+        }
+
+        ImageButtonType {
+            id: eyeImage
+            visible: buttonImageSource !== ""
+
+            implicitWidth: 40
+            implicitHeight: 40
+
+            hoverEnabled: true
+            image: buttonImageSource
+            imageColor: rightImageColor
+
+            Layout.alignment: Qt.AlignRight
+
+            Rectangle {
+                id: eyeImageBackground
+                anchors.fill: parent
+                radius: 12
+                color: "transparent"
+
+                Behavior on color {
+                    PropertyAnimation { duration: 200 }
+                }
+            }
+
+            onClicked: {
+                hideDescription = !hideDescription
+            }
+
+            Keys.onEnterPressed: {
+                clicked()
+            }
+
+            Keys.onReturnPressed: {
+                clicked()
             }
         }
 
@@ -155,6 +263,11 @@ Item {
                     PropertyAnimation { duration: 200 }
                 }
             }
+            onClicked: {
+                if (clickedFunction && typeof clickedFunction === "function") {
+                    clickedFunction()
+                }
+            }
         }
     }
 
@@ -163,48 +276,24 @@ Item {
         anchors.fill: root
         color: "transparent"
 
+        border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
+        border.width: root.activeFocus ? root.borderFocusedWidth : 0
+
 
         Behavior on color {
             PropertyAnimation { duration: 200 }
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        hoverEnabled: root.enabled
-
-        onEntered: {
-            if (rightImageSource) {
-                rightImageBackground.color = rightImage.hoveredColor
-            } else if (leftImageSource) {
-                leftImageBackground.color = rightImage.hoveredColor
-            }
-            root.textOpacity = 0.8
+    Keys.onEnterPressed: {
+        if (clickedFunction && typeof clickedFunction === "function") {
+            clickedFunction()
         }
+    }
 
-        onExited: {
-            if (rightImageSource) {
-                rightImageBackground.color = rightImage.defaultColor
-            } else if (leftImageSource) {
-                leftImageBackground.color = rightImage.defaultColor
-            }
-            root.textOpacity = 1
-        }
-
-        onPressedChanged: {
-            if (rightImageSource) {
-                rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
-            } else if (leftImageSource) {
-                leftImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
-            }
-            root.textOpacity = 0.7
-        }
-
-        onClicked: {
-            if (clickedFunction && typeof clickedFunction === "function") {
-                clickedFunction()
-            }
+    Keys.onReturnPressed: {
+        if (clickedFunction && typeof clickedFunction === "function") {
+            clickedFunction()
         }
     }
 }

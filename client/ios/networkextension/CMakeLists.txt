@@ -84,9 +84,18 @@ target_sources(networkextension PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPNAdapterDelegate.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+WireGuard.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPN.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/WGConfig.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
+)
+
+target_sources(networkextension PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
+)
+
+set_property(TARGET networkextension APPEND PROPERTY RESOURCE
+    ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
 )
 
 ## Build wireguard-go-version.h

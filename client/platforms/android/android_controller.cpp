@@ -2,6 +2,9 @@
 #include <QJsonDocument>
 #include <QQmlFile>
 #include <QEventLoop>
+#include <QImage>
+
+#include <android/bitmap.h>
 
 #include "android_controller.h"
 #include "android_utils.h"
@@ -90,6 +93,7 @@ bool AndroidController::initialize()
         {"onServiceDisconnected", "()V", reinterpret_cast<void *>(onServiceDisconnected)},
         {"onServiceError", "()V", reinterpret_cast<void *>(onServiceError)},
         {"onVpnPermissionRejected", "()V", reinterpret_cast<void *>(onVpnPermissionRejected)},
+        {"onNotificationStateChanged", "()V", reinterpret_cast<void *>(onNotificationStateChanged)},
         {"onVpnStateChanged", "(I)V", reinterpret_cast<void *>(onVpnStateChanged)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
@@ -170,14 +174,6 @@ QString AndroidController::openFile(const QString &filter)
     return fileName;
 }
 
-void AndroidController::setNotificationText(const QString &title, const QString &message, int timerSec)
-{
-    callActivityMethod("setNotificationText", "(Ljava/lang/String;Ljava/lang/String;I)V",
-                       QJniObject::fromString(title).object<jstring>(),
-                       QJniObject::fromString(message).object<jstring>(),
-                       (jint) timerSec);
-}
-
 bool AndroidController::isCameraPresent()
 {
     return callActivityMethod<jboolean>("isCameraPresent", "()Z");
@@ -207,6 +203,61 @@ void AndroidController::clearLogs()
 void AndroidController::setScreenshotsEnabled(bool enabled)
 {
     callActivityMethod("setScreenshotsEnabled", "(Z)V", enabled);
+}
+
+void AndroidController::minimizeApp()
+{
+    callActivityMethod("minimizeApp", "()V");
+}
+
+QJsonArray AndroidController::getAppList()
+{
+    QJniObject appList = callActivityMethod<jstring>("getAppList", "()Ljava/lang/String;");
+    QJsonArray jsonAppList = QJsonDocument::fromJson(appList.toString().toUtf8()).array();
+    return jsonAppList;
+}
+
+QPixmap AndroidController::getAppIcon(const QString &package, QSize *size, const QSize &requestedSize)
+{
+    QJniObject bitmap = callActivityMethod<jobject>("getAppIcon", "(Ljava/lang/String;II)Landroid/graphics/Bitmap;",
+                                                    QJniObject::fromString(package).object<jstring>(),
+                                                    requestedSize.width(), requestedSize.height());
+
+    QJniEnvironment env;
+    AndroidBitmapInfo info;
+    if (AndroidBitmap_getInfo(env.jniEnv(), bitmap.object(), &info) != ANDROID_BITMAP_RESULT_SUCCESS) return {};
+
+    void *pixels;
+    if (AndroidBitmap_lockPixels(env.jniEnv(), bitmap.object(), &pixels) != ANDROID_BITMAP_RESULT_SUCCESS) return {};
+
+    int width = info.width;
+    int height = info.height;
+
+    size->setWidth(width);
+    size->setHeight(height);
+
+    QImage image(width, height, QImage::Format_RGBA8888);
+    if (info.stride == uint32_t(image.bytesPerLine())) {
+        memcpy((void *) image.constBits(), pixels, info.stride * height);
+    } else {
+        auto *bmpPtr = static_cast<uchar *>(pixels);
+        for (int i = 0; i < height; i++, bmpPtr += info.stride)
+            memcpy((void *) image.constScanLine(i), bmpPtr, width);
+    }
+
+    if (AndroidBitmap_unlockPixels(env.jniEnv(), bitmap.object()) != ANDROID_BITMAP_RESULT_SUCCESS) return {};
+
+    return QPixmap::fromImage(image);
+}
+
+bool AndroidController::isNotificationPermissionGranted()
+{
+    return callActivityMethod<jboolean>("isNotificationPermissionGranted", "()Z");
+}
+
+void AndroidController::requestNotificationPermission()
+{
+    callActivityMethod("requestNotificationPermission", "()V");
 }
 
 // Moving log processing to the Android side
@@ -359,6 +410,15 @@ void AndroidController::onVpnPermissionRejected(JNIEnv *env, jobject thiz)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->vpnPermissionRejected();
+}
+
+// static
+void AndroidController::onNotificationStateChanged(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->notificationStateChanged();
 }
 
 // static

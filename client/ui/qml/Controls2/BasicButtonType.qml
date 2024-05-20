@@ -26,18 +26,29 @@ Button {
 
     property bool squareLeftSide: false
 
+    property FlickableType parentFlickable
+
     property var clickedFunc
 
     implicitHeight: 56
 
     hoverEnabled: true
+    focusPolicy: Qt.TabFocus
+
+    onFocusChanged: {
+        if (root.activeFocus) {
+            if (root.parentFlickable) {
+                root.parentFlickable.ensureVisible(this)
+            }
+        }
+    }
 
     background: Rectangle {
         id: focusBorder
 
         color: "transparent"
         border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
-        border.width: root.activeFocus ? root.borderFocusedWidth : "transparent"
+        border.width: root.activeFocus ? root.borderFocusedWidth : 0
 
         anchors.fill: parent
 

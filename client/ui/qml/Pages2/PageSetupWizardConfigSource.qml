@@ -22,6 +22,8 @@ PageType {
         }
     }
 
+    defaultActiveFocusItem: focusItem
+
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -37,8 +39,15 @@ PageType {
 
             spacing: 0
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: backButton
+            }
+
             BackButtonType {
+                id: backButton
                 Layout.topMargin: 20
+                KeyNavigation.tab: fileButton.rightButton
             }
 
             HeaderType {
@@ -61,6 +70,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: fileButton
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
@@ -68,9 +78,11 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
 
+                KeyNavigation.tab: qrButton.visible ? qrButton.rightButton : textButton.rightButton
+
                 clickedFunction: function() {
-                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.backup)" :
-                                                                       "Config files (*.vpn *.ovpn *.conf)"
+                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
+                                                                       "Config files (*.vpn *.ovpn *.conf *.json)"
                     var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
                     if (fileName !== "") {
                         if (ImportController.extractConfigFromFile(fileName)) {
@@ -83,12 +95,15 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                id: qrButton
                 Layout.fillWidth: true
                 visible: SettingsController.isCameraPresent()
 
                 text: qsTr("QR-code")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/qr-code.svg"
+
+                KeyNavigation.tab: textButton.rightButton
 
                 clickedFunction: function() {
                     ImportController.startDecodingQr()
@@ -103,11 +118,14 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: textButton
                 Layout.fillWidth: true
 
                 text: qsTr("Key as text")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/text-cursor.svg"
+
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSetupWizardTextKey)

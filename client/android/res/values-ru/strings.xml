@@ -1,5 +1,26 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="connecting">Подключение</string>
-    <string name="disconnecting">Отключение</string>
+    <string name="disconnected">Не подключено</string>
+    <string name="connected">Подключено</string>
+    <string name="connecting">Подключение…</string>
+    <string name="disconnecting">Отключение…</string>
+    <string name="reconnecting">Переподключение…</string>
+    <string name="connect">Подключиться</string>
+    <string name="disconnect">Отключиться</string>
+    <string name="ok">ОК</string>
+    <string name="cancel">Отмена</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+
+    <string name="vpnGranted">VPN-подключение разрешено</string>
+    <string name="vpnSetupFailed">Ошибка настройки VPN</string>
+    <string name="vpnSetupFailedMessage">Чтобы подключиться к AmneziaVPN необходимо:\n\n- Разрешить приложению подключаться к сети VPN\n- Отключить функцию \"Постоянная VPN\" для всех остальных VPN-приложений в системных настройках VPN</string>
+    <string name="openVpnSettings">Открыть настройки VPN</string>
+
+    <string name="notificationChannelDescription">Уведомления сервиса AmneziaVPN</string>
+    <string name="notificationDialogTitle">Сервис AmneziaVPN</string>
+    <string name="notificationDialogMessage">Показывать статус VPN в строке состояния?</string>
+    <string name="notificationSettingsDialogTitle">Настройки уведомлений</string>
+    <string name="notificationSettingsDialogMessage">Для показа уведомлений необходимо включить уведомления в системных настройках</string>
+    <string name="openNotificationSettings">Открыть настройки уведомлений</string>
 </resources>

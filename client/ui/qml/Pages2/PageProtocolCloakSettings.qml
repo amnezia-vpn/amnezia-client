@@ -17,8 +17,13 @@ PageType {
 
     defaultActiveFocusItem: listview.currentItem.trafficFromField.textField
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -27,12 +32,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listview.currentItem.trafficFromField.textField
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -123,7 +130,7 @@ PageType {
                                 }
                             }
 
-                            KeyNavigation.tab: saveRestartButton
+                            KeyNavigation.tab: cipherDropDown
                         }
 
                         DropDownType {
@@ -135,6 +142,7 @@ PageType {
                             headerText: qsTr("Cipher")
 
                             drawerParent: root
+                            KeyNavigation.tab: saveRestartButton
 
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView
@@ -175,9 +183,16 @@ PageType {
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save")
+                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()
+
+                                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                    return
+                                }
+
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(CloakConfigModel.getConfig())
                             }

@@ -50,11 +50,18 @@ public:
 
     void getBackendLogs(std::function<void(const QString &)> &&callback);
     void checkStatus();
+
+    bool shareText(const QStringList &filesToSend);
+    QString openFile();
+
+    void requestInetAccess();
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void importConfigFromOutside(const QString);
     void importBackupFromOutside(const QString);
+
+    void finished();
 
 protected slots:
 

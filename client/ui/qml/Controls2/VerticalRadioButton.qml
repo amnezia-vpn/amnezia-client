@@ -20,15 +20,22 @@ RadioButton {
     property string textColor: "#D7D8DB"
     property string selectedTextColor: "#FBB26A"
 
+    property string borderFocusedColor: "#D7D8DB"
+    property int borderFocusedWidth: 1
+
     property string imageSource
     property bool showImage
 
     hoverEnabled: true
+    focusPolicy: Qt.TabFocus
 
     indicator: Rectangle {
         id: background
 
         anchors.verticalCenter: parent.verticalCenter
+
+        border.color: root.focus ? root.borderFocusedColor : "transparent"
+        border.width: root.focus ? root.borderFocusedWidth : 0
 
         implicitWidth: 56
         implicitHeight: 56
@@ -48,6 +55,10 @@ RadioButton {
         }
 
         Behavior on color {
+            PropertyAnimation { duration: 200 }
+        }
+
+        Behavior on border.color {
             PropertyAnimation { duration: 200 }
         }
 
@@ -89,11 +100,11 @@ RadioButton {
     }
 
     contentItem: Item {
-        implicitWidth: content.implicitWidth
-        implicitHeight: content.implicitHeight
-
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.leftMargin: 8 + background.width
+
+        implicitHeight: content.implicitHeight
 
         ColumnLayout {
             id: content

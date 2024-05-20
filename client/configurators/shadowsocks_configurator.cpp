@@ -1,30 +1,26 @@
 #include "shadowsocks_configurator.h"
 
 #include <QFile>
-#include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonObject>
 
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
 
-ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings, QObject *parent):
-    ConfiguratorBase(settings, parent)
+ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
+                                                 QObject *parent)
+    : ConfiguratorBase(settings, serverController, parent)
 {
-
 }
 
-QString ShadowSocksConfigurator::genShadowSocksConfig(const ServerCredentials &credentials,
-    DockerContainer container, const QJsonObject &containerConfig, ErrorCode *errorCode)
+QString ShadowSocksConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                              const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
-    ErrorCode e = ErrorCode::NoError;
-    ServerController serverController(m_settings);
-
-    QString ssKey = serverController.getTextFileFromContainer(container, credentials,
-                                                              amnezia::protocols::shadowsocks::ssKeyPath, &e);
+    QString ssKey =
+            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::shadowsocks::ssKeyPath, errorCode);
     ssKey.replace("\n", "");
 
-    if (e) {
-        if (errorCode) *errorCode = e;
+    if (errorCode != ErrorCode::NoError) {
         return "";
     }
 
@@ -36,10 +32,9 @@ QString ShadowSocksConfigurator::genShadowSocksConfig(const ServerCredentials &c
     config.insert("timeout", 60);
     config.insert("method", "$SHADOWSOCKS_CIPHER");
 
+    QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(),
+                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));
 
-    QString textCfg = serverController.replaceVars(QJsonDocument(config).toJson(),
-                                                   serverController.genVarsForScript(credentials, container, containerConfig));
-
-    //qDebug().noquote() << textCfg;
+    // qDebug().noquote() << textCfg;
     return textCfg;
 }

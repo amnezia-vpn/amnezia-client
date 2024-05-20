@@ -29,6 +29,7 @@ namespace PageLoader
         PageSettingsAbout,
         PageSettingsLogging,
         PageSettingsSplitTunneling,
+        PageSettingsAppSplitTunneling,
 
         PageServiceSftpSettings,
         PageServiceTorWebsiteSettings,
@@ -48,6 +49,7 @@ namespace PageLoader
         PageProtocolOpenVpnSettings,
         PageProtocolShadowSocksSettings,
         PageProtocolCloakSettings,
+        PageProtocolXraySettings,        
         PageProtocolWireGuardSettings,
         PageProtocolAwgSettings,
         PageProtocolIKev2Settings,
@@ -75,6 +77,7 @@ public slots:
     QString getPagePath(PageLoader::PageEnum page);
 
     void closeWindow();
+    void hideWindow();
     void keyPressEvent(Qt::Key key);
 
     unsigned int getInitialPageNavigationBarColor();
@@ -109,6 +112,7 @@ signals:
 
     void showBusyIndicator(bool visible);
     void disableControls(bool disabled);
+    void disableTabBar(bool disabled);
 
     void hideMainWindow();
     void raiseMainWindow();
@@ -118,6 +122,9 @@ signals:
 
     void escapePressed();
     void closeTopDrawer();
+
+    void forceTabBarActiveFocus();
+    void forceStackActiveFocus();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

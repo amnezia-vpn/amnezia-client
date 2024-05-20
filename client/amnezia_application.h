@@ -2,6 +2,7 @@
 #define AMNEZIA_APPLICATION_H
 
 #include <QCommandLineParser>
+#include <QNetworkAccessManager>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QThread>
@@ -14,8 +15,6 @@
 #include "settings.h"
 #include "vpnconnection.h"
 
-#include "configurators/vpn_configurator.h"
-
 #include "ui/controllers/connectionController.h"
 #include "ui/controllers/exportController.h"
 #include "ui/controllers/importController.h"
@@ -24,11 +23,13 @@
 #include "ui/controllers/settingsController.h"
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
-#include "ui/controllers/apiController.h"
+#include "ui/controllers/appSplitTunnelingController.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
-#include "ui/notificationhandler.h"
+#ifndef Q_OS_ANDROID
+    #include "ui/notificationhandler.h"
+#endif
 #ifdef Q_OS_WINDOWS
     #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
@@ -36,11 +37,13 @@
 #include "ui/models/protocols/openvpnConfigModel.h"
 #include "ui/models/protocols/shadowsocksConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
+#include "ui/models/protocols/xrayConfigModel.h"
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/sites_model.h"
 #include "ui/models/clientManagementModel.h"
+#include "ui/models/appSplitTunnelingModel.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
@@ -73,6 +76,7 @@ public:
     bool parseCommands();
 
     QQmlApplicationEngine *qmlEngine() const;
+    QNetworkAccessManager *manager() { return m_nam; }
 
 signals:
     void translationsUpdated();
@@ -83,7 +87,6 @@ private:
 
     QQmlApplicationEngine *m_engine {};
     std::shared_ptr<Settings> m_settings;
-    std::shared_ptr<VpnConfigurator> m_configurator;
 
     QSharedPointer<ContainerProps> m_containerProps;
     QSharedPointer<ProtocolProps> m_protocolProps;
@@ -97,11 +100,13 @@ private:
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<ProtocolsModel> m_protocolsModel;
     QSharedPointer<SitesModel> m_sitesModel;
+    QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
 
     QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
     QScopedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;
     QScopedPointer<CloakConfigModel> m_cloakConfigModel;
+    QScopedPointer<XrayConfigModel> m_xrayConfigModel;    
     QScopedPointer<WireGuardConfigModel> m_wireGuardConfigModel;
     QScopedPointer<AwgConfigModel> m_awgConfigModel;
 #ifdef Q_OS_WINDOWS
@@ -112,7 +117,9 @@ private:
 
     QSharedPointer<VpnConnection> m_vpnConnection;
     QThread m_vpnConnectionThread;
+#ifndef Q_OS_ANDROID
     QScopedPointer<NotificationHandler> m_notificationHandler;
+#endif
 
     QScopedPointer<ConnectionController> m_connectionController;
     QScopedPointer<PageController> m_pageController;
@@ -122,7 +129,9 @@ private:
     QScopedPointer<SettingsController> m_settingsController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
-    QScopedPointer<ApiController> m_apiController;
+    QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
+
+    QNetworkAccessManager *m_nam;
 };
 
 #endif // AMNEZIA_APPLICATION_H

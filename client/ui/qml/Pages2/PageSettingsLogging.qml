@@ -15,6 +15,25 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    Connections {
+        target: SettingsController
+
+        function onLoggingStateChanged() {
+            if (SettingsController.isLoggingEnabled) {
+                var message = qsTr("Logging is enabled. Note that logs will be automatically \
+disabled after 14 days, and all log files will be deleted.")
+                PageController.showNotificationMessage(message)
+            }
+        }
+    }
+
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -22,6 +41,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: switcher
     }
 
     FlickableType {
@@ -45,15 +66,19 @@ PageType {
                 Layout.fillWidth: true
 
                 headerText: qsTr("Logging")
+                descriptionText: qsTr("Enabling this function will save application's logs automatically, " +
+                                      "By default, logging functionality is disabled. Enable log saving in case of application malfunction.")
             }
 
             SwitcherType {
+                id: switcher
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
                 text: qsTr("Save logs")
 
                 checked: SettingsController.isLoggingEnabled
+                KeyNavigation.tab: openFolderButton
                 onCheckedChanged: {
                     if (checked !== SettingsController.isLoggingEnabled) {
                         SettingsController.isLoggingEnabled = checked
@@ -70,14 +95,18 @@ PageType {
                     visible: !GC.isMobile()
 
                     ImageButtonType {
+                        id: openFolderButton
                         Layout.alignment: Qt.AlignHCenter
 
                         implicitWidth: 56
                         implicitHeight: 56
 
                         image: "qrc:/images/controls/folder-open.svg"
+                        KeyNavigation.tab: saveButton
 
                         onClicked: SettingsController.openLogsFolder()
+                        Keys.onReturnPressed: openFolderButton.clicked()
+                        Keys.onEnterPressed: openFolderButton.clicked()
                     }
 
                     CaptionTextType {
@@ -94,13 +123,17 @@ PageType {
                     Layout.preferredWidth: root.width / ( GC.isMobile() ? 2 : 3 )
 
                     ImageButtonType {
+                        id: saveButton
                         Layout.alignment: Qt.AlignHCenter
 
                         implicitWidth: 56
                         implicitHeight: 56
 
                         image: "qrc:/images/controls/save.svg"
+                        KeyNavigation.tab: clearButton
 
+                        Keys.onReturnPressed: saveButton.clicked()
+                        Keys.onEnterPressed: saveButton.clicked()
                         onClicked: {
                             var fileName = ""
                             if (GC.isMobile()) {
@@ -135,13 +168,17 @@ PageType {
                     Layout.preferredWidth: root.width / ( GC.isMobile() ? 2 : 3 )
 
                     ImageButtonType {
+                        id: clearButton
                         Layout.alignment: Qt.AlignHCenter
 
                         implicitWidth: 56
                         implicitHeight: 56
 
                         image: "qrc:/images/controls/delete.svg"
+                        Keys.onTabPressed: lastItemTabClicked(focusItem)
 
+                        Keys.onReturnPressed: clearButton.clicked()
+                        Keys.onEnterPressed: clearButton.clicked()
                         onClicked: function() {
                             var headerText = qsTr("Clear logs?")
                             var yesButtonText = qsTr("Continue")
@@ -152,8 +189,14 @@ PageType {
                                 SettingsController.clearLogs()
                                 PageController.showBusyIndicator(false)
                                 PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
+                                if (!GC.isMobile()) {
+                                    focusItem.forceActiveFocus()
+                                }
                             }
                             var noButtonFunction = function() {
+                                if (!GC.isMobile()) {
+                                    focusItem.forceActiveFocus()
+                                }
                             }
 
                             showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

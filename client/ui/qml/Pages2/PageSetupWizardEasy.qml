@@ -16,6 +16,7 @@ PageType {
     id: root
 
     property bool isEasySetup: true
+    defaultActiveFocusItem: focusItem
 
     SortFilterProxyModel {
         id: proxyContainersModel
@@ -32,6 +33,14 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        implicitWidth: 1
+        implicitHeight: 54
+
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -39,6 +48,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: continueButton
     }
 
     FlickableType {
@@ -136,8 +147,7 @@ PageType {
             CardType {
                 implicitWidth: parent.width
 
-                headerText: qsTr("Set up a VPN yourself")
-                bodyText: qsTr("I want to choose a VPN protocol")
+                headerText: qsTr("Choose a VPN protocol")
 
                 ButtonGroup.group: buttonGroup
 
@@ -146,21 +156,18 @@ PageType {
                 }
             }
 
-            Item {
-                implicitWidth: 1
-                implicitHeight: 54
-            }
-
             BasicButtonType {
                 id: continueButton
 
                 implicitWidth: parent.width
 
                 text: qsTr("Continue")
+                KeyNavigation.tab: setupLaterButton
+                parentFlickable: fl
 
                 clickedFunc: function() {
                     if (root.isEasySetup) {
-                        ContainersModel.setCurrentlyProcessedContainerIndex(containers.dockerContainer)
+                        ContainersModel.setProcessedContainerIndex(containers.dockerContainer)
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                         InstallController.install(containers.dockerContainer,
                                                   containers.containerDefaultPort,
@@ -185,6 +192,9 @@ PageType {
                 textColor: "#D7D8DB"
                 borderWidth: 1
 
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
+                parentFlickable: fl
+
                 visible: {
                     if (PageController.isTriggeredByConnectButton()) {
                         PageController.setTriggeredByConnectButton(false)
@@ -194,7 +204,7 @@ PageType {
                     return  true
                 }
 
-                text: qsTr("Set up later")
+                text: qsTr("Skip setup")
 
                 clickedFunc: function() {
                     PageController.goToPage(PageEnum.PageSetupWizardInstalling)

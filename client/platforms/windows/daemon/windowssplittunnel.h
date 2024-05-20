@@ -132,7 +132,7 @@ class WindowsSplitTunnel final : public QObject {
   void setRules(const QStringList& appPaths);
 
   // Fetches and Pushed needed info to move to engaged mode
-  void start(int inetAdapterIndex);
+  void start(int inetAdapterIndex, int vpnAdapterIndex = 0);
   // Deletes Rules and puts the driver into passive mode
   void stop();
   // Resets the Whole Driver
@@ -158,13 +158,14 @@ class WindowsSplitTunnel final : public QObject {
   constexpr static const auto MV_SERVICE_NAME = L"MullvadVPN";
   DRIVER_STATE getState();
 
+  int m_tries;
   // Initializes the WFP Sublayer
   bool initSublayer();
 
   // Generates a Configuration for Each APP
   std::vector<uint8_t> generateAppConfiguration(const QStringList& appPaths);
   // Generates a Configuration which IP's are VPN and which network
-  std::vector<uint8_t> generateIPConfiguration(int inetAdapterIndex);
+  std::vector<uint8_t> generateIPConfiguration(int inetAdapterIndex, int vpnAdapterIndex = 0);
   std::vector<uint8_t> generateProcessBlob();
 
   void getAddress(int adapterIndex, IN_ADDR* out_ipv4, IN6_ADDR* out_ipv6);

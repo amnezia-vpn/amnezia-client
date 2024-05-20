@@ -64,6 +64,22 @@ abstract class Protocol {
         }
     }
 
+    protected fun ProtocolConfig.Builder.configAppSplitTunneling(config: JSONObject) {
+        val splitTunnelType = config.optInt("appSplitTunnelType")
+        if (splitTunnelType == SPLIT_TUNNEL_DISABLE) return
+        val splitTunnelApps = config.getJSONArray("splitTunnelApps")
+        val appHandlerFunc = when (splitTunnelType) {
+            SPLIT_TUNNEL_INCLUDE -> ::includeApplication
+            SPLIT_TUNNEL_EXCLUDE -> ::excludeApplication
+
+            else -> throw BadConfigException("Unexpected value of the 'appSplitTunnelType' parameter: $splitTunnelType")
+        }
+
+        for (i in 0 until splitTunnelApps.length()) {
+            appHandlerFunc(splitTunnelApps.getString(i))
+        }
+    }
+
     protected open fun buildVpnInterface(config: ProtocolConfig, vpnBuilder: Builder) {
         vpnBuilder.setSession(VPN_SESSION_NAME)
 
@@ -89,20 +105,27 @@ abstract class Protocol {
             vpnBuilder.addSearchDomain(it)
         }
 
-        for (addr in config.routes) {
-            Log.d(TAG, "addRoute: $addr")
-            vpnBuilder.addRoute(addr)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            for (addr in config.excludedRoutes) {
-                Log.d(TAG, "excludeRoute: $addr")
-                vpnBuilder.excludeRoute(addr)
+        for ((inetNetwork, include) in config.routes) {
+            if (include) {
+                Log.d(TAG, "addRoute: $inetNetwork")
+                vpnBuilder.addRoute(inetNetwork)
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Log.d(TAG, "excludeRoute: $inetNetwork")
+                    vpnBuilder.excludeRoute(inetNetwork)
+                } else {
+                    Log.e(TAG, "Trying to exclude route $inetNetwork on old Android")
+                }
             }
         }
 
+        for (app in config.includedApplications) {
+            Log.d(TAG, "addAllowedApplication")
+            vpnBuilder.addAllowedApplication(app)
+        }
+
         for (app in config.excludedApplications) {
-            Log.d(TAG, "addDisallowedApplication: $app")
+            Log.d(TAG, "addDisallowedApplication")
             vpnBuilder.addDisallowedApplication(app)
         }
 

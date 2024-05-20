@@ -1,37 +1,48 @@
 package org.amnezia.vpn
 
+import android.Manifest
+import android.app.AlertDialog
+import android.app.NotificationManager
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Intent
 import android.content.Intent.EXTRA_MIME_TYPES
 import android.content.Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.net.Uri
+import android.graphics.Bitmap
 import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import android.provider.Settings
 import android.view.WindowManager.LayoutParams
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.annotation.MainThread
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.text.RegexOption.IGNORE_CASE
+import AppListProvider
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
 import org.amnezia.vpn.util.Log
+import org.amnezia.vpn.util.Prefs
 import org.qtproject.qt.android.bindings.QtActivity
 
 private const val TAG = "AmneziaActivity"
@@ -40,6 +51,9 @@ const val ACTIVITY_MESSENGER_NAME = "Activity"
 private const val CHECK_VPN_PERMISSION_ACTION_CODE = 1
 private const val CREATE_FILE_ACTION_CODE = 2
 private const val OPEN_FILE_ACTION_CODE = 3
+private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
+
+private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 
 class AmneziaActivity : QtActivity() {
 
@@ -48,8 +62,11 @@ class AmneziaActivity : QtActivity() {
     private var isWaitingStatus = true
     private var isServiceConnected = false
     private var isInBoundState = false
+    private var notificationStateReceiver: BroadcastReceiver? = null
     private lateinit var vpnServiceMessenger: IpcMessenger
-    private var tmpFileContentToSave: String = ""
+
+    private val actionResultHandlers = mutableMapOf<Int, ActivityResultHandler>()
+    private val permissionRequestHandlers = mutableMapOf<Int, PermissionRequestHandler>()
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -129,10 +146,6 @@ class AmneziaActivity : QtActivity() {
         }
     }
 
-    private data class CheckVpnPermissionCallbacks(val onSuccess: () -> Unit, val onFail: () -> Unit)
-
-    private var checkVpnPermissionCallbacks: CheckVpnPermissionCallbacks? = null
-
     /**
      * Activity overloaded methods
      */
@@ -147,7 +160,28 @@ class AmneziaActivity : QtActivity() {
                 doBindService()
             }
         )
+        registerBroadcastReceivers()
         intent?.let(::processIntent)
+    }
+
+    private fun registerBroadcastReceivers() {
+        notificationStateReceiver = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            registerBroadcastReceiver(
+                arrayOf(
+                    NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED,
+                    NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED
+                )
+            ) {
+                Log.d(
+                    TAG, "Notification state changed: ${it?.action}, blocked = " +
+                        "${it?.getBooleanExtra(NotificationManager.EXTRA_BLOCKED_STATE, false)}"
+                )
+                mainScope.launch {
+                    qtInitialized.await()
+                    QtAndroidController.onNotificationStateChanged()
+                }
+            }
+        } else null
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -187,50 +221,46 @@ class AmneziaActivity : QtActivity() {
 
     override fun onDestroy() {
         Log.d(TAG, "Destroy Amnezia activity")
+        unregisterBroadcastReceiver(notificationStateReceiver)
+        notificationStateReceiver = null
         mainScope.cancel()
         super.onDestroy()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            CREATE_FILE_ACTION_CODE -> {
-                when (resultCode) {
-                    RESULT_OK -> {
-                        data?.data?.let { uri ->
-                            alterDocument(uri)
-                        }
-                    }
-                }
+        Log.d(TAG, "Process activity result, code: ${actionCodeToString(requestCode)}, " +
+                "resultCode: $resultCode, data: $data")
+        actionResultHandlers[requestCode]?.let { handler ->
+            when (resultCode) {
+                RESULT_OK -> handler.onSuccess(data)
+                else -> handler.onFail(data)
             }
+            handler.onAny(data)
+            actionResultHandlers.remove(requestCode)
+        } ?: super.onActivityResult(requestCode, resultCode, data)
+    }
 
-            OPEN_FILE_ACTION_CODE -> {
-                when (resultCode) {
-                    RESULT_OK -> data?.data?.toString() ?: ""
-                    else -> ""
-                }.let { uri ->
-                    QtAndroidController.onFileOpened(uri)
-                }
+    private fun startActivityForResult(intent: Intent, requestCode: Int, handler: ActivityResultHandler) {
+        actionResultHandlers[requestCode] = handler
+        startActivityForResult(intent, requestCode)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        Log.d(TAG, "Process permission result, code: ${actionCodeToString(requestCode)}, " +
+                "permissions: ${permissions.contentToString()}, results: ${grantResults.contentToString()}")
+        permissionRequestHandlers[requestCode]?.let { handler ->
+            if (grantResults.isNotEmpty()) {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) handler.onSuccess()
+                else handler.onFail()
             }
+            handler.onAny()
+            permissionRequestHandlers.remove(requestCode)
+        } ?: super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 
-            CHECK_VPN_PERMISSION_ACTION_CODE -> {
-                when (resultCode) {
-                    RESULT_OK -> {
-                        Log.d(TAG, "Vpn permission granted")
-                        Toast.makeText(this, "Vpn permission granted", Toast.LENGTH_LONG).show()
-                        checkVpnPermissionCallbacks?.run { onSuccess() }
-                    }
-
-                    else -> {
-                        Log.w(TAG, "Vpn permission denied, resultCode: $resultCode")
-                        Toast.makeText(this, "Vpn permission denied", Toast.LENGTH_LONG).show()
-                        checkVpnPermissionCallbacks?.run { onFail() }
-                    }
-                }
-                checkVpnPermissionCallbacks = null
-            }
-
-            else -> super.onActivityResult(requestCode, resultCode, data)
-        }
+    private fun requestPermission(permission: String, requestCode: Int, handler: PermissionRequestHandler) {
+        permissionRequestHandlers[requestCode] = handler
+        requestPermissions(arrayOf(permission), requestCode)
     }
 
     /**
@@ -262,22 +292,75 @@ class AmneziaActivity : QtActivity() {
     /**
      * Methods of starting and stopping VpnService
      */
-    private fun checkVpnPermissionAndStart(vpnConfig: String) {
-        checkVpnPermission(
-            onSuccess = { startVpn(vpnConfig) },
-            onFail = QtAndroidController::onVpnPermissionRejected
-        )
+    @MainThread
+    private fun checkVpnPermission(onPermissionGranted: () -> Unit) {
+        Log.d(TAG, "Check VPN permission")
+        VpnService.prepare(applicationContext)?.let { intent ->
+            startActivityForResult(intent, CHECK_VPN_PERMISSION_ACTION_CODE, ActivityResultHandler(
+                onSuccess = {
+                    Log.d(TAG, "Vpn permission granted")
+                    Toast.makeText(this@AmneziaActivity, resources.getText(R.string.vpnGranted), Toast.LENGTH_LONG).show()
+                    onPermissionGranted()
+                },
+                onFail = {
+                    Log.w(TAG, "Vpn permission denied")
+                    showOnVpnPermissionRejectDialog()
+                    mainScope.launch {
+                        qtInitialized.await()
+                        QtAndroidController.onVpnPermissionRejected()
+                    }
+                }
+            ))
+        } ?: onPermissionGranted()
     }
 
-    @MainThread
-    private fun checkVpnPermission(onSuccess: () -> Unit, onFail: () -> Unit) {
-        Log.d(TAG, "Check VPN permission")
-        VpnService.prepare(applicationContext)?.let {
-            checkVpnPermissionCallbacks = CheckVpnPermissionCallbacks(onSuccess, onFail)
-            startActivityForResult(it, CHECK_VPN_PERMISSION_ACTION_CODE)
-            return
+    private fun showOnVpnPermissionRejectDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.vpnSetupFailed)
+            .setMessage(R.string.vpnSetupFailedMessage)
+            .setNegativeButton(R.string.ok) { _, _ -> }
+            .setPositiveButton(R.string.openVpnSettings) { _, _ ->
+                startActivity(Intent(Settings.ACTION_VPN_SETTINGS))
+            }
+            .show()
+    }
+
+    private fun checkNotificationPermission(onChecked: () -> Unit) {
+        Log.d(TAG, "Check notification permission")
+        if (
+            !isNotificationPermissionGranted() &&
+            !Prefs.load<Boolean>(PREFS_NOTIFICATION_PERMISSION_ASKED)
+        ) {
+            showNotificationPermissionDialog(onChecked)
+        } else {
+            onChecked()
         }
-        onSuccess()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun showNotificationPermissionDialog(onChecked: () -> Unit) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.notificationDialogTitle)
+            .setMessage(R.string.notificationDialogMessage)
+            .setNegativeButton(R.string.no) { _, _ ->
+                Prefs.save(PREFS_NOTIFICATION_PERMISSION_ASKED, true)
+                onChecked()
+            }
+            .setPositiveButton(R.string.yes) { _, _ ->
+                val saveAsked: () -> Unit = {
+                    Prefs.save(PREFS_NOTIFICATION_PERMISSION_ASKED, true)
+                }
+                requestPermission(
+                    Manifest.permission.POST_NOTIFICATIONS,
+                    CHECK_NOTIFICATION_PERMISSION_ACTION_CODE,
+                    PermissionRequestHandler(
+                        onSuccess = saveAsked,
+                        onFail = saveAsked,
+                        onAny = onChecked
+                    )
+                )
+            }
+            .show()
     }
 
     @MainThread
@@ -305,26 +388,19 @@ class AmneziaActivity : QtActivity() {
         Intent(this, AmneziaVpnService::class.java).apply {
             putExtra(MSG_VPN_CONFIG, vpnConfig)
         }.also {
-            ContextCompat.startForegroundService(this, it)
+            try {
+                ContextCompat.startForegroundService(this, it)
+            } catch (e: SecurityException) {
+                Log.e(TAG, "Failed to start AmneziaVpnService: $e")
+                QtAndroidController.onServiceError()
+            }
         }
     }
 
+    @MainThread
     private fun disconnectFromVpn() {
         Log.d(TAG, "Disconnect from VPN")
         vpnServiceMessenger.send(Action.DISCONNECT)
-    }
-
-    // saving file
-    private fun alterDocument(uri: Uri) {
-        try {
-            contentResolver.openOutputStream(uri)?.use { os ->
-                os.bufferedWriter().use { it.write(tmpFileContentToSave) }
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-        tmpFileContentToSave = ""
     }
 
     /**
@@ -340,7 +416,11 @@ class AmneziaActivity : QtActivity() {
     fun start(vpnConfig: String) {
         Log.v(TAG, "Start VPN")
         mainScope.launch {
-            checkVpnPermissionAndStart(vpnConfig)
+            checkVpnPermission {
+                checkNotificationPermission {
+                    startVpn(vpnConfig)
+                }
+            }
         }
     }
 
@@ -372,14 +452,26 @@ class AmneziaActivity : QtActivity() {
     fun saveFile(fileName: String, data: String) {
         Log.d(TAG, "Save file $fileName")
         mainScope.launch {
-            tmpFileContentToSave = data
-
             Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "text/*"
                 putExtra(Intent.EXTRA_TITLE, fileName)
             }.also {
-                startActivityForResult(it, CREATE_FILE_ACTION_CODE)
+                startActivityForResult(it, CREATE_FILE_ACTION_CODE, ActivityResultHandler(
+                    onSuccess = {
+                        it?.data?.let { uri ->
+                            Log.d(TAG, "Save file to $uri")
+                            try {
+                                contentResolver.openOutputStream(uri)?.use { os ->
+                                    os.bufferedWriter().use { it.write(data) }
+                                }
+                            } catch (e: IOException) {
+                                Log.e(TAG, "Failed to save file $uri: $e")
+                                // todo: send error to Qt
+                            }
+                        }
+                    }
+                ))
             }
         }
     }
@@ -387,36 +479,45 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun openFile(filter: String?) {
         Log.v(TAG, "Open file with filter: $filter")
+        mainScope.launch {
+            val mimeTypes = if (!filter.isNullOrEmpty()) {
+                val extensionRegex = "\\*\\.([a-z0-9]+)".toRegex(IGNORE_CASE)
+                val mime = MimeTypeMap.getSingleton()
+                extensionRegex.findAll(filter).map {
+                    it.groups[1]?.value?.let { mime.getMimeTypeFromExtension(it) } ?: "*/*"
+                }.toSet()
+            } else emptySet()
 
-        val mimeTypes = if (!filter.isNullOrEmpty()) {
-            val extensionRegex = "\\*\\.[a-z .]+".toRegex(IGNORE_CASE)
-            val mime = MimeTypeMap.getSingleton()
-            extensionRegex.findAll(filter).map {
-                mime.getMimeTypeFromExtension(it.value.drop(2))
-            }.filterNotNull().toSet()
-        } else emptySet()
-
-        Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            Log.v(TAG, "File mimyType filter: $mimeTypes")
-            when (mimeTypes.size) {
-                1 -> type = mimeTypes.first()
-
-                in 2..Int.MAX_VALUE -> {
+            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                Log.v(TAG, "File mimyType filter: $mimeTypes")
+                if ("*/*" in mimeTypes) {
                     type = "*/*"
-                    putExtra(EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+                } else {
+                    when (mimeTypes.size) {
+                        1 -> type = mimeTypes.first()
+
+                        in 2..Int.MAX_VALUE -> {
+                            type = "*/*"
+                            putExtra(EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+                        }
+
+                        else -> type = "*/*"
+                    }
                 }
-
-                else -> type = "*/*"
+            }.also {
+                startActivityForResult(it, OPEN_FILE_ACTION_CODE, ActivityResultHandler(
+                    onSuccess = {
+                        val uri = it?.data?.toString() ?: ""
+                        Log.d(TAG, "Open file: $uri")
+                        mainScope.launch {
+                            qtInitialized.await()
+                            QtAndroidController.onFileOpened(uri)
+                        }
+                    }
+                ))
             }
-        }.also {
-            startActivityForResult(it, OPEN_FILE_ACTION_CODE)
         }
-    }
-
-    @Suppress("unused")
-    fun setNotificationText(title: String, message: String, timerSec: Int) {
-        Log.v(TAG, "Set notification text")
     }
 
     @Suppress("unused")
@@ -432,7 +533,7 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun setSaveLogs(enabled: Boolean) {
-        Log.d(TAG, "Set save logs: $enabled")
+        Log.v(TAG, "Set save logs: $enabled")
         mainScope.launch {
             Log.saveLogs = enabled
             vpnServiceMessenger.send {
@@ -452,7 +553,9 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun clearLogs() {
         Log.v(TAG, "Clear logs")
-        Log.clearLogs()
+        mainScope.launch {
+            Log.clearLogs()
+        }
     }
 
     @Suppress("unused")
@@ -463,4 +566,104 @@ class AmneziaActivity : QtActivity() {
             window.setFlags(flag, LayoutParams.FLAG_SECURE)
         }
     }
+
+    @Suppress("unused")
+    fun minimizeApp() {
+        Log.v(TAG, "Minimize application")
+        mainScope.launch {
+            moveTaskToBack(false)
+        }
+    }
+
+    @Suppress("unused")
+    fun getAppList(): String {
+        Log.v(TAG, "Get app list")
+        var appList = ""
+        runBlocking {
+            mainScope.launch {
+                withContext(Dispatchers.IO) {
+                    appList = AppListProvider.getAppList(packageManager, packageName)
+                }
+            }.join()
+        }
+        return appList
+    }
+
+    @Suppress("unused")
+    fun getAppIcon(packageName: String, width: Int, height: Int): Bitmap {
+        Log.v(TAG, "Get app icon")
+        return AppListProvider.getAppIcon(packageManager, packageName, width, height)
+    }
+
+    @Suppress("unused")
+    fun isNotificationPermissionGranted(): Boolean = applicationContext.isNotificationPermissionGranted()
+
+    @Suppress("unused")
+    fun requestNotificationPermission() {
+        val shouldShowPreRequest = shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+        requestPermission(
+            Manifest.permission.POST_NOTIFICATIONS,
+            CHECK_NOTIFICATION_PERMISSION_ACTION_CODE,
+            PermissionRequestHandler(
+                onSuccess = {
+                    mainScope.launch {
+                        Prefs.save(PREFS_NOTIFICATION_PERMISSION_ASKED, true)
+                        vpnServiceMessenger.send(Action.NOTIFICATION_PERMISSION_GRANTED)
+                        qtInitialized.await()
+                        QtAndroidController.onNotificationStateChanged()
+                    }
+                },
+                onFail = {
+                    if (!Prefs.load<Boolean>(PREFS_NOTIFICATION_PERMISSION_ASKED)) {
+                        Prefs.save(PREFS_NOTIFICATION_PERMISSION_ASKED, true)
+                    } else {
+                        val shouldShowPostRequest =
+                            shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+                        if (!shouldShowPreRequest && !shouldShowPostRequest) {
+                            showNotificationSettingsDialog()
+                        }
+                    }
+                }
+            )
+        )
+    }
+
+    private fun showNotificationSettingsDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.notificationSettingsDialogTitle)
+            .setMessage(R.string.notificationSettingsDialogMessage)
+            .setNegativeButton(R.string.cancel) { _, _ -> }
+            .setPositiveButton(R.string.openNotificationSettings) { _, _ ->
+                startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                })
+            }
+            .show()
+    }
+
+    /**
+     * Utils methods
+     */
+    companion object {
+        private fun actionCodeToString(actionCode: Int): String =
+            when (actionCode) {
+                CHECK_VPN_PERMISSION_ACTION_CODE -> "CHECK_VPN_PERMISSION"
+                CREATE_FILE_ACTION_CODE -> "CREATE_FILE"
+                OPEN_FILE_ACTION_CODE -> "OPEN_FILE"
+                CHECK_NOTIFICATION_PERMISSION_ACTION_CODE -> "CHECK_NOTIFICATION_PERMISSION"
+                else -> actionCode.toString()
+            }
+    }
 }
+
+private class ActivityResultHandler(
+    val onSuccess: (data: Intent?) -> Unit = {},
+    val onFail: (data: Intent?) -> Unit = {},
+    val onAny: (data: Intent?) -> Unit = {}
+)
+
+private class PermissionRequestHandler(
+    val onSuccess: () -> Unit = {},
+    val onFail: () -> Unit = {},
+    val onAny: () -> Unit = {}
+)

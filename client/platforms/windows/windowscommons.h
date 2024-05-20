@@ -23,6 +23,10 @@ class WindowsCommons final {
   static int AdapterIndexTo(const QHostAddress& dst);
   // Returns the Path of the Current process
   static QString getCurrentPath();
+
+ private:
+  static QString getTunnelLogFilePath();
+  static QString getProgramFilesPath();
 };
 
 #endif  // WINDOWSCOMMONS_H

@@ -8,6 +8,7 @@
 #include <d3d11.h>
 #include <dxgi.h>
 #include <iphlpapi.h>
+#include <shlobj_core.h>
 
 #include <QDir>
 #include <QHostAddress>
@@ -19,9 +20,9 @@
 #include "logger.h"
 #include "platforms/windows/windowsutils.h"
 
-#define TUNNEL_SERVICE_NAME L"WireGuardTunnel$amnvpn"
-
 constexpr const char* VPN_NAME = "AmneziaVPN";
+constexpr const char* WIREGUARD_DIR = "WireGuard";
+constexpr const char* DATA_DIR = "Data";
 
 namespace {
 Logger logger("WindowsCommons");
@@ -67,24 +68,46 @@ QString WindowsCommons::tunnelConfigFile() {
   return QString();
 }
 
+// static
 QString WindowsCommons::tunnelLogFile() {
-  QStringList paths =
-      QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
+  static QString tunnelLogFilePath = getTunnelLogFilePath();
+  return tunnelLogFilePath;
+}
 
-  for (const QString& path : paths) {
-    QDir dir(path);
-    if (!dir.exists()) {
-      continue;
+// static
+QString WindowsCommons::getProgramFilesPath() {
+  wchar_t* path = nullptr;
+
+  if (SUCCEEDED(
+          SHGetKnownFolderPath(FOLDERID_ProgramFiles, 0, nullptr, &path))) {
+    auto guard = qScopeGuard([&] { CoTaskMemFree(path); });
+    return QString::fromWCharArray(path);
+  }
+  return QString();
+}
+
+// static
+QString WindowsCommons::getTunnelLogFilePath() {
+  // Return WireGuard's log file path, "\Program Files\WireGuard\Data\log.bin",
+  // if the directory path exists
+  auto programFilesPath = getProgramFilesPath();
+  if (!programFilesPath.isEmpty()) {
+    QDir programFilesDir(programFilesPath);
+
+    if (programFilesDir.exists()) {
+      QDir wireGuardDir(programFilesDir.filePath(WIREGUARD_DIR));
+
+      if (wireGuardDir.exists()) {
+        QDir wireGuardDataDir(wireGuardDir.filePath(DATA_DIR));
+
+        if (wireGuardDataDir.exists()) {
+          return wireGuardDataDir.filePath("log.bin");
+        }
+      }
     }
-
-    QDir vpnDir(dir.filePath(VPN_NAME));
-    if (!vpnDir.exists()) {
-      continue;
-    }
-
-    return vpnDir.filePath("log.bin");
   }
 
+  logger.debug() << "Failed to find WireGuard Tunnel log file";
   return QString();
 }
 
@@ -120,7 +143,7 @@ int WindowsCommons::VPNAdapterIndex() {
 
 // Static
 QString WindowsCommons::getCurrentPath() {
-  QByteArray buffer(2048, 0xFF);
+  QByteArray buffer(2048, 0xFFu);
   auto ok = GetModuleFileNameA(NULL, buffer.data(), buffer.size());
 
   if (ok == ERROR_INSUFFICIENT_BUFFER) {

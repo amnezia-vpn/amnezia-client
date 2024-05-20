@@ -15,6 +15,8 @@ PageType {
 
     property bool isControlsDisabled: false
 
+    defaultActiveFocusItem: focusItem
+
     Connections {
         target: PageController
 
@@ -24,6 +26,7 @@ PageType {
 
         function onClosePage() {
             if (stackView.depth <= 1) {
+                PageController.hideWindow()
                 return
             }
             stackView.pop()
@@ -45,6 +48,10 @@ PageType {
         }
 
         function onDisableControls(disabled) {
+            isControlsDisabled = disabled
+        }
+
+        function onDisableTabBar(disabled) {
             isControlsDisabled = disabled
         }
 
@@ -90,7 +97,7 @@ PageType {
             PageController.showBusyIndicator(false)
         }
 
-        function onImportErrorOccurred(errorMessage) {
+        function onImportErrorOccurred(errorMessage, goToPageHome) {
             PageController.showErrorMessage(errorMessage)
         }
     }
@@ -131,7 +138,13 @@ PageType {
                       qsTr(" Helps you access blocked content without revealing your privacy, even to VPN providers.")
             }
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: startButton
+            }
+
             BasicButtonType {
+                id: startButton
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
@@ -142,9 +155,12 @@ PageType {
                 clickedFunc: function() {
                     connectionTypeSelection.open()
                 }
+
+                KeyNavigation.tab: startButton2
             }
 
             BasicButtonType {
+                id: startButton2
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -162,11 +178,18 @@ PageType {
                 clickedFunc: function() {
                     Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
                 }
+
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
             }
         }
     }
 
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
+
+        onClosed: {
+            PageController.forceTabBarActiveFocus()
+            root.defaultActiveFocusItem.forceActiveFocus()
+        }
     }
 }

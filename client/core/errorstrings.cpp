@@ -11,6 +11,7 @@ QString errorString(ErrorCode code) {
     case(NoError): errorMessage = QObject::tr("No error"); break;
     case(UnknownError): errorMessage = QObject::tr("Unknown Error"); break;
     case(NotImplementedError): errorMessage = QObject::tr("Function not implemented"); break;
+    case(AmneziaServiceNotRunning): errorMessage = QObject::tr("Background service is not running"); break;
 
     // Server errors
     case(ServerCheckFailed): errorMessage = QObject::tr("Server check failed"); break;
@@ -19,6 +20,7 @@ QString errorString(ErrorCode code) {
     case(ServerDockerFailedError): errorMessage = QObject::tr("Server error: Docker failed"); break;
     case(ServerCancelInstallation): errorMessage = QObject::tr("Installation canceled by user"); break;
     case(ServerUserNotInSudo): errorMessage = QObject::tr("The user does not have permission to use sudo"); break;
+    case(ServerPacketManagerError): errorMessage = QObject::tr("Server error: Packet manager error"); break;
 
     // Libssh errors
     case(SshRequestDeniedError): errorMessage = QObject::tr("Ssh request was denied"); break;
@@ -55,6 +57,9 @@ QString errorString(ErrorCode code) {
     // Api errors
     case (ApiConfigDownloadError): errorMessage = QObject::tr("Error when retrieving configuration from API"); break;
     case (ApiConfigAlreadyAdded): errorMessage = QObject::tr("This config has already been added to the application"); break;
+    case (ApiConfigEmptyError): errorMessage = QObject::tr("In the response from the server, an empty config was received"); break;
+    case (ApiConfigSslError): errorMessage = QObject::tr("SSL error occurred"); break;
+    case (ApiConfigTimeoutError): errorMessage = QObject::tr("Server response timeout on api request"); break;
 
     // QFile errors
     case(OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;

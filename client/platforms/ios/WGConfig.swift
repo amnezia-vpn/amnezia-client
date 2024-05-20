@@ -86,17 +86,9 @@ struct WGConfig: Decodable {
     AllowedIPs = \(allowedIPs.joined(separator: ", "))
     Endpoint = \(hostName):\(port)
     PersistentKeepalive = \(persistentKeepAlive)
+
+    SplitTunnelType = \(splitTunnelType)
+    SplitTunnelSites = \(splitTunnelSites.joined(separator: ", "))
     """
-  }
-}
-
-struct OpenVPNConfig: Decodable {
-  let config: String
-  let mtu: String
-  let splitTunnelType: Int
-  let splitTunnelSites: [String]
-
-  var str: String {
-    "splitTunnelType: \(splitTunnelType) splitTunnelSites: \(splitTunnelSites) mtu: \(mtu) config: \(config)"
   }
 }

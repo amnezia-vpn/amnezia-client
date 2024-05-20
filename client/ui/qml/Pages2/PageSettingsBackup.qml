@@ -16,6 +16,8 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     Connections {
         target: SettingsController
 
@@ -34,6 +36,11 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -41,6 +48,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: makeBackupButton
     }
 
     FlickableType {
@@ -63,22 +72,18 @@ PageType {
             HeaderType {
                 Layout.fillWidth: true
 
-                headerText: qsTr("Backup")
+                headerText: qsTr("Back up your configuration")
+                descriptionText: qsTr("You can save your settings to a backup file to restore them the next time you install the application.")
             }
 
-            ListItemTitleType {
+            WarningType {
+                Layout.topMargin: 16
                 Layout.fillWidth: true
-                Layout.topMargin: 10
 
-                text: qsTr("Configuration backup")
-            }
+                textString: qsTr("The backup will contain your passwords and private keys for all servers added " +
+                                            "to AmneziaVPN. Keep this information in a secure place.")
 
-            CaptionTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: -12
-
-                text: qsTr("You can save your settings to a backup file to restore them the next time you install the application.")
-                color: "#878B91"
+                iconPath: "qrc:/images/controls/alert-circle.svg"
             }
 
             BasicButtonType {
@@ -106,9 +111,12 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Backup file saved"))
                     }
                 }
+
+                KeyNavigation.tab: restoreBackupButton
             }
 
             BasicButtonType {
+                id: restoreBackupButton
                 Layout.fillWidth: true
                 Layout.topMargin: -8
 
@@ -128,6 +136,8 @@ PageType {
                         restoreBackup(filePath)
                     }
                 }
+
+                Keys.onTabPressed: lastItemTabClicked()
             }
         }
     }
@@ -139,9 +149,13 @@ PageType {
         var noButtonText = qsTr("Cancel")
 
         var yesButtonFunction = function() {
-            PageController.showBusyIndicator(true)
-            SettingsController.restoreAppConfig(filePath)
-            PageController.showBusyIndicator(false)
+            if (ConnectionController.isConnected) {
+                PageController.showNotificationMessage(qsTr("Cannot restore backup settings during active connection"))
+            } else {
+                PageController.showBusyIndicator(true)
+                SettingsController.restoreAppConfig(filePath)
+                PageController.showBusyIndicator(false)
+            }
         }
         var noButtonFunction = function() {
         }

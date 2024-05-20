@@ -13,11 +13,12 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     case DockerContainer::WireGuard: return QLatin1String("wireguard");
     case DockerContainer::Awg: return QLatin1String("awg");
     case DockerContainer::Ipsec: return QLatin1String("ipsec");
+    case DockerContainer::Xray: return QLatin1String("xray");
 
     case DockerContainer::TorWebSite: return QLatin1String("website_tor");
     case DockerContainer::Dns: return QLatin1String("dns");
     case DockerContainer::Sftp: return QLatin1String("sftp");
-    default: return "";
+    default: return QString();
     }
 }
 
@@ -47,6 +48,7 @@ QString amnezia::scriptName(ProtocolScriptType type)
     case ProtocolScriptType::openvpn_template: return QLatin1String("template.ovpn");
     case ProtocolScriptType::wireguard_template: return QLatin1String("template.conf");
     case ProtocolScriptType::awg_template: return QLatin1String("template.conf");
+    case ProtocolScriptType::xray_template: return QLatin1String("template.json");
     default: return QString();
     }
 }
