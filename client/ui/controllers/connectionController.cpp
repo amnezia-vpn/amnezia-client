@@ -39,8 +39,8 @@ void ConnectionController::openConnection()
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
     {
-      emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
-      return;
+        emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
+        return;
     }
 #endif
 
@@ -51,9 +51,9 @@ void ConnectionController::openConnection()
 
     if (serverConfig.value(config_key::configVersion).toInt()
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-      m_apiController.updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverIndex, serverConfig);
+        m_apiController.updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverIndex, serverConfig);
     } else {
-      openConnection(false, serverConfig, serverIndex);
+        openConnection(false, serverConfig, serverIndex);
     }
 }
 
