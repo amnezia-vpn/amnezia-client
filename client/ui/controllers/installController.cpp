@@ -85,6 +85,11 @@ void InstallController::install(DockerContainer container, int port, TransportPr
             containerConfig.insert(config_key::port, QString::number(port));
             containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, protocol));
 
+            if (container == DockerContainer::Awg || container == DockerContainer::WireGuard) {
+                containerConfig[config_key::mtu] =
+                        container == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+            }
+
             if (container == DockerContainer::Awg) {
                 QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(3, 10));
                 QString junkPacketMinSize = QString::number(50);
@@ -579,9 +584,9 @@ void InstallController::removeApiConfig(const int serverIndex)
 
 #ifdef Q_OS_IOS
     QString vpncName = QString("%1 (%2) %3")
-        .arg(serverConfig[config_key::description].toString())
-        .arg(serverConfig[config_key::hostName].toString())
-        .arg(serverConfig[config_key::vpnproto].toString());
+                               .arg(serverConfig[config_key::description].toString())
+                               .arg(serverConfig[config_key::hostName].toString())
+                               .arg(serverConfig[config_key::vpnproto].toString());
 
     AmneziaVPN::removeVPNC(vpncName.toStdString());
 #endif
