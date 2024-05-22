@@ -2,6 +2,7 @@
 #define AMNEZIA_APPLICATION_H
 
 #include <QCommandLineParser>
+#include <QNetworkAccessManager>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QThread>
@@ -26,7 +27,9 @@
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
-#include "ui/notificationhandler.h"
+#ifndef Q_OS_ANDROID
+    #include "ui/notificationhandler.h"
+#endif
 #ifdef Q_OS_WINDOWS
     #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
@@ -73,6 +76,7 @@ public:
     bool parseCommands();
 
     QQmlApplicationEngine *qmlEngine() const;
+    QNetworkAccessManager *manager() { return m_nam; }
 
 signals:
     void translationsUpdated();
@@ -113,7 +117,9 @@ private:
 
     QSharedPointer<VpnConnection> m_vpnConnection;
     QThread m_vpnConnectionThread;
+#ifndef Q_OS_ANDROID
     QScopedPointer<NotificationHandler> m_notificationHandler;
+#endif
 
     QScopedPointer<ConnectionController> m_connectionController;
     QScopedPointer<PageController> m_pageController;
@@ -124,6 +130,8 @@ private:
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
+
+    QNetworkAccessManager *m_nam;
 };
 
 #endif // AMNEZIA_APPLICATION_H

@@ -24,5 +24,22 @@
 //    cppController->vpnStatusDidChange(notification);
 }
 
+@end
+
+@implementation DocumentPickerDelegate 
+
+- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
+    for (NSURL *url in urls) {
+        if (self.documentPickerClosedCallback) {
+            self.documentPickerClosedCallback([url path]);
+        }
+    }
+}
+    
+- (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
+    if (self.documentPickerClosedCallback) {
+        self.documentPickerClosedCallback(nil);
+    }
+}
 
 @end

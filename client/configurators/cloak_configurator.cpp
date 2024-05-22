@@ -13,7 +13,7 @@ CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, const Q
 }
 
 QString CloakConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                                        ErrorCode errorCode)
+                                        ErrorCode &errorCode)
 {
     QString cloakPublicKey =
             m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::cloak::ckPublicKeyPath, errorCode);

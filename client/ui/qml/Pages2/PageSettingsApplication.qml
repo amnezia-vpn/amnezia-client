@@ -74,12 +74,34 @@ PageType {
                     }
                 }
 
-                KeyNavigation.tab: labelWithButtonLanguage.rightButton
+                KeyNavigation.tab: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted ?
+                    labelWithButtonNotification.rightButton : labelWithButtonLanguage.rightButton
                 parentFlickable: fl
             }
 
             DividerType {
                 visible: GC.isMobile()
+            }
+
+            LabelWithButtonType {
+                id: labelWithButtonNotification
+                visible: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted
+                Layout.fillWidth: true
+
+                text: qsTr("Enable notifications")
+                descriptionText: qsTr("Enable notifications to show the VPN state in the status bar")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                KeyNavigation.tab: labelWithButtonLanguage.rightButton
+                parentFlickable: fl
+
+                clickedFunction: function() {
+                    SettingsController.requestNotificationPermission()
+                }
+            }
+
+            DividerType {
+                visible: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted
             }
 
             SwitcherType {
@@ -172,7 +194,6 @@ PageType {
                     selectLanguageDrawer.open()
                 }
             }
-
 
             DividerType {}
 

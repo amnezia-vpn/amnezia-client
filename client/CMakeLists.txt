@@ -127,7 +127,6 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/core/controllers/vpnConfigurationController.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/qml_register_protocols.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/pages.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/property_helper.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
@@ -154,8 +153,13 @@ include_directories(mozilla/models)
 
 if(NOT IOS)
     set(HEADERS ${HEADERS}
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.h
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
+    )
+endif()
+
+if(NOT ANDROID)
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.h
     )
 endif()
 
@@ -170,7 +174,6 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/core/controllers/serverController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/controllers/vpnConfigurationController.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
@@ -199,8 +202,13 @@ endif()
 
 if(NOT IOS)
     set(SOURCES ${SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/MobileUtils.cpp
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
+    )
+endif()
+
+if(NOT ANDROID)
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.cpp
     )
 endif()
 

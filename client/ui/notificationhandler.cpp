@@ -7,10 +7,7 @@
 
 #if defined(Q_OS_IOS)
 #  include "platforms/ios/iosnotificationhandler.h"
-#elif defined(Q_OS_ANDROID)
-#  include "platforms/android/android_notificationhandler.h"
 #else
-
 #  include "systemtray_notificationhandler.h"
 #endif
 
@@ -18,8 +15,6 @@
 NotificationHandler* NotificationHandler::create(QObject* parent) {
 #if defined(Q_OS_IOS)
     return new IOSNotificationHandler(parent);
-#elif defined(Q_OS_ANDROID)
-    return new AndroidNotificationHandler(parent);
 #else
 
 #  if defined(Q_OS_LINUX)

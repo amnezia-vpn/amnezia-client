@@ -2851,8 +2851,8 @@ IKEv2 သည် လုံခြုံရေး၊ တည်ငြိမ်မှ
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="115"/>
-        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>IKEv2 - ခေတ်မီတည်ငြိမ်သောပရိုတိုကော၊ အခြားအရာများထက်အနည်းငယ်ပိုမြန်သည်၊ signal ပျောက်ဆုံးပြီးနောက် ချိတ်ဆက်မှုကို ပြန်လည်ရယူပေးသည်. ၎င်းသည် Android နှင့် iOS ၏နောက်ဆုံးဗားရှင်းများတွင် မူရင်းအတိုင်းထောက်ပံ့မှုရရှိသည်.</translation>
+        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
+        <translation>IKEv2 - ခေတ်မီတည်ငြိမ်သောပရိုတိုကော၊ အခြားအရာများထက်အနည်းငယ်ပိုမြန်သည်၊ signal ပျောက်ဆုံးပြီးနောက် ချိတ်ဆက်မှုကို ပြန်လည်ရယူပေးသည်.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="118"/>

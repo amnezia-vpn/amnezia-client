@@ -93,6 +93,7 @@ bool AndroidController::initialize()
         {"onServiceDisconnected", "()V", reinterpret_cast<void *>(onServiceDisconnected)},
         {"onServiceError", "()V", reinterpret_cast<void *>(onServiceError)},
         {"onVpnPermissionRejected", "()V", reinterpret_cast<void *>(onVpnPermissionRejected)},
+        {"onNotificationStateChanged", "()V", reinterpret_cast<void *>(onNotificationStateChanged)},
         {"onVpnStateChanged", "(I)V", reinterpret_cast<void *>(onVpnStateChanged)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
@@ -173,14 +174,6 @@ QString AndroidController::openFile(const QString &filter)
     return fileName;
 }
 
-void AndroidController::setNotificationText(const QString &title, const QString &message, int timerSec)
-{
-    callActivityMethod("setNotificationText", "(Ljava/lang/String;Ljava/lang/String;I)V",
-                       QJniObject::fromString(title).object<jstring>(),
-                       QJniObject::fromString(message).object<jstring>(),
-                       (jint) timerSec);
-}
-
 bool AndroidController::isCameraPresent()
 {
     return callActivityMethod<jboolean>("isCameraPresent", "()Z");
@@ -255,6 +248,16 @@ QPixmap AndroidController::getAppIcon(const QString &package, QSize *size, const
     if (AndroidBitmap_unlockPixels(env.jniEnv(), bitmap.object()) != ANDROID_BITMAP_RESULT_SUCCESS) return {};
 
     return QPixmap::fromImage(image);
+}
+
+bool AndroidController::isNotificationPermissionGranted()
+{
+    return callActivityMethod<jboolean>("isNotificationPermissionGranted", "()Z");
+}
+
+void AndroidController::requestNotificationPermission()
+{
+    callActivityMethod("requestNotificationPermission", "()V");
 }
 
 // Moving log processing to the Android side
@@ -407,6 +410,15 @@ void AndroidController::onVpnPermissionRejected(JNIEnv *env, jobject thiz)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->vpnPermissionRejected();
+}
+
+// static
+void AndroidController::onNotificationStateChanged(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->notificationStateChanged();
 }
 
 // static

@@ -32,6 +32,7 @@ enum class Action : IpcMessage {
     CONNECT,
     DISCONNECT,
     REQUEST_STATUS,
+    NOTIFICATION_PERMISSION_GRANTED,
     SET_SAVE_LOGS
 }
 
