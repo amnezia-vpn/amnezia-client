@@ -54,7 +54,6 @@ void SystemController::saveFile(QString fileName, const QString &data)
     QFileInfo fi(fileName);
 
 #ifdef Q_OS_MAC
-    // need for macOS but maybe will work on windows and linux too, need check
     const auto url = "file://" + fi.absoluteDir().absolutePath();
 #else
     const auto url = fi.absoluteDir().absolutePath();
