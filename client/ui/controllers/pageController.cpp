@@ -1,7 +1,5 @@
 #include "pageController.h"
 #include "utils/converter.h"
-#include "ui/models/servers_model.h"
-#include "ui/models/languageModel.h"
 #include "core/errorstrings.h"
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
@@ -20,10 +18,8 @@
 #endif
 
 PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
-                               const std::shared_ptr<Settings> &settings,
-                               const QSharedPointer<LanguageModel> &languageModel,
-                               QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_settings(settings), m_languageModel(languageModel)
+                               const std::shared_ptr<Settings> &settings, QObject *parent)
+    : QObject(parent), m_serversModel(serversModel), m_settings(settings)
 {
 #ifdef Q_OS_ANDROID
     // Change color of navigation and status bar's
@@ -174,8 +170,7 @@ void PageController::onShowErrorMessage(ErrorCode errorCode)
 {
     const auto fullErrorMessage = errorString(errorCode);
     const auto errorMessage = fullErrorMessage.mid(fullErrorMessage.indexOf(". ") + 1); // remove ErrorCode %1.
-    const auto baseUrl = m_languageModel->getDocsEndpoint();
-    const auto errorUrl = QStringLiteral("%1/troubleshooting/error-codes/#error-%2-%3").arg(baseUrl).arg(static_cast<int>(errorCode)).arg(utils::enumToString(errorCode).toLower());
+    const auto errorUrl = QStringLiteral("https://docs.amnezia.org/troubleshooting/error-codes/#error-%1-%2").arg(static_cast<int>(errorCode)).arg(utils::enumToString(errorCode).toLower());
     const auto fullMessage = QStringLiteral("<a href=\"%1\" style=\"color: #FBB26A;\">ErrorCode: %2</a>. %3").arg(errorUrl).arg(static_cast<int>(errorCode)).arg(errorMessage);
 
     emit showErrorMessage(fullMessage);

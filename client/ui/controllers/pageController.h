@@ -6,7 +6,6 @@
 
 #include "core/defs.h"
 #include "ui/models/servers_model.h"
-#include "ui/models/languageModel.h"
 
 namespace PageLoader
 {
@@ -72,7 +71,7 @@ class PageController : public QObject
     Q_OBJECT
 public:
     explicit PageController(const QSharedPointer<ServersModel> &serversModel, const std::shared_ptr<Settings> &settings,
-                          const QSharedPointer<LanguageModel> & languageModel,QObject *parent = nullptr);
+                            QObject *parent = nullptr);
 
 public slots:
     QString getInitialPage();
@@ -136,8 +135,6 @@ private:
     QSharedPointer<ServersModel> m_serversModel;
 
     std::shared_ptr<Settings> m_settings;
-
-    QSharedPointer<LanguageModel> m_languageModel;
 
     bool m_isTriggeredByConnectButton;
 
