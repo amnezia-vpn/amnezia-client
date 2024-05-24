@@ -98,7 +98,7 @@ QString LanguageModel::getDocsEndpoint()
     case QLocale::Russian:
         baseUrl += "/ru";
         break;
-    case QLocale::Russian:
+    case QLocale::Ukrainian:
         baseUrl += "/ru";
         break;
     default:
