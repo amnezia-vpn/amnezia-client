@@ -1,2 +1,0 @@
-What's changed:
-* Bug fixes.

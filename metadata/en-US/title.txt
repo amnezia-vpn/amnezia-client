@@ -1,1 +1,1 @@
-AmneziaVPN - Multi protocol VPN client
+Amnezia VPN

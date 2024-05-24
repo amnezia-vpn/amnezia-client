@@ -1,5 +1,0 @@
-What's Changed:
-* WireGuard obfuscation feature added
-* Improved XRay support
-* Keyboard navigation
-* Updated Cloak plugin

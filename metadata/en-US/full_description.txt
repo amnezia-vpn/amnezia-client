@@ -6,13 +6,6 @@ Free open-source software to create a personal VPN on your server. Helps to acce
 
 We are not a VPN service, you don't have to connect to our servers and pay us anything. You free to use your own self-hosted VPS or you could purchase any VPS from any provider. To connect, use your own or purchase any VPS from any provider.
 
-Features
-
-• Connect using a config file, text code, by scanning a QR code, or setting up your own server
-• Select and set the protocols manually or use the "Wizard" function to configure them automatically based on the level of censorship in your country.
-• Supports the following VPN protocols on the server: WireGuard, AmneziaWG, OpenVPN, OpenVPN over Cloak, ShadowSocks and IKEv2.
-• Share your VPN with friends using the share function.
-
 Useful links
 
 • https://amnezia.org - project website
