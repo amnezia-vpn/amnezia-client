@@ -65,7 +65,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
 
 WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardConfig(const ServerCredentials &credentials,
                                                                                     DockerContainer container,
-                                                                                    const QJsonObject &containerConfig, ErrorCode errorCode)
+                                                                                    const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
     WireguardConfigurator::ConnectionData connData = WireguardConfigurator::genClientKeys();
     connData.host = credentials.hostName;
@@ -158,7 +158,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
 }
 
 QString WireguardConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                            const QJsonObject &containerConfig, ErrorCode errorCode)
+                                            const QJsonObject &containerConfig, ErrorCode &errorCode)
 {
     QString scriptData = amnezia::scriptData(m_configTemplate, container);
     QString config =

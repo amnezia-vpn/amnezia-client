@@ -1088,7 +1088,17 @@ Already installed containers were found on the server. All installed containers 
         <translation>Язык</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="147"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="218"/>
+        <source>Enable notifications</source>
+        <translation>Включить уведомления</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="219"/>
+        <source>Enable notifications to show the VPN state in the status bar</source>
+        <translation>Включить уведомления для отображения статуса VPN в строке состояния</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="238"/>
         <source>Logging</source>
         <translation>Логирование</translation>
     </message>
@@ -2987,8 +2997,8 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="121"/>
-        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>IKEv2 Современный стабильный протокол, немного быстрее других восстанавливает соединение после потери сигнала. Имеет нативную поддержку последних версиий Android и iOS.</translation>
+        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
+        <translation>IKEv2 Современный стабильный протокол, немного быстрее других восстанавливает соединение после потери сигнала.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="124"/>

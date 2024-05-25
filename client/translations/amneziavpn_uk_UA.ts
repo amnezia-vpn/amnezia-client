@@ -3191,8 +3191,8 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="124"/>
-        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>IKEv2 сучасний стабільний протокол, трішки швидше за інших відновлює підключення. Підтримується в останніх версіях Android и iOS самими операційними системами.</translation>
+        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
+        <translation>IKEv2 сучасний стабільний протокол, трішки швидше за інших відновлює підключення.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="127"/>

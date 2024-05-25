@@ -36,7 +36,7 @@ public:
                                         const QString &path,
                                         libssh::ScpOverwriteMode overwriteMode = libssh::ScpOverwriteMode::ScpOverwriteExisting);
     QByteArray getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials, const QString &path,
-                                        ErrorCode errorCode);
+                                        ErrorCode &errorCode);
 
     QString replaceVars(const QString &script, const Vars &vars);
     Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None,
@@ -50,7 +50,7 @@ public:
                                  const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut = nullptr,
                                  const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr = nullptr);
 
-    QString checkSshConnection(const ServerCredentials &credentials, ErrorCode errorCode);
+    QString checkSshConnection(const ServerCredentials &credentials, ErrorCode &errorCode);
 
     void cancelInstallation();
 

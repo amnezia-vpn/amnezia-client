@@ -77,7 +77,7 @@ ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isA
 
 QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
                                                                 const QJsonObject &containerConfig, const DockerContainer container,
-                                                                ErrorCode errorCode)
+                                                                ErrorCode &errorCode)
 {
     QJsonObject vpnConfiguration {};
 
