@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
 
         qInfo().noquote() << QString("Started %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
         qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
+        qInfo().noquote() << QString("SSL backend: %1").arg(QSslSocket::sslLibraryVersionString());
 
         return app.exec();
     }

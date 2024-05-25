@@ -10,7 +10,9 @@ import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.Handler
+import androidx.core.content.getSystemService
 import kotlin.LazyThreadSafetyMode.NONE
+import kotlinx.coroutines.delay
 import org.amnezia.vpn.util.Log
 
 private const val TAG = "NetworkState"
@@ -28,7 +30,7 @@ class NetworkState(
     }
 
     private val connectivityManager: ConnectivityManager by lazy(NONE) {
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        context.getSystemService<ConnectivityManager>()!!
     }
 
     private val networkRequest: NetworkRequest by lazy(NONE) {
@@ -80,13 +82,24 @@ class NetworkState(
         }
     }
 
-    fun bindNetworkListener() {
+    suspend fun bindNetworkListener() {
         if (isListenerBound) return
         Log.d(TAG, "Bind network listener")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             connectivityManager.registerBestMatchingNetworkCallback(networkRequest, networkCallback, handler)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            connectivityManager.requestNetwork(networkRequest, networkCallback, handler)
+            try {
+                connectivityManager.requestNetwork(networkRequest, networkCallback, handler)
+            } catch (e: SecurityException) {
+                Log.e(TAG, "Failed to bind network listener: $e")
+                // Android 11 bug: https://issuetracker.google.com/issues/175055271
+                if (e.message?.startsWith("Package android does not belong to") == true) {
+                    delay(1000)
+                    connectivityManager.requestNetwork(networkRequest, networkCallback, handler)
+                } else {
+                    throw e
+                }
+            }
         } else {
             connectivityManager.requestNetwork(networkRequest, networkCallback)
         }

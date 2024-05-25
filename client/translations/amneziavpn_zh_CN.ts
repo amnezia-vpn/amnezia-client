@@ -3057,8 +3057,8 @@ WireGuard非常容易被阻挡，因为其独特的数据包签名。与一些�
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="115"/>
-        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>IKEv2 - 现代稳定协议，相比其他协议较快一些，在信号丢失后恢复连接。Android 和 iOS最新版原生支持。</translation>
+        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
+        <translation>IKEv2 - 现代稳定协议，相比其他协议较快一些，在信号丢失后恢复连接。</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="118"/>
