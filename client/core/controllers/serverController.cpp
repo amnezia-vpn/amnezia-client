@@ -420,11 +420,16 @@ ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentia
 
 ErrorCode ServerController::buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
-    ErrorCode e = uploadFileToHost(credentials, amnezia::scriptData(ProtocolScriptType::dockerfile, container).toUtf8(),
-                                   amnezia::server::getDockerfileFolder(container) + "/Dockerfile");
+    QString dockerFilePath = amnezia::server::getDockerfileFolder(container) + "/Dockerfile";
+    QString scriptString = QString("sudo rm %1").arg(dockerFilePath);
+    ErrorCode errorCode = runScript(credentials, replaceVars(scriptString, genVarsForScript(credentials, container)));
+    if (errorCode)
+        return errorCode;
 
-    if (e)
-        return e;
+    errorCode = uploadFileToHost(credentials, amnezia::scriptData(ProtocolScriptType::dockerfile, container).toUtf8(),dockerFilePath);
+
+    if (errorCode)
+        return errorCode;
 
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -432,13 +437,13 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         return ErrorCode::NoError;
     };
 
-    e = runScript(credentials,
+    errorCode = runScript(credentials,
                   replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
                   cbReadStdOut);
-    if (e)
-        return e;
+    if (errorCode)
+        return errorCode;
 
-    return e;
+    return errorCode;
 }
 
 ErrorCode ServerController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)

@@ -2,6 +2,7 @@
 #define AMNEZIA_APPLICATION_H
 
 #include <QCommandLineParser>
+#include <QNetworkAccessManager>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QThread>
@@ -76,6 +77,7 @@ public:
     bool parseCommands();
 
     QQmlApplicationEngine *qmlEngine() const;
+    QNetworkAccessManager *manager() { return m_nam; }
 
 signals:
     void translationsUpdated();
@@ -130,6 +132,8 @@ private:
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
+
+    QNetworkAccessManager *m_nam;
 };
 
 #endif // AMNEZIA_APPLICATION_H

@@ -57,6 +57,9 @@ QString errorString(ErrorCode code) {
     // Api errors
     case (ApiConfigDownloadError): errorMessage = QObject::tr("Error when retrieving configuration from API"); break;
     case (ApiConfigAlreadyAdded): errorMessage = QObject::tr("This config has already been added to the application"); break;
+    case (ApiConfigEmptyError): errorMessage = QObject::tr("In the response from the server, an empty config was received"); break;
+    case (ApiConfigSslError): errorMessage = QObject::tr("SSL error occurred"); break;
+    case (ApiConfigTimeoutError): errorMessage = QObject::tr("Server response timeout on api request"); break;
 
     // QFile errors
     case(OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;
