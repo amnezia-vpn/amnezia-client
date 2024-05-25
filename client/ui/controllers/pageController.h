@@ -126,6 +126,8 @@ signals:
     void forceTabBarActiveFocus();
     void forceStackActiveFocus();
 
+    void showChangelogDrawer();
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
 

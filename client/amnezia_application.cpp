@@ -406,4 +406,12 @@ void AmneziaApplication::initControllers()
 
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
+
+    m_updateController.reset(new UpdateController(m_settings));
+    m_engine->rootContext()->setContextProperty("UpdateController", m_updateController.get());
+    m_updateController->checkForUpdates();
+
+    connect(m_updateController.get(), &UpdateController::updateFound, this, [this]() {
+        QTimer::singleShot(1000, this, [this]() { m_pageController->showChangelogDrawer(); });
+    });
 }

@@ -32,5 +32,7 @@ class IpcInterface
     SLOT( bool enablePeerTraffic( const QJsonObject &configStr) );
     SLOT( bool enableKillSwitch( const QJsonObject &excludeAddr, int vpnAdapterIndex) );
     SLOT( bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) );
+
+    SLOT( int mountDmg(const QString &path, bool mount) );
 };
 

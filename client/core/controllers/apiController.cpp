@@ -99,7 +99,7 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
 
         QByteArray requestBody = QJsonDocument(apiPayload).toJson();
 
-        QNetworkReply *reply = amnApp->manager()->post(request, requestBody); // ??
+        QNetworkReply *reply = amnApp->manager()->post(request, requestBody);
 
         QObject::connect(reply, &QNetworkReply::finished, [this, reply, protocol, apiPayloadData, serverIndex, serverConfig]() mutable {
             if (reply->error() == QNetworkReply::NoError) {
