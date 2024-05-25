@@ -8,7 +8,6 @@
 #include "amnezia_application.h"
 #include "configurators/wireguard_configurator.h"
 #include "version.h"
-#include "core/errorstrings.h"
 
 namespace
 {
@@ -110,7 +109,7 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
                 QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 
                 if (ba.isEmpty()) {
-                    emit errorOccurred(errorString(ErrorCode::ApiConfigEmptyError));
+                    emit errorOccurred(ErrorCode::ApiConfigEmptyError);
                     return;
                 }
 
@@ -135,14 +134,14 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
             } else {
                 if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
                     || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
-                    emit errorOccurred(errorString(ErrorCode::ApiConfigTimeoutError));
+                    emit errorOccurred(ErrorCode::ApiConfigTimeoutError);
                 } else {
                     QString err = reply->errorString();
                     qDebug() << QString::fromUtf8(reply->readAll());
                     qDebug() << reply->error();
                     qDebug() << err;
                     qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-                    emit errorOccurred(errorString(ErrorCode::ApiConfigDownloadError));
+                    emit errorOccurred(ErrorCode::ApiConfigDownloadError);
                 }
             }
 
@@ -153,7 +152,7 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
                          [this, reply](QNetworkReply::NetworkError error) { qDebug() << reply->errorString() << error; });
         connect(reply, &QNetworkReply::sslErrors, [this, reply](const QList<QSslError> &errors) {
             qDebug().noquote() << errors;
-            emit errorOccurred(errorString(ErrorCode::ApiConfigSslError));
+            emit errorOccurred(ErrorCode::ApiConfigSslError);
         });
     }
 }

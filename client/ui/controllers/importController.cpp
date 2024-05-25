@@ -10,6 +10,7 @@
 #include "utilities.h"
 #include "core/serialization/serialization.h"
 #include "core/errorstrings.h"
+
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
@@ -273,7 +274,7 @@ void ImportController::importConfig()
     } else if (m_config.contains(config_key::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(m_config).toJson());
         if (m_serversModel->isServerFromApiAlreadyExists(crc)) {
-            emit importErrorOccurred(errorString(ErrorCode::ApiConfigAlreadyAdded), true);
+            emit importErrorOccurred(ErrorCode::ApiConfigAlreadyAdded, true);
         } else {
             m_config.insert(config_key::crc, crc);
 
@@ -283,7 +284,7 @@ void ImportController::importConfig()
     } else {
         qDebug() << "Failed to import profile";
         qDebug().noquote() << QJsonDocument(m_config).toJson();
-        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
+        emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
     }
 
     m_config = {};
@@ -360,7 +361,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         hostName = hostNameAndPortMatch.captured(1);
     } else {
         qDebug() << "Key parameter 'Endpoint' is missing";
-        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
+        emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
         return QJsonObject();
     }
 
@@ -386,7 +387,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
     } else {
         qDebug() << "One of the key parameters is missing (PrivateKey, Address, PublicKey)";
-        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
+        emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
         return QJsonObject();
     }
 
