@@ -220,9 +220,10 @@ PageType {
 
                             Connections {
                                 target: changeSettingsDrawer
-                                enabled: !GC.isMobile()
                                 function onOpened() {
-                                    drawerFocusItem.forceActiveFocus()
+                                    if (!GC.isMobile()) {
+                                        drawerFocusItem.forceActiveFocus()
+                                    }
                                     tempPort = port
                                     tempUsername = username
                                     tempPassword = password
@@ -280,6 +281,7 @@ PageType {
                                 headerText: qsTr("Username")
                                 textFieldPlaceholderText: "username"
                                 textFieldText: username
+                                textField.maximumLength: 32
 
                                 textField.onEditingFinished: {
                                     textFieldText = textField.text.replace(/^\s+|\s+$/g, '')
@@ -303,6 +305,7 @@ PageType {
                                 headerText: qsTr("Password")
                                 textFieldPlaceholderText: "password"
                                 textFieldText: password
+                                textField.maximumLength: 32
 
                                 textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
                                 buttonImageSource: textFieldText !== "" ? (hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg")
