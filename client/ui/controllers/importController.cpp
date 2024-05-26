@@ -217,6 +217,7 @@ void ImportController::importConfig()
 
     if (credentials.isValid() || m_config.contains(config_key::containers)) {
         m_serversModel->addServer(m_config);
+        emit siteNeedsAddition(credentials.hostName);
         emit importFinished();
     } else if (m_config.contains(config_key::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(m_config).toJson());
@@ -226,6 +227,7 @@ void ImportController::importConfig()
             m_config.insert(config_key::crc, crc);
 
             m_serversModel->addServer(m_config);
+            emit siteNeedsAddition(credentials.hostName);
             emit importFinished();
         }
     } else {

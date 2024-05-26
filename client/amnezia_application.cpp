@@ -406,4 +406,6 @@ void AmneziaApplication::initControllers()
 
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
+
+    connect(m_importController.get(), &ImportController::siteNeedsAddition, m_sitesController.get(), &SitesController::addSite);
 }

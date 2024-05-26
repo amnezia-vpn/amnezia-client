@@ -59,6 +59,8 @@ signals:
 
     void restoreAppConfig(const QByteArray &data);
 
+    void siteNeedsAddition(const QString& hostname);
+
 private:
     QJsonObject extractOpenVpnConfig(const QString &data);
     QJsonObject extractWireGuardConfig(const QString &data);
