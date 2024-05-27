@@ -7,6 +7,7 @@ import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import ContainerProps 1.0
 import ProtocolProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -93,11 +94,11 @@ PageType {
 
                             implicitHeight: 32
 
-                            defaultColor: "transparent"
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                            disabledColor: "#878B91"
-                            textColor: "#FBB26A"
+                            defaultColor: AmneziaStyle.color.transparent
+                            hoveredColor: AmneziaStyle.color.blackHovered
+                            pressedColor: AmneziaStyle.color.blackPressed
+                            disabledColor: AmneziaStyle.color.grey
+                            textColor: AmneziaStyle.color.orange
 
                             text: qsTr("More detailed")
                             KeyNavigation.tab: transportProtoSelector
@@ -194,7 +195,7 @@ PageType {
 
                                         Rectangle {
                                             Layout.fillHeight: true
-                                            color: "transparent"
+                                            color: AmneziaStyle.color.transparent
                                         }
 
                                         BasicButtonType {
@@ -247,7 +248,7 @@ PageType {
 
                         Rectangle {
                             Layout.fillHeight: true
-                            color: "transparent"
+                            color: AmneziaStyle.color.transparent
                         }
 
                         BasicButtonType {

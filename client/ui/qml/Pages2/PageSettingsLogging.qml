@@ -6,6 +6,7 @@ import QtQuick.Dialogs
 import QtCore
 
 import PageEnum 1.0
+import Style 1.0
 
 import "../Controls2"
 import "../Config"
@@ -114,7 +115,7 @@ disabled after 14 days, and all log files will be deleted.")
                         Layout.fillWidth: true
 
                         text: qsTr("Open folder with logs")
-                        color: "#D7D8DB"
+                        color: AmneziaStyle.color.white
                     }
                 }
 
@@ -159,7 +160,7 @@ disabled after 14 days, and all log files will be deleted.")
                         Layout.fillWidth: true
 
                         text: qsTr("Save logs to file")
-                        color: "#D7D8DB"
+                        color: AmneziaStyle.color.white
                     }
                 }
 
@@ -208,7 +209,7 @@ disabled after 14 days, and all log files will be deleted.")
                         Layout.fillWidth: true
 
                         text: qsTr("Clear logs")
-                        color: "#D7D8DB"
+                        color: AmneziaStyle.color.white
                     }
                 }
             }
