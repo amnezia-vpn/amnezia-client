@@ -116,6 +116,7 @@ VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &
     case DockerContainer::WireGuard: return new WireguardProtocol(configuration);
     case DockerContainer::Awg: return new WireguardProtocol(configuration);
     case DockerContainer::Xray: return new XrayProtocol(configuration);
+    case DockerContainer::SSXray: return new XrayProtocol(configuration);
 #endif
     default: return nullptr;
     }

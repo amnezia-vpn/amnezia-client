@@ -691,6 +691,30 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     for (auto &port : fixedPorts) {
         script = script.append("|:%1").arg(port);
     }
+
+    if (transportProto == "tcpandudp") {
+        QString tcpProtoScript = script;
+        QString udpProtoScript = script;
+        tcpProtoScript.append("' | grep -i tcp");
+        udpProtoScript.append("' | grep -i udp");
+        tcpProtoScript.append(" | grep LISTEN");
+
+        ErrorCode errorCode = runScript(credentials, replaceVars(tcpProtoScript, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+        if (errorCode != ErrorCode::NoError) {
+            return errorCode;
+        }
+
+        errorCode = runScript(credentials, replaceVars(udpProtoScript, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+        if (errorCode != ErrorCode::NoError) {
+            return errorCode;
+        }
+
+        if (!stdOut.isEmpty()) {
+            return ErrorCode::ServerPortAlreadyAllocatedError;
+        }
+        return ErrorCode::NoError;
+    }
+
     script = script.append("' | grep -i %1").arg(transportProto);
 
     if (transportProto == "tcp") {

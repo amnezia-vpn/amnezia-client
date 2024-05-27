@@ -83,6 +83,7 @@ namespace amnezia
         constexpr char sftp[] = "sftp";
         constexpr char awg[] = "awg";
         constexpr char xray[] = "xray";
+        constexpr char ssxray[] = "ssxray";
 
         constexpr char configVersion[] = "config_version";
 
@@ -223,7 +224,8 @@ namespace amnezia
 
         enum TransportProto {
             Udp,
-            Tcp
+            Tcp,
+            TcpAndUdp
         };
         Q_ENUM_NS(TransportProto)
 
@@ -237,6 +239,7 @@ namespace amnezia
             Ikev2,
             L2tp,
             Xray,
+            SSXray,
 
             // non-vpn
             TorWebSite,
