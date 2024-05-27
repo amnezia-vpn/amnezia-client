@@ -53,6 +53,7 @@ import org.amnezia.vpn.protocol.cloak.Cloak
 import org.amnezia.vpn.protocol.openvpn.OpenVpn
 import org.amnezia.vpn.protocol.putStatus
 import org.amnezia.vpn.protocol.wireguard.Wireguard
+import org.amnezia.vpn.protocol.xray.Xray
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.Prefs
 import org.amnezia.vpn.util.net.NetworkState
@@ -555,6 +556,7 @@ class AmneziaVpnService : VpnService() {
                 "awg" -> Awg()
                 "openvpn" -> OpenVpn()
                 "cloak" -> Cloak()
+                "xray" -> Xray()
                 else -> throw IllegalArgumentException("Protocol '$protocolName' not found")
             }.apply { initialize(applicationContext, protocolState, ::onError) }
                 .also { protocolCache[protocolName] = it }
