@@ -9,7 +9,6 @@
 #include <QStandardPaths>
 
 #include "core/controllers/vpnConfigurationController.h"
-#include "core/errorstrings.h"
 #include "systemController.h"
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_utils.h"
@@ -101,7 +100,7 @@ void ExportController::generateConnectionConfig(const QString &clientName)
 
     errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig, clientName, serverController);
     if (errorCode != ErrorCode::NoError) {
-        emit exportErrorOccurred(errorString(errorCode));
+        emit exportErrorOccurred(errorCode);
         return;
     }
 
@@ -171,7 +170,7 @@ void ExportController::generateOpenVpnConfig(const QString &clientName)
     }
 
     if (errorCode) {
-        emit exportErrorOccurred(errorString(errorCode));
+        emit exportErrorOccurred(errorCode);
         return;
     }
 
@@ -189,7 +188,7 @@ void ExportController::generateWireGuardConfig(const QString &clientName)
     QJsonObject nativeConfig;
     ErrorCode errorCode = generateNativeConfig(DockerContainer::WireGuard, clientName, Proto::WireGuard, nativeConfig);
     if (errorCode) {
-        emit exportErrorOccurred(errorString(errorCode));
+        emit exportErrorOccurred(errorCode);
         return;
     }
 
@@ -209,7 +208,7 @@ void ExportController::generateAwgConfig(const QString &clientName)
     QJsonObject nativeConfig;
     ErrorCode errorCode = generateNativeConfig(DockerContainer::Awg, clientName, Proto::Awg, nativeConfig);
     if (errorCode) {
-        emit exportErrorOccurred(errorString(errorCode));
+        emit exportErrorOccurred(errorCode);
         return;
     }
 
@@ -237,7 +236,7 @@ void ExportController::generateShadowSocksConfig()
     }
 
     if (errorCode) {
-        emit exportErrorOccurred(errorString(errorCode));
+        emit exportErrorOccurred(errorCode);
         return;
     }
 
@@ -263,7 +262,7 @@ void ExportController::generateCloakConfig()
     QJsonObject nativeConfig;
     ErrorCode errorCode = generateNativeConfig(DockerContainer::Cloak, "", Proto::Cloak, nativeConfig);
     if (errorCode) {
-        emit exportErrorOccurred(errorString(errorCode));
+        emit exportErrorOccurred(errorCode);
         return;
     }
 
@@ -283,7 +282,7 @@ void ExportController::generateXrayConfig()
     QJsonObject nativeConfig;
     ErrorCode errorCode = generateNativeConfig(DockerContainer::Xray, "", Proto::Xray, nativeConfig);
     if (errorCode) {
-        emit exportErrorOccurred(errorString(errorCode));
+        emit exportErrorOccurred(errorCode);
         return;
     }
 
@@ -320,7 +319,7 @@ void ExportController::updateClientManagementModel(const DockerContainer contain
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
     ErrorCode errorCode = m_clientManagementModel->updateModel(container, credentials, serverController);
     if (errorCode != ErrorCode::NoError) {
-        emit exportErrorOccurred(errorString(errorCode));
+        emit exportErrorOccurred(errorCode);
     }
 }
 
@@ -330,7 +329,7 @@ void ExportController::revokeConfig(const int row, const DockerContainer contain
     ErrorCode errorCode =
             m_clientManagementModel->revokeClient(row, container, credentials, m_serversModel->getProcessedServerIndex(), serverController);
     if (errorCode != ErrorCode::NoError) {
-        emit exportErrorOccurred(errorString(errorCode));
+        emit exportErrorOccurred(errorCode);
     }
 }
 
@@ -339,7 +338,7 @@ void ExportController::renameClient(const int row, const QString &clientName, co
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
     ErrorCode errorCode = m_clientManagementModel->renameClient(row, clientName, container, credentials, serverController);
     if (errorCode != ErrorCode::NoError) {
-        emit exportErrorOccurred(errorString(errorCode));
+        emit exportErrorOccurred(errorCode);
     }
 }
 

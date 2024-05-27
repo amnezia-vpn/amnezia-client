@@ -23,6 +23,7 @@ namespace amnezia
             ShadowSocks,
             Ipsec,
             Xray,
+            SSXray,
 
             // non-vpn
             TorWebSite,

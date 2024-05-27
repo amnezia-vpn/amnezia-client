@@ -1,0 +1,4 @@
+What's Changed:
+* Added app split tunneling
+* Added a tile to the quick settings panel
+* Bug fixes and improvements

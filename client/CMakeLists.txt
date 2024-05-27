@@ -134,6 +134,8 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.h
     ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/serialization.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/transfer.h
 )
 
 # Mozilla headres
@@ -176,6 +178,14 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/outbound.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/inbound.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/ss.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/ssd.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vless.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/trojan.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess_new.cpp
 )
 
 # Mozilla sources

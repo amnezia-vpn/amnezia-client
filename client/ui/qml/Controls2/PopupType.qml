@@ -57,7 +57,17 @@ Popup {
                 horizontalAlignment: Text.AlignLeft
                 Layout.fillWidth: true
 
+                onLinkActivated: function(link) {
+                    Qt.openUrlExternally(link)
+                }
+
                 text: root.text
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
             }
 
             Item {

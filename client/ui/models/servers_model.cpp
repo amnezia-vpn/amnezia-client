@@ -582,6 +582,9 @@ bool ServersModel::serverHasInstalledContainers(const int serverIndex) const
         if (ContainerProps::containerService(container) == ServiceType::Vpn) {
             return true;
         }
+        if (container == DockerContainer::SSXray) {
+            return true;
+        }
     }
     return false;
 }

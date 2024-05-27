@@ -51,7 +51,14 @@ void SystemController::saveFile(QString fileName, const QString &data)
     return;
 #else
     QFileInfo fi(fileName);
-    QDesktopServices::openUrl(fi.absoluteDir().absolutePath());
+
+#ifdef Q_OS_MAC
+    const auto url = "file://" + fi.absoluteDir().absolutePath();
+#else
+    const auto url = fi.absoluteDir().absolutePath();
+#endif
+
+    QDesktopServices::openUrl(url);
 #endif
 }
 

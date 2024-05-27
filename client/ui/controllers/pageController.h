@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QQmlEngine>
 
+#include "core/defs.h"
 #include "ui/models/servers_model.h"
 
 namespace PageLoader
@@ -94,6 +95,9 @@ public slots:
     void setDrawerDepth(const int depth);
     int getDrawerDepth();
 
+  private slots:
+    void onShowErrorMessage(amnezia::ErrorCode errorCode);
+
 signals:
     void goToPage(PageLoader::PageEnum page, bool slide = true);
     void goToStartPage();
@@ -108,6 +112,7 @@ signals:
     void restorePageHomeState(bool isContainerInstalled = false);
     void replaceStartPage();
 
+    void showErrorMessage(amnezia::ErrorCode);
     void showErrorMessage(const QString &errorMessage);
     void showNotificationMessage(const QString &message);
 

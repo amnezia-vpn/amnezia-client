@@ -102,9 +102,10 @@ PageType {
             PageController.showBusyIndicator(false)
         }
 
-        function onExportErrorOccurred(errorMessage) {
+        function onExportErrorOccurred(error) {
             shareConnectionDrawer.close()
-            PageController.showErrorMessage(errorMessage)
+
+            PageController.showErrorMessage(error)
         }
     }
 
