@@ -14,5 +14,6 @@ android {
 dependencies {
     compileOnly(project(":utils"))
     compileOnly(project(":protocolApi"))
+    implementation(project(":xray:libXray"))
     implementation(libs.kotlinx.coroutines)
 }

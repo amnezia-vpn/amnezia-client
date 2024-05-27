@@ -98,7 +98,6 @@ android {
 }
 
 dependencies {
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
     implementation(project(":qt"))
     implementation(project(":utils"))
     implementation(project(":protocolApi"))
