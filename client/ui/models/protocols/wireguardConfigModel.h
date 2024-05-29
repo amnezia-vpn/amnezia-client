@@ -39,12 +39,15 @@ public slots:
     void updateModel(const QJsonObject &config);
     QJsonObject getConfig();
 
+    bool isServerSettingsEqual();
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
     DockerContainer m_container;
     QJsonObject m_protocolConfig;
+    QString m_mtu;
     QJsonObject m_fullConfig;
 };
 

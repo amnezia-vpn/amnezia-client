@@ -71,7 +71,10 @@ PageType {
                 }
 
                 delegate: Item {
-                    property alias focusItemId: portTextField.textField
+                    id: delegateItem
+
+                    property alias focusItemId: mtuTextField.textField
+                    property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
 
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
@@ -93,37 +96,23 @@ PageType {
                             headerText: qsTr("WG settings")
                         }
 
-                        TextFieldWithHeaderType {
-                            id: portTextField
+                        Header2TextType {
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
-                            headerText: qsTr("Port")
-                            textFieldText: port
-                            textField.maximumLength: 5
-                            textField.validator: IntValidator { bottom: 1; top: 65535 }
-
-                            KeyNavigation.tab: mtuTextField.textField
-
-                            textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
-                                }
-                            }
-
-                            checkEmptyText: true
+                            text: qsTr("Local settings")
                         }
 
                         TextFieldWithHeaderType {
                             id: mtuTextField
                             Layout.fillWidth: true
-                            Layout.topMargin: 16
+                            Layout.topMargin: 8
 
                             headerText: qsTr("MTU")
                             textFieldText: mtu
                             textField.validator: IntValidator { bottom: 576; top: 65535 }
 
-                            KeyNavigation.tab: saveButton
+                            KeyNavigation.tab: delegateItem.isEnabled ? portTextField.textField : saveButton
 
                             textField.onEditingFinished: {
                                 if (textFieldText === "") {
@@ -133,6 +122,36 @@ PageType {
                                     mtu = textFieldText
                                 }
                             }
+                            checkEmptyText: true
+                        }
+
+                        Header2TextType {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 16
+
+                            text: qsTr("General settings")
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: portTextField
+                            Layout.fillWidth: true
+                            Layout.topMargin: 8
+
+                            enabled: delegateItem.isEnabled
+
+                            headerText: qsTr("Port")
+                            textFieldText: port
+                            textField.maximumLength: 5
+                            textField.validator: IntValidator { bottom: 1; top: 65535 }
+
+                            KeyNavigation.tab: saveButton
+
+                            textField.onEditingFinished: {
+                                if (textFieldText !== port) {
+                                    port = textFieldText
+                                }
+                            }
+
                             checkEmptyText: true
                         }
 
@@ -149,17 +168,31 @@ PageType {
 
                             Keys.onTabPressed: lastItemTabClicked(focusItem)
 
-                            onClicked: {
+                            onClicked: function() {
                                 forceActiveFocus()
 
-                                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                                    return
-                                }
+                                var headerText = qsTr("Save settings?")
+                                var descriptionText = delegateItem.isEnabled && !WireGuardConfigModel.isServerSettingsEqual() ?
+                                            qsTr("All users with whom you shared a connection with will no longer be able to connect to it.") :
+                                            qsTr("Only the settings for this device will be changed")
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
 
-                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.updateContainer(WireGuardConfigModel.getConfig())
-                                focusItem.forceActiveFocus()
+                                var yesButtonFunction = function() {
+                                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                        PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                        return
+                                    }
+
+                                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                                    InstallController.updateContainer(WireGuardConfigModel.getConfig())
+                                }
+                                var noButtonFunction = function() {
+                                    if (!GC.isMobile()) {
+                                        saveRestartButton.forceActiveFocus()
+                                    }
+                                }
+                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
 
                             Keys.onEnterPressed: saveButton.clicked()

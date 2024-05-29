@@ -65,12 +65,15 @@ public slots:
     bool isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4);
     bool isPacketSizeEqual(const int s1, const int s2);
 
+    bool isServerSettingsEqual();
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
     DockerContainer m_container;
     QJsonObject m_protocolConfig;
+    QString m_mtu;
     QJsonObject m_fullConfig;
 };
 

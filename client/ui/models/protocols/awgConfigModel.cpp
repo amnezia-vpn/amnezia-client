@@ -22,7 +22,7 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
 
     switch (role) {
     case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
-    case Roles::MtuRole: m_protocolConfig.insert(config_key::mtu, value.toString()); break;
+    case Roles::MtuRole: m_mtu = value.toString(); break;
     case Roles::JunkPacketCountRole: m_protocolConfig.insert(config_key::junkPacketCount, value.toString()); break;
     case Roles::JunkPacketMinSizeRole: m_protocolConfig.insert(config_key::junkPacketMinSize, value.toString()); break;
     case Roles::JunkPacketMaxSizeRole: m_protocolConfig.insert(config_key::junkPacketMaxSize, value.toString()); break;
@@ -58,7 +58,7 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString();
-    case Roles::MtuRole: return m_protocolConfig.value(config_key::mtu).toString();
+    case Roles::MtuRole: return m_mtu;
     case Roles::JunkPacketCountRole: return m_protocolConfig.value(config_key::junkPacketCount);
     case Roles::JunkPacketMinSizeRole: return m_protocolConfig.value(config_key::junkPacketMinSize);
     case Roles::JunkPacketMaxSizeRole: return m_protocolConfig.value(config_key::junkPacketMaxSize);
@@ -84,7 +84,6 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
 
     m_protocolConfig[config_key::last_config] = protocolConfig.value(config_key::last_config);
     m_protocolConfig[config_key::port] = protocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
-    m_protocolConfig[config_key::mtu] = protocolConfig.value(config_key::mtu).toString(protocols::awg::defaultMtu);
     m_protocolConfig[config_key::junkPacketCount] =
             protocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
     m_protocolConfig[config_key::junkPacketMinSize] =
@@ -107,6 +106,10 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
             protocolConfig.value(config_key::transportPacketMagicHeader)
                     .toString(protocols::awg::defaultTransportPacketMagicHeader);
 
+    auto lastConfig = m_protocolConfig.value(config_key::last_config).toString();
+    QJsonObject jsonConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
+    m_mtu = jsonConfig[config_key::mtu].toString(protocols::awg::defaultMtu);
+
     endResetModel();
 }
 
@@ -120,7 +123,7 @@ QJsonObject AwgConfigModel::getConfig()
     } else {
         auto lastConfig = m_protocolConfig.value(config_key::last_config).toString();
         QJsonObject jsonConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
-        jsonConfig[config_key::mtu] = newConfig.mtu;
+        jsonConfig[config_key::mtu] = m_mtu;
 
         m_protocolConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
     }
@@ -137,6 +140,14 @@ bool AwgConfigModel::isHeadersEqual(const QString &h1, const QString &h2, const 
 bool AwgConfigModel::isPacketSizeEqual(const int s1, const int s2)
 {
     return (AwgConstant::messageInitiationSize + s1 == AwgConstant::messageResponseSize + s2);
+}
+
+bool AwgConfigModel::isServerSettingsEqual()
+{
+    const AwgConfig oldConfig(m_fullConfig.value(config_key::awg).toObject());
+    const AwgConfig newConfig(m_protocolConfig);
+
+    return oldConfig.hasEqualServerSettings(newConfig);
 }
 
 QHash<int, QByteArray> AwgConfigModel::roleNames() const
@@ -160,8 +171,11 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
 
 AwgConfig::AwgConfig(const QJsonObject &jsonConfig)
 {
+    auto lastConfig = jsonConfig.value(config_key::last_config).toString();
+    QJsonObject config = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
+    mtu = config[config_key::mtu].toString(protocols::awg::defaultMtu);
+
     port = jsonConfig.value(config_key::port).toString(protocols::awg::defaultPort);
-    mtu = jsonConfig.value(config_key::mtu).toString(protocols::awg::defaultMtu);
     junkPacketCount = jsonConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
     junkPacketMinSize =
             jsonConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize);

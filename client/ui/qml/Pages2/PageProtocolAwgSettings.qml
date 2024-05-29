@@ -16,7 +16,7 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.portTextField.textField
+    defaultActiveFocusItem: listview.currentItem.mtuTextField.textField
 
     Item {
         id: focusItem
@@ -39,7 +39,7 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listview.currentItem.portTextField.textField
+            KeyNavigation.tab: listview.currentItem.mtuTextField.textField
         }
     }
 
@@ -56,8 +56,6 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            enabled: ServersModel.isProcessedServerHasWriteAccess()
-
             ListView {
                 id: listview
 
@@ -70,12 +68,12 @@ PageType {
                 model: AwgConfigModel
 
                 delegate: Item {
-                    id: _delegate
-
+                    id: delegateItem
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
-                    property alias portTextField:portTextField
+                    property alias mtuTextField: mtuTextField
+                    property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
 
                     ColumnLayout {
                         id: col
@@ -95,10 +93,47 @@ PageType {
                             headerText: qsTr("AmneziaWG settings")
                         }
 
+                        Header2TextType {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 40
+
+                            text: qsTr("Local settings")
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: mtuTextField
+                            Layout.fillWidth: true
+                            Layout.topMargin: 8
+
+                            headerText: qsTr("MTU")
+                            textFieldText: mtu
+                            textField.validator: IntValidator { bottom: 576; top: 65535 }
+
+                            textField.onEditingFinished: {
+                                if (textFieldText === "") {
+                                    textFieldText = "0"
+                                }
+                                if (textFieldText !== mtu) {
+                                    mtu = textFieldText
+                                }
+                            }
+                            checkEmptyText: true
+                            KeyNavigation.tab: delegateItem.isEnabled ? portTextField.textField : saveRestartButton
+                        }
+
+                        Header2TextType {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 16
+
+                            text: qsTr("General settings")
+                        }
+
                         TextFieldWithHeaderType {
                             id: portTextField
                             Layout.fillWidth: true
-                            Layout.topMargin: 40
+                            Layout.topMargin: 8
+
+                            enabled: delegateItem.isEnabled
 
                             headerText: qsTr("Port")
                             textFieldText: port
@@ -114,27 +149,6 @@ PageType {
 
                             checkEmptyText: true
 
-                            KeyNavigation.tab: mtuTextField.textField
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: mtuTextField
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
-
-                            headerText: qsTr("MTU")
-                            textFieldText: mtu
-                            textField.validator: IntValidator { bottom: 576; top: 65535 }
-
-                            textField.onEditingFinished: {
-                                if (textFieldText === "") {
-                                    textFieldText = "0"
-                                }
-                                if (textFieldText !== mtu) {
-                                    mtu = textFieldText
-                                }
-                            }
-                            checkEmptyText: true
                             KeyNavigation.tab: junkPacketCountTextField.textField
                         }
 
@@ -142,6 +156,8 @@ PageType {
                             id: junkPacketCountTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+
+                            enabled: delegateItem.isEnabled
 
                             headerText: "Jc - Junk packet count"
                             textFieldText: junkPacketCount
@@ -168,6 +184,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
+                            enabled: delegateItem.isEnabled
+
                             headerText: "Jmin - Junk packet minimum size"
                             textFieldText: junkPacketMinSize
                             textField.validator: IntValidator { bottom: 0 }
@@ -188,6 +206,8 @@ PageType {
                             id: junkPacketMaxSizeTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+
+                            enabled: delegateItem.isEnabled
 
                             headerText: "Jmax - Junk packet maximum size"
                             textFieldText: junkPacketMaxSize
@@ -210,6 +230,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
+                            enabled: delegateItem.isEnabled
+
                             headerText: "S1 - Init packet junk size"
                             textFieldText: initPacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
@@ -230,6 +252,8 @@ PageType {
                             id: responsePacketJunkSizeTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+
+                            enabled: delegateItem.isEnabled
 
                             headerText: "S2 - Response packet junk size"
                             textFieldText: responsePacketJunkSize
@@ -252,6 +276,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
+                            enabled: delegateItem.isEnabled
+
                             headerText: "H1 - Init packet magic header"
                             textFieldText: initPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
@@ -272,6 +298,8 @@ PageType {
                             id: responsePacketMagicHeaderTextField
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+
+                            enabled: delegateItem.isEnabled
 
                             headerText: "H2 - Response packet magic header"
                             textFieldText: responsePacketMagicHeader
@@ -294,6 +322,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
+                            enabled: delegateItem.isEnabled
+
                             headerText: "H4 - Transport packet magic header"
                             textFieldText: transportPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
@@ -315,6 +345,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
                             parentFlickable: fl
+
+                            enabled: delegateItem.isEnabled
 
                             headerText: "H3 - Underload packet magic header"
                             textFieldText: underloadPacketMagicHeader
@@ -355,28 +387,32 @@ PageType {
                             Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
-                                if (AwgConfigModel.isHeadersEqual(underloadPacketMagicHeaderTextField.textField.text,
-                                                                  transportPacketMagicHeaderTextField.textField.text,
-                                                                  responsePacketMagicHeaderTextField.textField.text,
-                                                                  initPacketMagicHeaderTextField.textField.text)) {
-                                    PageController.showErrorMessage(qsTr("The values of the H1-H4 fields must be unique"))
-                                    return
-                                }
+                                forceActiveFocus()
 
-                                if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
-                                                                     parseInt(responsePacketJunkSizeTextField.textField.text))) {
-                                    PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)"))
-                                    return
+                                if (delegateItem.isEnabled) {
+                                    if (AwgConfigModel.isHeadersEqual(underloadPacketMagicHeaderTextField.textField.text,
+                                                                      transportPacketMagicHeaderTextField.textField.text,
+                                                                      responsePacketMagicHeaderTextField.textField.text,
+                                                                      initPacketMagicHeaderTextField.textField.text)) {
+                                        PageController.showErrorMessage(qsTr("The values of the H1-H4 fields must be unique"))
+                                        return
+                                    }
+
+                                    if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
+                                                                         parseInt(responsePacketJunkSizeTextField.textField.text))) {
+                                        PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)"))
+                                        return
+                                    }
                                 }
 
                                 var headerText = qsTr("Save settings?")
-                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                                var descriptionText = delegateItem.isEnabled && !AwgConfigModel.isServerSettingsEqual() ?
+                                            qsTr("All users with whom you shared a connection with will no longer be able to connect to it.") :
+                                            qsTr("Only the settings for this device will be changed")
                                 var yesButtonText = qsTr("Continue")
                                 var noButtonText = qsTr("Cancel")
 
                                 var yesButtonFunction = function() {
-                                    forceActiveFocus()
-
                                     if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
                                         PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                                         return
