@@ -173,6 +173,7 @@ bool ImportController::extractConfigFromData(QString data)
     }
     case ConfigTypes::Amnezia: {
         m_config = QJsonDocument::fromJson(config.toUtf8()).object();
+        processAmneziaConfig(m_config);
         if (!m_config.empty()) {
             checkForMaliciousStrings(m_config);
             return true;
@@ -643,6 +644,28 @@ void ImportController::checkForMaliciousStrings(const QJsonObject &serverConfig)
                     m_maliciousWarningText.push_back(QString("<br><i>%1</i>").arg(string));
                 }
             }
+        }
+    }
+}
+
+void ImportController::processAmneziaConfig(QJsonObject &config)
+{
+    auto containers = config.value(config_key::containers).toArray();
+    for (auto i = 0; i < containers.size(); i++) {
+        auto container = containers.at(i).toObject();
+        auto dockerContainer = ContainerProps::containerFromString(container.value(config_key::container).toString());
+        if (dockerContainer == DockerContainer::Awg || dockerContainer == DockerContainer::WireGuard) {
+            auto containerConfig = container.value(ContainerProps::containerTypeToString(dockerContainer)).toObject();
+            auto protocolConfig = containerConfig.value(config_key::last_config).toString();
+
+            QJsonObject jsonConfig = QJsonDocument::fromJson(protocolConfig.toUtf8()).object();
+            jsonConfig[config_key::mtu] = dockerContainer == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+
+            containerConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
+
+            container[ContainerProps::containerTypeToString(dockerContainer)] = containerConfig;
+            containers.replace(i, containerConfig);
+            config.insert(config_key::containers, containers);
         }
     }
 }
