@@ -1,8 +1,8 @@
 # Amnezia VPN
 ## _The best client for self-hosted VPN_
 
-[![Build Status](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml/badge.svg?branch=dev)](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml?query=branch:dev)
-[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/amnezia-vpn/amnezia-client)
+[![Build Status](https://github.com/vpn-naruzhu/vpnn-client/actions/workflows/deploy.yml/badge.svg?branch=dev)](https://github.com/vpn-naruzhu/vpnn-client/actions/workflows/deploy.yml?query=branch:dev)
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/vpn-naruzhu/vpnn-client)
 
 Amnezia is an open-source VPN client, with a key feature that enables you to deploy your own VPN server on your server.
 
@@ -16,14 +16,14 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 ## Links
 
-[https://amnezia.org](https://amnezia.org) - project website
-[https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit
+[https://vpn-naruzhu.site/](https://vpn-naruzhu.site/) - project website
+[https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit of original project
 [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)
 [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)
 
 ## Tech
 
-AmneziaVPN uses several open-source projects to work:
+VPNNaruzhu uses several open-source projects to work:
 
 - [OpenSSL](https://www.openssl.org/)
 - [OpenVPN](https://openvpn.net/)
@@ -118,10 +118,10 @@ export PATH=$(PATH):/path/to/GOPATH/bin
 If the build fails with the following error
 ```
 make: ***
-[$(PROJECTDIR)/client/build/AmneziaVPN.build/Debug-iphoneos/wireguard-go-bridge/goroot/.prepared]
+[$(PROJECTDIR)/client/build/VPNNaruzhu.build/Debug-iphoneos/wireguard-go-bridge/goroot/.prepared]
 Error 1
 ```
-Add a user-defined variable to both AmneziaVPN and WireGuardNetworkExtension targets' build settings with
+Add a user-defined variable to both VPNNaruzhu and WireGuardNetworkExtension targets' build settings with
 key `PATH` and value `${PATH}/path/to/bin/folder/with/go/executable`, e.g. `${PATH}:/usr/local/go/bin`.
 
 if the above error persists on your M1 Mac, then most probably you need to install arch based CMake

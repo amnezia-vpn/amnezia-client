@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_NAME=AmneziaVPN
+APP_NAME=VPNNaruzhu
 LOG_FOLDER=/var/log/$APP_NAME
 LOG_FILE="$LOG_FOLDER/post-uninstall.log"
 APP_PATH=/opt/$APP_NAME
@@ -13,7 +13,7 @@ date >> $LOG_FILE
 echo "Uninstall Script started" >> $LOG_FILE
 sudo killall -9 $APP_NAME 2>> $LOG_FILE
 
-ls /opt/AmneziaVPN/client/lib/* | while IFS=: read -r dir; do
+ls /opt/VPNNaruzhu/client/lib/* | while IFS=: read -r dir; do
 	sudo unlink $dir  >> $LOG_FILE
 done
 

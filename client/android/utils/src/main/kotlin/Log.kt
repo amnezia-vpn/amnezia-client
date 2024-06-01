@@ -24,8 +24,8 @@ import org.amnezia.vpn.util.Log.Priority.W
 import android.util.Log as NativeLog
 
 private const val TAG = "Log"
-private const val LOG_FILE_NAME = "amneziaVPN.log"
-private const val ROTATE_LOG_FILE_NAME = "amneziaVPN.rotate.log"
+private const val LOG_FILE_NAME = "vpnnaruzhu.log"
+private const val ROTATE_LOG_FILE_NAME = "vpnnaruzhu.rotate.log"
 private const val LOCK_FILE_NAME = ".lock"
 private const val DATE_TIME_PATTERN = "MM-dd HH:mm:ss.SSS"
 private const val PREFS_SAVE_LOGS_KEY = "SAVE_LOGS"

@@ -21,7 +21,7 @@
         <file>fonts/Lato-Regular.ttf</file>
         <file>fonts/Lato-Thin.ttf</file>
         <file>fonts/Lato-ThinItalic.ttf</file>
-        <file>images/AmneziaVPN.png</file>
+        <file>images/VPNNaruzhu.png</file>
         <file>images/share.png</file>
         <file>server_scripts/remove_container.sh</file>
         <file>server_scripts/setup_host_firewall.sh</file>
@@ -198,7 +198,7 @@
         <file>ui/qml/Pages2/PageProtocolOpenVpnSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolShadowSocksSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolCloakSettings.qml</file>
-        <file>ui/qml/Pages2/PageProtocolXraySettings.qml</file>        
+        <file>ui/qml/Pages2/PageProtocolXraySettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolRaw.qml</file>
         <file>ui/qml/Pages2/PageSettingsLogging.qml</file>
         <file>ui/qml/Pages2/PageServiceSftpSettings.qml</file>

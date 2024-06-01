@@ -1,5 +1,5 @@
 FROM alpine:3.15
-LABEL maintainer="AmneziaVPN"
+LABEL maintainer="VPNNaruzhu"
 
 ARG SS_RELEASE="v1.18.1"
 
@@ -27,7 +27,7 @@ RUN SERVER_ARCH=$(uname -m); \
   tar -Jxvf /usr/bin/ss.tar.xz -C /usr/bin/;\
   chmod a+x /usr/bin/ssserver;
 
-# Tune network  
+# Tune network
 RUN echo -e " \n\
   fs.file-max = 51200 \n\
   \n\
@@ -57,7 +57,7 @@ RUN echo -e " \n\
   echo -e " \n\
   * soft nofile 51200 \n\
   * hard nofile 51200 \n\
-  " | sed -e 's/^\s\+//g' | tee -a /etc/security/limits.conf  
+  " | sed -e 's/^\s\+//g' | tee -a /etc/security/limits.conf
 
 ENTRYPOINT [ "dumb-init", "/opt/amnezia/start.sh" ]
 CMD [ "" ]

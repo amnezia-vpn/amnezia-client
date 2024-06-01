@@ -228,7 +228,7 @@ PageType {
 
                 clickedFunction: function() {
                     var headerText = qsTr("Reset settings and remove all data from the application?")
-                    var descriptionText = qsTr("All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.")
+                    var descriptionText = qsTr("All settings will be reset to default. All installed VPNNaruzhu services will still remain on the server.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 

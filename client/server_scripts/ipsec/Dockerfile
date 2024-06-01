@@ -1,4 +1,4 @@
-FROM amneziavpn/ipsec-server:latest
+FROM vpnnaruzhu/ipsec-server:latest
 
 RUN mkdir -p /opt/amnezia
-LABEL maintainer="AmneziaVPN"
+LABEL maintainer="VPNNaruzhu"

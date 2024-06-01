@@ -170,7 +170,7 @@
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="59"/>
-        <source>Enabled 
+        <source>Enabled
 Can&apos;t be disabled for current server</source>
         <translation>فعال کو موجودہ سرور کے لیے غیر فعال نہیں کیا جا سکتا</translation>
     </message>
@@ -324,8 +324,8 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/notificationhandler.cpp" line="68"/>
         <location filename="../ui/notificationhandler.cpp" line="75"/>
-        <source>AmneziaVPN</source>
-        <translation>The translation of &quot;AmneziaVPN&quot; in Urdu would be:
+        <source>VPNNaruzhu</source>
+        <translation>The translation of &quot;VPNNaruzhu&quot; in Urdu would be:
 
 امنیزیا وی پی ای</translation>
     </message>
@@ -341,7 +341,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="99"/>
-        <source>AmneziaVPN notification</source>
+        <source>VPNNaruzhu notification</source>
         <translation>امنیزیا وی پی این کی اطلاعات</translation>
     </message>
     <message>
@@ -1004,8 +1004,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="118"/>
-        <source>About AmneziaVPN</source>
-        <translation>AmneziaVPN کے بارے میں</translation>
+        <source>About VPNNaruzhu</source>
+        <translation>VPNNaruzhu کے بارے میں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="137"/>
@@ -1223,7 +1223,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="244"/>
-        <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
+        <source>All settings will be reset to default. All installed VPNNaruzhu services will still remain on the server.</source>
         <translation>تمام ترتیبات کو معمولی حالت پر لوٹایا جائے گا۔ سب انسٹال کیے گئے امنیزیا وی پی این سروسزسرورپرموجودرہیںگی.</translation>
     </message>
     <message>
@@ -1261,8 +1261,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="83"/>
-        <source>The backup will contain your passwords and private keys for all servers added to AmneziaVPN. Keep this information in a secure place.</source>
-        <translation>بیک اپ میں آپ کے تمام سرورز جنہیں AmneziaVPN میں شامل کیا گیا ہے، ان کے پاسورڈ اور نجی کلید شامل ہوں گے۔ اس معلومات کو ایک محفوظ جگہ میں محفوظ رکھیں.</translation>
+        <source>The backup will contain your passwords and private keys for all servers added to VPNNaruzhu. Keep this information in a secure place.</source>
+        <translation>بیک اپ میں آپ کے تمام سرورز جنہیں VPNNaruzhu میں شامل کیا گیا ہے، ان کے پاسورڈ اور نجی کلید شامل ہوں گے۔ اس معلومات کو ایک محفوظ جگہ میں محفوظ رکھیں.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="94"/>
@@ -1615,8 +1615,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="176"/>
-        <source>All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>سرور پر تمام انسٹال شدہ AmneziaVPN سروسز محفوظ رہیں گے.</translation>
+        <source>All installed VPNNaruzhu services will still remain on the server.</source>
+        <translation>سرور پر تمام انسٹال شدہ VPNNaruzhu سروسز محفوظ رہیں گے.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="209"/>
@@ -2166,8 +2166,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="120"/>
-        <source>For the AmneziaVPN app</source>
-        <translation>AmneziaVPN ایپ کے لئے</translation>
+        <source>For the VPNNaruzhu app</source>
+        <translation>VPNNaruzhu ایپ کے لئے</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="125"/>
@@ -2881,7 +2881,7 @@ Already installed containers were found on the server. All installed containers 
 
 OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client and the server.
 
-Cloak protects OpenVPN from detection and blocking. 
+Cloak protects OpenVPN from detection and blocking.
 
 Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
 
@@ -2889,7 +2889,7 @@ Immediately after receiving the first data packet, Cloak authenticates the incom
 
 If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
 
-* Available in the AmneziaVPN across all platforms
+* Available in the VPNNaruzhu across all platforms
 * High power consumption on mobile devices
 * Flexible settings
 * Not recognised by DPI analysis systems
@@ -2904,7 +2904,7 @@ If there is a extreme level of Internet censorship in your region, we advise you
 WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
 WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the VPNNaruzhu across all platforms
 * Low power consumption
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
@@ -2914,8 +2914,8 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
     <message>
         <location filename="../containers/containers_defs.cpp" line="212"/>
         <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
-It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
-This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
+It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data.
+This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations.
 Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
         <translation>REALITY پروٹوکول، جو ایکس رے کے تخلیق کاروں کی ایک نوعیتی پیشرفت ہے، انٹرنیٹ سینسرشپ کی بلند ترین سطحوں کو مقابلہ کرنے کے لئے مخصوص طریقہ کار بنایا گیا ہے۔
 یہ فرد معین کو TLS ہینڈشیک فیز کے دوران سینسرز کو شناخت کرتا ہے، اصل کلائنٹس کے طور پر پراکسی کے طور پر بغیر رکاوٹ چلنے کے دوران سینسرز کو اصل ویب سائٹوں جیسے google.com پر منتقل کرتا ہے، اس طرح ایک مستند TLS سرٹیفکیٹ اور ڈیٹا کو پیش کرتا ہے۔
@@ -2965,24 +2965,24 @@ For more detailed information, you can
         <source>OpenVPN stands as one of the most popular and time-tested VPN protocols available.
 It employs its unique security protocol, leveraging the strength of SSL/TLS for encryption and key exchange. Furthermore, OpenVPN&apos;s support for a multitude of authentication methods makes it versatile and adaptable, catering to a wide range of devices and operating systems. Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, which continually reinforces its security. With a strong balance of performance, security, and compatibility, OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the VPNNaruzhu across all platforms
 * Normal power consumption on mobile devices
 * Flexible customisation to suit user needs to work with different operating systems and devices
 * Recognised by DPI analysis systems and therefore susceptible to blocking
 * Can operate over both TCP and UDP network protocols.</source>
-        <translation>OpenVPN دستیاب سب سے زیادہ مقبول اور وقتی آزمائشی VPN پروٹوکولز میں سے ایک ہے۔ یہ انکرپشن اور کلیدی تبادلے کے لیے SSL/TLS کی طاقت کا فائدہ اٹھاتے ہوئے اپنا منفرد سیکیورٹی پروٹوکول استعمال کرتا ہے۔ مزید برآں، توثیق کے بہت سے طریقوں کے لیے OpenVPN کی حمایت اسے ورسٹائل اور قابل موافق بناتی ہے، جو آلات اور آپریٹنگ سسٹم کی ایک وسیع رینج کو پورا کرتی ہے۔ اوپن سورس کی نوعیت کی وجہ سے، اوپن وی پی این کو عالمی برادری کی طرف سے وسیع جانچ سے فائدہ ہوتا ہے، جو اس کی سلامتی کو مسلسل تقویت دیتا ہے۔ کارکردگی، سیکورٹی اور مطابقت کے مضبوط توازن کے ساتھ، OpenVPN رازداری کے بارے میں شعور رکھنے والے افراد اور کاروباروں کے لیے یکساں انتخاب ہے۔ * تمام پلیٹ فارمز پر AmneziaVPN میں دستیاب ہے * موبائل آلات پر بجلی کی عام کھپت * صارف کو مختلف آپریٹنگ سسٹمز اور ڈیوائسز کے ساتھ کام کرنے کی ضرورت کے مطابق لچکدار تخصیص * DPI تجزیہ سسٹمز کے ذریعہ پہچانا جاتا ہے اور اس وجہ سے بلاک کرنے کا خطرہ ہوتا ہے * TCP اور UDP دونوں نیٹ ورک پر کام کر سکتا ہے۔ پروٹوکول</translation>
+        <translation>OpenVPN دستیاب سب سے زیادہ مقبول اور وقتی آزمائشی VPN پروٹوکولز میں سے ایک ہے۔ یہ انکرپشن اور کلیدی تبادلے کے لیے SSL/TLS کی طاقت کا فائدہ اٹھاتے ہوئے اپنا منفرد سیکیورٹی پروٹوکول استعمال کرتا ہے۔ مزید برآں، توثیق کے بہت سے طریقوں کے لیے OpenVPN کی حمایت اسے ورسٹائل اور قابل موافق بناتی ہے، جو آلات اور آپریٹنگ سسٹم کی ایک وسیع رینج کو پورا کرتی ہے۔ اوپن سورس کی نوعیت کی وجہ سے، اوپن وی پی این کو عالمی برادری کی طرف سے وسیع جانچ سے فائدہ ہوتا ہے، جو اس کی سلامتی کو مسلسل تقویت دیتا ہے۔ کارکردگی، سیکورٹی اور مطابقت کے مضبوط توازن کے ساتھ، OpenVPN رازداری کے بارے میں شعور رکھنے والے افراد اور کاروباروں کے لیے یکساں انتخاب ہے۔ * تمام پلیٹ فارمز پر VPNNaruzhu میں دستیاب ہے * موبائل آلات پر بجلی کی عام کھپت * صارف کو مختلف آپریٹنگ سسٹمز اور ڈیوائسز کے ساتھ کام کرنے کی ضرورت کے مطابق لچکدار تخصیص * DPI تجزیہ سسٹمز کے ذریعہ پہچانا جاتا ہے اور اس وجہ سے بلاک کرنے کا خطرہ ہوتا ہے * TCP اور UDP دونوں نیٹ ورک پر کام کر سکتا ہے۔ پروٹوکول</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="154"/>
         <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
 
-* Available in the AmneziaVPN only on desktop platforms
+* Available in the VPNNaruzhu only on desktop platforms
 * Normal power consumption on mobile devices
 
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
-        <translation>شیڈو ساکس، SOCKS5 پروٹوکول سے متاثر، AEAD سائفر کا استعمال کرتے ہوئے کنکشن کی حفاظت کرتا ہے۔ اگرچہ شیڈو ساکس کو سمجھدار اور شناخت کرنے کے لیے چیلنج کرنے کے لیے ڈیزائن کیا گیا ہے، لیکن یہ معیاری HTTPS کنکشن سے مماثل نہیں ہے۔ تاہم، کچھ ٹریفک تجزیہ نظام اب بھی شیڈو ساکس کنکشن کا پتہ لگا سکتے ہیں۔ Amnezia میں محدود تعاون کی وجہ سے، AmneziaWG پروٹوکول استعمال کرنے کی سفارش کی جاتی ہے۔ * صرف ڈیسک ٹاپ پلیٹ فارمز پر AmneziaVPN میں دستیاب ہے * موبائل آلات پر بجلی کی عام کھپت * قابل ترتیب انکرپشن پروٹوکول * کچھ DPI سسٹمز کے ذریعے قابل شناخت * TCP نیٹ ورک پروٹوکول پر کام کرتا ہے.</translation>
+        <translation>شیڈو ساکس، SOCKS5 پروٹوکول سے متاثر، AEAD سائفر کا استعمال کرتے ہوئے کنکشن کی حفاظت کرتا ہے۔ اگرچہ شیڈو ساکس کو سمجھدار اور شناخت کرنے کے لیے چیلنج کرنے کے لیے ڈیزائن کیا گیا ہے، لیکن یہ معیاری HTTPS کنکشن سے مماثل نہیں ہے۔ تاہم، کچھ ٹریفک تجزیہ نظام اب بھی شیڈو ساکس کنکشن کا پتہ لگا سکتے ہیں۔ Amnezia میں محدود تعاون کی وجہ سے، AmneziaWG پروٹوکول استعمال کرنے کی سفارش کی جاتی ہے۔ * صرف ڈیسک ٹاپ پلیٹ فارمز پر VPNNaruzhu میں دستیاب ہے * موبائل آلات پر بجلی کی عام کھپت * قابل ترتیب انکرپشن پروٹوکول * کچھ DPI سسٹمز کے ذریعے قابل شناخت * TCP نیٹ ورک پروٹوکول پر کام کرتا ہے.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="196"/>
@@ -2990,7 +2990,7 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. AmneziaWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
 This means that AmneziaWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the VPNNaruzhu across all platforms
 * Low power consumption
 * Minimum number of settings
 * Not recognised by DPI analysis systems, resistant to blocking
@@ -3000,15 +3000,15 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     <message>
         <location filename="../containers/containers_defs.cpp" line="223"/>
         <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
-One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
 
-* Available in the AmneziaVPN only on Windows
+* Available in the VPNNaruzhu only on Windows
 * Low power consumption, on mobile devices
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation>IKEv2، IPSec انکرپشن پرت کے ساتھ جوڑا، ایک جدید اور مستحکم VPN پروٹوکول کے طور پر کھڑا ہے۔ اس کی امتیازی خصوصیات میں سے ایک نیٹ ورکس اور ڈیوائسز کے درمیان تیزی سے سوئچ کرنے کی صلاحیت ہے، جو اسے متحرک نیٹ ورک کے ماحول میں خاص طور پر موافق بناتی ہے۔ اگرچہ یہ سیکیورٹی، استحکام اور رفتار کا امتزاج پیش کرتا ہے، لیکن یہ نوٹ کرنا ضروری ہے کہ IKEv2 کا آسانی سے پتہ لگایا جا سکتا ہے اور یہ بلاک کرنے کے لیے حساس ہے۔ * صرف ونڈوز پر AmneziaVPN میں دستیاب ہے * کم بجلی کی کھپت، موبائل ڈیوائسز پر * کم سے کم کنفیگریشن * DPI تجزیہ سسٹمز کے ذریعے پہچانا جاتا ہے * UDP نیٹ ورک پروٹوکول، پورٹ 500 اور 4500 پر کام .کرتا ہے</translation>
+        <translation>IKEv2، IPSec انکرپشن پرت کے ساتھ جوڑا، ایک جدید اور مستحکم VPN پروٹوکول کے طور پر کھڑا ہے۔ اس کی امتیازی خصوصیات میں سے ایک نیٹ ورکس اور ڈیوائسز کے درمیان تیزی سے سوئچ کرنے کی صلاحیت ہے، جو اسے متحرک نیٹ ورک کے ماحول میں خاص طور پر موافق بناتی ہے۔ اگرچہ یہ سیکیورٹی، استحکام اور رفتار کا امتزاج پیش کرتا ہے، لیکن یہ نوٹ کرنا ضروری ہے کہ IKEv2 کا آسانی سے پتہ لگایا جا سکتا ہے اور یہ بلاک کرنے کے لیے حساس ہے۔ * صرف ونڈوز پر VPNNaruzhu میں دستیاب ہے * کم بجلی کی کھپت، موبائل ڈیوائسز پر * کم سے کم کنفیگریشن * DPI تجزیہ سسٹمز کے ذریعے پہچانا جاتا ہے * UDP نیٹ ورک پروٹوکول، پورٹ 500 اور 4500 پر کام .کرتا ہے</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="235"/>
@@ -3116,8 +3116,8 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="27"/>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="34"/>
-        <source>Save AmneziaVPN config</source>
-        <translation>AmneziaVPN ترتیب کو محفوظ کریں</translation>
+        <source>Save VPNNaruzhu config</source>
+        <translation>VPNNaruzhu ترتیب کو محفوظ کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="85"/>

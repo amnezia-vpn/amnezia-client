@@ -31,7 +31,7 @@
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<false/>
 	<key>UILaunchStoryboardName</key>
-	<string>AmneziaVPNLaunchScreen</string>
+	<string>VPNNaruzhuLaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array/>
 	<key>UIRequiresFullScreen</key>
@@ -46,7 +46,7 @@
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
 	<key>com.wireguard.ios.app_group_id</key>
-	<string>group.org.amnezia.AmneziaVPN</string>
+	<string>group.org.amnezia.VPNNaruzhu</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
@@ -74,7 +74,7 @@
 			<key>UTTypeIconFiles</key>
 			<array/>
 			<key>UTTypeIdentifier</key>
-			<string>org.amnezia.AmneziaVPN.amnezia-config</string>
+			<string>org.amnezia.VPNNaruzhu.amnezia-config</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -97,7 +97,7 @@
                         <key>UTTypeIconFiles</key>
                         <array/>
                         <key>UTTypeIdentifier</key>
-                        <string>org.amnezia.AmneziaVPN.wireguard-config</string>
+                        <string>org.amnezia.VPNNaruzhu.wireguard-config</string>
                         <key>UTTypeTagSpecification</key>
                         <dict>
                                 <key>public.filename-extension</key>
@@ -121,7 +121,7 @@
                         <key>UTTypeIconFiles</key>
                         <array/>
                         <key>UTTypeIdentifier</key>
-                        <string>org.amnezia.AmneziaVPN.openvpn-config</string>
+                        <string>org.amnezia.VPNNaruzhu.openvpn-config</string>
                         <key>UTTypeTagSpecification</key>
                         <dict>
                                 <key>public.filename-extension</key>
@@ -140,11 +140,11 @@
                                 <string>public.data</string>
                         </array>
                         <key>UTTypeDescription</key>
-                        <string>AmneziaVPN backup file</string>
+                        <string>VPNNaruzhu backup file</string>
                         <key>UTTypeIconFiles</key>
                         <array/>
                         <key>UTTypeIdentifier</key>
-                        <string>org.amnezia.AmneziaVPN.backup-config</string>
+                        <string>org.amnezia.VPNNaruzhu.backup-config</string>
                         <key>UTTypeTagSpecification</key>
                         <dict>
                                 <key>public.filename-extension</key>
@@ -167,10 +167,10 @@
                         <string>Alternate</string>
                         <key>LSItemContentTypes</key>
                         <array>
-                                <string>org.amnezia.AmneziaVPN.amnezia-config</string>
-                                <string>org.amnezia.AmneziaVPN.wireguard-config</string>
-                                <string>org.amnezia.AmneziaVPN.openvpn-config</string>
-                                <string>org.amnezia.AmneziaVPN.backup-config</string>
+                                <string>org.amnezia.VPNNaruzhu.amnezia-config</string>
+                                <string>org.amnezia.VPNNaruzhu.wireguard-config</string>
+                                <string>org.amnezia.VPNNaruzhu.openvpn-config</string>
+                                <string>org.amnezia.VPNNaruzhu.backup-config</string>
                         </array>
                 </dict>
         </array>

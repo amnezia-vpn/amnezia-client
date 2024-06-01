@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QTimer>
+#include <QIcon>
 
 #include "amnezia_application.h"
 #include "migrations.h"
@@ -54,6 +55,7 @@ int main(int argc, char *argv[])
     app.setApplicationName(APPLICATION_NAME);
     app.setOrganizationName(ORGANIZATION_NAME);
     app.setApplicationDisplayName(APPLICATION_NAME);
+    app.setWindowIcon(QIcon(":/images/app.ico"));
 
     app.loadFonts();
 

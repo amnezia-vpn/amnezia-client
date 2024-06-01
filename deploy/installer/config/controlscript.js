@@ -21,8 +21,8 @@ function appExecutableFileName()
 function appInstalled()
 {
     if (runningOnWindows()) {
-        appInstalledUninstallerPath = installer.value("RootDir") + "Program Files/AmneziaVPN/maintenancetool.exe";
-        appInstalledUninstallerPath_x86 = installer.value("RootDir") + "Program Files (x86)/AmneziaVPN/maintenancetool.exe";
+        appInstalledUninstallerPath = installer.value("RootDir") + "Program Files/VPNNaruzhu/maintenancetool.exe";
+        appInstalledUninstallerPath_x86 = installer.value("RootDir") + "Program Files (x86)/VPNNaruzhu/maintenancetool.exe";
     } else if (runningOnMacOS()){
         appInstalledUninstallerPath = "/Applications/" + appName() + ".app/maintenancetool.app/Contents/MacOS/maintenancetool";
     } else if (runningOnLinux()){

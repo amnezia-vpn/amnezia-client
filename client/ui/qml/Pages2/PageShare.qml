@@ -117,7 +117,7 @@ PageType {
 
     QtObject {
         id: amneziaConnectionFormat
-        property string name: qsTr("For the AmneziaVPN app")
+        property string name: qsTr("For the VPNNaruzhu app")
         property var type: PageShare.ConfigType.AmneziaConnection
     }
     QtObject {
@@ -566,7 +566,7 @@ PageType {
                 visible: accessTypeSelector.currentIndex === 0
 
                 text: qsTr("Share")
-                imageSource: "qrc:/images/controls/share-2.svg"                
+                imageSource: "qrc:/images/controls/share-2.svg"
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
 

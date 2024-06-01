@@ -136,8 +136,8 @@
         </activity>
 
         <service
-            android:name=".AmneziaVpnService"
-            android:process=":amneziaVpnService"
+            android:name=".VPNNaruzhuService"
+            android:process=":vpnnaruzhuService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:foregroundServiceType="systemExempted"
             android:exported="false"

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
-set(PROJECT AmneziaVPN-service)
+set(PROJECT VPNNaruzhu-service)
 project(${PROJECT})
 
 set(CMAKE_CXX_STANDARD 20)
@@ -72,7 +72,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/models/server.cpp
 
     ${CMAKE_CURRENT_LIST_DIR}/../../client/platforms/dummy/dummynetworkwatcher.cpp
-    
+
     ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/interfaceconfig.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/ipaddress.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/mozilla/shared/leakdetector.cpp
@@ -215,7 +215,7 @@ if(LINUX)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/dnsutilslinux.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/wireguardutilslinux.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxroutemonitor.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxfirewall.h        
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxfirewall.h
     )
 
     set(SOURCES ${SOURCES}

@@ -29,7 +29,7 @@ import org.amnezia.vpn.protocol.ProtocolState.UNKNOWN
 import org.amnezia.vpn.util.Log
 
 private const val TAG = "AmneziaTileService"
-private const val DEFAULT_TILE_LABEL = "AmneziaVPN"
+private const val DEFAULT_TILE_LABEL = "VPNNaruzhu"
 
 class AmneziaTileService : TileService() {
 
@@ -95,7 +95,7 @@ class AmneziaTileService : TileService() {
     override fun onStartListening() {
         super.onStartListening()
         Log.d(TAG, "Start listening")
-        if (AmneziaVpnService.isRunning(applicationContext)) {
+        if (VPNNaruzhuService.isRunning(applicationContext)) {
             Log.d(TAG, "Vpn service is running")
             doBindService()
         } else {
@@ -147,7 +147,7 @@ class AmneziaTileService : TileService() {
 
     private fun doBindService() {
         Log.d(TAG, "Bind service")
-        Intent(this, AmneziaVpnService::class.java).also {
+        Intent(this, VPNNaruzhuService::class.java).also {
             bindService(it, serviceConnection, BIND_ABOVE_CLIENT)
         }
         isInBoundState = true
@@ -192,10 +192,10 @@ class AmneziaTileService : TileService() {
         try {
             ContextCompat.startForegroundService(
                 applicationContext,
-                Intent(this, AmneziaVpnService::class.java)
+                Intent(this, VPNNaruzhuService::class.java)
             )
         } catch (e: SecurityException) {
-            Log.e(TAG, "Failed to start AmneziaVpnService: $e")
+            Log.e(TAG, "Failed to start VPNNaruzhuService: $e")
         }
     }
 

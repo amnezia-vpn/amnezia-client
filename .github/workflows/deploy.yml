@@ -49,19 +49,19 @@ jobs:
         bash deploy/build_linux.sh
 
     - name: 'Pack installer'
-      run: cd deploy && tar -cf AmneziaVPN_Linux_Installer.tar AmneziaVPN_Linux_Installer.bin
+      run: cd deploy && tar -cf VPNNaruzhu_Linux_Installer.tar VPNNaruzhu_Linux_Installer.bin
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN_Linux_installer.tar
-        path: deploy/AmneziaVPN_Linux_Installer.tar
+        name: VPNNaruzhu_Linux_installer.tar
+        path: deploy/VPNNaruzhu_Linux_Installer.tar
         retention-days: 7
 
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN_Linux_unpacked
+        name: VPNNaruzhu_Linux_unpacked
         path: deploy/AppDir
         retention-days: 7
 
@@ -116,14 +116,14 @@ jobs:
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN_Windows_installer
-        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
+        name: VPNNaruzhu_Windows_installer
+        path: VPNNaruzhu_x${{ env.BUILD_ARCH }}.exe
         retention-days: 7
 
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN_Windows_unpacked
+        name: VPNNaruzhu_Windows_unpacked
         path: deploy\\build_${{ env.BUILD_ARCH }}\\client\\Release
         retention-days: 7
 
@@ -214,7 +214,7 @@ jobs:
 #      with:
 #        name: app-store ipa & dsyms
 #        path: |
-#          ${{ github.workspace }}/AmneziaVPN-iOS.ipa
+#          ${{ github.workspace }}/VPNNaruzhu-iOS.ipa
 #          ${{ github.workspace }}/*.app.dSYM.zip
 #        retention-days: 7
 
@@ -272,15 +272,15 @@ jobs:
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN_MacOS_installer
-        path: AmneziaVPN.dmg
+        name: VPNNaruzhu_MacOS_installer
+        path: VPNNaruzhu.dmg
         retention-days: 7
 
     - name: 'Upload unpacked artifact'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN_MacOS_unpacked
-        path: deploy/build/client/AmneziaVPN.app
+        name: VPNNaruzhu_MacOS_unpacked
+        path: deploy/build/client/VPNNaruzhu.app
         retention-days: 7
 
 # ------------------------------------------------------
@@ -396,39 +396,39 @@ jobs:
     - name: 'Upload x86_64 apk'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN-android-x86_64
-        path: deploy/build/AmneziaVPN-x86_64-release.apk
+        name: VPNNaruzhu-android-x86_64
+        path: deploy/build/VPNNaruzhu-x86_64-release.apk
         compression-level: 0
         retention-days: 7
 
     - name: 'Upload x86 apk'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN-android-x86
-        path: deploy/build/AmneziaVPN-x86-release.apk
+        name: VPNNaruzhu-android-x86
+        path: deploy/build/VPNNaruzhu-x86-release.apk
         compression-level: 0
         retention-days: 7
 
     - name: 'Upload arm64-v8a apk'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN-android-arm64-v8a
-        path: deploy/build/AmneziaVPN-arm64-v8a-release.apk
+        name: VPNNaruzhu-android-arm64-v8a
+        path: deploy/build/VPNNaruzhu-arm64-v8a-release.apk
         compression-level: 0
         retention-days: 7
 
     - name: 'Upload armeabi-v7a apk'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN-android-armeabi-v7a
-        path: deploy/build/AmneziaVPN-armeabi-v7a-release.apk
+        name: VPNNaruzhu-android-armeabi-v7a
+        path: deploy/build/VPNNaruzhu-armeabi-v7a-release.apk
         compression-level: 0
         retention-days: 7
 
     - name: 'Upload aab'
       uses: actions/upload-artifact@v4
       with:
-        name: AmneziaVPN-android
-        path: deploy/build/AmneziaVPN-release.aab
+        name: VPNNaruzhu-android
+        path: deploy/build/VPNNaruzhu-release.aab
         compression-level: 0
         retention-days: 7

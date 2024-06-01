@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
-    <Name>AmneziaVPN</Name>
+    <Name>VPNNaruzhu</Name>
     <Version>@CMAKE_PROJECT_VERSION@</Version>
-    <Title>AmneziaVPN</Title>
-    <Publisher>AmneziaVPN</Publisher>
-    <StartMenuDir>AmneziaVPN</StartMenuDir>
-    <TargetDir>@RootDir@/Program Files/AmneziaVPN</TargetDir>
+    <Title>VPNNaruzhu</Title>
+    <Publisher>VPNNaruzhu</Publisher>
+    <StartMenuDir>VPNNaruzhu</StartMenuDir>
+    <TargetDir>@RootDir@/Program Files/VPNNaruzhu</TargetDir>
     <WizardDefaultWidth>600</WizardDefaultWidth>
     <WizardDefaultHeight>380</WizardDefaultHeight>
     <WizardStyle>Modern</WizardStyle>

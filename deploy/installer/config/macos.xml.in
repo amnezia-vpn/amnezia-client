@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
-    <Name>AmneziaVPN</Name>
+    <Name>VPNNaruzhu</Name>
     <Version>@CMAKE_PROJECT_VERSION@</Version>
-    <Title>AmneziaVPN</Title>
-    <Publisher>AmneziaVPN</Publisher>
-    <StartMenuDir>AmneziaVPN</StartMenuDir>
-    <TargetDir>/Applications/AmneziaVPN.app</TargetDir>
+    <Title>VPNNaruzhu</Title>
+    <Publisher>VPNNaruzhu</Publisher>
+    <StartMenuDir>VPNNaruzhu</StartMenuDir>
+    <TargetDir>/Applications/VPNNaruzhu.app</TargetDir>
     <WizardDefaultWidth>600</WizardDefaultWidth>
     <WizardDefaultHeight>380</WizardDefaultHeight>
     <WizardStyle>Mac</WizardStyle>
@@ -19,9 +19,9 @@
     <DisableAuthorizationFallback>true</DisableAuthorizationFallback>
     <RemoteRepositories>
         <Repository>
-            <Url>https://amneziavpn.org/updates/macos</Url>
+            <Url>https://vpnnaruzhu.org/updates/macos</Url>
             <Enabled>true</Enabled>
-            <DisplayName>AmneziaVPN - repository for macOS</DisplayName>
+            <DisplayName>VPNNaruzhu - repository for macOS</DisplayName>
         </Repository>
     </RemoteRepositories>
 </Installer>

@@ -1,5 +1,5 @@
 FROM alpine:3.15
-LABEL maintainer="AmneziaVPN"
+LABEL maintainer="VPNNaruzhu"
 
 ARG XRAY_RELEASE="v1.8.6"
 
@@ -16,7 +16,7 @@ RUN curl -L https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/
   unzip /root/xray.zip -d /usr/bin/;\
   chmod a+x /usr/bin/xray;
 
-# Tune network  
+# Tune network
 RUN echo -e " \n\
   fs.file-max = 51200 \n\
   \n\
@@ -45,7 +45,7 @@ RUN echo -e " \n\
   echo -e " \n\
   * soft nofile 51200 \n\
   * hard nofile 51200 \n\
-  " | sed -e 's/^\s\+//g' | tee -a /etc/security/limits.conf  
+  " | sed -e 's/^\s\+//g' | tee -a /etc/security/limits.conf
 
 ENV TZ=Asia/Shanghai
 

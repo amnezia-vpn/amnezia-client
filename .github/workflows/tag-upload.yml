@@ -34,14 +34,14 @@ jobs:
         uses: robinraju/release-downloader@v1.8
         with:
           tag: ${{ github.ref_name }}
-          fileName: "AmneziaVPN_(Linux_|)${{ github.ref_name }}*"
+          fileName: "VPNNaruzhu_(Linux_|)${{ github.ref_name }}*"
           out-file-path: ${{ github.ref_name }}
 
       - name: Upload beta version
         uses: jakejarvis/s3-sync-action@master
         if: contains(github.event.base_ref, 'dev')
         with:
-          args: --include "AmneziaVPN*" --delete
+          args: --include "VPNNaruzhu*" --delete
         env:
           AWS_S3_BUCKET: updates
           AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
@@ -54,7 +54,7 @@ jobs:
         uses: jakejarvis/s3-sync-action@master
         if: contains(github.event.base_ref, 'master')
         with:
-          args: --include "AmneziaVPN*" --delete
+          args: --include "VPNNaruzhu*" --delete
         env:
           AWS_S3_BUCKET: updates
           AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
