@@ -56,7 +56,7 @@ TabButton {
         anchors.fill: background
         height: 24
 
-        font.family: "Noto Sans"
+        font.family: "PT Root UI VF"
         font.styleName: "normal"
         font.weight: 500
         font.pixelSize: 16

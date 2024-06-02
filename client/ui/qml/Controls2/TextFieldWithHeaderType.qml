@@ -97,7 +97,7 @@ Item {
 
                         font.pixelSize: 16
                         font.weight: 400
-                        font.family: "Noto Sans"
+                        font.family: "PT Root UI VF"
 
                         height: 24
                         Layout.fillWidth: true

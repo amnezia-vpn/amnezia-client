@@ -59,7 +59,7 @@ Rectangle {
 
                 font.pixelSize: 16
                 font.weight: Font.Medium
-                font.family: "Noto Sans"
+                font.family: "PT Root UI VF"
 
                 placeholderText: root.placeholderText
                 text: root.text

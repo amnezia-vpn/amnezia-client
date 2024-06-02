@@ -238,7 +238,7 @@ void AmneziaApplication::loadFonts()
 {
     QQuickStyle::setStyle("Basic");
 
-    QFontDatabase::addApplicationFont(":/fonts/NotoSans.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/pt-root-ui_vf.ttf");
 }
 
 void AmneziaApplication::loadTranslator()

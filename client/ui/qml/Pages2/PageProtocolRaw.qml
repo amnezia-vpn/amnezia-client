@@ -197,7 +197,7 @@ PageType {
 
                                             font.pixelSize: 16
                                             font.weight: Font.Medium
-                                            font.family: "Noto Sans"
+                                            font.family: "PT Root UI VF"
 
                                             text: rawConfig
 

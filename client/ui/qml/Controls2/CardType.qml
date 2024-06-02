@@ -85,7 +85,7 @@ RadioButton {
             color: "#D7D8DB"
             font.pixelSize: 25
             font.weight: 700
-            font.family: "Noto Sans"
+            font.family: "PT Root UI VF"
 
             height: 30
             Layout.fillWidth: true
@@ -100,7 +100,7 @@ RadioButton {
             color: "#D7D8DB"
             font.pixelSize: 16
             font.weight: 400
-            font.family: "Noto Sans"
+            font.family: "PT Root UI VF"
 
             height: 24
             Layout.fillWidth: true
@@ -116,7 +116,7 @@ RadioButton {
             color: "#878B91"
             font.pixelSize: 13
             font.weight: 400
-            font.family: "Noto Sans"
+            font.family: "PT Root UI VF"
 
             height: 16
             Layout.fillWidth: true

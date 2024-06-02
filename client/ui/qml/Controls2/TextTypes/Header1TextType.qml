@@ -7,7 +7,7 @@ Text {
     color: "#D7D8DB"
     font.pixelSize: 32
     font.weight: 700
-    font.family: "Noto Sans"
+    font.family: "PT Root UI VF"
     font.letterSpacing: -1.0
 
     wrapMode: Text.WordWrap
