@@ -99,8 +99,13 @@ PageType {
                 leftImageColor: "transparent"
                 borderWidth: 0
 
-                property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled || AppSplitTunnelingModel.isTunnelingEnabled ||
-                                                       (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
+                property bool isSplitTunnelingEnabled: {
+                    if (!AppSplitTunnelingModel.isTunnelingEnabled) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
 
                 text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
 
@@ -263,7 +268,7 @@ PageType {
                     id: collapsedServerMenuDescription
                     Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 89 : 44
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    text: drawer.isCollapsed ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
+                    text: ServersModel.defaultServerDescriptionExpanded
                 }
             }
 
@@ -288,7 +293,7 @@ PageType {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     spacing: 8
 
-                    visible: !ServersModel.isDefaultServerFromApi
+                    visible: false
 
                     Item {
                         id: focusItem1

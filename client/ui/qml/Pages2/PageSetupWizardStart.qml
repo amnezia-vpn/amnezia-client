@@ -118,7 +118,7 @@ PageType {
 
             Image {
                 id: image
-                source: "qrc:/images/amneziaBigLogo.png"
+                source: "qrc:/images/naruzhu_logo.png"
 
                 Layout.alignment: Qt.AlignCenter
                 Layout.topMargin: 32
@@ -130,12 +130,12 @@ PageType {
 
             ParagraphTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 50
+                Layout.topMargin: 18
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-
-                text: qsTr("Free service for creating a personal VPN on your server.") +
-                      qsTr(" Helps you access blocked content without revealing your privacy, even to VPN providers.")
+                horizontalAlignment: Text.AlignHCenter
+                color: "#F1F0EF"
+                text: qsTr("Open foreign and Russian websites.")
             }
 
             Item {
@@ -146,14 +146,35 @@ PageType {
             BasicButtonType {
                 id: startButton
                 Layout.fillWidth: true
-                Layout.topMargin: 32
+                Layout.topMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 text: qsTr("I have the data to connect")
+                defaultColor: "transparent"
+                hoveredColor: "#FFDD51"
+                pressedColor: "#FFDD51"
+                disabledColor: "#878B91"
+                textColor: "#000000" // Set default text color to black
 
+                // Button styling
+                background: Rectangle {
+                    color: parent.hovered ? "#FFDD51" : "transparent"
+                    border.color: parent.hovered ? "#191919" : "#FFDD51" // Set border color to corner color when hovered
+                    radius: 10
+                }
+
+                // Button text color
+                contentItem: Text {
+                    text: parent.text
+                    color: parent.hovered ? "#000000" : "#FFDD51" // Change text color when hovered
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    font.pixelSize: 16
+                }
                 clickedFunc: function() {
-                    connectionTypeSelection.open()
+                    PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
+                    root.close()
                 }
 
                 KeyNavigation.tab: startButton2
@@ -166,20 +187,34 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
+                // Button appearance properties
                 defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                hoveredColor: "#FFDD51"
+                pressedColor: "#FFDD51"
                 disabledColor: "#878B91"
-                textColor: "#D7D8DB"
-                borderWidth: 1
+                textColor: "#000000" // Set default text color to black
 
                 text: qsTr("I have nothing")
-
-                clickedFunc: function() {
-                    Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
+                // Button styling
+                background: Rectangle {
+                    color: parent.hovered ? "#FFDD51" : "transparent"
+                    border.color: parent.hovered ? "#191919" : "#FFDD51" // Set border color to corner color when hovered
+                    radius: 10
                 }
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
+                // Button text color
+                contentItem: Text {
+                    text: parent.text
+                    color: parent.hovered ? "#000000" : "#FFDD51" // Change text color when hovered
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    font.pixelSize: 16
+                }
+
+                // Click functionality
+                onClicked: {
+                    Qt.openUrlExternally(qsTr("https://vpn-naruzhu.com"))
+                }
             }
         }
     }

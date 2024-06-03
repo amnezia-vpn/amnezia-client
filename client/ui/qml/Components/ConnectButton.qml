@@ -10,14 +10,15 @@ import PageEnum 1.0
 Button {
     id: root
 
-    property string defaultButtonColor: "#D7D8DB"
-    property string progressButtonColor: "#D7D8DB"
-    property string connectedButtonColor: "#FBB26A"
+    property string defaultButtonColor: "#F1F0EF"
+    property string progressButtonColor: "#FFDD51"
+    property string connectedButtonColor: "#33CC8C"
+    property string errorButtonColor: "#FF6969"
 
     implicitWidth: 190
     implicitHeight: 190
 
-    text: ConnectionController.connectionStateText
+    text: qsTr(ConnectionController.connectionStateText)
 
     Connections {
         target: ConnectionController
@@ -49,7 +50,7 @@ Button {
                 verticalOffset: 0
                 radius: 10
                 samples: 25
-                color: root.activeFocus ? "#D7D8DB" : "#FBB26A"
+                color: root.activeFocus ? "#D7D8DB" : "#F1F0EF"
                 source: backgroundCircle
             }
 
@@ -73,9 +74,11 @@ Button {
                 fillColor: "transparent"
                 strokeColor: {
                     if (ConnectionController.isConnectionInProgress) {
-                        return "#261E1A"
+                        return progressButtonColor
                     } else if (ConnectionController.isConnected) {
                         return connectedButtonColor
+                    } else if (ConnectionController.isConnectionFailed) {
+                        return errorButtonColor
                     } else {
                         return defaultButtonColor
                     }
@@ -114,7 +117,7 @@ Button {
 
             ShapePath {
                 fillColor: "transparent"
-                strokeColor: "#D7D8DB"
+                strokeColor: "black"
                 strokeWidth: 3
                 capStyle: ShapePath.RoundCap
 
@@ -146,7 +149,18 @@ Button {
         font.weight: 700
         font.pixelSize: 20
 
-        color: ConnectionController.isConnected ? connectedButtonColor : defaultButtonColor
+        color: {
+            if (ConnectionController.isConnectionInProgress) {
+                return progressButtonColor
+            } else if (ConnectionController.isConnected) {
+                return connectedButtonColor
+            } else if (ConnectionController.isConnectionFailed) {
+                return errorButtonColor
+            } else {
+                return defaultButtonColor
+            }
+        }
+
         text: root.text
 
         horizontalAlignment: Text.AlignHCenter

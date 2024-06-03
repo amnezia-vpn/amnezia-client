@@ -6,7 +6,7 @@ TabButton {
 
     property string hoveredColor: "#633303"
     property string defaultColor: "#2C2D30"
-    property string selectedColor: "#FBB26A"
+    property string selectedColor: "#FFDD51"
 
     property string textColor: "#D7D8DB"
 
