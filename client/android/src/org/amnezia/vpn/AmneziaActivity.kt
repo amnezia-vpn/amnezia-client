@@ -269,7 +269,7 @@ class AmneziaActivity : QtActivity() {
     @MainThread
     private fun doBindService() {
         Log.d(TAG, "Bind service")
-        Intent(this, VPNNaruzhuService::class.java).also {
+        Intent(this, VpnNaruzhuService::class.java).also {
             bindService(it, serviceConnection, BIND_ABOVE_CLIENT and BIND_AUTO_CREATE)
         }
         isInBoundState = true
@@ -385,13 +385,13 @@ class AmneziaActivity : QtActivity() {
 
     private fun startVpnService(vpnConfig: String) {
         Log.d(TAG, "Start VPN service")
-        Intent(this, VPNNaruzhuService::class.java).apply {
+        Intent(this, VpnNaruzhuService::class.java).apply {
             putExtra(MSG_VPN_CONFIG, vpnConfig)
         }.also {
             try {
                 ContextCompat.startForegroundService(this, it)
             } catch (e: SecurityException) {
-                Log.e(TAG, "Failed to start VPNNaruzhuService: $e")
+                Log.e(TAG, "Failed to start VpnNaruzhuService: $e")
                 QtAndroidController.onServiceError()
             }
         }

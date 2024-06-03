@@ -136,7 +136,7 @@
         </activity>
 
         <service
-            android:name=".VPNNaruzhuService"
+            android:name=".VpnNaruzhuService"
             android:process=":vpnnaruzhuService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:foregroundServiceType="systemExempted"

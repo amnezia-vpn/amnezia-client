@@ -138,7 +138,7 @@ class ServiceNotification(private val context: Context) {
                     createServicePendingIntent(
                         context,
                         CONNECT_REQUEST_CODE,
-                        Intent(context, VPNNaruzhuService::class.java),
+                        Intent(context, VpnNaruzhuService::class.java),
                         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                     )
                 )

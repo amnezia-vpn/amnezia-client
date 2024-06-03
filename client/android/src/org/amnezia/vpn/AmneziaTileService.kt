@@ -95,7 +95,7 @@ class AmneziaTileService : TileService() {
     override fun onStartListening() {
         super.onStartListening()
         Log.d(TAG, "Start listening")
-        if (VPNNaruzhuService.isRunning(applicationContext)) {
+        if (VpnNaruzhuService.isRunning(applicationContext)) {
             Log.d(TAG, "Vpn service is running")
             doBindService()
         } else {
@@ -147,7 +147,7 @@ class AmneziaTileService : TileService() {
 
     private fun doBindService() {
         Log.d(TAG, "Bind service")
-        Intent(this, VPNNaruzhuService::class.java).also {
+        Intent(this, VpnNaruzhuService::class.java).also {
             bindService(it, serviceConnection, BIND_ABOVE_CLIENT)
         }
         isInBoundState = true
@@ -192,10 +192,10 @@ class AmneziaTileService : TileService() {
         try {
             ContextCompat.startForegroundService(
                 applicationContext,
-                Intent(this, VPNNaruzhuService::class.java)
+                Intent(this, VpnNaruzhuService::class.java)
             )
         } catch (e: SecurityException) {
-            Log.e(TAG, "Failed to start VPNNaruzhuService: $e")
+            Log.e(TAG, "Failed to start VpnNaruzhuService: $e")
         }
     }
 

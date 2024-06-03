@@ -1,13 +1,28 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">NaruzhuVpn</string>
+    <string name="disconnected">Not connected</string>
+    <string name="connected">Connected</string>
     <string name="connecting">Connecting</string>
     <string name="disconnecting">Disconnecting</string>
-    <string name="cancel">Cancel</string>
+    <string name="reconnecting">Reconnecting…</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
     <string name="vpnGranted">VPN permission granted</string>
     <string name="vpnDenied">VPN permission denied</string>
     <string name="vpnSetupFailed">VPN setup error</string>
     <string name="vpnSetupFailedMessage">To connect to VPNNaruzhu, please do the following:\n\n- Allow the app to set up a VPN connection\n- Disable Always-on VPN for any other VPN app in the VPN system settings</string>
     <string name="openVpnSettings">Open VPN settings</string>
+
+    <string name="notificationChannelDescription">VPNNaruzhu service notification</string>
+    <string name="notificationDialogTitle">VPNNaruzhu service</string>
+    <string name="notificationDialogMessage">Show the VPN state in the status bar?</string>
+    <string name="notificationSettingsDialogTitle">Notification settings</string>
+    <string name="notificationSettingsDialogMessage">To show notifications, you must enable notifications in the system settings</string>
+    <string name="openNotificationSettings">Open notification settings</string>
 </resources>
