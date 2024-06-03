@@ -17,7 +17,7 @@ elseif(LINUX)
     )
 
     configure_file(
-        ${CMAKE_CURRENT_LIST_DIR}/config/VPNNaruzhu.desktop.in
+        ${CMAKE_CURRENT_LIST_DIR}/config/AmneziaVPN.desktop.in
         ${CMAKE_BINARY_DIR}/../AppDir/VPNNaruzhu.desktop
     )
 endif()

@@ -60,7 +60,7 @@ import org.amnezia.vpn.util.net.TrafficStats
 import org.json.JSONException
 import org.json.JSONObject
 
-private const val TAG = "VpnnaruzhuService"
+private const val TAG = "VPNNaruzhuService"
 
 const val ACTION_DISCONNECT = "org.amnezia.vpn.action.disconnect"
 
@@ -79,7 +79,7 @@ private const val TRAFFIC_STATS_UPDATE_TIMEOUT = 1000L
 private const val DISCONNECT_TIMEOUT = 5000L
 private const val STOP_SERVICE_TIMEOUT = 5000L
 
-class VpnnaruzhuService : VpnService() {
+class VPNNaruzhuService : VpnService() {
 
     private lateinit var mainScope: CoroutineScope
     private lateinit var connectionScope: CoroutineScope
@@ -164,7 +164,7 @@ class VpnnaruzhuService : VpnService() {
                         clientMessengers[msg.replyTo]?.let { clientMessenger ->
                             clientMessenger.send {
                                 ServiceEvent.STATUS.packToMessage {
-                                    putStatus(this@VpnnaruzhuService.protocolState.value)
+                                    putStatus(this@VPNNaruzhuService.protocolState.value)
                                 }
                             }
                         }
