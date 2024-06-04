@@ -3,6 +3,7 @@ import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
     id("property-delegate")
 }
 
@@ -109,6 +110,7 @@ dependencies {
     implementation(libs.androidx.core)
     implementation(libs.androidx.activity)
     implementation(libs.kotlinx.coroutines)
+    implementation(libs.kotlinx.serialization.protobuf)
     implementation(libs.bundles.androidx.camera)
     implementation(libs.google.mlkit)
     implementation(libs.androidx.datastore)

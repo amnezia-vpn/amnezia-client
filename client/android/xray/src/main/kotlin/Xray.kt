@@ -5,15 +5,14 @@ import android.net.VpnService.Builder
 import java.io.File
 import java.io.IOException
 import go.Seq
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.amnezia.vpn.protocol.Protocol
-import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.VpnStartException
 import org.amnezia.vpn.protocol.xray.libXray.DialerController
 import org.amnezia.vpn.protocol.xray.libXray.LibXray
+import org.amnezia.vpn.protocol.xray.libXray.Logger
 import org.amnezia.vpn.protocol.xray.libXray.Tun2SocksConfig
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.net.InetNetwork
@@ -84,18 +83,29 @@ import org.json.JSONObject
  */
 
 private const val TAG = "Xray"
+private const val LIBXRAY_TAG = "libXray"
 
 class Xray : Protocol() {
 
     private var isRunning: Boolean = false
-    private lateinit var context: Context
-
     override val statistics: Statistics = Statistics.EMPTY_STATISTICS
 
-    override fun initialize(context: Context, state: MutableStateFlow<ProtocolState>, onError: (String) -> Unit) {
-        super.initialize(context, state, onError)
-        this.context = context
+    override fun internalInit() {
         Seq.setContext(context)
+        if (!isInitialized) {
+            LibXray.initLogger(object : Logger {
+                override fun warning(s: String) = Log.w(LIBXRAY_TAG, s)
+
+                override fun error(s: String) = Log.e(LIBXRAY_TAG, s)
+
+                override fun write(msg: ByteArray): Long {
+                    Log.w(LIBXRAY_TAG, String(msg))
+                    return msg.size.toLong()
+                }
+            }).isNotNullOrBlank { err ->
+                Log.w(TAG, "Failed to initialize logger: $err")
+            }
+        }
     }
 
     override fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
@@ -109,6 +119,9 @@ class Xray : Protocol() {
 
         // for debug
         // xrayJsonConfig.getJSONObject("log").put("loglevel", "debug")
+        xrayJsonConfig.getJSONObject("log").put("loglevel", "warning")
+        // disable access log
+        xrayJsonConfig.getJSONObject("log").put("access", "none")
 
         // replace socks address
         // (xrayJsonConfig.getJSONArray("inbounds")[0] as JSONObject).put("listen", "::1")

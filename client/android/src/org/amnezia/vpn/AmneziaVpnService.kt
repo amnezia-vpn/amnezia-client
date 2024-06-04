@@ -1,5 +1,6 @@
 package org.amnezia.vpn
 
+import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE
 import android.app.NotificationManager
@@ -39,7 +40,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.LoadLibraryException
-import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTING
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
@@ -48,12 +48,7 @@ import org.amnezia.vpn.protocol.ProtocolState.RECONNECTING
 import org.amnezia.vpn.protocol.ProtocolState.UNKNOWN
 import org.amnezia.vpn.protocol.VpnException
 import org.amnezia.vpn.protocol.VpnStartException
-import org.amnezia.vpn.protocol.awg.Awg
-import org.amnezia.vpn.protocol.cloak.Cloak
-import org.amnezia.vpn.protocol.openvpn.OpenVpn
 import org.amnezia.vpn.protocol.putStatus
-import org.amnezia.vpn.protocol.wireguard.Wireguard
-import org.amnezia.vpn.protocol.xray.Xray
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.Prefs
 import org.amnezia.vpn.util.net.NetworkState
@@ -64,6 +59,7 @@ import org.json.JSONObject
 private const val TAG = "AmneziaVpnService"
 
 const val ACTION_DISCONNECT = "org.amnezia.vpn.action.disconnect"
+const val ACTION_CONNECT = "org.amnezia.vpn.action.connect"
 
 const val MSG_VPN_CONFIG = "VPN_CONFIG"
 const val MSG_ERROR = "ERROR"
@@ -74,19 +70,18 @@ const val AFTER_PERMISSION_CHECK = "AFTER_PERMISSION_CHECK"
 private const val PREFS_CONFIG_KEY = "LAST_CONF"
 private const val PREFS_SERVER_NAME = "LAST_SERVER_NAME"
 private const val PREFS_SERVER_INDEX = "LAST_SERVER_INDEX"
-private const val PROCESS_NAME = "org.amnezia.vpn:amneziaVpnService"
 // private const val STATISTICS_SENDING_TIMEOUT = 1000L
 private const val TRAFFIC_STATS_UPDATE_TIMEOUT = 1000L
 private const val DISCONNECT_TIMEOUT = 5000L
 private const val STOP_SERVICE_TIMEOUT = 5000L
 
-class AmneziaVpnService : VpnService() {
+@SuppressLint("Registered")
+open class AmneziaVpnService : VpnService() {
 
     private lateinit var mainScope: CoroutineScope
     private lateinit var connectionScope: CoroutineScope
     private var isServiceBound = false
-    private var protocol: Protocol? = null
-    private val protocolCache = mutableMapOf<String, Protocol>()
+    private var vpnProto: VpnProto? = null
     private var protocolState = MutableStateFlow(UNKNOWN)
     private var serverName: String? = null
     private var serverIndex: Int = -1
@@ -106,7 +101,7 @@ class AmneziaVpnService : VpnService() {
     // private var statisticsSendingJob: Job? = null
     private lateinit var networkState: NetworkState
     private lateinit var trafficStats: TrafficStats
-    private var disconnectReceiver: BroadcastReceiver? = null
+    private var controlReceiver: BroadcastReceiver? = null
     private var notificationStateReceiver: BroadcastReceiver? = null
     private var screenOnReceiver: BroadcastReceiver? = null
     private var screenOffReceiver: BroadcastReceiver? = null
@@ -117,7 +112,6 @@ class AmneziaVpnService : VpnService() {
 
     private val connectionExceptionHandler = CoroutineExceptionHandler { _, e ->
         protocolState.value = DISCONNECTED
-        protocol = null
         when (e) {
             is IllegalArgumentException,
             is VpnStartException,
@@ -228,7 +222,8 @@ class AmneziaVpnService : VpnService() {
             connect(intent?.getStringExtra(MSG_VPN_CONFIG))
         }
         ServiceCompat.startForeground(
-            this, NOTIFICATION_ID, serviceNotification.buildNotification(serverName, protocolState.value),
+            this, NOTIFICATION_ID,
+            serviceNotification.buildNotification(serverName, vpnProto?.label, protocolState.value),
             foregroundServiceTypeCompat
         )
         return START_REDELIVER_INTENT
@@ -293,9 +288,17 @@ class AmneziaVpnService : VpnService() {
 
     private fun registerBroadcastReceivers() {
         Log.d(TAG, "Register broadcast receivers")
-        disconnectReceiver = registerBroadcastReceiver(ACTION_DISCONNECT, ContextCompat.RECEIVER_NOT_EXPORTED) {
-            Log.d(TAG, "Broadcast request received: $ACTION_DISCONNECT")
-            disconnect()
+        controlReceiver = registerBroadcastReceiver(
+            arrayOf(ACTION_CONNECT, ACTION_DISCONNECT), ContextCompat.RECEIVER_NOT_EXPORTED
+        ) {
+            it?.action?.let { action ->
+                Log.d(TAG, "Broadcast request received: $action")
+                when (action) {
+                    ACTION_CONNECT -> connect()
+                    ACTION_DISCONNECT -> disconnect()
+                    else -> Log.w(TAG, "Unknown action received: $action")
+                }
+            }
         }
 
         notificationStateReceiver = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -341,10 +344,10 @@ class AmneziaVpnService : VpnService() {
 
     private fun unregisterBroadcastReceivers() {
         Log.d(TAG, "Unregister broadcast receivers")
-        unregisterBroadcastReceiver(disconnectReceiver)
+        unregisterBroadcastReceiver(controlReceiver)
         unregisterBroadcastReceiver(notificationStateReceiver)
         unregisterScreenStateBroadcastReceivers()
-        disconnectReceiver = null
+        controlReceiver = null
         notificationStateReceiver = null
     }
 
@@ -357,7 +360,7 @@ class AmneziaVpnService : VpnService() {
             protocolState.drop(1).collect { protocolState ->
                 Log.d(TAG, "Protocol state changed: $protocolState")
 
-                serviceNotification.updateNotification(serverName, protocolState)
+                serviceNotification.updateNotification(serverName, vpnProto?.label, protocolState)
 
                 clientMessengers.send {
                     ServiceEvent.STATUS_CHANGED.packToMessage {
@@ -365,7 +368,7 @@ class AmneziaVpnService : VpnService() {
                     }
                 }
 
-                VpnStateStore.store { VpnState(protocolState, serverName, serverIndex) }
+                VpnStateStore.store { VpnState(protocolState, serverName, serverIndex, vpnProto) }
 
                 when (protocolState) {
                     CONNECTED -> {
@@ -422,7 +425,7 @@ class AmneziaVpnService : VpnService() {
     @MainThread
     private fun enableNotification() {
         registerScreenStateBroadcastReceivers()
-        serviceNotification.updateNotification(serverName, protocolState.value)
+        serviceNotification.updateNotification(serverName, vpnProto?.label, protocolState.value)
         launchTrafficStatsUpdate()
     }
 
@@ -485,8 +488,6 @@ class AmneziaVpnService : VpnService() {
 
         Log.d(TAG, "Start VPN connection")
 
-        protocolState.value = CONNECTING
-
         val config = parseConfigToJson(vpnConfig)
         saveServerData(config)
         if (config == null) {
@@ -494,6 +495,16 @@ class AmneziaVpnService : VpnService() {
             protocolState.value = DISCONNECTED
             return
         }
+
+        try {
+            vpnProto = VpnProto.get(config.getString("protocol"))
+        } catch (e: Exception) {
+            onError("Invalid VPN config: ${e.message}")
+            protocolState.value = DISCONNECTED
+            return
+        }
+
+        protocolState.value = CONNECTING
 
         if (!checkPermission()) {
             protocolState.value = DISCONNECTED
@@ -504,8 +515,10 @@ class AmneziaVpnService : VpnService() {
             disconnectionJob?.join()
             disconnectionJob = null
 
-            protocol = getProtocol(config.getString("protocol"))
-            protocol?.startVpn(config, Builder(), ::protect)
+            vpnProto?.protocol?.let { protocol ->
+                protocol.initialize(applicationContext, protocolState, ::onError)
+                protocol.startVpn(config, Builder(), ::protect)
+            }
         }
     }
 
@@ -521,8 +534,8 @@ class AmneziaVpnService : VpnService() {
             connectionJob?.join()
             connectionJob = null
 
-            protocol?.stopVpn()
-            protocol = null
+            vpnProto?.protocol?.stopVpn()
+
             try {
                 withTimeout(DISCONNECT_TIMEOUT) {
                     // waiting for disconnect state
@@ -544,22 +557,9 @@ class AmneziaVpnService : VpnService() {
         protocolState.value = RECONNECTING
 
         connectionJob = connectionScope.launch {
-            protocol?.reconnectVpn(Builder())
+            vpnProto?.protocol?.reconnectVpn(Builder())
         }
     }
-
-    @MainThread
-    private fun getProtocol(protocolName: String): Protocol =
-        protocolCache[protocolName]
-            ?: when (protocolName) {
-                "wireguard" -> Wireguard()
-                "awg" -> Awg()
-                "openvpn" -> OpenVpn()
-                "cloak" -> Cloak()
-                "xray" -> Xray()
-                else -> throw IllegalArgumentException("Protocol '$protocolName' not found")
-            }.apply { initialize(applicationContext, protocolState, ::onError) }
-                .also { protocolCache[protocolName] = it }
 
     /**
      * Utils methods
@@ -605,6 +605,7 @@ class AmneziaVpnService : VpnService() {
         if (prepare(applicationContext) != null) {
             Intent(this, VpnRequestActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra(EXTRA_PROTOCOL, vpnProto)
             }.also {
                 startActivity(it)
             }
@@ -614,9 +615,9 @@ class AmneziaVpnService : VpnService() {
         }
 
     companion object {
-        fun isRunning(context: Context): Boolean =
+        fun isRunning(context: Context, processName: String): Boolean =
             context.getSystemService<ActivityManager>()!!.runningAppProcesses.any {
-                it.processName == PROCESS_NAME && it.importance <= IMPORTANCE_FOREGROUND_SERVICE
+                it.processName == processName && it.importance <= IMPORTANCE_FOREGROUND_SERVICE
             }
     }
 }
