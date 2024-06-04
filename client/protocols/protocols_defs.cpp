@@ -72,6 +72,8 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
              { Proto::Ikev2, "IKEv2" },
              { Proto::L2tp, "L2TP" },
              { Proto::Xray, "XRay" },
+             { Proto::SSXray, "ShadowSocks"},
+
 
              { Proto::TorWebSite, "Website in Tor network" },
              { Proto::Dns, "DNS Service" },
@@ -87,6 +89,8 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
 {
     switch (p) {
     case Proto::Any: return ServiceType::None;
+    case Proto::SSXray: return ServiceType::None;
+
     case Proto::OpenVpn: return ServiceType::Vpn;
     case Proto::Cloak: return ServiceType::Vpn;
     case Proto::ShadowSocks: return ServiceType::Vpn;
@@ -160,7 +164,7 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     case Proto::Any: return TransportProto::Udp;
     case Proto::OpenVpn: return TransportProto::Udp;
     case Proto::Cloak: return TransportProto::Tcp;
-    case Proto::ShadowSocks: return TransportProto::Tcp;
+    case Proto::ShadowSocks: return TransportProto::TcpAndUdp;
     case Proto::WireGuard: return TransportProto::Udp;
     case Proto::Awg: return TransportProto::Udp;
     case Proto::Ikev2: return TransportProto::Udp;
