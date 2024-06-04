@@ -198,7 +198,7 @@
         <file>ui/qml/Pages2/PageProtocolOpenVpnSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolShadowSocksSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolCloakSettings.qml</file>
-        <file>ui/qml/Pages2/PageProtocolXraySettings.qml</file>        
+        <file>ui/qml/Pages2/PageProtocolXraySettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolRaw.qml</file>
         <file>ui/qml/Pages2/PageSettingsLogging.qml</file>
         <file>ui/qml/Pages2/PageServiceSftpSettings.qml</file>
@@ -239,5 +239,6 @@
         <file>images/controls/alert-circle.svg</file>
         <file>images/controls/file-check-2.svg</file>
         <file>ui/qml/Controls2/WarningType.qml</file>
+        <file>ui/qml/Components/ChangelogDrawer.qml</file>
     </qresource>
 </RCC>

@@ -9,7 +9,7 @@ class SystemController : public QObject
 {
     Q_OBJECT
 public:
-    explicit SystemController(const std::shared_ptr<Settings> &setting, QObject *parent = nullptr);
+    explicit SystemController(const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
     static void saveFile(QString fileName, const QString &data);
 
