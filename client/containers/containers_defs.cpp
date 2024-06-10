@@ -69,6 +69,8 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
 
     case DockerContainer::Sftp: return { Proto::Sftp };
 
+    case DockerContainer::Socks5Proxy: return { Proto::Socks5Proxy };
+
     default: return { defaultProtocol(container) };
     }
 }
@@ -98,7 +100,8 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
              { DockerContainer::Dns, QObject::tr("Amnezia DNS") },
-             { DockerContainer::Sftp, QObject::tr("Sftp file sharing service") } };
+             { DockerContainer::Sftp, QObject::tr("Sftp file sharing service") },
+             { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") } };
 }
 
 QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
@@ -131,7 +134,9 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
              { DockerContainer::Dns,
                QObject::tr("Replace the current DNS server with your own. This will increase your privacy level.") },
              { DockerContainer::Sftp,
-               QObject::tr("Create a file vault on your server to securely store and transfer files.") } };
+               QObject::tr("Create a file vault on your server to securely store and transfer files.") },
+             { DockerContainer::Socks5Proxy,
+               QObject::tr("") } };
 }
 
 QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
@@ -240,7 +245,8 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
           QObject::tr("After installation, Amnezia will create a\n\n file storage on your server. "
                       "You will be able to access it using\n FileZilla or other SFTP clients, "
                       "as well as mount the disk on your device to access\n it directly from your device.\n\n"
-                      "For more detailed information, you can\n find it in the support section under \"Create SFTP file storage.\" ") }
+                      "For more detailed information, you can\n find it in the support section under \"Create SFTP file storage.\" ") },
+        { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") }
     };
 }
 
@@ -265,6 +271,7 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::TorWebSite: return Proto::TorWebSite;
     case DockerContainer::Dns: return Proto::Dns;
     case DockerContainer::Sftp: return Proto::Sftp;
+    case DockerContainer::Socks5Proxy: return Proto::Socks5Proxy;
     default: return Proto::Any;
     }
 }
@@ -367,6 +374,7 @@ bool ContainerProps::isShareable(DockerContainer container)
     case DockerContainer::TorWebSite: return false;
     case DockerContainer::Dns: return false;
     case DockerContainer::Sftp: return false;
+    case DockerContainer::Socks5Proxy: return false;
     default: return true;
     }
 }

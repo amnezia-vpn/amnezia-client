@@ -351,6 +351,9 @@ void AmneziaApplication::initModels()
     m_sftpConfigModel.reset(new SftpConfigModel(this));
     m_engine->rootContext()->setContextProperty("SftpConfigModel", m_sftpConfigModel.get());
 
+    m_socks5ConfigModel.reset(new Socks5ProxyConfigModel(this));
+    m_engine->rootContext()->setContextProperty("Socks5ProxyConfigModel", m_socks5ConfigModel.get());
+
     m_clientManagementModel.reset(new ClientManagementModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
     connect(m_clientManagementModel.get(), &ClientManagementModel::adminConfigRevoked, m_serversModel.get(),

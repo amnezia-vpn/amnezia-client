@@ -261,6 +261,11 @@ PageType {
                             Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
+                                if (!port.textField.acceptableInput) {
+                                    port.errorText = qsTr("The port must be in the range of 1 to 65535")
+                                    return
+                                }
+
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.install(dockerContainer, port.textFieldText, transportProtoSelector.currentIndex)
                             }
