@@ -182,8 +182,9 @@ class Xray : Protocol() {
 
             Log.d(TAG, "Run XRay")
             Log.i(TAG, "xray ${LibXray.xrayVersion()}")
-            LibXray.initXray()
-            val geoDir = File(context.getDir("assets", Context.MODE_PRIVATE), "geo").absolutePath
+            val assetsPath = context.getDir("assets", Context.MODE_PRIVATE).absolutePath
+            LibXray.initXray(assetsPath)
+            val geoDir = File(assetsPath, "geo").absolutePath
             val configPath = File(context.cacheDir, "config.json")
             Log.d(TAG, "xray.location.asset: $geoDir")
             Log.d(TAG, "config: $configPath")
