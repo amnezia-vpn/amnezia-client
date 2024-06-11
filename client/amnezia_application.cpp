@@ -254,13 +254,18 @@ void AmneziaApplication::updateTranslator(const QLocale &locale)
         QCoreApplication::removeTranslator(m_translator.get());
     }
 
-    QString strFileName = QString(":/translations/amneziavpn") + QLatin1String("_") + locale.name() + ".qm";
-    if (m_translator->load(strFileName)) {
-        if (QCoreApplication::installTranslator(m_translator.get())) {
-            m_settings->setAppLanguage(locale);
-        }
-    } else {
+    if (locale == QLocale::English) {
+        // English as a default language doesn't have a translation file
         m_settings->setAppLanguage(QLocale::English);
+    } else {
+        QString strFileName = QString(":/translations/amneziavpn") + QLatin1String("_") + locale.name() + ".qm";
+        if (m_translator->load(strFileName)) {
+            if (QCoreApplication::installTranslator(m_translator.get())) {
+                m_settings->setAppLanguage(locale);
+            }
+        } else {
+            m_settings->setAppLanguage(QLocale::Russian);
+        }
     }
 
     m_engine->retranslate();

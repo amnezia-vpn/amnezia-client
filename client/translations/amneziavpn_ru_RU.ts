@@ -1073,17 +1073,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="135"/>
         <source>Support via Telegram</source>
-        <translation type="unfinished"></translation>
+        <translation>Поддержка в Телеграм</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="150"/>
         <source>Support via Email</source>
-        <translation type="unfinished"></translation>
+        <translation>Поддержка по Email</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="165"/>
         <source>Telegram Group</source>
-        <translation type="unfinished"></translation>
+        <translation>Группа в Телеграм</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="180"/>
