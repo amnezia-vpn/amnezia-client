@@ -26,6 +26,7 @@ enum ProtocolScriptType {
     configure_container,
     container_startup,
     openvpn_template,
+    openvpn_password_auth,
     wireguard_template,
     awg_template,
     xray_template

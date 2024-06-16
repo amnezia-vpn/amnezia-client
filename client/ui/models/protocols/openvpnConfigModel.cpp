@@ -35,6 +35,12 @@ bool OpenVpnConfigModel::setData(const QModelIndex &index, const QVariant &value
     case Roles::AdditionalServerCommandsRole:
         m_protocolConfig.insert(config_key::additional_server_config, value.toString());
         break;
+    case Roles::AuthLogin:
+
+        break;
+    case Roles::AuthPassword:
+
+        break;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -72,6 +78,8 @@ QVariant OpenVpnConfigModel::data(const QModelIndex &index, int role) const
     case Roles::IsPortEditable: return m_container == DockerContainer::OpenVpn ? true : false;
     case Roles::IsTransportProtoEditable: return m_container == DockerContainer::OpenVpn ? true : false;
     case Roles::HasRemoveButton: return m_container == DockerContainer::OpenVpn ? true : false;
+    case Roles::AuthLogin:return {};
+    case Roles::AuthPassword: return {};
     }
     return QVariant();
 }
@@ -146,6 +154,8 @@ QHash<int, QByteArray> OpenVpnConfigModel::roleNames() const
     roles[IsTransportProtoEditable] = "isTransportProtoEditable";
 
     roles[HasRemoveButton] = "hasRemoveButton";
+    roles[AuthLogin] = "authLogin";
+    roles[AuthPassword] = "authPassword";
 
     return roles;
 }
