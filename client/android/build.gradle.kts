@@ -3,6 +3,7 @@ import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
     id("property-delegate")
 }
 
@@ -98,7 +99,6 @@ android {
 }
 
 dependencies {
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
     implementation(project(":qt"))
     implementation(project(":utils"))
     implementation(project(":protocolApi"))
@@ -106,9 +106,11 @@ dependencies {
     implementation(project(":awg"))
     implementation(project(":openvpn"))
     implementation(project(":cloak"))
+    implementation(project(":xray"))
     implementation(libs.androidx.core)
     implementation(libs.androidx.activity)
     implementation(libs.kotlinx.coroutines)
+    implementation(libs.kotlinx.serialization.protobuf)
     implementation(libs.bundles.androidx.camera)
     implementation(libs.google.mlkit)
     implementation(libs.androidx.datastore)
