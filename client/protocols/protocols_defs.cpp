@@ -77,7 +77,8 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
 
              { Proto::TorWebSite, "Website in Tor network" },
              { Proto::Dns, "DNS Service" },
-             { Proto::Sftp, QObject::tr("SFTP service") } };
+             { Proto::Sftp, QObject::tr("SFTP service") },
+             { Proto::Socks5Proxy, QObject::tr("SOCKS5 proxy server") } };
 }
 
 QMap<amnezia::Proto, QString> ProtocolProps::protocolDescriptions()
@@ -102,6 +103,7 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
     case Proto::TorWebSite: return ServiceType::Other;
     case Proto::Dns: return ServiceType::Other;
     case Proto::Sftp: return ServiceType::Other;
+    case Proto::Socks5Proxy: return ServiceType::Other;
     default: return ServiceType::Other;
     }
 }
@@ -113,6 +115,7 @@ int ProtocolProps::getPortForInstall(Proto p)
     case WireGuard:
     case ShadowSocks:
     case OpenVpn:
+    case Socks5Proxy:
         return QRandomGenerator::global()->bounded(30000, 50000);
     default:
         return defaultPort(p);
@@ -135,6 +138,7 @@ int ProtocolProps::defaultPort(Proto p)
     case Proto::TorWebSite: return -1;
     case Proto::Dns: return 53;
     case Proto::Sftp: return 222;
+    case Proto::Socks5Proxy: return 38080;
     default: return -1;
     }
 }
@@ -154,6 +158,7 @@ bool ProtocolProps::defaultPortChangeable(Proto p)
     case Proto::TorWebSite: return false;
     case Proto::Dns: return false;
     case Proto::Sftp: return true;
+    case Proto::Socks5Proxy: return true;
     default: return false;
     }
 }
@@ -175,6 +180,7 @@ TransportProto ProtocolProps::defaultTransportProto(Proto p)
     case Proto::TorWebSite: return TransportProto::Tcp;
     case Proto::Dns: return TransportProto::Udp;
     case Proto::Sftp: return TransportProto::Tcp;
+    case Proto::Socks5Proxy: return TransportProto::Tcp;
     }
 }
 
@@ -195,6 +201,7 @@ bool ProtocolProps::defaultTransportProtoChangeable(Proto p)
     case Proto::TorWebSite: return false;
     case Proto::Dns: return false;
     case Proto::Sftp: return false;
+    case Proto::Socks5Proxy: return false;
     default: return false;
     }
     return false;

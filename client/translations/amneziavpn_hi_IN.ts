@@ -1144,7 +1144,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="278"/>
         <source>Executable file (*.*)</source>
-        <translation>निष्पादनीय फाइल (*।*)</translation>
+        <translation>निष्पादनीय फाइल (*.*)</translation>
     </message>
 </context>
 <context>
@@ -1276,7 +1276,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="102"/>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="134"/>
         <source>Backup files (*.backup)</source>
-        <translation>बैकअप फ़ाइलें (*.बैकअप)</translation>
+        <translation>बैकअप फ़ाइलें (*.backup)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="111"/>
@@ -1480,7 +1480,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="143"/>
         <source>Logs files (*.log)</source>
-        <translation>लॉग फ़ाइलें (*.लॉग)</translation>
+        <translation>लॉग फ़ाइलें (*.log)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="152"/>

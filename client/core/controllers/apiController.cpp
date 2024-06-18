@@ -40,6 +40,28 @@ void ApiController::processApiConfig(const QString &protocol, const ApiControlle
         return;
     } else if (protocol == configKey::awg) {
         config.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", apiPayloadData.wireGuardClientPrivKey);
+        auto serverConfig = QJsonDocument::fromJson(config.toUtf8()).object();
+        auto containers = serverConfig.value(config_key::containers).toArray();
+        if (containers.isEmpty()) {
+            return;
+        }
+        auto container = containers.at(0).toObject();
+        QString containerName = ContainerProps::containerTypeToString(DockerContainer::Awg);
+        auto containerConfig = container.value(containerName).toObject();
+        auto protocolConfig = QJsonDocument::fromJson(containerConfig.value(config_key::last_config).toString().toUtf8()).object();
+        containerConfig[config_key::junkPacketCount] = protocolConfig.value(config_key::junkPacketCount);
+        containerConfig[config_key::junkPacketMinSize] = protocolConfig.value(config_key::junkPacketMinSize);
+        containerConfig[config_key::junkPacketMaxSize] = protocolConfig.value(config_key::junkPacketMaxSize);
+        containerConfig[config_key::initPacketJunkSize] = protocolConfig.value(config_key::initPacketJunkSize);
+        containerConfig[config_key::responsePacketJunkSize] = protocolConfig.value(config_key::responsePacketJunkSize);
+        containerConfig[config_key::initPacketMagicHeader] = protocolConfig.value(config_key::initPacketMagicHeader);
+        containerConfig[config_key::responsePacketMagicHeader] = protocolConfig.value(config_key::responsePacketMagicHeader);
+        containerConfig[config_key::underloadPacketMagicHeader] = protocolConfig.value(config_key::underloadPacketMagicHeader);
+        containerConfig[config_key::transportPacketMagicHeader] = protocolConfig.value(config_key::transportPacketMagicHeader);
+        container[containerName] = containerConfig;
+        containers.replace(0, container);
+        serverConfig[config_key::containers] = containers;
+        config = QString(QJsonDocument(serverConfig).toJson());
     }
     return;
 }
