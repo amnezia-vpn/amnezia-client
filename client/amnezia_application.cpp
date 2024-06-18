@@ -3,13 +3,13 @@
 #include <QClipboard>
 #include <QFontDatabase>
 #include <QMimeData>
+#include <QQuickItem>
 #include <QQuickStyle>
 #include <QResource>
 #include <QStandardPaths>
 #include <QTextDocument>
 #include <QTimer>
 #include <QTranslator>
-#include <QQuickItem>
 
 #include "logger.h"
 #include "ui/models/installedAppsModel.h"
@@ -358,6 +358,9 @@ void AmneziaApplication::initModels()
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
     connect(m_clientManagementModel.get(), &ClientManagementModel::adminConfigRevoked, m_serversModel.get(),
             &ServersModel::clearCachedProfile);
+
+    m_apiServicesModel.reset(new ApiServicesModel(this));
+    m_engine->rootContext()->setContextProperty("ApiServicesModel", m_apiServicesModel.get());
 }
 
 void AmneziaApplication::initControllers()
@@ -366,15 +369,17 @@ void AmneziaApplication::initControllers()
             new ConnectionController(m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_settings));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
-    connect(m_connectionController.get(), qOverload<const QString &>(&ConnectionController::connectionErrorOccurred), this, [this](const QString &errorMessage) {
-        emit m_pageController->showErrorMessage(errorMessage);
-        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-    });
+    connect(m_connectionController.get(), qOverload<const QString &>(&ConnectionController::connectionErrorOccurred), this,
+            [this](const QString &errorMessage) {
+                emit m_pageController->showErrorMessage(errorMessage);
+                emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+            });
 
-    connect(m_connectionController.get(), qOverload<ErrorCode>(&ConnectionController::connectionErrorOccurred), this, [this](ErrorCode errorCode) {
-      emit m_pageController->showErrorMessage(errorCode);
-      emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-    });
+    connect(m_connectionController.get(), qOverload<ErrorCode>(&ConnectionController::connectionErrorOccurred), this,
+            [this](ErrorCode errorCode) {
+                emit m_pageController->showErrorMessage(errorCode);
+                emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+            });
 
     connect(m_connectionController.get(), &ConnectionController::connectButtonClicked, m_connectionController.get(),
             &ConnectionController::toggleConnection, Qt::QueuedConnection);
@@ -384,7 +389,8 @@ void AmneziaApplication::initControllers()
     m_pageController.reset(new PageController(m_serversModel, m_settings));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
 
-    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_settings));
+    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel,
+                                                    m_apiServicesModel, m_settings));
     m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
     connect(m_installController.get(), &InstallController::passphraseRequestStarted, m_pageController.get(),
             &PageController::showPassphraseRequestDrawer);

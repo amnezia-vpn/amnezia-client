@@ -148,6 +148,18 @@ PageType {
             DividerType {
                 visible: GC.isDesktop()
             }
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                Layout.preferredHeight: about.height
+
+                text: qsTr("test")
+                leftImageSource: "qrc:/images/controls/x-circle.svg"
+
+                clickedFunction: function() {
+                    ConnectionController.test()
+                }
+            }
         }
     }
 }

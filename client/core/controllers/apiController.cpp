@@ -5,6 +5,8 @@
 #include <QNetworkReply>
 #include <QtConcurrent>
 
+#include "QRsa.h"
+
 #include "amnezia_application.h"
 #include "configurators/wireguard_configurator.h"
 #include "version.h"
@@ -25,6 +27,28 @@ namespace
         constexpr char uuid[] = "installation_uuid";
         constexpr char osVersion[] = "os_version";
         constexpr char appVersion[] = "app_version";
+
+        constexpr char countryCode[] = "country_code";
+        constexpr char serviceType[] = "service_type";
+    }
+
+    ErrorCode checkErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply)
+    {
+        if (!sslErrors.empty()) {
+            qDebug().noquote() << sslErrors;
+            return ErrorCode::ApiConfigSslError;
+        } else if (reply->error() == QNetworkReply::NoError) {
+            return ErrorCode::NoError;
+        } else if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
+            return ErrorCode::ApiConfigTimeoutError;
+        } else {
+            QString err = reply->errorString();
+            qDebug() << QString::fromUtf8(reply->readAll());
+            qDebug() << reply->error();
+            qDebug() << err;
+            qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+            return ErrorCode::ApiConfigDownloadError;
+        }
     }
 }
 
@@ -101,8 +125,6 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
     QThread::msleep(10);
 #endif
 
-    auto containerConfig = serverConfig.value(config_key::containers).toArray();
-
     if (serverConfig.value(config_key::configVersion).toInt()) {
         QNetworkRequest request;
         request.setTransferTimeout(7000);
@@ -141,6 +163,7 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
                 }
 
                 QString configStr = ba;
+                qDebug() << QJsonDocument::fromJson(configStr.toUtf8()).object();
                 processApiConfig(protocol, apiPayloadData, configStr);
 
                 QJsonObject apiConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
@@ -177,4 +200,79 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
             emit errorOccurred(ErrorCode::ApiConfigSslError);
         });
     }
+}
+
+ErrorCode ApiController::getServicesList(QByteArray &responseBody)
+{
+#ifdef Q_OS_IOS
+    IosController::Instance()->requestInetAccess();
+    QThread::msleep(10);
+#endif
+
+    QNetworkAccessManager manager;
+    QNetworkRequest request;
+    request.setTransferTimeout(7000);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    request.setUrl(QString("http://localhost:52525/v1/services"));
+
+    QScopedPointer<QNetworkReply> reply;
+    reply.reset(manager.get(request));
+
+    QEventLoop wait;
+    QObject::connect(reply.get(), &QNetworkReply::finished, &wait, &QEventLoop::quit);
+
+    QList<QSslError> sslErrors;
+    connect(reply.get(), &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) {
+        sslErrors = errors;
+    });
+    wait.exec();
+
+    responseBody = reply->readAll();
+
+    return checkErrors(sslErrors, reply.get());
+}
+
+ErrorCode ApiController::getConfigForService(const QString &installationUuid, const QString &countryCode, const QString &serviceType,
+                                             const QString &protocol, QByteArray &responseBody)
+{
+#ifdef Q_OS_IOS
+    IosController::Instance()->requestInetAccess();
+    QThread::msleep(10);
+#endif
+
+    QNetworkAccessManager manager;
+    QNetworkRequest request;
+    request.setTransferTimeout(7000);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    request.setUrl(QString("http://localhost:52525/v1/config"));
+
+    ApiPayloadData apiPayloadData = generateApiPayloadData(protocol);
+
+    QJsonObject apiPayload = fillApiPayload(protocol, apiPayloadData);
+    apiPayload[configKey::countryCode] = countryCode;
+    apiPayload[configKey::serviceType] = serviceType;
+    apiPayload[configKey::uuid] = installationUuid;
+
+    QByteArray requestBody = QJsonDocument(apiPayload).toJson();
+    QSimpleCrypto::QRsa rsa;
+    EVP_PKEY* publicKey = rsa.getPublicKeyFromFile("testkeys.pub");
+    QByteArray encryptedRequestBody = rsa.encrypt(requestBody, publicKey, RSA_PKCS1_PADDING);
+
+    QScopedPointer<QNetworkReply> reply;
+    reply.reset(manager.post(request, requestBody));
+
+    QEventLoop wait;
+    connect(reply.get(), &QNetworkReply::finished, &wait, &QEventLoop::quit);
+
+    QList<QSslError> sslErrors;
+    connect(reply.get(), &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) {
+        sslErrors = errors;
+    });
+    wait.exec();
+
+    responseBody = reply->readAll();
+
+    return checkErrors(sslErrors, reply.get());
 }

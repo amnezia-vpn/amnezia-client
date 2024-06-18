@@ -10,6 +10,7 @@
 #include "ui/models/containers_model.h"
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
+#include "ui/models/apiServicesModel.h"
 
 class InstallController : public QObject
 {
@@ -18,6 +19,7 @@ public:
     explicit InstallController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                const QSharedPointer<ProtocolsModel> &protocolsModel,
                                const QSharedPointer<ClientManagementModel> &clientManagementModel,
+                               const QSharedPointer<ApiServicesModel> &apiServicesModel,
                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
     ~InstallController();
 
@@ -49,6 +51,9 @@ public slots:
     void setEncryptedPassphrase(QString passphrase);
 
     void addEmptyServer();
+
+    bool fillAvailableServices();
+    void installServiceFromApi();
 
 signals:
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
@@ -95,6 +100,8 @@ private:
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ProtocolsModel> m_protocolModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
+    QSharedPointer<ApiServicesModel> m_apiServicesModel;
+
     std::shared_ptr<Settings> m_settings;
 
     ServerCredentials m_processedServerCredentials;

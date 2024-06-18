@@ -56,83 +56,139 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: qsTr("Server connection")
-                descriptionText: qsTr("Do not use connection codes from untrusted sources, as they may be created to intercept your data.")
+                headerText: qsTr("Connection")
             }
 
-            Header2TextType {
+            TextFieldWithHeaderType {
+                id: textKey
+
                 Layout.fillWidth: true
-                Layout.topMargin: 48
+                Layout.topMargin: 32
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                text: qsTr("What do you have?")
+                headerText: qsTr("Key")
+                textFieldPlaceholderText: "vpn://"
+                buttonText: qsTr("Insert")
+
+                clickedFunc: function() {
+                    textField.text = ""
+                    textField.paste()
+                }
+
+                KeyNavigation.tab: continueButton
             }
 
-            LabelWithButtonType {
-                id: fileButton
+            BasicButtonType {
+                id: continueButton
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
 
-                text: !ServersModel.getServersCount() ? qsTr("File with connection settings or backup") : qsTr("File with connection settings")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: "qrc:/images/controls/folder-open.svg"
-
-                KeyNavigation.tab: qrButton.visible ? qrButton.rightButton : textButton.rightButton
-
-                clickedFunction: function() {
-                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
-                                                                       "Config files (*.vpn *.ovpn *.conf *.json)"
-                    var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
-                    if (fileName !== "") {
-                        if (ImportController.extractConfigFromFile(fileName)) {
-                            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
-                        }
-                    }
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                id: qrButton
-                Layout.fillWidth: true
-                visible: SettingsController.isCameraPresent()
-
-                text: qsTr("QR-code")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: "qrc:/images/controls/qr-code.svg"
-
-                KeyNavigation.tab: textButton.rightButton
-
-                clickedFunction: function() {
-                    ImportController.startDecodingQr()
-                    if (Qt.platform.os === "ios") {
-                        PageController.goToPage(PageEnum.PageSetupWizardQrReader)
-                    }
-                }
-            }
-
-            DividerType {
-                visible: SettingsController.isCameraPresent()
-            }
-
-            LabelWithButtonType {
-                id: textButton
-                Layout.fillWidth: true
-
-                text: qsTr("Key as text")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: "qrc:/images/controls/text-cursor.svg"
-
+                text: qsTr("Continue")
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
 
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSetupWizardTextKey)
+                clickedFunc: function() {
+                    if (ImportController.extractConfigFromData(textKey.textFieldText)) {
+                        PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                    }
                 }
             }
 
-            DividerType {}
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 40
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 24
+
+                color: "#494B50"
+                text: qsTr("Other connection options")
+            }
+
+            CardWithIconsType {
+                id: apiInstalling
+
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                headerText: qsTr("Get a VPN from Amnezia")
+                bodyText: qsTr("Free VPN to bypass blocking and censorship in China, Russia, Iran and more.")
+
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: {
+                    PageController.showBusyIndicator(true)
+                    if (InstallController.fillAvailableServices()) {
+                        PageController.goToPage(PageEnum.PageSetupWizardApiServicesList)
+                    }
+                    PageController.showBusyIndicator(false)
+                }
+            }
+
+            CardWithIconsType {
+                id: manualInstalling
+
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                headerText: qsTr("Create a VPN on your server")
+                bodyText: qsTr("Configure Amnezia VPN on your own server")
+
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: {
+                    PageController.goToPage(PageEnum.PageSetupWizardCredentials)
+                }
+            }
+
+//            LabelWithButtonType {
+//                id: fileButton
+//                Layout.fillWidth: true
+//                Layout.topMargin: 16
+
+//                descriptionText: "What do you have?"
+
+//                text: !ServersModel.getServersCount() ? qsTr("File with connection settings or backup") : qsTr("File with connection settings")
+//                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+//                leftImageSource: "qrc:/images/controls/folder-open.svg"
+
+//                KeyNavigation.tab: qrButton.visible ? qrButton.rightButton : textButton.rightButton
+
+//                clickedFunction: function() {
+//                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
+//                                                                       "Config files (*.vpn *.ovpn *.conf *.json)"
+//                    var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
+//                    if (fileName !== "") {
+//                        if (ImportController.extractConfigFromFile(fileName)) {
+//                            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+//                        }
+//                    }
+//                }
+//            }
+
+//            LabelWithButtonType {
+//                id: qrButton
+//                Layout.fillWidth: true
+//                visible: SettingsController.isCameraPresent()
+
+//                text: qsTr("QR-code")
+//                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+//                leftImageSource: "qrc:/images/controls/qr-code.svg"
+
+//                KeyNavigation.tab: textButton.rightButton
+
+//                clickedFunction: function() {
+//                    ImportController.startDecodingQr()
+//                    if (Qt.platform.os === "ios") {
+//                        PageController.goToPage(PageEnum.PageSetupWizardQrReader)
+//                    }
+//                }
+//            }
         }
     }
 }

@@ -102,94 +102,53 @@ PageType {
         }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        contentHeight: content.height
+    ColumnLayout {
+        id: content
 
-        ColumnLayout {
-            id: content
+        anchors.fill: parent
+        spacing: 0
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            spacing: 0
+        Image {
+            id: image
+            source: "qrc:/images/amneziaBigLogo.png"
 
-            Image {
-                id: image
-                source: "qrc:/images/amneziaBigLogo.png"
-
-                Layout.alignment: Qt.AlignCenter
-                Layout.topMargin: 32
-                Layout.leftMargin: 8
-                Layout.rightMargin: 8
-                Layout.preferredWidth: 344
-                Layout.preferredHeight: 279
-            }
-
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 50
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Free service for creating a personal VPN on your server.") +
-                      qsTr(" Helps you access blocked content without revealing your privacy, even to VPN providers.")
-            }
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: startButton
-            }
-
-            BasicButtonType {
-                id: startButton
-                Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("I have the data to connect")
-
-                clickedFunc: function() {
-                    connectionTypeSelection.open()
-                }
-
-                KeyNavigation.tab: startButton2
-            }
-
-            BasicButtonType {
-                id: startButton2
-                Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#D7D8DB"
-                borderWidth: 1
-
-                text: qsTr("I have nothing")
-
-                clickedFunc: function() {
-                    Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
-                }
-
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
-            }
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+            Layout.topMargin: 32
+            Layout.preferredWidth: 360
+            Layout.preferredHeight: 287
         }
-    }
 
-    ConnectionTypeSelectionDrawer {
-        id: connectionTypeSelection
+        ParagraphTextType {
+            Layout.fillWidth: true
+            Layout.topMargin: 16
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
-        onClosed: {
-            PageController.forceTabBarActiveFocus()
-            root.defaultActiveFocusItem.forceActiveFocus()
+            text: qsTr("Free service for creating a personal VPN on your server.") +
+                  qsTr(" Helps you access blocked content without revealing your privacy, even to VPN providers.")
+        }
+
+        Item {
+            id: focusItem
+            KeyNavigation.tab: startButton
+            Layout.fillHeight: true
+        }
+
+        BasicButtonType {
+            id: startButton
+            Layout.fillWidth: true
+            Layout.bottomMargin: 48
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.alignment: Qt.AlignBottom
+
+            text: qsTr("Let's get started")
+
+            clickedFunc: function() {
+                PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
+            }
+
+            Keys.onTabPressed: lastItemTabClicked(focusItem)
         }
     }
 }

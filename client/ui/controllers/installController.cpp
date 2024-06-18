@@ -7,6 +7,7 @@
 #include <QRandomGenerator>
 #include <QStandardPaths>
 
+#include "core/controllers/apiController.h"
 #include "core/controllers/serverController.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/networkUtilities.h"
@@ -52,12 +53,14 @@ namespace
 InstallController::InstallController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                      const QSharedPointer<ProtocolsModel> &protocolsModel,
                                      const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                     const std::shared_ptr<Settings> &settings, QObject *parent)
+                                     const QSharedPointer<ApiServicesModel> &apiServicesModel, const std::shared_ptr<Settings> &settings,
+                                     QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_protocolModel(protocolsModel),
       m_clientManagementModel(clientManagementModel),
+      m_apiServicesModel(apiServicesModel),
       m_settings(settings)
 {
 }
@@ -432,7 +435,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         containerConfig.insert(config_key::password, password);
                     } else if (protocol == Proto::Socks5Proxy) {
                         QString proxyConfig = serverController->getTextFileFromContainer(container, credentials,
-                                                                                          protocols::socks5Proxy::proxyConfigPath, errorCode);
+                                                                                         protocols::socks5Proxy::proxyConfigPath, errorCode);
 
                         const static QRegularExpression usernameAndPasswordRegExp("users (\\w+):CL:(\\w+)");
                         QRegularExpressionMatch usernameAndPasswordMatch = usernameAndPasswordRegExp.match(proxyConfig);
@@ -595,9 +598,9 @@ void InstallController::removeApiConfig(const int serverIndex)
 
 #ifdef Q_OS_IOS
     QString vpncName = QString("%1 (%2) %3")
-        .arg(serverConfig[config_key::description].toString())
-        .arg(serverConfig[config_key::hostName].toString())
-        .arg(serverConfig[config_key::vpnproto].toString());
+                               .arg(serverConfig[config_key::description].toString())
+                               .arg(serverConfig[config_key::hostName].toString())
+                               .arg(serverConfig[config_key::vpnproto].toString());
 
     AmneziaVPN::removeVPNC(vpncName.toStdString());
 #endif
@@ -799,6 +802,32 @@ void InstallController::addEmptyServer()
     m_serversModel->addServer(server);
 
     emit installServerFinished(tr("Server added successfully"));
+}
+
+bool InstallController::fillAvailableServices()
+{
+    ApiController apiController;
+
+    QByteArray responseBody;
+    ErrorCode errorCode = apiController.getServicesList(responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        emit installationErrorOccurred(errorCode);
+        return false;
+    }
+
+    QJsonObject data = QJsonDocument::fromJson(responseBody).object();
+    m_apiServicesModel->updateModel(data);
+    return true;
+}
+
+void InstallController::installServiceFromApi()
+{
+    ApiController apiController;
+    QByteArray responseBody;
+    ErrorCode errorCode = apiController.getConfigForService(m_settings->getInstallationUuid(true), m_apiServicesModel->getCountryCode(),
+                                                    m_apiServicesModel->getSelectedServiceType(),
+                                                    m_apiServicesModel->getSelectedServiceProtocol(), responseBody);
+    qDebug() << responseBody;
 }
 
 bool InstallController::isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig,
