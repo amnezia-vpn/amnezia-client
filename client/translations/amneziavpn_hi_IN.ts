@@ -86,7 +86,7 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="162"/>
-        <source>Settings updated successfully, Reconnnection...</source>
+        <source>Settings updated successfully, reconnnection...</source>
         <translation>सेटिंग्स सफलतापूर्वक अपडेट हो गईं...</translation>
     </message>
     <message>
@@ -711,7 +711,7 @@ Already installed containers were found on the server. All installed containers 
     <name>PageProtocolShadowSocksSettings</name>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="95"/>
-        <source>ShadowSocks settings</source>
+        <source>Shadowsocks settings</source>
         <translation>शैडोसॉक्स सेटिंग्स</translation>
     </message>
     <message>
@@ -1055,13 +1055,13 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="140"/>
-        <source>Github</source>
-        <translation>Github</translation>
+        <source>GitHub</source>
+        <translation>GitHub</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="147"/>
         <source>https://github.com/amnezia-vpn/amnezia-client</source>
-        <translation></translation>
+        <translation>https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="158"/>
@@ -1386,7 +1386,7 @@ Already installed containers were found on the server. All installed containers 
     <name>PageSettingsDns</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="46"/>
-        <source>Default server does not support custom dns</source>
+        <source>Default server does not support custom DNS</source>
         <translation>डिफ़ॉल्ट सर्वर कस्टम डीएनएस का समर्थन नहीं करता है</translation>
     </message>
     <message>
@@ -1459,7 +1459,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="69"/>
-        <source>Enabling this function will save application&apos;s logs automatically, By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
+        <source>Enabling this function will save application&apos;s logs automatically. By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
         <translation>इस फ़ंक्शन को सक्षम करने से एप्लिकेशन के लॉग स्वचालित रूप से सहेजे जाएंगे, डिफ़ॉल्ट रूप से, लॉगिंग कार्यक्षमता अक्षम है। एप्लिकेशन की खराबी की स्थिति में लॉग सेविंग सक्षम करें.</translation>
     </message>
     <message>
@@ -1868,7 +1868,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="102"/>
-        <source>QR-code</source>
+        <source>QR code</source>
         <translation>क्यू आर संहिता</translation>
     </message>
     <message>
@@ -2164,7 +2164,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="81"/>
-        <source>Save ShadowSocks config</source>
+        <source>Save Shadowsocks config</source>
         <translation>शैडोसॉक्स कॉन्फ़िगरेशन सहेजें</translation>
     </message>
     <message>
@@ -2199,7 +2199,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="140"/>
-        <source>ShadowSocks native format</source>
+        <source>Shadowsocks native format</source>
         <translation>शैडोसॉक्स मूल प्रारूप</translation>
     </message>
     <message>
@@ -2663,7 +2663,7 @@ Already installed containers were found on the server. All installed containers 
     <name>QObject</name>
     <message>
         <location filename="../protocols/protocols_defs.cpp" line="78"/>
-        <source>Sftp service</source>
+        <source>SFTP service</source>
         <translation>एसएफटीपी सेवा</translation>
     </message>
     <message>
@@ -2673,7 +2673,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="12"/>
-        <source>Unknown Error</source>
+        <source>Unknown error</source>
         <translation>अज्ञात त्रुटि</translation>
     </message>
     <message>
@@ -2718,18 +2718,18 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="25"/>
-        <source>Ssh request was denied</source>
-        <translation>Ssh अनुरोध अस्वीकार कर दिया गया</translation>
+        <source>SSH request was denied</source>
+        <translation>SSH अनुरोध अस्वीकार कर दिया गया</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
-        <source>Ssh request was interrupted</source>
-        <translation>Ssh अनुरोध बाधित हो गया था</translation>
+        <source>SSH request was interrupted</source>
+        <translation>SSH अनुरोध बाधित हो गया था</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="27"/>
-        <source>Ssh internal error</source>
-        <translation>Ssh आंतरिक त्रुटि</translation>
+        <source>SSH internal error</source>
+        <translation>SSH आंतरिक त्रुटि</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="28"/>
@@ -2773,7 +2773,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="33"/>
-        <source>Scp error: Generic failure</source>
+        <source>SCP error: Generic failure</source>
         <translation>एससीपी त्रुटि: सामान्य विफलता</translation>
     </message>
     <message>
@@ -2788,7 +2788,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="41"/>
-        <source>ShadowSocks (ss-local) executable missing</source>
+        <source>Shadowsocks (ss-local) executable missing</source>
         <translation>शैडोसॉक्स (एसएस-स्थानीय) निष्पादन योग्य गायब है</translation>
     </message>
     <message>
@@ -2874,13 +2874,13 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="97"/>
-        <source>Amnezia DNS</source>
-        <translation></translation>
+        <source>AmneziaDNS</source>
+        <translation>AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="98"/>
-        <source>Sftp file sharing service</source>
-        <translation>Sftp फ़ाइल साझाकरण सेवा</translation>
+        <source>SFTP file sharing service</source>
+        <translation>SFTP फ़ाइल साझाकरण सेवा</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="104"/>
@@ -2889,7 +2889,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="107"/>
-        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
+        <source>Shadowsocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
         <translation>शैडोसॉक्स - वीपीएन ट्रैफ़िक को मास्क करता है, जिससे यह सामान्य वेब ट्रैफ़िक के समान हो जाता है, लेकिन इसे कुछ अत्यधिक सेंसर किए गए क्षेत्रों में विश्लेषण प्रणालियों द्वारा पहचाना जा सकता है.</translation>
     </message>
     <message>
@@ -2998,8 +2998,8 @@ For more detailed information, you can
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="124"/>
-        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
-        <translation>IKEv2 - आधुनिक स्थिर प्रोटोकॉल, दूसरों की तुलना में थोड़ा तेज़, सिग्नल हानि के बाद कनेक्शन पुनर्स्थापित करता है।</translation>
+        <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
+        <translation>IKEv2/IPsec - आधुनिक स्थिर प्रोटोकॉल, दूसरों की तुलना में थोड़ा तेज़, सिग्नल हानि के बाद कनेक्शन पुनर्स्थापित करता है।</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="127"/>
@@ -3035,16 +3035,12 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
         <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
 
 * Available in the AmneziaVPN only on desktop platforms
-* Normal power consumption on mobile devices
-
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
         <translation>शैडोसॉक्स, SOCKS5 प्रोटोकॉल से प्रेरित होकर, AEAD सिफर का उपयोग करके कनेक्शन की सुरक्षा करता है। हालाँकि शैडोसॉक्स को विवेकपूर्ण और पहचानने में चुनौतीपूर्ण बनाया गया है, यह एक मानक HTTPS कनेक्शन के समान नहीं है। हालाँकि, कुछ ट्रैफ़िक विश्लेषण प्रणालियाँ अभी भी शैडोसॉक्स कनेक्शन का पता लगा सकती हैं। Amnezia में सीमित समर्थन के कारण, AmneziaWG प्रोटोकॉल का उपयोग करने की अनुशंसा की जाती है।
 
 * AmneziaVPN केवल डेस्कटॉप प्लेटफ़ॉर्म पर उपलब्ध है
-* मोबाइल उपकरणों पर सामान्य बिजली की खपत
-
 * कॉन्फ़िगर करने योग्य एन्क्रिप्शन प्रोटोकॉल
 * कुछ डीपीआई सिस्टम द्वारा पता लगाने योग्य
 * टीसीपी नेटवर्क प्रोटोकॉल पर काम करता है।.</translation>

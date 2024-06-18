@@ -97,8 +97,8 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::SSXray, "ShadowSocks"},
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
-             { DockerContainer::Dns, QObject::tr("Amnezia DNS") },
-             { DockerContainer::Sftp, QObject::tr("Sftp file sharing service") } };
+             { DockerContainer::Dns, QObject::tr("AmneziaDNS") },
+             { DockerContainer::Sftp, QObject::tr("SFTP file sharing service") } };
 }
 
 QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
@@ -107,7 +107,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                QObject::tr("OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its "
                            "own security protocol with SSL/TLS for key exchange.") },
              { DockerContainer::ShadowSocks,
-               QObject::tr("ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it "
+               QObject::tr("Shadowsocks - masks VPN traffic, making it similar to normal web traffic, but it "
                            "may be recognized by analysis systems in some highly censored regions.") },
              { DockerContainer::Cloak,
                QObject::tr("OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against "
@@ -124,7 +124,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                QObject::tr("XRay with REALITY - Suitable for countries with the highest level of internet censorship. "
                            "Traffic masking as web traffic at the TLS level, and protection against detection by active probing methods.") },
              { DockerContainer::Ipsec,
-               QObject::tr("IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after "
+               QObject::tr("IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after "
                            "signal loss. It has native support on the latest versions of Android and iOS.") },
 
              { DockerContainer::TorWebSite, QObject::tr("Deploy a WordPress site on the Tor network in two clicks.") },
@@ -159,7 +159,6 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "However, certain traffic analysis systems might still detect a Shadowsocks connection. "
                       "Due to limited support in Amnezia, it's recommended to use AmneziaWG protocol.\n\n"
                       "* Available in the AmneziaVPN only on desktop platforms\n"
-                      "* Normal power consumption on mobile devices\n\n"
                       "* Configurable encryption protocol\n"
                       "* Detectable by some DPI systems\n"
                       "* Works over TCP network protocol.") },

@@ -99,7 +99,7 @@ PageType {
                 Layout.fillWidth: true
                 visible: SettingsController.isCameraPresent()
 
-                text: qsTr("QR-code")
+                text: qsTr("QR code")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/qr-code.svg"
 
