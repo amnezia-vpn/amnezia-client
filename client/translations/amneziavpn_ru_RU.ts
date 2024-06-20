@@ -694,7 +694,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="83"/>
         <source>Port</source>
-        <translation">Порт</translation>
+        <translation>Порт</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="102"/>
