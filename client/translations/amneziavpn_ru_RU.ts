@@ -2686,7 +2686,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="32"/>
         <source>SCP error: Generic failure</source>
-        <translatioт>Ошибка SCP: общий сбой</translation>
+        <translation>Ошибка SCP: общий сбой</translation>
     </message>
     <message>
         <source>Sftp error: End-of-file encountered</source>
@@ -2832,7 +2832,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="62"/>
         <source>QFile error: The file could not be accessed</source>
-        <translation>Ошибка QFile: не удалось получить доступ к файлу<</translation>
+        <translation>Ошибка QFile: не удалось получить доступ к файлу</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="63"/>
