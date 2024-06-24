@@ -112,9 +112,9 @@ QString Logger::getLogFile()
 
     file.open(QIODevice::ReadOnly);
     QString qtLog = file.readAll();
-    
+
 #ifdef Q_OS_IOS
-    return QString().fromStdString(AmneziaVPN::swiftUpdateLogData(qtLog.toStdString()));
+    return QString().fromStdString(VPNNaruzhu::swiftUpdateLogData(qtLog.toStdString()));
 #else
     return qtLog;
 #endif
@@ -157,11 +157,11 @@ void Logger::clearLogs()
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
     file.resize(0);
     file.close();
-    
+
 #ifdef Q_OS_IOS
-    AmneziaVPN::swiftDeleteLog();
+    VPNNaruzhu::swiftDeleteLog();
 #endif
-    
+
     if (isLogActive) {
         init();
     }

@@ -66,7 +66,7 @@ Item {
 
             text: root.descriptionText
 
-            color: "#878B91"
+            color: "#F1F0EF"
 
             visible: root.descriptionText !== ""
         }

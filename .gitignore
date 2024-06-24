@@ -1,9 +1,9 @@
 # User settings
 *.user
 macOSPackage/
-AmneziaVPN.dmg
-AmneziaVPN.exe
-AmneziaVPN_*.exe
+VPNNaruzhu.dmg
+VPNNaruzhu.exe
+VPNNaruzhu_*.exe
 deploy/build/*
 deploy/build_32/*
 deploy/build_64/*
@@ -48,10 +48,10 @@ client/ui_*.cpp
 client/Makefile*
 client/fastlane/build/
 client/*build-*
-client/AmneziaVPN.xcodeproj
+client/VPNNaruzhu.xcodeproj
 client/Debug-iphonesimulator/
-client/amneziavpn_plugin_import.cpp
-client/amneziavpn_qml_plugin_import.cpp
+client/vpnnaruzhu_plugin_import.cpp
+client/vpnnaruzhu_qml_plugin_import.cpp
 client/qmlcache_loader.cpp
 client/rep_ipc_interface_replica.h
 client/resources_qmlcache.qrc
@@ -72,7 +72,7 @@ CMakeLists.txt.user*
 *.7z
 deploy/AppDir
 deploy/Tools
-deploy/AmneziaVPN*Installer*
+deploy/VPNNaruzhu*Installer*
 
 # MACOS files
 .DS_Store

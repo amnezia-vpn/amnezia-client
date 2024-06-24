@@ -191,7 +191,7 @@ void MacOSStatusIcon::showMessage(const QString& title, const QString& message) 
   UNTimeIntervalNotificationTrigger* trigger =
       [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1 repeats:NO];
 
-  UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"amneziavpn"
+  UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"vpnnaruzhu"
                                                                         content:content
                                                                         trigger:trigger];
 

@@ -21,7 +21,7 @@ NSString* MacOSUtils::appId() {
   if (!appId) {
     // Fallback. When an unsigned/un-notarized app is executed in
     // command-line mode, it could fail the fetching of its own bundle id.
-    appId = @"org.amnezia.AmneziaVPN";
+    appId = @"org.amnezia.VPNNaruzhu";
   }
 
   return appId;
@@ -77,7 +77,7 @@ bool dockClickHandler(id self, SEL cmd, ...) {
   Q_UNUSED(cmd);
 
   logger.debug() << "Dock icon clicked.";
-  
+
   //TODO IMPL FOR AMNEZIA
   //QmlEngineHolder::instance()->showWindow();
   return FALSE;

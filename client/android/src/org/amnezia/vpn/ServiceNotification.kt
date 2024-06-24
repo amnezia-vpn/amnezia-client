@@ -66,7 +66,7 @@ class ServiceNotification(private val context: Context) {
 
         return notificationBuilder
             .setSmallIcon(R.drawable.ic_amnezia_round)
-            .setContentTitle(serverName ?: "AmneziaVPN")
+            .setContentTitle(serverName ?: "VPNNaruzhu")
             .setContentText(context.getString(state))
             .setSubText(speedString)
             .setWhen(System.currentTimeMillis())
@@ -138,7 +138,7 @@ class ServiceNotification(private val context: Context) {
                     createServicePendingIntent(
                         context,
                         CONNECT_REQUEST_CODE,
-                        Intent(context, AmneziaVpnService::class.java),
+                        Intent(context, VpnNaruzhuService::class.java),
                         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                     )
                 )
@@ -165,7 +165,7 @@ class ServiceNotification(private val context: Context) {
                         .setSound(null, null)
                         .setVibrationEnabled(false)
                         .setLightsEnabled(false)
-                        .setName("AmneziaVPN")
+                        .setName("VPNNaruzhu")
                         .setDescription(context.resources.getString(R.string.notificationChannelDescription))
                         .build()
                 )

@@ -92,11 +92,11 @@ void LocalSocketController::initializeInternal() {
   m_daemonState = eInitializing;
 
 #ifdef MZ_WINDOWS
-  QString path = "\\\\.\\pipe\\amneziavpn";
+  QString path = "\\\\.\\pipe\\vpnnaruzhu";
 #else
-  QString path = "/var/run/amneziavpn/daemon.socket";
+  QString path = "/var/run/vpnnaruzhu/daemon.socket";
   if (!QFileInfo::exists(path)) {
-    path = "/tmp/amneziavpn.socket";
+    path = "/tmp/vpnnaruzhu.socket";
   }
 #endif
 
@@ -130,7 +130,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   // set up IPv6 unique-local-address, ULA, with "fd00::/8" prefix, not globally routable.
   // this will be default IPv6 gateway, OS recognizes that IPv6 link is local and switches to IPv4.
-  // Otherwise some OSes (Linux) try IPv6 forever and hang. 
+  // Otherwise some OSes (Linux) try IPv6 forever and hang.
   // https://en.wikipedia.org/wiki/Unique_local_address (RFC 4193)
   // https://man7.org/linux/man-pages/man5/gai.conf.5.html
   json.insert("deviceIpv6Address", "fd58:baa6:dead::1"); // simply "dead::1" is globally-routable, don't use it

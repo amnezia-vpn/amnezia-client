@@ -10,8 +10,8 @@ namespace LanguageSettings
 {
     Q_NAMESPACE
     enum class AvailableLanguageEnum {
-        English,
         Russian,
+        English,
         China_cn,
         Ukrainian,
         Persian,

@@ -14,9 +14,9 @@ set PROJECT_DIR=%cd%
 set SCRIPT_DIR=%PROJECT_DIR:"=%\deploy
 
 set WORK_DIR=%SCRIPT_DIR:"=%\build_%BUILD_ARCH:"=%
-set APP_NAME=AmneziaVPN
+set APP_NAME=VPNNaruzhu
 set APP_FILENAME=%APP_NAME:"=%.exe
-set APP_DOMAIN=org.amneziavpn.package
+set APP_DOMAIN=org.vpnnaruzhu.package
 set OUT_APP_DIR=%WORK_DIR:"=%\client\release
 set PREBILT_DEPLOY_DATA_DIR=%PROJECT_DIR:"=%\client\3rd-prebuilt\deploy-prebuilt\windows\x%BUILD_ARCH:"=%
 set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%

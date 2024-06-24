@@ -41,7 +41,7 @@ public:
     ErrorCode start() override;
     void stop() override;
 
-    static QString tunnelName() { return "AmneziaVPN IKEv2"; }
+    static QString tunnelName() { return "VPNNaruzhu IKEv2"; }
 
 public:
     void newConnectionStateEventReceived(UINT unMsg,

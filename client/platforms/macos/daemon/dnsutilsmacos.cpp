@@ -20,7 +20,7 @@ DnsUtilsMacos::DnsUtilsMacos(QObject* parent) : DnsUtils(parent) {
   MZ_COUNT_CTOR(DnsUtilsMacos);
 
   m_scStore = SCDynamicStoreCreate(kCFAllocatorSystemDefault,
-                                   CFSTR("amneziavpn"), nullptr, nullptr);
+                                   CFSTR("vpnnaruzhu"), nullptr, nullptr);
   if (m_scStore == nullptr) {
     logger.error() << "Failed to create system configuration store ref";
   }

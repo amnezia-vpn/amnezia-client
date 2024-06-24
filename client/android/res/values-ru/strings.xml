@@ -14,11 +14,11 @@
 
     <string name="vpnGranted">VPN-подключение разрешено</string>
     <string name="vpnSetupFailed">Ошибка настройки VPN</string>
-    <string name="vpnSetupFailedMessage">Чтобы подключиться к AmneziaVPN необходимо:\n\n- Разрешить приложению подключаться к сети VPN\n- Отключить функцию \"Постоянная VPN\" для всех остальных VPN-приложений в системных настройках VPN</string>
+    <string name="vpnSetupFailedMessage">Чтобы подключиться к VPNNaruzhu необходимо:\n\n- Разрешить приложению подключаться к сети VPN\n- Отключить функцию \"Постоянная VPN\" для всех остальных VPN-приложений в системных настройках VPN</string>
     <string name="openVpnSettings">Открыть настройки VPN</string>
 
-    <string name="notificationChannelDescription">Уведомления сервиса AmneziaVPN</string>
-    <string name="notificationDialogTitle">Сервис AmneziaVPN</string>
+    <string name="notificationChannelDescription">Уведомления сервиса VPNNaruzhu</string>
+    <string name="notificationDialogTitle">Сервис VPNNaruzhu</string>
     <string name="notificationDialogMessage">Показывать статус VPN в строке состояния?</string>
     <string name="notificationSettingsDialogTitle">Настройки уведомлений</string>
     <string name="notificationSettingsDialogMessage">Для показа уведомлений необходимо включить уведомления в системных настройках</string>

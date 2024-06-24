@@ -17,12 +17,12 @@ DEPLOY_DIR=$PROJECT_DIR/deploy
 mkdir -p $DEPLOY_DIR/build
 BUILD_DIR=$DEPLOY_DIR/build
 
-echo "Project dir: ${PROJECT_DIR}" 
+echo "Project dir: ${PROJECT_DIR}"
 echo "Build dir: ${BUILD_DIR}"
 
-APP_NAME=AmneziaVPN
+APP_NAME=VPNNaruzhu
 APP_FILENAME=$APP_NAME.app
-APP_DOMAIN=org.amneziavpn.package
+APP_DOMAIN=org.vpnnaruzhu.package
 PLIST_NAME=$APP_NAME.plist
 
 OUT_APP_DIR=$BUILD_DIR/client
@@ -121,7 +121,7 @@ cp -av $DEPLOY_DATA_DIR/$PLIST_NAME $INSTALLER_DATA_DIR/$PLIST_NAME
 
 chmod a+x $INSTALLER_DATA_DIR/post_install.sh $INSTALLER_DATA_DIR/post_uninstall.sh
 
-cd $BUNDLE_DIR 
+cd $BUNDLE_DIR
 tar czf $INSTALLER_DATA_DIR/$APP_NAME.tar.gz ./
 
 echo "Building installer..."
@@ -147,7 +147,7 @@ fi
 
 echo "Building DMG installer..."
 # Allow Terminal to make changes in Privacy & Security > App Management
-hdiutil create -size 256mb -volname AmneziaVPN -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
+hdiutil create -size 256mb -volname VPNNaruzhu -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
 
 if [ "${MAC_CERT_PW+x}" ]; then
   echo "Signing DMG installer..."

@@ -3,5 +3,5 @@
 @interface QIOSApplicationDelegate
 @end
 
-@interface QIOSApplicationDelegate (AmneziaVPNDelegate)
+@interface QIOSApplicationDelegate (VPNNaruzhuDelegate)
 @end

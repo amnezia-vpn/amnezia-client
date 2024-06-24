@@ -253,7 +253,7 @@ QString Settings::routeModeString(RouteMode mode) const
 
 Settings::RouteMode Settings::routeMode() const
 {
-    return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt());
+    return static_cast<RouteMode>(value("Conf/routeMode", 2).toInt());
 }
 
 bool Settings::isSitesSplitTunnelingEnabled() const

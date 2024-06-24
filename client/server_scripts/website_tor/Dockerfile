@@ -1,3 +1,3 @@
-FROM amneziavpn/torpress:latest
+FROM vpnnaruzhu/torpress:latest
 
-LABEL maintainer="AmneziaVPN"
+LABEL maintainer="VPNNaruzhu"

@@ -115,18 +115,61 @@ PageType {
                 id: about
                 Layout.fillWidth: true
 
-                text: qsTr("About AmneziaVPN")
+                text: qsTr("About VPNNaruzhu")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: "qrc:/images/controls/amnezia.svg"
+                leftImageSource: "qrc:/images/controls/external-link.svg"
 
                 clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsAbout)
+                    Qt.openUrlExternally("https://vpn-naruzhu.com")
                 }
                 KeyNavigation.tab: close
 
             }
 
             DividerType {}
+
+            LabelWithButtonType {
+                id: supportTelegramm
+                Layout.fillWidth: true
+
+                text: qsTr("Support via Telegram")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/telegramNaruzhu.svg"
+
+                clickedFunction: function() {
+                     Qt.openUrlExternally("https://t.me/vpn_naruzhu_bot")
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                id: supportEmail
+                Layout.fillWidth: true
+
+                text: qsTr("Support via Email")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/email.svg"
+
+                clickedFunction: function() {
+                     Qt.openUrlExternally("mailto:support@vpn-naruzhu.com")
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                id: telegrammGroup
+                Layout.fillWidth: true
+
+                text: qsTr("Telegram Group")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/chat.svg"
+
+                clickedFunction: function() {
+                     Qt.openUrlExternally("https://t.me/vpn_naruzhu")
+                }
+            }
 
             LabelWithButtonType {
                 id: close
@@ -136,7 +179,7 @@ PageType {
 
                 text: qsTr("Close application")
                 leftImageSource: "qrc:/images/controls/x-circle.svg"
-                isLeftImageHoverEnabled: false                
+                isLeftImageHoverEnabled: false
 
                 Keys.onTabPressed: lastItemTabClicked(header)
 

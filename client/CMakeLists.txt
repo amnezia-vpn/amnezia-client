@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
-set(PROJECT AmneziaVPN)
+set(PROJECT VPNNaruzhu)
 project(${PROJECT})
 
 
@@ -34,7 +34,7 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
-set(LIBS ${LIBS} 
+set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
@@ -242,7 +242,7 @@ set(SOURCES ${SOURCES}
 
 if(WIN32)
     configure_file(
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc.in 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc.in
         ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
     )
 
@@ -275,16 +275,16 @@ if(APPLE)
     cmake_policy(SET CMP0114 NEW)
 
     if(NOT BUILD_OSX_APP_IDENTIFIER)
-        set(BUILD_OSX_APP_IDENTIFIER org.amnezia.AmneziaVPN CACHE STRING "OSX Application identifier")
+        set(BUILD_OSX_APP_IDENTIFIER org.amnezia.VPNNaruzhu CACHE STRING "OSX Application identifier")
     endif()
     if(NOT BUILD_IOS_APP_IDENTIFIER)
-        set(BUILD_IOS_APP_IDENTIFIER org.amnezia.AmneziaVPN CACHE STRING "iOS Application identifier")
+        set(BUILD_IOS_APP_IDENTIFIER org.amnezia.VPNNaruzhu CACHE STRING "iOS Application identifier")
     endif()
     if(NOT BUILD_IOS_GROUP_IDENTIFIER)
-        set(BUILD_IOS_GROUP_IDENTIFIER group.org.amnezia.AmneziaVPN CACHE STRING "iOS Group identifier")
+        set(BUILD_IOS_GROUP_IDENTIFIER group.org.amnezia.VPNNaruzhu CACHE STRING "iOS Group identifier")
     endif()
     if(NOT BUILD_VPN_DEVELOPMENT_TEAM)
-        set(BUILD_VPN_DEVELOPMENT_TEAM X7UJ388FXK CACHE STRING "Amnezia VPN Development Team")
+        set(BUILD_VPN_DEVELOPMENT_TEAM X7UJ388FXK CACHE STRING "VPN Naruzhu Development Team")
     endif()
 
     set(CMAKE_XCODE_GENERATE_SCHEME FALSE)

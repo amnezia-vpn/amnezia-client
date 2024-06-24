@@ -1,3 +1,3 @@
 FROM atmoz/sftp
 
-LABEL maintainer="AmneziaVPN" 
+LABEL maintainer="VPNNaruzhu"

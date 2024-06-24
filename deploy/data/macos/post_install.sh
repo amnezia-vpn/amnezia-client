@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_NAME=AmneziaVPN
+APP_NAME=VPNNaruzhu
 PLIST_NAME=$APP_NAME.plist
 LAUNCH_DAEMONS_PLIST_NAME=/Library/LaunchDaemons/$PLIST_NAME
 LOG_FOLDER=/var/log/$APP_NAME

@@ -69,7 +69,7 @@ void LanguageModel::changeLanguage(const LanguageSettings::AvailableLanguageEnum
     case LanguageSettings::AvailableLanguageEnum::Burmese: emit updateTranslations(QLocale::Burmese); break;
     case LanguageSettings::AvailableLanguageEnum::Urdu: emit updateTranslations(QLocale::Urdu); break;
     case LanguageSettings::AvailableLanguageEnum::Hindi: emit updateTranslations(QLocale::Hindi); break;
-    default: emit updateTranslations(QLocale::English); break;
+    default: emit updateTranslations(QLocale::Russian); break;
     }
 }
 
@@ -77,6 +77,7 @@ int LanguageModel::getCurrentLanguageIndex()
 {
     auto locale = m_settings->getAppLanguage();
     switch (locale.language()) {
+    case QLocale::UnitedStates:
     case QLocale::English: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     case QLocale::Russian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Russian); break;
     case QLocale::Chinese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::China_cn); break;
@@ -86,7 +87,7 @@ int LanguageModel::getCurrentLanguageIndex()
     case QLocale::Burmese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Burmese); break;
     case QLocale::Urdu: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Urdu); break;
     case QLocale::Hindi: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Hindi); break;
-    default: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
+    default: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Russian); break;
     }
 }
 

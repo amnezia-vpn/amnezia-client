@@ -1,6 +1,6 @@
 name: 'Release deploy workflow'
 
-on: 
+on:
   workflow_dispatch:
   # push:
   # tags:
@@ -90,11 +90,11 @@ jobs:
         fetch-depth: 10
 
     - name: 'Preparations before keystore fetching'
-      run: | 
+      run: |
         mkdir keystore
 
     - name: 'Getting keystore'
-      uses: actions/checkout@v3  
+      uses: actions/checkout@v3
       with:
         repository: amnezia-vpn/amnezia-android-certificates
         ssh-key: ${{ secrets.ANDROID_CERTS_SSH_PRIVATE_KEY }}
@@ -117,9 +117,9 @@ jobs:
         export ANDROID_NDK_HOME=${{ runner.temp }}/android-ndk-r${NDK_VERSION}
         export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
 
-        if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then 
+        if [ ! -f $ANDROID_NDK_ROOT/ndk-build ]; then
           wget https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux.zip -qO ${{ runner.temp }}/ndk.zip &&
-          unzip -q -d ${{ runner.temp }} ${{ runner.temp }}/ndk.zip ; 
+          unzip -q -d ${{ runner.temp }} ${{ runner.temp }}/ndk.zip ;
         fi
 
         export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_arm64_v8a/bin
@@ -132,11 +132,11 @@ jobs:
 
         ANDROID_BUILD_TOOLS_VERSION=30.0.3
 
-        ${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/zipalign -f -v 4 AmneziaVPN-release-unsigned.apk AmneziaVPN-release-aligned.apk
-        ${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/apksigner sign --out AmneziaVPN-release-signed.apk --ks keystore/debug.keystore --ks-key-alias ${{ secrets.DEBUG_ANDROID_KEYSTORE_KEY_ALIAS }} --ks-pass pass:${{secrets.DEBUG_ANDROID_KEYSTOTE_KEY_PASS }} AmneziaVPN-release-aligned.apk
+        ${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/zipalign -f -v 4 VPNNaruzhu-release-unsigned.apk VPNNaruzhu-release-aligned.apk
+        ${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/apksigner sign --out VPNNaruzhu-release-signed.apk --ks keystore/debug.keystore --ks-key-alias ${{ secrets.DEBUG_ANDROID_KEYSTORE_KEY_ALIAS }} --ks-pass pass:${{secrets.DEBUG_ANDROID_KEYSTOTE_KEY_PASS }} VPNNaruzhu-release-aligned.apk
 
     - name: 'Upload'
       uses: actions/upload-artifact@v3
       with:
         name: Release APK
-        path: ${{ runner.temp }}/main/AmneziaVPN-release-signed.apk
+        path: ${{ runner.temp }}/main/VPNNaruzhu-release-signed.apk

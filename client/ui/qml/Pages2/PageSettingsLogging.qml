@@ -137,11 +137,11 @@ disabled after 14 days, and all log files will be deleted.")
                         onClicked: {
                             var fileName = ""
                             if (GC.isMobile()) {
-                                fileName = "AmneziaVPN.log"
+                                fileName = "VPNNaruzhu.log"
                             } else {
                                 fileName = SystemController.getFileName(qsTr("Save"),
                                                                         qsTr("Logs files (*.log)"),
-                                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
+                                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/VPNNaruzhu",
                                                                         true,
                                                                         ".log")
                             }

@@ -25,10 +25,10 @@ export QT_PLUGIN_PATH="$BASE_DIR"/plugins/:$QT_PLUGIN_PATH
 export QTWEBENGINEPROCESS_PATH="$BASE_DIR"/bin//QtWebEngineProcess
 export QTDIR="$BASE_DIR"
 export CQT_PKG_ROOT="$BASE_DIR"
-export CQT_RUN_FILE="$BASE_DIR/AmneziaVPN-service.sh"
+export CQT_RUN_FILE="$BASE_DIR/VPNNaruzhu-service.sh"
 
 export QT_QPA_PLATFORM_PLUGIN_PATH="$BASE_DIR"/plugins//platforms:$QT_QPA_PLATFORM_PLUGIN_PATH
 
 
 
-"$BASE_DIR/bin/AmneziaVPN-service" "$@" 
+"$BASE_DIR/bin/VPNNaruzhu-service" "$@"

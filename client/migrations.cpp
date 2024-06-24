@@ -54,7 +54,7 @@ void Migrations::migrateV3()
         return;
     }
 
-    QString location = rootLocation + "/files/.config/AmneziaVPN.ORG/AmneziaVPN.conf";
+    QString location = rootLocation + "/files/.config/VPNNaruzhu.ORG/VPNNaruzhu.conf";
 
     QFile oldConfig(location);
 
@@ -63,7 +63,7 @@ void Migrations::migrateV3()
 
         QDir newConfigDir(newConfigPath);
 
-        newConfigPath += "/AmneziaVPN.ORG";
+        newConfigPath += "/VPNNaruzhu.ORG";
 
         bool mkPathRes = newConfigDir.mkpath(newConfigPath);
 
@@ -71,14 +71,14 @@ void Migrations::migrateV3()
             return;
         }
 
-        QFile newConfigFile(newConfigPath + "/AmneziaVPN.conf");
+        QFile newConfigFile(newConfigPath + "/VPNNaruzhu.conf");
 
         if (!newConfigFile.exists()) {
             bool cpResult = QFile::copy(oldConfig.fileName(), newConfigFile.fileName());
             if (cpResult) {
                 oldConfig.remove();
                 QDir oldConfigDir(rootLocation + "/files/.config");
-                oldConfigDir.rmdir("AmneziaVPN.ORG");
+                oldConfigDir.rmdir("VPNNaruzhu.ORG");
             }
         }
     }

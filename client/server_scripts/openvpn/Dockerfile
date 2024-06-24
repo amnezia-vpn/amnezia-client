@@ -1,6 +1,6 @@
 FROM alpine:3.15
 
-LABEL maintainer="AmneziaVPN"
+LABEL maintainer="VPNNaruzhu"
 
 #Install required packages
 RUN apk add --no-cache curl openvpn easy-rsa bash netcat-openbsd dumb-init rng-tools
@@ -13,7 +13,7 @@ RUN mkdir -p /opt/amnezia
 RUN echo -e "#!/bin/bash\ntail -f /dev/null" > /opt/amnezia/start.sh
 RUN chmod a+x /opt/amnezia/start.sh
 
-# Tune network  
+# Tune network
 RUN echo -e " \n\
   fs.file-max = 51200 \n\
   \n\
@@ -43,7 +43,7 @@ RUN echo -e " \n\
   echo -e " \n\
   * soft nofile 51200 \n\
   * hard nofile 51200 \n\
-  " | sed -e 's/^\s\+//g' | tee -a /etc/security/limits.conf  
+  " | sed -e 's/^\s\+//g' | tee -a /etc/security/limits.conf
 
 ENTRYPOINT [ "dumb-init", "/opt/amnezia/start.sh" ]
 CMD [ "" ]

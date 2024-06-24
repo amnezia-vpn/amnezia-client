@@ -66,7 +66,7 @@ class VpnRequestActivity : ComponentActivity() {
 
     private fun onPermissionGranted() {
         Toast.makeText(this, resources.getString(R.string.vpnGranted), Toast.LENGTH_LONG).show()
-        Intent(applicationContext, AmneziaVpnService::class.java).apply {
+        Intent(applicationContext, VpnNaruzhuService::class.java).apply {
             putExtra(AFTER_PERMISSION_CHECK, true)
         }.also {
             ContextCompat.startForegroundService(this, it)
