@@ -213,7 +213,7 @@ PageType {
 
                 // Click functionality
                 onClicked: {
-                    Qt.openUrlExternally(qsTr("https://vpn-naruzhu.com"))
+                    Qt.openUrlExternally(qsTr("https://naruzhu.click/appam"))
                 }
             }
         }
