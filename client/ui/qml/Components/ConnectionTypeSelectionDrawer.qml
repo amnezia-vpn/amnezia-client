@@ -49,22 +49,6 @@ DrawerType2 {
             KeyNavigation.tab: ip.rightButton
         }
 
-        LabelWithButtonType {
-            id: ip
-            Layout.fillWidth: true
-            Layout.topMargin: 16
-
-            text: qsTr("Configure your server")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-            clickedFunction: function() {
-                PageController.goToPage(PageEnum.PageSetupWizardCredentials)
-                root.close()
-            }
-
-            KeyNavigation.tab: qrCode.rightButton
-        }
-
         DividerType {}
 
         LabelWithButtonType {
