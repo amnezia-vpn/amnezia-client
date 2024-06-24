@@ -102,12 +102,7 @@
         <translation>نیا کنکشن کا اندراج کریں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="57"/>
-        <source>Configure your server</source>
-        <translation>اپنے سرور کو ترتیب دیں</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="74"/>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="58"/>
         <source>Open config file, key or QR code</source>
         <translation>کھولو کنفیگ فاءیل،کی یا کور کوڈ</translation>
     </message>
@@ -1887,37 +1882,27 @@ Already installed containers were found on the server. All installed containers 
         <translation>سرور کنکشن</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
-        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation>غیر معتبر ماخذ سے کنکشن کوڈ استعمال نہ کریں، کیونکہ یہ آپ کے ڈیٹا کو منسلک کرنے کے لئے تخلیق کیا گیا ہوسکتا ہے.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
         <source>What do you have?</source>
         <translation>آپ کو کس میں مدد چاہیے؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings or backup</source>
-        <translation>کنکشن کی ترتیبات یا بیک اپ والی فائل</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="76"/>
+        <source>Key as file</source>
         <translation>کنکشن کی ترتیبات والی فائل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="86"/>
-        <source>Open config file</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="84"/>
+        <source>Open key file</source>
         <translation>کنفیگ فائل کو کھولیں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="100"/>
         <source>QR-code</source>
         <translation>QR کوڈ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="122"/>
         <source>Key as text</source>
         <translation>متن کے طور پر کلید</translation>
     </message>
@@ -1925,59 +1910,40 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSetupWizardCredentials</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="53"/>
-        <source>Configure your server</source>
-        <translation>اپنے سرور کو ترتیب دیں</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="60"/>
         <source>Server IP address [:port]</source>
-        <translation>سرور آئی پی پتہ [:پورٹ]</translation>
+        <translation type="vanished">سرور آئی پی پتہ [:پورٹ]</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="115"/>
         <source>Continue</source>
-        <translation>براہ کرم جاری رکھیں</translation>
+        <translation type="vanished">براہ کرم جاری رکھیں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="143"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation>آپ جو ڈیٹا داخل کریں گے وہ بالکل خفیہ رہے گا اور نہ تو امنیزیا یا کسی تیسری شخصیت کے ساتھ اشتراک کیا جائے گا</translation>
+        <translation type="vanished">آپ جو ڈیٹا داخل کریں گے وہ بالکل خفیہ رہے گا اور نہ تو امنیزیا یا کسی تیسری شخصیت کے ساتھ اشتراک کیا جائے گا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="61"/>
-        <source>255.255.255.255:22</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="77"/>
         <source>SSH Username</source>
-        <translation>ایس ایس ایچ صارف نام</translation>
+        <translation type="vanished">ایس ایس ایچ صارف نام</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="93"/>
         <source>Password or SSH private key</source>
-        <translation>پاس ورڈ یا SSH نجی کلید</translation>
+        <translation type="vanished">پاس ورڈ یا SSH نجی کلید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="152"/>
         <source>Ip address cannot be empty</source>
-        <translation>آئی پی پتہ خالی نہیں ہو سکتا</translation>
+        <translation type="vanished">آئی پی پتہ خالی نہیں ہو سکتا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="155"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
-        <translation>ایڈریس درج کریں فارمیٹ 255.255.255.255:88</translation>
+        <translation type="vanished">ایڈریس درج کریں فارمیٹ 255.255.255.255:88</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="159"/>
         <source>Login cannot be empty</source>
-        <translation>لاگ ان نام خالی نہیں ہو سکتا</translation>
+        <translation type="vanished">لاگ ان نام خالی نہیں ہو سکتا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="163"/>
         <source>Password/private key cannot be empty</source>
-        <translation>پاس ورڈ یا نجی کلید خالی نہیں ہو سکتی</translation>
+        <translation type="vanished">پاس ورڈ یا نجی کلید خالی نہیں ہو سکتی</translation>
     </message>
 </context>
 <context>
@@ -2174,7 +2140,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="111"/>
-        <source>Show content</source>
+        <source>View debugging information</source>
         <translation>مواد دکھائیں</translation>
     </message>
     <message>
@@ -2183,12 +2149,7 @@ Already installed containers were found on the server. All installed containers 
         <translation>وائر گارڈ کی غلط شناخت کو بروئے کار لانے کے لئے وائر گارڈ غلط شناخت کو فعال کریں۔ آپ کے پرووائیڈر پر وائر گارڈ بند ہونے کی صورت میں یہ کار آمد ہو سکتی ہے۔</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="146"/>
-        <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
-        <translation>صرف ان ماخذ سے کنکشن کوڈ استعمال کریں جن پر آپ کو اعتماد ہو۔ عوامی ماخذوں سے کوڈز آپ کے ڈیٹا کو منسلک کرنے کے لیے بنائے گئے ہو سکتے ہیں.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="189"/>
         <source>Connect</source>
         <translation>کنکٹ</translation>
     </message>
@@ -2985,17 +2946,19 @@ Already installed containers were found on the server. All installed containers 
         <translation>فائلوں کو محفوظ طریقے سے اسٹور اور ٹرانسفر کرنے کے لیے اپنے سرور پر ایک فائل والٹ بنائیں.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="212"/>
         <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
-It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
-This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
+It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data.
+This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations.
 Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">REALITY پروٹوکول، جو ایکس رے کے تخلیق کاروں کی ایک نوعیتی پیشرفت ہے، انٹرنیٹ سینسرشپ کی بلند ترین سطحوں کو مقابلہ کرنے کے لئے مخصوص طریقہ کار بنایا گیا ہے۔
+یہ فرد معین کو TLS ہینڈشیک فیز کے دوران سینسرز کو شناخت کرتا ہے، اصل کلائنٹس کے طور پر پراکسی کے طور پر بغیر رکاوٹ چلنے کے دوران سینسرز کو اصل ویب سائٹوں جیسے google.com پر منتقل کرتا ہے، اس طرح ایک مستند TLS سرٹیفکیٹ اور ڈیٹا کو پیش کرتا ہے۔
+یہ بلند پذیرای کی صلاحیت کو مخصوص ترتیبات کی ضرورت کے بغیر ویب ٹریفک کو اصلی سائٹس سے آنے کی طرح بنانے کی بنیاد میں مختلف ہے۔
+پرانے پروٹوکولوں جیسے VMess، VLESS، اور XTLS-Vision ٹرانسپورٹ کے برعکس، REALITY کا TLS ہینڈشیک کے دوران نئی &quot;دوست یا دشمن&quot; شناخت TLS پر سکیورٹی کو بڑھاتا ہے اور توانائی کے ساتھ DPI سسٹمز کی پیشہ ورانہ چھان بین تکنیکوں کے ذریعے شناخت سے بچتا ہے۔
+یہ REALITY کو سخت سینسرشپ والے ماحولوں میں انٹرنیٹ کی آزادی کو برقرار رکھنے کے لئے ایک مضبوط حل بناتا ہے۔</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="223"/>
         <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
-One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
 
 * Available in the VPNNaruzhu only on Windows
@@ -3003,7 +2966,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">IKEv2، IPSec انکرپشن پرت کے ساتھ جوڑا، ایک جدید اور مستحکم VPN پروٹوکول کے طور پر کھڑا ہے۔ اس کی امتیازی خصوصیات میں سے ایک نیٹ ورکس اور ڈیوائسز کے درمیان تیزی سے سوئچ کرنے کی صلاحیت ہے، جو اسے متحرک نیٹ ورک کے ماحول میں خاص طور پر موافق بناتی ہے۔ اگرچہ یہ سیکیورٹی، استحکام اور رفتار کا امتزاج پیش کرتا ہے، لیکن یہ نوٹ کرنا ضروری ہے کہ IKEv2 کا آسانی سے پتہ لگایا جا سکتا ہے اور یہ بلاک کرنے کے لیے حساس ہے۔ * صرف ونڈوز پر VPNNaruzhu میں دستیاب ہے * کم بجلی کی کھپت، موبائل ڈیوائسز پر * کم سے کم کنفیگریشن * DPI تجزیہ سسٹمز کے ذریعے پہچانا جاتا ہے * UDP نیٹ ورک پروٹوکول، پورٹ 500 اور 4500 پر کام .کرتا ہے</translation>
     </message>
     <message>
         <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for protecting against blocking.
@@ -3039,17 +3002,6 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
 * Easily recognised by DPI analysis systems, susceptible to blocking
 * Works over UDP network protocol.</source>
         <translation>ایک نسبتاً نیا مقبول وی پی این پروٹوکول جس میں سادہ معماری ہے۔ وائر گارڈ تمام آلات پر مضبوط وی پی این کنکشن اور اعلی کارکردگی فراہم کرتا ہے۔ اس میں ہارڈ کوڈ کردہ انکرپشن سیٹنگز استعمال کی جاتی ہیں۔ وائر گارڈ کو اوپن وی پی این سے موازنہ کرنے پر لیٹنسی میں کمی اور بہتر ڈیٹا ٹرانسفر تھروپٹ حاصل ہوتی ہے۔ وائر گارڈ کا مخصوص پیکٹ سائنیچرز کی وجہ سے بلاک کرنا زیادہ آسان ہوتا ہے۔ کچھ دوسرے وی پی این پروٹوکول کے مخالف، جو اوبفسکیشن ٹیکنیکس کا استعمال کرتے ہیں، وائر گارڈ کے پیکٹس کے مسلسل سائنیچر پیٹرنز کو زیادہ آسانی سے پہچانا جا سکتا ہے اور اس طرح معقد ڈیپ پیکٹ انسپیکشن (DPI) سسٹمز اور دیگر نیٹ ورک مانیٹرنگ ٹولز کے ذریعے بلاک کیا جا سکتا ہے۔ * تمام پلیٹ فارمز پر دستیاب ہے * کم بجلی کی استعمال * کم سیٹنگز کی تعداد * ڈی پی آئی تجزیہ سسٹمز کے ذریعے آسانی سے پہچانا جاتا ہے، بلاک کرنے کے لئے زیادہ متاثر ہے * یو ڈی پی نیٹ ورک پروٹوکول پر کام کرتا ہے.</translation>
-    </message>
-    <message>
-        <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
-It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data.
-This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations.
-Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
-        <translation type="vanished">REALITY پروٹوکول، جو ایکس رے کے تخلیق کاروں کی ایک نوعیتی پیشرفت ہے، انٹرنیٹ سینسرشپ کی بلند ترین سطحوں کو مقابلہ کرنے کے لئے مخصوص طریقہ کار بنایا گیا ہے۔
-یہ فرد معین کو TLS ہینڈشیک فیز کے دوران سینسرز کو شناخت کرتا ہے، اصل کلائنٹس کے طور پر پراکسی کے طور پر بغیر رکاوٹ چلنے کے دوران سینسرز کو اصل ویب سائٹوں جیسے google.com پر منتقل کرتا ہے، اس طرح ایک مستند TLS سرٹیفکیٹ اور ڈیٹا کو پیش کرتا ہے۔
-یہ بلند پذیرای کی صلاحیت کو مخصوص ترتیبات کی ضرورت کے بغیر ویب ٹریفک کو اصلی سائٹس سے آنے کی طرح بنانے کی بنیاد میں مختلف ہے۔
-پرانے پروٹوکولوں جیسے VMess، VLESS، اور XTLS-Vision ٹرانسپورٹ کے برعکس، REALITY کا TLS ہینڈشیک کے دوران نئی &quot;دوست یا دشمن&quot; شناخت TLS پر سکیورٹی کو بڑھاتا ہے اور توانائی کے ساتھ DPI سسٹمز کی پیشہ ورانہ چھان بین تکنیکوں کے ذریعے شناخت سے بچتا ہے۔
-یہ REALITY کو سخت سینسرشپ والے ماحولوں میں انٹرنیٹ کی آزادی کو برقرار رکھنے کے لئے ایک مضبوط حل بناتا ہے۔</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="237"/>
@@ -3147,8 +3099,17 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation>ایک معاصر اشارہ جاتا ہے مقبول وی پی این پروٹوکول کا امنیزیہ ڈبلیو جی۔ امنیزیہ ڈبلیو جی وائر گارڈ کے بنیادی ڈھانچے پر مبنی ہے، جس نے اس کی آسانی سے معماری اور ایکسیلنٹ کارکردگی کی خصوصیات کو برقرار رکھا۔ جبکہ وائر گارڈ کو اس کی کارآمدی کے لئے جانا جاتا ہے، اس میں اپنے ممتاز پیکٹ سائنیچرز کی وجہ سے آسانی سے پہچان میں مسائل پیش آتے تھے۔ امنیزیہ ڈبلیو جی اس مسئلے کا حل پیش کرتا ہے بہتر اوبفسکیشن میتھڈس کے ذریعے، جس سے اس کی ٹریفک عام انٹرنیٹ ٹریفک کے ساتھ مل جل کر رہتی ہے۔ اس سے مطلب یہ ہے کہ امنیزیہ ڈبلیو جی نے اصل وائر گارڈ کی تیزی کارکردگی کو برقرار رکھا جبکہ اس میں ایک اضافی پردہ شامل کیا، جو اسے ایک تیز اور پرانے طریقہ سے وی پی این کنکشن کی درخواست کرنے والوں کے لئے ایک عمدہ چوئس بناتا ہے۔ * تمام پلیٹ فارمز پر دستیاب ہے * کم بجلی کی استعمال * کم سیٹنگز کی تعداد * ڈی پی آئی تجزیہ سسٹمز سے پہچانا نہیں جاتا، بند کرنے کے لئے مزید مضبوط ہے * یو ڈی پی نیٹ ورک پروٹوکول پر کام کرتا ہے۔</translation>
     </message>
     <message>
+        <location filename="../containers/containers_defs.cpp" line="212"/>
+        <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
+It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
+This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
+Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="223"/>
         <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
-One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
 
 * Available in the VPNNaruzhu only on Windows
@@ -3156,7 +3117,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="vanished">IKEv2، IPSec انکرپشن پرت کے ساتھ جوڑا، ایک جدید اور مستحکم VPN پروٹوکول کے طور پر کھڑا ہے۔ اس کی امتیازی خصوصیات میں سے ایک نیٹ ورکس اور ڈیوائسز کے درمیان تیزی سے سوئچ کرنے کی صلاحیت ہے، جو اسے متحرک نیٹ ورک کے ماحول میں خاص طور پر موافق بناتی ہے۔ اگرچہ یہ سیکیورٹی، استحکام اور رفتار کا امتزاج پیش کرتا ہے، لیکن یہ نوٹ کرنا ضروری ہے کہ IKEv2 کا آسانی سے پتہ لگایا جا سکتا ہے اور یہ بلاک کرنے کے لیے حساس ہے۔ * صرف ونڈوز پر VPNNaruzhu میں دستیاب ہے * کم بجلی کی کھپت، موبائل ڈیوائسز پر * کم سے کم کنفیگریشن * DPI تجزیہ سسٹمز کے ذریعے پہچانا جاتا ہے * UDP نیٹ ورک پروٹوکول، پورٹ 500 اور 4500 پر کام .کرتا ہے</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="235"/>

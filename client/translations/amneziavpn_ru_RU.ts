@@ -103,12 +103,7 @@
         <translation>Добавить новое соединение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="57"/>
-        <source>Configure your server</source>
-        <translation>Настроить свой сервер</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="74"/>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="58"/>
         <source>Open config file, key or QR code</source>
         <translation>Открыть файл конфигурации, ключ или QR код</translation>
     </message>
@@ -2008,37 +2003,27 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 Всё в порядке, если кодом поделился пользователь, которому вы доверяете.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
-        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation>Не используйте коды подключения из ненадежных источников, так как они могут быть созданы для перехвата ваших данных.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
         <source>What do you have?</source>
         <translation>Выберите что у вас есть</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings</source>
-        <translation>Файл с настройками подключения</translation>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="76"/>
+        <source>Key as file</source>
+        <translation>Ключ в виде файла</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings or backup</source>
-        <translation>Файл с настройками подключения или бэкап</translation>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="84"/>
+        <source>Open key file</source>
+        <translation>Открыть файл с ключём</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="86"/>
-        <source>Open config file</source>
-        <translation>Открыть файл с конфигурацией</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="100"/>
         <source>QR-code</source>
         <translation>QR-код</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="122"/>
         <source>Key as text</source>
         <translation>Ключ в виде текста</translation>
     </message>
@@ -2050,9 +2035,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="vanished">Подключение к серверу</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="60"/>
         <source>Server IP address [:port]</source>
-        <translation>Server IP address [:port]</translation>
+        <translation type="vanished">Server IP address [:port]</translation>
     </message>
     <message>
         <source>255.255.255.255:88</source>
@@ -2063,9 +2047,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="vanished">Password / SSH private key</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="115"/>
         <source>Continue</source>
-        <translation>Продолжить</translation>
+        <translation type="vanished">Продолжить</translation>
     </message>
     <message>
         <source>All data you enter will remain strictly confidential
@@ -2073,53 +2056,36 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Все данные, которые вы вводите, останутся строго конфиденциальными и не будут переданы или раскрыты Amnezia или каким-либо третьим лицам</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="155"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
-        <translation>Введите адрес в формате 255.255.255.255:88</translation>
+        <translation type="vanished">Введите адрес в формате 255.255.255.255:88</translation>
     </message>
     <message>
         <source>Login to connect via SSH</source>
         <translation type="vanished">Login to connect via SSH</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="53"/>
-        <source>Configure your server</source>
-        <translation>Настроить ваш сервер</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="61"/>
-        <source>255.255.255.255:22</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="77"/>
         <source>SSH Username</source>
-        <translation>SSH Имя пользователя</translation>
+        <translation type="vanished">SSH Имя пользователя</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="93"/>
         <source>Password or SSH private key</source>
-        <translation>Пароль или закрытый ключ SSH</translation>
+        <translation type="vanished">Пароль или закрытый ключ SSH</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="143"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation>Все данные, которые вы вводите, останутся строго конфиденциальными и не будут переданы или раскрыты Amnezia или каким-либо третьим лицам</translation>
+        <translation type="vanished">Все данные, которые вы вводите, останутся строго конфиденциальными и не будут переданы или раскрыты Amnezia или каким-либо третьим лицам</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="152"/>
         <source>Ip address cannot be empty</source>
-        <translation>Поле IP address не может быть пустым</translation>
+        <translation type="vanished">Поле IP address не может быть пустым</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="159"/>
         <source>Login cannot be empty</source>
-        <translation>Поле Login не может быть пустым</translation>
+        <translation type="vanished">Поле Login не может быть пустым</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="163"/>
         <source>Password/private key cannot be empty</source>
-        <translation>Поле Password/Private key не может быть пустым</translation>
+        <translation type="vanished">Поле Password/Private key не может быть пустым</translation>
     </message>
 </context>
 <context>
@@ -2336,8 +2302,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="111"/>
-        <source>Show content</source>
-        <translation>Показать содержимое ключа</translation>
+        <source>View debugging information</source>
+        <translation>Посмотреть отладочную информацию</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="125"/>
@@ -2345,12 +2311,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="146"/>
-        <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
-        <translation>Используйте файлы конфигурации только из тех источников, которым вы доверяете. Файлы из общедоступных источников могли быть созданы с целью перехвата ваших личных данных</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="189"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>

@@ -102,12 +102,7 @@
         <translation>添加新连接</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="57"/>
-        <source>Configure your server</source>
-        <translation>配置您的服务器</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="74"/>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="58"/>
         <source>Open config file, key or QR code</source>
         <translation>配置文件，授权码或二维码</translation>
     </message>
@@ -2076,37 +2071,27 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 请确保连接码来源可信。</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
-        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation>请勿使用来自不受信任来源的连接代码，因为它们可能是为了拦截您的数据而创建的。</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
         <source>What do you have?</source>
         <translation>你用什么方式创建连接？</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings or backup</source>
-        <translation>包含连接配置或备份的文件</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="76"/>
+        <source>Key as file</source>
         <translation>包含连接配置的文件</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="86"/>
-        <source>Open config file</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="84"/>
+        <source>Open key file</source>
         <translation>打开配置文件</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="100"/>
         <source>QR-code</source>
         <translation>二维码</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="122"/>
         <source>Key as text</source>
         <translation>授权码文本</translation>
     </message>
@@ -2118,14 +2103,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="vanished">连接服务器</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="53"/>
-        <source>Configure your server</source>
-        <translation>配置服务器</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="60"/>
         <source>Server IP address [:port]</source>
-        <translation>服务器IP [:端口]</translation>
+        <translation type="vanished">服务器IP [:端口]</translation>
     </message>
     <message>
         <source>Login to connect via SSH</source>
@@ -2136,14 +2115,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="vanished">密码 或 私钥</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="115"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation type="vanished">继续</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="143"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation>您输入的所有数据将严格保密，不会与 Amnezia 或任何第三方共享或披露</translation>
+        <translation type="vanished">您输入的所有数据将严格保密，不会与 Amnezia 或任何第三方共享或披露</translation>
     </message>
     <message>
         <source>All data you enter will remain strictly confidential
@@ -2152,39 +2129,28 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 不会向 Amnezia 或任何第三方分享或披露</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="61"/>
-        <source>255.255.255.255:22</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="77"/>
         <source>SSH Username</source>
-        <translation>SSH 用户名</translation>
+        <translation type="vanished">SSH 用户名</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="93"/>
         <source>Password or SSH private key</source>
-        <translation>密码或 SSH 私钥</translation>
+        <translation type="vanished">密码或 SSH 私钥</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="152"/>
         <source>Ip address cannot be empty</source>
-        <translation>IP不能为空</translation>
+        <translation type="vanished">IP不能为空</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="155"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
-        <translation>按照这种格式输入 255.255.255.255:88</translation>
+        <translation type="vanished">按照这种格式输入 255.255.255.255:88</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="159"/>
         <source>Login cannot be empty</source>
-        <translation>账号不能为空</translation>
+        <translation type="vanished">账号不能为空</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="163"/>
         <source>Password/private key cannot be empty</source>
-        <translation>密码或私钥不能为空</translation>
+        <translation type="vanished">密码或私钥不能为空</translation>
     </message>
 </context>
 <context>
@@ -2405,7 +2371,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="111"/>
-        <source>Show content</source>
+        <source>View debugging information</source>
         <translation>显示内容</translation>
     </message>
     <message>
@@ -2414,12 +2380,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="146"/>
-        <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
-        <translation>只使用您信任的来源提供的连接代码。公共来源的代码可能是为了拦截您的数据而创建的。</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="189"/>
         <source>Connect</source>
         <translation>连接</translation>
     </message>
@@ -3306,28 +3267,6 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="164"/>
-        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for protecting against blocking.
-
-OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client and the server.
-
-Cloak protects OpenVPN from detection and blocking. 
-
-Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
-
-Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
-
-If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
-
-* Available in the VPNNaruzhu across all platforms
-* High power consumption on mobile devices
-* Flexible settings
-* Not recognised by DPI analysis systems
-* Works over TCP network protocol, 443 port.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../containers/containers_defs.cpp" line="212"/>
         <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
 It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
@@ -3347,6 +3286,26 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
+While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
+
+* Available in the VPNNaruzhu only on Windows
+* Low power consumption, on mobile devices
+* Minimal configuration
+* Recognised by DPI analysis systems
+* Works over UDP network protocol, ports 500 and 4500.</source>
+        <translation type="obsolete">IKEv2 与 IPSec 加密层配合使用，是一种现代且稳定的 VPN 协议。
+其显着特征之一是能够在网络和设备之间快速切换，使其特别适应动态网络环境。
+虽然 IKEv2 兼具安全性、稳定性和速度，但必须注意的是，IKEv2 很容易被检测到，并且容易受到阻止。
+
+* 仅在 Windows 上的 VPNNaruzhu 中可用
+* 低功耗，在移动设备上
+* 最低配置
+* 获得DPI分析系统认可
+* 通过 UDP 网络协议、端口 500 和 4500 工作。</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="237"/>
@@ -3375,6 +3334,28 @@ For more detailed information, you can
         <location filename="../containers/containers_defs.cpp" line="131"/>
         <source>Create a file vault on your server to securely store and transfer files.</source>
         <translation>在您的服务器上创建一个文件保险库，用于安全存储和传输文件。</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="164"/>
+        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for protecting against blocking.
+
+OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client and the server.
+
+Cloak protects OpenVPN from detection and blocking. 
+
+Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
+
+Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
+
+If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
+
+* Available in the VPNNaruzhu across all platforms
+* High power consumption on mobile devices
+* Flexible settings
+* Not recognised by DPI analysis systems
+* Works over TCP network protocol, 443 port.
+</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="183"/>
@@ -3551,26 +3532,6 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 * 通过 UDP 网络协议工作。</translation>
     </message>
     <message>
-        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
-One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
-While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
-
-* Available in the VPNNaruzhu only on Windows
-* Low power consumption, on mobile devices
-* Minimal configuration
-* Recognised by DPI analysis systems
-* Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="vanished">IKEv2 与 IPSec 加密层配合使用，是一种现代且稳定的 VPN 协议。
-其显着特征之一是能够在网络和设备之间快速切换，使其特别适应动态网络环境。
-虽然 IKEv2 兼具安全性、稳定性和速度，但必须注意的是，IKEv2 很容易被检测到，并且容易受到阻止。
-
-* 仅在 Windows 上的 VPNNaruzhu 中可用
-* 低功耗，在移动设备上
-* 最低配置
-* 获得DPI分析系统认可
-* 通过 UDP 网络协议、端口 500 和 4500 工作。</translation>
-    </message>
-    <message>
         <source>OpenVPN container</source>
         <translation type="vanished">OpenVPN容器</translation>
     </message>
@@ -3732,10 +3693,6 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="163"/>
         <source>Show connection settings</source>
         <translation>显示连接配置</translation>
-    </message>
-    <message>
-        <source>Show content</source>
-        <translation type="obsolete">展示内容</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="352"/>

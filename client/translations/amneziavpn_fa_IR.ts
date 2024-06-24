@@ -104,12 +104,7 @@
         <translation>ایجاد ارتباط جدید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="57"/>
-        <source>Configure your server</source>
-        <translation>تنظیم سرور</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="74"/>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="58"/>
         <source>Open config file, key or QR code</source>
         <translation>بارگذاری فایل تنظیمات، کلید یا QR Code</translation>
     </message>
@@ -1948,37 +1943,27 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 ایرادی ندارد که از طرف کسی باشد که به او اعتماد دارید.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
-        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation>از کدهای اتصال از منابع نامعتبر استفاده نکنید، زیرا ممکن است برای رهگیری داده های شما ایجاد شده باشند.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
         <source>What do you have?</source>
         <translation>چی داری؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="76"/>
+        <source>Key as file</source>
         <translation>فایل شامل تنظیمات اتصال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings or backup</source>
-        <translation>فایل شامل تنظیمات اتصال یا بک‎آپ</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="86"/>
-        <source>Open config file</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="84"/>
+        <source>Open key file</source>
         <translation>باز کردن فایل تنظیمات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="100"/>
         <source>QR-code</source>
         <translation>QR-Code</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="122"/>
         <source>Key as text</source>
         <translation>متن شامل کلید</translation>
     </message>
@@ -1986,59 +1971,36 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 <context>
     <name>PageSetupWizardCredentials</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="60"/>
         <source>Server IP address [:port]</source>
-        <translation>آدرس آی‎پی سرور (:پورت)</translation>
+        <translation type="vanished">آدرس آی‎پی سرور (:پورت)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="115"/>
         <source>Continue</source>
-        <translation>ادامه</translation>
+        <translation type="vanished">ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="155"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
-        <translation>آدرس را با فرمت 255.255.255.255:88 وارد کنید</translation>
+        <translation type="vanished">آدرس را با فرمت 255.255.255.255:88 وارد کنید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="53"/>
-        <source>Configure your server</source>
-        <translation>سرور خود را پیکربندی کنید</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="61"/>
-        <source>255.255.255.255:22</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="77"/>
-        <source>SSH Username</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="93"/>
         <source>Password or SSH private key</source>
-        <translation>رمز عبور یا کلید خصوصی SSH</translation>
+        <translation type="vanished">رمز عبور یا کلید خصوصی SSH</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="143"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation>تمام داده‎هایی که شما وارد می‎کنید به شدت محرمانه‎ است و با Amnezia یا هر شخص ثالث دیگری به اشتراک گذاشته نمی‎شود</translation>
+        <translation type="vanished">تمام داده‎هایی که شما وارد می‎کنید به شدت محرمانه‎ است و با Amnezia یا هر شخص ثالث دیگری به اشتراک گذاشته نمی‎شود</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="152"/>
         <source>Ip address cannot be empty</source>
-        <translation>آدرس آی‎پی نمی‎تواند خالی باشد</translation>
+        <translation type="vanished">آدرس آی‎پی نمی‎تواند خالی باشد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="159"/>
         <source>Login cannot be empty</source>
-        <translation>نام‎کاربری نمی‎تواند خالی باشد</translation>
+        <translation type="vanished">نام‎کاربری نمی‎تواند خالی باشد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="163"/>
         <source>Password/private key cannot be empty</source>
-        <translation>پسورد یا کلید خصوصی نمی‎تواند خالی باشد</translation>
+        <translation type="vanished">پسورد یا کلید خصوصی نمی‎تواند خالی باشد</translation>
     </message>
 </context>
 <context>
@@ -2235,7 +2197,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="111"/>
-        <source>Show content</source>
+        <source>View debugging information</source>
         <translation>نمایش محتوا</translation>
     </message>
     <message>
@@ -2244,12 +2206,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="146"/>
-        <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
-        <translation>از کدهای اتصال فقط از منابع مورد اعتماد خود استفاده کنید. ممکن است کدهایی از منابع عمومی برای رهگیری داده های شما ایجاد شده باشند</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="189"/>
         <source>Connect</source>
         <translation>اتصال</translation>
     </message>
@@ -3068,6 +3025,26 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>ساختن یک گنجانده فایل بر روی سرور شما برای ذخیره و انتقال ایمن فایل‌ها.</translation>
     </message>
     <message>
+        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
+While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
+
+* Available in the VPNNaruzhu only on Windows
+* Low power consumption, on mobile devices
+* Minimal configuration
+* Recognised by DPI analysis systems
+* Works over UDP network protocol, ports 500 and 4500.</source>
+        <translation type="obsolete">پروتکل IKEv2 به همراه لایه رمزنگاری IPSec به عنوان پروتکل وی‎پی‎ان مدرن و پایدار است.
+یکی از قابلیت‎‎های متمایز این پروتکل قابلیت سوییچ بین شبکه‎ها و دستگاه‎هاست که قابلیت انطباق بالایی در محیط شبکه‎های دینامیک را دارد
+در حالیکه ترکیبی از امنیت، پایداری و سرعت را ارائه میدهد اما مهم است که اشاره کنیم IKEv2 به راحتی قابل تشخیص در شبکه و بلاک شدن میباشد.
+
+* در VPNNaruzhu فقط بر روی ویندوز در دسترس است
+* مصرف باتری کم روی دستگاه‎های موبایل
+* تنظیمات ساده
+* امکان شناسایی شدن در شبکه‎های تحلیل DPI
+* روی پروتکل شبکه UDP، پورت‎های 500 و 4500 کار می‎کند.</translation>
+    </message>
+    <message>
         <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for protecting against blocking.
 
 OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client and the server.
@@ -3127,8 +3104,17 @@ WireGuard به دلیل امضاهای بسته متمایز خود، بسیار
 * روی پروتکل شبکه UDP کار می کند.</translation>
     </message>
     <message>
+        <location filename="../containers/containers_defs.cpp" line="212"/>
+        <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
+It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
+This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
+Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="223"/>
         <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
-One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
 
 * Available in the VPNNaruzhu only on Windows
@@ -3136,15 +3122,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="vanished">پروتکل IKEv2 به همراه لایه رمزنگاری IPSec به عنوان پروتکل وی‎پی‎ان مدرن و پایدار است.
-یکی از قابلیت‎‎های متمایز این پروتکل قابلیت سوییچ بین شبکه‎ها و دستگاه‎هاست که قابلیت انطباق بالایی در محیط شبکه‎های دینامیک را دارد
-در حالیکه ترکیبی از امنیت، پایداری و سرعت را ارائه میدهد اما مهم است که اشاره کنیم IKEv2 به راحتی قابل تشخیص در شبکه و بلاک شدن میباشد.
-
-* در VPNNaruzhu فقط بر روی ویندوز در دسترس است
-* مصرف باتری کم روی دستگاه‎های موبایل
-* تنظیمات ساده
-* امکان شناسایی شدن در شبکه‎های تحلیل DPI
-* روی پروتکل شبکه UDP، پورت‎های 500 و 4500 کار می‎کند.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="235"/>
@@ -3279,27 +3257,6 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 * کمترین میزان تنظیمات
 * غیرقابل تشخیص توسط سیستم‎های تحلیل عمیق DPI و مقاوم به بلاک شدن
 * کار بر روی پروتکل شبکه UDP</translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="212"/>
-        <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
-It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
-This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
-Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="223"/>
-        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
-One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
-While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
-
-* Available in the VPNNaruzhu only on Windows
-* Low power consumption, on mobile devices
-* Minimal configuration
-* Recognised by DPI analysis systems
-* Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="237"/>

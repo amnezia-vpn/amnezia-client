@@ -57,7 +57,6 @@ PageType {
                 Layout.leftMargin: 16
 
                 headerText: qsTr("Server connection")
-                descriptionText: qsTr("Do not use connection codes from untrusted sources, as they may be created to intercept your data.")
             }
 
             Header2TextType {
@@ -74,16 +73,15 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
-                text: !ServersModel.getServersCount() ? qsTr("File with connection settings or backup") : qsTr("File with connection settings")
+                text: qsTr("Key as file")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
 
                 KeyNavigation.tab: qrButton.visible ? qrButton.rightButton : textButton.rightButton
 
                 clickedFunction: function() {
-                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
-                                                                       "Config files (*.vpn *.ovpn *.conf *.json)"
-                    var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
+                    var nameFilter = "Config files (*.vpn *.ovpn *.conf *.json)"
+                    var fileName = SystemController.getFileName(qsTr("Open key file"), nameFilter)
                     if (fileName !== "") {
                         if (ImportController.extractConfigFromFile(fileName)) {
                             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
