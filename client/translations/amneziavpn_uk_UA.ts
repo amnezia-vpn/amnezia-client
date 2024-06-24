@@ -2098,37 +2098,27 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 Все в порядку, якщо ви використовуєте код, яким поділився користувач, якому ви довіряєте.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
-        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation>Не використовуйте код підключення з загальнодоступних джерел. Можливо, його було створено для перехоплення ваших даних.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
         <source>What do you have?</source>
         <translation>Виберіть що у вас є</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings</source>
-        <translation>Файл з налаштуваннями підключення</translation>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="76"/>
+        <source>Key as file</source>
+        <translation>Ключ як файл</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings or backup</source>
-        <translation>Файл з налаштуваннями підключення або бекап</translation>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="84"/>
+        <source>Open key file</source>
+        <translation>Відкрити файл із ключем</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="86"/>
-        <source>Open config file</source>
-        <translation>Відкрити файл з конфігурацією</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="100"/>
         <source>QR-code</source>
         <translation>QR-код</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="122"/>
         <source>Key as text</source>
         <translation>Ключ у вигляді тексту</translation>
     </message>
@@ -2425,18 +2415,14 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Не використовуйте код підключення з загальнодоступних джерел. Він може бути створений для перехоплення ваших даних.</translation>
     </message>
     <message>
-        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation type="vanished">Не використовуйте код підключення з загальнодоступних джерел. Він може бути створений для перехоплення ваших даних.</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="111"/>
         <source>Collapse content</source>
         <translation>Згорнути</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="111"/>
-        <source>Show content</source>
-        <translation>Показати вміст ключа</translation>
+        <source>View debugging information</source>
+        <translation>Переглянути інформацію про налагодження</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="125"/>
@@ -2444,12 +2430,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="146"/>
-        <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="189"/>
         <source>Connect</source>
         <translation>Підключитись</translation>
     </message>
@@ -3308,7 +3289,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="vanished">IKEv2 разом з шифруванням IPSec -- це сучасний та стабільний протокол VPN.
+        <translation type="obsolete">IKEv2 разом з шифруванням IPSec -- це сучасний та стабільний протокол VPN.
 Він може швидко переключись між мережами та пристроями, що робить його осболиво адаптованим під динамічні мережеві середовища.
 Потрібно зазначити, що незважаючи на стабільність та швидкість, IKEv2 легко розпізнається та вразливий до блокувань.
 

@@ -1949,37 +1949,27 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 သင်ယုံကြည်ရတဲ့သူတစ်ယောက်ဆီမှ ရရှိတဲ့ကုဒ်ဖြစ်နေသရွေ့တော့ အဆင်ပြေပါသည်.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
-        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation>သင့်ဒေတာကို ကြားဖြတ်ရန် ဖန်တီးထားနိုင်သောကြောင့် မယုံကြည်ရသော ရင်းမြစ်များမှ ချိတ်ဆက်ကုဒ်များကို မသုံးပါနှင့်။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
         <source>What do you have?</source>
         <translation>သင့်တွင်ဘာရှိပါသလဲ?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="76"/>
+        <source>Key as file</source>
         <translation>ချိတ်ဆက်မှုဆက်တင်များပါဝင်သောဖိုင်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings or backup</source>
-        <translation>ချိတ်ဆက်မှုဆက်တင်များ သို့မဟုတ် အရန်သိမ်းဆည်းထားမှုပါဝင်သောဖိုင်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="86"/>
-        <source>Open config file</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="84"/>
+        <source>Open key file</source>
         <translation>config ဖိုင်ကိုဖွင့်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="100"/>
         <source>QR-code</source>
         <translation>QR-ကုဒ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="122"/>
         <source>Key as text</source>
         <translation>Key ကိုစာသားအဖြစ်</translation>
     </message>
@@ -2240,7 +2230,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="111"/>
-        <source>Show content</source>
+        <source>View debugging information</source>
         <translation>အကြောင်းအရာများကိုပြမည်</translation>
     </message>
     <message>
@@ -2249,12 +2239,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="146"/>
-        <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
-        <translation>သင်ယုံကြည်ရသော ရင်းမြစ်များမှသာ ချိတ်ဆက်ကုဒ်များကို အသုံးပြုပါ။ သင့်ဒေတာကို ကြားဖြတ်ရန် အများသူငှာ ရင်းမြစ်များမှ ကုဒ်များကို ဖန်တီးထားသည်။</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="189"/>
         <source>Connect</source>
         <translation>ချိတ်ဆက်မည်</translation>
     </message>
@@ -3073,6 +3058,26 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>ဖိုင်များကို လုံခြုံစွာသိမ်းဆည်းရန်နှင့် လွှဲပြောင်းရန်အတွက် သင့်ဆာဗာပေါ်တွင် fire vault တစ်ခု ဖန်တီးပါ.</translation>
     </message>
     <message>
+        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
+While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
+
+* Available in the VPNNaruzhu only on Windows
+* Low power consumption, on mobile devices
+* Minimal configuration
+* Recognised by DPI analysis systems
+* Works over UDP network protocol, ports 500 and 4500.</source>
+        <translation type="obsolete">IPSec ကုဒ်ဝှက်ခြင်းအလွှာနှင့်တွဲဆက်ထားသည့် IKEv2 သည် ခေတ်မီပြီး တည်ငြိမ်သော VPN ပရိုတိုကောဖြစ်သည်။
+၎င်း၏ထူးခြားသောအင်္ဂါရပ်များထဲမှတစ်ခုမှာ ကွန်ရက်များနှင့် စက်ပစ္စည်းများကြား လျင်မြန်စွာပြောင်းလဲနိုင်သည့်စွမ်းရည်ဖြစ်ပြီး ဤစွမ်းရည်ကပင် dynamic ဖြစ်သောကွန်ရက်ပတ်ဝန်းကျင်များတွင် လိုက်လျောညီထွေဖြစ်စေရန်အကူအညီပေးပါသည်။
+IKEv2 သည် လုံခြုံရေး၊ တည်ငြိမ်မှု၊ နှင့် အမြန်နှုန်းတို့ ပေးစွမ်းနိုင်သော်လည်း၊ အလွယ်တကူ ထောက်လှန်းသိရှိခံရနိုင်ပြီး ပိတ်ဆို့ခြင်း ခံရနိုင်သည်ကို သတိပြုရန် အရေးကြီးပါသည်။
+
+* Windows တွင်ရှိသော VPNNaruzhu တွင်သာရနိုင်သည်။
+* မိုဘိုင်းစက်ပစ္စည်းများတွင် ပါဝါသုံးစွဲမှုနည်းပါးခြင်း။
+* တပ်ဆင်ချိန်ညှိရန်သိပ်မလိုအပ်ခြင်း။
+* DPI ခွဲခြမ်းစိတ်ဖြာမှုစနစ်များမှထောက်လှန်းနိုင်ခြင်း။
+* UDP ကွန်ရက်ပရိုတိုကော၊ port 500 နှင့် 4500 ကျော်တွင် အလုပ်လုပ်သည်။.</translation>
+    </message>
+    <message>
         <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for protecting against blocking.
 
 OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client and the server.
@@ -3130,26 +3135,6 @@ WireGuard သည် ၎င်း၏ ကွဲပြားသော packet လက
 * ဆက်တင်အရေအတွက်နည်းပါခြင်း။
 * DPI ခွဲခြမ်းစိတ်ဖြာမှုစနစ်များက အလွယ်တကူ ထောက်လှန်းသိရှိခံရနိုင်ပြီး ပိတ်ဆို့ခြင်းခံရနိုင်သည်။
 * UDP ကွန်ရက်ပရိုတိုကောပေါ်တွင် အလုပ်လုပ်သည်။.</translation>
-    </message>
-    <message>
-        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
-One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
-While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
-
-* Available in the VPNNaruzhu only on Windows
-* Low power consumption, on mobile devices
-* Minimal configuration
-* Recognised by DPI analysis systems
-* Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="vanished">IPSec ကုဒ်ဝှက်ခြင်းအလွှာနှင့်တွဲဆက်ထားသည့် IKEv2 သည် ခေတ်မီပြီး တည်ငြိမ်သော VPN ပရိုတိုကောဖြစ်သည်။
-၎င်း၏ထူးခြားသောအင်္ဂါရပ်များထဲမှတစ်ခုမှာ ကွန်ရက်များနှင့် စက်ပစ္စည်းများကြား လျင်မြန်စွာပြောင်းလဲနိုင်သည့်စွမ်းရည်ဖြစ်ပြီး ဤစွမ်းရည်ကပင် dynamic ဖြစ်သောကွန်ရက်ပတ်ဝန်းကျင်များတွင် လိုက်လျောညီထွေဖြစ်စေရန်အကူအညီပေးပါသည်။
-IKEv2 သည် လုံခြုံရေး၊ တည်ငြိမ်မှု၊ နှင့် အမြန်နှုန်းတို့ ပေးစွမ်းနိုင်သော်လည်း၊ အလွယ်တကူ ထောက်လှန်းသိရှိခံရနိုင်ပြီး ပိတ်ဆို့ခြင်း ခံရနိုင်သည်ကို သတိပြုရန် အရေးကြီးပါသည်။
-
-* Windows တွင်ရှိသော VPNNaruzhu တွင်သာရနိုင်သည်။
-* မိုဘိုင်းစက်ပစ္စည်းများတွင် ပါဝါသုံးစွဲမှုနည်းပါးခြင်း။
-* တပ်ဆင်ချိန်ညှိရန်သိပ်မလိုအပ်ခြင်း။
-* DPI ခွဲခြမ်းစိတ်ဖြာမှုစနစ်များမှထောက်လှန်းနိုင်ခြင်း။
-* UDP ကွန်ရက်ပရိုတိုကော၊ port 500 နှင့် 4500 ကျော်တွင် အလုပ်လုပ်သည်။.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="235"/>

@@ -2076,37 +2076,27 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
 请确保连接码来源可信。</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
-        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation>请勿使用来自不受信任来源的连接代码，因为它们可能是为了拦截您的数据而创建的。</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
         <source>What do you have?</source>
         <translation>你用什么方式创建连接？</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings or backup</source>
-        <translation>包含连接配置或备份的文件</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="76"/>
+        <source>Key as file</source>
         <translation>包含连接配置的文件</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="86"/>
-        <source>Open config file</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="84"/>
+        <source>Open key file</source>
         <translation>打开配置文件</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="100"/>
         <source>QR-code</source>
         <translation>二维码</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="122"/>
         <source>Key as text</source>
         <translation>授权码文本</translation>
     </message>
@@ -2405,7 +2395,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="111"/>
-        <source>Show content</source>
+        <source>View debugging information</source>
         <translation>显示内容</translation>
     </message>
     <message>
@@ -2414,12 +2404,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="146"/>
-        <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
-        <translation>只使用您信任的来源提供的连接代码。公共来源的代码可能是为了拦截您的数据而创建的。</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="189"/>
         <source>Connect</source>
         <translation>连接</translation>
     </message>
@@ -3349,6 +3334,26 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
+While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
+
+* Available in the VPNNaruzhu only on Windows
+* Low power consumption, on mobile devices
+* Minimal configuration
+* Recognised by DPI analysis systems
+* Works over UDP network protocol, ports 500 and 4500.</source>
+        <translation type="obsolete">IKEv2 与 IPSec 加密层配合使用，是一种现代且稳定的 VPN 协议。
+其显着特征之一是能够在网络和设备之间快速切换，使其特别适应动态网络环境。
+虽然 IKEv2 兼具安全性、稳定性和速度，但必须注意的是，IKEv2 很容易被检测到，并且容易受到阻止。
+
+* 仅在 Windows 上的 VPNNaruzhu 中可用
+* 低功耗，在移动设备上
+* 最低配置
+* 获得DPI分析系统认可
+* 通过 UDP 网络协议、端口 500 和 4500 工作。</translation>
+    </message>
+    <message>
         <location filename="../containers/containers_defs.cpp" line="237"/>
         <source>After installation, Amnezia will create a
 
@@ -3551,26 +3556,6 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 * 通过 UDP 网络协议工作。</translation>
     </message>
     <message>
-        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
-One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
-While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
-
-* Available in the VPNNaruzhu only on Windows
-* Low power consumption, on mobile devices
-* Minimal configuration
-* Recognised by DPI analysis systems
-* Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="vanished">IKEv2 与 IPSec 加密层配合使用，是一种现代且稳定的 VPN 协议。
-其显着特征之一是能够在网络和设备之间快速切换，使其特别适应动态网络环境。
-虽然 IKEv2 兼具安全性、稳定性和速度，但必须注意的是，IKEv2 很容易被检测到，并且容易受到阻止。
-
-* 仅在 Windows 上的 VPNNaruzhu 中可用
-* 低功耗，在移动设备上
-* 最低配置
-* 获得DPI分析系统认可
-* 通过 UDP 网络协议、端口 500 和 4500 工作。</translation>
-    </message>
-    <message>
         <source>OpenVPN container</source>
         <translation type="vanished">OpenVPN容器</translation>
     </message>
@@ -3732,10 +3717,6 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="163"/>
         <source>Show connection settings</source>
         <translation>显示连接配置</translation>
-    </message>
-    <message>
-        <source>Show content</source>
-        <translation type="obsolete">展示内容</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="352"/>

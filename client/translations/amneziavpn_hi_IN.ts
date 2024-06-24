@@ -1885,37 +1885,27 @@ Already installed containers were found on the server. All installed containers 
         <translation>सर्वर कनेक्शन</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="60"/>
-        <source>Do not use connection codes from untrusted sources, as they may be created to intercept your data.</source>
-        <translation>अविश्वसनीय स्रोतों से कनेक्शन कोड का उपयोग न करें, क्योंकि वे आपके डेटा को बाधित करने के लिए बनाए जा सकते हैं.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="68"/>
         <source>What do you have?</source>
         <translation>तुम्हारे पास क्या है?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings or backup</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="76"/>
+        <source>Key as file</source>
         <translation>कनेक्शन सेटिंग्स वाली फ़ाइल</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
-        <source>File with connection settings</source>
-        <translation>कनेक्शन सेटिंग्स वाली फ़ाइल</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="86"/>
-        <source>Open config file</source>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="84"/>
+        <source>Open key file</source>
         <translation>कॉन्फ़िग फ़ाइल खोलें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="102"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="100"/>
         <source>QR-code</source>
         <translation>क्यू आर संहिता</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="122"/>
         <source>Key as text</source>
         <translation>पाठ के रूप में कुंजी</translation>
     </message>
@@ -2172,7 +2162,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="111"/>
-        <source>Show content</source>
+        <source>View debugging information</source>
         <translation>सामग्री दिखाओ</translation>
     </message>
     <message>
@@ -2181,12 +2171,7 @@ Already installed containers were found on the server. All installed containers 
         <translation>वायरगार्ड अस्पष्टीकरण सक्षम करें. यदि आपके प्रदाता पर वायरगार्ड अवरुद्ध है तो यह उपयोगी हो सकता है.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="146"/>
-        <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
-        <translation>केवल उन स्रोतों से कनेक्शन कोड का उपयोग करें जिन पर आपको भरोसा है। हो सकता है कि आपके डेटा को इंटरसेप्ट करने के लिए सार्वजनिक स्रोतों से कोड बनाए गए हों.</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="198"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="189"/>
         <source>Connect</source>
         <translation>कनेक्ट</translation>
     </message>
@@ -3042,17 +3027,18 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
 * यूडीपी नेटवर्क प्रोटोकॉल पर काम करता है।.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="212"/>
         <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
-It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
-This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
+It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data.
+This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations.
 Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">रियलिटी प्रोटोकॉल, एक्सरे के रचनाकारों द्वारा एक अग्रणी विकास, विशेष रूप से चोरी के अपने नए दृष्टिकोण के माध्यम से इंटरनेट सेंसरशिप के उच्चतम स्तर का प्रतिकार करने के लिए डिज़ाइन किया गया है।
+यह टीएलएस हैंडशेक चरण के दौरान सेंसर की विशिष्ट रूप से पहचान करता है, सेंसर को google.com जैसी वास्तविक वेबसाइटों की ओर मोड़ते हुए वैध ग्राहकों के लिए प्रॉक्सी के रूप में निर्बाध रूप से काम करता है, इस प्रकार एक प्रामाणिक टीएलएस प्रमाणपत्र और डेटा प्रस्तुत करता है।
+यह उन्नत क्षमता विशिष्ट कॉन्फ़िगरेशन की आवश्यकता के बिना यादृच्छिक, वैध साइटों से आने वाले वेब ट्रैफ़िक को छिपाने की क्षमता के कारण REALITY को समान तकनीकों से अलग करती है।
+VMess, VLESS और XTLS-Vision ट्रांसपोर्ट जैसे पुराने प्रोटोकॉल के विपरीत, TLS हैंडशेक पर REALITY की अभिनव &quot;दोस्त या दुश्मन&quot; पहचान सुरक्षा को बढ़ाती है और सक्रिय जांच तकनीकों को नियोजित करने वाले परिष्कृत DPI सिस्टम द्वारा पहचान को रोकती है। यह REALITY को कठोर सेंसरशिप वाले वातावरण में इंटरनेट की स्वतंत्रता बनाए रखने के लिए एक मजबूत समाधान बनाता है.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="223"/>
         <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
-One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
 
 * Available in the VPNNaruzhu only on Windows
@@ -3060,7 +3046,15 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">IKEv2, IPSec एन्क्रिप्शन परत के साथ मिलकर, एक आधुनिक और स्थिर वीपीएन प्रोटोकॉल के रूप में खड़ा है।
+इसकी विशिष्ट विशेषताओं में से एक नेटवर्क और उपकरणों के बीच तेजी से स्विच करने की क्षमता है, जो इसे गतिशील नेटवर्क वातावरण में विशेष रूप से अनुकूली बनाती है।
+हालाँकि यह सुरक्षा, स्थिरता और गति का मिश्रण प्रदान करता है, यह ध्यान रखना आवश्यक है कि IKEv2 को आसानी से पहचाना जा सकता है और अवरुद्ध होने की संभावना है।
+
+* केवल विंडोज़ पर VPNNaruzhu में उपलब्ध है
+* मोबाइल उपकरणों पर कम बिजली की खपत
+* न्यूनतम विन्यास
+* डीपीआई विश्लेषण प्रणालियों द्वारा मान्यता प्राप्त
+* यूडीपी नेटवर्क प्रोटोकॉल, पोर्ट 500 और 4500 पर काम करता है.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="237"/>
@@ -3187,18 +3181,17 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 * यूडीपी नेटवर्क प्रोटोकॉल पर काम करता है।.</translation>
     </message>
     <message>
+        <location filename="../containers/containers_defs.cpp" line="212"/>
         <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
-It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data.
-This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations.
+It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
+This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
 Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
-        <translation type="vanished">रियलिटी प्रोटोकॉल, एक्सरे के रचनाकारों द्वारा एक अग्रणी विकास, विशेष रूप से चोरी के अपने नए दृष्टिकोण के माध्यम से इंटरनेट सेंसरशिप के उच्चतम स्तर का प्रतिकार करने के लिए डिज़ाइन किया गया है।
-यह टीएलएस हैंडशेक चरण के दौरान सेंसर की विशिष्ट रूप से पहचान करता है, सेंसर को google.com जैसी वास्तविक वेबसाइटों की ओर मोड़ते हुए वैध ग्राहकों के लिए प्रॉक्सी के रूप में निर्बाध रूप से काम करता है, इस प्रकार एक प्रामाणिक टीएलएस प्रमाणपत्र और डेटा प्रस्तुत करता है।
-यह उन्नत क्षमता विशिष्ट कॉन्फ़िगरेशन की आवश्यकता के बिना यादृच्छिक, वैध साइटों से आने वाले वेब ट्रैफ़िक को छिपाने की क्षमता के कारण REALITY को समान तकनीकों से अलग करती है।
-VMess, VLESS और XTLS-Vision ट्रांसपोर्ट जैसे पुराने प्रोटोकॉल के विपरीत, TLS हैंडशेक पर REALITY की अभिनव &quot;दोस्त या दुश्मन&quot; पहचान सुरक्षा को बढ़ाती है और सक्रिय जांच तकनीकों को नियोजित करने वाले परिष्कृत DPI सिस्टम द्वारा पहचान को रोकती है। यह REALITY को कठोर सेंसरशिप वाले वातावरण में इंटरनेट की स्वतंत्रता बनाए रखने के लिए एक मजबूत समाधान बनाता है.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../containers/containers_defs.cpp" line="223"/>
         <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
-One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments.
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
 
 * Available in the VPNNaruzhu only on Windows
@@ -3206,15 +3199,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation type="vanished">IKEv2, IPSec एन्क्रिप्शन परत के साथ मिलकर, एक आधुनिक और स्थिर वीपीएन प्रोटोकॉल के रूप में खड़ा है।
-इसकी विशिष्ट विशेषताओं में से एक नेटवर्क और उपकरणों के बीच तेजी से स्विच करने की क्षमता है, जो इसे गतिशील नेटवर्क वातावरण में विशेष रूप से अनुकूली बनाती है।
-हालाँकि यह सुरक्षा, स्थिरता और गति का मिश्रण प्रदान करता है, यह ध्यान रखना आवश्यक है कि IKEv2 को आसानी से पहचाना जा सकता है और अवरुद्ध होने की संभावना है।
-
-* केवल विंडोज़ पर VPNNaruzhu में उपलब्ध है
-* मोबाइल उपकरणों पर कम बिजली की खपत
-* न्यूनतम विन्यास
-* डीपीआई विश्लेषण प्रणालियों द्वारा मान्यता प्राप्त
-* यूडीपी नेटवर्क प्रोटोकॉल, पोर्ट 500 और 4500 पर काम करता है.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="235"/>
