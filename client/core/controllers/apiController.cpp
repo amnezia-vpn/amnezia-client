@@ -30,6 +30,8 @@ namespace
 
         constexpr char countryCode[] = "country_code";
         constexpr char serviceType[] = "service_type";
+
+        constexpr char encryptPublicKey[] = "encrypt_public_key";
     }
 
     ErrorCode checkErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply)
@@ -39,7 +41,8 @@ namespace
             return ErrorCode::ApiConfigSslError;
         } else if (reply->error() == QNetworkReply::NoError) {
             return ErrorCode::NoError;
-        } else if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
+        } else if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
+                   || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
             return ErrorCode::ApiConfigTimeoutError;
         } else {
             QString err = reply->errorString();
@@ -223,9 +226,7 @@ ErrorCode ApiController::getServicesList(QByteArray &responseBody)
     QObject::connect(reply.get(), &QNetworkReply::finished, &wait, &QEventLoop::quit);
 
     QList<QSslError> sslErrors;
-    connect(reply.get(), &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) {
-        sslErrors = errors;
-    });
+    connect(reply.get(), &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
     wait.exec();
 
     responseBody = reply->readAll();
@@ -255,22 +256,58 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
     apiPayload[configKey::serviceType] = serviceType;
     apiPayload[configKey::uuid] = installationUuid;
 
+    QByteArray localPublicKey;
+    QByteArray localPrivateKey;
+
+    try {
+        QSimpleCrypto::QRsa rsa;
+        EVP_PKEY *key = rsa.generateRsaKeys(2048, 3);
+        localPublicKey = rsa.savePublicKeyToByteArray(key);
+        localPrivateKey = rsa.savePrivateKeyToByteArray(key, "123456", EVP_aes_256_cbc());
+        EVP_PKEY_free(key);
+    } catch (const std::runtime_error &e) {
+        qCritical() << "error when encrypting the request body" << e.what();
+    } catch (...) {
+        qCritical() << "error when encrypting the request body";
+    }
+
+    apiPayload[configKey::encryptPublicKey] = QString(localPublicKey.toBase64());
+
     QByteArray requestBody = QJsonDocument(apiPayload).toJson();
-    QSimpleCrypto::QRsa rsa;
-    EVP_PKEY* publicKey = rsa.getPublicKeyFromFile("testkeys.pub");
-    QByteArray encryptedRequestBody = rsa.encrypt(requestBody, publicKey, RSA_PKCS1_PADDING);
+
+    QByteArray encryptedRequestBody;
+    try {
+        QSimpleCrypto::QRsa rsa;
+        EVP_PKEY *publicKey = rsa.getPublicKeyFromFile("testkeys.pem");
+        encryptedRequestBody = rsa.encrypt(requestBody, publicKey, RSA_PKCS1_PADDING);
+        EVP_PKEY_free(publicKey);
+    } catch (const std::runtime_error &e) {
+        qCritical() << "error when encrypting the request body" << e.what();
+    } catch (...) {
+        qCritical() << "error when encrypting the request body";
+    }
 
     QScopedPointer<QNetworkReply> reply;
-    reply.reset(manager.post(request, requestBody));
+    reply.reset(manager.post(request, encryptedRequestBody));
 
     QEventLoop wait;
     connect(reply.get(), &QNetworkReply::finished, &wait, &QEventLoop::quit);
 
     QList<QSslError> sslErrors;
-    connect(reply.get(), &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) {
-        sslErrors = errors;
-    });
+    connect(reply.get(), &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
     wait.exec();
+
+    auto encryptedResponseBody = reply->readAll();
+    try {
+        QSimpleCrypto::QRsa rsa;
+        EVP_PKEY *privateKey = rsa.getPrivateKeyFromByteArray(localPrivateKey, "123456");
+        responseBody = rsa.decrypt(encryptedResponseBody, privateKey, RSA_PKCS1_PADDING);
+        EVP_PKEY_free(privateKey);
+    } catch (const std::runtime_error &e) {
+        qCritical() << "error when decrypting the request body" << e.what();
+    } catch (...) {
+        qCritical() << "error when decrypting the request body";
+    }
 
     responseBody = reply->readAll();
 

@@ -11,6 +11,7 @@ namespace
     namespace configKey
     {
         constexpr char countryCode[] = "country_code";
+        constexpr char servicesDescription[] = "services_description";
         constexpr char services[] = "services";
         constexpr char serviceInfo[] = "service_info";
         constexpr char serviceType[] = "service_type";
@@ -60,6 +61,7 @@ void ApiServicesModel::updateModel(const QJsonObject &data)
     beginResetModel();
 
     m_countryCode = data.value(configKey::countryCode).toString();
+    m_servicesDescription = data.value(configKey::servicesDescription).toString();
     m_services = data.value(configKey::services).toArray();
 
     endResetModel();
@@ -91,6 +93,11 @@ QString ApiServicesModel::getSelectedServiceProtocol()
 QString ApiServicesModel::getCountryCode()
 {
     return m_countryCode;
+}
+
+QString ApiServicesModel::getServicesDescription()
+{
+    return m_servicesDescription;
 }
 
 QHash<int, QByteArray> ApiServicesModel::roleNames() const

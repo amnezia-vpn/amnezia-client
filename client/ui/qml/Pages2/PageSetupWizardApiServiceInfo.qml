@@ -21,7 +21,7 @@ PageType {
         id: fl
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        contentHeight: content.height + continueButton.implicitHeight + continueButton.anchors.bottomMargin
 
         ColumnLayout {
             id: content
@@ -53,27 +53,120 @@ PageType {
                 descriptionText: serviceInfo["description"]
             }
 
-            BasicButtonType {
-                id: continueButton
-
+            LabelWithImageType {
                 Layout.fillWidth: true
-                Layout.topMargin: 8
+                Layout.margins: 16
+
+                imageSource: "qrc:/images/controls/map-pin.svg"
+                leftText: qsTr("For the region")
+                rightText: "russia"
+            }
+
+            LabelWithImageType {
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                imageSource: "qrc:/images/controls/tag.svg"
+                leftText: qsTr("Price")
+                rightText: serviceInfo["price"]
+            }
+
+            LabelWithImageType {
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                imageSource: "qrc:/images/controls/history.svg"
+                leftText: qsTr("Work period")
+                rightText: serviceInfo["timelimit"]
+            }
+
+            LabelWithImageType {
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                imageSource: "qrc:/images/controls/gauge.svg"
+                leftText: qsTr("Speed")
+                rightText: serviceInfo["speed"]
+            }
+
+            LabelWithImageType {
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                imageSource: "qrc:/images/controls/info.svg"
+                leftText: qsTr("Features")
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                text: qsTr("Connect")
+                text: serviceInfo["features"]
+            }
 
-                clickedFunc: function() {
-                    PageController.showBusyIndicator(true)
-                    if (InstallController.installServiceFromApi()) {
-                        PageController.goToStartPage()
-                        if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
-                            PageController.replaceStartPage()
-                        }
-                    }
-                    PageController.showBusyIndicator(false)
+            Header2TextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.bottomMargin: 8
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                text: qsTr("How to connect")
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 24
+
+                text: serviceInfo["how_to_install"]
+            }
+
+            Header2TextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.bottomMargin: 8
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                text: qsTr("How to use")
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 24
+
+                text: serviceInfo["how_to_use"]
+            }
+        }
+    }
+
+    BasicButtonType {
+        id: continueButton
+
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+
+        anchors.rightMargin: 16
+        anchors.leftMargin: 16
+        anchors.bottomMargin: 48
+
+        text: qsTr("Connect")
+
+        clickedFunc: function() {
+            PageController.showBusyIndicator(true)
+            if (InstallController.installServiceFromApi()) {
+                PageController.goToStartPage()
+                if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
+                    PageController.replaceStartPage()
                 }
             }
+            PageController.showBusyIndicator(false)
         }
     }
 }

@@ -4,25 +4,17 @@ import QtQuick.Layouts
 
 import "TextTypes"
 
-RadioButton {
+Button {
     id: root
 
     property string headerText
     property string bodyText
     property string footerText
 
-    property string hoveredColor: Qt.rgba(1, 1, 1, 0.05)
-    property string defaultColor: Qt.rgba(1, 1, 1, 0)
-    property string disabledColor: Qt.rgba(1, 1, 1, 0)
-    property string pressedColor: Qt.rgba(1, 1, 1, 0.05)
-    property string selectedColor: Qt.rgba(1, 1, 1, 0)
+    property string hoveredColor: "#2C2D30"
+    property string defaultColor: "#1C1D21"
 
     property string textColor: "#0E0E11"
-
-    property string pressedBorderColor: Qt.rgba(251/255, 178/255, 106/255, 0.3)
-    property string selectedBorderColor: "#FBB26A"
-    property string defaultBodredColor: "transparent"
-    property int borderWidth: 0
 
     property string rightImageSource
     property string rightImageColor: "#d7d8db"
@@ -31,49 +23,14 @@ RadioButton {
 
     hoverEnabled: true
 
-    indicator: Rectangle {
+    background: Rectangle {
+        id: backgroundRect
         anchors.fill: parent
         radius: 16
 
-        color: {
-            if (root.enabled) {
-                if (root.hovered) {
-                    return hoveredColor
-                } else if (root.checked) {
-                    return selectedColor
-                }
-                return defaultColor
-            } else {
-                return disabledColor
-            }
-        }
-
-        border.color: {
-            if (root.enabled) {
-                if (root.pressed) {
-                    return pressedBorderColor
-                } else if (root.checked) {
-                    return selectedBorderColor
-                }
-            }
-            return defaultBodredColor
-        }
-
-        border.width: {
-            if (root.enabled) {
-                if(root.checked) {
-                    return 1
-                }
-                return root.pressed ? 1 : 0
-            } else {
-                return 0
-            }
-        }
+        color: defaultColor
 
         Behavior on color {
-            PropertyAnimation { duration: 200 }
-        }
-        Behavior on border.color {
             PropertyAnimation { duration: 200 }
         }
     }
@@ -162,37 +119,41 @@ RadioButton {
                 }
             }
         }
+    }
 
-        MouseArea {
-            anchors.fill: parent
+    MouseArea {
+        anchors.fill: parent
 
-            cursorShape: Qt.PointingHandCursor
-            hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        hoverEnabled: true
 
-            onEntered: {
-                if (rightImageSource) {
-                    rightImageBackground.color = rightImage.hoveredColor
-                }
-                root.textOpacity = 0.8
+        onEntered: {
+            backgroundRect.color = root.hoveredColor
+
+            if (rightImageSource) {
+                rightImageBackground.color = rightImage.hoveredColor
             }
+            root.textOpacity = 0.8
+        }
 
-            onExited: {
-                if (rightImageSource) {
-                    rightImageBackground.color = rightImage.defaultColor
-                }
-                root.textOpacity = 1
-            }
+        onExited: {
+            backgroundRect.color = root.defaultColor
 
-            onPressedChanged: {
-                if (rightImageSource) {
-                    rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
-                }
-                root.textOpacity = 0.7
+            if (rightImageSource) {
+                rightImageBackground.color = rightImage.defaultColor
             }
+            root.textOpacity = 1
+        }
 
-            onClicked: {
-                root.clicked()
+        onPressedChanged: {
+            if (rightImageSource) {
+                rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
             }
+            root.textOpacity = 0.7
+        }
+
+        onClicked: {
+            root.clicked()
         }
     }
 }

@@ -46,9 +46,10 @@ PageType {
                 Layout.topMargin: 8
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.bottomMargin: 32
 
                 headerText: qsTr("VPN from Amnezia")
-                descriptionText: qsTr("description")
+                descriptionText: ApiServicesModel.getServicesDescription()
             }
 
             ListView {

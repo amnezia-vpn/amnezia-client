@@ -28,6 +28,7 @@ public slots:
     QString getSelectedServiceType();
     QString getSelectedServiceProtocol();
     QString getCountryCode();
+    QString getServicesDescription();
 signals:
 
 protected:
@@ -35,6 +36,7 @@ protected:
 
 private:
     QString m_countryCode;
+    QString m_servicesDescription;
     QJsonArray m_services;
 
     int m_selectedServiceIndex;

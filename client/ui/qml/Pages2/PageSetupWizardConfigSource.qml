@@ -114,6 +114,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.bottomMargin: 16
 
                 headerText: qsTr("Get a VPN from Amnezia")
                 bodyText: qsTr("Free VPN to bypass blocking and censorship in China, Russia, Iran and more.")
@@ -122,10 +123,11 @@ PageType {
 
                 onClicked: {
                     PageController.showBusyIndicator(true)
-                    if (InstallController.fillAvailableServices()) {
+                    var result = InstallController.fillAvailableServices()
+                    PageController.showBusyIndicator(false)
+                    if (result) {
                         PageController.goToPage(PageEnum.PageSetupWizardApiServicesList)
                     }
-                    PageController.showBusyIndicator(false)
                 }
             }
 

@@ -247,5 +247,11 @@
         <file>ui/qml/Pages2/PageSetupWizardApiServicesList.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml</file>
         <file>ui/qml/Controls2/CardWithIconsType.qml</file>
+        <file>images/controls/tag.svg</file>
+        <file>images/controls/history.svg</file>
+        <file>images/controls/gauge.svg</file>
+        <file>images/controls/map-pin.svg</file>
+        <file>ui/qml/Controls2/LabelWithImageType.qml</file>
+        <file>images/controls/info.svg</file>
     </qresource>
 </RCC>
