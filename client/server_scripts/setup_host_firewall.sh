@@ -1,15 +1,11 @@
 sudo sysctl -w net.ipv4.ip_forward=1;\
 sudo iptables -C INPUT -p icmp --icmp-type echo-request -j DROP || sudo iptables -A INPUT -p icmp --icmp-type echo-request -j DROP;\
-\
-# sudo iptables -P FORWARD ACCEPT
 sudo iptables -C FORWARD -j DOCKER-USER || sudo iptables -A FORWARD -j DOCKER-USER;\
 sudo iptables -C FORWARD -j DOCKER-ISOLATION-STAGE-1 || sudo iptables -A FORWARD -j DOCKER-ISOLATION-STAGE-1;\
 sudo iptables -C FORWARD -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT || sudo iptables -A FORWARD -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT;\
 sudo iptables -C FORWARD -o docker0 -j DOCKER || sudo iptables -A FORWARD -o docker0 -j DOCKER;\
 sudo iptables -C FORWARD -i docker0 ! -o docker0 -j ACCEPT || sudo iptables -A FORWARD -i docker0 ! -o docker0 -j ACCEPT;\
 sudo iptables -C FORWARD -i docker0 -o docker0 -j ACCEPT || sudo iptables -A FORWARD -i docker0 -o docker0 -j ACCEPT;\
-\
-# Tuning network
 sudo sysctl fs.file-max=51200;\
 sudo sysctl net.core.rmem_max=67108864;\
 sudo sysctl net.core.wmem_max=67108864;\
