@@ -77,7 +77,7 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
 
              { Proto::TorWebSite, "Website in Tor network" },
              { Proto::Dns, "DNS Service" },
-             { Proto::Sftp, QObject::tr("Sftp service") },
+             { Proto::Sftp, QObject::tr("SFTP service") },
              { Proto::Socks5Proxy, QObject::tr("SOCKS5 proxy server") } };
 }
 

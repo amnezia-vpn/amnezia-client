@@ -106,7 +106,7 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     if (e)
         return e;
 
-    QString runner = QString("sudo docker exec -i $CONTAINER_NAME sh %1 ").arg(fileName);
+    QString runner = QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, (container == DockerContainer::Socks5Proxy ? "sh" : "bash"));
     e = runScript(credentials, replaceVars(runner, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
 
     QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);

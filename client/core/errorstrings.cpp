@@ -9,7 +9,7 @@ QString errorString(ErrorCode code) {
 
     // General error codes
     case(ErrorCode::NoError): errorMessage = QObject::tr("No error"); break;
-    case(ErrorCode::UnknownError): errorMessage = QObject::tr("Unknown Error"); break;
+    case(ErrorCode::UnknownError): errorMessage = QObject::tr("Unknown error"); break;
     case(ErrorCode::NotImplementedError): errorMessage = QObject::tr("Function not implemented"); break;
     case(ErrorCode::AmneziaServiceNotRunning): errorMessage = QObject::tr("Background service is not running"); break;
 
@@ -23,15 +23,15 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::ServerPacketManagerError): errorMessage = QObject::tr("Server error: Packet manager error"); break;
 
     // Libssh errors
-    case(ErrorCode::SshRequestDeniedError): errorMessage = QObject::tr("Ssh request was denied"); break;
-    case(ErrorCode::SshInterruptedError): errorMessage = QObject::tr("Ssh request was interrupted"); break;
-    case(ErrorCode::SshInternalError): errorMessage = QObject::tr("Ssh internal error"); break;
+    case(ErrorCode::SshRequestDeniedError): errorMessage = QObject::tr("SSH request was denied"); break;
+    case(ErrorCode::SshInterruptedError): errorMessage = QObject::tr("SSH request was interrupted"); break;
+    case(ErrorCode::SshInternalError): errorMessage = QObject::tr("SSH internal error"); break;
     case(ErrorCode::SshPrivateKeyError): errorMessage = QObject::tr("Invalid private key or invalid passphrase entered"); break;
     case(ErrorCode::SshPrivateKeyFormatError): errorMessage = QObject::tr("The selected private key format is not supported, use openssh ED25519 key types or PEM key types"); break;
     case(ErrorCode::SshTimeoutError): errorMessage = QObject::tr("Timeout connecting to server"); break;
 
     // Ssh scp errors
-    case(ErrorCode::SshScpFailureError): errorMessage = QObject::tr("Scp error: Generic failure"); break;
+    case(ErrorCode::SshScpFailureError): errorMessage = QObject::tr("SCP error: Generic failure"); break;
 
     // Local errors
     case (ErrorCode::OpenVpnConfigMissing): errorMessage = QObject::tr("OpenVPN config missing"); break;
@@ -39,7 +39,7 @@ QString errorString(ErrorCode code) {
 
     // Distro errors
     case (ErrorCode::OpenVpnExecutableMissing): errorMessage = QObject::tr("OpenVPN executable missing"); break;
-    case (ErrorCode::ShadowSocksExecutableMissing): errorMessage = QObject::tr("ShadowSocks (ss-local) executable missing"); break;
+    case (ErrorCode::ShadowSocksExecutableMissing): errorMessage = QObject::tr("Shadowsocks (ss-local) executable missing"); break;
     case (ErrorCode::CloakExecutableMissing): errorMessage = QObject::tr("Cloak (ck-client) executable missing"); break;
     case (ErrorCode::AmneziaServiceConnectionFailed): errorMessage = QObject::tr("Amnezia helper service error"); break;
     case (ErrorCode::OpenSslFailed): errorMessage = QObject::tr("OpenSSL failed"); break;

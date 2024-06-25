@@ -69,6 +69,12 @@ android {
             }
             signingConfig = signingConfigs["release"]
         }
+
+        create("fdroid") {
+            initWith(getByName("release"))
+            signingConfig = null
+            matchingFallbacks += "release"
+        }
     }
 
     splits {

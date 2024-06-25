@@ -147,50 +147,6 @@ PageType {
                     PageController.goToPage(PageEnum.PageSetupWizardCredentials)
                 }
             }
-
-//            LabelWithButtonType {
-//                id: fileButton
-//                Layout.fillWidth: true
-//                Layout.topMargin: 16
-
-//                descriptionText: "What do you have?"
-
-//                text: !ServersModel.getServersCount() ? qsTr("File with connection settings or backup") : qsTr("File with connection settings")
-//                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-//                leftImageSource: "qrc:/images/controls/folder-open.svg"
-
-//                KeyNavigation.tab: qrButton.visible ? qrButton.rightButton : textButton.rightButton
-
-//                clickedFunction: function() {
-//                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
-//                                                                       "Config files (*.vpn *.ovpn *.conf *.json)"
-//                    var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
-//                    if (fileName !== "") {
-//                        if (ImportController.extractConfigFromFile(fileName)) {
-//                            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
-//                        }
-//                    }
-//                }
-//            }
-
-//            LabelWithButtonType {
-//                id: qrButton
-//                Layout.fillWidth: true
-//                visible: SettingsController.isCameraPresent()
-
-//                text: qsTr("QR-code")
-//                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-//                leftImageSource: "qrc:/images/controls/qr-code.svg"
-
-//                KeyNavigation.tab: textButton.rightButton
-
-//                clickedFunction: function() {
-//                    ImportController.startDecodingQr()
-//                    if (Qt.platform.os === "ios") {
-//                        PageController.goToPage(PageEnum.PageSetupWizardQrReader)
-//                    }
-//                }
-//            }
         }
     }
 }
