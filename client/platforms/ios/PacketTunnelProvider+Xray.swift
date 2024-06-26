@@ -83,6 +83,7 @@ extension PacketTunnelProvider {
     func stopXray(completionHandler: () -> Void) {
         Socks5Tunnel.quit()
         LibXrayStopXray()
+        completionHandler()
     }
 
     private func setupAndStartXray(configData: Data,

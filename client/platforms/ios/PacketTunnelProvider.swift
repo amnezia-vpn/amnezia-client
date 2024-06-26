@@ -132,7 +132,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             stopOpenVPN(with: reason,
                         completionHandler: completionHandler)
         case .xray:
-                    stopXray(completionHandler: completionHandler)
+            stopXray(completionHandler: completionHandler)
         }
     }
   
