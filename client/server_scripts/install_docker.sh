@@ -14,11 +14,14 @@ if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs;\
   if [ "$check_moby" != "0" ]; then echo "Docker is not supported"; docker; exit 1;\
   else sudo $pm $silent_inst $docker_pkg;\
     if ! command -v docker > /dev/null 2>&1; then docker; exit 1;\
-    elif [ "$check_podman" != "0" ]; then sleep 5; sudo systemctl enable --now podman.socket; sleep 5;\
+    elif [ "$check_podman" != "0" ]; then \
+      sleep 5; sudo systemctl enable --now podman.socket; sleep 5;\
+      sudo touch /etc/containers/nodocker;\
+      sudo sed -i 's/short-name-mode = "enforcing"/short-name-mode = "permissive"/g' /etc/containers/registries.conf;\
     else sleep 5; sudo systemctl enable --now docker; sleep 5; fi;\
   fi;\
 fi;\
-if [ "$(systemctl is-active docker)" != "active" ]; then \
+if [ "$(systemctl is-active podman.socket)" != "active" ]; then \
   sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
   sleep 5; sudo systemctl start docker; sleep 5;\
 fi;\
