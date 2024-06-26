@@ -8,9 +8,15 @@ if [ "$dist" = "debian" ]; then export DEBIAN_FRONTEND=noninteractive; fi;\
 if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst sudo; fi;\
 if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc; fi;\
 if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof; fi;\
-if ! command -v docker > /dev/null 2>&1; then \
-  sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
-  sleep 5; sudo systemctl enable --now docker; sleep 5;\
+if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs;\
+  check_podman=$(sudo $pm --assumeno install --setopt=tsflags=test $docker_pkg 2>&1 | grep -c podman-docker);\
+  check_moby=$(sudo $pm --assumeno install --setopt=tsflags=test $docker_pkg 2>&1 | grep -c moby-engine);\
+  if [ "$check_moby" != "0" ]; then echo "Docker is not supported"; docker; exit 1;\
+  else sudo $pm $silent_inst $docker_pkg;\
+    if ! command -v docker > /dev/null 2>&1; then docker; exit 1;\
+    elif [ "$check_podman" != "0" ]; then sleep 5; sudo systemctl enable --now podman.socket; sleep 5;\
+    else sleep 5; sudo systemctl enable --now docker; sleep 5; fi;\
+  fi;\
 fi;\
 if [ "$(systemctl is-active docker)" != "active" ]; then \
   sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
