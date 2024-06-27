@@ -52,3 +52,6 @@ foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
         ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/android/${abi}/libssh.so
     )
 endforeach()
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/xray/android/libxray.aar
+        DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/android/xray/libXray)

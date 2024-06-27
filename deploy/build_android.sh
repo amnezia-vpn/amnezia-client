@@ -22,6 +22,7 @@ Options:
  -b, --build-platform <platform>  The SDK platform used for building the Java code of the application
                                   By default, the latest available platform is used
  -m, --move                       Move the build result to the root of the build directory
+ -f, --fdroid                     Build for F-Droid
  -h, --help                       Display this help
 
 EOT
@@ -29,7 +30,7 @@ EOT
 
 BUILD_TYPE="release"
 
-opts=$(getopt -l debug,aab,apk:,build-platform:,move,help -o "dua:b:mh" -- "$@")
+opts=$(getopt -l debug,aab,apk:,build-platform:,move,fdroid,help -o "dua:b:mfh" -- "$@")
 eval set -- "$opts"
 while true; do
   case "$1" in
@@ -38,6 +39,7 @@ while true; do
     -a | --apk) ABIS=$2; shift 2;;
     -b | --build-platform) ANDROID_BUILD_PLATFORM=$2; shift 2;;
     -m | --move) MOVE_RESULT=1; shift;;
+    -f | --fdroid) FDROID=1; shift;;
     -h | --help) usage; exit 0;;
     --) shift; break;;
   esac
@@ -143,6 +145,10 @@ $QT_HOST_PATH/bin/androiddeployqt \
 # run gradle
 gradle_opts=()
 
+if [ -v FDROID ]; then
+  BUILD_TYPE="fdroid"
+fi
+
 if [ -v AAB ]; then
   gradle_opts+=(bundle"${BUILD_TYPE^}")
 fi
@@ -167,10 +173,15 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
       ABIS="x86;x86_64;armeabi-v7a;arm64-v8a"
     fi
 
+    suffix=$BUILD_TYPE
+    if [ -v FDROID ]; then
+      suffix+="-unsigned"
+    fi
+
     IFS=';' read -r -a abi_array <<< "$ABIS"
     for ABI in "${abi_array[@]}"
     do
-      mv -u $OUT_APP_DIR/android-build/build/outputs/apk/$BUILD_TYPE/AmneziaVPN-$ABI-$BUILD_TYPE.apk \
+      mv -u $OUT_APP_DIR/android-build/build/outputs/apk/$BUILD_TYPE/AmneziaVPN-$ABI-$suffix.apk \
        $PROJECT_DIR/deploy/build/
     done
   fi

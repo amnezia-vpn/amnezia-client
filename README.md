@@ -9,7 +9,7 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 ## Features
 
 - Very easy to use - enter your IP address, SSH login, and password, and Amnezia will automatically install VPN docker containers to your server and connect to the VPN.
-- OpenVPN, ShadowSocks, WireGuard, and IKEv2 protocols support.
+- OpenVPN, Shadowsocks, WireGuard, and IKEv2 protocols support.
 - Masking VPN with OpenVPN over Cloak plugin
 - Split tunneling support - add any sites to the client to enable VPN only for them (only for desktops)
 - Windows, MacOS, Linux, Android, iOS releases.
@@ -27,7 +27,7 @@ AmneziaVPN uses several open-source projects to work:
 
 - [OpenSSL](https://www.openssl.org/)
 - [OpenVPN](https://openvpn.net/)
-- [ShadowSocks](https://shadowsocks.org/)
+- [Shadowsocks](https://shadowsocks.org/)
 - [Qt](https://www.qt.io/)
 - [LibSsh](https://libssh.org) - forked from Qt Creator
 - and more...

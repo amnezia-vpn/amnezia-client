@@ -1,12 +1,9 @@
 package org.amnezia.vpn.protocol.wireguard
 
-import android.content.Context
 import android.net.VpnService.Builder
 import java.util.TreeMap
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.amnezia.awg.GoBackend
 import org.amnezia.vpn.protocol.Protocol
-import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.Statistics
@@ -78,9 +75,8 @@ open class Wireguard : Protocol() {
             }
         }
 
-    override fun initialize(context: Context, state: MutableStateFlow<ProtocolState>, onError: (String) -> Unit) {
-        super.initialize(context, state, onError)
-        loadSharedLibrary(context, "wg-go")
+    override fun internalInit() {
+        if (!isInitialized) loadSharedLibrary(context, "wg-go")
     }
 
     override fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {

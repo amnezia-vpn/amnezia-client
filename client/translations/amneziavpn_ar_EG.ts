@@ -39,7 +39,7 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="115"/>
-        <source>Settings updated successfully, Reconnnection...</source>
+        <source>Settings updated successfully, reconnnection...</source>
         <translation>تم تحديث الاعدادات بنجاح, جاري إعادة الاتصال...</translation>
     </message>
     <message>
@@ -700,8 +700,8 @@ Already installed containers were found on the server. All installed containers 
     <name>PageProtocolShadowSocksSettings</name>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="80"/>
-        <source>ShadowSocks settings</source>
-        <translation>ShadowSocks  إعدادات</translation>
+        <source>Shadowsocks settings</source>
+        <translation>Shadowsocks  إعدادات</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="89"/>
@@ -1041,8 +1041,8 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="115"/>
-        <source>Github</source>
-        <translation></translation>
+        <source>GitHub</source>
+        <translation>GitHub</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="119"/>
@@ -1317,7 +1317,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <name>PageSettingsDns</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="39"/>
-        <source>Default server does not support custom dns</source>
+        <source>Default server does not support custom DNS</source>
         <translation>الخادم الافتراضي لا يدعم DNS مخصص</translation>
     </message>
     <message>
@@ -1390,7 +1390,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="64"/>
-        <source>Enabling this function will save application&apos;s logs automatically, By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
+        <source>Enabling this function will save application&apos;s logs automatically. By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
         <translation>سيتم حفظ سجلات البرنامج بشكل تلقائي عند تفعيل هذه الميزة, بشكل افتراضي, هذه الميزة مٌعطلة. قم بتفعيل هذه الميزة في حالة هناك خلل في التطبيق.</translation>
     </message>
     <message>
@@ -1797,7 +1797,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="89"/>
-        <source>QR-code</source>
+        <source>QR code</source>
         <translation>رمز QR</translation>
     </message>
     <message>
@@ -2089,8 +2089,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="79"/>
-        <source>Save ShadowSocks config</source>
-        <translation>احفظ تكوين ShadowSocks</translation>
+        <source>Save Shadowsocks config</source>
+        <translation>احفظ تكوين Shadowsocks</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="86"/>
@@ -2119,8 +2119,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="131"/>
-        <source>ShadowSocks native format</source>
-        <translation>تنسيق ShadowSocks الاصلي</translation>
+        <source>Shadowsocks native format</source>
+        <translation>تنسيق Shadowsocks الاصلي</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="136"/>
@@ -2571,8 +2571,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <name>QObject</name>
     <message>
         <location filename="../protocols/protocols_defs.cpp" line="77"/>
-        <source>Sftp service</source>
-        <translation>خدمة Sftp</translation>
+        <source>SFTP service</source>
+        <translation>خدمة SFTP</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="11"/>
@@ -2581,7 +2581,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="12"/>
-        <source>Unknown Error</source>
+        <source>Unknown error</source>
         <translation>خطأ غير معروف</translation>
     </message>
     <message>
@@ -2621,18 +2621,18 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="24"/>
-        <source>Ssh request was denied</source>
-        <translation>طلب Ssh محظو</translation>
+        <source>SSH request was denied</source>
+        <translation>طلب SSH محظو</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="25"/>
-        <source>Ssh request was interrupted</source>
-        <translation>إنقطع طلب Ssh</translation>
+        <source>SSH request was interrupted</source>
+        <translation>إنقطع طلب SSH</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
-        <source>Ssh internal error</source>
-        <translation>مشكلة داخلية Ssh</translation>
+        <source>SSH internal error</source>
+        <translation>مشكلة داخلية SSH</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="27"/>
@@ -2720,7 +2720,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="32"/>
-        <source>Scp error: Generic failure</source>
+        <source>SCP error: Generic failure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2735,8 +2735,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="40"/>
-        <source>ShadowSocks (ss-local) executable missing</source>
-        <translation>ShadowSocks (ss-local) executable مفقود</translation>
+        <source>Shadowsocks (ss-local) executable missing</source>
+        <translation>Shadowsocks (ss-local) executable مفقود</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="41"/>
@@ -2821,13 +2821,13 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="91"/>
-        <source>Amnezia DNS</source>
-        <translation></translation>
+        <source>AmneziaDNS</source>
+        <translation>AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="92"/>
-        <source>Sftp file sharing service</source>
-        <translation>ملف Sftp: خدمة المشاركة</translation>
+        <source>SFTP file sharing service</source>
+        <translation>ملف SFTP: خدمة المشاركة</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="98"/>
@@ -2836,8 +2836,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="101"/>
-        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
-        <translation>بروتوكول ShadowSocks- يتنكر في حركة مرور VPN, يبدو ك حركة مرور الويب العادية
+        <source>Shadowsocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
+        <translation>بروتوكول Shadowsocks- يتنكر في حركة مرور VPN, يبدو ك حركة مرور الويب العادية
 ولكن قد يتم التعرف عليه من خلال أنظمة التحليل في بعض المناطق شديدة الرقابة.</translation>
     </message>
     <message>
@@ -2944,8 +2944,8 @@ For more detailed information, you can
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="115"/>
-        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
-        <translation>بروتوكول IKEv2 - بروتوكول مستقر حديث, اسرع بقليل من الباقي, يسترجع الاتصال بعد خسارة الاشارة.</translation>
+        <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
+        <translation>بروتوكول IKEv2/IPsec - بروتوكول مستقر حديث, اسرع بقليل من الباقي, يسترجع الاتصال بعد خسارة الاشارة.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="118"/>
@@ -2981,16 +2981,12 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
         <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
 
 * Available in the AmneziaVPN only on desktop platforms
-* Normal power consumption on mobile devices
-
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
         <translation>Shadowsocks, مستوحي من بروتوكول SOCKS5, يحمي الاتصال بأستعمال شفرة AEAD. كذلك Shadowsocks صٌمم كي يكون متحفظاً ويصعب تحديدة, إنه ليس مطابقًا لاتصال HTTPS القياسي. عمتاُ. بعض انظمة تحليل حركات المرور قد تتعرف علي اتصال Shadowsocks. بسبب الدعم المحدود في Amnezia, يٌنصح بأستخدام بروتوكول AmneziaWG.
 
 * مٌتاح في AmneziaVPN عبر جميع المنصات
-* استهلاك طاقة عادي علي اجهزة المحمول
-
 * بروتوكول تشفير قابل للتكوين
 * قابل للكشف بواسطة بعض انظمة DPI
 * يعمل عبر بروتوكول شبكة TCP.</translation>

@@ -27,13 +27,20 @@ private const val SPLIT_TUNNEL_EXCLUDE = 2
 abstract class Protocol {
 
     abstract val statistics: Statistics
+    protected lateinit var context: Context
     protected lateinit var state: MutableStateFlow<ProtocolState>
     protected lateinit var onError: (String) -> Unit
+    protected var isInitialized: Boolean = false
 
-    open fun initialize(context: Context, state: MutableStateFlow<ProtocolState>, onError: (String) -> Unit) {
+    fun initialize(context: Context, state: MutableStateFlow<ProtocolState>, onError: (String) -> Unit) {
+        this.context = context
         this.state = state
         this.onError = onError
+        internalInit()
+        isInitialized = true
     }
+
+    protected abstract fun internalInit()
 
     abstract fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean)
 
