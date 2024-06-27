@@ -58,7 +58,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 
 #ifdef AMNEZIA_DESKTOP
     QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
-    
+
     if (IpcClient::Interface()) {
         if (state == Vpn::ConnectionState::Connected) {
             IpcClient::Interface()->resetIpStack();
@@ -178,6 +178,25 @@ void VpnConnection::addRoutes(const QStringList &ips)
 #endif
 }
 
+void VpnConnection::addRoute(const QString& ip)
+{
+    emit newRoute(ip);
+}
+
+void VpnConnection::waitForVpnConnectionFinished(int msecs)
+{
+    m_vpnProtocol->waitForDisconected(msecs);
+}
+
+void VpnConnection::addNewDns(const QString& dnsAddr)
+{
+    if (  m_vpnConfiguration.value(config_key::dns1).toString() != dnsAddr
+       && m_vpnConfiguration.value(config_key::dns2).toString() != dnsAddr)
+    {
+        emit restartConnectionWithDns(dnsAddr);
+    }
+}
+
 void VpnConnection::deleteRoutes(const QStringList &ips)
 {
 #ifdef AMNEZIA_DESKTOP
@@ -256,6 +275,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
         emit connectionStateChanged(Vpn::ConnectionState::Error);
         return;
     }
+
     m_vpnProtocol->prepare();
 #elif defined Q_OS_ANDROID
     androidVpnProtocol = createDefaultAndroidVpnProtocol();
@@ -282,6 +302,8 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), SIGNAL(connectionStateChanged(Vpn::ConnectionState)), this,
             SLOT(onConnectionStateChanged(Vpn::ConnectionState)));
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
+    connect(m_vpnProtocol.get(), &VpnProtocol::newRoute, this, &VpnConnection::addRoute);
+    connect(m_vpnProtocol.get(), &VpnProtocol::newDns, this, &VpnConnection::addNewDns);
 }
 
 void VpnConnection::appendKillSwitchConfig()

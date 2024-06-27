@@ -35,7 +35,7 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="78"/>
+        <location filename="../ui/controllers/connectionController.h" line="79"/>
         <location filename="../ui/controllers/connectionController.cpp" line="95"/>
         <location filename="../ui/controllers/connectionController.cpp" line="110"/>
         <location filename="../ui/controllers/connectionController.cpp" line="116"/>
@@ -43,7 +43,7 @@
         <translation>कनेक्ट</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="210"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="215"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>पीएन प्रोटोकॉल स्थापित नहीं है.
@@ -55,12 +55,12 @@
         <translation>जुड़ा हुआ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="205"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="210"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation>चयनित प्रोटोकॉल वर्तमान प्लेटफ़ॉर्म पर समर्थित नहीं है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="229"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="234"/>
         <source>unable to create configuration</source>
         <translation>कॉन्फ़िगरेशन बनाने में असमर्थ</translation>
     </message>
@@ -3409,7 +3409,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="375"/>
+        <location filename="../vpnconnection.cpp" line="397"/>
         <source>Mbps</source>
         <translation></translation>
     </message>

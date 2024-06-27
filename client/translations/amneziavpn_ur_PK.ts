@@ -35,7 +35,7 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="78"/>
+        <location filename="../ui/controllers/connectionController.h" line="79"/>
         <location filename="../ui/controllers/connectionController.cpp" line="95"/>
         <location filename="../ui/controllers/connectionController.cpp" line="110"/>
         <location filename="../ui/controllers/connectionController.cpp" line="116"/>
@@ -43,18 +43,18 @@
         <translation>جوڑنا</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="205"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="210"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation>منتخب کردہ پروٹوکول موجودہ پلیٹ فارم پر تعاون یافتہ نہیں ہے</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="210"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="215"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>وی پی این پروٹوکول انسٹال نہیں ہے,براہ کرم پہلےوی پی این کنٹینر انسٹال کریں</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="229"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="234"/>
         <source>unable to create configuration</source>
         <translation>تشکیل تیار کرنے میں ناکام</translation>
     </message>
@@ -3347,7 +3347,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="375"/>
+        <location filename="../vpnconnection.cpp" line="397"/>
         <source>Mbps</source>
         <translation>ایم بی پی ایس</translation>
     </message>
