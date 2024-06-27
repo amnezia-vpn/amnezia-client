@@ -102,6 +102,24 @@ Window  {
         }
     }
 
+    Connections {
+        target: InstallController
+
+        function onInstallServerFromApiFinished() {
+            if (!ConnectionController.isConnected) {
+                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                ServersModel.processedIndex = ServersModel.defaultIndex
+            }
+
+            PageController.goToStartPage()
+            if (rootStackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
+                PageController.replaceStartPage()
+            }
+
+            PageController.showNotificationMessage()
+        }
+    }
+
     Item {
         anchors.right: parent.right
         anchors.left: parent.left

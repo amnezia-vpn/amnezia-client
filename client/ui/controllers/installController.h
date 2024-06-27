@@ -58,6 +58,7 @@ public slots:
 signals:
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
     void installServerFinished(const QString &finishMessage);
+    void installServerFromApiFinished();
 
     void updateContainerFinished(const QString &message);
 

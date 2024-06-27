@@ -823,11 +823,12 @@ bool InstallController::fillAvailableServices()
 void InstallController::installServiceFromApi()
 {
     ApiController apiController;
-    QByteArray responseBody;
+    QJsonObject serverConfig;
     ErrorCode errorCode = apiController.getConfigForService(m_settings->getInstallationUuid(true), m_apiServicesModel->getCountryCode(),
-                                                    m_apiServicesModel->getSelectedServiceType(),
-                                                    m_apiServicesModel->getSelectedServiceProtocol(), responseBody);
-    qDebug() << responseBody;
+                                                            m_apiServicesModel->getSelectedServiceType(),
+                                                            m_apiServicesModel->getSelectedServiceProtocol(), serverConfig);
+    m_serversModel->addServer(serverConfig);
+    emit installServerFromApiFinished();
 }
 
 bool InstallController::isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig,

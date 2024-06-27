@@ -21,7 +21,7 @@ public slots:
 
     ErrorCode getServicesList(QByteArray &responseBody);
     ErrorCode getConfigForService(const QString &installationUuid, const QString &countryCode, const QString &serviceType,
-                                  const QString &protocol, QByteArray &responseBody);
+                                  const QString &protocol, QJsonObject &serverConfig);
 
 signals:
     void errorOccurred(ErrorCode errorCode);
@@ -38,7 +38,8 @@ private:
 
     ApiPayloadData generateApiPayloadData(const QString &protocol);
     QJsonObject fillApiPayload(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData);
-    void processApiConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, QString &config);
+    void fillServerConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, const QByteArray &apiResponseBody,
+                          QJsonObject &serverConfig);
 };
 
 #endif // APICONTROLLER_H
