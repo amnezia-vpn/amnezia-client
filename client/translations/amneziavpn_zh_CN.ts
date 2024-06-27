@@ -35,7 +35,7 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="78"/>
+        <location filename="../ui/controllers/connectionController.h" line="79"/>
         <location filename="../ui/controllers/connectionController.cpp" line="95"/>
         <location filename="../ui/controllers/connectionController.cpp" line="110"/>
         <location filename="../ui/controllers/connectionController.cpp" line="116"/>
@@ -43,7 +43,7 @@
         <translation>连接</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="210"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="215"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>请先安装VPN协议</translation>
@@ -84,12 +84,12 @@
         <translation>配置更新成功</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="205"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="210"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation type="unfinished">当前平台不支持所选协议</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="229"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="234"/>
         <source>unable to create configuration</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3787,7 +3787,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="375"/>
+        <location filename="../vpnconnection.cpp" line="464"/>
         <source>Mbps</source>
         <translation></translation>
     </message>

@@ -42,6 +42,7 @@ QVariant SitesModel::data(const QModelIndex &index, int role) const
 
 bool SitesModel::addSite(const QString &hostname, const QString &ip)
 {
+    qDebug() << "site_model.cpp: addSite: routeMode: " << m_currentRouteMode << ", hostname: " << hostname << ", ip: " << ip << "\n";
     if (!m_settings->addVpnSite(m_currentRouteMode, hostname, ip)) {
         return false;
     }

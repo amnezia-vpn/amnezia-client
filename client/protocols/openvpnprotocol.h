@@ -25,6 +25,8 @@ public:
     static QString defaultConfigFileName();
     static QString defaultConfigPath();
 
+    void waitForDisconected(int msecs) override;
+
 protected slots:
     void onReadyReadDataFromManagementServer();
 

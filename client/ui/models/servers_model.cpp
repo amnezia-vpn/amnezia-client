@@ -504,6 +504,15 @@ bool ServersModel::isAmneziaDnsContainerInstalled(const int serverIndex) const
     return false;
 }
 
+void ServersModel::setNewDns(QString dnsAddr)
+{
+    qDebug() << "New DNS: " << dnsAddr << "\n";
+    const QJsonObject &server = m_servers.at(m_processedServerIndex).toObject();
+    const auto containers = server.value(config_key::containers).toArray();
+
+    server[config_key::dns1] = dnsAddr;
+}
+
 QPair<QString, QString> ServersModel::getDnsPair(int serverIndex)
 {
     QPair<QString, QString> dns;

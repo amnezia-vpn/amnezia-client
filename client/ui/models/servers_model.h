@@ -56,6 +56,8 @@ public:
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
 
 public slots:
+    void setNewDns(QString dnsAddr);
+
     void setDefaultServerIndex(const int index);
     const int getDefaultServerIndex();
     const QString getDefaultServerName();
