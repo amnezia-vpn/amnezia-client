@@ -9,6 +9,18 @@
 #include "containers/containers_defs.h"
 #include "logger.h"
 
+namespace {
+
+// true if invalid address or ip matches either of localhost/multicast/broadcast
+bool isIpAddressReserved(const QString &ipStr)
+{
+  QHostAddress ip(ipStr);
+
+  return ip.isLoopback() || ip.isMulticast() || ip.isBroadcast();
+}
+
+}
+
 const char Settings::cloudFlareNs1[] = "1.1.1.1";
 const char Settings::cloudFlareNs2[] = "1.0.0.1";
 
@@ -272,6 +284,11 @@ bool Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip
     if (sites.contains(site) && ip.isEmpty())
         return false;
 
+    if (isIpAddressReserved(site))
+    {
+        return false;
+    }
+
     sites.insert(site, ip);
     setVpnSites(mode, sites);
     return true;
@@ -283,6 +300,11 @@ void Settings::addVpnSites(RouteMode mode, const QMap<QString, QString> &sites)
     for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
         const QString &site = i.key();
         const QString &ip = i.value();
+
+        if (isIpAddressReserved(site))
+        {
+            continue;
+        }
 
         if (allSites.contains(site) && allSites.value(site) == ip)
             continue;
