@@ -105,7 +105,7 @@ Window  {
     Connections {
         target: InstallController
 
-        function onInstallServerFromApiFinished() {
+        function onInstallServerFromApiFinished(message) {
             if (!ConnectionController.isConnected) {
                 ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
                 ServersModel.processedIndex = ServersModel.defaultIndex
@@ -116,7 +116,7 @@ Window  {
                 PageController.replaceStartPage()
             }
 
-            PageController.showNotificationMessage()
+            PageController.showNotificationMessage(message)
         }
     }
 

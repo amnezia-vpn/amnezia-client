@@ -90,6 +90,12 @@ QString ApiServicesModel::getSelectedServiceProtocol()
     return service.value(configKey::serviceProtocol).toString();
 }
 
+QString ApiServicesModel::getSelectedServiceName()
+{
+    auto modelIndex = index(m_selectedServiceIndex, 0);
+    return data(modelIndex, ApiServicesModel::Roles::NameRole).toString();
+}
+
 QString ApiServicesModel::getCountryCode()
 {
     return m_countryCode;

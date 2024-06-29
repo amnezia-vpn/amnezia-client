@@ -53,12 +53,12 @@ public slots:
     void addEmptyServer();
 
     bool fillAvailableServices();
-    void installServiceFromApi();
+    bool installServiceFromApi();
 
 signals:
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
     void installServerFinished(const QString &finishMessage);
-    void installServerFromApiFinished();
+    void installServerFromApiFinished(const QString &message);
 
     void updateContainerFinished(const QString &message);
 

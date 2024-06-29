@@ -820,15 +820,20 @@ bool InstallController::fillAvailableServices()
     return true;
 }
 
-void InstallController::installServiceFromApi()
+bool InstallController::installServiceFromApi()
 {
     ApiController apiController;
     QJsonObject serverConfig;
     ErrorCode errorCode = apiController.getConfigForService(m_settings->getInstallationUuid(true), m_apiServicesModel->getCountryCode(),
                                                             m_apiServicesModel->getSelectedServiceType(),
                                                             m_apiServicesModel->getSelectedServiceProtocol(), serverConfig);
+    if (errorCode != ErrorCode::NoError) {
+        emit installationErrorOccurred(errorCode);
+        return false;
+    }
     m_serversModel->addServer(serverConfig);
-    emit installServerFromApiFinished();
+    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+    return true;
 }
 
 bool InstallController::isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig,

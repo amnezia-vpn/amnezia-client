@@ -24,9 +24,12 @@ public slots:
     void updateModel(const QJsonObject &data);
 
     void setServiceIndex(const int index);
+
     QJsonObject getSelectedServiceInfo();
     QString getSelectedServiceType();
     QString getSelectedServiceProtocol();
+    QString getSelectedServiceName();
+
     QString getCountryCode();
     QString getServicesDescription();
 signals:

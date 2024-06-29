@@ -253,5 +253,8 @@
         <file>images/controls/map-pin.svg</file>
         <file>ui/qml/Controls2/LabelWithImageType.qml</file>
         <file>images/controls/info.svg</file>
+        <file>ui/qml/Controls2/TextAreaWithFooterType.qml</file>
+        <file>images/controls/scan-line.svg</file>
+        <file>images/controls/folder-search-2.svg</file>
     </qresource>
 </RCC>

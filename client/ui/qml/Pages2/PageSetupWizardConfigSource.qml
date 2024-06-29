@@ -47,7 +47,7 @@ PageType {
             BackButtonType {
                 id: backButton
                 Layout.topMargin: 20
-                KeyNavigation.tab: fileButton.rightButton
+                KeyNavigation.tab: textKey.textArea
             }
 
             HeaderType {
@@ -59,21 +59,36 @@ PageType {
                 headerText: qsTr("Connection")
             }
 
-            TextFieldWithHeaderType {
+            TextAreaWithFooterType {
                 id: textKey
 
                 Layout.fillWidth: true
                 Layout.topMargin: 32
-                Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                headerText: qsTr("Key")
-                textFieldPlaceholderText: "vpn://"
-                buttonText: qsTr("Insert")
+                headerText: qsTr("Connection key")
+                placeholderText: qsTr("Starts with vpn://")
 
-                clickedFunc: function() {
-                    textField.text = ""
-                    textField.paste()
+                firstButtonImage: SettingsController.isCameraPresent() ? "qrc:/images/controls/scan-line.svg" : ""
+                secondButtonImage: "qrc:/images/controls/folder-search-2.svg"
+
+                firstButtonClickedFunc: function() {
+                    ImportController.startDecodingQr()
+                    if (Qt.platform.os === "ios") {
+                        PageController.goToPage(PageEnum.PageSetupWizardQrReader)
+                    }
+                }
+
+                secondButtonClickedFunc: function() {
+                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
+                                                                       "Config files (*.vpn *.ovpn *.conf *.json)"
+                    var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
+                    if (fileName !== "") {
+                        if (ImportController.extractConfigFromFile(fileName)) {
+                            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                        }
+                    }
                 }
 
                 KeyNavigation.tab: continueButton
@@ -91,7 +106,7 @@ PageType {
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunc: function() {
-                    if (ImportController.extractConfigFromData(textKey.textFieldText)) {
+                    if (ImportController.extractConfigFromData(textKey.textAreaText)) {
                         PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
                     }
                 }
@@ -137,6 +152,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.bottomMargin: 16
 
                 headerText: qsTr("Create a VPN on your server")
                 bodyText: qsTr("Configure Amnezia VPN on your own server")

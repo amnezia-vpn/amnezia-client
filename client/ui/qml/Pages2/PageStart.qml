@@ -64,7 +64,6 @@ PageType {
         }
 
         function onGoToStartPage() {
-            connectionTypeSelection.close()
             while (tabBarStackView.depth > 1) {
                 tabBarStackView.pop()
             }
@@ -77,9 +76,9 @@ PageType {
 
             var pageName = tabBarStackView.currentItem.objectName
             if ((pageName === PageController.getPagePath(PageEnum.PageShare)) ||
-                    (pageName === PageController.getPagePath(PageEnum.PageSettings))) {
+                    (pageName === PageController.getPagePath(PageEnum.PageSettings)) ||
+                    (pageName === PageController.getPagePath(PageEnum.PageSetupWizardConfigSource))) {
                 PageController.goToPageHome()
-                tabBar.previousIndex = 0
             } else {
                 PageController.closePage()
             }
@@ -174,8 +173,6 @@ PageType {
         enabled: !root.isControlsDisabled
 
         function goToTabBarPage(page) {
-            connectionTypeSelection.close()
-
             var pagePath = PageController.getPagePath(page)
             tabBarStackView.clear(StackView.Immediate)
             tabBarStackView.replace(pagePath, { "objectName" : pagePath }, StackView.Immediate)
@@ -190,8 +187,6 @@ PageType {
 
     TabBar {
         id: tabBar
-
-        property int previousIndex: 0
 
         anchors.right: parent.right
         anchors.left: parent.left
@@ -231,7 +226,6 @@ PageType {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
                 ServersModel.processedIndex = ServersModel.defaultIndex
                 tabBar.currentIndex = 0
-                tabBar.previousIndex = 0
             }
 
             KeyNavigation.tab: shareTabButton
@@ -260,7 +254,6 @@ PageType {
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageShare)
                 tabBar.currentIndex = 1
-                tabBar.previousIndex = 1
             }
 
             KeyNavigation.tab: settingsTabButton
@@ -273,7 +266,6 @@ PageType {
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
                 tabBar.currentIndex = 2
-                tabBar.previousIndex = 2
             }
 
             KeyNavigation.tab: plusTabButton
@@ -284,19 +276,11 @@ PageType {
             isSelected: tabBar.currentIndex === 3
             image: "qrc:/images/controls/plus.svg"
             clickedFunc: function () {
-                connectionTypeSelection.open()
+                tabBarStackView.goToTabBarPage(PageEnum.PageSetupWizardConfigSource)
+                tabBar.currentIndex = 3
             }
 
             Keys.onTabPressed: PageController.forceStackActiveFocus()
-        }
-    }
-
-    ConnectionTypeSelectionDrawer {
-        id: connectionTypeSelection
-
-        onAboutToHide: {
-            PageController.forceTabBarActiveFocus()
-            tabBar.setCurrentIndex(tabBar.previousIndex)
         }
     }
 }
