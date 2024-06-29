@@ -22,18 +22,17 @@ if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs;\
   if [ -n "$($pm $wh_pkg $docker_pkg 2>/dev/null | grep 'moby-engine')" ]; then echo "Docker is not supported"; docker; exit 1;\
   else sudo $pm $silent_inst $docker_pkg;\
     if ! command -v docker > /dev/null 2>&1; then docker; exit 1;\
-    elif [ -n "$(docker --version | grep 'podman')" ]; then check_srv="podman.socket"; sudo touch /etc/containers/nodocker; fi;\
+    elif [ -n "$(docker --version 2>&1 | grep 'podman')" ]; then check_srv="podman.socket podman"; sudo touch /etc/containers/nodocker; fi;\
   sleep 5; sudo systemctl enable --now $check_srv; sleep 5;\
   fi;\
 fi;\
-if [ -n "$(docker --version | grep 'moby-engine')" ]; then echo "Docker is not supported"; echo "command not found"; exit 1;\
-elif [ -n "$(docker --version | grep 'podman')" ]; then check_srv="podman.socket"; docker_pkg="podman-docker";\
+if [ -n "$(docker --version 2>&1 | grep 'moby-engine')" ]; then echo "Docker is not supported"; echo "command not found"; exit 1;\
+elif [ -n "$(docker --version 2>&1 | grep 'podman')" ]; then check_srv="podman.socket podman"; docker_pkg="podman-docker";\
   if [ -n "$(docker --version 2>&1 | grep '/etc/containers/nodocker')" ]; then sudo touch /etc/containers/nodocker; fi;\
-  sudo sed -i 's/short-name-mode = "enforcing"/short-name-mode = "permissive"/g' /etc/containers/registries.conf;\
 fi;\
-if [ "$(systemctl is-active $check_srv)" != "active" ]; then \
+if [ "$(systemctl is-active $check_srv | head -n1)" != "active" ]; then \
   sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
   sleep 5; sudo systemctl start $check_srv; sleep 5;\
-  if [ "$(systemctl is-active $check_srv)" != "active" ]; then echo "Failed to status docker"; echo "command not found"; exit 1; fi;\
+  if [ "$(systemctl is-active $check_srv | head -n1)" != "active" ]; then echo "Failed to status docker"; echo "command not found"; exit 1; fi;\
 fi;\
 docker --version
