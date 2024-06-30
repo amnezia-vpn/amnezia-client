@@ -72,6 +72,8 @@ private:
     void stopDecodingQr();
 #endif
 
+    QString getNewServerName();
+
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     std::shared_ptr<Settings> m_settings;
