@@ -72,9 +72,11 @@ private:
     bool setupCloak();
     bool setupWireGuard();
     bool setupAwg();
+    bool setupXray();
 
     bool startOpenVPN(const QString &config);
     bool startWireGuard(const QString &jsonConfig);
+    bool startXray(const QString &jsonConfig);
 
     void startTunnel();
 
