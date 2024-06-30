@@ -358,5 +358,25 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                 qDebug() << QString("Set vpn local address %1, gw %2").arg(m_vpnLocalAddress).arg(vpnGateway());
             }
         }
+
+        if (l.contains("route")) {
+            if (l.split(" ").size() == 4) {
+                QString addr = l.split(" ").at(1);
+                QString mask = l.split(" ").at(2);
+                emit newRoute(addr);
+            }
+        }
+
+        if (l.contains("DNS")) {
+            if (l.split(" ").size() == 3) {
+                QString dnsAddr = l.split(" ").at(2);
+                emit newDns(dnsAddr);
+            }
+        }
     }
+}
+
+void OpenVpnProtocol::waitForDisconected(int msecs)
+{
+    m_openVpnProcess->waitForFinished(msecs);
 }

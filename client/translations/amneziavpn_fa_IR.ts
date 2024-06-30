@@ -35,7 +35,7 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="210"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="215"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>پروتکل وی‎پی‎ان نصب نشده است
@@ -68,12 +68,12 @@
         <translation>تنظیمات با موفقیت به‎روز‎رسانی شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="205"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="210"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation type="unfinished">پروتکل انتخاب شده بر روی این پلتفرم پشتیبانی نمی‎‎شود</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="229"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="234"/>
         <source>unable to create configuration</source>
         <translation type="unfinished"></translation>
     </message>
@@ -83,7 +83,7 @@
         <translation>اتصال دوباره...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="78"/>
+        <location filename="../ui/controllers/connectionController.h" line="79"/>
         <location filename="../ui/controllers/connectionController.cpp" line="95"/>
         <location filename="../ui/controllers/connectionController.cpp" line="110"/>
         <location filename="../ui/controllers/connectionController.cpp" line="116"/>
@@ -3509,7 +3509,7 @@ For more detailed information, you can
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="375"/>
+        <location filename="../vpnconnection.cpp" line="397"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>

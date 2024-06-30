@@ -58,14 +58,14 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="210"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="215"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>VPN протоколи не встановлено.
  Будь-ласка, встановіть VPN контейнер</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="229"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="234"/>
         <source>unable to create configuration</source>
         <translation type="unfinished"></translation>
     </message>
@@ -95,7 +95,7 @@
         <translation>Налаштування оновлено.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="205"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="210"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation type="unfinished">Вибраний протокол не підтримується на цьому пристрої</translation>
     </message>
@@ -105,7 +105,7 @@
         <translation>Перепідключення...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="78"/>
+        <location filename="../ui/controllers/connectionController.h" line="79"/>
         <location filename="../ui/controllers/connectionController.cpp" line="95"/>
         <location filename="../ui/controllers/connectionController.cpp" line="110"/>
         <location filename="../ui/controllers/connectionController.cpp" line="116"/>
@@ -3731,7 +3731,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="375"/>
+        <location filename="../vpnconnection.cpp" line="397"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>
