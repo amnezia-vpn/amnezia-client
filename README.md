@@ -18,9 +18,8 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 [https://naruzhu.click/appam](https://naruzhu.click/appam) - project website
 [https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit of original project
-[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)
-[https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)
-
+[https://t.me/vpn_naruzhu_support_bot](https://t.me/vpn_naruzhu_support_bot) - Telegram support
+[https://t.me/vpn_naruzhu](https://t.me/vpn_naruzhu) - Telegram group
 ## Tech
 
 VPNNaruzhu uses several open-source projects to work:

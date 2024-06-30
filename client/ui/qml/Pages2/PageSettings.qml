@@ -137,7 +137,7 @@ PageType {
                 leftImageSource: "qrc:/images/controls/telegramNaruzhu.svg"
 
                 clickedFunction: function() {
-                     Qt.openUrlExternally("https://t.me/vpn_naruzhu_bot")
+                     Qt.openUrlExternally("https://t.me/vpn_naruzhu_support_bot")
                 }
             }
 
@@ -148,11 +148,12 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Support via Email")
+                descriptionText: qsTr("team@vpn-naruzhu.com")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/email.svg"
 
                 clickedFunction: function() {
-                     Qt.openUrlExternally("mailto:support@vpn-naruzhu.com")
+                     Qt.openUrlExternally("mailto:team@vpn-naruzhu.com")
                 }
             }
 

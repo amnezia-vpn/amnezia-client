@@ -294,7 +294,7 @@ PageType {
             isSelected: tabBar.currentIndex === 4
             image: "qrc:/images/controls/tabBarChat.svg"
             onClicked: {
-                Qt.openUrlExternally("https://t.me/vpn_naruzhu_bot")
+                Qt.openUrlExternally("https://t.me/vpn_naruzhu_support_bot")
             }
         }
     }

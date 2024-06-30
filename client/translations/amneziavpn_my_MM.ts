@@ -1072,12 +1072,17 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="151"/>
+        <source>team@vpn-naruzhu.com</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="166"/>
         <source>Telegram Group</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="180"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="181"/>
         <source>Close application</source>
         <translation>အပလီကေးရှင်းကို ပိတ်မည်</translation>
     </message>
@@ -1100,62 +1105,68 @@ Already installed containers were found on the server. All installed containers 
         <translation>ဆက်သွယ်ရန်လိပ်စာများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="104"/>
         <source>Telegram group</source>
-        <translation>Telegram ဂရု</translation>
+        <translation type="vanished">Telegram ဂရု</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="105"/>
         <source>To discuss features</source>
-        <translation>feature များကိုဆွေးနွေးရန်</translation>
+        <translation type="vanished">feature များကိုဆွေးနွေးရန်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="112"/>
         <source>https://t.me/amnezia_vpn_en</source>
-        <translation>https://t.me/amnezia_vpn</translation>
+        <translation type="vanished">https://t.me/amnezia_vpn</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="122"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="124"/>
         <source>Mail</source>
         <translation>မေးလ်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="125"/>
         <source>For reviews and bug reports</source>
         <translation>သုံးသပ်ချက်များနှင့် ချွတ်ယွင်းချက်အစီရင်ခံစာများအတွက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="140"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="132"/>
+        <source>https://github.com/vpn-naruzhu/vpnn-client/issues</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="143"/>
         <source>Github</source>
         <translation>Github</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="147"/>
         <source>https://github.com/amnezia-vpn/amnezia-client</source>
-        <translation>https://github.com/amnezia-vpn/amnezia-client</translation>
+        <translation type="vanished">https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="158"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="150"/>
+        <source>https://github.com/vpn-naruzhu/vpnn-client</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="161"/>
         <source>Website</source>
         <translation>ဝဘ်ဆိုက်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="168"/>
         <source>https://amnezia.org</source>
         <translation>https://amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="178"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="181"/>
         <source>Software version: %1</source>
         <translation>ဆော့ဖ်ဝဲဗားရှင်း: %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="195"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="198"/>
         <source>Check for updates</source>
         <translation>အပ်ဒိတ်များရှိမရှိ စစ်ဆေးမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="218"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="221"/>
         <source>Privacy Policy</source>
         <translation>ကိုယ်ရေးအချက်အလက်မူဝါဒ</translation>
     </message>
