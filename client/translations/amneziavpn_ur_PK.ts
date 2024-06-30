@@ -1370,57 +1370,54 @@ Already installed containers were found on the server. All installed containers 
         <translation>کنکشن</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="80"/>
         <source>When AmneziaDNS is not used or installed</source>
-        <translation>ایمنیزیا ڈی این ایس کو استعمال نہیں کیا گیا ہو یا اسے انسٹال نہیں کیا گیاہے</translation>
+        <translation type="vanished">ایمنیزیا ڈی این ایس کو استعمال نہیں کیا گیا ہو یا اسے انسٹال نہیں کیا گیاہے</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="130"/>
         <source>Allows you to use the VPN only for certain Apps</source>
         <translation>آپ کو صرف مخصوص ایپلیکیشنز کے لئے وی پی این استعمال کرنے کی اجازت دیتا ہے</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="60"/>
         <source>Use AmneziaDNS</source>
-        <translation>AmneziaDNS استعمال کریں</translation>
+        <translation type="vanished">AmneziaDNS استعمال کریں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="61"/>
         <source>If AmneziaDNS is installed on the server</source>
-        <translation>اگر سرور پر AmneziaDNS انسٹال کیا گیا ہو تو</translation>
+        <translation type="vanished">اگر سرور پر AmneziaDNS انسٹال کیا گیا ہو تو</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="81"/>
         <source>DNS servers</source>
         <translation>ڈی این ایس سرور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="96"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
         <source>Site-based split tunneling</source>
         <translation>سائٹ کے بنیادی سپلٹ ٹنلنگ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="97"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
         <source>Allows you to select which sites you want to access through the VPN</source>
         <translation>آپ کو یہ امکان فراہم کرتا ہے کہ آپ وی پی این کے ذریعہ کس سائٹ کو دسترس دینا چاہتے ہیں وہ منتخب کریں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="125"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="129"/>
         <source>App-based split tunneling</source>
         <translation>ایپ کے بنیاد پر سپلٹ ٹنلنگ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="157"/>
         <source>KillSwitch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="158"/>
         <source>Disables your internet if your encrypted VPN connection drops out for any reason.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="169"/>
         <source>Cannot change killSwitch settings during active connection</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1438,52 +1435,51 @@ Already installed containers were found on the server. All installed containers 
         <translation>ڈی این ایس سرور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="69"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation>اگر AmneziaDNS استعمال نہیں کیا گیا ہو یا انسٹال نہیں کیا گیا ہو تو</translation>
+        <translation type="vanished">اگر AmneziaDNS استعمال نہیں کیا گیا ہو یا انسٹال نہیں کیا گیا ہو تو</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="76"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="78"/>
         <source>Primary DNS</source>
         <translation>اولین DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="92"/>
         <source>Secondary DNS</source>
         <translation>ثانوی DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="111"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="113"/>
         <source>Restore default</source>
         <translation>اصل حالت کو بحال کریں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="116"/>
         <source>Restore default DNS settings?</source>
         <translation>اصل DNS ترتیبات کو بحال کریں؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="117"/>
         <source>Continue</source>
         <translation>براہ کرم جاری رکھیں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="118"/>
         <source>Cancel</source>
         <translation>منسوخ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="125"/>
         <source>Settings have been reset</source>
         <translation>ترتیبات کو دوبارہ ترتیب دیا گیا ہے</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="148"/>
         <source>Save</source>
         <translation>محفوظ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="157"/>
         <source>Settings saved</source>
         <translation>ترتیبات محفوظ ہوگئیں</translation>
     </message>
@@ -3213,12 +3209,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="138"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="140"/>
         <source>Backup file is corrupted</source>
         <translation>بیک اپ فائل خراب ہو گئی ہے</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="160"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="162"/>
         <source>All settings have been reset to default values</source>
         <translation>تمام ترتیبات کو ڈیفالٹ اقدار پر دوبارہ ترتیب دیا گیا ہے</translation>
     </message>

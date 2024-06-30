@@ -1368,57 +1368,54 @@ Already installed containers were found on the server. All installed containers 
         <translation>कनेक्शन</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="80"/>
         <source>When AmneziaDNS is not used or installed</source>
-        <translation>जब AmneziaDNS का उपयोग या स्थापित नहीं किया जाता है</translation>
+        <translation type="vanished">जब AmneziaDNS का उपयोग या स्थापित नहीं किया जाता है</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="130"/>
         <source>Allows you to use the VPN only for certain Apps</source>
         <translation>आपको केवल कुछ ऐप्स के लिए वीपीएन का उपयोग करने की अनुमति देता है</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="60"/>
         <source>Use AmneziaDNS</source>
-        <translation>Amneziaडीएनएस का प्रयोग करें</translation>
+        <translation type="vanished">Amneziaडीएनएस का प्रयोग करें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="61"/>
         <source>If AmneziaDNS is installed on the server</source>
-        <translation>यदि AmneziaDNS सर्वर पर स्थापित है</translation>
+        <translation type="vanished">यदि AmneziaDNS सर्वर पर स्थापित है</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="81"/>
         <source>DNS servers</source>
         <translation>DNS सर्वर</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="96"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
         <source>Site-based split tunneling</source>
         <translation>साइट-आधारित विभाजित टनलिंग</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="97"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
         <source>Allows you to select which sites you want to access through the VPN</source>
         <translation>आपको यह चुनने की अनुमति देता है कि आप वीपीएन के माध्यम से किन साइटों तक पहुंचना चाहते हैं</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="125"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="129"/>
         <source>App-based split tunneling</source>
         <translation>ऐप-आधारित स्प्लिट टनलिंग</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="157"/>
         <source>KillSwitch</source>
         <translation>स्विच बन्द कर दो</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="158"/>
         <source>Disables your internet if your encrypted VPN connection drops out for any reason.</source>
         <translation>यदि आपका एन्क्रिप्टेड वीपीएन कनेक्शन किसी भी कारण से बंद हो जाता है तो आपका इंटरनेट अक्षम कर देता है.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="169"/>
         <source>Cannot change killSwitch settings during active connection</source>
         <translation>सक्रिय कनेक्शन के दौरान किलस्विच सेटिंग्स को नहीं बदला जा सकता</translation>
     </message>
@@ -1436,52 +1433,51 @@ Already installed containers were found on the server. All installed containers 
         <translation>DNS सर्वर</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="69"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation>यदि AmneziaDNS का उपयोग या स्थापित नहीं किया गया है</translation>
+        <translation type="vanished">यदि AmneziaDNS का उपयोग या स्थापित नहीं किया गया है</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="76"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="78"/>
         <source>Primary DNS</source>
         <translation>प्राथमिक डीएनएस</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="92"/>
         <source>Secondary DNS</source>
         <translation>द्वितीयक डीएनएस</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="111"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="113"/>
         <source>Restore default</source>
         <translation>डिफ़ॉल्ट बहाल</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="116"/>
         <source>Restore default DNS settings?</source>
         <translation>डिफ़ॉल्ट DNS सेटिंग्स पुनर्स्थापित करें?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="117"/>
         <source>Continue</source>
         <translation>जारी रखना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="118"/>
         <source>Cancel</source>
         <translation>रद्द करना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="125"/>
         <source>Settings have been reset</source>
         <translation>सेटिंग्स रीसेट कर दी गई हैं</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="148"/>
         <source>Save</source>
         <translation>सहेजें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="157"/>
         <source>Settings saved</source>
         <translation>सेटिंग्स को सहेजा गया</translation>
     </message>
@@ -3275,12 +3271,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="138"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="140"/>
         <source>Backup file is corrupted</source>
         <translation>बैकअप फ़ाइल दूषित है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="160"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="162"/>
         <source>All settings have been reset to default values</source>
         <translation>सभी सेटिंग्स को डिफ़ॉल्ट मानों पर रीसेट कर दिया गया है</translation>
     </message>

@@ -64,10 +64,12 @@ PageType {
                 headerText: qsTr("DNS servers")
             }
 
+            /* issue_13: don't allow to use Amnezia DNS
             ParagraphTextType {
                 Layout.fillWidth: true
                 text: qsTr("If AmneziaDNS is not used or installed")
             }
+            */
 
             TextFieldWithHeaderType {
                 id: primaryDns

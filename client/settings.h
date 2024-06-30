@@ -136,6 +136,7 @@ public:
     void removeVpnSites(RouteMode mode, const QStringList &sites);
     void removeAllVpnSites(RouteMode mode);
 
+    /* issue_13: don't allow to use Amnezia DNS
     bool useAmneziaDns() const
     {
         return value("Conf/useAmneziaDns", true).toBool();
@@ -144,6 +145,7 @@ public:
     {
         setValue("Conf/useAmneziaDns", enabled);
     }
+    */
 
     QString primaryDns() const;
     QString secondaryDns() const;

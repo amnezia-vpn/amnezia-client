@@ -35,6 +35,7 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
 #endif
 }
 
+/* issue_13: don't allow to use Amnezia DNS
 void SettingsController::toggleAmneziaDns(bool enable)
 {
     m_settings->setUseAmneziaDns(enable);
@@ -45,6 +46,7 @@ bool SettingsController::isAmneziaDnsEnabled()
 {
     return m_settings->useAmneziaDns();
 }
+*/
 
 QString SettingsController::getPrimaryDns()
 {
