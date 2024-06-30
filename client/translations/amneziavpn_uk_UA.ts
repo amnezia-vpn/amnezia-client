@@ -1521,57 +1521,54 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Підключення до VPN при старті застосунку</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="60"/>
         <source>Use AmneziaDNS</source>
-        <translation>Використовувати Amnezia DNS</translation>
+        <translation type="vanished">Використовувати Amnezia DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="61"/>
         <source>If AmneziaDNS is installed on the server</source>
-        <translation>Якщо він встановлений на сервері</translation>
+        <translation type="vanished">Якщо він встановлений на сервері</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="81"/>
         <source>DNS servers</source>
         <translation>DNS сервер</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="80"/>
         <source>When AmneziaDNS is not used or installed</source>
-        <translation type="unfinished">Ці адреси будуть використовуватись коли вимкнений AmneziaDNS</translation>
+        <translation type="obsolete">Ці адреси будуть використовуватись коли вимкнений AmneziaDNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="130"/>
         <source>Allows you to use the VPN only for certain Apps</source>
         <translation type="unfinished">Дозволяє використовувати VPN тільки для вибраних застосунків</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="157"/>
         <source>KillSwitch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="158"/>
         <source>Disables your internet if your encrypted VPN connection drops out for any reason.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="169"/>
         <source>Cannot change killSwitch settings during active connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="96"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
         <source>Site-based split tunneling</source>
         <translation>Роздільне тунелювання сайтів</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="97"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
         <source>Allows you to select which sites you want to access through the VPN</source>
         <translation>Дозволяє доступ до одних сайтів через VPN, а для інших в обхід VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="125"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="129"/>
         <source>App-based split tunneling</source>
         <translation>Роздільне VPN-тунелювання застосунків</translation>
     </message>
@@ -1597,52 +1594,51 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Ці адреси будуть використовуватись, коли вимкнено або не встановлено AmneziaDNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="69"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation type="unfinished">Якщо AmneziaDNS вимкнено або не встановлено</translation>
+        <translation type="obsolete">Якщо AmneziaDNS вимкнено або не встановлено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="76"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="78"/>
         <source>Primary DNS</source>
         <translation>Основний DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="92"/>
         <source>Secondary DNS</source>
         <translation>Допоміжний DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="111"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="113"/>
         <source>Restore default</source>
         <translation>Відновити за замовчуванням</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="116"/>
         <source>Restore default DNS settings?</source>
         <translation>Відновити налаштування DNS за замовчуванням?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="117"/>
         <source>Continue</source>
         <translation>Продовжити</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="118"/>
         <source>Cancel</source>
         <translation>Відмінити</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="125"/>
         <source>Settings have been reset</source>
         <translation>Налаштування скинуті</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="148"/>
         <source>Save</source>
         <translation>Зберегти</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="157"/>
         <source>Settings saved</source>
         <translation>Зберегти налаштування</translation>
     </message>
@@ -3601,7 +3597,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="160"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="162"/>
         <source>All settings have been reset to default values</source>
         <translation>Всі налаштування були скинуті до значення &quot;По замовчуванню&quot;</translation>
     </message>
@@ -3610,7 +3606,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation type="vanished">Кеш профілю очищено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="138"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="140"/>
         <source>Backup file is corrupted</source>
         <translation>Backup файл пошкодженно</translation>
     </message>

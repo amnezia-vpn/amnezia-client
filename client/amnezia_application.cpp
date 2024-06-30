@@ -401,7 +401,9 @@ void AmneziaApplication::initControllers()
     if (m_settingsController->isAutoConnectEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
     }
+    /* issue_13: don't allow to use Amnezia DNS
     connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled, m_serversModel.get(), &ServersModel::toggleAmneziaDns);
+    */
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());

@@ -1419,57 +1419,54 @@ Already installed containers were found on the server. All installed containers 
         <translation>ချိတ်ဆက်မှု</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="60"/>
         <source>Use AmneziaDNS</source>
-        <translation>AmneziaDNS ကို အသုံးပြုမည်</translation>
+        <translation type="vanished">AmneziaDNS ကို အသုံးပြုမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="61"/>
         <source>If AmneziaDNS is installed on the server</source>
-        <translation>အကယ်၍ AmneziaDNS ကို ဆာဗာတွင် ထည့်သွင်းထားလျှင်</translation>
+        <translation type="vanished">အကယ်၍ AmneziaDNS ကို ဆာဗာတွင် ထည့်သွင်းထားလျှင်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="81"/>
         <source>DNS servers</source>
         <translation>DNS ဆာဗာများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="80"/>
         <source>When AmneziaDNS is not used or installed</source>
-        <translation>AmneziaDNS ကို အသုံးမပြု သို့မဟုတ် ထည့်သွင်းခြင်းမပြုသည့်အခါ</translation>
+        <translation type="vanished">AmneziaDNS ကို အသုံးမပြု သို့မဟုတ် ထည့်သွင်းခြင်းမပြုသည့်အခါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="126"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="130"/>
         <source>Allows you to use the VPN only for certain Apps</source>
         <translation>အချို့သောအက်ပ်များအတွက်သာ VPN ကို အသုံးပြုခွင့်ပေးသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="157"/>
         <source>KillSwitch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="158"/>
         <source>Disables your internet if your encrypted VPN connection drops out for any reason.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="169"/>
         <source>Cannot change killSwitch settings during active connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="96"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
         <source>Site-based split tunneling</source>
         <translation>ဝက်ဆိုဒ်အခြေပြု split tunneling</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="97"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
         <source>Allows you to select which sites you want to access through the VPN</source>
         <translation>VPN မှတဆင့် သင်ဝင်ရောက်လိုသည့်ဆိုဒ်များကို ရွေးချယ်စေနိုင်သည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="125"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="129"/>
         <source>App-based split tunneling</source>
         <translation>App အခြေပြု split tunneling</translation>
     </message>
@@ -1487,52 +1484,51 @@ Already installed containers were found on the server. All installed containers 
         <translation>DNS ဆာဗာများ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="69"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation>AmneziaDNS ကို အသုံးမပြု သို့မဟုတ် ထည့်သွင်းခြင်းမပြုသည့်အခါ</translation>
+        <translation type="vanished">AmneziaDNS ကို အသုံးမပြု သို့မဟုတ် ထည့်သွင်းခြင်းမပြုသည့်အခါ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="76"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="78"/>
         <source>Primary DNS</source>
         <translation>Primary DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="90"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="92"/>
         <source>Secondary DNS</source>
         <translation>Secondary DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="111"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="113"/>
         <source>Restore default</source>
         <translation>မူရင်းအတိုင်းပြန်လည်ထားရှိမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="116"/>
         <source>Restore default DNS settings?</source>
         <translation>မူရင်း DNS ဆက်တင်များကို ပြန်လည်ရယူလိုပါသလား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="117"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="118"/>
         <source>Cancel</source>
         <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="123"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="125"/>
         <source>Settings have been reset</source>
         <translation>ဆက်တင်များကို ပြန်လည်သတ်မှတ်ပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="146"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="148"/>
         <source>Save</source>
         <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="157"/>
         <source>Settings saved</source>
         <translation>ဆက်တင်များကို သိမ်းဆည်းပြီးပြီ</translation>
     </message>
@@ -3389,7 +3385,7 @@ For more detailed information, you can
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="160"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="162"/>
         <source>All settings have been reset to default values</source>
         <translation>ဆက်တင်အားလုံးကို မူရင်းတန်ဖိုးများအဖြစ် ပြန်လည်သတ်မှတ်ထားသည်</translation>
     </message>
@@ -3398,7 +3394,7 @@ For more detailed information, you can
         <translation type="vanished">ကက်ရှ်ပရိုဖိုင်များကို ရှင်းလင်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="138"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="140"/>
         <source>Backup file is corrupted</source>
         <translation>အရန်သိမ်းထားသည့်ဖိုင်ပျက်ဆီးနေသည်</translation>
     </message>
