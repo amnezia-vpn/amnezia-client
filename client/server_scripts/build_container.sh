@@ -1,9 +1,9 @@
 if [ -n "$(docker --version 2>/dev/null | grep 'podman')" ]; then \
-  sudo sh -c "if [ ! -d '/var/cache/containers' ]; then \
-    mkdir -m 700 -p /var/cache/containers; fi";\
-  sudo sh -c "if [ ! -f '/var/cache/containers/short-name-aliases.conf' ]; then \
-    touch /var/cache/containers/short-name-aliases.conf;\
-    chmod 600 /var/cache/containers/short-name-aliases.conf; fi";\
+  if [ ! sudo test -d '/var/cache/containers' ]; then \
+    sudo mkdir -m 700 -p /var/cache/containers; fi;\
+  if [ ! sudo test -f '/var/cache/containers/short-name-aliases.conf' ]; then \
+    sudo touch /var/cache/containers/short-name-aliases.conf;\
+    sudo chmod 600 /var/cache/containers/short-name-aliases.conf; fi;\
   sudo sh -c "if ! grep -q '\[aliases\]' /var/cache/containers/short-name-aliases.conf; then \
     echo '[aliases]' >> /var/cache/containers/short-name-aliases.conf; fi";\
   sudo sh -c "if ! grep -q '  \# Amnezia start' /var/cache/containers/short-name-aliases.conf; then \
