@@ -1,4 +1,4 @@
-if [ -n "$(docker --version 2>/dev/null | grep 'podman')" ]; then \
+if [ -n "$(sudo docker --version 2>/dev/null | grep 'podman')" ]; then \
   if ! sudo test -d "/var/cache/containers"; then \
     sudo mkdir -m 700 -p /var/cache/containers; fi;\
   if ! sudo test -f "/var/cache/containers/short-name-aliases.conf"; then \
