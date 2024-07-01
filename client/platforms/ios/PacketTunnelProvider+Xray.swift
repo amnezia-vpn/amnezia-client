@@ -60,23 +60,50 @@ extension PacketTunnelProvider {
         let dns = ["8.8.4.4","1.1.1.1"]
         settings.dnsSettings = NEDNSSettings(servers: dns)
 
-        setTunnelNetworkSettings(settings) { [weak self] error in
-            if let error {
-                completionHandler(error)
+        do {
+            let port = 10808
+            let address = "::1"
+
+            let jsonDict = try JSONSerialization.jsonObject(with: xrayConfigData,
+                                                            options: []) as? [String: Any]
+
+            guard var jsonDict else {
+                xrayLog(.error, message: "Can't parse address and port for hevSocks")
+                completionHandler(XrayErrors.cantParseListenAndPort)
                 return
             }
 
-            // Launch xray
-            self?.setupAndStartXray(configData: xrayConfigData) { xrayError in
-                if let xrayError {
-                    completionHandler(xrayError)
+            if var inboundsArray = jsonDict["inbounds"] as? [[String: Any]], !inboundsArray.isEmpty {
+                inboundsArray[0]["port"] = port
+                inboundsArray[0]["listen"] = address
+                jsonDict["inbounds"] = inboundsArray
+            }
+
+            let updatedData = try JSONSerialization.data(withJSONObject: jsonDict, options: [])
+
+            setTunnelNetworkSettings(settings) { [weak self] error in
+                if let error {
+                    completionHandler(error)
                     return
                 }
 
-                // Launch hevSocks
-                self?.setupAndRunTun2socks(configData: xrayConfigData,
-                                           completionHandler: completionHandler)
+                // Launch xray
+                self?.setupAndStartXray(configData: updatedData) { xrayError in
+                    if let xrayError {
+                        completionHandler(xrayError)
+                        return
+                    }
+
+                    // Launch hevSocks
+                    self?.setupAndRunTun2socks(configData: updatedData,
+                                               address: address,
+                                               port: port,
+                                               completionHandler: completionHandler)
+                }
             }
+        } catch {
+            completionHandler(error)
+            return
         }
     }
 
@@ -104,29 +131,9 @@ extension PacketTunnelProvider {
     }
 
     private func setupAndRunTun2socks(configData: Data,
+                                      address: String,
+                                      port: Int,
                                       completionHandler: @escaping (Error?) -> Void) {
-        var port = 10808
-        var address = "::1"
-
-        let jsonDict = try? JSONSerialization.jsonObject(with: configData, options: []) as? [String: Any]
-
-        guard let jsonDict else {
-            xrayLog(.error, message: "Can't parse address and port for hevSocks")
-            completionHandler(XrayErrors.cantParseListenAndPort)
-            return
-        }
-
-        // Xray listen and port should be the same as port and address in hevSocks
-        if let inbounds = jsonDict["inbounds"] as? [[String: Any]], let inbound = inbounds.first {
-            if let listen = inbound["listen"] as? String {
-                address = listen
-                address.removeAll { $0 == "[" || $0 == "]" }
-            }
-            if let portFromConfig = inbound["port"] as? Int {
-                port = portFromConfig
-            }
-        }
-
         let config = """
         tunnel:
           mtu: 9000
