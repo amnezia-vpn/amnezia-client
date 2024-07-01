@@ -70,7 +70,9 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 
                 IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 
+                /* issue_5
                 if (m_settings->isSitesSplitTunnelingEnabled()) {
+                */
                     IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                         // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
                     if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
@@ -83,17 +85,23 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                         IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
                         addSitesRoutes(m_vpnProtocol->routeGateway(), m_settings->routeMode());
                     }
+                /* issue_5
                 }
+                */
             }
 
         } else if (state == Vpn::ConnectionState::Error) {
             IpcClient::Interface()->flushDns();
 
+            /* issue_5
             if (m_settings->isSitesSplitTunnelingEnabled()) {
+            */
                 if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
                     IpcClient::Interface()->clearSavedRoutes();
                 }
+            /* issue_5
             }
+            */
         } else if (state == Vpn::ConnectionState::Connecting) {
 
         } else if (state == Vpn::ConnectionState::Disconnected) {
@@ -331,7 +339,9 @@ void VpnConnection::appendSplitTunnelingConfig()
     } else {
         Settings::RouteMode routeMode = Settings::RouteMode::VpnAllSites;
         QJsonArray sitesJsonArray;
+        /* issue_5
         if (m_settings->isSitesSplitTunnelingEnabled()) {
+        */
             routeMode = m_settings->routeMode();
 
             auto sites = m_settings->getVpnIps(routeMode);
@@ -344,7 +354,9 @@ void VpnConnection::appendSplitTunnelingConfig()
                 sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
                 sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
             }
+        /* issue_5
         }
+        */
 
         m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
         m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);

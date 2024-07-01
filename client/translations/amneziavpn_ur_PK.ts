@@ -376,27 +376,25 @@ Already installed containers were found on the server. All installed containers 
         <translation>لاگنگ فعال ہے</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="110"/>
         <source>Split tunneling enabled</source>
-        <translation>سپلٹ ٹنلنگ فعال ہے</translation>
+        <translation type="vanished">سپلٹ ٹنلنگ فعال ہے</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="110"/>
         <source>Split tunneling disabled</source>
-        <translation>سپلٹ ٹنلنگ غیر فعال ہے</translation>
+        <translation type="vanished">سپلٹ ٹنلنگ غیر فعال ہے</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="317"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="319"/>
         <source>VPN protocol</source>
         <translation>وی پی این پروٹوکول</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="372"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="374"/>
         <source>Servers</source>
         <translation>سرور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="484"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="486"/>
         <source>Unable change server while there is an active connection</source>
         <translation>فعال کنکشن موجود ہونے کی وجہ سے سرور تبدیل کرنے میں ناکام ہیں</translation>
     </message>
@@ -1374,9 +1372,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">ایمنیزیا ڈی این ایس کو استعمال نہیں کیا گیا ہو یا اسے انسٹال نہیں کیا گیاہے</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="130"/>
         <source>Allows you to use the VPN only for certain Apps</source>
-        <translation>آپ کو صرف مخصوص ایپلیکیشنز کے لئے وی پی این استعمال کرنے کی اجازت دیتا ہے</translation>
+        <translation type="vanished">آپ کو صرف مخصوص ایپلیکیشنز کے لئے وی پی این استعمال کرنے کی اجازت دیتا ہے</translation>
     </message>
     <message>
         <source>Use AmneziaDNS</source>
@@ -1392,32 +1389,29 @@ Already installed containers were found on the server. All installed containers 
         <translation>ڈی این ایس سرور</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
         <source>Site-based split tunneling</source>
-        <translation>سائٹ کے بنیادی سپلٹ ٹنلنگ</translation>
+        <translation type="vanished">سائٹ کے بنیادی سپلٹ ٹنلنگ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
         <source>Allows you to select which sites you want to access through the VPN</source>
-        <translation>آپ کو یہ امکان فراہم کرتا ہے کہ آپ وی پی این کے ذریعہ کس سائٹ کو دسترس دینا چاہتے ہیں وہ منتخب کریں</translation>
+        <translation type="vanished">آپ کو یہ امکان فراہم کرتا ہے کہ آپ وی پی این کے ذریعہ کس سائٹ کو دسترس دینا چاہتے ہیں وہ منتخب کریں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="129"/>
         <source>App-based split tunneling</source>
-        <translation>ایپ کے بنیاد پر سپلٹ ٹنلنگ</translation>
+        <translation type="vanished">ایپ کے بنیاد پر سپلٹ ٹنلنگ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="157"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="165"/>
         <source>KillSwitch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="158"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="166"/>
         <source>Disables your internet if your encrypted VPN connection drops out for any reason.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="177"/>
         <source>Cannot change killSwitch settings during active connection</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3214,7 +3208,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation>بیک اپ فائل خراب ہو گئی ہے</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="162"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="164"/>
         <source>All settings have been reset to default values</source>
         <translation>تمام ترتیبات کو ڈیفالٹ اقدار پر دوبارہ ترتیب دیا گیا ہے</translation>
     </message>
@@ -3346,7 +3340,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="397"/>
+        <location filename="../vpnconnection.cpp" line="409"/>
         <source>Mbps</source>
         <translation>ایم بی پی ایس</translation>
     </message>

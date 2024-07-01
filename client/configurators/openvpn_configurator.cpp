@@ -116,13 +116,16 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
     if (!isApiConfig) {
         QRegularExpression regex("redirect-gateway.*");
         config.replace(regex, "");
-        
+
+        /* issue_5
         if (!m_settings->isSitesSplitTunnelingEnabled()) {
             config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
             // Prevent ipv6 leak
             config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
             config.append("block-ipv6\n");
-        } else if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+        } else
+        */
+        if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
 
             // no redirect-gateway
         } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {

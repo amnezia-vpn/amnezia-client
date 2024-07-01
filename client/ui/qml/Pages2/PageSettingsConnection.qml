@@ -88,11 +88,18 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsDns)
                 }
 
-                KeyNavigation.tab: splitTunnelingButton.rightButton
+                KeyNavigation.tab: { // issue_5 splitTunnelingButton.rightButton
+                    if (killSwitchSwitcher.visible) {
+                        return killSwitchSwitcher.forceActiveFocus()
+                    } else {
+                        lastItemTabClicked()
+                    }
+                }
             }
 
             DividerType {}
 
+        /* issue_5
             LabelWithButtonType {
                 id: splitTunnelingButton
                 Layout.fillWidth: true
@@ -146,6 +153,7 @@ PageType {
             DividerType {
                 visible: root.isAppSplitTinnelingEnabled
             }
+        */
 
             SwitcherType {
                 id: killSwitchSwitcher
