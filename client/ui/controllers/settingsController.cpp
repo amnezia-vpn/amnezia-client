@@ -153,11 +153,13 @@ void SettingsController::clearSettings()
     m_languageModel->changeLanguage(
             static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
 
+    /* issue_5
     m_sitesModel->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
     m_sitesModel->toggleSplitTunneling(false);
 
     m_appSplitTunnelingModel->setRouteMode(Settings::AppsRouteMode::VpnAllExceptApps);
     m_appSplitTunnelingModel->toggleSplitTunneling(false);
+    */
 
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 

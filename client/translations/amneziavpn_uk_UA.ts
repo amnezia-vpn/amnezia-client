@@ -406,27 +406,25 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="110"/>
         <source>Split tunneling enabled</source>
-        <translation type="unfinished">Роздільне тунелювання увімкнено</translation>
+        <translation type="obsolete">Роздільне тунелювання увімкнено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="110"/>
         <source>Split tunneling disabled</source>
-        <translation type="unfinished">Роздільне тунелювання вимкнено</translation>
+        <translation type="obsolete">Роздільне тунелювання вимкнено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="317"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="319"/>
         <source>VPN protocol</source>
         <translation>VPN протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="372"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="374"/>
         <source>Servers</source>
         <translation>Сервери</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="484"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="486"/>
         <source>Unable change server while there is an active connection</source>
         <translation>Не можна змінити сервер при активному підключенні</translation>
     </message>
@@ -1538,39 +1536,35 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete">Ці адреси будуть використовуватись коли вимкнений AmneziaDNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="130"/>
         <source>Allows you to use the VPN only for certain Apps</source>
-        <translation type="unfinished">Дозволяє використовувати VPN тільки для вибраних застосунків</translation>
+        <translation type="obsolete">Дозволяє використовувати VPN тільки для вибраних застосунків</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="157"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="165"/>
         <source>KillSwitch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="158"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="166"/>
         <source>Disables your internet if your encrypted VPN connection drops out for any reason.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="177"/>
         <source>Cannot change killSwitch settings during active connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
         <source>Site-based split tunneling</source>
-        <translation>Роздільне тунелювання сайтів</translation>
+        <translation type="vanished">Роздільне тунелювання сайтів</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="101"/>
         <source>Allows you to select which sites you want to access through the VPN</source>
-        <translation>Дозволяє доступ до одних сайтів через VPN, а для інших в обхід VPN</translation>
+        <translation type="vanished">Дозволяє доступ до одних сайтів через VPN, а для інших в обхід VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="129"/>
         <source>App-based split tunneling</source>
-        <translation>Роздільне VPN-тунелювання застосунків</translation>
+        <translation type="vanished">Роздільне VPN-тунелювання застосунків</translation>
     </message>
     <message>
         <source>Allows you to use the VPN only for certain applications</source>
@@ -3597,7 +3591,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="162"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="164"/>
         <source>All settings have been reset to default values</source>
         <translation>Всі налаштування були скинуті до значення &quot;По замовчуванню&quot;</translation>
     </message>
@@ -3738,7 +3732,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="397"/>
+        <location filename="../vpnconnection.cpp" line="409"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>

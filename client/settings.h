@@ -115,8 +115,10 @@ public:
     RouteMode routeMode() const;
     void setRouteMode(RouteMode mode) { setValue("Conf/routeMode", mode); }
 
+    /* issue_5
     bool isSitesSplitTunnelingEnabled() const;
     void setSitesSplitTunnelingEnabled(bool enabled);
+    */
 
     QVariantMap vpnSites(RouteMode mode) const
     {

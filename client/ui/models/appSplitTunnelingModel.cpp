@@ -5,7 +5,9 @@
 AppSplitTunnelingModel::AppSplitTunnelingModel(std::shared_ptr<Settings> settings, QObject *parent)
     : QAbstractListModel(parent), m_settings(settings)
 {
+    /* issue_5
     m_isSplitTunnelingEnabled = true;
+    */
     m_currentRouteMode = m_settings->getAppsRouteMode();
     if (m_currentRouteMode == Settings::VpnAllApps) { // for old split tunneling configs
         m_settings->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(Settings::VpnAllExceptApps));
@@ -74,6 +76,7 @@ void AppSplitTunnelingModel::setRouteMode(int routeMode)
     emit routeModeChanged();
 }
 
+/* issue_5
 bool AppSplitTunnelingModel::isSplitTunnelingEnabled()
 {
     return m_isSplitTunnelingEnabled;
@@ -85,6 +88,7 @@ void AppSplitTunnelingModel::toggleSplitTunneling(bool enabled)
     m_isSplitTunnelingEnabled = enabled;
     emit splitTunnelingToggled();
 }
+*/
 
 QHash<int, QByteArray> AppSplitTunnelingModel::roleNames() const
 {

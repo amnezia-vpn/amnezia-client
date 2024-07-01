@@ -24,7 +24,9 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     Q_PROPERTY(int routeMode READ getRouteMode WRITE setRouteMode NOTIFY routeModeChanged)
+    /* issue_5
     Q_PROPERTY(bool isTunnelingEnabled READ isSplitTunnelingEnabled NOTIFY splitTunnelingToggled)
+    */
 
 public slots:
     bool addApp(const InstalledAppInfo &appInfo);
@@ -33,8 +35,10 @@ public slots:
     int getRouteMode();
     void setRouteMode(int routeMode);
 
+    /* issue_5
     bool isSplitTunnelingEnabled();
     void toggleSplitTunneling(bool enabled);
+    */
 
 signals:
     void routeModeChanged();
@@ -46,7 +50,9 @@ protected:
 private:
     std::shared_ptr<Settings> m_settings;
 
+    /* issue_5
     bool m_isSplitTunnelingEnabled;
+    */
     Settings::AppsRouteMode m_currentRouteMode;
 
     QVector<InstalledAppInfo> m_apps;

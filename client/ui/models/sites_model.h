@@ -22,7 +22,9 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     Q_PROPERTY(int routeMode READ getRouteMode WRITE setRouteMode NOTIFY routeModeChanged)
+    /* issue_5
     Q_PROPERTY(bool isTunnelingEnabled READ isSplitTunnelingEnabled NOTIFY splitTunnelingToggled)
+    */
 
 public slots:
     bool addSite(const QString &hostname, const QString &ip);
@@ -32,8 +34,10 @@ public slots:
     int getRouteMode();
     void setRouteMode(int routeMode);
 
+    /* issue_5
     bool isSplitTunnelingEnabled();
     void toggleSplitTunneling(bool enabled);
+    */
 
     QVector<QPair<QString, QString>> getCurrentSites();
 
@@ -49,7 +53,9 @@ private:
 
     std::shared_ptr<Settings> m_settings;
 
+    /* issue_5
     bool m_isSplitTunnelingEnabled;
+    */
     Settings::RouteMode m_currentRouteMode;
 
     QVector<QPair<QString, QString>> m_sites;
