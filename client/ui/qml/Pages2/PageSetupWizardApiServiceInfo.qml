@@ -9,6 +9,7 @@ import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
+import "../Components"
 
 PageType {
     id: root
@@ -40,7 +41,7 @@ PageType {
             BackButtonType {
                 id: backButton
                 Layout.topMargin: 20
-                KeyNavigation.tab: fileButton.rightButton
+//                KeyNavigation.tab: fileButton.rightButton
             }
 
             HeaderType {
@@ -103,6 +104,11 @@ PageType {
                 Layout.leftMargin: 16
 
                 text: serviceInfo["features"]
+            }
+
+            ShowSupportedSitesButton {
+                drawerParent: root
+                sitesList: serviceInfo["sites_list"]
             }
 
             Header2TextType {

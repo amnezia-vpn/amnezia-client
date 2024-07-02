@@ -30,7 +30,10 @@ public:
         DefaultContainerRole,
 
         HasInstalledContainers,
-        IsServerFromApiRole,
+
+        IsServerFromTelegramApiRole,
+        IsServerFromGatewayApiRole,
+        ApiServiceInfoRole,
 
         HasAmneziaDns
     };

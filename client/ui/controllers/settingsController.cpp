@@ -252,3 +252,8 @@ void SettingsController::requestNotificationPermission()
     AndroidController::instance()->requestNotificationPermission();
 #endif
 }
+
+QString SettingsController::getInstallationUuid()
+{
+    return m_settings->getInstallationUuid(false);
+}

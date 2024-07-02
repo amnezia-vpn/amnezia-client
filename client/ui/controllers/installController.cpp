@@ -24,6 +24,11 @@ namespace
 {
     Logger logger("ServerController");
 
+    namespace configKey
+    {
+        constexpr char serviceInfo[] = "service_info";
+    }
+
 #ifdef Q_OS_WINDOWS
     QString getNextDriverLetter()
     {
@@ -824,6 +829,7 @@ bool InstallController::installServiceFromApi()
 {
     ApiController apiController;
     QJsonObject serverConfig;
+
     ErrorCode errorCode = apiController.getConfigForService(m_settings->getInstallationUuid(true), m_apiServicesModel->getCountryCode(),
                                                             m_apiServicesModel->getSelectedServiceType(),
                                                             m_apiServicesModel->getSelectedServiceProtocol(), serverConfig);
@@ -831,6 +837,12 @@ bool InstallController::installServiceFromApi()
         emit installationErrorOccurred(errorCode);
         return false;
     }
+
+    auto serviceInfo = m_apiServicesModel->getSelectedServiceInfo();
+
+    serverConfig.insert(config_key::configVersion, 2); //todo remove?
+    serverConfig.insert(configKey::serviceInfo, serviceInfo);
+
     m_serversModel->addServer(serverConfig);
     emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
     return true;

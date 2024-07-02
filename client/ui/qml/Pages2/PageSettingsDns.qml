@@ -37,12 +37,12 @@ PageType {
         anchors.bottom: parent.bottom
         contentHeight: content.height
 
-        property var isServerFromApi: ServersModel.getDefaultServerData("isServerFromApi")
+        property var isServerFromTelegramApi: ServersModel.getDefaultServerData("isServerFromTelegramApi")
 
-        enabled: !isServerFromApi
+        enabled: !isServerFromTelegramApi
 
         Component.onCompleted: {
-            if (isServerFromApi) {
+            if (isServerFromTelegramApi) {
                 PageController.showNotificationMessage(qsTr("Default server does not support custom DNS"))
             }
         }

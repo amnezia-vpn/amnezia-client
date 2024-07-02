@@ -20,7 +20,7 @@ import "../Components"
 PageType {
     id: root
 
-    property var isServerFromApi: ServersModel.getDefaultServerData("isServerFromApi")
+    property var isServerFromTelegramApi: ServersModel.getDefaultServerData("isServerFromTelegramApi")
     
     defaultActiveFocusItem: searchField.textField
 
@@ -35,7 +35,7 @@ PageType {
         if (ConnectionController.isConnected) {
             PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
             root.pageEnabled = false
-        } else if (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && isServerFromApi) {
+        } else if (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && isServerFromTelegramApi) {
             PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
             root.pageEnabled = false
         } else {

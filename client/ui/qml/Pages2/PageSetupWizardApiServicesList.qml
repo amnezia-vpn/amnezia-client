@@ -38,7 +38,7 @@ PageType {
             BackButtonType {
                 id: backButton
                 Layout.topMargin: 20
-                KeyNavigation.tab: fileButton.rightButton
+//                KeyNavigation.tab: fileButton.rightButton
             }
 
             HeaderType {

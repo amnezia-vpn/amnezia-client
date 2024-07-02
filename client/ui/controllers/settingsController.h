@@ -70,6 +70,8 @@ public slots:
     bool isNotificationPermissionGranted();
     void requestNotificationPermission();
 
+    QString getInstallationUuid();
+
 signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();

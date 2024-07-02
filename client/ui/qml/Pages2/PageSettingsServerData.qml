@@ -246,7 +246,7 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButton5
-                visible: ServersModel.getProcessedServerData("isServerFromApi")
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
                 Layout.fillWidth: true
 
                 text: qsTr("Reset API config")
@@ -284,7 +284,7 @@ PageType {
             }
 
             DividerType {
-                visible: ServersModel.getProcessedServerData("isServerFromApi")
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
             }
         }
     }

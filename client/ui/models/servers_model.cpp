@@ -3,6 +3,13 @@
 #include "core/controllers/serverController.h"
 #include "core/networkUtilities.h"
 
+namespace {
+    enum ApiConfigSources {
+        Telegram = 1,
+        AmneziaGateway
+    };
+}
+
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
     m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
@@ -98,8 +105,14 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     case HasInstalledContainers: {
         return serverHasInstalledContainers(index.row());
     }
-    case IsServerFromApiRole: {
-        return server.value(config_key::configVersion).toInt();
+    case IsServerFromTelegramApiRole: {
+        return server.value(config_key::configVersion).toInt() == ApiConfigSources::Telegram;
+    }
+    case IsServerFromGatewayApiRole: {
+        return server.value(config_key::configVersion).toInt() == ApiConfigSources::AmneziaGateway;
+    }
+    case ApiServiceInfoRole: {
+        return server.value("service_info").toObject();
     }
     case HasAmneziaDns: {
         QString primaryDns = server.value(config_key::dns1).toString();
@@ -233,7 +246,7 @@ bool ServersModel::isDefaultServerCurrentlyProcessed()
 
 bool ServersModel::isDefaultServerFromApi()
 {
-    return qvariant_cast<bool>(data(m_defaultServerIndex, IsServerFromApiRole));
+    return qvariant_cast<bool>(data(m_defaultServerIndex, IsServerFromTelegramApiRole));
 }
 
 bool ServersModel::isProcessedServerHasWriteAccess()
@@ -315,7 +328,9 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[DefaultContainerRole] = "defaultContainer";
     roles[HasInstalledContainers] = "hasInstalledContainers";
 
-    roles[IsServerFromApiRole] = "isServerFromApi";
+    roles[IsServerFromTelegramApiRole] = "isServerFromTelegramApi";
+    roles[IsServerFromGatewayApiRole] = "isServerFromGatewayApi";
+    roles[ApiServiceInfoRole] = "apiServiceInfo";
     return roles;
 }
 
@@ -565,7 +580,7 @@ void ServersModel::toggleAmneziaDns(bool enabled)
 
 bool ServersModel::isServerFromApiAlreadyExists(const quint16 crc)
 {
-    for (const auto &server : qAsConst(m_servers)) {
+    for (const auto &server : std::as_const(m_servers)) {
         if (static_cast<quint16>(server.toObject().value(config_key::crc).toInt()) == crc) {
             return true;
         }

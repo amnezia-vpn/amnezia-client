@@ -171,12 +171,14 @@ PageType {
 
             Layout.fillWidth: true
 
-            currentIndex: (ServersModel.getProcessedServerData("isServerFromApi")
+            currentIndex: (ServersModel.getProcessedServerData("isServerFromTelegramApi")
                            && !ServersModel.getProcessedServerData("hasInstalledContainers")) ? 2 : 0
 
             background: Rectangle {
                 color: "transparent"
             }
+
+            visible: !ServersModel.getProcessedServerData("isServerFromGatewayApi")
 
             activeFocusOnTab: true
             onFocusChanged: {
@@ -196,6 +198,7 @@ PageType {
                 Keys.onReturnPressed: tabBar.currentIndex = 0
                 Keys.onEnterPressed: tabBar.currentIndex = 0
             }
+
             TabButtonType {
                 id: servicesTab
                 visible: servicesPage.installedServicesCount
@@ -207,6 +210,7 @@ PageType {
                 Keys.onReturnPressed: tabBar.currentIndex = 1
                 Keys.onEnterPressed: tabBar.currentIndex = 1
             }
+
             TabButtonType {
                 id: dataTab
                 isSelected: tabBar.currentIndex === 2
@@ -227,7 +231,7 @@ PageType {
             Layout.preferredWidth: root.width
             Layout.preferredHeight: root.height - tabBar.implicitHeight - header.implicitHeight
 
-            currentIndex: tabBar.currentIndex
+            currentIndex: ServersModel.getProcessedServerData("isServerFromGatewayApi") ? 3 : tabBar.currentIndex
 
             PageSettingsServerProtocols {
                 id: protocolsPage
@@ -235,17 +239,26 @@ PageType {
 
                 onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
+
             PageSettingsServerServices {
                 id: servicesPage
                 stackView: root.stackView
 
                 onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
+
             PageSettingsServerData {
                 id: dataPage
                 stackView: root.stackView
 
                 onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
+            }
+
+            PageSettingsApiServerInfo {
+                id: apiInfoPage
+                stackView: root.stackView
+
+//                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
         }
 
