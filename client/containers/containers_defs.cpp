@@ -389,3 +389,18 @@ QJsonObject ContainerProps::getProtocolConfigFromContainer(const Proto protocol,
 
     return QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 }
+
+int ContainerProps::installPageOrder(DockerContainer container)
+{
+    switch (container) {
+    case DockerContainer::OpenVpn: return 4;
+    case DockerContainer::Cloak: return 5;
+    case DockerContainer::ShadowSocks: return 6;
+    case DockerContainer::WireGuard: return 2;
+    case DockerContainer::Awg: return 1;
+    case DockerContainer::Xray: return 3;
+    case DockerContainer::Ipsec: return 7;
+    case DockerContainer::SSXray: return 8;
+    default: return 0;
+    }
+}

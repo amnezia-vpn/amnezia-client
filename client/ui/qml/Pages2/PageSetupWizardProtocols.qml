@@ -34,6 +34,10 @@ PageType {
                 value: true
             }
         ]
+        sorters: RoleSorter {
+            roleName: "installPageOrder"
+            sortOrder: Qt.AscendingOrder
+        }
     }
 
     ColumnLayout {
