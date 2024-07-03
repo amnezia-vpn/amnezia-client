@@ -60,7 +60,8 @@ PageType {
                     id: proxyContainersModel
                     sourceModel: ContainersModel
                     sorters: [
-                        RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
+                        RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder },
+                        RoleSorter { roleName: "installPageOrder"; sortOrder: Qt.AscendingOrder }
                     ]
                 }
 
