@@ -392,10 +392,6 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         return QJsonObject();
     }
 
-    if (!configMap.value("MTU").isEmpty()) {
-        lastConfig[config_key::mtu] = configMap.value("MTU");
-    }
-
     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(","));
 
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
@@ -418,6 +414,12 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
         protocolName = "awg";
         m_configType = ConfigTypes::Awg;
+    }
+
+    if (!configMap.value("MTU").isEmpty()) {
+        lastConfig[config_key::mtu] = configMap.value("MTU");
+    } else {
+        lastConfig[config_key::mtu] = protocolName == "awg" ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
     }
 
     QJsonObject wireguardConfig;
@@ -664,7 +666,7 @@ void ImportController::processAmneziaConfig(QJsonObject &config)
             containerConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
 
             container[ContainerProps::containerTypeToString(dockerContainer)] = containerConfig;
-            containers.replace(i, containerConfig);
+            containers.replace(i, container);
             config.insert(config_key::containers, containers);
         }
     }
