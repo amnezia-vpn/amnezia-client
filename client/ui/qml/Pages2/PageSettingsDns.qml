@@ -44,7 +44,7 @@ PageType {
 
         Component.onCompleted: {
             if (isServerFromApi) {
-                PageController.showNotificationMessage(qsTr("Default server does not support custom dns"))
+                PageController.showNotificationMessage(qsTr("Default server does not support custom DNS"))
             }
         }
 

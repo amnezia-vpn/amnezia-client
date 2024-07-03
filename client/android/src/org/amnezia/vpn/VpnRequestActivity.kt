@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
@@ -18,9 +19,11 @@ import androidx.core.content.getSystemService
 import org.amnezia.vpn.util.Log
 
 private const val TAG = "VpnRequestActivity"
+const val EXTRA_PROTOCOL = "PROTOCOL"
 
 class VpnRequestActivity : ComponentActivity() {
 
+    private var vpnProto: VpnProto? = null
     private var userPresentReceiver: BroadcastReceiver? = null
     private val requestLauncher =
         registerForActivityResult(StartActivityForResult(), ::checkRequestResult)
@@ -28,6 +31,12 @@ class VpnRequestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Start request activity")
+        vpnProto = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.extras?.getSerializable(EXTRA_PROTOCOL, VpnProto::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.extras?.getSerializable(EXTRA_PROTOCOL) as VpnProto
+        }
         val requestIntent = VpnService.prepare(applicationContext)
         if (requestIntent != null) {
             if (getSystemService<KeyguardManager>()!!.isKeyguardLocked) {
@@ -66,10 +75,18 @@ class VpnRequestActivity : ComponentActivity() {
 
     private fun onPermissionGranted() {
         Toast.makeText(this, resources.getString(R.string.vpnGranted), Toast.LENGTH_LONG).show()
-        Intent(applicationContext, AmneziaVpnService::class.java).apply {
-            putExtra(AFTER_PERMISSION_CHECK, true)
-        }.also {
-            ContextCompat.startForegroundService(this, it)
+        vpnProto?.let { proto ->
+            Intent(applicationContext, proto.serviceClass).apply {
+                putExtra(AFTER_PERMISSION_CHECK, true)
+            }.also {
+                ContextCompat.startForegroundService(this, it)
+            }
+        } ?: run {
+            Intent(this, AmneziaActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }.also {
+                startActivity(it)
+            }
         }
     }
 
