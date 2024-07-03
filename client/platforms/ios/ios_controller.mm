@@ -216,6 +216,9 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
     if (proto == amnezia::Proto::Awg) {
         return setupAwg();
     }
+    if (proto == amnezia::Proto::Xray) {
+        return setupXray();
+    }
 
     return false;
 }
@@ -501,6 +504,15 @@ bool IosController::setupWireGuard()
     return startWireGuard(wgConfigDocStr);
 }
 
+bool IosController::setupXray()
+{
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Xray)].toObject();
+    QJsonDocument xrayConfigDoc(config);
+    QString xrayConfigStr(xrayConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startXray(xrayConfigStr);
+}
+
 bool IosController::setupAwg()
 {
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Awg)].toObject();
@@ -583,6 +595,20 @@ bool IosController::startWireGuard(const QString &config)
     NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
     tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
     tunnelProtocol.providerConfiguration = @{@"wireguard": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
+    tunnelProtocol.serverAddress = m_serverAddress;
+
+    m_currentTunnel.protocolConfiguration = tunnelProtocol;
+
+    startTunnel();
+}
+
+bool IosController::startXray(const QString &config)
+{
+    qDebug() << "IosController::startXray";
+
+    NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
+    tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
+    tunnelProtocol.providerConfiguration = @{@"xray": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
     tunnelProtocol.serverAddress = m_serverAddress;
 
     m_currentTunnel.protocolConfiguration = tunnelProtocol;

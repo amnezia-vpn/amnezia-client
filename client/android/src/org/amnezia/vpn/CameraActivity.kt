@@ -140,7 +140,7 @@ class CameraActivity : ComponentActivity() {
                             }
                         }
                     }.addOnFailureListener {
-                        Log.e(TAG, "Processing QR-code image failed: ${it.message}")
+                        Log.e(TAG, "Processing QR code image failed: ${it.message}")
                     }.addOnCompleteListener {
                         imageProxy.close()
                     }

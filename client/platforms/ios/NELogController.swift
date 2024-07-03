@@ -13,6 +13,10 @@ public func ovpnLog(_ type: OSLogType, title: String = "", message: String) {
     neLog(type, title: "OVPN: \(title)", message: message)
 }
 
+public func xrayLog(_ type: OSLogType, title: String = "", message: String) {
+    neLog(type, title: "XRAY: \(title)", message: message)
+}
+
 public func neLog(_ type: OSLogType, title: String = "", message: String) {
     Log.log(type, title: "NE: \(title)", message: message)
 }
