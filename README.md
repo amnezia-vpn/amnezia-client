@@ -44,6 +44,19 @@ git submodule update --init --recursive
 
 Want to contribute? Welcome!
 
+### Help with translations
+
+Download the most actual translation files.
+
+Go to ["Actions" tab](https://github.com/amnezia-vpn/amnezia-client/actions?query=is%3Asuccess+branch%3Adev), click on the first line.
+Then scroll down to the "Artifacts" section and download "AmneziaVPN_translations".
+
+Unzip this file.
+Each *.ts file contains strings for one corresponding language.
+
+Translate or correct some strings in one or multiple *.ts files and commit them back to this repository into the ``client/translations`` folder.
+You can do it via a web-interface or any other method you're familiar with.
+
 ### Building sources and deployment
 
 Check deploy folder for build scripts. 
