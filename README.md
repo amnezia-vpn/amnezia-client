@@ -18,7 +18,9 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 [https://amnezia.org](https://amnezia.org) - project website  
 [https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
-[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English)  
+[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English) 
+[https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Telegram support channel (Farsi) 
+[https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Telegram support channel (Myanmar)  
 [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
 
 ## Tech
@@ -52,7 +54,7 @@ Check deploy folder for build scripts.
 
 1. First, make sure you have [XCode](https://developer.apple.com/xcode/) installed, at least version 14 or higher.
 
-2. We use QT to generate the XCode project. We need QT version 6.6.1. Install QT for MacOS [here](https://doc.qt.io/qt-6/macos.html) or [QT Online Installer](https://www.qt.io/download-open-source). Required modules:
+2. We use QT to generate the XCode project. We need QT version 6.6.2. Install QT for MacOS [here](https://doc.qt.io/qt-6/macos.html) or [QT Online Installer](https://www.qt.io/download-open-source). Required modules:
    - MacOS
    - iOS
    - Qt 5 Compatibility Module
@@ -142,10 +144,10 @@ GPL v3.0
 
 ## Donate
 
-Bitcoin: bc1qn9rhsffuxwnhcuuu4qzrwp4upkrq94xnh8r26u  
+Patreon: [https://www.patreon.com/amneziavpn](https://www.patreon.com/amneziavpn)  
+USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4
+USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d
 XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3  
-payeer.com: P2561305  
-ko-fi.com: [https://ko-fi.com/amnezia_vpn](https://ko-fi.com/amnezia_vpn)  
 
 ## Acknowledgments
 
