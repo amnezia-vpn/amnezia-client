@@ -243,9 +243,11 @@ void ImportController::importConfig()
 
 QString ImportController::getNewServerName()
 {
+    QFileInfo s(m_configFileName);
+    QString name = s.baseName();
     bool isServerNameExist = false;
     for (const QJsonValue &server : m_settings->serversArray()) {
-        if (server.toObject().value(config_key::description).toString() == m_configFileName) {
+        if (server.toObject().value(config_key::description).toString() == name) {
             isServerNameExist = true;
             break;
         }
@@ -254,7 +256,7 @@ QString ImportController::getNewServerName()
     if (isServerNameExist) {
         return m_settings->nextAvailableServerName();
     } else {
-        return m_configFileName;
+        return name;
     }
 }
 

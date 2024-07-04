@@ -60,6 +60,7 @@ public slots:
 
     void addRoute(const QString& ip);
     void addNewDns(const QString& dnsAddr);
+    void finishReceivingSettings();
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
@@ -69,7 +70,7 @@ signals:
     void serviceIsNotReady();
 
     void newRoute(const QString& ip);
-    void restartConnectionWithDns(const QString& dnsAddr);
+    void restartConnection();
     void toggleConnection();
 
 protected slots:
@@ -80,6 +81,7 @@ protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
 
 private:
+    bool needToRestartConnection = false;
     std::shared_ptr<Settings> m_settings;
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;

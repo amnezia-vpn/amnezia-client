@@ -268,6 +268,12 @@ void Settings::setSitesSplitTunnelingEnabled(bool enabled)
 }
 */
 
+bool Settings::isVpnSiteInSettings(const QString &site)
+{
+    QVariantMap sites = vpnSites(VpnAllExceptSites);
+    return sites.contains(site);
+}
+
 bool Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
 {
     QVariantMap sites = vpnSites(mode);

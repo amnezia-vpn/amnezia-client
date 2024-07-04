@@ -416,15 +416,14 @@ void AmneziaApplication::initControllers()
 
     connect(m_importController.get(), &ImportController::siteNeedsAddition, m_sitesController.get(), &SitesController::addSite);
     connect(m_vpnConnection.get(), &VpnConnection::newRoute, m_sitesController.get(), &SitesController::addSite);
-    connect(m_vpnConnection.get(), &VpnConnection::restartConnectionWithDns, this, &AmneziaApplication::restartConnectionWithDns);
+    connect(m_vpnConnection.get(), &VpnConnection::restartConnection, this, &AmneziaApplication::restartConnection);
     connect(this, &AmneziaApplication::toggleConnection, m_connectionController.get(),
         &ConnectionController::toggleConnection, Qt::QueuedConnection);
 }
 
-void AmneziaApplication::restartConnectionWithDns(const QString& dnsAddr)
+void AmneziaApplication::restartConnection()
 {
     emit toggleConnection();
     m_connectionController->waitForConnectionFinished(10000);
-    m_settings->setPrimaryDns(dnsAddr);
     emit toggleConnection();
 }

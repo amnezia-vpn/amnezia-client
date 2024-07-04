@@ -76,6 +76,7 @@ signals:
 
     void newRoute(const QString& ip);
     void newDns(const QString& dnsAddr);
+    void finishReceivingSettings();
 
 public slots:
     virtual void onTimeout(); // todo: remove?

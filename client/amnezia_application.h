@@ -135,7 +135,7 @@ private:
     QNetworkAccessManager *m_nam;
 
 public slots:
-    void restartConnectionWithDns(const QString& dnsAddr);
+    void restartConnection();
 };
 
 #endif // AMNEZIA_APPLICATION_H

@@ -322,37 +322,44 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
 static void
 transformNetMask(QString &mask)
 {
-    if (QString("255.255.255.0") == mask) {
-        mask = QString("24");
-    } else if (QString("255.255.254.0") == mask) {
-        mask = QString("23");
-    } else if (QString("255.255.252.0") == mask) {
-        mask = QString("22");
-    } else if (QString("255.255.248.0") == mask) {
-        mask = QString("21");
-    } else if (QString("255.255.240.0") == mask) {
-        mask = QString("20");
-    } else if (QString("255.255.224.0") == mask) {
-        mask = QString("19");
-    } else if (QString("255.255.255.252") == mask) {
-        mask = QString("30");
-    } else if (QString("255.255.255.248") == mask) {
-        mask = QString("29");
-    } else if (QString("255.255.255.240") == mask) {
-        mask = QString("28");
-    } else if (QString("255.255.255.224") == mask) {
-        mask = QString("27");
-    } else if (QString("255.255.255.192") == mask) {
-        mask = QString("26");
-    } else if (QString("255.255.255.128") == mask) {
-        mask = QString("25");
-    } else if (QString("255.255.192.0") == mask) {
-        mask = QString("18");
-    } else if (QString("255.255.128.0") == mask) {
-        mask = QString("17");
-    } else if (QString("255.255.0.0") == mask) {
-        mask = QString("16");
+    if (mask.split(".").size() != 4)
+        return;
+
+    uint val = 0;
+    for (const QString &v: mask.split(".")) {
+        switch (v.toUInt()) {
+        case 255:
+            val += 8;
+            break;
+        case 254:
+            val += 7;
+            break;
+        case 252:
+            val += 6;
+            break;
+        case 248:
+            val += 5;
+            break;
+        case 240:
+            val += 4;
+            break;
+        case 224:
+            val += 3;
+            break;
+        case 192:
+            val += 2;
+            break;
+        case 128:
+            val += 1;
+            break;
+        case 0:
+            break;
+        default:
+            return;
+        }
     }
+
+    mask = QString::number(val);
 }
 
 void OpenVpnProtocol::updateVpnGateway(const QString &line)
@@ -409,6 +416,10 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                 QString dnsAddr = l.split(" ").at(2);
                 emit newDns(dnsAddr);
             }
+        }
+
+        if (l.contains("push-continuation 1")) {
+            emit finishReceivingSettings();
         }
     }
 }

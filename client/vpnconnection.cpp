@@ -188,6 +188,10 @@ void VpnConnection::addRoutes(const QStringList &ips)
 
 void VpnConnection::addRoute(const QString& ip)
 {
+    if (m_settings->isVpnSiteInSettings(ip))
+        return;
+
+    needToRestartConnection = true;
     emit newRoute(ip);
 }
 
@@ -201,8 +205,15 @@ void VpnConnection::addNewDns(const QString& dnsAddr)
     if (  m_vpnConfiguration.value(config_key::dns1).toString() != dnsAddr
        && m_vpnConfiguration.value(config_key::dns2).toString() != dnsAddr)
     {
-        emit restartConnectionWithDns(dnsAddr);
+        m_settings->setPrimaryDns(dnsAddr);
+        needToRestartConnection = true;
     }
+}
+
+void VpnConnection::finishReceivingSettings()
+{
+    if (needToRestartConnection)
+        emit restartConnection();
 }
 
 void VpnConnection::deleteRoutes(const QStringList &ips)
@@ -242,6 +253,7 @@ ErrorCode VpnConnection::lastError() const
 void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
                                  const QJsonObject &vpnConfiguration)
 {
+    needToRestartConnection = false;
     qDebug() << QString("ConnectToVpn, Server index is %1, container is %2, route mode is")
                         .arg(serverIndex)
                         .arg(ContainerProps::containerToString(container))
@@ -312,6 +324,7 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
     connect(m_vpnProtocol.get(), &VpnProtocol::newRoute, this, &VpnConnection::addRoute);
     connect(m_vpnProtocol.get(), &VpnProtocol::newDns, this, &VpnConnection::addNewDns);
+    connect(m_vpnProtocol.get(), &VpnProtocol::finishReceivingSettings, this, &VpnConnection::finishReceivingSettings);
 }
 
 void VpnConnection::appendKillSwitchConfig()

@@ -129,6 +129,7 @@ public:
         setValue("Conf/" + routeModeString(mode), sites);
         m_settings.sync();
     }
+    bool isVpnSiteInSettings(const QString &site);
     bool addVpnSite(RouteMode mode, const QString &site, const QString &ip = "");
     void addVpnSites(RouteMode mode, const QMap<QString, QString> &sites); // map <site, ip>
     QStringList getVpnIps(RouteMode mode) const;
