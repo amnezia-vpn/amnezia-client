@@ -144,7 +144,7 @@ GPL v3.0
 
 ## Donate
 
-Patreon: [https://www.patreon.com/amneziavpn](https://www.patreon.com/amneziavpn)  
+Patreon: [https://www.patreon.com/amneziavpn](https://www.patreon.com/amneziavpn)
 USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4
 USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d
 XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3  
