@@ -1,0 +1,5 @@
+include_directories(${CMAKE_CURRENT_LIST_DIR})
+
+set(QJSONSTRUCT_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/QJsonStruct.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/QJsonIO.hpp)

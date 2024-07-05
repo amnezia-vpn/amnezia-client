@@ -39,7 +39,7 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="115"/>
-        <source>Settings updated successfully, Reconnnection...</source>
+        <source>Settings updated successfully, reconnnection...</source>
         <translation>配置已更新, 重连中...</translation>
     </message>
     <message>
@@ -698,8 +698,8 @@ Already installed containers were found on the server. All installed containers 
     <name>PageProtocolShadowSocksSettings</name>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="80"/>
-        <source>ShadowSocks settings</source>
-        <translation>ShadowSocks 配置</translation>
+        <source>Shadowsocks settings</source>
+        <translation>Shadowsocks 配置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="89"/>
@@ -1039,13 +1039,13 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="115"/>
-        <source>Github</source>
-        <translation></translation>
+        <source>GitHub</source>
+        <translation>GitHub</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="119"/>
         <source>https://github.com/amnezia-vpn/amnezia-client</source>
-        <translation></translation>
+        <translation>https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="128"/>
@@ -1323,8 +1323,8 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     <name>PageSettingsDns</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="39"/>
-        <source>Default server does not support custom dns</source>
-        <translation>默认服务器不支持自定义 dns</translation>
+        <source>Default server does not support custom DNS</source>
+        <translation>默认服务器不支持自定义 DNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="57"/>
@@ -1396,7 +1396,7 @@ And if you don&apos;t like the app, all the more support it - the donation will 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="64"/>
-        <source>Enabling this function will save application&apos;s logs automatically, By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
+        <source>Enabling this function will save application&apos;s logs automatically. By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
         <translation>默认情况下，日志功能是禁用的。如果应用程序出现故障，则启用日志保存功能。</translation>
     </message>
     <message>
@@ -1834,7 +1834,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="89"/>
-        <source>QR-code</source>
+        <source>QR code</source>
         <translation>二维码</translation>
     </message>
     <message>
@@ -2167,8 +2167,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="79"/>
-        <source>Save ShadowSocks config</source>
-        <translation>保存 ShadowSocks 配置</translation>
+        <source>Save Shadowsocks config</source>
+        <translation>保存 Shadowsocks 配置</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="86"/>
@@ -2197,8 +2197,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="131"/>
-        <source>ShadowSocks native format</source>
-        <translation>ShadowSocks原生格式</translation>
+        <source>Shadowsocks native format</source>
+        <translation>Shadowsocks原生格式</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="136"/>
@@ -2681,8 +2681,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <name>QObject</name>
     <message>
         <location filename="../protocols/protocols_defs.cpp" line="77"/>
-        <source>Sftp service</source>
-        <translation>Sftp 服务</translation>
+        <source>SFTP service</source>
+        <translation>SFTP 服务</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="11"/>
@@ -2691,7 +2691,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="12"/>
-        <source>Unknown Error</source>
+        <source>Unknown error</source>
         <translation>未知错误</translation>
     </message>
     <message>
@@ -2731,18 +2731,18 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="24"/>
-        <source>Ssh request was denied</source>
-        <translation>ssh请求被拒绝</translation>
+        <source>SSH request was denied</source>
+        <translation>SSH请求被拒绝</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="25"/>
-        <source>Ssh request was interrupted</source>
-        <translation>ssh请求中断</translation>
+        <source>SSH request was interrupted</source>
+        <translation>SSH请求中断</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
-        <source>Ssh internal error</source>
-        <translation>ssh内部错误</translation>
+        <source>SSH internal error</source>
+        <translation>SSH内部错误</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="27"/>
@@ -2761,7 +2761,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="32"/>
-        <source>Scp error: Generic failure</source>
+        <source>SCP error: Generic failure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2887,8 +2887,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="40"/>
-        <source>ShadowSocks (ss-local) executable missing</source>
-        <translation>ShadowSocks (ss-local) 执行文件丢失</translation>
+        <source>Shadowsocks (ss-local) executable missing</source>
+        <translation>Shadowsocks (ss-local) 执行文件丢失</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="41"/>
@@ -2947,12 +2947,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="91"/>
-        <source>Amnezia DNS</source>
-        <translation></translation>
+        <source>AmneziaDNS</source>
+        <translation>AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="92"/>
-        <source>Sftp file sharing service</source>
+        <source>SFTP file sharing service</source>
         <translation>SFTP文件共享服务</translation>
     </message>
     <message>
@@ -2962,8 +2962,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="101"/>
-        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
-        <translation>ShadowSocks - 掩盖VPN流量，使其类似于正常的网络流量，但在一些高度审查的地区可能会被分析系统识别.</translation>
+        <source>Shadowsocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
+        <translation>Shadowsocks - 掩盖VPN流量，使其类似于正常的网络流量，但在一些高度审查的地区可能会被分析系统识别.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="217"/>
@@ -3037,8 +3037,8 @@ WireGuard非常容易被阻挡，因为其独特的数据包签名。与一些�
     通过UDP网络协议运行。</translation>
     </message>
     <message>
-        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but is recognised by analysis systems in some highly censored regions.</source>
-        <translation type="vanished">ShadowSocks - 混淆 VPN 流量，使其与正常的 Web 流量相似，但在一些审查力度高的地区可以被分析系统识别。</translation>
+        <source>Shadowsocks - masks VPN traffic, making it similar to normal web traffic, but is recognised by analysis systems in some highly censored regions.</source>
+        <translation type="vanished">Shadowsocks - 混淆 VPN 流量，使其与正常的 Web 流量相似，但在一些审查力度高的地区可以被分析系统识别。</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="104"/>
@@ -3057,8 +3057,8 @@ WireGuard非常容易被阻挡，因为其独特的数据包签名。与一些�
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="115"/>
-        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>IKEv2 - 现代稳定协议，相比其他协议较快一些，在信号丢失后恢复连接。Android 和 iOS最新版原生支持。</translation>
+        <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
+        <translation>IKEv2/IPsec - 现代稳定协议，相比其他协议较快一些，在信号丢失后恢复连接。</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="118"/>
@@ -3098,16 +3098,12 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
         <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
 
 * Available in the AmneziaVPN only on desktop platforms
-* Normal power consumption on mobile devices
-
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
         <translation>Shadowsocks 受到 SOCKS5 协议的启发，使用 AEAD 密码保护连接。尽管 Shadowsocks 设计得谨慎且难以识别，但它与标准 HTTPS 连接并不相同。但是，某些流量分析系统可能仍会检测到 Shadowsocks 连接。由于Amnezia支持有限，建议使用AmneziaWG协议。
 
 * 仅在桌面平台上的 AmneziaVPN 中可用
-* 移动设备的正常功耗
-
 * 可配置的加密协议
 * 可以被某些 DPI 系统检测到
 * 通过 TCP 网络协议工作。</translation>

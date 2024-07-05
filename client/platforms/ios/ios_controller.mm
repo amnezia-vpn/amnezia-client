@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QThread>
+#include <QEventLoop>
 
 #include "../protocols/vpnprotocol.h"
 #import "ios_controller_wrapper.h"
@@ -26,6 +27,15 @@ const char* MessageKey::isOnDemand = "is-on-demand";
 const char* MessageKey::SplitTunnelType = "SplitTunnelType";
 const char* MessageKey::SplitTunnelSites = "SplitTunnelSites";
 
+static UIViewController* getViewController() {
+    NSArray *windows = [[UIApplication sharedApplication]windows];
+    for (UIWindow *window in windows) {
+        if (window.isKeyWindow) {
+            return window.rootViewController;
+        }
+    }
+    return nil;
+}
 
 Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
   switch (status) {
@@ -205,6 +215,9 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
     }
     if (proto == amnezia::Proto::Awg) {
         return setupAwg();
+    }
+    if (proto == amnezia::Proto::Xray) {
+        return setupXray();
     }
 
     return false;
@@ -491,6 +504,15 @@ bool IosController::setupWireGuard()
     return startWireGuard(wgConfigDocStr);
 }
 
+bool IosController::setupXray()
+{
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Xray)].toObject();
+    QJsonDocument xrayConfigDoc(config);
+    QString xrayConfigStr(xrayConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startXray(xrayConfigStr);
+}
+
 bool IosController::setupAwg()
 {
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Awg)].toObject();
@@ -573,6 +595,20 @@ bool IosController::startWireGuard(const QString &config)
     NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
     tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
     tunnelProtocol.providerConfiguration = @{@"wireguard": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
+    tunnelProtocol.serverAddress = m_serverAddress;
+
+    m_currentTunnel.protocolConfiguration = tunnelProtocol;
+
+    startTunnel();
+}
+
+bool IosController::startXray(const QString &config)
+{
+    qDebug() << "IosController::startXray";
+
+    NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
+    tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
+    tunnelProtocol.providerConfiguration = @{@"xray": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
     tunnelProtocol.serverAddress = m_serverAddress;
 
     m_currentTunnel.protocolConfiguration = tunnelProtocol;
@@ -702,4 +738,87 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
                  << [sendError.localizedDescription UTF8String];
     }
 
+}
+
+bool IosController::shareText(const QStringList& filesToSend) {
+    NSMutableArray *sharingItems = [NSMutableArray new];
+
+    for (int i = 0; i < filesToSend.size(); i++) {
+        NSURL *logFileUrl = [[NSURL alloc] initFileURLWithPath:filesToSend[i].toNSString()];
+        [sharingItems addObject:logFileUrl];
+    }
+
+    UIViewController *qtController = getViewController();
+    if (!qtController) return;
+
+    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
+    
+    __block bool isAccepted = false;
+    
+    [activityController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
+        isAccepted = completed;
+        emit finished();
+    }];
+
+    [qtController presentViewController:activityController animated:YES completion:nil];
+    UIPopoverPresentationController *popController = activityController.popoverPresentationController;
+    if (popController) {
+        popController.sourceView = qtController.view;
+        popController.sourceRect = CGRectMake(100, 100, 100, 100);
+    }
+    
+    QEventLoop wait;
+    QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
+    wait.exec();
+    
+    return isAccepted;
+}
+
+QString IosController::openFile() {
+    UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.item"] inMode:UIDocumentPickerModeOpen];
+
+    DocumentPickerDelegate *documentPickerDelegate = [[DocumentPickerDelegate alloc] init];
+    documentPicker.delegate = documentPickerDelegate;
+
+    UIViewController *qtController = getViewController();
+    if (!qtController) return;
+
+    [qtController presentViewController:documentPicker animated:YES completion:nil];
+    
+    __block QString filePath;
+
+    documentPickerDelegate.documentPickerClosedCallback = ^(NSString *path) {
+        if (path) {
+            filePath = QString::fromUtf8(path.UTF8String);
+        } else {
+            filePath = QString();
+        }
+        emit finished();
+    };
+
+    QEventLoop wait;
+    QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
+    wait.exec();
+    
+    return filePath;
+}
+
+void IosController::requestInetAccess() {
+    NSURL *url = [NSURL URLWithString:@"http://captive.apple.com/generate_204"];
+    if (url) {
+        qDebug() << "IosController::requestInetAccess URL error";
+        return;
+    }
+
+    NSURLSession *session = [NSURLSession sharedSession];
+    NSURLSessionDataTask *task = [session dataTaskWithURL:url completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (error) {
+            qDebug() << "IosController::requestInetAccess error:" << error.localizedDescription;
+        } else {
+            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+            QString responseBody = QString::fromUtf8((const char*)data.bytes, data.length);
+            qDebug() << "IosController::requestInetAccess server response:" << httpResponse.statusCode << "\n\n" <<responseBody;
+        }
+    }];
+    [task resume];
 }

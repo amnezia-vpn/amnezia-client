@@ -2,6 +2,7 @@
 #define AMNEZIA_APPLICATION_H
 
 #include <QCommandLineParser>
+#include <QNetworkAccessManager>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QThread>
@@ -40,6 +41,7 @@
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
 #include "ui/models/services/sftpConfigModel.h"
+#include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/sites_model.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/appSplitTunnelingModel.h"
@@ -75,6 +77,7 @@ public:
     bool parseCommands();
 
     QQmlApplicationEngine *qmlEngine() const;
+    QNetworkAccessManager *manager() { return m_nam; }
 
 signals:
     void translationsUpdated();
@@ -112,6 +115,7 @@ private:
 #endif
 
     QScopedPointer<SftpConfigModel> m_sftpConfigModel;
+    QScopedPointer<Socks5ProxyConfigModel> m_socks5ConfigModel;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
     QThread m_vpnConnectionThread;
@@ -128,6 +132,8 @@ private:
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
+
+    QNetworkAccessManager *m_nam;
 };
 
 #endif // AMNEZIA_APPLICATION_H

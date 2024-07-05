@@ -1,6 +1,7 @@
 #ifndef CONNECTIONCONTROLLER_H
 #define CONNECTIONCONTROLLER_H
 
+#include "core/controllers/apiController.h"
 #include "protocols/vpnprotocol.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
@@ -33,7 +34,7 @@ public slots:
     void openConnection();
     void closeConnection();
 
-    QString getLastConnectionError();
+    ErrorCode getLastConnectionError();
     void onConnectionStateChanged(Vpn::ConnectionState state);
 
     void onCurrentContainerUpdated();
@@ -49,6 +50,7 @@ signals:
     void connectionStateChanged();
 
     void connectionErrorOccurred(const QString &errorMessage);
+    void connectionErrorOccurred(ErrorCode errorCode);
     void reconnectWithUpdatedContainer(const QString &message);
 
     void noInstalledContainers();
@@ -59,6 +61,10 @@ signals:
 private:
     Vpn::ConnectionState getCurrentConnectionState();
     bool isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container);
+
+    void openConnection(const bool updateConfig, const QJsonObject &config, const int serverIndex);
+
+    ApiController m_apiController;
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;

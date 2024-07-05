@@ -64,6 +64,7 @@ signals:
     void removeProcessedContainerFinished(const QString &finishedMessage);
 
     void installationErrorOccurred(const QString &errorMessage);
+    void installationErrorOccurred(ErrorCode errorCode);
 
     void serverAlreadyExists(int serverIndex);
 

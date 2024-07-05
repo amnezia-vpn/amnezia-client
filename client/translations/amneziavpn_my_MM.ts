@@ -22,7 +22,7 @@
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="115"/>
-        <source>Settings updated successfully, Reconnnection...</source>
+        <source>Settings updated successfully, reconnnection...</source>
         <translation>ဆက်တင်များကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ပြီးပါပြီ၊ ပြန်လည်ချိတ်ဆက်နေပါသည်...</translation>
     </message>
     <message>
@@ -664,8 +664,8 @@ Already installed containers were found on the server. All installed containers 
     <name>PageProtocolShadowSocksSettings</name>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="80"/>
-        <source>ShadowSocks settings</source>
-        <translation>ShadowSocks ဆက်တင်များ</translation>
+        <source>Shadowsocks settings</source>
+        <translation>Shadowsocks ဆက်တင်များ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="89"/>
@@ -1002,8 +1002,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="115"/>
-        <source>Github</source>
-        <translation>Github</translation>
+        <source>GitHub</source>
+        <translation>GitHub</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="119"/>
@@ -1250,8 +1250,8 @@ Already installed containers were found on the server. All installed containers 
     <name>PageSettingsDns</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="39"/>
-        <source>Default server does not support custom dns</source>
-        <translation>မူရင်းဆာဗာသည် စိတ်ကြိုက် dns ကို အထောက်အပံ့မပေးပါ</translation>
+        <source>Default server does not support custom DNS</source>
+        <translation>မူရင်းဆာဗာသည် စိတ်ကြိုက် DNS ကို အထောက်အပံ့မပေးပါ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="57"/>
@@ -1323,7 +1323,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="64"/>
-        <source>Enabling this function will save application&apos;s logs automatically, By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
+        <source>Enabling this function will save application&apos;s logs automatically. By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
         <translation>ဤလုပ်ဆောင်ချက်ကို ဖွင့်ခြင်းဖြင့် အပလီကေးရှင်း၏ မှတ်တမ်းများကို အလိုအလျောက် သိမ်းဆည်းပေးမည် ဖြစ်ပြီး မူရင်းအတိုင်း၊ မှတ်တမ်းလုပ်ဆောင်ချက်ကို ပိတ်ထားသည်။ အပလီကေးရှင်းချို့ယွင်းချက်ရှိသောအခါ မှတ်တမ်းသိမ်းဆည်းခြင်းကို ဖွင့်ပါ။</translation>
     </message>
     <message>
@@ -1711,7 +1711,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="89"/>
-        <source>QR-code</source>
+        <source>QR code</source>
         <translation>QR-ကုဒ်</translation>
     </message>
     <message>
@@ -2038,8 +2038,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="79"/>
-        <source>Save ShadowSocks config</source>
-        <translation>ShadowSocks config ကိုသိမ်းဆည်းမည်</translation>
+        <source>Save Shadowsocks config</source>
+        <translation>Shadowsocks config ကိုသိမ်းဆည်းမည်</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="86"/>
@@ -2058,8 +2058,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="131"/>
-        <source>ShadowSocks native format</source>
-        <translation>ShadowSocks မူရင်းဖောမတ်</translation>
+        <source>Shadowsocks native format</source>
+        <translation>Shadowsocks မူရင်းဖောမတ်</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="136"/>
@@ -2477,7 +2477,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="12"/>
-        <source>Unknown Error</source>
+        <source>Unknown error</source>
         <translation>အမည်မသိ မှားယွင်းမှု</translation>
     </message>
     <message>
@@ -2517,18 +2517,18 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="24"/>
-        <source>Ssh request was denied</source>
-        <translation>Ssh တောင်းဆိုမှု ငြင်းဆိုခံလိုက်ရပါသည်</translation>
+        <source>SSH request was denied</source>
+        <translation>SSH တောင်းဆိုမှု ငြင်းဆိုခံလိုက်ရပါသည်</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="25"/>
-        <source>Ssh request was interrupted</source>
-        <translation>Ssh တောင်းဆိုမှု အနှောက်အယက်ခံလိုက်ရပါသည်</translation>
+        <source>SSH request was interrupted</source>
+        <translation>SSH တောင်းဆိုမှု အနှောက်အယက်ခံလိုက်ရပါသည်</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
-        <source>Ssh internal error</source>
-        <translation>စက်တွင်းဖြစ်သော Ssh မှားယွင်းမှု</translation>
+        <source>SSH internal error</source>
+        <translation>စက်တွင်းဖြစ်သော SSH မှားယွင်းမှု</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="27"/>
@@ -2624,7 +2624,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="32"/>
-        <source>Scp error: Generic failure</source>
+        <source>SCP error: Generic failure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2639,8 +2639,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="40"/>
-        <source>ShadowSocks (ss-local) executable missing</source>
-        <translation>ShadowSocks (ss-local) executable ပျောက်နေပါသည်</translation>
+        <source>Shadowsocks (ss-local) executable missing</source>
+        <translation>Shadowsocks (ss-local) executable ပျောက်နေပါသည်</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="41"/>
@@ -2719,8 +2719,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="101"/>
-        <source>ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
-        <translation>ShadowSocks - ၎င်းသည် ပုံမှန်ဝဘ်လမ်းကြောင်းနှင့် ဆင်တူစေရန် VPN အသွားအလာကို ဖုံးကွယ်ထားသော်လည်း ၎င်းကို အချို့သော ဆင်ဆာဖြတ်ထားသော ဒေသများရှိ ခွဲခြမ်းစိတ်ဖြာမှုစနစ်များက ထောက်လှန်းသိရှိနိုင်ပါသည်.</translation>
+        <source>Shadowsocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
+        <translation>Shadowsocks - ၎င်းသည် ပုံမှန်ဝဘ်လမ်းကြောင်းနှင့် ဆင်တူစေရန် VPN အသွားအလာကို ဖုံးကွယ်ထားသော်လည်း ၎င်းကို အချို့သော ဆင်ဆာဖြတ်ထားသော ဒေသများရှိ ခွဲခြမ်းစိတ်ဖြာမှုစနစ်များက ထောက်လှန်းသိရှိနိုင်ပါသည်.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="104"/>
@@ -2820,8 +2820,8 @@ IKEv2 သည် လုံခြုံရေး၊ တည်ငြိမ်မှ
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="92"/>
-        <source>Sftp file sharing service</source>
-        <translation>Sftp ဖိုင်မျှဝေခြင်းဆားဗစ်</translation>
+        <source>SFTP file sharing service</source>
+        <translation>SFTP ဖိုင်မျှဝေခြင်းဆားဗစ်</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="90"/>
@@ -2831,8 +2831,8 @@ IKEv2 သည် လုံခြုံရေး၊ တည်ငြိမ်မှ
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="91"/>
-        <source>Amnezia DNS</source>
-        <translation>Amnezia DNS</translation>
+        <source>AmneziaDNS</source>
+        <translation>AmneziaDNS</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="98"/>
@@ -2851,8 +2851,8 @@ IKEv2 သည် လုံခြုံရေး၊ တည်ငြိမ်မှ
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="115"/>
-        <source>IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>IKEv2 - ခေတ်မီတည်ငြိမ်သောပရိုတိုကော၊ အခြားအရာများထက်အနည်းငယ်ပိုမြန်သည်၊ signal ပျောက်ဆုံးပြီးနောက် ချိတ်ဆက်မှုကို ပြန်လည်ရယူပေးသည်. ၎င်းသည် Android နှင့် iOS ၏နောက်ဆုံးဗားရှင်းများတွင် မူရင်းအတိုင်းထောက်ပံ့မှုရရှိသည်.</translation>
+        <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
+        <translation>IKEv2/IPsec - ခေတ်မီတည်ငြိမ်သောပရိုတိုကော၊ အခြားအရာများထက်အနည်းငယ်ပိုမြန်သည်၊ signal ပျောက်ဆုံးပြီးနောက် ချိတ်ဆက်မှုကို ပြန်လည်ရယူပေးသည်.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="118"/>
@@ -2888,16 +2888,12 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
         <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
 
 * Available in the AmneziaVPN only on desktop platforms
-* Normal power consumption on mobile devices
-
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
         <translation>SOCKS5 ပရိုတိုကောကို အတုယူအခြေခံတည်ဆောက်ထားသော Shadowsocks သည် AEAD cipher ကိုအသုံးပြု၍ ချိတ်ဆက်မှုကိုကာကွယ်ပေးသည်။ Shadowsocks သည် ထောက်လှန်းသိရှိခံရခြင်းမှရှောင်ရှားနိုင်ရန်နှင့် ထောက်လှန်းသည့်သူများခက်ခဲစေရန် ဒီဇိုင်းထုတ်ထားသော်လည်း စံသတ်မှတ်ထားသည့် HTTPS ချိတ်ဆက်မှုနှင့် ထပ်တူမကျပါ။ သို့သော်၊ အချို့သောလမ်းကြောင်းဆိုင်ရာ ခွဲခြမ်းစိတ်ဖြာမှုစနစ်များသည် Shadowsocks ချိတ်ဆက်မှုကို ရှာဖွေတွေ့ရှိနိုင်သေးသည်။ Amnezia တွင် ထောက်ပံ့မှုအကန့်အသတ်ရှိသောကြောင့် AmneziaWG ပရိုတိုကောကို အသုံးပြုရန် အကြံပြုထားသည်။
 
 * Desktop ပလပ်ဖောင်းများတွင်ရှိ‌သော AmneziaVPN တွင်သာအသုံးပြုနိုင်ပါသည်။
-* မိုဘိုင်းစက်ပစ္စည်းများတွင် ပုံမှန်ပါဝါသုံးစွဲမှုရှိခြင်း။
-
 * ပြင်ဆင်သတ်မှတ်နိုင်သော စာဝှက်စနစ် ပရိုတိုကော
 * အချို့သော DPI စနစ်များဖြင့် ထောက်လှန်းသိရှိနိုင်သည်။
 * TCP ကွန်ရက် ပရိုတိုကောပေါ်တွင် အလုပ်လုပ်သည်။.</translation>
@@ -2944,8 +2940,8 @@ For more detailed information, you can
     </message>
     <message>
         <location filename="../protocols/protocols_defs.cpp" line="77"/>
-        <source>Sftp service</source>
-        <translation>Sftp ဝန်ဆောင်မှု</translation>
+        <source>SFTP service</source>
+        <translation>SFTP ဝန်ဆောင်မှု</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/qtkeychain/libsecret.cpp" line="119"/>

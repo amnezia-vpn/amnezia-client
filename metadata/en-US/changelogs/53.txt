@@ -1,0 +1,6 @@
+What's Changed:
+* Added XRay protocol support
+* Added app split tunneling
+* Added a notification to the status bar when VPN is running
+* Added a tile to the quick settings panel
+* Bug fixes and improvements

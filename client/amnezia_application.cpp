@@ -55,6 +55,7 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecond
 #endif
 
     m_settings = std::shared_ptr<Settings>(new Settings);
+    m_nam = new QNetworkAccessManager(this);
 }
 
 AmneziaApplication::~AmneziaApplication()
@@ -150,7 +151,7 @@ void AmneziaApplication::init()
 
     connect(m_notificationHandler.get(), &NotificationHandler::raiseRequested, m_pageController.get(), &PageController::raiseMainWindow);
     connect(m_notificationHandler.get(), &NotificationHandler::connectRequested, m_connectionController.get(),
-            &ConnectionController::openConnection);
+            static_cast<void (ConnectionController::*)()>(&ConnectionController::openConnection));
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
             &ConnectionController::closeConnection);
     connect(this, &AmneziaApplication::translationsUpdated, m_notificationHandler.get(), &NotificationHandler::onTranslationsUpdated);
@@ -350,6 +351,9 @@ void AmneziaApplication::initModels()
     m_sftpConfigModel.reset(new SftpConfigModel(this));
     m_engine->rootContext()->setContextProperty("SftpConfigModel", m_sftpConfigModel.get());
 
+    m_socks5ConfigModel.reset(new Socks5ProxyConfigModel(this));
+    m_engine->rootContext()->setContextProperty("Socks5ProxyConfigModel", m_socks5ConfigModel.get());
+
     m_clientManagementModel.reset(new ClientManagementModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
     connect(m_clientManagementModel.get(), &ClientManagementModel::adminConfigRevoked, m_serversModel.get(),
@@ -362,10 +366,16 @@ void AmneziaApplication::initControllers()
             new ConnectionController(m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_settings));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
-    connect(m_connectionController.get(), &ConnectionController::connectionErrorOccurred, this, [this](const QString &errorMessage) {
+    connect(m_connectionController.get(), qOverload<const QString &>(&ConnectionController::connectionErrorOccurred), this, [this](const QString &errorMessage) {
         emit m_pageController->showErrorMessage(errorMessage);
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
     });
+
+    connect(m_connectionController.get(), qOverload<ErrorCode>(&ConnectionController::connectionErrorOccurred), this, [this](ErrorCode errorCode) {
+      emit m_pageController->showErrorMessage(errorCode);
+      emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+    });
+
     connect(m_connectionController.get(), &ConnectionController::connectButtonClicked, m_connectionController.get(),
             &ConnectionController::toggleConnection, Qt::QueuedConnection);
 
