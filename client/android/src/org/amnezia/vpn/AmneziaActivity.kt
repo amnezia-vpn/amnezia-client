@@ -384,7 +384,8 @@ class AmneziaActivity : QtActivity() {
         getVpnProto(vpnConfig)?.let { proto ->
             Log.d(TAG, "Proto from config: $proto, current proto: $vpnProto")
             if (isServiceConnected) {
-                if (proto == vpnProto) {
+                if (proto.serviceClass == vpnProto?.serviceClass) {
+                    vpnProto = proto
                     connectToVpn(vpnConfig)
                     return
                 }
