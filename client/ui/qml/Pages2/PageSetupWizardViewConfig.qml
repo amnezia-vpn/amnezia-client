@@ -54,6 +54,9 @@ PageType {
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
                 PageController.replaceStartPage()
             }
+            if (stackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageHome)) {
+                PageController.goToPageHome()
+            }
         }
     }
 
