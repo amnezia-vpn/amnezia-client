@@ -49,7 +49,15 @@ enum class VpnProto(
         "org.amnezia.vpn:amneziaXrayService",
         XrayService::class.java
     ) {
-        override fun createProtocol(): Protocol = Xray()
+        override fun createProtocol(): Protocol = Xray.instance
+    },
+
+    SSXRAY(
+        "SSXRay",
+        "org.amnezia.vpn:amneziaXrayService",
+        XrayService::class.java
+    ) {
+        override fun createProtocol(): Protocol = Xray.instance
     };
 
     private var _protocol: Protocol? = null
