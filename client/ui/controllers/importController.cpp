@@ -559,25 +559,28 @@ bool ImportController::parseQrCodeChunk(const QString &code)
                 data.append(m_qrCodeChunks.value(i));
             }
 
-            bool ok = extractConfigFromQr(data);
-            if (ok) {
-                m_isQrCodeProcessed = false;
-                qDebug() << "stopDecodingQr";
-                stopDecodingQr();
-                return true;
-            } else {
+            auto format = checkConfigFormat(data);
+            if (format == ConfigTypes::Invalid) {
                 qDebug() << "error while extracting data from qr";
                 m_qrCodeChunks.clear();
                 m_totalQrCodeChunksCount = 0;
                 m_receivedQrCodeChunksCount = 0;
+            } else {
+                qDebug() << "stopDecodingQr";
+                m_isQrCodeProcessed = false;
+                stopDecodingQr();
+                extractConfigFromQr(data);
+                return true;
             }
         }
     } else {
-        bool ok = extractConfigFromQr(code.toUtf8());
-        if (ok) {
-            m_isQrCodeProcessed = false;
+        auto data = code.toUtf8();
+        auto format = checkConfigFormat(data);
+        if (format != ConfigTypes::Invalid) {
             qDebug() << "stopDecodingQr";
+            m_isQrCodeProcessed = false;
             stopDecodingQr();
+            extractConfigFromQr(data);
             return true;
         }
     }
