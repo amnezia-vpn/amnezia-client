@@ -117,14 +117,9 @@ class Xray : Protocol() {
         val xrayJsonConfig = config.getJSONObject("xray_config_data")
         val xrayConfig = parseConfig(config, xrayJsonConfig)
 
-        // for debug
-        // xrayJsonConfig.getJSONObject("log").put("loglevel", "debug")
-        xrayJsonConfig.getJSONObject("log").put("loglevel", "warning")
-        // disable access log
-        xrayJsonConfig.getJSONObject("log").put("access", "none")
-
-        // replace socks address
-        // (xrayJsonConfig.getJSONArray("inbounds")[0] as JSONObject).put("listen", "::1")
+        (xrayJsonConfig.optJSONObject("log") ?: JSONObject().also { xrayJsonConfig.put("log", it) })
+            .put("loglevel", "warning")
+            .put("access", "none") // disable access log
 
         start(xrayConfig, xrayJsonConfig.toString(), vpnBuilder, protect)
         state.value = CONNECTED
