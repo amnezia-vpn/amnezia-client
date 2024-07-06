@@ -5,6 +5,7 @@ import android.net.VpnService.Builder
 import java.io.File
 import java.io.IOException
 import go.Seq
+import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
@@ -114,7 +115,9 @@ class Xray : Protocol() {
             return
         }
 
-        val xrayJsonConfig = config.getJSONObject("xray_config_data")
+        val xrayJsonConfig = config.optJSONObject("xray_config_data")
+            ?: config.optJSONObject("ssxray_config_data")
+            ?: throw BadConfigException("config_data not found")
         val xrayConfig = parseConfig(config, xrayJsonConfig)
 
         (xrayJsonConfig.optJSONObject("log") ?: JSONObject().also { xrayJsonConfig.put("log", it) })
@@ -222,6 +225,10 @@ class Xray : Protocol() {
         LibXray.startTun2Socks(tun2SocksConfig, fd.toLong()).isNotNullOrBlank { err ->
             throw VpnStartException("Failed to start tun2socks: $err")
         }
+    }
+
+    companion object {
+        val instance: Xray by lazy { Xray() }
     }
 }
 

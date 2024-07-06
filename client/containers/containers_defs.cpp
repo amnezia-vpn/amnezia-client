@@ -306,6 +306,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Awg: return true;
     case DockerContainer::Cloak: return true;
     case DockerContainer::Xray: return true;
+    case DockerContainer::SSXray: return true;
     default: return false;
     }
 
