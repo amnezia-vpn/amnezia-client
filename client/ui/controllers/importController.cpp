@@ -659,6 +659,9 @@ void ImportController::processAmneziaConfig(QJsonObject &config)
         if (dockerContainer == DockerContainer::Awg || dockerContainer == DockerContainer::WireGuard) {
             auto containerConfig = container.value(ContainerProps::containerTypeToString(dockerContainer)).toObject();
             auto protocolConfig = containerConfig.value(config_key::last_config).toString();
+            if (protocolConfig.isEmpty()) {
+                return;
+            }
 
             QJsonObject jsonConfig = QJsonDocument::fromJson(protocolConfig.toUtf8()).object();
             jsonConfig[config_key::mtu] = dockerContainer == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
