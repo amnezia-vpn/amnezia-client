@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -114,7 +115,7 @@ PageType {
                             descriptionOnTop: true
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: "#D7D8DB"
+                            rightImageColor: AmneziaStyle.color.white
 
                             clickedFunction: function() {
                                 GC.copyToClipBoard(descriptionText)
@@ -138,7 +139,7 @@ PageType {
                             KeyNavigation.tab: usernameLabel.rightButton
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: "#D7D8DB"
+                            rightImageColor: AmneziaStyle.color.white
 
                             clickedFunction: function() {
                                 GC.copyToClipBoard(descriptionText)
@@ -162,7 +163,7 @@ PageType {
                             KeyNavigation.tab: passwordLabel.eyeButton
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: "#D7D8DB"
+                            rightImageColor: AmneziaStyle.color.white
 
                             clickedFunction: function() {
                                 GC.copyToClipBoard(descriptionText)
@@ -193,7 +194,7 @@ PageType {
                             }
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: "#D7D8DB"
+                            rightImageColor: AmneziaStyle.color.white
 
                             buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
 
@@ -216,11 +217,11 @@ PageType {
                             Layout.leftMargin: 16
                             Layout.rightMargin: 16
 
-                            defaultColor: "transparent"
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                            disabledColor: "#878B91"
-                            textColor: "#D7D8DB"
+                            defaultColor: AmneziaStyle.color.transparent
+                            hoveredColor: AmneziaStyle.color.blackHovered
+                            pressedColor: AmneziaStyle.color.blackPressed
+                            disabledColor: AmneziaStyle.color.grey
+                            textColor: AmneziaStyle.color.white
                             borderWidth: 1
 
                             parentFlickable: fl
@@ -280,11 +281,11 @@ PageType {
                             Layout.leftMargin: 8
                             implicitHeight: 32
 
-                            defaultColor: "transparent"
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                            disabledColor: "#878B91"
-                            textColor: "#FBB26A"
+                            defaultColor: AmneziaStyle.color.transparent
+                            hoveredColor: AmneziaStyle.color.blackHovered
+                            pressedColor: AmneziaStyle.color.blackPressed
+                            disabledColor: AmneziaStyle.color.grey
+                            textColor: AmneziaStyle.color.orange
 
                             text: qsTr("Detailed instructions")
 

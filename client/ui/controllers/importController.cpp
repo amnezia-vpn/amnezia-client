@@ -4,9 +4,13 @@
 #include <QFileInfo>
 #include <QQuickItem>
 #include <QRandomGenerator>
+#include <QUrlQuery>
 #include <QStandardPaths>
 
+#include "utilities.h"
+#include "core/serialization/serialization.h"
 #include "core/errorstrings.h"
+
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
@@ -87,6 +91,55 @@ bool ImportController::extractConfigFromFile(const QString &fileName)
 bool ImportController::extractConfigFromData(QString data)
 {
     QString config = data;
+    QString prefix;
+    QString errormsg;
+
+    if (config.startsWith("vless://")) {
+        m_configType = ConfigTypes::Xray;
+        m_config = extractXrayConfig(Utils::JsonToString(serialization::vless::Deserialize(config, &prefix, &errormsg),
+                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        return m_config.empty() ? false : true;
+    }
+
+    if (config.startsWith("vmess://") && config.contains("@")) {
+        m_configType = ConfigTypes::Xray;
+        m_config = extractXrayConfig(Utils::JsonToString(serialization::vmess_new::Deserialize(config, &prefix, &errormsg),
+                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        return m_config.empty() ? false : true;
+    }
+
+    if (config.startsWith("vmess://")) {
+        m_configType = ConfigTypes::Xray;
+        m_config = extractXrayConfig(Utils::JsonToString(serialization::vmess::Deserialize(config, &prefix, &errormsg),
+                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        return m_config.empty() ? false : true;
+    }
+
+    if (config.startsWith("trojan://")) {
+        m_configType = ConfigTypes::Xray;
+        m_config = extractXrayConfig(Utils::JsonToString(serialization::trojan::Deserialize(config, &prefix, &errormsg),
+                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        return m_config.empty() ? false : true;
+    }
+
+    if (config.startsWith("ss://") && !config.contains("plugin=")) {
+        m_configType = ConfigTypes::ShadowSocks;
+        m_config = extractXrayConfig(Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg),
+                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        return m_config.empty() ? false : true;
+    }
+
+    if (config.startsWith("ssd://")) {
+        QStringList tmp;
+        QList<std::pair<QString, QJsonObject>> servers = serialization::ssd::Deserialize(config, &prefix, &tmp);
+        m_configType = ConfigTypes::ShadowSocks;
+        // Took only first config from list
+        if (!servers.isEmpty()) {
+            m_config = extractXrayConfig(servers.first().first);
+        }
+        return m_config.empty() ? false : true;
+    }
+
     m_configType = checkConfigFormat(config);
     if (m_configType == ConfigTypes::Invalid) {
         data.replace("vpn://", "");
@@ -221,7 +274,7 @@ void ImportController::importConfig()
     } else if (m_config.contains(config_key::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(m_config).toJson());
         if (m_serversModel->isServerFromApiAlreadyExists(crc)) {
-            emit importErrorOccurred(errorString(ErrorCode::ApiConfigAlreadyAdded), true);
+            emit importErrorOccurred(ErrorCode::ApiConfigAlreadyAdded, true);
         } else {
             m_config.insert(config_key::crc, crc);
 
@@ -231,7 +284,7 @@ void ImportController::importConfig()
     } else {
         qDebug() << "Failed to import profile";
         qDebug().noquote() << QJsonDocument(m_config).toJson();
-        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
+        emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
     }
 
     m_config = {};
@@ -308,7 +361,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         hostName = hostNameAndPortMatch.captured(1);
     } else {
         qDebug() << "Key parameter 'Endpoint' is missing";
-        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
+        emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
         return QJsonObject();
     }
 
@@ -334,7 +387,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
     } else {
         qDebug() << "One of the key parameters is missing (PrivateKey, Address, PublicKey)";
-        emit importErrorOccurred(errorString(ErrorCode::ImportInvalidConfigError), false);
+        emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
         return QJsonObject();
     }
 
@@ -398,7 +451,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     return config;
 }
 
-QJsonObject ImportController::extractXrayConfig(const QString &data)
+QJsonObject ImportController::extractXrayConfig(const QString &data, const QString &description)
 {
     QJsonParseError parserErr;
     QJsonDocument jsonConf = QJsonDocument::fromJson(data.toLocal8Bit(), &parserErr);
@@ -410,8 +463,13 @@ QJsonObject ImportController::extractXrayConfig(const QString &data)
     lastConfig[config_key::isThirdPartyConfig] = true;
 
     QJsonObject containers;
-    containers.insert(config_key::container, QJsonValue("amnezia-xray"));
-    containers.insert(config_key::xray, QJsonValue(lastConfig));
+    if (m_configType == ConfigTypes::ShadowSocks) {
+        containers.insert(config_key::ssxray, QJsonValue(lastConfig));
+        containers.insert(config_key::container, QJsonValue("amnezia-ssxray"));
+    } else {
+        containers.insert(config_key::container, QJsonValue("amnezia-xray"));
+        containers.insert(config_key::xray, QJsonValue(lastConfig));
+    }
 
     QJsonArray arr;
     arr.push_back(containers);
@@ -426,9 +484,17 @@ QJsonObject ImportController::extractXrayConfig(const QString &data)
 
     QJsonObject config;
     config[config_key::containers] = arr;
-    config[config_key::defaultContainer] = "amnezia-xray";
-    config[config_key::description] = m_settings->nextAvailableServerName();
 
+    if (m_configType == ConfigTypes::ShadowSocks) {
+        config[config_key::defaultContainer] = "amnezia-ssxray";
+    } else {
+       config[config_key::defaultContainer] = "amnezia-xray";
+    }
+    if (description.isEmpty()) {
+        config[config_key::description] = m_settings->nextAvailableServerName();
+    } else {
+        config[config_key::description] = description;
+    }
     config[config_key::hostName] = hostName;
 
     return config;

@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -82,10 +83,10 @@ PageType {
                 }
 
                 descriptionOnTop: true
-                textColor: "#FBB26A"
+                textColor: AmneziaStyle.color.orange
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: "#D7D8DB"
+                rightImageColor: AmneziaStyle.color.white
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
 

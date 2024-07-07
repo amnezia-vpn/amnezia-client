@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -84,7 +85,7 @@ PageType {
                 font.pixelSize: 14
 
                 text: qsTr("Amnezia is a free and open-source application. You can support the developers if you like it.")
-                color: "#CCCAC8"
+                color: AmneziaStyle.color.white
             }
 
             ParagraphTextType {
@@ -137,7 +138,7 @@ PageType {
                 id: githubButton
                 Layout.fillWidth: true
 
-                text: qsTr("Github")
+                text: qsTr("GitHub")
                 leftImageSource: "qrc:/images/controls/github.svg"
 
                 KeyNavigation.tab: websiteButton
@@ -176,7 +177,7 @@ PageType {
                 horizontalAlignment: Text.AlignHCenter
 
                 text: qsTr("Software version: %1").arg(SettingsController.getAppVersion())
-                color: "#878B91"
+                color: AmneziaStyle.color.grey
             }
 
             BasicButtonType {
@@ -186,11 +187,11 @@ PageType {
                 Layout.bottomMargin: 16
                 implicitHeight: 32
 
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#FBB26A"
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.blackHovered
+                pressedColor: AmneziaStyle.color.blackPressed
+                disabledColor: AmneziaStyle.color.grey
+                textColor: AmneziaStyle.color.orange
 
                 text: qsTr("Check for updates")
 
@@ -209,11 +210,11 @@ PageType {
               Layout.topMargin: -15
               implicitHeight: 25
 
-              defaultColor: "transparent"
-              hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-              pressedColor: Qt.rgba(1, 1, 1, 0.12)
-              disabledColor: "#878B91"
-              textColor: "#FBB26A"
+              defaultColor: AmneziaStyle.color.transparent
+              hoveredColor: AmneziaStyle.color.blackHovered
+              pressedColor: AmneziaStyle.color.blackPressed
+              disabledColor: AmneziaStyle.color.grey
+              textColor: AmneziaStyle.color.orange
 
               text: qsTr("Privacy Policy")
 

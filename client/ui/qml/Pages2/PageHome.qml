@@ -8,6 +8,7 @@ import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerProps 1.0
 import ContainersModelFilters 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -55,11 +56,11 @@ PageType {
 
                 implicitHeight: 36
 
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#878B91"
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.blackHovered
+                pressedColor: AmneziaStyle.color.blackPressed
+                disabledColor: AmneziaStyle.color.grey
+                textColor: AmneziaStyle.color.grey
                 borderWidth: 0
 
                 visible: isLoggingEnabled ? true : false
@@ -92,12 +93,12 @@ PageType {
 
                 implicitHeight: 36
 
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#878B91"
-                leftImageColor: "transparent"
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.blackHovered
+                pressedColor: AmneziaStyle.color.blackPressed
+                disabledColor: AmneziaStyle.color.grey
+                textColor: AmneziaStyle.color.grey
+                leftImageColor: AmneziaStyle.color.transparent
                 borderWidth: 0
 
                 buttonTextLabel.lineHeight: 20
@@ -242,7 +243,7 @@ PageType {
 
                         hoverEnabled: false
                         image: "qrc:/images/controls/chevron-down.svg"
-                        imageColor: "#d7d8db"
+                        imageColor: AmneziaStyle.color.white
 
                         icon.width: 18
                         icon.height: 18
@@ -303,17 +304,17 @@ PageType {
                     DropDownType {
                         id: containersDropDown
 
-                        rootButtonImageColor: "#0E0E11"
-                        rootButtonBackgroundColor: "#D7D8DB"
+                        rootButtonImageColor: AmneziaStyle.color.black
+                        rootButtonBackgroundColor: AmneziaStyle.color.white
                         rootButtonBackgroundHoveredColor: Qt.rgba(215, 216, 219, 0.8)
                         rootButtonBackgroundPressedColor: Qt.rgba(215, 216, 219, 0.65)
-                        rootButtonHoveredBorderColor: "transparent"
-                        rootButtonDefaultBorderColor: "transparent"
+                        rootButtonHoveredBorderColor: AmneziaStyle.color.transparent
+                        rootButtonDefaultBorderColor: AmneziaStyle.color.transparent
                         rootButtonTextTopMargin: 8
                         rootButtonTextBottomMargin: 8
 
                         text: ServersModel.defaultServerDefaultContainerName
-                        textColor: "#0E0E11"
+                        textColor: AmneziaStyle.color.black
                         headerText: qsTr("VPN protocol")
                         headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
@@ -504,7 +505,7 @@ PageType {
                             ImageButtonType {
                                 id: serverInfoButton
                                 image: "qrc:/images/controls/settings.svg"
-                                imageColor: "#D7D8DB"
+                                imageColor: AmneziaStyle.color.white
 
                                 implicitWidth: 56
                                 implicitHeight: 56

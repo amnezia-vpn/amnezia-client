@@ -8,6 +8,7 @@ import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -106,6 +107,7 @@ PageType {
                             case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             case ProtocolEnum.Sftp: SftpConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                            case ProtocolEnum.Socks5Proxy: Socks5ProxyConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             }
                             PageController.goToPage(protocolPage);
                         }
@@ -182,7 +184,7 @@ PageType {
             Keys.onTabPressed: lastItemTabClicked(focusItem)
 
             text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-            textColor: "#EB5757"
+            textColor: AmneziaStyle.color.red
 
             clickedFunction: function() {
                 var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())

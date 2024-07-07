@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -223,7 +224,7 @@ PageType {
 
                 text: qsTr("Reset settings and remove all data from the application")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
 
                 Keys.onTabPressed: lastItemTabClicked()
                 parentFlickable: fl

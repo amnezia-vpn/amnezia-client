@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "TextTypes"
 
 ListView {
@@ -103,8 +105,8 @@ ListView {
                 indicator: Rectangle {
                     width: parent.width - 1
                     height: parent.height
-                    color: radioButton.hovered ? "#2C2D30" : "#1C1D21"
-                    border.color: radioButton.focus ? "#D7D8DB" : "transparent"
+                    color: radioButton.hovered ? AmneziaStyle.color.greyDark : AmneziaStyle.color.blackLight
+                    border.color: radioButton.focus ? AmneziaStyle.color.white : AmneziaStyle.color.transparent
                     border.width: radioButton.focus ? 1 : 0
 
                     Behavior on color {

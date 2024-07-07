@@ -34,6 +34,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -43,6 +44,8 @@ import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.Prefs
+import org.json.JSONException
+import org.json.JSONObject
 import org.qtproject.qt.android.bindings.QtActivity
 
 private const val TAG = "AmneziaActivity"
@@ -59,6 +62,7 @@ class AmneziaActivity : QtActivity() {
 
     private lateinit var mainScope: CoroutineScope
     private val qtInitialized = CompletableDeferred<Unit>()
+    private var vpnProto: VpnProto? = null
     private var isWaitingStatus = true
     private var isServiceConnected = false
     private var isInBoundState = false
@@ -141,6 +145,7 @@ class AmneziaActivity : QtActivity() {
             override fun onBindingDied(name: ComponentName?) {
                 Log.w(TAG, "Binding to the ${name?.flattenToString()} unexpectedly died")
                 doUnbindService()
+                QtAndroidController.onServiceDisconnected()
                 doBindService()
             }
         }
@@ -153,15 +158,20 @@ class AmneziaActivity : QtActivity() {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Create Amnezia activity: $intent")
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        val proto = mainScope.async(Dispatchers.IO) {
+            VpnStateStore.getVpnState().vpnProto
+        }
         vpnServiceMessenger = IpcMessenger(
             "VpnService",
             onDeadObjectException = {
                 doUnbindService()
+                QtAndroidController.onServiceDisconnected()
                 doBindService()
             }
         )
         registerBroadcastReceivers()
         intent?.let(::processIntent)
+        runBlocking { vpnProto = proto.await() }
     }
 
     private fun registerBroadcastReceivers() {
@@ -209,13 +219,18 @@ class AmneziaActivity : QtActivity() {
         Log.d(TAG, "Start Amnezia activity")
         mainScope.launch {
             qtInitialized.await()
-            doBindService()
+            vpnProto?.let { proto ->
+                if (AmneziaVpnService.isRunning(applicationContext, proto.processName)) {
+                    doBindService()
+                }
+            }
         }
     }
 
     override fun onStop() {
         Log.d(TAG, "Stop Amnezia activity")
         doUnbindService()
+        QtAndroidController.onServiceDisconnected()
         super.onStop()
     }
 
@@ -269,10 +284,12 @@ class AmneziaActivity : QtActivity() {
     @MainThread
     private fun doBindService() {
         Log.d(TAG, "Bind service")
-        Intent(this, AmneziaVpnService::class.java).also {
-            bindService(it, serviceConnection, BIND_ABOVE_CLIENT and BIND_AUTO_CREATE)
+        vpnProto?.let { proto ->
+            Intent(this, proto.serviceClass).also {
+                bindService(it, serviceConnection, BIND_ABOVE_CLIENT and BIND_AUTO_CREATE)
+            }
+            isInBoundState = true
         }
-        isInBoundState = true
     }
 
     @MainThread
@@ -280,7 +297,6 @@ class AmneziaActivity : QtActivity() {
         if (isInBoundState) {
             Log.d(TAG, "Unbind service")
             isWaitingStatus = true
-            QtAndroidController.onServiceDisconnected()
             isServiceConnected = false
             vpnServiceMessenger.send(Action.UNREGISTER_CLIENT, activityMessenger)
             vpnServiceMessenger.reset()
@@ -365,13 +381,32 @@ class AmneziaActivity : QtActivity() {
 
     @MainThread
     private fun startVpn(vpnConfig: String) {
-        if (isServiceConnected) {
-            connectToVpn(vpnConfig)
-        } else {
+        getVpnProto(vpnConfig)?.let { proto ->
+            Log.d(TAG, "Proto from config: $proto, current proto: $vpnProto")
+            if (isServiceConnected) {
+                if (proto.serviceClass == vpnProto?.serviceClass) {
+                    vpnProto = proto
+                    connectToVpn(vpnConfig)
+                    return
+                }
+                doUnbindService()
+            }
+            vpnProto = proto
             isWaitingStatus = false
-            startVpnService(vpnConfig)
+            startVpnService(vpnConfig, proto)
             doBindService()
-        }
+        } ?: QtAndroidController.onServiceError()
+    }
+
+    private fun getVpnProto(vpnConfig: String): VpnProto? = try {
+        require(vpnConfig.isNotBlank()) { "Blank VPN config" }
+        VpnProto.get(JSONObject(vpnConfig).getString("protocol"))
+    } catch (e: JSONException) {
+        Log.e(TAG, "Invalid VPN config json format: ${e.message}")
+        null
+    } catch (e: IllegalArgumentException) {
+        Log.e(TAG, "Protocol not found: ${e.message}")
+        null
     }
 
     private fun connectToVpn(vpnConfig: String) {
@@ -383,15 +418,15 @@ class AmneziaActivity : QtActivity() {
         }
     }
 
-    private fun startVpnService(vpnConfig: String) {
-        Log.d(TAG, "Start VPN service")
-        Intent(this, AmneziaVpnService::class.java).apply {
+    private fun startVpnService(vpnConfig: String, proto: VpnProto) {
+        Log.d(TAG, "Start VPN service: $proto")
+        Intent(this, proto.serviceClass).apply {
             putExtra(MSG_VPN_CONFIG, vpnConfig)
         }.also {
             try {
                 ContextCompat.startForegroundService(this, it)
             } catch (e: SecurityException) {
-                Log.e(TAG, "Failed to start AmneziaVpnService: $e")
+                Log.e(TAG, "Failed to start ${proto.serviceClass.simpleName}: $e")
                 QtAndroidController.onServiceError()
             }
         }

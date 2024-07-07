@@ -13,7 +13,7 @@ struct WGConfig: Decodable {
   let clientIP: String
   let clientPrivateKey: String
   let serverPublicKey: String
-  let presharedKey: String
+  let presharedKey: String?
   var allowedIPs: [String]
   var persistentKeepAlive: String
   let splitTunnelType: Int
@@ -65,7 +65,7 @@ struct WGConfig: Decodable {
     \(settings)
     [Peer]
     PublicKey = \(serverPublicKey)
-    PresharedKey = \(presharedKey)
+    \(presharedKey == nil ? "" : "PresharedKey = \(presharedKey!)")
     AllowedIPs = \(allowedIPs.joined(separator: ", "))
     Endpoint = \(hostName):\(port)
     PersistentKeepalive = \(persistentKeepAlive)

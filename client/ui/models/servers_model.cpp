@@ -548,6 +548,8 @@ QStringList ServersModel::getAllInstalledServicesName(const int serverIndex)
                 servicesName.append("SFTP");
             } else if (container == DockerContainer::TorWebSite) {
                 servicesName.append("TOR");
+            } else if (container == DockerContainer::Socks5Proxy) {
+                servicesName.append("SOCKS5");
             }
         }
     }
@@ -578,6 +580,9 @@ bool ServersModel::serverHasInstalledContainers(const int serverIndex) const
     for (auto it = containers.begin(); it != containers.end(); it++) {
         auto container = ContainerProps::containerFromString(it->toObject().value(config_key::container).toString());
         if (ContainerProps::containerService(container) == ServiceType::Vpn) {
+            return true;
+        }
+        if (container == DockerContainer::SSXray) {
             return true;
         }
     }
@@ -612,15 +617,18 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
 {
     auto server = m_servers.at(m_defaultServerIndex).toObject();
     auto defaultContainer = ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
-    auto containerConfig = server.value(config_key::containers).toArray().at(defaultContainer).toObject();
-    auto protocolConfig = containerConfig.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
 
-    if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
-        return !(protocolConfig.value(config_key::last_config).toString().contains("AllowedIPs = 0.0.0.0/0, ::/0"));
-    } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn
-               || defaultContainer == DockerContainer::ShadowSocks) {
-        return !(protocolConfig.value(config_key::last_config).toString().contains("redirect-gateway"));
+    auto containers = server.value(config_key::containers).toArray();
+    for (auto i = 0; i < containers.size(); i++) {
+        auto container = containers.at(i).toObject();
+        if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
+            auto containerConfig = container.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
+            return !(containerConfig.value(config_key::last_config).toString().contains("AllowedIPs = 0.0.0.0/0, ::/0"));
+        } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn
+                   || defaultContainer == DockerContainer::ShadowSocks) {
+            auto containerConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
+            return !(containerConfig.value(config_key::last_config).toString().contains("redirect-gateway"));
+        }
     }
-
     return false;
 }

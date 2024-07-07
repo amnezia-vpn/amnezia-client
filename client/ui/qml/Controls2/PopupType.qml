@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "TextTypes"
 
 Popup {
@@ -57,7 +59,17 @@ Popup {
                 horizontalAlignment: Text.AlignLeft
                 Layout.fillWidth: true
 
+                onLinkActivated: function(link) {
+                    Qt.openUrlExternally(link)
+                }
+
                 text: root.text
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
             }
 
             Item {
@@ -72,11 +84,11 @@ Popup {
                 implicitHeight: 32
 
                 defaultColor: "white"
-                hoveredColor: "#C1C2C5"
-                pressedColor: "#AEB0B7"
-                disabledColor: "#494B50"
+                hoveredColor: AmneziaStyle.color.whiteHovered
+                pressedColor: AmneziaStyle.color.whiteHovered
+                disabledColor: AmneziaStyle.color.greyDisabled
 
-                textColor: "#0E0E11"
+                textColor: AmneziaStyle.color.black
                 borderWidth: 0
 
                 text: qsTr("Close")

@@ -281,7 +281,8 @@ ErrorCode ClientManagementModel::wgShow(const DockerContainer container, const S
         }
     };
 
-    for (int i = 0; i < peerList.size() && i < transferredDataList.size(); ++i) {
+    for (int i = 0; i < peerList.size() && i < transferredDataList.size() && i < latestHandshakeList.size(); ++i) {
+
         const auto transferredData = getStrValue(transferredDataList[i]).split(",");
         auto latestHandshake = getStrValue(latestHandshakeList[i]);
         auto serverBytesReceived = transferredData.front().trimmed();

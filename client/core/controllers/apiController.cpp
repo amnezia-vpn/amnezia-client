@@ -8,7 +8,6 @@
 #include "amnezia_application.h"
 #include "configurators/wireguard_configurator.h"
 #include "version.h"
-#include "core/errorstrings.h"
 
 namespace
 {
@@ -41,6 +40,28 @@ void ApiController::processApiConfig(const QString &protocol, const ApiControlle
         return;
     } else if (protocol == configKey::awg) {
         config.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", apiPayloadData.wireGuardClientPrivKey);
+        auto serverConfig = QJsonDocument::fromJson(config.toUtf8()).object();
+        auto containers = serverConfig.value(config_key::containers).toArray();
+        if (containers.isEmpty()) {
+            return;
+        }
+        auto container = containers.at(0).toObject();
+        QString containerName = ContainerProps::containerTypeToString(DockerContainer::Awg);
+        auto containerConfig = container.value(containerName).toObject();
+        auto protocolConfig = QJsonDocument::fromJson(containerConfig.value(config_key::last_config).toString().toUtf8()).object();
+        containerConfig[config_key::junkPacketCount] = protocolConfig.value(config_key::junkPacketCount);
+        containerConfig[config_key::junkPacketMinSize] = protocolConfig.value(config_key::junkPacketMinSize);
+        containerConfig[config_key::junkPacketMaxSize] = protocolConfig.value(config_key::junkPacketMaxSize);
+        containerConfig[config_key::initPacketJunkSize] = protocolConfig.value(config_key::initPacketJunkSize);
+        containerConfig[config_key::responsePacketJunkSize] = protocolConfig.value(config_key::responsePacketJunkSize);
+        containerConfig[config_key::initPacketMagicHeader] = protocolConfig.value(config_key::initPacketMagicHeader);
+        containerConfig[config_key::responsePacketMagicHeader] = protocolConfig.value(config_key::responsePacketMagicHeader);
+        containerConfig[config_key::underloadPacketMagicHeader] = protocolConfig.value(config_key::underloadPacketMagicHeader);
+        containerConfig[config_key::transportPacketMagicHeader] = protocolConfig.value(config_key::transportPacketMagicHeader);
+        container[containerName] = containerConfig;
+        containers.replace(0, container);
+        serverConfig[config_key::containers] = containers;
+        config = QString(QJsonDocument(serverConfig).toJson());
     }
     return;
 }
@@ -110,7 +131,7 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
                 QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 
                 if (ba.isEmpty()) {
-                    emit errorOccurred(errorString(ErrorCode::ApiConfigEmptyError));
+                    emit errorOccurred(ErrorCode::ApiConfigEmptyError);
                     return;
                 }
 
@@ -135,14 +156,14 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
             } else {
                 if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
                     || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
-                    emit errorOccurred(errorString(ErrorCode::ApiConfigTimeoutError));
+                    emit errorOccurred(ErrorCode::ApiConfigTimeoutError);
                 } else {
                     QString err = reply->errorString();
                     qDebug() << QString::fromUtf8(reply->readAll());
                     qDebug() << reply->error();
                     qDebug() << err;
                     qDebug() << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
-                    emit errorOccurred(errorString(ErrorCode::ApiConfigDownloadError));
+                    emit errorOccurred(ErrorCode::ApiConfigDownloadError);
                 }
             }
 
@@ -153,7 +174,7 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
                          [this, reply](QNetworkReply::NetworkError error) { qDebug() << reply->errorString() << error; });
         connect(reply, &QNetworkReply::sslErrors, [this, reply](const QList<QSslError> &errors) {
             qDebug().noquote() << errors;
-            emit errorOccurred(errorString(ErrorCode::ApiConfigSslError));
+            emit errorOccurred(ErrorCode::ApiConfigSslError);
         });
     }
 }

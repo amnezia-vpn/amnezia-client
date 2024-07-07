@@ -229,5 +229,12 @@
         <file>images/controls/file-check-2.svg</file>
         <file>ui/qml/Controls2/WarningType.qml</file>
         <file>fonts/pt-root-ui_vf.ttf</file>
+        <file>ui/qml/Modules/Style/qmldir</file>
+        <file>ui/qml/Modules/Style/AmneziaStyle.qml</file>
+        <file>ui/qml/Pages2/PageServiceSocksProxySettings.qml</file>
+        <file>server_scripts/socks5_proxy/run_container.sh</file>
+        <file>server_scripts/socks5_proxy/Dockerfile</file>
+        <file>server_scripts/socks5_proxy/configure_container.sh</file>
+        <file>server_scripts/socks5_proxy/start.sh</file>
     </qresource>
 </RCC>
