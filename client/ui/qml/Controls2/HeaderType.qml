@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "TextTypes"
 
 Item {
@@ -46,7 +48,7 @@ Item {
                 Layout.alignment: Qt.AlignRight
 
                 image: root.actionButtonImage
-                imageColor: "#D7D8DB"
+                imageColor: AmneziaStyle.color.white
 
                 visible: image ? true : false
 
@@ -66,7 +68,7 @@ Item {
 
             text: root.descriptionText
 
-            color: "#878B91"
+            color: AmneziaStyle.color.grey
 
             visible: root.descriptionText !== ""
         }

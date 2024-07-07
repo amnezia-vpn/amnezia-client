@@ -8,6 +8,7 @@ import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerProps 1.0
 import ProtocolProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -175,7 +176,7 @@ PageType {
                            && !ServersModel.getProcessedServerData("hasInstalledContainers")) ? 2 : 0
 
             background: Rectangle {
-                color: "transparent"
+                color: AmneziaStyle.color.transparent
             }
 
             activeFocusOnTab: true

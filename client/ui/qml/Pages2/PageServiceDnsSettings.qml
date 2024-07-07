@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -69,7 +70,7 @@ PageType {
                 width: parent.width
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
 
                 Keys.onTabPressed: root.lastItemTabClicked()
 

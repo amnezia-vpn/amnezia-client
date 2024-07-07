@@ -8,6 +8,7 @@ import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -182,7 +183,7 @@ PageType {
             Keys.onTabPressed: lastItemTabClicked(focusItem)
 
             text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-            textColor: "#EB5757"
+            textColor: AmneziaStyle.color.red
 
             clickedFunction: function() {
                 var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())

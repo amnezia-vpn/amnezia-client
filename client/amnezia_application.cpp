@@ -157,6 +157,7 @@ void AmneziaApplication::init()
     connect(this, &AmneziaApplication::translationsUpdated, m_notificationHandler.get(), &NotificationHandler::onTranslationsUpdated);
 #endif
 
+    m_engine->addImportPath("qrc:/ui/qml/Modules/");
     m_engine->load(url);
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
 
