@@ -138,12 +138,7 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
         FirewallParams params { };
         params.dnsServers.append(config.m_dnsServer);
 
-        QStringList allowedIpsStringList;
-        for (auto allowedIp : config.m_allowedIPAddressRanges) {
-            allowedIpsStringList.push_back(allowedIp.toString());
-        }
-
-        if (allowedIpsStringList.contains("0.0.0.0/0")) {
+        if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
           params.blockAll = true;
           if (config.m_excludedAddresses.size()) {
             params.allowNets = true;
