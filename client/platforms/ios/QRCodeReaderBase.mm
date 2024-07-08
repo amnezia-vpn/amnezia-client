@@ -1,12 +1,12 @@
 #include "QRCodeReaderBase.h"
 
-#import <UIKit/UIKit.h>
+//#import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 
-@interface QRCodeReaderImpl : UIViewController
-@end
+//@interface QRCodeReaderImpl : UIViewController
+//@end
 
-@interface QRCodeReaderImpl () <AVCaptureMetadataOutputObjectsDelegate>
+/*@interface QRCodeReaderImpl () <AVCaptureMetadataOutputObjectsDelegate>
 @property (nonatomic) QRCodeReader* qrCodeReader;
 @property (nonatomic, strong) AVCaptureSession *captureSession;
 @property (nonatomic, strong) AVCaptureVideoPreviewLayer *videoPreviewPlayer;
@@ -15,15 +15,15 @@
 
 @implementation QRCodeReaderImpl
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
+//- (void)viewDidLoad {
+//    [super viewDidLoad];
 
-    _captureSession = nil;
-}
+//    _captureSession = nil;
+//}
 
-- (void)setQrCodeReader: (QRCodeReader*)value {
-    _qrCodeReader = value;
-}
+//- (void)setQrCodeReader: (QRCodeReader*)value {
+//    _qrCodeReader = value;
+//}
 
 - (BOOL)startReading {
     NSError *error;
@@ -49,7 +49,7 @@
 
     _videoPreviewPlayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession: _captureSession];
     
-    CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+    //CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
 
     QRect cameraRect = _qrCodeReader->cameraSize();
     CGRect cameraCGRect = CGRectMake(cameraRect.x(),
@@ -60,7 +60,7 @@
     [_videoPreviewPlayer setVideoGravity: AVLayerVideoGravityResizeAspectFill];
     [_videoPreviewPlayer setFrame: cameraCGRect];
 
-    CALayer* layer = [UIApplication sharedApplication].keyWindow.layer;
+   // CALayer* layer = [UIApplication sharedApplication].keyWindow.layer;
     [layer addSublayer: _videoPreviewPlayer];
 
     [_captureSession startRunning];
@@ -107,4 +107,4 @@ void QRCodeReader::startReading() {
 
 void QRCodeReader::stopReading() {
     [m_qrCodeReader stopReading];
-}
+}*/

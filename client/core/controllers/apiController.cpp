@@ -1,3 +1,5 @@
+#define Q_OS_IOS 1
+
 #include "apiController.h"
 
 #include <QEventLoop>

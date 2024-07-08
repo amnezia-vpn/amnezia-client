@@ -12,6 +12,8 @@
 #include <configurators/wireguard_configurator.h>
 #include "core/controllers/serverController.h"
 
+#define Q_OS_IOS 1
+
 #ifdef AMNEZIA_DESKTOP
     #include "core/ipcclient.h"
     #include "ipc.h"

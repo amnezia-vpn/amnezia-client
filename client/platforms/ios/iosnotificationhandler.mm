@@ -6,8 +6,9 @@
 
 #import <UserNotifications/UserNotifications.h>
 #import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
+//#import <UIKit/UIKit.h>
 
+/*
 @interface IOSNotificationDelegate
     : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate> {
   IOSNotificationHandler* m_iosNotificationHandler;
@@ -86,4 +87,4 @@ void IOSNotificationHandler::notify(NotificationHandler::Message type, const QSt
                NSLog(@"Local Notification failed");
              }
            }];
-}
+}*/

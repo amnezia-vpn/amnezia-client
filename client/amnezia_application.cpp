@@ -217,7 +217,7 @@ void AmneziaApplication::registerTypes()
     declareQmlProtocolEnum();
     declareQmlContainerEnum();
 
-    qmlRegisterType<QRCodeReader>("QRCodeReader", 1, 0, "QRCodeReader");
+   // qmlRegisterType<QRCodeReader>("QRCodeReader", 1, 0, "QRCodeReader");
 
     m_containerProps.reset(new ContainerProps());
     qmlRegisterSingletonInstance("ContainerProps", 1, 0, "ContainerProps", m_containerProps.get());

@@ -1,5 +1,7 @@
 #include "ssh_configurator.h"
 
+#define Q_OS_IOS 1
+
 #include <QDebug>
 #include <QObject>
 #include <QProcess>
@@ -101,8 +103,8 @@ QProcessEnvironment SshConfigurator::prepareEnv()
     pathEnvVar.clear();
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\cygwin;");
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn;");
-#elif defined(Q_OS_MACX)
-    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS");
+//#elif defined(Q_OS_MACX)
+//    pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS");
 #endif
 
     env.insert("PATH", pathEnvVar);

@@ -4,7 +4,6 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 import PageEnum 1.0
-import QRCodeReader 1.0
 
 import "./"
 import "../Controls2"
@@ -63,23 +62,5 @@ PageType {
         color: "transparent"
         //radius: 16
 
-        QRCodeReader {
-           id: qrCodeReader
-
-           onCodeReaded: function(code) {
-               ImportController.parseQrCodeChunk(code)
-               progressBar.value = ImportController.getQrCodeScanProgressBarValue()
-               header.progressString = ImportController.getQrCodeScanProgressString()
-           }
-
-           Component.onCompleted: {
-               qrCodeReader.setCameraSize(Qt.rect(qrCodeRectange.x,
-                                                  qrCodeRectange.y,
-                                                  qrCodeRectange.width,
-                                                  qrCodeRectange.height))
-               qrCodeReader.startReading()
-           }
-           Component.onDestruction: qrCodeReader.stopReading()
-        }
     }
 }

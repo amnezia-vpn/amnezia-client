@@ -27,15 +27,15 @@ const char* MessageKey::isOnDemand = "is-on-demand";
 const char* MessageKey::SplitTunnelType = "SplitTunnelType";
 const char* MessageKey::SplitTunnelSites = "SplitTunnelSites";
 
-static UIViewController* getViewController() {
-    NSArray *windows = [[UIApplication sharedApplication]windows];
-    for (UIWindow *window in windows) {
-        if (window.isKeyWindow) {
-            return window.rootViewController;
-        }
-    }
-    return nil;
-}
+//static UIViewController* getViewController() {
+//    NSArray *windows = [[UIApplication sharedApplication]windows];
+//    for (UIWindow *window in windows) {
+//        if (window.isKeyWindow) {
+//            return window.rootViewController;
+//        }
+//    }
+//    return nil;
+//}
 
 Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
   switch (status) {
@@ -748,24 +748,24 @@ bool IosController::shareText(const QStringList& filesToSend) {
         [sharingItems addObject:logFileUrl];
     }
 
-    UIViewController *qtController = getViewController();
-    if (!qtController) return;
+  //  UIViewController *qtController = getViewController();
+  //  if (!qtController) return;
 
-    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
+  //  UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
     
     __block bool isAccepted = false;
     
-    [activityController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
-        isAccepted = completed;
-        emit finished();
-    }];
+ //   [activityController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
+ //       isAccepted = completed;
+ //       emit finished();
+ //   }];
 
-    [qtController presentViewController:activityController animated:YES completion:nil];
-    UIPopoverPresentationController *popController = activityController.popoverPresentationController;
-    if (popController) {
-        popController.sourceView = qtController.view;
-        popController.sourceRect = CGRectMake(100, 100, 100, 100);
-    }
+//    [qtController presentViewController:activityController animated:YES completion:nil];
+//    UIPopoverPresentationController *popController = activityController.popoverPresentationController;
+//    if (popController) {
+//        popController.sourceView = qtController.view;
+//        popController.sourceRect = CGRectMake(100, 100, 100, 100);
+//    }
     
     QEventLoop wait;
     QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
@@ -775,26 +775,26 @@ bool IosController::shareText(const QStringList& filesToSend) {
 }
 
 QString IosController::openFile() {
-    UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.item"] inMode:UIDocumentPickerModeOpen];
+ //   UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.item"] inMode:UIDocumentPickerModeOpen];
 
-    DocumentPickerDelegate *documentPickerDelegate = [[DocumentPickerDelegate alloc] init];
-    documentPicker.delegate = documentPickerDelegate;
+ //   DocumentPickerDelegate *documentPickerDelegate = [[DocumentPickerDelegate alloc] init];
+ //   documentPicker.delegate = documentPickerDelegate;
 
-    UIViewController *qtController = getViewController();
-    if (!qtController) return;
+ //   UIViewController *qtController = getViewController();
+ //  if (!qtController) return;
 
-    [qtController presentViewController:documentPicker animated:YES completion:nil];
+ //   [qtController presentViewController:documentPicker animated:YES completion:nil];
     
     __block QString filePath;
 
-    documentPickerDelegate.documentPickerClosedCallback = ^(NSString *path) {
-        if (path) {
-            filePath = QString::fromUtf8(path.UTF8String);
-        } else {
-            filePath = QString();
-        }
-        emit finished();
-    };
+ //   documentPickerDelegate.documentPickerClosedCallback = ^(NSString *path) {
+ //       if (path) {
+ //           filePath = QString::fromUtf8(path.UTF8String);
+ //       } else {
+ //           filePath = QString();
+ //       }
+ //       emit finished();
+ //   };
 
     QEventLoop wait;
     QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);

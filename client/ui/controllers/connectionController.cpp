@@ -1,5 +1,7 @@
 #include "connectionController.h"
 
+#define Q_OS_IOS 1
+
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     #include <QGuiApplication>
 #else

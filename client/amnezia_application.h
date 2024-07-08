@@ -1,6 +1,8 @@
 #ifndef AMNEZIA_APPLICATION_H
 #define AMNEZIA_APPLICATION_H
 
+#define Q_OS_IOS 1
+
 #include <QCommandLineParser>
 #include <QNetworkAccessManager>
 #include <QQmlApplicationEngine>

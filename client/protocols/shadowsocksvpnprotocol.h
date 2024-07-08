@@ -5,6 +5,8 @@
 #include "QProcess"
 #include "containers/containers_defs.h"
 
+#define Q_OS_IOS 1
+
 class ShadowSocksVpnProtocol : public OpenVpnProtocol
 {
 public:
@@ -27,7 +29,7 @@ private:
 #ifndef Q_OS_IOS
     QProcess m_ssProcess;
 #endif
-    QTemporaryFile m_shadowSocksCfgFile;
+//    QTemporaryFile m_shadowSocksCfgFile;
 };
 
 #endif // SHADOWSOCKSVPNPROTOCOL_H

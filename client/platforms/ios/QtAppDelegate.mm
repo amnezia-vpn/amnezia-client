@@ -6,7 +6,7 @@
 
 @implementation QIOSApplicationDelegate (AmneziaVPNDelegate)
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+/*- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     [application setMinimumBackgroundFetchInterval: UIApplicationBackgroundFetchIntervalMinimum];
     // Override point for customization after application launch.
@@ -56,6 +56,6 @@
         return YES;
     }
     return NO;
-}
+}*/
 
 @end

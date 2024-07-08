@@ -5,9 +5,11 @@
 #include <QObject>
 
 #include "ipc.h"
-#include "rep_ipc_interface_replica.h"
+//#include "rep_ipc_interface_replica.h"
 
 #include "privileged_process.h"
+
+/*
 
 class IpcClient : public QObject
 {
@@ -46,6 +48,6 @@ private:
     bool m_isSocketConnected {false};
 
     static IpcClient *m_instance;
-};
+}; */
 
 #endif // IPCCLIENT_H

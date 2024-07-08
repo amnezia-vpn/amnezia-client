@@ -11,7 +11,7 @@ find_package(Qt6 REQUIRED COMPONENTS ShaderTools)
 set(LIBS ${LIBS} Qt6::ShaderTools)
 
 find_library(FW_AUTHENTICATIONSERVICES AuthenticationServices)
-find_library(FW_UIKIT UIKit)
+#find_library(FW_UIKIT UIKit)
 find_library(FW_AVFOUNDATION AVFoundation)
 find_library(FW_FOUNDATION Foundation)
 find_library(FW_STOREKIT StoreKit)
@@ -20,7 +20,7 @@ find_library(FW_NETWORKEXTENSION NetworkExtension)
 
 set(LIBS ${LIBS}
     ${FW_AUTHENTICATIONSERVICES}
-    ${FW_UIKIT}
+#    ${FW_UIKIT}
     ${FW_AVFOUNDATION}
     ${FW_FOUNDATION}
     ${FW_STOREKIT}

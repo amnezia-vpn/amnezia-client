@@ -1,7 +1,7 @@
 #import <NetworkExtension/NetworkExtension.h>
 #import <NetworkExtension/NETunnelProviderSession.h>
 #import <Foundation/Foundation.h>
-#include <UIKit/UIKit.h>
+//#include <UIKit/UIKit.h>
 #include <Security/Security.h>
 
 class IosController;
@@ -18,8 +18,8 @@ class IosController;
 
 typedef void (^DocumentPickerClosedCallback)(NSString *path);
 
-@interface DocumentPickerDelegate : NSObject <UIDocumentPickerDelegate>
+//@interface DocumentPickerDelegate : NSObject <UIDocumentPickerDelegate>
 
-@property (nonatomic, copy) DocumentPickerClosedCallback documentPickerClosedCallback;
+//@property (nonatomic, copy) DocumentPickerClosedCallback documentPickerClosedCallback;
 
-@end
+//@end

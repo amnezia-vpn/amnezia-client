@@ -52,9 +52,9 @@ find_library(FW_MOBILE_CORE MobileCoreServices)
 find_library(FW_UI_KIT UIKit)
 find_library(FW_LIBRESOLV libresolv.9.tbd)
 
-target_link_libraries(networkextension PRIVATE ${FW_ASSETS_LIBRARY})
-target_link_libraries(networkextension PRIVATE ${FW_MOBILE_CORE})
-target_link_libraries(networkextension PRIVATE ${FW_UI_KIT})
+#target_link_libraries(networkextension PRIVATE ${FW_ASSETS_LIBRARY})
+#target_link_libraries(networkextension PRIVATE ${FW_MOBILE_CORE})
+#target_link_libraries(networkextension PRIVATE ${FW_UI_KIT})
 target_link_libraries(networkextension PRIVATE ${FW_LIBRESOLV})
 
 target_compile_options(networkextension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")

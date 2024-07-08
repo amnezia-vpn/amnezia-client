@@ -2,6 +2,8 @@
 #include "utils/converter.h"
 #include "core/errorstrings.h"
 
+#define Q_OS_IOS 1
+
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     #include <QGuiApplication>
 #else
@@ -37,8 +39,8 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
 #endif
 
 #if defined Q_OS_MACX
-    connect(this, &PageController::raiseMainWindow, []() { setDockIconVisible(true); });
-    connect(this, &PageController::hideMainWindow, []() { setDockIconVisible(false); });
+  //  connect(this, &PageController::raiseMainWindow, []() { setDockIconVisible(true); });
+  //  connect(this, &PageController::hideMainWindow, []() { setDockIconVisible(false); });
 #endif
 
     connect(this, qOverload<ErrorCode>(&PageController::showErrorMessage), this, &PageController::onShowErrorMessage);
@@ -134,7 +136,7 @@ void PageController::showOnStartup()
 #ifdef Q_OS_WIN
         emit hideMainWindow();
 #elif defined Q_OS_MACX
-        setDockIconVisible(false);
+  //      setDockIconVisible(false);
 #endif
     }
 }

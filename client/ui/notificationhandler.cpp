@@ -5,6 +5,8 @@
 #include <QDebug>
 #include "notificationhandler.h"
 
+#define Q_OS_IOS 1
+
 #if defined(Q_OS_IOS)
 #  include "platforms/ios/iosnotificationhandler.h"
 #else
@@ -14,7 +16,7 @@
 // static
 NotificationHandler* NotificationHandler::create(QObject* parent) {
 #if defined(Q_OS_IOS)
-    return new IOSNotificationHandler(parent);
+    return nullptr;//new IOSNotificationHandler(parent);
 #else
 
 #  if defined(Q_OS_LINUX)

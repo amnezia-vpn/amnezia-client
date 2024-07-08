@@ -11,7 +11,7 @@ EOF
 
 
   cd 3rd/OpenVPNAdapter
-  if $XCODEBUILD -scheme OpenVPNAdapter -configuration Release -xcconfig Configuration/amnezia.xcconfig -sdk iphoneos -destination 'generic/platform=iOS' -project OpenVPNAdapter.xcodeproj ; then
+  if $XCODEBUILD -scheme OpenVPNAdapter -configuration Release -xcconfig Configuration/amnezia.xcconfig -sdk macosx14.2 -destination 'generic/platform=MacOS' -project OpenVPNAdapter.xcodeproj ; then
     echo "OpenVPNAdapter built successfully"
   else
     echo "OpenVPNAdapter build failed"

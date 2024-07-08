@@ -1,5 +1,7 @@
 #include "openvpn_configurator.h"
 
+#define Q_OS_IOS 1
+
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonObject>

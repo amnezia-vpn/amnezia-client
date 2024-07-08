@@ -45,7 +45,7 @@ private:
     ManagementServer m_managementServer;
     QString m_configFileName;
     QJsonObject m_configData;
-    QTemporaryFile m_configFile;
+ //   QTemporaryFile m_configFile;
 
     uint selectMgmtPort();
 
@@ -53,7 +53,7 @@ private:
     void updateRouteGateway(QString line);
     void updateVpnGateway(const QString &line);
 
-    QSharedPointer<PrivilegedProcess> m_openVpnProcess;
+  //  QSharedPointer<PrivilegedProcess> m_openVpnProcess;
 };
 
 #endif // OPENVPNPROTOCOL_H
