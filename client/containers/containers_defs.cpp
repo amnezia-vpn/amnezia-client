@@ -90,7 +90,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 {
     return { { DockerContainer::None, "Not installed" },
              { DockerContainer::OpenVpn, "OpenVPN" },
-             { DockerContainer::ShadowSocks, "ShadowSocks" },
+             { DockerContainer::ShadowSocks, "OpenVPN over SS" },
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
              { DockerContainer::Awg, "AmneziaWG" },
@@ -306,6 +306,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Awg: return true;
     case DockerContainer::Cloak: return true;
     case DockerContainer::Xray: return true;
+    case DockerContainer::SSXray: return true;
     default: return false;
     }
 

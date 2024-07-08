@@ -5,6 +5,7 @@ import QtQuick.Dialogs
 
 import PageEnum 1.0
 import QRCodeReader 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -60,7 +61,7 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 34
 
-        color: "transparent"
+        color: AmneziaStyle.color.transparent
         //radius: 16
 
         QRCodeReader {

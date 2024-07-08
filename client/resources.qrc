@@ -239,6 +239,8 @@
         <file>images/controls/alert-circle.svg</file>
         <file>images/controls/file-check-2.svg</file>
         <file>ui/qml/Controls2/WarningType.qml</file>
+        <file>ui/qml/Modules/Style/qmldir</file>
+        <file>ui/qml/Modules/Style/AmneziaStyle.qml</file>
         <file>ui/qml/Pages2/PageServiceSocksProxySettings.qml</file>
         <file>server_scripts/socks5_proxy/run_container.sh</file>
         <file>server_scripts/socks5_proxy/Dockerfile</file>

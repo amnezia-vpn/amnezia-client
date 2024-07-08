@@ -3,20 +3,22 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
+import Style 1.0
+
 import "TextTypes"
 
 Button {
     id: root
 
-    property string hoveredColor: "#C1C2C5"
-    property string defaultColor: "#D7D8DB"
-    property string disabledColor: "#494B50"
-    property string pressedColor: "#979799"
+    property string hoveredColor: AmneziaStyle.color.whiteHovered
+    property string defaultColor: AmneziaStyle.color.white
+    property string disabledColor: AmneziaStyle.color.greyDisabled
+    property string pressedColor: AmneziaStyle.color.grey
 
-    property string textColor: "#0E0E11"
+    property string textColor: AmneziaStyle.color.black
 
-    property string borderColor: "#D7D8DB"
-    property string borderFocusedColor: "#D7D8DB"
+    property string borderColor: AmneziaStyle.color.white
+    property string borderFocusedColor: AmneziaStyle.color.white
     property int borderWidth: 0
     property int borderFocusedWidth: 1
 
@@ -46,8 +48,8 @@ Button {
     background: Rectangle {
         id: focusBorder
 
-        color: "transparent"
-        border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
+        color: AmneziaStyle.color.transparent
+        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
         border.width: root.activeFocus ? root.borderFocusedWidth : 0
 
         anchors.fill: parent

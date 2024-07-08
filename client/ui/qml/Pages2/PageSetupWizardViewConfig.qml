@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -54,6 +55,9 @@ PageType {
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
                 PageController.replaceStartPage()
             }
+            if (stackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageHome)) {
+                PageController.goToPageHome()
+            }
         }
     }
 
@@ -102,11 +106,11 @@ PageType {
                 Layout.leftMargin: -8
                 implicitHeight: 32
 
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#FBB26A"
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.blackHovered
+                pressedColor: AmneziaStyle.color.blackPressed
+                disabledColor: AmneziaStyle.color.grey
+                textColor: AmneziaStyle.color.orange
 
                 text: showContent ? qsTr("Collapse content") : qsTr("Show content")
                 KeyNavigation.tab: connectButton
@@ -135,8 +139,8 @@ PageType {
 
                 iconPath: "qrc:/images/controls/alert-circle.svg"
 
-                textColor: "#EB5757"
-                imageColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
+                imageColor: AmneziaStyle.color.red
             }
 
             WarningType {
@@ -155,7 +159,7 @@ PageType {
                 implicitHeight: configContent.implicitHeight
 
                 radius: 10
-                color: "#1C1D21"
+                color: AmneziaStyle.color.blackLight
 
                 visible: showContent
 
@@ -176,7 +180,7 @@ PageType {
     Rectangle {
         anchors.fill: columnContent
         anchors.bottomMargin: -24
-        color: "#0E0E11"
+        color: AmneziaStyle.color.black
         opacity: 0.8
     }
 

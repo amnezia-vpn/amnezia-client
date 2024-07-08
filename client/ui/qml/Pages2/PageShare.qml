@@ -7,6 +7,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -267,7 +268,7 @@ PageType {
                 implicitWidth: accessTypeSelectorContent.implicitWidth
                 implicitHeight: accessTypeSelectorContent.implicitHeight
 
-                color: "#1C1D21"
+                color: AmneziaStyle.color.blackLight
                 radius: 16
 
                 RowLayout {
@@ -321,7 +322,7 @@ PageType {
                 visible: accessTypeSelector.currentIndex === 0
 
                 text: qsTr("Share VPN access without the ability to manage the server")
-                color: "#878B91"
+                color: AmneziaStyle.color.grey
             }
 
             TextFieldWithHeaderType {
@@ -652,7 +653,7 @@ PageType {
                 ImageButtonType {
                     id: closeSearchButton
                     image: "qrc:/images/controls/close.svg"
-                    imageColor: "#D7D8DB"
+                    imageColor: AmneziaStyle.color.white
 
                     Keys.onTabPressed: {
                         if (!GC.isMobile()) {
@@ -800,7 +801,7 @@ PageType {
                                 ColumnLayout
                                 {
                                     id: textColumn
-                                    property string textColor: "#878B91"
+                                    property string textColor: AmneziaStyle.color.grey
                                     Layout.bottomMargin: 24
 
                                     ParagraphTextType {
@@ -846,11 +847,11 @@ PageType {
                                     Layout.fillWidth: true
                                     Layout.topMargin: 24
 
-                                    defaultColor: "transparent"
-                                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                                    disabledColor: "#878B91"
-                                    textColor: "#D7D8DB"
+                                    defaultColor: AmneziaStyle.color.transparent
+                                    hoveredColor: AmneziaStyle.color.blackHovered
+                                    pressedColor: AmneziaStyle.color.blackPressed
+                                    disabledColor: AmneziaStyle.color.grey
+                                    textColor: AmneziaStyle.color.white
                                     borderWidth: 1
 
                                     text: qsTr("Rename")
@@ -939,11 +940,11 @@ PageType {
                                     id: revokeButton
                                     Layout.fillWidth: true
 
-                                    defaultColor: "transparent"
-                                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                                    disabledColor: "#878B91"
-                                    textColor: "#D7D8DB"
+                                    defaultColor: AmneziaStyle.color.transparent
+                                    hoveredColor: AmneziaStyle.color.blackHovered
+                                    pressedColor: AmneziaStyle.color.blackPressed
+                                    disabledColor: AmneziaStyle.color.grey
+                                    textColor: AmneziaStyle.color.white
                                     borderWidth: 1
 
                                     text: qsTr("Revoke")

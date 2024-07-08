@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -82,10 +83,10 @@ PageType {
                 }
 
                 descriptionOnTop: true
-                textColor: "#FBB26A"
+                textColor: AmneziaStyle.color.orange
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: "#D7D8DB"
+                rightImageColor: AmneziaStyle.color.white
 
                 KeyNavigation.tab: removeButton
 
@@ -134,10 +135,10 @@ PageType {
                 Layout.leftMargin: 8
                 implicitHeight: 32
 
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                textColor: "#EB5757"
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.blackHovered
+                pressedColor: AmneziaStyle.color.blackPressed
+                textColor: AmneziaStyle.color.red
 
                 text: qsTr("Remove website")
 
