@@ -20,6 +20,10 @@ PageType {
             PageController.closePage()
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
+
+        function onQrDecodingError() {
+            PageController.closePage()
+        }
     }
 
     defaultActiveFocusItem: focusItem

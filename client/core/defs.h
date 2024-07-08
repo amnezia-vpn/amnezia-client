@@ -96,6 +96,7 @@ namespace amnezia
 
         // import and install errors
         ImportInvalidConfigError = 900,
+        ImportQrDecodingError = 901,
 
         // Android errors
         AndroidError = 1000,

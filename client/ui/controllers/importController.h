@@ -61,6 +61,10 @@ signals:
 
     void restoreAppConfig(const QByteArray &data);
 
+#if defined Q_OS_ANDROID || defined Q_OS_IOS
+    void qrDecodingError(ErrorCode errorCode);
+#endif
+
 private:
     QJsonObject extractOpenVpnConfig(const QString &data);
     QJsonObject extractWireGuardConfig(const QString &data);
@@ -69,7 +73,7 @@ private:
     void checkForMaliciousStrings(const QJsonObject &protocolConfig);
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
-    void stopDecodingQr();
+    void stopDecodingQr(const QByteArray &data);
 #endif
 
     QSharedPointer<ServersModel> m_serversModel;

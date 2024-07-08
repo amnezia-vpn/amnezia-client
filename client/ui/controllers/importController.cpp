@@ -521,8 +521,12 @@ void ImportController::startDecodingQr()
     #endif
 }
 
-void ImportController::stopDecodingQr()
+void ImportController::stopDecodingQr(const QByteArray &data)
 {
+    if (!extractConfigFromQr(data)) {
+        emit qrDecodingError(ErrorCode::ImportQrDecodingError);
+        return;
+    }
     emit qrDecodingFinished();
 }
 
@@ -559,6 +563,7 @@ bool ImportController::parseQrCodeChunk(const QString &code)
                 data.append(m_qrCodeChunks.value(i));
             }
 
+            data = qUncompress(data);
             auto format = checkConfigFormat(data);
             if (format == ConfigTypes::Invalid) {
                 qDebug() << "error while extracting data from qr";
@@ -568,8 +573,7 @@ bool ImportController::parseQrCodeChunk(const QString &code)
             } else {
                 qDebug() << "stopDecodingQr";
                 m_isQrCodeProcessed = false;
-                stopDecodingQr();
-                extractConfigFromQr(data);
+                stopDecodingQr(data);
                 return true;
             }
         }
@@ -579,8 +583,7 @@ bool ImportController::parseQrCodeChunk(const QString &code)
         if (format != ConfigTypes::Invalid) {
             qDebug() << "stopDecodingQr";
             m_isQrCodeProcessed = false;
-            stopDecodingQr();
-            extractConfigFromQr(data);
+            stopDecodingQr(data);
             return true;
         }
     }
