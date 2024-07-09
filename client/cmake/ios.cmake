@@ -1,10 +1,14 @@
 message("Client iOS build")
-set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
+
+set_target_properties(${PROJECT} PROPERTIES MACOSX_BUNDLE TRUE)
+set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
+
 set(APPLE_PROJECT_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH})
 
 
 enable_language(OBJC)
-enable_language(OBJCXX)
+# enable_language(OBJCXX)
 enable_language(Swift)
 
 find_package(Qt6 REQUIRED COMPONENTS ShaderTools)
@@ -111,13 +115,13 @@ target_sources(${PROJECT} PRIVATE
 )
 
 target_sources(${PROJECT} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
+    #${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 
 set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
+    #${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )

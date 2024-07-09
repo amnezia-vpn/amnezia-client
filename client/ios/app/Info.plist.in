@@ -26,21 +26,6 @@
 	<string>${MACOSX_BUNDLE_COPYRIGHT}</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<false/>
-	<key>UILaunchStoryboardName</key>
-	<string>AmneziaVPNLaunchScreen</string>
-	<key>UIRequiredDeviceCapabilities</key>
-	<array/>
-	<key>UIRequiresFullScreen</key>
-	<true/>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationPortrait</string>
-	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array/>
 	<key>UIUserInterfaceStyle</key>

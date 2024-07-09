@@ -344,7 +344,7 @@ endif()
 
 if(IOS)
     include(cmake/ios.cmake)
-    include(cmake/ios-arch-fixup.cmake)
+    #include(cmake/ios-arch-fixup.cmake)
 elseif(APPLE AND NOT IOS)
     include(cmake/osxtools.cmake)
     include(cmake/macos.cmake)
