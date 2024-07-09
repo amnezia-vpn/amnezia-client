@@ -73,6 +73,7 @@ private:
     bool setupWireGuard();
     bool setupAwg();
     bool setupXray();
+    bool setupSSXray();
 
     bool startOpenVPN(const QString &config);
     bool startWireGuard(const QString &jsonConfig);

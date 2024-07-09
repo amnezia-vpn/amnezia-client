@@ -219,6 +219,9 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
     if (proto == amnezia::Proto::Xray) {
         return setupXray();
     }
+    if (proto == amnezia::Proto::SSXray) {
+        return setupSSXray();
+    }
 
     return false;
 }
@@ -511,6 +514,15 @@ bool IosController::setupXray()
     QString xrayConfigStr(xrayConfigDoc.toJson(QJsonDocument::Compact));
 
     return startXray(xrayConfigStr);
+}
+
+bool IosController::setupSSXray()
+{
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::SSXray)].toObject();
+    QJsonDocument ssXrayConfigDoc(config);
+    QString ssXrayConfigStr(ssXrayConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startXray(ssXrayConfigStr);
 }
 
 bool IosController::setupAwg()
