@@ -17,7 +17,6 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
    <a href="https://apps.apple.com/us/app/amneziavpn/id1600529900"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/apl.png" width="150" style="max-width: 100%;"></a>
    <a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.5.3.0/AmneziaVPN-arm64-v8a-release.apk"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/andr.png" width="150" style="max-width: 100%;"></a>
 
-<br>
 
 [All releases](https://github.com/amnezia-vpn/amnezia-client/releases)
 
