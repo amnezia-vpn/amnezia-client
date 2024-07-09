@@ -10,12 +10,12 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 <br>
 <p align=center>
-    <a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.5.3.0/AmneziaVPN_4.5.3.0_x64.exe"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/win.png" width="200" style="max-width: 100%;"></a> 
-   <a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.5.3.0/AmneziaVPN_4.5.3.0.dmg"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/mac.png" width="200" style="max-width: 100%;"></a> 
-   <a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.5.3.0/AmneziaVPN_Linux_installer.tar.zip"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/lin.png" width="200" style="max-width: 100%;"></a>
-    <a href="https://play.google.com/store/search?q=amnezia+vpn&c=apps"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/play.png" width="200" style="max-width: 100%;"></a>
-   <a href="https://apps.apple.com/us/app/amneziavpn/id1600529900"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/apl.png" width="200" style="max-width: 100%;"></a>
-   <a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.5.3.0/AmneziaVPN-arm64-v8a-release.apk"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/andr.png" width="200" style="max-width: 100%;"></a>
+    <a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.5.3.0/AmneziaVPN_4.5.3.0_x64.exe"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/win.png" width="150" style="max-width: 100%;"></a> 
+   <a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.5.3.0/AmneziaVPN_4.5.3.0.dmg"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/mac.png" width="150" style="max-width: 100%;"></a> 
+   <a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.5.3.0/AmneziaVPN_Linux_installer.tar.zip"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/lin.png" width="150" style="max-width: 100%;"></a>
+    <a href="https://play.google.com/store/search?q=amnezia+vpn&c=apps"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/play.png" width="150" style="max-width: 100%;"></a>
+   <a href="https://apps.apple.com/us/app/amneziavpn/id1600529900"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/apl.png" width="150" style="max-width: 100%;"></a>
+   <a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.5.3.0/AmneziaVPN-arm64-v8a-release.apk"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/andr.png" width="150" style="max-width: 100%;"></a>
 </p>
 <br>
 
