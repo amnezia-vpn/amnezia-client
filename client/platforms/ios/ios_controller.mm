@@ -11,6 +11,8 @@
 #include "../protocols/vpnprotocol.h"
 #import "ios_controller_wrapper.h"
 
+#include <Security/Security.h>
+
 const char* Action::start = "start";
 const char* Action::restart = "restart";
 const char* Action::stop = "stop";
@@ -36,6 +38,26 @@ const char* MessageKey::SplitTunnelSites = "SplitTunnelSites";
 //    }
 //    return nil;
 //}
+
+OSStatus requestAuthorization() {
+    AuthorizationRef authRef;
+    OSStatus status = AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &authRef);
+    if (status != errAuthorizationSuccess) {
+        qDebug() << "Authorization failed with status:" << status;
+        return status;
+    }
+
+    AuthorizationItem authItem = {kAuthorizationRightExecute, 0, NULL, 0};
+    AuthorizationRights authRights = {1, &authItem};
+    AuthorizationFlags flags = kAuthorizationFlagDefaults | kAuthorizationFlagInteractionAllowed | kAuthorizationFlagExtendRights;
+
+    status = AuthorizationCopyRights(authRef, &authRights, NULL, flags, NULL);
+    if (status != errAuthorizationSuccess) {
+        qDebug() << "Authorization rights copy failed with status:" << status;
+    }
+
+    return status;
+}
 
 Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
   switch (status) {
@@ -84,6 +106,11 @@ IosController* IosController::Instance() {
 
 bool IosController::initialize()
 {
+    if (requestAuthorization() != errAuthorizationSuccess) {
+        emit connectionStateChanged(Vpn::ConnectionState::Error);
+        return false;
+    }
+    
     __block bool ok = true;
     [NETunnelProviderManager loadAllFromPreferencesWithCompletionHandler:^(NSArray<NETunnelProviderManager *> * _Nullable managers, NSError * _Nullable error) {
         @try {
