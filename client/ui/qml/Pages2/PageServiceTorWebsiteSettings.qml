@@ -88,7 +88,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/copy.svg"
                 rightImageColor: AmneziaStyle.color.white
 
-                KeyNavigation.tab: removeButton
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
@@ -126,41 +126,6 @@ PageType {
                 Layout.rightMargin: 16
 
                 text: qsTr("When configuring WordPress set the this onion address as domain.")
-            }
-
-            BasicButtonType {
-                id: removeButton
-                Layout.topMargin: 24
-                Layout.bottomMargin: 16
-                Layout.leftMargin: 8
-                implicitHeight: 32
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.blackHovered
-                pressedColor: AmneziaStyle.color.blackPressed
-                textColor: AmneziaStyle.color.red
-
-                text: qsTr("Remove website")
-
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
-
-                clickedFunc: function() {
-                    var headerText = qsTr("The site with all data will be removed from the tor network.")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeProcessedContainer()
-                    }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            removeButton.forceActiveFocus()
-                        }
-                    }
-
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                }
             }
         }
     }

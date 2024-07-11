@@ -104,8 +104,6 @@ PageType {
                     enabled: false
                 }
             }
-
-            DividerType {}
         }
     }
 }

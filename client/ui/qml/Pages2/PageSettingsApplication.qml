@@ -51,6 +51,8 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
+            spacing: 0
+
             HeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
