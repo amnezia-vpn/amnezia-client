@@ -257,3 +257,31 @@ QString SettingsController::getInstallationUuid()
 {
     return m_settings->getInstallationUuid(false);
 }
+
+void SettingsController::enableDevMode()
+{
+    m_isDevModeEnabled = true;
+    emit devModeEnabled();
+}
+
+bool SettingsController::isDevModeEnabled()
+{
+    return m_isDevModeEnabled;
+}
+
+void SettingsController::resetGatewayEndpoint()
+{
+    m_settings->resetGatewayEndpoint();
+    emit gatewayEndpointChanged(m_settings->getGatewayEndpoint());
+}
+
+void SettingsController::setGatewayEndpoint(const QString &endpoint)
+{
+    m_settings->setGatewayEndpoint(endpoint);
+    emit gatewayEndpointChanged(endpoint);
+}
+
+QString SettingsController::getGatewayEndpoint()
+{
+    return m_settings->getGatewayEndpoint();
+}

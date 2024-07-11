@@ -177,6 +177,18 @@ PageType {
 
                 text: qsTr("Software version: %1").arg(SettingsController.getAppVersion())
                 color: "#878B91"
+
+                MouseArea {
+                    property int clickCount: 0
+                    anchors.fill: parent
+                    onClicked: {
+                        if (clickCount > 10) {
+                            SettingsController.enableDevMode()
+                        } else {
+                            clickCount++
+                        }
+                    }
+                }
             }
 
             BasicButtonType {

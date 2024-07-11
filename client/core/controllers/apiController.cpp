@@ -61,7 +61,7 @@ namespace
     }
 }
 
-ApiController::ApiController(QObject *parent) : QObject(parent)
+ApiController::ApiController(const QString &gatewayEndpoint, QObject *parent) : QObject(parent), m_gatewayEndpoint(gatewayEndpoint)
 {
 }
 
@@ -118,6 +118,12 @@ void ApiController::fillServerConfig(const QString &protocol, const ApiControlle
     serverConfig[config_key::dns2] = apiConfig.value(config_key::dns2);
     serverConfig[config_key::containers] = apiConfig.value(config_key::containers);
     serverConfig[config_key::hostName] = apiConfig.value(config_key::hostName);
+
+    if (apiConfig.value(config_key::configVersion).toInt() == 2) {
+        serverConfig[config_key::configVersion] = apiConfig.value(config_key::configVersion);
+        serverConfig[config_key::description] = apiConfig.value(config_key::description);
+        serverConfig[config_key::name] = apiConfig.value(config_key::name);
+    }
 
     auto defaultContainer = apiConfig.value(config_key::defaultContainer).toString();
     serverConfig[config_key::defaultContainer] = defaultContainer;
@@ -222,7 +228,7 @@ ErrorCode ApiController::getServicesList(QByteArray &responseBody)
     request.setTransferTimeout(7000);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    request.setUrl(QString("http://localhost:52525/v1/services"));
+    request.setUrl(QString("%1v1/services").arg(m_gatewayEndpoint));
 
     QScopedPointer<QNetworkReply> reply;
     reply.reset(manager.get(request));
@@ -252,7 +258,7 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
     request.setTransferTimeout(7000);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    request.setUrl(QString("http://localhost:52525/v1/config"));
+    request.setUrl(QString("%1v1/config").arg(m_gatewayEndpoint));
 
     ApiPayloadData apiPayloadData = generateApiPayloadData(protocol);
 

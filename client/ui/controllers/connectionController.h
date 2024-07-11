@@ -64,7 +64,7 @@ private:
 
     void openConnection(const bool updateConfig, const QJsonObject &config, const int serverIndex);
 
-    ApiController m_apiController;
+    QScopedPointer<ApiController> m_apiController;
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;

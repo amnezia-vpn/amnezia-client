@@ -14,7 +14,7 @@ class ApiController : public QObject
     Q_OBJECT
 
 public:
-    explicit ApiController(QObject *parent = nullptr);
+    explicit ApiController(const QString &gatewayEndpoint, QObject *parent = nullptr);
 
 public slots:
     void updateServerConfigFromApi(const QString &installationUuid, const int serverIndex, QJsonObject serverConfig);
@@ -40,6 +40,8 @@ private:
     QJsonObject fillApiPayload(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData);
     void fillServerConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, const QByteArray &apiResponseBody,
                           QJsonObject &serverConfig);
+
+    QString m_gatewayEndpoint;
 };
 
 #endif // APICONTROLLER_H

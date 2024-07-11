@@ -59,7 +59,9 @@ namespace PageLoader
         PageProtocolIKev2Settings,
         PageProtocolRaw,
 
-        PageShareFullAccess
+        PageShareFullAccess,
+
+        PageDevConsole
     };
     Q_ENUM_NS(PageEnum)
 

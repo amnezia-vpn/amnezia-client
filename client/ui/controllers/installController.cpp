@@ -811,7 +811,7 @@ void InstallController::addEmptyServer()
 
 bool InstallController::fillAvailableServices()
 {
-    ApiController apiController;
+    ApiController apiController(m_settings->getGatewayEndpoint());
 
     QByteArray responseBody;
     ErrorCode errorCode = apiController.getServicesList(responseBody);
@@ -827,7 +827,7 @@ bool InstallController::fillAvailableServices()
 
 bool InstallController::installServiceFromApi()
 {
-    ApiController apiController;
+    ApiController apiController(m_settings->getGatewayEndpoint());
     QJsonObject serverConfig;
 
     ErrorCode errorCode = apiController.getConfigForService(m_settings->getInstallationUuid(true), m_apiServicesModel->getCountryCode(),
@@ -840,7 +840,6 @@ bool InstallController::installServiceFromApi()
 
     auto serviceInfo = m_apiServicesModel->getSelectedServiceInfo();
 
-    serverConfig.insert(config_key::configVersion, 2); //todo remove?
     serverConfig.insert(configKey::serviceInfo, serviceInfo);
 
     m_serversModel->addServer(serverConfig);

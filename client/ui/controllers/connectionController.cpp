@@ -16,20 +16,21 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
                                            const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
                                            QObject *parent)
     : QObject(parent),
-      m_apiController(this),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_clientManagementModel(clientManagementModel),
       m_vpnConnection(vpnConnection),
       m_settings(settings)
 {
+    m_apiController.reset(new ApiController(m_settings->getGatewayEndpoint(), this));
+
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this, &ConnectionController::onConnectionStateChanged);
     connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
 
-    connect(&m_apiController, &ApiController::configUpdated, this,
+    connect(m_apiController.get(), &ApiController::configUpdated, this,
             static_cast<void (ConnectionController::*)(const bool, const QJsonObject &, const int)>(&ConnectionController::openConnection));
-    connect(&m_apiController, qOverload<ErrorCode>(&ApiController::errorOccurred), this, qOverload<ErrorCode>(&ConnectionController::connectionErrorOccurred));
+    connect(m_apiController.get(), qOverload<ErrorCode>(&ApiController::errorOccurred), this, qOverload<ErrorCode>(&ConnectionController::connectionErrorOccurred));
 
     m_state = Vpn::ConnectionState::Disconnected;
 }
@@ -51,7 +52,7 @@ void ConnectionController::openConnection()
 
     if (serverConfig.value(config_key::configVersion).toInt()
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        m_apiController.updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverIndex, serverConfig);
+        m_apiController->updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverIndex, serverConfig);
     } else {
         openConnection(false, serverConfig, serverIndex);
     }

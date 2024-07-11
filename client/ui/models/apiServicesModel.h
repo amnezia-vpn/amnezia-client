@@ -20,6 +20,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
 public slots:
     void updateModel(const QJsonObject &data);
 
@@ -32,7 +33,6 @@ public slots:
 
     QString getCountryCode();
     QString getServicesDescription();
-signals:
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
