@@ -276,7 +276,7 @@ PageType {
 
                 if (Qt.platform.os === "windows") {
                     var fileName = SystemController.getFileName(qsTr("Open executable file"),
-                                                                qsTr("Executable file (*.*)"))
+                                                                qsTr("Executable files (*.*)"))
                     if (fileName !== "") {
                         AppSplitTunnelingController.addApp(fileName)
                     }
