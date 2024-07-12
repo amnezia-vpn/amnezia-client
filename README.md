@@ -16,12 +16,12 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 ## Links
 
-[https://amnezia.org](https://amnezia.org) - project website  
-[https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
-[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English) 
-[https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Telegram support channel (Farsi) 
-[https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Telegram support channel (Myanmar)  
-[https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
+- [https://amnezia.org](https://amnezia.org) - project website  
+- [https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
+- [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English) 
+- [https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Telegram support channel (Farsi) 
+- [https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Telegram support channel (Myanmar)  
+- [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
 
 ## Tech
 
@@ -157,10 +157,10 @@ GPL v3.0
 
 ## Donate
 
-Patreon: [https://www.patreon.com/amneziavpn](https://www.patreon.com/amneziavpn)
-USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4
-USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d
-XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3  
+- Patreon: [https://www.patreon.com/amneziavpn](https://www.patreon.com/amneziavpn)
+- USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4
+- USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d
+- XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3  
 
 ## Acknowledgments
 
