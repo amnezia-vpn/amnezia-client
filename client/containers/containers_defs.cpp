@@ -90,13 +90,13 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 {
     return { { DockerContainer::None, "Not installed" },
              { DockerContainer::OpenVpn, "OpenVPN" },
-             { DockerContainer::ShadowSocks, "OpenVPN over SS" },
+             { DockerContainer::ShadowSocks, "OpenVPN over Shadowsocks" },
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
              { DockerContainer::Awg, "AmneziaWG" },
              { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
-             { DockerContainer::SSXray, "ShadowSocks"},
+             { DockerContainer::SSXray, "Shadowsocks"},
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
              { DockerContainer::Dns, QObject::tr("AmneziaDNS") },
