@@ -7,7 +7,10 @@ import "TextTypes"
 RowLayout {
     property string imageSource
     property string leftText
-    property string rightText
+    property var rightText
+    property bool isRightTextUndefined: rightText === undefined
+
+    visible: !isRightTextUndefined
 
     Image {
         Layout.preferredHeight: 18
@@ -28,6 +31,6 @@ RowLayout {
 
         Layout.alignment: Qt.AlignLeft
 
-        text: rightText
+        text: isRightTextUndefined ? "" : rightText
     }
 }

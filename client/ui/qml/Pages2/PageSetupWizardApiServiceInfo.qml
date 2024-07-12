@@ -60,7 +60,7 @@ PageType {
 
                 imageSource: "qrc:/images/controls/map-pin.svg"
                 leftText: qsTr("For the region")
-                rightText: "russia"
+                rightText: serviceInfo["region"]
             }
 
             LabelWithImageType {

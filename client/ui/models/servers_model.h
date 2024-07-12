@@ -111,6 +111,8 @@ public slots:
 
     bool isDefaultServerDefaultContainerHasSplitTunneling();
 
+    bool isServerFromApi(const int serverIndex);
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 

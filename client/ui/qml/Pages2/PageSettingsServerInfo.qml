@@ -81,7 +81,9 @@ PageType {
 
                     headerText: name
                     descriptionText: {
-                        if (ServersModel.isProcessedServerHasWriteAccess()) {
+                        if (ServersModel.isServerFromApi(ServersModel.processedIndex)) {
+                            return serverDescription
+                        } else if (ServersModel.isProcessedServerHasWriteAccess()) {
                             return credentialsLogin + " · " + hostName
                         } else {
                             return hostName
@@ -257,6 +259,8 @@ PageType {
             PageSettingsApiServerInfo {
                 id: apiInfoPage
                 stackView: root.stackView
+
+                supportedSitesDrawerRoot: root
 
 //                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }

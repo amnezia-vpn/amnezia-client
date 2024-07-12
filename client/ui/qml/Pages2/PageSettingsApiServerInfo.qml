@@ -17,6 +17,7 @@ PageType {
     defaultActiveFocusItem: focusItem
 
     property var serviceInfo: ServersModel.getProcessedServerData("apiServiceInfo")
+    property var supportedSitesDrawerRoot
 
     FlickableType {
         id: fl
@@ -62,18 +63,22 @@ PageType {
 
                 imageSource: "qrc:/images/controls/info.svg"
                 leftText: qsTr("Features")
+                rightText: ""
             }
 
             ParagraphTextType {
+                property var features: serviceInfo["features"]
+
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                text: serviceInfo["features"]
+                text: features === undefined ? "" : features
             }
 
             ShowSupportedSitesButton {
-                drawerParent: root
+                id: supportedSites
+                drawerParent: root.supportedSitesDrawerRoot
                 sitesList: serviceInfo["sites_list"]
             }
 

@@ -3,7 +3,8 @@
 #include "core/controllers/serverController.h"
 #include "core/networkUtilities.h"
 
-namespace {
+namespace
+{
     enum ApiConfigSources {
         Telegram = 1,
         AmneziaGateway
@@ -246,7 +247,8 @@ bool ServersModel::isDefaultServerCurrentlyProcessed()
 
 bool ServersModel::isDefaultServerFromApi()
 {
-    return qvariant_cast<bool>(data(m_defaultServerIndex, IsServerFromTelegramApiRole));
+    return data(m_defaultServerIndex, IsServerFromTelegramApiRole).toBool()
+            || data(m_defaultServerIndex, IsServerFromGatewayApiRole).toBool();
 }
 
 bool ServersModel::isProcessedServerHasWriteAccess()
@@ -414,8 +416,7 @@ void ServersModel::addContainerConfig(const int containerIndex, const QJsonObjec
 
     auto defaultContainer = server.value(config_key::defaultContainer).toString();
     if (ContainerProps::containerFromString(defaultContainer) == DockerContainer::None
-         && ContainerProps::containerService(container) != ServiceType::Other
-         && ContainerProps::isSupportedByCurrentPlatform(container)) {
+        && ContainerProps::containerService(container) != ServiceType::Other && ContainerProps::isSupportedByCurrentPlatform(container)) {
         server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
     }
 
@@ -646,4 +647,10 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
         }
     }
     return false;
+}
+
+bool ServersModel::isServerFromApi(const int serverIndex)
+{
+    return data(serverIndex, IsServerFromTelegramApiRole).toBool()
+            || data(serverIndex, IsServerFromGatewayApiRole).toBool();
 }

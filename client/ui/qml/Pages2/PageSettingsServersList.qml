@@ -119,7 +119,11 @@ PageType {
                                     servicesNameString += servicesName[i] + " · "
                                 }
 
-                                return servicesNameString + hostName
+                                if (ServersModel.isServerFromApi(index)) {
+                                    return servicesNameString + serverDescription
+                                } else {
+                                    return servicesNameString + hostName
+                                }
                             }
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
