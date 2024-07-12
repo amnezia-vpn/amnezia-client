@@ -41,6 +41,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_processedContainerIndex);
     case IsSupportedRole: return ContainerProps::isSupportedByCurrentPlatform(container);
     case IsShareableRole: return ContainerProps::isShareable(container);
+    case InstallPageOrderRole: return ContainerProps::installPageOrder(container);
     }
 
     return QVariant();
@@ -112,5 +113,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
     roles[IsSupportedRole] = "isSupported";
     roles[IsShareableRole] = "isShareable";
+
+    roles[InstallPageOrderRole] = "installPageOrder";
     return roles;
 }

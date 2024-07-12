@@ -7,6 +7,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -66,7 +67,7 @@ PageType {
 
                 text: qsTr("We recommend that you use full access to the server only for your own additional devices.\n") +
                       qsTr("If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. ")
-                color: "#878B91"
+                color: AmneziaStyle.color.grey
             }
 
             DropDownType {

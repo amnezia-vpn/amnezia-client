@@ -14,7 +14,7 @@ DrawerType2 {
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
 
     anchors.fill: parent
-    expandedHeight: parent.height * 0.7
+    expandedHeight: parent.height * 0.9
 
     expandedContent: ColumnLayout {
         id: content

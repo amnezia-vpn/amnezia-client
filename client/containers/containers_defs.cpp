@@ -90,7 +90,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 {
     return { { DockerContainer::None, "Not installed" },
              { DockerContainer::OpenVpn, "OpenVPN" },
-             { DockerContainer::ShadowSocks, "ShadowSocks" },
+             { DockerContainer::ShadowSocks, "OpenVPN over SS" },
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
              { DockerContainer::Awg, "AmneziaWG" },
@@ -285,8 +285,9 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::WireGuard: return true;
     case DockerContainer::OpenVpn: return true;
     case DockerContainer::Awg: return true;
-    case DockerContainer::Cloak:
-        return true;
+    case DockerContainer::Xray: return true;
+    case DockerContainer::Cloak: return true;
+    case DockerContainer::SSXray: return true;
         //    case DockerContainer::ShadowSocks: return true;
     default: return false;
     }
@@ -305,6 +306,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Awg: return true;
     case DockerContainer::Cloak: return true;
     case DockerContainer::Xray: return true;
+    case DockerContainer::SSXray: return true;
     default: return false;
     }
 
@@ -387,4 +389,19 @@ QJsonObject ContainerProps::getProtocolConfigFromContainer(const Proto protocol,
                                            .toString();
 
     return QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+}
+
+int ContainerProps::installPageOrder(DockerContainer container)
+{
+    switch (container) {
+    case DockerContainer::OpenVpn: return 4;
+    case DockerContainer::Cloak: return 5;
+    case DockerContainer::ShadowSocks: return 6;
+    case DockerContainer::WireGuard: return 2;
+    case DockerContainer::Awg: return 1;
+    case DockerContainer::Xray: return 3;
+    case DockerContainer::Ipsec: return 7;
+    case DockerContainer::SSXray: return 8;
+    default: return 0;
+    }
 }

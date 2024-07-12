@@ -2,24 +2,26 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "TextTypes"
 
 RadioButton {
     id: root
 
-    property string hoveredColor: Qt.rgba(1, 1, 1, 0.05)
-    property string defaultColor: Qt.rgba(1, 1, 1, 0)
-    property string checkedColor: Qt.rgba(1, 1, 1, 0)
-    property string disabledColor: "transparent"
+    property string hoveredColor: AmneziaStyle.color.blackHovered
+    property string defaultColor: AmneziaStyle.color.transparent
+    property string checkedColor: AmneziaStyle.color.transparent
+    property string disabledColor: AmneziaStyle.color.transparent
 
-    property string textColor:  "#D7D8DB"
-    property string textDisabledColor: "#878B91"
+    property string textColor: AmneziaStyle.color.white
+    property string textDisabledColor: AmneziaStyle.color.grey
 
-    property string pressedBorderColor: "#494B50"
-    property string checkedBorderColor: "#FBB26A"
-    property string defaultBodredColor: "transparent"
-    property string checkedDisabledBorderColor: "#84603D"
-    property string borderFocusedColor: "#D7D8DB"
+    property string pressedBorderColor: AmneziaStyle.color.greyDisabled
+    property string checkedBorderColor: AmneziaStyle.color.orange
+    property string defaultBodredColor: AmneziaStyle.color.transparent
+    property string checkedDisabledBorderColor: AmneziaStyle.color.brownLight
+    property string borderFocusedColor: AmneziaStyle.color.white
     property int borderWidth: 0
 
     implicitWidth: content.implicitWidth

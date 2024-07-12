@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ProtocolEnum 1.0
+import Style 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
@@ -118,7 +119,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Reboot server")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
 
                 KeyNavigation.tab: labelWithButton3
 
@@ -159,7 +160,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Remove server from application")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
 
                 Keys.onTabPressed: {
                     if (content.isServerWithWriteAccess) {
@@ -207,7 +208,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Clear server from Amnezia software")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
 
                 Keys.onTabPressed: labelWithButton5.visible ?
                                     labelWithButton5.forceActiveFocus() :
@@ -250,7 +251,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Reset API config")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
 
                 Keys.onTabPressed: root.lastItemTabClickedSignal()
 

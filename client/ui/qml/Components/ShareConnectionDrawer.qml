@@ -9,6 +9,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -111,11 +112,11 @@ DrawerType2 {
                     Layout.fillWidth: true
                     Layout.topMargin: 8
 
-                    defaultColor: "transparent"
-                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                    disabledColor: "#878B91"
-                    textColor: "#D7D8DB"
+                    defaultColor: AmneziaStyle.color.transparent
+                    hoveredColor: AmneziaStyle.color.blackHovered
+                    pressedColor: AmneziaStyle.color.blackPressed
+                    disabledColor: AmneziaStyle.color.grey
+                    textColor: AmneziaStyle.color.white
                     borderWidth: 1
 
                     text: qsTr("Copy")
@@ -134,11 +135,11 @@ DrawerType2 {
 
                     visible: false
 
-                    defaultColor: "transparent"
-                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                    disabledColor: "#878B91"
-                    textColor: "#D7D8DB"
+                    defaultColor: AmneziaStyle.color.transparent
+                    hoveredColor: AmneziaStyle.color.blackHovered
+                    pressedColor: AmneziaStyle.color.blackPressed
+                    disabledColor: AmneziaStyle.color.grey
+                    textColor: AmneziaStyle.color.white
                     borderWidth: 1
 
                     text: qsTr("Copy config string")
@@ -153,11 +154,11 @@ DrawerType2 {
                     Layout.fillWidth: true
                     Layout.topMargin: 24
 
-                    defaultColor: "transparent"
-                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                    disabledColor: "#878B91"
-                    textColor: "#D7D8DB"
+                    defaultColor: AmneziaStyle.color.transparent
+                    hoveredColor: AmneziaStyle.color.blackHovered
+                    pressedColor: AmneziaStyle.color.blackPressed
+                    disabledColor: AmneziaStyle.color.grey
+                    textColor: AmneziaStyle.color.white
                     borderWidth: 1
 
                     text: qsTr("Show connection settings")
@@ -281,9 +282,9 @@ DrawerType2 {
                                     readOnly: true
                                     activeFocusOnTab: false
 
-                                    color: "#D7D8DB"
-                                    selectionColor:  "#633303"
-                                    selectedTextColor: "#D7D8DB"
+                                    color: AmneziaStyle.color.white
+                                    selectionColor:  AmneziaStyle.color.brown
+                                    selectedTextColor: AmneziaStyle.color.white
 
                                     font.pixelSize: 16
                                     font.weight: Font.Medium
@@ -294,7 +295,7 @@ DrawerType2 {
                                     wrapMode: Text.Wrap
 
                                     background: Rectangle {
-                                        color: "transparent"
+                                        color: AmneziaStyle.color.transparent
                                     }
                                 }
                             }

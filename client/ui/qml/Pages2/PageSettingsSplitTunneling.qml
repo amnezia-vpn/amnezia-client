@@ -10,6 +10,7 @@ import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -265,7 +266,7 @@ PageType {
                             text: url
                             descriptionText: ip
                             rightImageSource: "qrc:/images/controls/trash.svg"
-                            rightImageColor: "#D7D8DB"
+                            rightImageColor: AmneziaStyle.color.white
 
                             clickedFunction: function() {
                                 var headerText = qsTr("Remove ") + url + "?"
@@ -299,7 +300,7 @@ PageType {
     Rectangle {
         anchors.fill: addSiteButton
         anchors.bottomMargin: -24
-        color: "#0E0E11"
+        color: AmneziaStyle.color.black
         opacity: 0.8
     }
 
@@ -340,7 +341,7 @@ PageType {
             implicitHeight: 56
 
             image: "qrc:/images/controls/more-vertical.svg"
-            imageColor: "#D7D8DB"
+            imageColor: AmneziaStyle.color.white
 
             onClicked: function () {
                 moreActionsDrawer.open()
