@@ -140,7 +140,7 @@ PageType {
                 // Keys.onTabPressed: lastItemTabClicked(header)
 
                 clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageDevConsole)
+                    PageController.goToPage(PageEnum.PageDevMenu)
                 }
             }
 

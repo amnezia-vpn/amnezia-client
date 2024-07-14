@@ -57,7 +57,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: "Dev console"
+                headerText: "Dev menu"
             }
 
 
@@ -73,7 +73,7 @@ PageType {
                 headerText: qsTr("Gateway endpoint")
                 textFieldText: SettingsController.gatewayEndpoint
 
-                buttonImageSource: textFieldText !== "" ? "qrc:/images/controls/close.svg" : ""
+                buttonImageSource: textFieldText !== "" ? "qrc:/images/controls/refresh-cw.svg" : ""
 
                 clickedFunc: function() {
                     SettingsController.resetGatewayEndpoint()

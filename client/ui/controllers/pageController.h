@@ -61,7 +61,7 @@ namespace PageLoader
 
         PageShareFullAccess,
 
-        PageDevConsole
+        PageDevMenu
     };
     Q_ENUM_NS(PageEnum)
 

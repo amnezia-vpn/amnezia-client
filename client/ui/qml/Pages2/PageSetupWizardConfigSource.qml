@@ -41,18 +41,13 @@ PageType {
 
             Item {
                 id: focusItem
-                KeyNavigation.tab: backButton
-            }
-
-            BackButtonType {
-                id: backButton
-                Layout.topMargin: 20
                 KeyNavigation.tab: textKey.textArea
             }
 
+
             HeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 8
+                Layout.topMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
