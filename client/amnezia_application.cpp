@@ -116,7 +116,7 @@ void AmneziaApplication::init()
     }
 
     connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, [this](QString data) {
-        m_pageController->replaceStartPage();
+        m_pageController->goToPageHome();
         m_importController->extractConfigFromData(data);
         m_pageController->goToPageViewConfig();
     });
@@ -127,13 +127,13 @@ void AmneziaApplication::init()
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
     connect(IosController::Instance(), &IosController::importConfigFromOutside, [this](QString data) {
-        m_pageController->replaceStartPage();
+        m_pageController->goToPageHome();
         m_importController->extractConfigFromData(data);
         m_pageController->goToPageViewConfig();
     });
 
     connect(IosController::Instance(), &IosController::importBackupFromOutside, [this](QString filePath) {
-        m_pageController->replaceStartPage();
+        m_pageController->goToPageHome();
         m_pageController->goToPageSettingsBackup();
         m_settingsController->importBackupFromOutside(filePath);
     });

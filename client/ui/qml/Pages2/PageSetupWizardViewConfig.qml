@@ -51,13 +51,7 @@ PageType {
                 ServersModel.processedIndex = ServersModel.defaultIndex
             }
 
-            PageController.goToStartPage()
-            if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
-                PageController.replaceStartPage()
-            }
-            if (stackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageHome)) {
-                PageController.goToPageHome()
-            }
+            PageController.goToPageHome()
         }
     }
 

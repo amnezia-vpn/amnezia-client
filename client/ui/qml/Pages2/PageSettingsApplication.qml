@@ -241,7 +241,7 @@ PageType {
                         } else
                         {
                             SettingsController.clearSettings()
-                            PageController.replaceStartPage()
+                            PageController.goToPageHome()
                         }
 
                         if (!GC.isMobile()) {

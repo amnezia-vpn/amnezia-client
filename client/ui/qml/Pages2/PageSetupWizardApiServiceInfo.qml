@@ -166,12 +166,7 @@ PageType {
 
         clickedFunc: function() {
             PageController.showBusyIndicator(true)
-            if (InstallController.installServiceFromApi()) {
-                PageController.goToStartPage()
-                if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
-                    PageController.replaceStartPage()
-                }
-            }
+            InstallController.installServiceFromApi()
             PageController.showBusyIndicator(false)
         }
     }

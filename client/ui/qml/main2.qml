@@ -10,6 +10,7 @@ import Style 1.0
 import "Config"
 import "Controls2"
 import "Components"
+import "Pages2"
 
 Window  {
     id: root
@@ -31,33 +32,8 @@ Window  {
 
     title: "AmneziaVPN"
 
-    StackViewType {
-        id: rootStackView
-
-        width: root.width
-        height: root.height
-        focus: true
-
-        Component.onCompleted: {
-            var pagePath = PageController.getInitialPage()
-            rootStackView.push(pagePath, { "objectName" : pagePath })
-        }
-
-        Keys.onPressed: function(event) {
-            PageController.keyPressEvent(event.key)
-            event.accepted = true
-        }
-    }
-
     Connections {
         target: PageController
-
-        function onReplaceStartPage() {
-            var pagePath = PageController.getInitialPage()
-            rootStackView.clear()
-            PageController.updateNavigationBarColor(PageController.getInitialPageNavigationBarColor())
-            rootStackView.replace(pagePath, { "objectName" : pagePath })
-        }
 
         function onRaiseMainWindow() {
             root.show()
@@ -103,22 +79,8 @@ Window  {
         }
     }
 
-    Connections {
-        target: InstallController
-
-        function onInstallServerFromApiFinished(message) {
-            if (!ConnectionController.isConnected) {
-                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersModel.processedIndex = ServersModel.defaultIndex
-            }
-
-            PageController.goToStartPage()
-            if (rootStackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
-                PageController.replaceStartPage()
-            }
-
-            PageController.showNotificationMessage(message)
-        }
+    PageStart {
+        anchors.fill: parent
     }
 
     Item {

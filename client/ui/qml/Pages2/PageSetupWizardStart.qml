@@ -70,22 +70,7 @@ PageType {
 
         function onRestoreBackupFinished() {
             PageController.showNotificationMessage(qsTr("Settings restored from backup file"))
-            PageController.replaceStartPage()
-        }
-    }
-
-    Connections {
-        target: InstallController
-
-        function onInstallationErrorOccurred(error) {
-            PageController.showBusyIndicator(false)
-            PageController.showErrorMessage(error)
-
-            var currentPageName = stackView.currentItem.objectName
-
-            if (currentPageName === PageController.getPagePath(PageEnum.PageSetupWizardInstalling)) {
-                PageController.closePage()
-            }
+            PageController.goToPageHome()
         }
     }
 
@@ -96,10 +81,6 @@ PageType {
             PageController.showBusyIndicator(true)
             SettingsController.restoreAppConfigFromData(data)
             PageController.showBusyIndicator(false)
-        }
-
-        function onImportErrorOccurred(error, goToPageHome) {
-            PageController.showErrorMessage(error)
         }
     }
 

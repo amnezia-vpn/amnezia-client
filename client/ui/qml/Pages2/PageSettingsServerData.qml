@@ -38,7 +38,7 @@ PageType {
 
         function onRemoveProcessedServerFinished(finishedMessage) {
             if (!ServersModel.getServersCount()) {
-                PageController.replaceStartPage()
+                PageController.goToPageHome()
             } else {
                 PageController.goToStartPage()
                 PageController.goToPage(PageEnum.PageSettingsServersList)

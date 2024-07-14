@@ -24,8 +24,14 @@ PageType {
         target: PageController
 
         function onGoToPageHome() {
-            tabBar.setCurrentIndex(0)
-            tabBarStackView.goToTabBarPage(PageEnum.PageHome)
+            if (PageController.isStartPageVisible()) {
+                tabBar.visible = false
+                tabBarStackView.goToTabBarPage(PageEnum.PageSetupWizardStart)
+            } else {
+                tabBar.visible = true
+                tabBar.setCurrentIndex(0)
+                tabBarStackView.goToTabBarPage(PageEnum.PageHome)
+            }
         }
 
         function onGoToPageSettings() {
@@ -125,6 +131,16 @@ PageType {
         function onCachedProfileCleared(message) {
             PageController.showNotificationMessage(message)
         }
+
+        function onInstallServerFromApiFinished(message) {
+            if (!ConnectionController.isConnected) {
+                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                ServersModel.processedIndex = ServersModel.defaultIndex
+            }
+
+            PageController.goToPageHome()
+            PageController.showNotificationMessage(message)
+        }
     }
 
     Connections {
@@ -180,9 +196,22 @@ PageType {
         }
 
         Component.onCompleted: {
-            var pagePath = PageController.getPagePath(PageEnum.PageHome)
-            ServersModel.processedIndex = ServersModel.defaultIndex
+            var pagePath
+            if (PageController.isStartPageVisible()) {
+                tabBar.visible = false
+                pagePath = PageController.getPagePath(PageEnum.PageSetupWizardStart)
+            } else {
+                tabBar.visible = true
+                pagePath = PageController.getPagePath(PageEnum.PageHome)
+                ServersModel.processedIndex = ServersModel.defaultIndex
+            }
+
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
+        }
+
+        Keys.onPressed: function(event) {
+            PageController.keyPressEvent(event.key)
+            event.accepted = true
         }
     }
 
