@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "../Config"
 import "../Controls2"
 import "../Controls2/TextTypes"

@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
