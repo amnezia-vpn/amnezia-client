@@ -101,10 +101,10 @@ PageType {
                 implicitHeight: 32
 
                 defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.blackHovered
-                pressedColor: AmneziaStyle.color.blackPressed
-                disabledColor: AmneziaStyle.color.grey
-                textColor: AmneziaStyle.color.orange
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.goldenApricot
 
                 text: showContent ? qsTr("Collapse content") : qsTr("Show content")
                 KeyNavigation.tab: connectButton
@@ -133,8 +133,8 @@ PageType {
 
                 iconPath: "qrc:/images/controls/alert-circle.svg"
 
-                textColor: AmneziaStyle.color.red
-                imageColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
+                imageColor: AmneziaStyle.color.vibrantRed
             }
 
             WarningType {
@@ -153,7 +153,7 @@ PageType {
                 implicitHeight: configContent.implicitHeight
 
                 radius: 10
-                color: AmneziaStyle.color.blackLight
+                color: AmneziaStyle.color.onyxBlack
 
                 visible: showContent
 
@@ -174,7 +174,7 @@ PageType {
     Rectangle {
         anchors.fill: columnContent
         anchors.bottomMargin: -24
-        color: AmneziaStyle.color.black
+        color: AmneziaStyle.color.midnightBlack
         opacity: 0.8
     }
 

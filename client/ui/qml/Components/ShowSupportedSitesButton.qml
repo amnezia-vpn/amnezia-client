@@ -36,11 +36,11 @@ Item {
 
         implicitHeight: 32
 
-        defaultColor: "transparent"
-        hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-        pressedColor: Qt.rgba(1, 1, 1, 0.12)
-        disabledColor: "#878B91"
-        textColor: "#FBB26A"
+        defaultColor: AmneziaStyle.color.transparent
+        hoveredColor: AmneziaStyle.color.translucentWhite
+        pressedColor: AmneziaStyle.color.sheerWhite
+        disabledColor: AmneziaStyle.color.mutedGray
+        textColor: AmneziaStyle.color.goldenApricot
 
         text: qsTr("List of supported sites")
 

@@ -114,7 +114,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.bottomMargin: 24
 
-                color: "#494B50"
+                color: AmneziaStyle.color.charcoalGray
                 text: qsTr("Other connection options")
             }
 

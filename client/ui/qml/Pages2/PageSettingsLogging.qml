@@ -115,7 +115,7 @@ disabled after 14 days, and all log files will be deleted.")
                         Layout.fillWidth: true
 
                         text: qsTr("Open folder with logs")
-                        color: AmneziaStyle.color.white
+                        color: AmneziaStyle.color.paleGray
                     }
                 }
 
@@ -160,7 +160,7 @@ disabled after 14 days, and all log files will be deleted.")
                         Layout.fillWidth: true
 
                         text: qsTr("Save logs to file")
-                        color: AmneziaStyle.color.white
+                        color: AmneziaStyle.color.paleGray
                     }
                 }
 
@@ -209,7 +209,7 @@ disabled after 14 days, and all log files will be deleted.")
                         Layout.fillWidth: true
 
                         text: qsTr("Clear logs")
-                        color: AmneziaStyle.color.white
+                        color: AmneziaStyle.color.paleGray
                     }
                 }
             }

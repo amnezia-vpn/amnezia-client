@@ -215,7 +215,7 @@ PageType {
 
                             text: appPath
                             rightImageSource: "qrc:/images/controls/trash.svg"
-                            rightImageColor: AmneziaStyle.color.white
+                            rightImageColor: AmneziaStyle.color.paleGray
 
                             clickedFunction: function() {
                                 var headerText = qsTr("Remove ") + appPath + "?"
@@ -242,7 +242,7 @@ PageType {
     Rectangle {
         anchors.fill: addAppButton
         anchors.bottomMargin: -24
-        color: AmneziaStyle.color.black
+        color: AmneziaStyle.color.midnightBlack
         opacity: 0.8
     }
 

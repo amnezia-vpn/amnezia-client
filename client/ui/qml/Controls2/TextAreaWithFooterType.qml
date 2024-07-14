@@ -13,9 +13,9 @@ Rectangle {
     property alias textArea: textArea
     property alias textAreaText: textArea.text
 
-    property string borderHoveredColor: "#494B50"
-    property string borderNormalColor: "#2C2D30"
-    property string borderFocusedColor: "#d7d8db"
+    property string borderHoveredColor: AmneziaStyle.color.charcoalGray
+    property string borderNormalColor: AmneziaStyle.color.slateGray
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
 
     property string firstButtonImage
     property string secondButtonImage
@@ -24,7 +24,7 @@ Rectangle {
     property var secondButtonClickedFunc
 
     height: 148
-    color: "#1C1D21"
+    color: AmneziaStyle.color.onyxBlack
     border.width: 1
     border.color: getBorderColor(borderNormalColor)
     radius: 16
@@ -64,10 +64,10 @@ Rectangle {
                 leftPadding: 0
                 Layout.bottomMargin: 16
 
-                color: "#D7D8DB"
-                selectionColor:  "#633303"
-                selectedTextColor: "#D7D8DB"
-                placeholderTextColor: "#878B91"
+                color: AmneziaStyle.color.paleGray
+                selectionColor:  AmneziaStyle.color.richBrown
+                selectedTextColor: AmneziaStyle.color.paleGray
+                placeholderTextColor: AmneziaStyle.color.mutedGray
 
                 font.pixelSize: 16
                 font.weight: Font.Medium
@@ -118,7 +118,7 @@ Rectangle {
                     id: firstButton
                     visible: root.firstButtonImage !== ""
 
-                    imageColor: "#D7D8DB"
+                    imageColor: AmneziaStyle.color.paleGray
 
                     image: root.firstButtonImage
                     onClicked: function() {
@@ -132,7 +132,7 @@ Rectangle {
                     id: secondButton
                     visible: root.secondButtonImage !== ""
 
-                    imageColor: "#D7D8DB"
+                    imageColor: AmneziaStyle.color.paleGray
 
                     image: root.secondButtonImage
                     onClicked: function() {
@@ -148,7 +148,7 @@ Rectangle {
 
                 ImageButtonType {
                     id: resetButton
-                    imageColor: "#D7D8DB"
+                    imageColor: AmneziaStyle.color.paleGray
 
                     visible: root.textAreaText !== ""
                     image: "qrc:/images/controls/close.svg"

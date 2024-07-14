@@ -11,13 +11,13 @@ Button {
     property string bodyText
     property string footerText
 
-    property string hoveredColor: "#2C2D30"
-    property string defaultColor: "#1C1D21"
+    property string hoveredColor: AmneziaStyle.color.slateGray
+    property string defaultColor: AmneziaStyle.color.onyxBlack
 
-    property string textColor: "#0E0E11"
+    property string textColor: AmneziaStyle.color.midnightBlack
 
     property string rightImageSource
-    property string rightImageColor: "#d7d8db"
+    property string rightImageColor: AmneziaStyle.color.paleGray
 
     property real textOpacity: 1.0
 
@@ -61,7 +61,7 @@ Button {
                     text: root.bodyText
                     visible: text !== ""
 
-                    color: "#878B91"
+                    color: AmneziaStyle.color.mutedGray
 
                     Layout.fillWidth: true
                     Layout.rightMargin: 16
@@ -75,7 +75,7 @@ Button {
                     text: root.footerText
                     visible: text !== ""
 
-                    color: "#878B91"
+                    color: AmneziaStyle.color.mutedGray
 
                     Layout.fillWidth: true
                     Layout.rightMargin: 16

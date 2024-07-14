@@ -106,7 +106,7 @@ PageType {
                         descriptionOnTop: true
 
                         rightImageSource: "qrc:/images/controls/copy.svg"
-                        rightImageColor: "#D7D8DB"
+                        rightImageColor: AmneziaStyle.color.paleGray
 
                         clickedFunction: function() {
                             GC.copyToClipBoard(descriptionText)
@@ -130,7 +130,7 @@ PageType {
                         KeyNavigation.tab: usernameLabel.rightButton
 
                         rightImageSource: "qrc:/images/controls/copy.svg"
-                        rightImageColor: "#D7D8DB"
+                        rightImageColor: AmneziaStyle.color.paleGray
 
                         clickedFunction: function() {
                             GC.copyToClipBoard(descriptionText)
@@ -154,7 +154,7 @@ PageType {
                         KeyNavigation.tab: passwordLabel.eyeButton
 
                         rightImageSource: "qrc:/images/controls/copy.svg"
-                        rightImageColor: "#D7D8DB"
+                        rightImageColor: AmneziaStyle.color.paleGray
 
                         clickedFunction: function() {
                             GC.copyToClipBoard(descriptionText)
@@ -179,7 +179,7 @@ PageType {
                         rightButton.KeyNavigation.tab: changeSettingsButton
 
                         rightImageSource: "qrc:/images/controls/copy.svg"
-                        rightImageColor: "#D7D8DB"
+                        rightImageColor: AmneziaStyle.color.paleGray
 
                         buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
 

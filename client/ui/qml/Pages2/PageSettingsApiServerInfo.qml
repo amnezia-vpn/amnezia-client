@@ -95,7 +95,7 @@ PageType {
 //                KeyNavigation.tab: passwordLabel.eyeButton
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: "#D7D8DB"
+                rightImageColor: AmneziaStyle.color.paleGray
 
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
@@ -116,7 +116,7 @@ PageType {
                 defaultColor: "transparent"
                 hoveredColor: Qt.rgba(1, 1, 1, 0.08)
                 pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.vibrantRed
 
                 text: qsTr("Remove from application")
 

@@ -9,18 +9,18 @@ Button {
 
     property string image
 
-    property string hoveredColor: AmneziaStyle.color.blackHovered
+    property string hoveredColor: AmneziaStyle.color.translucentWhite
     property string defaultColor: AmneziaStyle.color.transparent
-    property string pressedColor: AmneziaStyle.color.blackPressed
-    property string disableColor: AmneziaStyle.color.greyDark
+    property string pressedColor: AmneziaStyle.color.sheerWhite
+    property string disableColor: AmneziaStyle.color.slateGray
 
-    property string imageColor: AmneziaStyle.color.grey
-    property string disableImageColor: AmneziaStyle.color.greyDark
+    property string imageColor: AmneziaStyle.color.mutedGray
+    property string disableImageColor: AmneziaStyle.color.slateGray
 
     property alias backgroundColor: background.color
     property alias backgroundRadius: background.radius
 
-    property string borderFocusedColor: AmneziaStyle.color.white
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
     hoverEnabled: true

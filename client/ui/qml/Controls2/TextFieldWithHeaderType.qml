@@ -10,8 +10,8 @@ Item {
     id: root
 
     property string headerText
-    property string headerTextDisabledColor: AmneziaStyle.color.greyDisabled
-    property string headerTextColor: AmneziaStyle.color.grey
+    property string headerTextDisabledColor: AmneziaStyle.color.charcoalGray
+    property string headerTextColor: AmneziaStyle.color.mutedGray
 
     property alias errorText: errorField.text
     property bool checkEmptyText: false
@@ -23,18 +23,18 @@ Item {
 
     property alias textField: textField
     property alias textFieldText: textField.text
-    property string textFieldTextColor: AmneziaStyle.color.white
-    property string textFieldTextDisabledColor: AmneziaStyle.color.grey
+    property string textFieldTextColor: AmneziaStyle.color.paleGray
+    property string textFieldTextDisabledColor: AmneziaStyle.color.mutedGray
 
     property string textFieldPlaceholderText
     property bool textFieldEditable: true
 
-    property string borderColor: AmneziaStyle.color.greyDark
-    property string borderFocusedColor: AmneziaStyle.color.white
+    property string borderColor: AmneziaStyle.color.slateGray
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
 
-    property string backgroundColor: AmneziaStyle.color.blackLight
+    property string backgroundColor: AmneziaStyle.color.onyxBlack
     property string backgroundDisabledColor: AmneziaStyle.color.transparent
-    property string bgBorderHoveredColor: AmneziaStyle.color.greyDisabled
+    property string bgBorderHoveredColor: AmneziaStyle.color.charcoalGray
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
@@ -92,10 +92,10 @@ Item {
                         inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
 
                         placeholderText: root.textFieldPlaceholderText
-                        placeholderTextColor: AmneziaStyle.color.greyDisabled
+                        placeholderTextColor: AmneziaStyle.color.charcoalGray
 
-                        selectionColor:  AmneziaStyle.color.brown
-                        selectedTextColor: AmneziaStyle.color.white
+                        selectionColor:  AmneziaStyle.color.richBrown
+                        selectedTextColor: AmneziaStyle.color.paleGray
 
                         font.pixelSize: 16
                         font.weight: 400
@@ -149,7 +149,7 @@ Item {
 
             text: root.errorText
             visible: root.errorText !== ""
-            color: AmneziaStyle.color.red
+            color: AmneziaStyle.color.vibrantRed
         }
     }
 

@@ -119,7 +119,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Reboot server")
-                textColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
 
                 KeyNavigation.tab: labelWithButton3
 
@@ -160,7 +160,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Remove server from application")
-                textColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: {
                     if (content.isServerWithWriteAccess) {
@@ -208,7 +208,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Clear server from Amnezia software")
-                textColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: labelWithButton5.visible ?
                                     labelWithButton5.forceActiveFocus() :
@@ -251,7 +251,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Reset API config")
-                textColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: root.lastItemTabClickedSignal()
 

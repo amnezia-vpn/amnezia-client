@@ -84,11 +84,11 @@ Popup {
                 implicitHeight: 32
 
                 defaultColor: "white"
-                hoveredColor: AmneziaStyle.color.whiteHovered
-                pressedColor: AmneziaStyle.color.whiteHovered
-                disabledColor: AmneziaStyle.color.greyDisabled
+                hoveredColor: AmneziaStyle.color.lightGray
+                pressedColor: AmneziaStyle.color.lightGray
+                disabledColor: AmneziaStyle.color.charcoalGray
 
-                textColor: AmneziaStyle.color.black
+                textColor: AmneziaStyle.color.midnightBlack
                 borderWidth: 0
 
                 text: qsTr("Close")
