@@ -6,7 +6,7 @@
 
 Amnezia is an open-source VPN client, with a key feature that enables you to deploy your own VPN server on your server.
 
-![Image](https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/uipic2.png)
+![Image](https://github.com/amnezia-vpn/amnezia-client/blob/IMGs-for-Readme/metadata/img-readme/uipic4.png)
 
 <br>
 
