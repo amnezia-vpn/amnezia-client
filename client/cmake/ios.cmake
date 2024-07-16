@@ -62,7 +62,6 @@ set_target_properties(${PROJECT} PROPERTIES
     MACOSX_BUNDLE_ICON_FILE "AppIcon"
     MACOSX_BUNDLE_INFO_STRING "AmneziaVPN"
     MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPN"
-    MACOSX_BUNDLE_GUI_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}"
     MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
     MACOSX_BUNDLE_LONG_VERSION_STRING "${APPLE_PROJECT_VERSION}-${CMAKE_PROJECT_VERSION_TWEAK}"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${APPLE_PROJECT_VERSION}"
@@ -76,15 +75,23 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
     XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
-    XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON
+    XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY "NO"
+    XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY "YES"
+
     XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
-    XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks"
+    XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../Frameworks"
     XCODE_EMBED_APP_EXTENSIONS networkextension
-    XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
-    XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
+
+    #XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
     XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
-    XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "match AppStore org.amnezia.AmneziaVPN"
-    XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "match Development org.amnezia.AmneziaVPN"
+
+    XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution: Privacy Technologies OU (X7UJ388FXK)"
+    #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
+
+
+    XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "Mac AppStore AmneziaVPN"
+    #XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "Mac AppStore AmneziaVPN"
+
 )
 set_target_properties(${PROJECT} PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
@@ -133,6 +140,31 @@ set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
     "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
 )
 
+
+
 set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
 target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework")
 
+get_target_property(QtCore_location Qt6::Core LOCATION)
+message("QtCore_location")
+message(${QtCore_location})
+
+get_filename_component(QT_BIN_DIR_DETECTED "${QtCore_location}/../../../../../bin" ABSOLUTE)
+
+#if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:AmneziaVPN> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
+    SET(SIGN_CMD codesign --deep --force --sign 'Apple Distribution: Privacy Technologies OU \(X7UJ388FXK\)' --timestamp --options runtime $<TARGET_BUNDLE_DIR:AmneziaVPN>)
+    message(${SIGN_CMD})
+
+
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${SIGN_CMD}
+    )
+
+    # add_custom_command(TARGET ${PROJECT} POST_BUILD
+    #     COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/ios/scripts/sign_macos_appstore.sh $<TARGET_BUNDLE_DIR:AmneziaVPN>
+    # )
+#endif()

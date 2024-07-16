@@ -4,7 +4,12 @@
 <dict>
 	<key>com.apple.application-identifier</key>
 	<string>$(DEVELOPMENT_TEAM).$(NETEXT_ID_MACOS)</string>
-
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<key>com.apple.security.network.server</key>
+	<true/>
 	<key>com.apple.developer.networking.networkextension</key>
 	<array>
 		<string>packet-tunnel-provider</string>
