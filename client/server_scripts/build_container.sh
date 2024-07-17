@@ -1,16 +1,14 @@
 if [ -n "$(sudo docker --version 2>/dev/null | grep podman)" ]; then \
-  if ! sudo test -d "/var/cache/containers"; then \
+  sudo test -d "/var/cache/containers" || \
     sudo mkdir -m 700 -p /var/cache/containers;\
-  fi;\
-  if ! sudo test -f "/var/cache/containers/short-name-aliases.conf"; then \
-    sudo touch /var/cache/containers/short-name-aliases.conf;\
+  sudo test ! -f "/var/cache/containers/short-name-aliases.conf" && \
+    sudo touch /var/cache/containers/short-name-aliases.conf && \
     sudo chmod 600 /var/cache/containers/short-name-aliases.conf;\
-  fi;\
-  if ! sudo grep -q "\[aliases\]" /var/cache/containers/short-name-aliases.conf; then \
+  sudo grep -q "\[aliases\]" /var/cache/containers/short-name-aliases.conf || \
     sudo sh -c "echo '[aliases]' >> /var/cache/containers/short-name-aliases.conf";\
-  fi;\
-  if ! sudo grep -q "  # Amnezia start" /var/cache/containers/short-name-aliases.conf; then \
-    sudo sh -c "printf '%s\n' '  # Amnezia start' \
+  sudo grep -q "  # Amnezia start" /var/cache/containers/short-name-aliases.conf || \
+    sudo sh -c "printf '%s\n' \
+      '  # Amnezia start' \
       '  \"3proxy/3proxy\" = \"docker.io/3proxy/3proxy\"' \
       '  \"amneziavpn/amnezia-wg\" = \"docker.io/amneziavpn/amnezia-wg\"' \
       '  \"amneziavpn/amneziawg-go\" = \"docker.io/amneziavpn/amneziawg-go\"' \
@@ -19,7 +17,7 @@ if [ -n "$(sudo docker --version 2>/dev/null | grep podman)" ]; then \
       '  \"atmoz/sftp\" = \"docker.io/atmoz/sftp\"' \
       '  \"mvance/unbound\" = \"docker.io/mvance/unbound\"' \
       '  \"alpine\" = \"docker.io/library/alpine\"' \
-      '  # Amnezia finish' >> /var/cache/containers/short-name-aliases.conf";\
-  fi;\
+      '  # Amnezia finish' \
+    >> /var/cache/containers/short-name-aliases.conf";\
 fi;\
 sudo docker build --no-cache --pull -t $CONTAINER_NAME $DOCKERFILE_FOLDER
