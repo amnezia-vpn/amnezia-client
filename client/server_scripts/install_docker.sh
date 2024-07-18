@@ -5,21 +5,16 @@ elif which pacman > /dev/null 2>&1; then pm=$(which pacman); silent_inst="-S --n
 else echo "Packet manager not found"; exit 1; fi;\
 echo "Dist: $dist, Packet manager: $pm, Install command: $silent_inst, Check pkgs command: $check_pkgs, What pkg command: $wh_pkg, Docker pkg: $docker_pkg, Check service: $check_srv";\
 if [ "$dist" = "debian" ]; then export DEBIAN_FRONTEND=noninteractive; fi;\
-if [ -z "$(echo $LANG | grep -e 'en_US.UTF-8' -e 'C.UTF-8')" ]; then \
-  if [ -n "$(locale -a | grep 'en_US.utf8')" ]; then export LC_ALL=en_US.UTF-8;\
-  else export LC_ALL=C.UTF-8; fi;\
+if [ -z "$(echo $LANG | grep -E 'en_US.UTF-8|C.UTF-8')" ]; then \
+  if [ -n "$(locale -a | grep en_US.utf8)" ]; then export LC_ALL=en_US.UTF-8;\
+  elif [ -n "$(locale -a | grep C.utf8)" ]; then export LC_ALL=C.UTF-8;\
+  fi;\
 fi;\
-if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst sudo;\
-  if ! command -v sudo > /dev/null 2>&1; then sudo; exit 1; fi;\
-fi;\
-if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc;\
-  if ! command -v fuser > /dev/null 2>&1; then fuser; exit 1; fi;\
-fi;\
-if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof;\
-  if ! command -v lsof > /dev/null 2>&1; then lsof; exit 1; fi;\
-fi;\
+if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst sudo || sudo 2>&1 > /dev/null || exit 1; fi;\
+if ! command -v fuser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc || fuser 2>&1 > /dev/null || exit 1; fi;\
+if ! command -v lsof > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof || lsof 2>&1 > /dev/null || exit 1; fi;\
 if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs;\
-  if [ -n "$($pm $wh_pkg $docker_pkg 2>/dev/null | grep 'moby-engine')" ]; then echo "Docker is not supported"; docker; exit 1;\
+  if [ -n "$($pm $wh_pkg $docker_pkg 2>/dev/null | grep moby-engine)" ]; then echo "Docker is not supported"; docker; exit 1;\
   else sudo $pm $silent_inst $docker_pkg;\
     if ! command -v docker > /dev/null 2>&1; then docker; exit 1;\
     elif [ -n "$(sudo docker --version 2>&1 | grep 'podman')" ]; then check_srv="podman.socket podman"; sudo touch /etc/containers/nodocker; fi;\
