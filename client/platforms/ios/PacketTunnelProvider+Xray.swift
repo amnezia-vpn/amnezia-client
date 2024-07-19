@@ -33,7 +33,7 @@ extension PacketTunnelProvider {
         }
 
         // Tunnel settings
-        let ipv6Enabled = true
+        let ipv6Enabled = false
         let hideVPNIcon = false
 
         let settings = NEPacketTunnelNetworkSettings(tunnelRemoteAddress: "254.1.1.1")
