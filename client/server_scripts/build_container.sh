@@ -14,5 +14,8 @@ if [ -n "$(sudo docker --version 2>/dev/null | grep podman)" ]; then sudo sh -c 
     '  \"alpine\" = \"docker.io/library/alpine\"' \
     '  # Amnezia finish' \
     >> /var/cache/containers/short-name-aliases.conf";\
-fi;\
-sudo docker build --no-cache --pull -t $CONTAINER_NAME $DOCKERFILE_FOLDER
+  sudo docker build --no-cache --pull -t $CONTAINER_NAME $DOCKERFILE_FOLDER && sudo sh -c '\
+    podman generate systemd --name $CONTAINER_NAME 2>/dev/null > $DOCKERFILE_FOLDER/container-$CONTAINER_NAME.service && \
+    systemctl enable $DOCKERFILE_FOLDER/container-$CONTAINER_NAME.service';\
+else sudo docker build --no-cache --pull -t $CONTAINER_NAME $DOCKERFILE_FOLDER;\
+fi
