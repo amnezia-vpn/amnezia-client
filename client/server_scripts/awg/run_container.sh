@@ -12,9 +12,11 @@ sudo docker run -d \
 $CONTAINER_NAME
 
 # Create service for podman
-sudo sh -c 'docker --version 2>/dev/null | grep -q podman && \
-podman generate systemd --name $CONTAINER_NAME 2>/dev/null > /opt/amnezia/$CONTAINER_NAME/container-$CONTAINER_NAME.service && \
-systemctl enable /opt/amnezia/$CONTAINER_NAME/container-$CONTAINER_NAME.service > /dev/null'
+if [ -n "$(sudo docker --version 2>/dev/null | grep podman)" ]; then \
+  sudo docker update --restart no $CONTAINER_NAME;\
+  sudo podman generate systemd --name $CONTAINER_NAME > /opt/amnezia/$CONTAINER_NAME/container-$CONTAINER_NAME.service;\
+  sudo systemctl enable /opt/amnezia/$CONTAINER_NAME/container-$CONTAINER_NAME.service > /dev/null;\ 
+fi;
 
 sudo docker network connect amnezia-dns-net $CONTAINER_NAME
 
