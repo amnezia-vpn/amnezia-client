@@ -18,7 +18,7 @@ if ! command -v docker > /dev/null 2>&1; then sudo $pm $check_pkgs;\
   else sudo $pm $silent_inst $docker_pkg || docker 2>&1 > /dev/null || exit 1;\
   fi;\
   if [ -n "$(sudo docker --version 2>/dev/null | grep podman)" ]; then check_srv="podman.socket podman"; sudo touch /etc/containers/nodocker; fi;\
-  sleep 5; sudo systemctl enable --now $check_srv > /dev/null; sleep 5;\
+  sleep 5; sudo systemctl enable --now $check_srv 2>/dev/null; sleep 5;\
 fi;\
 if [ -n "$(sudo docker --version 2>&1 | grep moby-engine)" ]; then echo "Docker is not supported"; echo "command not found"; exit 1;\
 elif [ -n "$(sudo docker --version 2>&1 | grep podman)" ]; then check_srv="podman.socket podman"; docker_pkg="podman-docker";\
