@@ -13,8 +13,8 @@ $CONTAINER_NAME
 
 # Create service for podman
 if [ -n "$(sudo docker --version 2>/dev/null | grep podman)" ]; then \
-  sudo sh -c "podman generate systemd --name $CONTAINER_NAME 2>/dev/null > $DOCKERFILE_FOLDER/$CONTAINER_NAME.service";\
-  sudo sh -c "systemctl enable --now $DOCKERFILE_FOLDER/$CONTAINER_NAME.service && docker update --restart no $CONTAINER_NAME > /dev/null";\
+  sudo sh -c "podman generate systemd --restart-policy=always -t 1 --name $CONTAINER_NAME 2>/dev/null > container-$DOCKERFILE_FOLDER/$CONTAINER_NAME.service";\
+  sudo sh -c "systemctl enable --now container-$DOCKERFILE_FOLDER/$CONTAINER_NAME.service && docker update --restart no $CONTAINER_NAME > /dev/null";\
 fi
 
 sudo docker network connect amnezia-dns-net $CONTAINER_NAME
