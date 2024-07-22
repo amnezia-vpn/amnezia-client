@@ -4,6 +4,7 @@ import WireGuardKitGo
 
 enum XrayErrors: Error {
     case noXrayConfig
+    case xrayConfigIsWrong
     case cantSaveXrayConfig
     case cantParseListenAndPort
     case cantSaveHevSocksConfig
@@ -26,7 +27,7 @@ extension PacketTunnelProvider {
         // Xray configuration
         guard let protocolConfiguration = self.protocolConfiguration as? NETunnelProviderProtocol,
               let providerConfiguration = protocolConfiguration.providerConfiguration,
-              let xrayConfigData = providerConfiguration[Constants.xrayConfigKey] as? Data else {
+              let configData = providerConfiguration[Constants.xrayConfigKey] as? Data else {
             xrayLog(.error, message: "Can't get xray configuration")
             completionHandler(XrayErrors.noXrayConfig)
             return
@@ -57,12 +58,29 @@ extension PacketTunnelProvider {
             return settings
         }()
 
-        let dns = ["8.8.4.4","1.1.1.1"]
-        settings.dnsSettings = NEDNSSettings(servers: dns)
-
         do {
-            let port = 10808
-            let address = "::1"
+            let xrayConfig = try JSONDecoder().decode(XrayConfig.self,
+                                                      from: configData)
+
+            var dnsArray = [String]()
+            if let dns1 = xrayConfig.dns1 {
+                dnsArray.append(dns1)
+            }
+            if let dns2 = xrayConfig.dns2 {
+                dnsArray.append(dns2)
+            }
+
+            settings.dnsSettings = !dnsArray.isEmpty
+            ? NEDNSSettings(servers: dnsArray)
+            : NEDNSSettings(servers: ["1.1.1.1"])
+
+            let xrayConfigData = xrayConfig.config.data(using: .utf8)
+
+            guard let xrayConfigData else {
+                xrayLog(.error, message: "Can't encode config to data")
+                completionHandler(XrayErrors.xrayConfigIsWrong)
+                return
+            }
 
             let jsonDict = try JSONSerialization.jsonObject(with: xrayConfigData,
                                                             options: []) as? [String: Any]
@@ -72,6 +90,9 @@ extension PacketTunnelProvider {
                 completionHandler(XrayErrors.cantParseListenAndPort)
                 return
             }
+
+            let port = 10808
+            let address = "::1"
 
             if var inboundsArray = jsonDict["inbounds"] as? [[String: Any]], !inboundsArray.isEmpty {
                 inboundsArray[0]["port"] = port
