@@ -511,18 +511,36 @@ bool IosController::setupXray()
 {
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Xray)].toObject();
     QJsonDocument xrayConfigDoc(config);
+
     QString xrayConfigStr(xrayConfigDoc.toJson(QJsonDocument::Compact));
 
-    return startXray(xrayConfigStr);
+    QJsonObject finalConfig;
+    finalConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1].toString());
+    finalConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2].toString());
+    finalConfig.insert(config_key::config, xrayConfigStr);
+
+    QJsonDocument finalConfigDoc(finalConfig);
+    QString finalConfigStr(finalConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startXray(finalConfigStr);
 }
 
 bool IosController::setupSSXray()
 {
     QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::SSXray)].toObject();
     QJsonDocument ssXrayConfigDoc(config);
+
     QString ssXrayConfigStr(ssXrayConfigDoc.toJson(QJsonDocument::Compact));
 
-    return startXray(ssXrayConfigStr);
+    QJsonObject finalConfig;
+    finalConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
+    finalConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2]);
+    finalConfig.insert(config_key::config, ssXrayConfigStr);
+
+    QJsonDocument finalConfigDoc(finalConfig);
+    QString finalConfigStr(finalConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startXray(finalConfigStr);
 }
 
 bool IosController::setupAwg()
