@@ -46,6 +46,7 @@
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/appSplitTunnelingModel.h"
 #include "ui/models/apiServicesModel.h"
+#include "ui/models/apiCountryModel.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
@@ -105,6 +106,7 @@ private:
     QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
     QSharedPointer<ApiServicesModel> m_apiServicesModel;
+    QSharedPointer<ApiCountryModel> m_apiCountryModel;
 
     QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
     QScopedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;

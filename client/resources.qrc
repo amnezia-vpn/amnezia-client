@@ -253,5 +253,6 @@
         <file>images/controls/bug.svg</file>
         <file>ui/qml/Pages2/PageDevMenu.qml</file>
         <file>images/controls/refresh-cw.svg</file>
+        <file>ui/qml/Pages2/PageSettingsApiLanguageList.qml</file>
     </qresource>
 </RCC>

@@ -133,10 +133,18 @@ PageType {
         }
 
         function onInstallServerFromApiFinished(message) {
+            PageController.showBusyIndicator(false)
             if (!ConnectionController.isConnected) {
                 ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
                 ServersModel.processedIndex = ServersModel.defaultIndex
             }
+
+            PageController.goToPageHome()
+            PageController.showNotificationMessage(message)
+        }
+
+        function onUpdateServerFromApiFinished(message) {
+            PageController.showBusyIndicator(false)
 
             PageController.goToPageHome()
             PageController.showNotificationMessage(message)
@@ -183,9 +191,6 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: tabBar.top
-
-        width: parent.width
-        height: root.height - tabBar.implicitHeight
 
         enabled: !root.isControlsDisabled
 

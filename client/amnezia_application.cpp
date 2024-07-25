@@ -362,6 +362,13 @@ void AmneziaApplication::initModels()
 
     m_apiServicesModel.reset(new ApiServicesModel(this));
     m_engine->rootContext()->setContextProperty("ApiServicesModel", m_apiServicesModel.get());
+
+    m_apiCountryModel.reset(new ApiCountryModel(this));
+    m_engine->rootContext()->setContextProperty("ApiCountryModel", m_apiCountryModel.get());
+    connect(m_serversModel.get(), &ServersModel::updateApiLanguageModel, this, [this]() {
+        m_apiCountryModel->updateModel(m_serversModel->getProcessedServerData("apiAvailableCountries").toJsonArray(),
+                                       m_serversModel->getProcessedServerData("apiServerCountryCode").toString());
+    });
 }
 
 void AmneziaApplication::initControllers()

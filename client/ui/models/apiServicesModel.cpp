@@ -10,7 +10,7 @@ namespace
 
     namespace configKey
     {
-        constexpr char countryCode[] = "country_code";
+        constexpr char userCountryCode[] = "user_country_code";
         constexpr char servicesDescription[] = "services_description";
         constexpr char services[] = "services";
         constexpr char serviceInfo[] = "service_info";
@@ -20,6 +20,7 @@ namespace
         constexpr char description[] = "description";
         constexpr char name[] = "name";
         constexpr char price[] = "price";
+        constexpr char availableCountries[] = "available_countries";
     }
 }
 
@@ -60,7 +61,7 @@ void ApiServicesModel::updateModel(const QJsonObject &data)
 {
     beginResetModel();
 
-    m_countryCode = data.value(configKey::countryCode).toString();
+    m_countryCode = data.value(configKey::userCountryCode).toString();
     m_servicesDescription = data.value(configKey::servicesDescription).toString();
     m_services = data.value(configKey::services).toArray();
 
@@ -94,6 +95,12 @@ QString ApiServicesModel::getSelectedServiceName()
 {
     auto modelIndex = index(m_selectedServiceIndex, 0);
     return data(modelIndex, ApiServicesModel::Roles::NameRole).toString();
+}
+
+QJsonArray ApiServicesModel::getSelectedServiceCountries()
+{
+    QJsonObject service = m_services.at(m_selectedServiceIndex).toObject();
+    return service.value(configKey::availableCountries).toArray();
 }
 
 QString ApiServicesModel::getCountryCode()

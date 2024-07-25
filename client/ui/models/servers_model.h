@@ -34,6 +34,9 @@ public:
         IsServerFromTelegramApiRole,
         IsServerFromGatewayApiRole,
         ApiServiceInfoRole,
+        IsCountrySelectionAvailableRole,
+        ApiAvailableCountriesRole,
+        ApiServerCountryCodeRole,
 
         HasAmneziaDns
     };
@@ -112,6 +115,7 @@ public slots:
     bool isDefaultServerDefaultContainerHasSplitTunneling();
 
     bool isServerFromApi(const int serverIndex);
+    void setCurrentCountryCode(const QString &code, const int serverIndex);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -125,6 +129,8 @@ signals:
     void containersUpdated(const QJsonArray &containers);
     void defaultServerContainersUpdated(const QJsonArray &containers);
     void defaultServerDefaultContainerChanged(const int containerIndex);
+
+    void updateApiLanguageModel();
 
 private:
     ServerCredentials serverCredentials(int index) const;

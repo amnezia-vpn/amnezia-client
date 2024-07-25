@@ -29,7 +29,8 @@ namespace
         constexpr char osVersion[] = "os_version";
         constexpr char appVersion[] = "app_version";
 
-        constexpr char countryCode[] = "country_code";
+        constexpr char userCountryCode[] = "user_country_code";
+        constexpr char serverCountryCode[] = "server_country_code";
         constexpr char serviceType[] = "service_type";
 
         constexpr char aesKey[] = "aes_key";
@@ -245,8 +246,8 @@ ErrorCode ApiController::getServicesList(QByteArray &responseBody)
     return checkErrors(sslErrors, reply.get());
 }
 
-ErrorCode ApiController::getConfigForService(const QString &installationUuid, const QString &countryCode, const QString &serviceType,
-                                             const QString &protocol, QJsonObject &serverConfig)
+ErrorCode ApiController::getConfigForService(const QString &installationUuid, const QString &userCountryCode, const QString &serviceType,
+                                             const QString &protocol, const QString &serverCountryCode, QJsonObject &serverConfig)
 {
 #ifdef Q_OS_IOS
     IosController::Instance()->requestInetAccess();
@@ -263,7 +264,10 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
     ApiPayloadData apiPayloadData = generateApiPayloadData(protocol);
 
     QJsonObject apiPayload = fillApiPayload(protocol, apiPayloadData);
-    apiPayload[configKey::countryCode] = countryCode;
+    apiPayload[configKey::userCountryCode] = userCountryCode;
+    if (!serverCountryCode.isEmpty()) {
+        apiPayload[configKey::serverCountryCode] = serverCountryCode;
+    }
     apiPayload[configKey::serviceType] = serviceType;
     apiPayload[configKey::uuid] = installationUuid;
 

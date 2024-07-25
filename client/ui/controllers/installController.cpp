@@ -27,6 +27,15 @@ namespace
     namespace configKey
     {
         constexpr char serviceInfo[] = "service_info";
+        constexpr char serviceType[] = "service_type";
+        constexpr char serviceProtocol[] = "service_protocol";
+        constexpr char userCountryCode[] = "user_country_code";
+
+        constexpr char serverCountryCode[] = "server_country_code";
+        constexpr char serverCountryName[] = "server_country_name";
+        constexpr char availableCountries[] = "available_countries";
+
+        constexpr char apiConfig[] = "api_config";
     }
 
 #ifdef Q_OS_WINDOWS
@@ -832,18 +841,66 @@ bool InstallController::installServiceFromApi()
 
     ErrorCode errorCode = apiController.getConfigForService(m_settings->getInstallationUuid(true), m_apiServicesModel->getCountryCode(),
                                                             m_apiServicesModel->getSelectedServiceType(),
-                                                            m_apiServicesModel->getSelectedServiceProtocol(), serverConfig);
+                                                            m_apiServicesModel->getSelectedServiceProtocol(), "", serverConfig);
     if (errorCode != ErrorCode::NoError) {
         emit installationErrorOccurred(errorCode);
         return false;
     }
 
     auto serviceInfo = m_apiServicesModel->getSelectedServiceInfo();
+    QJsonObject apiConfig; //serverConfig.value(configKey::apiConfig).toObject();
+    apiConfig.insert(configKey::serviceInfo, serviceInfo);
+    apiConfig.insert(configKey::userCountryCode, m_apiServicesModel->getCountryCode());
+    apiConfig.insert(configKey::serviceType, m_apiServicesModel->getSelectedServiceType());
+    apiConfig.insert(configKey::serviceProtocol, m_apiServicesModel->getSelectedServiceProtocol());
 
-    serverConfig.insert(configKey::serviceInfo, serviceInfo);
+
+    //todo remore
+    auto countries = m_apiServicesModel->getSelectedServiceCountries();
+    if (!countries.isEmpty()) {
+        apiConfig.insert(configKey::availableCountries, countries);
+        apiConfig.insert(configKey::serverCountryCode, "RU");
+        apiConfig.insert(configKey::serverCountryName, "Russian Federation");
+    }
+
+    serverConfig.insert(configKey::apiConfig, apiConfig);
 
     m_serversModel->addServer(serverConfig);
     emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+    return true;
+}
+
+bool InstallController::updateServiceFromApi(const QString &newCountryCode, const QString &newCountryName)
+{
+    ApiController apiController(m_settings->getGatewayEndpoint());
+
+    auto serverIndex = m_serversModel->getProcessedServerIndex();
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+
+    QJsonObject newServerConfig;
+    ErrorCode errorCode =
+            apiController.getConfigForService(m_settings->getInstallationUuid(true), apiConfig.value(configKey::userCountryCode).toString(),
+                                              apiConfig.value(configKey::serviceType).toString(),
+                                              apiConfig.value(configKey::serviceProtocol).toString(), newCountryCode, newServerConfig);
+    if (errorCode != ErrorCode::NoError) {
+        emit installationErrorOccurred(errorCode);
+        return false;
+    }
+
+    QJsonObject newApiConfig = newServerConfig.value(configKey::apiConfig).toObject();
+    newApiConfig.insert(configKey::userCountryCode, apiConfig.value(configKey::userCountryCode));
+    newApiConfig.insert(configKey::serviceType, apiConfig.value(configKey::serviceType));
+    newApiConfig.insert(configKey::serviceProtocol, apiConfig.value(configKey::serviceProtocol));
+
+    newApiConfig.insert(configKey::availableCountries, apiConfig.value(configKey::availableCountries));
+    newApiConfig.insert(configKey::serverCountryCode, newCountryCode);
+    newApiConfig.insert(configKey::serverCountryName, newCountryName);
+
+    newServerConfig.insert(configKey::apiConfig, newApiConfig);
+    m_serversModel->editServer(newServerConfig, serverIndex);
+
+    emit updateServerFromApiFinished(tr("Successfully changed the country of connection to %1").arg(newCountryName));
     return true;
 }
 

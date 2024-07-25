@@ -54,6 +54,7 @@ public slots:
 
     bool fillAvailableServices();
     bool installServiceFromApi();
+    bool updateServiceFromApi(const QString &newCountryCode, const QString &newCountryName);
 
 signals:
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
@@ -61,6 +62,7 @@ signals:
     void installServerFromApiFinished(const QString &message);
 
     void updateContainerFinished(const QString &message);
+    void updateServerFromApiFinished(const QString &message);
 
     void scanServerFinished(bool isInstalledContainerFound);
 

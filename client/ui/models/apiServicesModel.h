@@ -30,6 +30,7 @@ public slots:
     QString getSelectedServiceType();
     QString getSelectedServiceProtocol();
     QString getSelectedServiceName();
+    QJsonArray getSelectedServiceCountries();
 
     QString getCountryCode();
     QString getServicesDescription();

@@ -9,6 +9,15 @@ namespace
         Telegram = 1,
         AmneziaGateway
     };
+
+    namespace configKey
+    {
+        constexpr char apiConfig[] = "api_config";
+        constexpr char serviceInfo[] = "service_info";
+        constexpr char availableCountries[] = "available_countries";
+        constexpr char serverCountryCode[] = "server_country_code";
+        constexpr char serverCountryName[] = "server_country_name";
+    }
 }
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
@@ -71,6 +80,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     }
 
     const QJsonObject server = m_servers.at(index.row()).toObject();
+    const auto apiConfig = server.value(configKey::apiConfig).toObject();
     const auto configVersion = server.value(config_key::configVersion).toInt();
     switch (role) {
     case NameRole: {
@@ -113,7 +123,16 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return server.value(config_key::configVersion).toInt() == ApiConfigSources::AmneziaGateway;
     }
     case ApiServiceInfoRole: {
-        return server.value("service_info").toObject();
+        return apiConfig.value(configKey::serviceInfo).toObject();
+    }
+    case IsCountrySelectionAvailableRole: {
+        return !apiConfig.value(configKey::availableCountries).toArray().isEmpty();
+    }
+    case ApiAvailableCountriesRole: {
+        return apiConfig.value(configKey::availableCountries).toArray();
+    }
+    case ApiServerCountryCodeRole: {
+        return apiConfig.value(configKey::serverCountryCode).toString();
     }
     case HasAmneziaDns: {
         QString primaryDns = server.value(config_key::dns1).toString();
@@ -160,10 +179,13 @@ const QString ServersModel::getDefaultServerName()
 QString ServersModel::getServerDescription(const QJsonObject &server, const int index) const
 {
     const auto configVersion = server.value(config_key::configVersion).toInt();
+    const auto apiConfig = server.value(configKey::apiConfig).toObject();
 
     QString description;
 
-    if (configVersion) {
+    if (configVersion && !apiConfig.value(configKey::serverCountryCode).toString().isEmpty()) {
+        return apiConfig.value(configKey::serverCountryName).toString();
+    } else if (configVersion) {
         return server.value(config_key::description).toString();
     } else if (data(index, HasWriteAccessRole).toBool()) {
         if (m_isAmneziaDnsEnabled && isAmneziaDnsContainerInstalled(index)) {
@@ -222,6 +244,9 @@ void ServersModel::setProcessedServerIndex(const int index)
 {
     m_processedServerIndex = index;
     updateContainersModel();
+    if (data(index, IsServerFromGatewayApiRole).toBool()) {
+        emit updateApiLanguageModel();
+    }
     emit processedServerIndexChanged(m_processedServerIndex);
 }
 
@@ -333,6 +358,9 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[IsServerFromTelegramApiRole] = "isServerFromTelegramApi";
     roles[IsServerFromGatewayApiRole] = "isServerFromGatewayApi";
     roles[ApiServiceInfoRole] = "apiServiceInfo";
+    roles[IsCountrySelectionAvailableRole] = "isCountrySelectionAvailable";
+    roles[ApiAvailableCountriesRole] = "apiAvailableCountries";
+    roles[ApiServerCountryCodeRole] = "apiServerCountryCode";
     return roles;
 }
 
@@ -653,4 +681,11 @@ bool ServersModel::isServerFromApi(const int serverIndex)
 {
     return data(serverIndex, IsServerFromTelegramApiRole).toBool()
             || data(serverIndex, IsServerFromGatewayApiRole).toBool();
+}
+
+void ServersModel::setCurrentCountryCode(const QString &code, const int serverIndex)
+{
+    QJsonObject s = m_servers.at(serverIndex).toObject();
+    s.insert(configKey::serverCountryCode, code);
+    editServer(s, serverIndex);
 }
