@@ -10,6 +10,7 @@
 #include "ikev2_vpn_protocol_windows.h"
 #include "utilities.h"
 
+
 static Ikev2Protocol* self = nullptr;
 static std::mutex rasDialFuncMutex;
 
@@ -80,10 +81,10 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
     case RASCS_AuthNotify:
         //qDebug()<<__FUNCTION__ << __LINE__;
         if (dwError != 0) {
-            //qDebug() << "have error" << dwError;
+            qDebug() << "have error" << dwError;
             setConnectionState(Vpn::ConnectionState::Disconnected);
         } else {
-            //qDebug() << "RASCS_AuthNotify but no error" << dwError;
+            qDebug() << "RASCS_AuthNotify but no error" << dwError;
         }
         break;
     case RASCS_AuthRetry:
@@ -193,16 +194,16 @@ ErrorCode Ikev2Protocol::start()
             return ErrorCode::AmneziaServiceConnectionFailed;
         }
 
-        certInstallProcess->waitForSource(1000);
+        certInstallProcess->waitForSource();
         if (!certInstallProcess->isInitialized()) {
             qWarning() << "IpcProcess replica is not connected!";
             setLastError(ErrorCode::AmneziaServiceConnectionFailed);
             return ErrorCode::AmneziaServiceConnectionFailed;
         }
         certInstallProcess->setProgram(PermittedProcess::CertUtil);
-        QStringList arguments({"-f" , "-importpfx",
-                               "-p", m_config[config_key::password].toString(),
-                               certFile.fileName(), "NoExport"
+        QString password = QString("-p %1").arg(m_config[config_key::password].toString());
+        QStringList arguments({"-f", "-importpfx", password,
+                               QDir::toNativeSeparators(certFile.fileName()), "NoExport"
                               });
         certInstallProcess->setArguments(arguments);
 
@@ -227,9 +228,8 @@ ErrorCode Ikev2Protocol::start()
     }
 
     {
-        auto adapterConfigProcess = new QProcess;
-
-        adapterConfigProcess->setProgram("powershell");
+        QProcess adapterConfigProcess;
+        adapterConfigProcess.setProgram("powershell");
         QString arguments = QString("-command \"Set-VpnConnectionIPsecConfiguration\" "
                                     "-ConnectionName '%1' "
                                     "-AuthenticationTransformConstants GCMAES128 "
@@ -240,10 +240,11 @@ ErrorCode Ikev2Protocol::start()
                                     "-DHGroup Group14 "
                                     "-PassThru -Force\"")
                 .arg(tunnelName());
-        adapterConfigProcess->setNativeArguments(arguments);
 
-        adapterConfigProcess->start();
-        adapterConfigProcess->waitForFinished(5000);
+        adapterConfigProcess.setNativeArguments(arguments);
+
+        adapterConfigProcess.start();
+        adapterConfigProcess.waitForFinished(5000);
     }
     //*/
     {
@@ -299,6 +300,7 @@ bool Ikev2Protocol::connect_to_vpn(const QString & vpn_name){
     auto ret = RasDial(NULL, NULL, &RasDialParams, 0,
                        &RasDialFuncCallback,
                        &hRasConn);
+
     if (ret == ERROR_SUCCESS){
         return true;
     }
