@@ -106,7 +106,7 @@ PageType {
                 buttonTextLabel.font.weight: 500
 
                 property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled || AppSplitTunnelingModel.isTunnelingEnabled ||
-                                                       (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromTelegramApi"))
+                                                       (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.isDefaultServerFromApi)
 
                 text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
 
@@ -265,11 +265,21 @@ PageType {
                     }
                 }
 
-                LabelTextType {
-                    id: collapsedServerMenuDescription
-                    Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 89 : 44
+                RowLayout {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    text: drawer.isCollapsed ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
+                    Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 89 : 44
+                    spacing: 0
+
+                    Image {
+                        Layout.rightMargin: 8
+                        visible: source !== ""
+                        source: ServersModel.defaultServerImagePathCollapsed
+                    }
+
+                    LabelTextType {
+                        id: collapsedServerMenuDescription
+                        text: drawer.isCollapsed ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
+                    }
                 }
             }
 

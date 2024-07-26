@@ -39,50 +39,58 @@ PageType {
                 id: content
 
                 anchors.fill: parent
-                anchors.rightMargin: 16
-                anchors.leftMargin: 16
 
-                VerticalRadioButton {
-                    id: containerRadioButton
+                RowLayout {
+                    VerticalRadioButton {
+                        id: containerRadioButton
 
-                    Layout.fillWidth: true
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
 
-                    text: countryName
+                        text: countryName
 
-                    ButtonGroup.group: containersRadioButtonGroup
+                        ButtonGroup.group: containersRadioButtonGroup
 
-                    imageSource: "qrc:/images/controls/download.svg"
+                        imageSource: "qrc:/images/controls/download.svg"
 
-                    checked: index === ApiCountryModel.currentIndex
+                        checked: index === ApiCountryModel.currentIndex
 
-                    onClicked: {
-                        if (index !== ApiCountryModel.currentIndex) {
-                            PageController.showBusyIndicator(true)
-                            var prevIndex = ApiCountryModel.currentIndex
-                            ApiCountryModel.currentIndex = index
-                            if (!InstallController.updateServiceFromApi(countryCode, countryName)) {
-                                ApiCountryModel.currentIndex = prevIndex
+                        onClicked: {
+                            if (index !== ApiCountryModel.currentIndex) {
+                                PageController.showBusyIndicator(true)
+                                var prevIndex = ApiCountryModel.currentIndex
+                                ApiCountryModel.currentIndex = index
+                                if (!InstallController.updateServiceFromApi(countryCode, countryName)) {
+                                    ApiCountryModel.currentIndex = prevIndex
+                                }
                             }
                         }
+
+                        MouseArea {
+                            anchors.fill: containerRadioButton
+                            cursorShape: Qt.PointingHandCursor
+                            enabled: false
+                        }
+
+                        Keys.onEnterPressed: {
+                            if (checkable) {
+                                checked = true
+                            }
+                            containerRadioButton.clicked()
+                        }
+                        Keys.onReturnPressed: {
+                            if (checkable) {
+                                checked = true
+                            }
+                            containerRadioButton.clicked()
+                        }
                     }
 
-                    MouseArea {
-                        anchors.fill: containerRadioButton
-                        cursorShape: Qt.PointingHandCursor
-                        enabled: false
-                    }
+                    Image {
+                        Layout.rightMargin: 32
+                        Layout.alignment: Qt.AlignRight
 
-                    Keys.onEnterPressed: {
-                        if (checkable) {
-                            checked = true
-                        }
-                        containerRadioButton.clicked()
-                    }
-                    Keys.onReturnPressed: {
-                        if (checkable) {
-                            checked = true
-                        }
-                        containerRadioButton.clicked()
+                        source: "qrc:/countriesFlags/images/flagKit/" + countryCode + ".svg"
                     }
                 }
 

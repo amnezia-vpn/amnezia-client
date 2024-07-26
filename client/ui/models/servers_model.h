@@ -55,6 +55,7 @@ public:
     Q_PROPERTY(QString defaultServerName READ getDefaultServerName NOTIFY defaultServerNameChanged)
     Q_PROPERTY(QString defaultServerDefaultContainerName READ getDefaultServerDefaultContainerName NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerDescriptionCollapsed READ getDefaultServerDescriptionCollapsed NOTIFY defaultServerDefaultContainerChanged)
+    Q_PROPERTY(QString defaultServerImagePathCollapsed READ getDefaultServerImagePathCollapsed NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerDescriptionExpanded READ getDefaultServerDescriptionExpanded NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ isDefaultServerDefaultContainerHasSplitTunneling NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
@@ -66,6 +67,7 @@ public slots:
     const int getDefaultServerIndex();
     const QString getDefaultServerName();
     const QString getDefaultServerDescriptionCollapsed();
+    const QString getDefaultServerImagePathCollapsed();
     const QString getDefaultServerDescriptionExpanded();
     const QString getDefaultServerDefaultContainerName();
     bool isDefaultServerCurrentlyProcessed();
@@ -115,7 +117,6 @@ public slots:
     bool isDefaultServerDefaultContainerHasSplitTunneling();
 
     bool isServerFromApi(const int serverIndex);
-    void setCurrentCountryCode(const QString &code, const int serverIndex);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

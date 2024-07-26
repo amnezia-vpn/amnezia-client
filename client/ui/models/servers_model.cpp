@@ -683,9 +683,14 @@ bool ServersModel::isServerFromApi(const int serverIndex)
             || data(serverIndex, IsServerFromGatewayApiRole).toBool();
 }
 
-void ServersModel::setCurrentCountryCode(const QString &code, const int serverIndex)
+const QString ServersModel::getDefaultServerImagePathCollapsed()
 {
-    QJsonObject s = m_servers.at(serverIndex).toObject();
-    s.insert(configKey::serverCountryCode, code);
-    editServer(s, serverIndex);
+    const auto server = m_servers.at(m_defaultServerIndex).toObject();
+    const auto apiConfig = server.value(configKey::apiConfig).toObject();
+    const auto countryCode = apiConfig.value(configKey::serverCountryCode).toString();
+
+    if (countryCode.isEmpty()) {
+        return "";
+    }
+    return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(countryCode);
 }

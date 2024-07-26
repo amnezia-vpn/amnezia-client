@@ -14,7 +14,7 @@ namespace
     const char cloudFlareNs1[] = "1.1.1.1";
     const char cloudFlareNs2[] = "1.0.0.1";
 
-    constexpr char gatewayEndpoint[] = "http://localhost:52525/";
+    constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
 }
 
 Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_NAME, APPLICATION_NAME, this)
