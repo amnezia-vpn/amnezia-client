@@ -213,8 +213,8 @@ PageType {
                 startY: 0
 
                 PathLine { x: width; y: 0 }
-                PathLine { x: width; y: height - 1 }
-                PathLine { x: 0; y: height - 1 }
+                PathLine { x: width; y: tabBar.height - 1 }
+                PathLine { x: 0; y: tabBar.height - 1 }
                 PathLine { x: 0; y: 0 }
 
                 strokeWidth: 1
