@@ -889,6 +889,7 @@ bool InstallController::updateServiceFromApi(const QString &newCountryCode, cons
     }
 
     QJsonObject newApiConfig = newServerConfig.value(configKey::apiConfig).toObject();
+    newApiConfig.insert(configKey::serviceInfo, apiConfig.value(configKey::apiConfig));
     newApiConfig.insert(configKey::userCountryCode, apiConfig.value(configKey::userCountryCode));
     newApiConfig.insert(configKey::serviceType, apiConfig.value(configKey::serviceType));
     newApiConfig.insert(configKey::serviceProtocol, apiConfig.value(configKey::serviceProtocol));

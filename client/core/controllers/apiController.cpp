@@ -41,6 +41,8 @@ namespace
         constexpr char keyPayload[] = "key_payload";
     }
 
+    const QStringList proxyStorageUrl = {""};
+
     ErrorCode checkErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply)
     {
         if (!sslErrors.empty()) {
@@ -130,6 +132,41 @@ void ApiController::fillServerConfig(const QString &protocol, const ApiControlle
     serverConfig[config_key::defaultContainer] = defaultContainer;
 
     return;
+}
+
+QStringList ApiController::getProxyUrls()
+{
+    QNetworkRequest request;
+    request.setTransferTimeout(7000);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QEventLoop wait;
+    QList<QSslError> sslErrors;
+    QNetworkReply* reply;
+
+    for (const auto &proxyStorageUrl : proxyStorageUrl) {
+        request.setUrl(proxyStorageUrl);
+        reply = amnApp->manager()->get(request);
+
+        connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
+        connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
+        wait.exec();
+
+        if (reply->error() == QNetworkReply::NetworkError::NoError) {
+            break;
+        }
+        reply->deleteLater();
+    }
+
+    auto responseBody = reply->readAll();
+    reply->deleteLater();
+    auto endpointsArray = QJsonDocument::fromJson(responseBody).array();
+
+    QStringList endpoints;
+    for (const auto &endpoint : endpointsArray) {
+        endpoints.push_back(endpoint.toString());
+    }
+    return endpoints;
 }
 
 ApiController::ApiPayloadData ApiController::generateApiPayloadData(const QString &protocol)
@@ -224,26 +261,42 @@ ErrorCode ApiController::getServicesList(QByteArray &responseBody)
     QThread::msleep(10);
 #endif
 
-    QNetworkAccessManager manager;
     QNetworkRequest request;
     request.setTransferTimeout(7000);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     request.setUrl(QString("%1v1/services").arg(m_gatewayEndpoint));
 
-    QScopedPointer<QNetworkReply> reply;
-    reply.reset(manager.get(request));
+    QNetworkReply* reply;
+    reply = amnApp->manager()->get(request);
 
     QEventLoop wait;
-    QObject::connect(reply.get(), &QNetworkReply::finished, &wait, &QEventLoop::quit);
+    QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
 
     QList<QSslError> sslErrors;
-    connect(reply.get(), &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
+    connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
     wait.exec();
 
-    responseBody = reply->readAll();
+    if (reply->error() == QNetworkReply::NetworkError::TimeoutError || reply->error() == QNetworkReply::NetworkError::OperationCanceledError) {
+        m_proxyUrls = getProxyUrls();
+        for (const QString &proxyUrl : m_proxyUrls) {
+            request.setUrl(QString("%1v1/services").arg(proxyUrl));
+            reply = amnApp->manager()->get(request);
 
-    return checkErrors(sslErrors, reply.get());
+            QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
+            connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
+            wait.exec();
+            if (reply->error() != QNetworkReply::NetworkError::TimeoutError && reply->error() != QNetworkReply::NetworkError::OperationCanceledError) {
+                break;
+            }
+            reply->deleteLater();
+        }
+    }
+
+    responseBody = reply->readAll();
+    auto errorCode = checkErrors(sslErrors, reply);
+    reply->deleteLater();
+    return errorCode;
 }
 
 ErrorCode ApiController::getConfigForService(const QString &installationUuid, const QString &userCountryCode, const QString &serviceType,
@@ -298,22 +351,40 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
     requestBody[configKey::keyPayload] = QString(encryptedKeyPayload.toBase64());
     requestBody[configKey::apiPayload] = QString(encryptedApiPayload.toBase64());
 
-    QScopedPointer<QNetworkReply> reply;
-    reply.reset(manager.post(request, QJsonDocument(requestBody).toJson()));
+    QNetworkReply* reply = manager.post(request, QJsonDocument(requestBody).toJson());
 
     QEventLoop wait;
-    connect(reply.get(), &QNetworkReply::finished, &wait, &QEventLoop::quit);
+    connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
 
     QList<QSslError> sslErrors;
-    connect(reply.get(), &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
+    connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
     wait.exec();
 
-    auto errorCode = checkErrors(sslErrors, reply.get());
+    if (reply->error() == QNetworkReply::NetworkError::TimeoutError || reply->error() == QNetworkReply::NetworkError::OperationCanceledError) {
+        if (m_proxyUrls.isEmpty()) {
+            m_proxyUrls = getProxyUrls();
+        }
+        for (const QString &proxyUrl : m_proxyUrls) {
+            request.setUrl(QString("%1v1/config").arg(proxyUrl));
+            reply = manager.post(request, QJsonDocument(requestBody).toJson());
+
+            QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
+            connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
+            wait.exec();
+            if (reply->error() != QNetworkReply::NetworkError::TimeoutError && reply->error() != QNetworkReply::NetworkError::OperationCanceledError) {
+                break;
+            }
+            reply->deleteLater();
+        }
+    }
+
+    auto errorCode = checkErrors(sslErrors, reply);
     if (errorCode) {
         return errorCode;
     }
 
     auto encryptedResponseBody = reply->readAll();
+    reply->deleteLater();
     try {
         auto responseBody = blockCipher.decryptAesBlockCipher(encryptedResponseBody, key, iv, "", salt);
         fillServerConfig(protocol, apiPayloadData, responseBody, serverConfig);

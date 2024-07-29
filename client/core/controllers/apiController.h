@@ -40,8 +40,10 @@ private:
     QJsonObject fillApiPayload(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData);
     void fillServerConfig(const QString &protocol, const ApiController::ApiPayloadData &apiPayloadData, const QByteArray &apiResponseBody,
                           QJsonObject &serverConfig);
+    QStringList getProxyUrls();
 
     QString m_gatewayEndpoint;
+    QStringList m_proxyUrls;
 };
 
 #endif // APICONTROLLER_H
