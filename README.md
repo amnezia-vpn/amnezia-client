@@ -6,6 +6,26 @@
 
 Amnezia is an open-source VPN client, with a key feature that enables you to deploy your own VPN server on your server.
 
+![Image](https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/uipic4.png)
+
+<br>
+
+<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.6.0.3/AmneziaVPN_4.6.0.3_x64.exe"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/win.png" width="150" style="max-width: 100%;"></a> 
+<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.6.0.3/AmneziaVPN_4.6.0.3.dmg"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/mac.png" width="150" style="max-width: 100%;"></a> 
+<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.6.0.3/AmneziaVPN_Linux_4.6.0.3.tar.zip"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/lin.png" width="150" style="max-width: 100%;"></a>
+<a href="https://github.com/amnezia-vpn/amnezia-client/releases/tag/4.6.0.3"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/andr.png" width="150" style="max-width: 100%;"></a>
+
+<br>
+
+<a href="https://play.google.com/store/search?q=amnezia+vpn&c=apps"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/play.png" width="150" style="max-width: 100%;"></a>
+<a href="https://apps.apple.com/us/app/amneziavpn/id1600529900"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/apl.png" width="150" style="max-width: 100%;"></a>
+
+
+[All releases](https://github.com/amnezia-vpn/amnezia-client/releases)
+
+<br>
+
+
 ## Features
 
 - Very easy to use - enter your IP address, SSH login, and password, and Amnezia will automatically install VPN docker containers to your server and connect to the VPN.
@@ -16,12 +36,12 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 ## Links
 
-[https://amnezia.org](https://amnezia.org) - project website  
-[https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
-[https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English) 
-[https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Telegram support channel (Farsi) 
-[https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Telegram support channel (Myanmar)  
-[https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
+- [https://amnezia.org](https://amnezia.org) - project website  
+- [https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
+- [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English) 
+- [https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Telegram support channel (Farsi) 
+- [https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Telegram support channel (Myanmar)  
+- [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
 
 ## Tech
 
@@ -158,8 +178,9 @@ GPL v3.0
 ## Donate
 
 Patreon: [https://www.patreon.com/amneziavpn](https://www.patreon.com/amneziavpn)
-USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4
-USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d
+
+USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4 <br>
+USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d <br>
 XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3  
 
 ## Acknowledgments
