@@ -338,7 +338,17 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
     QByteArray encryptedApiPayload;
     try {
         QSimpleCrypto::QRsa rsa;
-        EVP_PKEY *publicKey = rsa.getPublicKeyFromFile("testkeys.pem");
+
+        EVP_PKEY *publicKey = nullptr;
+        try {
+            QByteArray key = qgetenv("PROD_AGW_PUBLIC_KEY");
+            QSimpleCrypto::QRsa rsa;
+            publicKey = rsa.getPublicKeyFromByteArray(key);
+        } catch (...) {
+            qCritical() << "error loading public key from environment variables";
+            return ErrorCode::ApiMissingAgwPublicKey;
+        }
+
         encryptedKeyPayload = rsa.encrypt(QJsonDocument(keyPayload).toJson(), publicKey, RSA_PKCS1_PADDING);
         EVP_PKEY_free(publicKey);
 
