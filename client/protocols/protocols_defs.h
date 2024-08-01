@@ -24,6 +24,7 @@ namespace amnezia
         constexpr char description[] = "description";
         constexpr char name[] = "name";
         constexpr char cert[] = "cert";
+        constexpr char cacert[] = "cacert";
         constexpr char config[] = "config";
 
         constexpr char containers[] = "containers";

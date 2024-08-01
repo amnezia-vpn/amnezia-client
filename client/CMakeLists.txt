@@ -306,6 +306,15 @@ endif()
 if(LINUX AND NOT ANDROID)
     set(LIBS ${LIBS} -static-libstdc++ -static-libgcc -ldl)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
+
+    set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_linux.h
+    )
+    
+    set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_linux.cpp
+    )
+
 endif()
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))

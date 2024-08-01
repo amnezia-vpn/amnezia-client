@@ -35,6 +35,12 @@ public:
     virtual bool enableKillSwitch(const QJsonObject &excludeAddr, int vpnAdapterIndex) override;
     virtual bool disableKillSwitch() override;
     virtual bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) override;
+    virtual bool writeIPsecCaCert(QString cacert, QString uuid) override;
+    virtual bool writeIPsecPrivate(QString privKey, QString uuid) override;
+    virtual bool writeIPsecConfig(QString config) override;
+    virtual bool writeIPsecUserCert(QString usercert, QString uuid) override;
+    virtual bool writeIPsecPrivatePass(QString pass, QString uuid) override;
+
 
 private:
     int m_localpid = 0;

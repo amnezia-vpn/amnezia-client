@@ -5,6 +5,7 @@
 #include <QLocalSocket>
 #include <QFileInfo>
 
+#include "qjsonarray.h"
 #include "router.h"
 #include "logger.h"
 
@@ -306,6 +307,62 @@ bool IpcServer::disableKillSwitch()
 #endif
 
     return true;
+}
+
+bool IpcServer::writeIPsecConfig(QString config)
+{
+    qDebug() << "IPSEC: IPSec config file";
+    QString configFile = QString("/etc/ipsec.conf");
+    QFile ipSecConfFile(configFile);
+    if (ipSecConfFile.open(QIODevice::WriteOnly)) {
+        ipSecConfFile.write(config.toUtf8());
+        ipSecConfFile.close();
+    }
+}
+
+bool IpcServer::writeIPsecUserCert(QString usercert, QString uuid)
+{
+    qDebug() << "IPSEC: Write user cert " << uuid;
+    QString certName = QString("/etc/ipsec.d/certs/%1.crt").arg(uuid);
+    QFile userCertFile(certName);
+    if (userCertFile.open(QIODevice::WriteOnly)) {
+        userCertFile.write(usercert.toUtf8());
+        userCertFile.close();
+    }
+}
+
+bool IpcServer::writeIPsecCaCert(QString cacert, QString uuid)
+{
+    qDebug() << "IPSEC: Write CA cert user " << uuid;
+    QString certName = QString("/etc/ipsec.d/cacerts/%1.crt").arg(uuid);
+    QFile caCertFile(certName);
+    if (caCertFile.open(QIODevice::WriteOnly)) {
+        caCertFile.write(cacert.toUtf8());
+        caCertFile.close();
+    }
+}
+
+bool IpcServer::writeIPsecPrivate(QString privKey, QString uuid)
+{
+    qDebug() << "IPSEC: User private key " << uuid;
+    QString privateKey = QString("/etc/ipsec.d/private/%1.p12").arg(uuid);
+    QFile pKeyFile(privateKey);
+    if (pKeyFile.open(QIODevice::WriteOnly)) {
+        pKeyFile.write(QByteArray::fromBase64(privKey.toUtf8()));
+        pKeyFile.close();
+    }
+}
+
+
+bool IpcServer::writeIPsecPrivatePass(QString pass, QString uuid)
+{
+    qDebug() << "IPSEC: User private key " << uuid;
+    QFile secretsFile("/etc/ipsec.secrets");
+    QString P12 = QString(": P12 %1.p12 \"%2\" \n").arg(uuid, pass);
+    if (secretsFile.open(QIODevice::WriteOnly | QIODevice::Append)) {
+        secretsFile.write(P12.toUtf8());
+        secretsFile.close();
+    }
 }
 
 bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
