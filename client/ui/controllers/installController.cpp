@@ -608,25 +608,8 @@ void InstallController::removeProcessedContainer()
 
 void InstallController::removeApiConfig(const int serverIndex)
 {
-    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
-
-#ifdef Q_OS_IOS
-    QString vpncName = QString("%1 (%2) %3")
-                               .arg(serverConfig[config_key::description].toString())
-                               .arg(serverConfig[config_key::hostName].toString())
-                               .arg(serverConfig[config_key::vpnproto].toString());
-
-    AmneziaVPN::removeVPNC(vpncName.toStdString());
-#endif
-
-    serverConfig.remove(config_key::dns1);
-    serverConfig.remove(config_key::dns2);
-    serverConfig.remove(config_key::containers);
-    serverConfig.remove(config_key::hostName);
-
-    serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
-
-    m_serversModel->editServer(serverConfig, serverIndex);
+    m_serversModel->removeApiConfig(serverIndex);
+    emit apiConfigRemoved(tr("Api config removed"));
 }
 
 void InstallController::clearCachedProfile(QSharedPointer<ServerController> serverController)
@@ -848,14 +831,13 @@ bool InstallController::installServiceFromApi()
     }
 
     auto serviceInfo = m_apiServicesModel->getSelectedServiceInfo();
-    QJsonObject apiConfig; //serverConfig.value(configKey::apiConfig).toObject();
+    QJsonObject apiConfig; // serverConfig.value(configKey::apiConfig).toObject();
     apiConfig.insert(configKey::serviceInfo, serviceInfo);
     apiConfig.insert(configKey::userCountryCode, m_apiServicesModel->getCountryCode());
     apiConfig.insert(configKey::serviceType, m_apiServicesModel->getSelectedServiceType());
     apiConfig.insert(configKey::serviceProtocol, m_apiServicesModel->getSelectedServiceProtocol());
 
-
-    //todo remore
+    // todo remore
     auto countries = m_apiServicesModel->getSelectedServiceCountries();
     if (!countries.isEmpty()) {
         apiConfig.insert(configKey::availableCountries, countries);
@@ -870,11 +852,10 @@ bool InstallController::installServiceFromApi()
     return true;
 }
 
-bool InstallController::updateServiceFromApi(const QString &newCountryCode, const QString &newCountryName)
+bool InstallController::updateServiceFromApi(const int serverIndex, const QString &newCountryCode, const QString &newCountryName)
 {
     ApiController apiController(m_settings->getGatewayEndpoint());
 
-    auto serverIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
@@ -894,15 +875,39 @@ bool InstallController::updateServiceFromApi(const QString &newCountryCode, cons
     newApiConfig.insert(configKey::serviceType, apiConfig.value(configKey::serviceType));
     newApiConfig.insert(configKey::serviceProtocol, apiConfig.value(configKey::serviceProtocol));
 
-    newApiConfig.insert(configKey::availableCountries, apiConfig.value(configKey::availableCountries));
-    newApiConfig.insert(configKey::serverCountryCode, newCountryCode);
-    newApiConfig.insert(configKey::serverCountryName, newCountryName);
+    if (!apiConfig.value(configKey::availableCountries).toArray().isEmpty()) {
+        newApiConfig.insert(configKey::availableCountries, apiConfig.value(configKey::availableCountries));
+        newApiConfig.insert(configKey::serverCountryCode, newCountryCode);
+        newApiConfig.insert(configKey::serverCountryName, newCountryName);
+    }
 
     newServerConfig.insert(configKey::apiConfig, newApiConfig);
     m_serversModel->editServer(newServerConfig, serverIndex);
 
-    emit updateServerFromApiFinished(tr("Successfully changed the country of connection to %1").arg(newCountryName));
+    if (newCountryName.isEmpty()) {
+        emit updateServerFromApiFinished();
+    } else {
+        emit changeApiCountryFinished(tr("Successfully changed the country of connection to %1").arg(newCountryName));
+    }
     return true;
+}
+
+void InstallController::updateServiceFromTelegram(const int serverIndex)
+{
+    ApiController *apiController = new ApiController(m_settings->getGatewayEndpoint());
+
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+
+    apiController->updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverIndex, serverConfig);
+    connect(apiController, &ApiController::finished, this, [this, apiController](const QJsonObject &config, const int serverIndex) {
+        m_serversModel->editServer(config, serverIndex);
+        emit updateServerFromApiFinished();
+        apiController->deleteLater();
+    });
+    connect(apiController, &ApiController::errorOccurred, this, [this, apiController](ErrorCode errorCode) {
+        emit installationErrorOccurred(errorCode);
+        apiController->deleteLater();
+    });
 }
 
 bool InstallController::isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig,

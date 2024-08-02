@@ -392,8 +392,6 @@ void AmneziaApplication::initControllers()
     connect(m_connectionController.get(), &ConnectionController::connectButtonClicked, m_connectionController.get(),
             &ConnectionController::toggleConnection, Qt::QueuedConnection);
 
-    connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
-
     m_pageController.reset(new PageController(m_serversModel, m_settings));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
 
@@ -406,6 +404,28 @@ void AmneziaApplication::initControllers()
             &InstallController::setEncryptedPassphrase);
     connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
             &ConnectionController::onCurrentContainerUpdated);
+
+    connect(m_installController.get(), &InstallController::updateServerFromApiFinished, m_connectionController.get(),
+            &ConnectionController::configFromApiUpdated);
+
+    connect(m_connectionController.get(), &ConnectionController::updateApiConfigFromGateway, this, [this]() {
+        QObject *context = new QObject(this);
+        auto connection = connect(m_installController.get(), qOverload<ErrorCode>(&InstallController::installationErrorOccurred), context, [this, context]() {
+            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+            context->deleteLater();
+        });
+        m_installController->updateServiceFromApi(m_serversModel->getDefaultServerIndex(), "", "");
+    });
+    connect(m_connectionController.get(), &ConnectionController::updateApiConfigFromTelegram, this, [this]() {
+        QObject *context = new QObject(this);
+        auto connection = connect(m_installController.get(), qOverload<ErrorCode>(&InstallController::installationErrorOccurred), context, [this, context]() {
+            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+            context->deleteLater();
+        });
+        m_installController->updateServiceFromTelegram(m_serversModel->getDefaultServerIndex());
+    });
+
+    connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
 
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());

@@ -1,15 +1,11 @@
 #include "servers_model.h"
 
+#include "core/enums/apiEnums.h"
 #include "core/controllers/serverController.h"
 #include "core/networkUtilities.h"
 
 namespace
 {
-    enum ApiConfigSources {
-        Telegram = 1,
-        AmneziaGateway
-    };
-
     namespace configKey
     {
         constexpr char apiConfig[] = "api_config";
@@ -17,6 +13,9 @@ namespace
         constexpr char availableCountries[] = "available_countries";
         constexpr char serverCountryCode[] = "server_country_code";
         constexpr char serverCountryName[] = "server_country_name";
+
+        constexpr char publicKeyInfo[] = "public_key";
+        constexpr char endDate[] = "end_date";
     }
 }
 
@@ -681,6 +680,49 @@ bool ServersModel::isServerFromApi(const int serverIndex)
 {
     return data(serverIndex, IsServerFromTelegramApiRole).toBool()
             || data(serverIndex, IsServerFromGatewayApiRole).toBool();
+}
+
+bool ServersModel::isApiKeyExpired(const int serverIndex)
+{
+    auto serverConfig = m_servers.at(serverIndex).toObject();
+    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+
+    auto publicKeyInfo = apiConfig.value(configKey::publicKeyInfo).toObject();
+    const auto endDate = publicKeyInfo.value(configKey::endDate).toString();
+    if (endDate.isEmpty()) {
+        publicKeyInfo.insert(configKey::endDate, QDateTime::currentDateTimeUtc().addDays(14).toString());
+        apiConfig.insert(configKey::publicKeyInfo, publicKeyInfo);
+        serverConfig.insert(configKey::apiConfig, apiConfig);
+        editServer(serverConfig, serverIndex);
+
+        return false;
+    }
+
+    auto endDateDateTime = QDateTime::fromString(endDate).toUTC();
+    return endDateDateTime < QDateTime::currentDateTimeUtc();
+}
+
+void ServersModel::removeApiConfig(const int serverIndex)
+{
+    auto serverConfig = getServerConfig(serverIndex);
+
+#ifdef Q_OS_IOS
+    QString vpncName = QString("%1 (%2) %3")
+                               .arg(serverConfig[config_key::description].toString())
+                               .arg(serverConfig[config_key::hostName].toString())
+                               .arg(serverConfig[config_key::vpnproto].toString());
+
+    AmneziaVPN::removeVPNC(vpncName.toStdString());
+#endif
+
+    serverConfig.remove(config_key::dns1);
+    serverConfig.remove(config_key::dns2);
+    serverConfig.remove(config_key::containers);
+    serverConfig.remove(config_key::hostName);
+
+    serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
+
+    editServer(serverConfig, serverIndex);
 }
 
 const QString ServersModel::getDefaultServerImagePathCollapsed()

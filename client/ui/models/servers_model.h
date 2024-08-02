@@ -117,6 +117,8 @@ public slots:
     bool isDefaultServerDefaultContainerHasSplitTunneling();
 
     bool isServerFromApi(const int serverIndex);
+    bool isApiKeyExpired(const int serverIndex);
+    void removeApiConfig(const int serverIndex);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

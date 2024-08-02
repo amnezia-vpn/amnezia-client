@@ -136,6 +136,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.h
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/serialization.h
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/transfer.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/enums/apiEnums.h
 )
 
 # Mozilla headres

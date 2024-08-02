@@ -1,7 +1,6 @@
 #ifndef CONNECTIONCONTROLLER_H
 #define CONNECTIONCONTROLLER_H
 
-#include "core/controllers/apiController.h"
 #include "protocols/vpnprotocol.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
@@ -58,13 +57,15 @@ signals:
     void connectButtonClicked();
     void preparingConfig();
 
+    void updateApiConfigFromGateway();
+    void updateApiConfigFromTelegram();
+    void configFromApiUpdated();
+
 private:
     Vpn::ConnectionState getCurrentConnectionState();
     bool isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container);
 
-    void openConnection(const bool updateConfig, const QJsonObject &config, const int serverIndex);
-
-    QScopedPointer<ApiController> m_apiController;
+    void continueConnection();
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;

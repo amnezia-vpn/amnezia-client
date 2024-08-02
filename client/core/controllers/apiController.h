@@ -25,7 +25,7 @@ public slots:
 
 signals:
     void errorOccurred(ErrorCode errorCode);
-    void configUpdated(const bool updateConfig, const QJsonObject &config, const int serverIndex);
+    void finished(const QJsonObject &config, const int serverIndex);
 
 private:
     struct ApiPayloadData

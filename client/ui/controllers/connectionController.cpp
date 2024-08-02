@@ -8,6 +8,7 @@
 #include <QtConcurrent>
 
 #include "core/controllers/vpnConfigurationController.h"
+#include "core/enums/apiEnums.h"
 #include "version.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
@@ -22,15 +23,11 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
       m_vpnConnection(vpnConnection),
       m_settings(settings)
 {
-    m_apiController.reset(new ApiController(m_settings->getGatewayEndpoint(), this));
-
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this, &ConnectionController::onConnectionStateChanged);
     connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
 
-    connect(m_apiController.get(), &ApiController::configUpdated, this,
-            static_cast<void (ConnectionController::*)(const bool, const QJsonObject &, const int)>(&ConnectionController::openConnection));
-    connect(m_apiController.get(), qOverload<ErrorCode>(&ApiController::errorOccurred), this, qOverload<ErrorCode>(&ConnectionController::connectionErrorOccurred));
+    connect(this, &ConnectionController::configFromApiUpdated, this, &ConnectionController::continueConnection);
 
     m_state = Vpn::ConnectionState::Disconnected;
 }
@@ -38,8 +35,7 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 void ConnectionController::openConnection()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
-    {
+    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true)) {
         emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
         return;
     }
@@ -47,14 +43,22 @@ void ConnectionController::openConnection()
 
     int serverIndex = m_serversModel->getDefaultServerIndex();
     QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
+    auto configVersion = serverConfig.value(config_key::configVersion).toInt();
 
     emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
-    if (serverConfig.value(config_key::configVersion).toInt()
+    if (configVersion == ApiConfigSources::Telegram
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        m_apiController->updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverIndex, serverConfig);
+        emit updateApiConfigFromTelegram();
+    } else if (configVersion && m_serversModel->isApiKeyExpired(serverIndex)) {
+        if (configVersion == ApiConfigSources::Telegram) {
+            m_serversModel->removeApiConfig(serverIndex);
+            emit updateApiConfigFromTelegram();
+        } else {
+            emit updateApiConfigFromGateway();
+        }
     } else {
-        openConnection(false, serverConfig, serverIndex);
+        continueConnection();
     }
 }
 
@@ -186,12 +190,11 @@ bool ConnectionController::isProtocolConfigExists(const QJsonObject &containerCo
     return true;
 }
 
-void ConnectionController::openConnection(const bool updateConfig, const QJsonObject &config, const int serverIndex)
+void ConnectionController::continueConnection()
 {
-    // Update config for this server as it was received from API
-    if (updateConfig) {
-        m_serversModel->editServer(config, serverIndex);
-    }
+    int serverIndex = m_serversModel->getDefaultServerIndex();
+    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
+    auto configVersion = serverConfig.value(config_key::configVersion).toInt();
 
     if (!m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         emit noInstalledContainers();
@@ -224,7 +227,7 @@ void ConnectionController::openConnection(const bool updateConfig, const QJsonOb
 
     auto dns = m_serversModel->getDnsPair(serverIndex);
 
-    auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, config, containerConfig, container, errorCode);
+    auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container, errorCode);
     if (errorCode != ErrorCode::NoError) {
         emit connectionErrorOccurred(tr("unable to create configuration"));
         return;

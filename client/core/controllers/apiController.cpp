@@ -9,6 +9,7 @@
 #include "QRsa.h"
 
 #include "amnezia_application.h"
+#include "core/enums/apiEnums.h"
 #include "configurators/wireguard_configurator.h"
 #include "version.h"
 
@@ -122,7 +123,7 @@ void ApiController::fillServerConfig(const QString &protocol, const ApiControlle
     serverConfig[config_key::containers] = apiConfig.value(config_key::containers);
     serverConfig[config_key::hostName] = apiConfig.value(config_key::hostName);
 
-    if (apiConfig.value(config_key::configVersion).toInt() == 2) {
+    if (apiConfig.value(config_key::configVersion).toInt() == ApiConfigSources::AmneziaGateway) {
         serverConfig[config_key::configVersion] = apiConfig.value(config_key::configVersion);
         serverConfig[config_key::description] = apiConfig.value(config_key::description);
         serverConfig[config_key::name] = apiConfig.value(config_key::name);
@@ -221,13 +222,13 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
 
         QByteArray requestBody = QJsonDocument(apiPayload).toJson();
 
-        QNetworkReply *reply = amnApp->manager()->post(request, requestBody); // ??
+        QNetworkReply *reply = amnApp->manager()->post(request, requestBody);
 
         QObject::connect(reply, &QNetworkReply::finished, [this, reply, protocol, apiPayloadData, serverIndex, serverConfig]() mutable {
             if (reply->error() == QNetworkReply::NoError) {
                 auto apiResponseBody = reply->readAll();
                 fillServerConfig(protocol, apiPayloadData, apiResponseBody, serverConfig);
-                emit configUpdated(true, serverConfig, serverIndex);
+                emit finished(serverConfig, serverIndex);
             } else {
                 if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
                     || reply->error() == QNetworkReply::NetworkError::TimeoutError) {

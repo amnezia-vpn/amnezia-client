@@ -132,6 +132,10 @@ PageType {
             PageController.showNotificationMessage(message)
         }
 
+        function onApiConfigRemoved(message) {
+            PageController.showNotificationMessage(message)
+        }
+
         function onInstallServerFromApiFinished(message) {
             PageController.showBusyIndicator(false)
             if (!ConnectionController.isConnected) {
@@ -143,7 +147,7 @@ PageType {
             PageController.showNotificationMessage(message)
         }
 
-        function onUpdateServerFromApiFinished(message) {
+        function onChangeApiCountryFinished(message) {
             PageController.showBusyIndicator(false)
 
             PageController.goToPageHome()

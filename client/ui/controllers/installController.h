@@ -54,7 +54,9 @@ public slots:
 
     bool fillAvailableServices();
     bool installServiceFromApi();
-    bool updateServiceFromApi(const QString &newCountryCode, const QString &newCountryName);
+    bool updateServiceFromApi(const int serverIndex, const QString &newCountryCode, const QString &newCountryName);
+
+    void updateServiceFromTelegram(const int serverIndex);
 
 signals:
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
@@ -62,7 +64,8 @@ signals:
     void installServerFromApiFinished(const QString &message);
 
     void updateContainerFinished(const QString &message);
-    void updateServerFromApiFinished(const QString &message);
+    void updateServerFromApiFinished();
+    void changeApiCountryFinished(const QString &message);
 
     void scanServerFinished(bool isInstalledContainerFound);
 
@@ -85,6 +88,7 @@ signals:
     void currentContainerUpdated();
 
     void cachedProfileCleared(const QString &message);
+    void apiConfigRemoved(const QString &message);
 
 private:
     void installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
