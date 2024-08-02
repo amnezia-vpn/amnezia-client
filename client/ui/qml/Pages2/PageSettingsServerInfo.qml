@@ -97,7 +97,9 @@ PageType {
 
                     headerText: name
                     descriptionText: {
-                        if (ServersModel.isServerFromApi(ServersModel.processedIndex)) {
+                        if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
+                            return ApiServicesModel.getSelectedServiceData("serviceDescription")
+                        } else if (ServersModel.getProcessedServerData("isServerFromTelegramApi")) {
                             return serverDescription
                         } else if (ServersModel.isProcessedServerHasWriteAccess()) {
                             return credentialsLogin + " · " + hostName
@@ -286,8 +288,6 @@ PageType {
             PageSettingsApiServerInfo {
                 id: apiInfoPage
                 stackView: root.stackView
-
-                supportedSitesDrawerRoot: root
 
 //                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }

@@ -11,7 +11,12 @@ class ApiServicesModel : public QAbstractListModel
 public:
     enum Roles {
         NameRole = Qt::UserRole + 1,
-        DescriptionRole,
+        CardDescriptionRole,
+        ServiceDescriptionRole,
+        SpeedRole,
+        WorkPeriodRole,
+        RegionRole,
+        FeaturesRole,
         PriceRole
     };
 
@@ -33,14 +38,14 @@ public slots:
     QJsonArray getSelectedServiceCountries();
 
     QString getCountryCode();
-    QString getServicesDescription();
+
+    QVariant getSelectedServiceData(const QString roleString);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
     QString m_countryCode;
-    QString m_servicesDescription;
     QJsonArray m_services;
 
     int m_selectedServiceIndex;

@@ -55,6 +55,7 @@ Button {
                     Layout.rightMargin: 16
                     Layout.leftMargin: 16
                     Layout.topMargin: 16
+                    Layout.bottomMargin: root.bodyText !== "" ? 0 : 16
 
                     opacity: root.textOpacity
                 }
@@ -102,6 +103,7 @@ Button {
 
                 Layout.alignment: Qt.AlignRight | Qt.AlignTop
                 Layout.topMargin: 16
+                Layout.bottomMargin: 16
                 Layout.rightMargin: 16
 
                 Rectangle {

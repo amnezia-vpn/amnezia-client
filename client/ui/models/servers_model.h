@@ -33,7 +33,7 @@ public:
 
         IsServerFromTelegramApiRole,
         IsServerFromGatewayApiRole,
-        ApiServiceInfoRole,
+        ApiConfigRole,
         IsCountrySelectionAvailableRole,
         ApiAvailableCountriesRole,
         ApiServerCountryCodeRole,
@@ -134,6 +134,7 @@ signals:
     void defaultServerDefaultContainerChanged(const int containerIndex);
 
     void updateApiLanguageModel();
+    void updateApiServicesModel();
 
 private:
     ServerCredentials serverCredentials(int index) const;

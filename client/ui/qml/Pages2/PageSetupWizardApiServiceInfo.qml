@@ -17,13 +17,11 @@ PageType {
 
     defaultActiveFocusItem: focusItem
 
-    property var serviceInfo: ApiServicesModel.getSelectedServiceInfo()
-
     FlickableType {
         id: fl
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        contentHeight: content.height + continueButton.implicitHeight + continueButton.anchors.bottomMargin
+        contentHeight: content.height + continueButton.implicitHeight + continueButton.anchors.bottomMargin + continueButton.anchors.topMargin
 
         ColumnLayout {
             id: content
@@ -50,9 +48,10 @@ PageType {
                 Layout.topMargin: 8
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.bottomMargin: 32
 
-                headerText: serviceInfo["name"]
-                descriptionText: serviceInfo["description"]
+                headerText: ApiServicesModel.getSelectedServiceData("name")
+                descriptionText: ApiServicesModel.getSelectedServiceData("serviceDescription")
             }
 
             LabelWithImageType {
@@ -61,7 +60,7 @@ PageType {
 
                 imageSource: "qrc:/images/controls/map-pin.svg"
                 leftText: qsTr("For the region")
-                rightText: serviceInfo["region"]
+                rightText: ApiServicesModel.getSelectedServiceData("region")
             }
 
             LabelWithImageType {
@@ -70,7 +69,7 @@ PageType {
 
                 imageSource: "qrc:/images/controls/tag.svg"
                 leftText: qsTr("Price")
-                rightText: serviceInfo["price"]
+                rightText: ApiServicesModel.getSelectedServiceData("price")
             }
 
             LabelWithImageType {
@@ -79,7 +78,9 @@ PageType {
 
                 imageSource: "qrc:/images/controls/history.svg"
                 leftText: qsTr("Work period")
-                rightText: serviceInfo["timelimit"]
+                rightText: ApiServicesModel.getSelectedServiceData("workPeriod")
+
+                visible: rightText !== ""
             }
 
             LabelWithImageType {
@@ -88,7 +89,7 @@ PageType {
 
                 imageSource: "qrc:/images/controls/gauge.svg"
                 leftText: qsTr("Speed")
-                rightText: serviceInfo["speed"]
+                rightText: ApiServicesModel.getSelectedServiceData("speed")
             }
 
             LabelWithImageType {
@@ -97,6 +98,7 @@ PageType {
 
                 imageSource: "qrc:/images/controls/info.svg"
                 leftText: qsTr("Features")
+                rightText: ""
             }
 
             ParagraphTextType {
@@ -104,50 +106,17 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                text: serviceInfo["features"]
-            }
+                onLinkActivated: function(link) {
+                    Qt.openUrlExternally(link)
+                }
+                textFormat: Text.RichText
+                text: ApiServicesModel.getSelectedServiceData("features")
 
-            ShowSupportedSitesButton {
-                drawerParent: root
-                sitesList: serviceInfo["sites_list"]
-            }
-
-            Header2TextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.bottomMargin: 8
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                text: qsTr("How to connect")
-            }
-
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-                Layout.bottomMargin: 24
-
-                text: serviceInfo["how_to_install"]
-            }
-
-            Header2TextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.bottomMargin: 8
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                text: qsTr("How to use")
-            }
-
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-                Layout.bottomMargin: 24
-
-                text: serviceInfo["how_to_use"]
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
             }
         }
     }
@@ -159,9 +128,10 @@ PageType {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
 
+        anchors.topMargin: 32
         anchors.rightMargin: 16
         anchors.leftMargin: 16
-        anchors.bottomMargin: 48
+        anchors.bottomMargin: 32
 
         text: qsTr("Connect")
 

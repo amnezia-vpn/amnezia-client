@@ -121,8 +121,8 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     case IsServerFromGatewayApiRole: {
         return server.value(config_key::configVersion).toInt() == ApiConfigSources::AmneziaGateway;
     }
-    case ApiServiceInfoRole: {
-        return apiConfig.value(configKey::serviceInfo).toObject();
+    case ApiConfigRole: {
+        return apiConfig;
     }
     case IsCountrySelectionAvailableRole: {
         return !apiConfig.value(configKey::availableCountries).toArray().isEmpty();
@@ -244,7 +244,10 @@ void ServersModel::setProcessedServerIndex(const int index)
     m_processedServerIndex = index;
     updateContainersModel();
     if (data(index, IsServerFromGatewayApiRole).toBool()) {
-        emit updateApiLanguageModel();
+        if (data(index, IsCountrySelectionAvailableRole).toBool()) {
+            emit updateApiLanguageModel();
+        }
+        emit updateApiServicesModel();
     }
     emit processedServerIndexChanged(m_processedServerIndex);
 }
@@ -356,7 +359,7 @@ QHash<int, QByteArray> ServersModel::roleNames() const
 
     roles[IsServerFromTelegramApiRole] = "isServerFromTelegramApi";
     roles[IsServerFromGatewayApiRole] = "isServerFromGatewayApi";
-    roles[ApiServiceInfoRole] = "apiServiceInfo";
+    roles[ApiConfigRole] = "apiConfig";
     roles[IsCountrySelectionAvailableRole] = "isCountrySelectionAvailable";
     roles[ApiAvailableCountriesRole] = "apiAvailableCountries";
     roles[ApiServerCountryCodeRole] = "apiServerCountryCode";

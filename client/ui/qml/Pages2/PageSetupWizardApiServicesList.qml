@@ -50,7 +50,7 @@ PageType {
                 Layout.bottomMargin: 32
 
                 headerText: qsTr("VPN from Amnezia")
-                descriptionText: ApiServicesModel.getServicesDescription()
+                descriptionText: qsTr("Choose a VPN service that suits your needs.")
             }
 
             ListView {
@@ -82,7 +82,7 @@ PageType {
                             Layout.leftMargin: 16
 
                             headerText: name
-                            bodyText: description
+                            bodyText: cardDescription
                             footerText: price
 
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"

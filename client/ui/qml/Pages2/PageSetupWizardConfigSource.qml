@@ -55,16 +55,24 @@ PageType {
                 headerText: qsTr("Connection")
             }
 
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 32
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 24
+
+                text: qsTr("Insert the key, add a configuration file or scan the QR-code")
+            }
+
             TextAreaWithFooterType {
                 id: textKey
 
                 Layout.fillWidth: true
-                Layout.topMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                headerText: qsTr("Connection key")
-                placeholderText: qsTr("Starts with vpn://")
+                headerText: qsTr("Insert key")
 
                 firstButtonImage: SettingsController.isCameraPresent() ? "qrc:/images/controls/scan-line.svg" : ""
                 secondButtonImage: "qrc:/images/controls/folder-search-2.svg"
@@ -127,8 +135,8 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.bottomMargin: 16
 
-                headerText: qsTr("Get a VPN from Amnezia")
-                bodyText: qsTr("Free VPN to bypass blocking and censorship in China, Russia, Iran and more.")
+                headerText: qsTr("VPN from Amnezia")
+                bodyText: qsTr("Connect to classic paid and free VPN services from Amnezia")
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
@@ -150,13 +158,36 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.bottomMargin: 16
 
-                headerText: qsTr("Create a VPN on your server")
+                headerText: qsTr("Self-hosted VPN")
                 bodyText: qsTr("Configure Amnezia VPN on your own server")
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: {
                     PageController.goToPage(PageEnum.PageSetupWizardCredentials)
+                }
+            }
+
+            CardWithIconsType {
+                id: backupRestore
+
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 16
+
+                headerText: qsTr("Restore from backup")
+
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: {
+                    var filePath = SystemController.getFileName(qsTr("Open backup file"),
+                                                                qsTr("Backup files (*.backup)"))
+                    if (filePath !== "") {
+                        PageController.showBusyIndicator(true)
+                        SettingsController.restoreAppConfig(filePath)
+                        PageController.showBusyIndicator(false)
+                    }
                 }
             }
         }

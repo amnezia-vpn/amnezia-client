@@ -249,7 +249,6 @@
         <file>images/controls/scan-line.svg</file>
         <file>images/controls/folder-search-2.svg</file>
         <file>ui/qml/Pages2/PageSettingsApiServerInfo.qml</file>
-        <file>ui/qml/Components/ShowSupportedSitesButton.qml</file>
         <file>images/controls/bug.svg</file>
         <file>ui/qml/Pages2/PageDevMenu.qml</file>
         <file>images/controls/refresh-cw.svg</file>

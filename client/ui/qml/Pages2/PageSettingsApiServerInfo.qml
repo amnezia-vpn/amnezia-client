@@ -17,9 +17,6 @@ PageType {
 
     defaultActiveFocusItem: focusItem
 
-    property var serviceInfo: ServersModel.getProcessedServerData("apiServiceInfo")
-    property var supportedSitesDrawerRoot
-
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -44,9 +41,29 @@ PageType {
                 Layout.fillWidth: true
                 Layout.margins: 16
 
+                imageSource: "qrc:/images/controls/map-pin.svg"
+                leftText: qsTr("For the region")
+                rightText: ApiServicesModel.getSelectedServiceData("region")
+            }
+
+            LabelWithImageType {
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                imageSource: "qrc:/images/controls/tag.svg"
+                leftText: qsTr("Price")
+                rightText: ApiServicesModel.getSelectedServiceData("price")
+            }
+
+            LabelWithImageType {
+                Layout.fillWidth: true
+                Layout.margins: 16
+
                 imageSource: "qrc:/images/controls/history.svg"
                 leftText: qsTr("Work period")
-                rightText: serviceInfo["timelimit"]
+                rightText: ApiServicesModel.getSelectedServiceData("workPeriod")
+
+                visible: rightText !== ""
             }
 
             LabelWithImageType {
@@ -55,39 +72,32 @@ PageType {
 
                 imageSource: "qrc:/images/controls/gauge.svg"
                 leftText: qsTr("Speed")
-                rightText: serviceInfo["speed"]
-            }
-
-            LabelWithImageType {
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                imageSource: "qrc:/images/controls/info.svg"
-                leftText: qsTr("Features")
-                rightText: ""
+                rightText: ApiServicesModel.getSelectedServiceData("speed")
             }
 
             ParagraphTextType {
-                property var features: serviceInfo["features"]
-
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                text: features === undefined ? "" : features
-            }
+                onLinkActivated: function(link) {
+                    Qt.openUrlExternally(link)
+                }
+                textFormat: Text.RichText
+                text: ApiServicesModel.getSelectedServiceData("features")
 
-            ShowSupportedSitesButton {
-                id: supportedSites
-                drawerParent: root.supportedSitesDrawerRoot
-                sitesList: serviceInfo["sites_list"]
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
             }
 
             LabelWithButtonType {
                 id: supportUuid
                 Layout.fillWidth: true
 
-                text: qsTr("Support uuid")
+                text: qsTr("Support tag")
                 descriptionText: SettingsController.getInstallationUuid()
 
                 descriptionOnTop: true
@@ -109,6 +119,7 @@ PageType {
 
             BasicButtonType {
                 id: removeButton
+                Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
                 Layout.leftMargin: 8
