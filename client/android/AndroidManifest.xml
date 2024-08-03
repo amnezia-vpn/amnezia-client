@@ -34,6 +34,7 @@
         android:theme="@style/NoActionBar"
         android:fullBackupContent="@xml/backup_content"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:hasFragileUserData="false"
         tools:targetApi="s">
 
         <activity
