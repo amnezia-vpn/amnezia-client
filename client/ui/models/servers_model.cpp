@@ -4,6 +4,10 @@
 #include "core/controllers/serverController.h"
 #include "core/networkUtilities.h"
 
+#ifdef Q_OS_IOS
+    #include <AmneziaVPN-Swift.h>
+#endif
+
 namespace
 {
     namespace configKey

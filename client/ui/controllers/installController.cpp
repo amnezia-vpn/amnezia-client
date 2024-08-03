@@ -16,10 +16,6 @@
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "utilities.h"
 
-#ifdef Q_OS_IOS
-    #include <AmneziaVPN-Swift.h>
-#endif
-
 namespace
 {
     Logger logger("ServerController");
