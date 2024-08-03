@@ -230,7 +230,10 @@ class AmneziaActivity : QtActivity() {
     override fun onStop() {
         Log.d(TAG, "Stop Amnezia activity")
         doUnbindService()
-        QtAndroidController.onServiceDisconnected()
+        mainScope.launch {
+            qtInitialized.await()
+            QtAndroidController.onServiceDisconnected()
+        }
         super.onStop()
     }
 
