@@ -542,7 +542,7 @@ class AmneziaActivity : QtActivity() {
                 }
             }.also {
                 startActivityForResult(it, OPEN_FILE_ACTION_CODE, ActivityResultHandler(
-                    onSuccess = {
+                    onAny = {
                         val uri = it?.data?.toString() ?: ""
                         Log.d(TAG, "Open file: $uri")
                         mainScope.launch {
