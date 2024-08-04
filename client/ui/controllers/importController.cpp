@@ -395,7 +395,11 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::mtu] = configMap.value("MTU");
     }
 
-    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(","));
+    if (!configMap.value("PersistentKeepalive").isEmpty()) {
+        lastConfig[config_key::persistent_keep_alive] = configMap.value("PersistentKeepalive");
+    }
+
+    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(", "));
 
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
 
