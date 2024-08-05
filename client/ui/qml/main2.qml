@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 import PageEnum 1.0
+import Style 1.0
 
 import "Config"
 import "Controls2"
@@ -21,7 +22,7 @@ Window  {
     maximumWidth: 600
     maximumHeight: 800
 
-    color: "#0E0E11"
+    color: AmneziaStyle.color.black
 
     onClosing: function() {
         console.debug("QML onClosing signal")
@@ -33,7 +34,8 @@ Window  {
     StackViewType {
         id: rootStackView
 
-        anchors.fill: parent
+        width: root.width
+        height: root.height
         focus: true
 
         Component.onCompleted: {
@@ -193,11 +195,11 @@ Window  {
 
                     Layout.fillWidth: true
 
-                    defaultColor: "transparent"
-                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                    disabledColor: "#878B91"
-                    textColor: "#D7D8DB"
+                    defaultColor: AmneziaStyle.color.transparent
+                    hoveredColor: AmneziaStyle.color.blackHovered
+                    pressedColor: AmneziaStyle.color.blackPressed
+                    disabledColor: AmneziaStyle.color.grey
+                    textColor: AmneziaStyle.color.white
                     borderWidth: 1
 
                     text: qsTr("Save")

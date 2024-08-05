@@ -7,94 +7,54 @@
 #endif
 #include <QtConcurrent>
 
-#include "core/controllers/apiController.h"
 #include "core/controllers/vpnConfigurationController.h"
-#include "core/errorstrings.h"
+#include "version.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ContainersModel> &containersModel,
                                            const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                           const QSharedPointer<VpnConnection> &vpnConnection,
-                                           const std::shared_ptr<Settings> &settings, QObject *parent)
+                                           const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
+                                           QObject *parent)
     : QObject(parent),
+      m_apiController(this),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_clientManagementModel(clientManagementModel),
       m_vpnConnection(vpnConnection),
       m_settings(settings)
 {
-    connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this,
-            &ConnectionController::onConnectionStateChanged);
-    connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn,
-            Qt::QueuedConnection);
-    connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn,
-            Qt::QueuedConnection);
+    connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this, &ConnectionController::onConnectionStateChanged);
+    connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn, Qt::QueuedConnection);
+    connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
+
+    connect(&m_apiController, &ApiController::configUpdated, this,
+            static_cast<void (ConnectionController::*)(const bool, const QJsonObject &, const int)>(&ConnectionController::openConnection));
+    connect(&m_apiController, qOverload<ErrorCode>(&ApiController::errorOccurred), this, qOverload<ErrorCode>(&ConnectionController::connectionErrorOccurred));
 
     m_state = Vpn::ConnectionState::Disconnected;
 }
 
 void ConnectionController::openConnection()
 {
-    int serverIndex = m_serversModel->getDefaultServerIndex();
-    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
+    {
+        emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
+        return;
+    }
+#endif
 
-    ErrorCode errorCode = ErrorCode::NoError;
+    int serverIndex = m_serversModel->getDefaultServerIndex();
+    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
 
     emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
     if (serverConfig.value(config_key::configVersion).toInt()
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        ApiController apiController;
-        errorCode = apiController.updateServerConfigFromApi(serverConfig);
-        if (errorCode != ErrorCode::NoError) {
-            emit connectionErrorOccurred(errorString(errorCode));
-            return;
-        }
-        m_serversModel->editServer(serverConfig, serverIndex);
+        m_apiController.updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverIndex, serverConfig);
+    } else {
+        openConnection(false, serverConfig, serverIndex);
     }
-
-    if (!m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        emit noInstalledContainers();
-        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-        return;
-    }
-
-    DockerContainer container =
-            qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
-
-    if (!m_containersModel->isSupportedByCurrentPlatform(container)) {
-        emit connectionErrorOccurred(tr("The selected protocol is not supported on the current platform"));
-        return;
-    }
-
-    if (container == DockerContainer::None) {
-        emit connectionErrorOccurred(tr("VPN Protocols is not installed.\n Please install VPN container at first"));
-        return;
-    }
-
-    qApp->processEvents();
-
-    VpnConfigurationsController vpnConfigurationController(m_settings);
-
-    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
-    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
-    errorCode = updateProtocolConfig(container, credentials, containerConfig);
-    if (errorCode != ErrorCode::NoError) {
-        emit connectionErrorOccurred(errorString(errorCode));
-        return;
-    }
-
-    auto dns = m_serversModel->getDnsPair(serverIndex);
-    serverConfig = m_serversModel->getServerConfig(serverIndex);
-
-    auto vpnConfiguration =
-            vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container, errorCode);
-    if (errorCode != ErrorCode::NoError) {
-        emit connectionErrorOccurred(tr("unable to create configuration"));
-        return;
-    }
-
-    emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);
 }
 
 void ConnectionController::closeConnection()
@@ -102,9 +62,9 @@ void ConnectionController::closeConnection()
     emit disconnectFromVpn();
 }
 
-QString ConnectionController::getLastConnectionError()
+ErrorCode ConnectionController::getLastConnectionError()
 {
-    return errorString(m_vpnConnection->lastError());
+    return m_vpnConnection->lastError();
 }
 
 void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
@@ -163,7 +123,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
 void ConnectionController::onCurrentContainerUpdated()
 {
     if (m_isConnected || m_isConnectionInProgress) {
-        emit reconnectWithUpdatedContainer(tr("Settings updated successfully, Reconnnection..."));
+        emit reconnectWithUpdatedContainer(tr("Settings updated successfully, reconnnection..."));
         openConnection();
     } else {
         emit reconnectWithUpdatedContainer(tr("Settings updated successfully"));
@@ -215,10 +175,8 @@ bool ConnectionController::isConnected() const
 bool ConnectionController::isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container)
 {
     for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
-        QString protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol))
-                                         .toObject()
-                                         .value(config_key::last_config)
-                                         .toString();
+        QString protocolConfig =
+                containerConfig.value(ProtocolProps::protoToString(protocol)).toObject().value(config_key::last_config).toString();
 
         if (protocolConfig.isEmpty()) {
             return false;
@@ -227,24 +185,74 @@ bool ConnectionController::isProtocolConfigExists(const QJsonObject &containerCo
     return true;
 }
 
-ErrorCode ConnectionController::updateProtocolConfig(const DockerContainer container,
-                                                     const ServerCredentials &credentials, QJsonObject &containerConfig)
+void ConnectionController::openConnection(const bool updateConfig, const QJsonObject &config, const int serverIndex)
+{
+    // Update config for this server as it was received from API
+    if (updateConfig) {
+        m_serversModel->editServer(config, serverIndex);
+    }
+
+    if (!m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
+        emit noInstalledContainers();
+        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+        return;
+    }
+
+    DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
+
+    if (!m_containersModel->isSupportedByCurrentPlatform(container)) {
+        emit connectionErrorOccurred(tr("The selected protocol is not supported on the current platform"));
+        return;
+    }
+
+    if (container == DockerContainer::None) {
+        emit connectionErrorOccurred(tr("VPN Protocols is not installed.\n Please install VPN container at first"));
+        return;
+    }
+
+    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
+
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+    ErrorCode errorCode = updateProtocolConfig(container, credentials, containerConfig, serverController);
+    if (errorCode != ErrorCode::NoError) {
+        emit connectionErrorOccurred(errorCode);
+        return;
+    }
+
+    auto dns = m_serversModel->getDnsPair(serverIndex);
+
+    auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, config, containerConfig, container, errorCode);
+    if (errorCode != ErrorCode::NoError) {
+        emit connectionErrorOccurred(tr("unable to create configuration"));
+        return;
+    }
+
+    emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);
+}
+
+ErrorCode ConnectionController::updateProtocolConfig(const DockerContainer container, const ServerCredentials &credentials,
+                                                     QJsonObject &containerConfig, QSharedPointer<ServerController> serverController)
 {
     QFutureWatcher<ErrorCode> watcher;
 
-    QFuture<ErrorCode> future = QtConcurrent::run([this, container, &credentials, &containerConfig]() {
+    if (serverController.isNull()) {
+        serverController.reset(new ServerController(m_settings));
+    }
+
+    QFuture<ErrorCode> future = QtConcurrent::run([this, container, &credentials, &containerConfig, &serverController]() {
         ErrorCode errorCode = ErrorCode::NoError;
         if (!isProtocolConfigExists(containerConfig, container)) {
-            VpnConfigurationsController vpnConfigurationController(m_settings);
-            errorCode =
-                    vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig);
+            VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
+            errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
             }
             m_serversModel->updateContainerConfig(container, containerConfig);
 
             errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig,
-                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()));
+                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
             }

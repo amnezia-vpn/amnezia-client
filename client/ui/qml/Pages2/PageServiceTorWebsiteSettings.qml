@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -16,6 +17,8 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
     Connections {
         target: InstallController
 
@@ -24,8 +27,13 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -34,12 +42,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: websiteName.rightButton
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -61,6 +71,7 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: websiteName
                 Layout.fillWidth: true
                 Layout.topMargin: 32
 
@@ -72,14 +83,19 @@ PageType {
                 }
 
                 descriptionOnTop: true
-                textColor: "#FBB26A"
+                textColor: AmneziaStyle.color.orange
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: "#D7D8DB"
+                rightImageColor: AmneziaStyle.color.white
+
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
                     PageController.showNotificationMessage(qsTr("Copied"))
+                    if (!GC.isMobile()) {
+                        this.rightButton.forceActiveFocus()
+                    }
                 }
             }
 
@@ -110,35 +126,6 @@ PageType {
                 Layout.rightMargin: 16
 
                 text: qsTr("When configuring WordPress set the this onion address as domain.")
-            }
-
-            BasicButtonType {
-                Layout.topMargin: 24
-                Layout.bottomMargin: 16
-                Layout.leftMargin: 8
-                implicitHeight: 32
-
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                textColor: "#EB5757"
-
-                text: qsTr("Remove website")
-
-                clickedFunc: function() {
-                    var headerText = qsTr("The site with all data will be removed from the tor network.")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeProcessedContainer()
-                    }
-                    var noButtonFunction = function() {
-                    }
-
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                }
             }
         }
     }

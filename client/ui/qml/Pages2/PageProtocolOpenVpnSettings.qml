@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ContainerEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -18,8 +19,18 @@ PageType {
 
     defaultActiveFocusItem: listview.currentItem.vpnAddressSubnetTextField.textField
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+        onActiveFocusChanged: {
+            if (activeFocus) {
+                fl.ensureVisible(focusItem)
+            }
+        }
+    }
+
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -28,12 +39,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: listview.currentItem.vpnAddressSubnetTextField.textField
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -90,13 +103,14 @@ PageType {
                             headerText: qsTr("VPN address subnet")
                             textFieldText: subnetAddress
 
+                            parentFlickable: fl
+                            KeyNavigation.tab: transportProtoSelector
+
                             textField.onEditingFinished: {
                                 if (textFieldText !== subnetAddress) {
                                     subnetAddress = textFieldText
                                 }
                             }
-
-                            KeyNavigation.tab: portTextField.enabled ? portTextField.textField : saveRestartButton
                         }
 
                         ParagraphTextType {
@@ -107,6 +121,7 @@ PageType {
                         }
 
                         TransportProtoSelector {
+                            id: transportProtoSelector
                             Layout.fillWidth: true
                             Layout.topMargin: 16
                             rootWidth: root.width
@@ -116,6 +131,8 @@ PageType {
                             currentIndex: {
                                 return transportProto === "tcp" ? 1 : 0
                             }
+
+                            KeyNavigation.tab: portTextField.enabled ? portTextField.textField : autoNegotiateEncryprionSwitcher
 
                             onCurrentIndexChanged: {
                                 if (transportProto === "tcp" && currentIndex === 0) {
@@ -131,6 +148,7 @@ PageType {
 
                             Layout.fillWidth: true
                             Layout.topMargin: 40
+                            parentFlickable: fl
 
                             enabled: isPortEditable
 
@@ -145,7 +163,7 @@ PageType {
                                 }
                             }
 
-                            KeyNavigation.tab: saveRestartButton
+                            KeyNavigation.tab: autoNegotiateEncryprionSwitcher
                         }
 
                         SwitcherType {
@@ -153,6 +171,7 @@ PageType {
 
                             Layout.fillWidth: true
                             Layout.topMargin: 24
+                            parentFlickable: fl
 
                             text: qsTr("Auto-negotiate encryption")
                             checked: autoNegotiateEncryprion
@@ -162,6 +181,10 @@ PageType {
                                     autoNegotiateEncryprion = checked
                                 }
                             }
+
+                            KeyNavigation.tab: hashDropDown.enabled ?
+                                                   hashDropDown :
+                                                   tlsAuthCheckBox
                         }
 
                         DropDownType {
@@ -175,6 +198,10 @@ PageType {
                             headerText: qsTr("Hash")
 
                             drawerParent: root
+                            parentFlickable: fl
+                            KeyNavigation.tab: cipherDropDown.enabled ?
+                                               cipherDropDown :
+                                               tlsAuthCheckBox
 
                             listView: ListViewWithRadioButtonType {
                                 id: hashListView
@@ -223,6 +250,9 @@ PageType {
                             headerText: qsTr("Cipher")
 
                             drawerParent: root
+                            parentFlickable: fl
+
+                            KeyNavigation.tab: tlsAuthCheckBox
 
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView
@@ -261,24 +291,40 @@ PageType {
                         }
 
                         Rectangle {
+                            id: contentRect
                             Layout.fillWidth: true
                             Layout.topMargin: 32
                             Layout.preferredHeight: checkboxLayout.implicitHeight
-                            color: "#1C1D21"
+                            color: AmneziaStyle.color.blackLight
                             radius: 16
+
+                            Connections {
+                                target: tlsAuthCheckBox
+                                enabled: !GC.isMobile()
+
+                                function onFocusChanged() {
+                                    if (tlsAuthCheckBox.activeFocus) {
+                                        fl.ensureVisible(contentRect)
+                                    }
+                                }
+                            }
 
                             ColumnLayout {
                                 id: checkboxLayout
 
                                 anchors.fill: parent
                                 CheckBoxType {
+                                    id: tlsAuthCheckBox
                                     Layout.fillWidth: true
 
                                     text: qsTr("TLS auth")
                                     checked: tlsAuth
 
+                                    KeyNavigation.tab: blockDnsCheckBox
+
                                     onCheckedChanged: {
                                         if (checked !== tlsAuth) {
+                                            console.log("tlsAuth changed to: " + checked)
                                             tlsAuth = checked
                                         }
                                     }
@@ -287,10 +333,13 @@ PageType {
                                 DividerType {}
 
                                 CheckBoxType {
+                                    id: blockDnsCheckBox
                                     Layout.fillWidth: true
 
                                     text: qsTr("Block DNS requests outside of VPN")
                                     checked: blockDns
+
+                                    KeyNavigation.tab: additionalClientCommandsSwitcher
 
                                     onCheckedChanged: {
                                         if (checked !== blockDns) {
@@ -305,6 +354,10 @@ PageType {
                             id: additionalClientCommandsSwitcher
                             Layout.fillWidth: true
                             Layout.topMargin: 32
+                            parentFlickable: fl
+                            KeyNavigation.tab: additionalClientCommandsTextArea.visible ?
+                                               additionalClientCommandsTextArea.textArea :
+                                               additionalServerCommandsSwitcher
 
                             checked: additionalClientCommands !== ""
 
@@ -318,10 +371,13 @@ PageType {
                         }
 
                         TextAreaType {
+                            id: additionalClientCommandsTextArea
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
                             visible: additionalClientCommandsSwitcher.checked
+                            KeyNavigation.tab: additionalServerCommandsSwitcher
+                            parentFlickable: fl
 
                             textAreaText: additionalClientCommands
                             placeholderText: qsTr("Commands:")
@@ -337,6 +393,10 @@ PageType {
                             id: additionalServerCommandsSwitcher
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+                            parentFlickable: fl
+                            KeyNavigation.tab: additionalServerCommandsTextArea.visible ?
+                                               additionalServerCommandsTextArea.textArea :
+                                               saveRestartButton
 
                             checked: additionalServerCommands !== ""
 
@@ -350,6 +410,7 @@ PageType {
                         }
 
                         TextAreaType {
+                            id: additionalServerCommandsTextArea
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
@@ -357,7 +418,8 @@ PageType {
 
                             textAreaText: additionalServerCommands
                             placeholderText: qsTr("Commands:")
-
+                            parentFlickable: fl
+                            KeyNavigation.tab: saveRestartButton
                             textArea.onEditingFinished: {
                                 if (additionalServerCommands !== textAreaText) {
                                     additionalServerCommands = textAreaText
@@ -373,9 +435,17 @@ PageType {
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save")
+                            parentFlickable: fl
+                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()
+
+                                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                    return
+                                }
+
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.updateContainer(OpenVpnConfigModel.getConfig())
                             }

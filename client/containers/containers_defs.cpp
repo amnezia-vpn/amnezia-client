@@ -63,9 +63,13 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
 
     case DockerContainer::Xray: return { Proto::Xray };
 
+    case DockerContainer::SSXray: return { Proto::SSXray };
+
     case DockerContainer::Dns: return { Proto::Dns };
 
     case DockerContainer::Sftp: return { Proto::Sftp };
+
+    case DockerContainer::Socks5Proxy: return { Proto::Socks5Proxy };
 
     default: return { defaultProtocol(container) };
     }
@@ -86,16 +90,18 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
 {
     return { { DockerContainer::None, "Not installed" },
              { DockerContainer::OpenVpn, "OpenVPN" },
-             { DockerContainer::ShadowSocks, "ShadowSocks" },
+             { DockerContainer::ShadowSocks, "OpenVPN over SS" },
              { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
              { DockerContainer::Awg, "AmneziaWG" },
              { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
+             { DockerContainer::SSXray, "Shadowsocks"},
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
-             { DockerContainer::Dns, QObject::tr("Amnezia DNS") },
-             { DockerContainer::Sftp, QObject::tr("Sftp file sharing service") } };
+             { DockerContainer::Dns, QObject::tr("AmneziaDNS") },
+             { DockerContainer::Sftp, QObject::tr("SFTP file sharing service") },
+             { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") } };
 }
 
 QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
@@ -104,7 +110,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                QObject::tr("OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its "
                            "own security protocol with SSL/TLS for key exchange.") },
              { DockerContainer::ShadowSocks,
-               QObject::tr("ShadowSocks - masks VPN traffic, making it similar to normal web traffic, but it "
+               QObject::tr("Shadowsocks - masks VPN traffic, making it similar to normal web traffic, but it "
                            "may be recognized by analysis systems in some highly censored regions.") },
              { DockerContainer::Cloak,
                QObject::tr("OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against "
@@ -121,14 +127,16 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                QObject::tr("XRay with REALITY - Suitable for countries with the highest level of internet censorship. "
                            "Traffic masking as web traffic at the TLS level, and protection against detection by active probing methods.") },
              { DockerContainer::Ipsec,
-               QObject::tr("IKEv2 -  Modern stable protocol, a bit faster than others, restores connection after "
+               QObject::tr("IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after "
                            "signal loss. It has native support on the latest versions of Android and iOS.") },
 
              { DockerContainer::TorWebSite, QObject::tr("Deploy a WordPress site on the Tor network in two clicks.") },
              { DockerContainer::Dns,
                QObject::tr("Replace the current DNS server with your own. This will increase your privacy level.") },
              { DockerContainer::Sftp,
-               QObject::tr("Create a file vault on your server to securely store and transfer files.") } };
+               QObject::tr("Create a file vault on your server to securely store and transfer files.") },
+             { DockerContainer::Socks5Proxy,
+               QObject::tr("") } };
 }
 
 QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
@@ -156,7 +164,6 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "However, certain traffic analysis systems might still detect a Shadowsocks connection. "
                       "Due to limited support in Amnezia, it's recommended to use AmneziaWG protocol.\n\n"
                       "* Available in the AmneziaVPN only on desktop platforms\n"
-                      "* Normal power consumption on mobile devices\n\n"
                       "* Configurable encryption protocol\n"
                       "* Detectable by some DPI systems\n"
                       "* Works over TCP network protocol.") },
@@ -237,7 +244,8 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
           QObject::tr("After installation, Amnezia will create a\n\n file storage on your server. "
                       "You will be able to access it using\n FileZilla or other SFTP clients, "
                       "as well as mount the disk on your device to access\n it directly from your device.\n\n"
-                      "For more detailed information, you can\n find it in the support section under \"Create SFTP file storage.\" ") }
+                      "For more detailed information, you can\n find it in the support section under \"Create SFTP file storage.\" ") },
+        { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") }
     };
 }
 
@@ -257,10 +265,12 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::Awg: return Proto::Awg;
     case DockerContainer::Xray: return Proto::Xray;
     case DockerContainer::Ipsec: return Proto::Ikev2;
+    case DockerContainer::SSXray: return Proto::SSXray;
 
     case DockerContainer::TorWebSite: return Proto::TorWebSite;
     case DockerContainer::Dns: return Proto::Dns;
     case DockerContainer::Sftp: return Proto::Sftp;
+    case DockerContainer::Socks5Proxy: return Proto::Socks5Proxy;
     default: return Proto::Any;
     }
 }
@@ -275,8 +285,9 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::WireGuard: return true;
     case DockerContainer::OpenVpn: return true;
     case DockerContainer::Awg: return true;
-    case DockerContainer::Cloak:
-        return true;
+    case DockerContainer::Xray: return true;
+    case DockerContainer::Cloak: return true;
+    case DockerContainer::SSXray: return true;
         //    case DockerContainer::ShadowSocks: return true;
     default: return false;
     }
@@ -294,6 +305,8 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::ShadowSocks: return false;
     case DockerContainer::Awg: return true;
     case DockerContainer::Cloak: return true;
+    case DockerContainer::Xray: return true;
+    case DockerContainer::SSXray: return true;
     default: return false;
     }
 
@@ -321,7 +334,7 @@ bool ContainerProps::isEasySetupContainer(DockerContainer container)
     switch (container) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::Awg: return true;
-    case DockerContainer::Cloak: return true;
+    // case DockerContainer::Cloak: return true;
     default: return false;
     }
 }
@@ -330,8 +343,8 @@ QString ContainerProps::easySetupHeader(DockerContainer container)
 {
     switch (container) {
     case DockerContainer::WireGuard: return tr("Low");
-    case DockerContainer::Awg: return tr("Medium or High");
-    case DockerContainer::Cloak: return tr("Extreme");
+    case DockerContainer::Awg: return tr("High");
+    // case DockerContainer::Cloak: return tr("Extreme");
     default: return "";
     }
 }
@@ -341,8 +354,8 @@ QString ContainerProps::easySetupDescription(DockerContainer container)
     switch (container) {
     case DockerContainer::WireGuard: return tr("I just want to increase the level of my privacy.");
     case DockerContainer::Awg: return tr("I want to bypass censorship. This option recommended in most cases.");
-    case DockerContainer::Cloak:
-        return tr("Most VPN protocols are blocked. Recommended if other options are not working.");
+    // case DockerContainer::Cloak:
+    //     return tr("Most VPN protocols are blocked. Recommended if other options are not working.");
     default: return "";
     }
 }
@@ -352,7 +365,7 @@ int ContainerProps::easySetupOrder(DockerContainer container)
     switch (container) {
     case DockerContainer::WireGuard: return 3;
     case DockerContainer::Awg: return 2;
-    case DockerContainer::Cloak: return 1;
+    // case DockerContainer::Cloak: return 1;
     default: return 0;
     }
 }
@@ -363,6 +376,7 @@ bool ContainerProps::isShareable(DockerContainer container)
     case DockerContainer::TorWebSite: return false;
     case DockerContainer::Dns: return false;
     case DockerContainer::Sftp: return false;
+    case DockerContainer::Socks5Proxy: return false;
     default: return true;
     }
 }
@@ -375,4 +389,19 @@ QJsonObject ContainerProps::getProtocolConfigFromContainer(const Proto protocol,
                                            .toString();
 
     return QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+}
+
+int ContainerProps::installPageOrder(DockerContainer container)
+{
+    switch (container) {
+    case DockerContainer::OpenVpn: return 4;
+    case DockerContainer::Cloak: return 5;
+    case DockerContainer::ShadowSocks: return 6;
+    case DockerContainer::WireGuard: return 2;
+    case DockerContainer::Awg: return 1;
+    case DockerContainer::Xray: return 3;
+    case DockerContainer::Ipsec: return 7;
+    case DockerContainer::SSXray: return 8;
+    default: return 0;
+    }
 }

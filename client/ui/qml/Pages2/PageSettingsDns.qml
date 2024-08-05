@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -15,6 +16,11 @@ PageType {
 
     defaultActiveFocusItem: primaryDns.textField
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -22,6 +28,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: root.defaultActiveFocusItem
     }
 
     FlickableType {
@@ -36,7 +44,7 @@ PageType {
 
         Component.onCompleted: {
             if (isServerFromApi) {
-                PageController.showNotificationMessage(qsTr("Default server does not support custom dns"))
+                PageController.showNotificationMessage(qsTr("Default server does not support custom DNS"))
             }
         }
 
@@ -87,17 +95,18 @@ PageType {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
 
-                KeyNavigation.tab: saveButton
+                KeyNavigation.tab: restoreDefaultButton
             }
 
             BasicButtonType {
+                id: restoreDefaultButton
                 Layout.fillWidth: true
 
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#D7D8DB"
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.blackHovered
+                pressedColor: AmneziaStyle.color.blackPressed
+                disabledColor: AmneziaStyle.color.grey
+                textColor: AmneziaStyle.color.white
                 borderWidth: 1
 
                 text: qsTr("Restore default")
@@ -113,12 +122,21 @@ PageType {
                         SettingsController.secondaryDns = "1.0.0.1"
                         secondaryDns.textFieldText = SettingsController.secondaryDns
                         PageController.showNotificationMessage(qsTr("Settings have been reset"))
+
+                        if (!GC.isMobile()) {
+                            defaultActiveFocusItem.forceActiveFocus()
+                        }
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            defaultActiveFocusItem.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
+
+                KeyNavigation.tab: saveButton
             }
 
             BasicButtonType {
@@ -137,6 +155,8 @@ PageType {
                     }
                     PageController.showNotificationMessage(qsTr("Settings saved"))
                 }
+
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
             }
         }
     }

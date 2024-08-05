@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -13,6 +14,19 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+
+        onFocusChanged: {
+            if (focusItem.activeFocus) {
+                fl.contentY = 0
+            }
+        }
+    }
+
     BackButtonType {
         id: backButton
 
@@ -20,6 +34,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: GC.isMobile() ? switcher : switcherAutoStart
     }
 
     FlickableType {
@@ -35,6 +51,8 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
+            spacing: 0
+
             HeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -44,6 +62,7 @@ PageType {
             }
 
             SwitcherType {
+                id: switcher
                 visible: GC.isMobile()
 
                 Layout.fillWidth: true
@@ -57,13 +76,39 @@ PageType {
                         SettingsController.toggleScreenshotsEnabled(checked)
                     }
                 }
+
+                KeyNavigation.tab: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted ?
+                    labelWithButtonNotification.rightButton : labelWithButtonLanguage.rightButton
+                parentFlickable: fl
             }
 
             DividerType {
                 visible: GC.isMobile()
             }
 
+            LabelWithButtonType {
+                id: labelWithButtonNotification
+                visible: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted
+                Layout.fillWidth: true
+
+                text: qsTr("Enable notifications")
+                descriptionText: qsTr("Enable notifications to show the VPN state in the status bar")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                KeyNavigation.tab: labelWithButtonLanguage.rightButton
+                parentFlickable: fl
+
+                clickedFunction: function() {
+                    SettingsController.requestNotificationPermission()
+                }
+            }
+
+            DividerType {
+                visible: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted
+            }
+
             SwitcherType {
+                id: switcherAutoStart
                 visible: !GC.isMobile()
 
                 Layout.fillWidth: true
@@ -71,6 +116,9 @@ PageType {
 
                 text: qsTr("Auto start")
                 descriptionText: qsTr("Launch the application every time the device is starts")
+
+                KeyNavigation.tab: switcherAutoConnect
+                parentFlickable: fl
 
                 checked: SettingsController.isAutoStartEnabled()
                 onCheckedChanged: {
@@ -85,6 +133,7 @@ PageType {
             }
 
             SwitcherType {
+                id: switcherAutoConnect
                 visible: !GC.isMobile()
 
                 Layout.fillWidth: true
@@ -92,6 +141,9 @@ PageType {
 
                 text: qsTr("Auto connect")
                 descriptionText: qsTr("Connect to VPN on app start")
+
+                KeyNavigation.tab: switcherStartMinimized
+                parentFlickable: fl
 
                 checked: SettingsController.isAutoConnectEnabled()
                 onCheckedChanged: {
@@ -106,6 +158,7 @@ PageType {
             }
 
             SwitcherType {
+                id: switcherStartMinimized
                 visible: !GC.isMobile()
 
                 Layout.fillWidth: true
@@ -113,6 +166,9 @@ PageType {
 
                 text: qsTr("Start minimized")
                 descriptionText: qsTr("Launch application minimized")
+
+                KeyNavigation.tab: labelWithButtonLanguage.rightButton
+                parentFlickable: fl
 
                 checked: SettingsController.isStartMinimizedEnabled()
                 onCheckedChanged: {
@@ -127,26 +183,33 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: labelWithButtonLanguage
                 Layout.fillWidth: true
 
                 text: qsTr("Language")
                 descriptionText: LanguageModel.currentLanguageName
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
+                KeyNavigation.tab: labelWithButtonLogging.rightButton
+                parentFlickable: fl
+
                 clickedFunction: function() {
                     selectLanguageDrawer.open()
                 }
             }
 
-
             DividerType {}
 
             LabelWithButtonType {
+                id: labelWithButtonLogging
                 Layout.fillWidth: true
 
                 text: qsTr("Logging")
                 descriptionText: SettingsController.isLoggingEnabled ? qsTr("Enabled") : qsTr("Disabled")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                KeyNavigation.tab: labelWithButtonReset.rightButton
+                parentFlickable: fl
 
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsLogging)
@@ -156,11 +219,15 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                id: labelWithButtonReset
                 Layout.fillWidth: true
 
                 text: qsTr("Reset settings and remove all data from the application")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
+
+                Keys.onTabPressed: lastItemTabClicked()
+                parentFlickable: fl
 
                 clickedFunction: function() {
                     var headerText = qsTr("Reset settings and remove all data from the application?")
@@ -176,8 +243,15 @@ PageType {
                             SettingsController.clearSettings()
                             PageController.replaceStartPage()
                         }
+
+                        if (!GC.isMobile()) {
+                            root.defaultActiveFocusItem.forceActiveFocus()
+                        }
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            root.defaultActiveFocusItem.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -193,5 +267,11 @@ PageType {
 
         width: root.width
         height: root.height
+
+        onClosed: {
+            if (!GC.isMobile()) {
+                focusItem.forceActiveFocus()
+            }
+        }
     }
 }

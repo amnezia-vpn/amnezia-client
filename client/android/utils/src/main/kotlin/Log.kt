@@ -109,9 +109,11 @@ object Log {
         "${deviceInfo()}\n${readLogs()}\nLOGCAT:\n${getLogcat()}"
 
     fun clearLogs() {
-        withLock {
-            logFile.delete()
-            rotateLogFile.delete()
+        if (logDir.exists()) {
+            withLock {
+                logFile.delete()
+                rotateLogFile.delete()
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Shapes
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -13,6 +14,8 @@ import "../Components"
 
 PageType {
     id: root
+
+    defaultActiveFocusItem: homeTabButton
 
     property bool isControlsDisabled: false
     property bool isTabBarDisabled: false
@@ -82,14 +85,25 @@ PageType {
                 PageController.closePage()
             }
         }
+
+        function onForceTabBarActiveFocus() {
+            homeTabButton.focus = true
+            tabBar.forceActiveFocus()
+        }
+
+        function onForceStackActiveFocus() {
+            homeTabButton.focus = true
+            tabBarStackView.forceActiveFocus()
+        }
     }
 
     Connections {
         target: InstallController
 
-        function onInstallationErrorOccurred(errorMessage) {
+        function onInstallationErrorOccurred(error) {
             PageController.showBusyIndicator(false)
-            PageController.showErrorMessage(errorMessage)
+
+            PageController.showErrorMessage(error)
 
             var needCloseCurrentPage = false
             var currentPageName = tabBarStackView.currentItem.objectName
@@ -134,8 +148,8 @@ PageType {
     Connections {
         target: ImportController
 
-        function onImportErrorOccurred(errorMessage, goToPageHome) {
-            PageController.showErrorMessage(errorMessage)
+        function onImportErrorOccurred(error, goToPageHome) {
+            PageController.showErrorMessage(error)
         }
     }
 
@@ -200,24 +214,30 @@ PageType {
                 startY: 0
 
                 PathLine { x: width; y: 0 }
-                PathLine { x: width; y: height - 1 }
-                PathLine { x: 0; y: height - 1 }
+                PathLine { x: width; y: tabBar.height - 1 }
+                PathLine { x: 0; y: tabBar.height - 1 }
                 PathLine { x: 0; y: 0 }
 
                 strokeWidth: 1
-                strokeColor: "#2C2D30"
-                fillColor: "#1C1D21"
+                strokeColor: AmneziaStyle.color.greyDark
+                fillColor: AmneziaStyle.color.blackLight
             }
         }
 
         TabImageButtonType {
+            id: homeTabButton
             isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
-            onClicked: {
+            clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
                 ServersModel.processedIndex = ServersModel.defaultIndex
+                tabBar.currentIndex = 0
                 tabBar.previousIndex = 0
             }
+
+            KeyNavigation.tab: shareTabButton
+            Keys.onEnterPressed: this.clicked()
+            Keys.onReturnPressed: this.clicked()
         }
 
         TabImageButtonType {
@@ -238,27 +258,37 @@ PageType {
 
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"
-            onClicked: {
+            clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageShare)
+                tabBar.currentIndex = 1
                 tabBar.previousIndex = 1
             }
+
+            KeyNavigation.tab: settingsTabButton
         }
 
         TabImageButtonType {
+            id: settingsTabButton
             isSelected: tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
-            onClicked: {
+            clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
+                tabBar.currentIndex = 2
                 tabBar.previousIndex = 2
             }
+
+            KeyNavigation.tab: plusTabButton
         }
 
         TabImageButtonType {
+            id: plusTabButton
             isSelected: tabBar.currentIndex === 3
             image: "qrc:/images/controls/plus.svg"
-            onClicked: {
+            clickedFunc: function () {
                 connectionTypeSelection.open()
             }
+
+            Keys.onTabPressed: PageController.forceStackActiveFocus()
         }
     }
 
@@ -266,6 +296,7 @@ PageType {
         id: connectionTypeSelection
 
         onAboutToHide: {
+            PageController.forceTabBarActiveFocus()
             tabBar.setCurrentIndex(tabBar.previousIndex)
         }
     }

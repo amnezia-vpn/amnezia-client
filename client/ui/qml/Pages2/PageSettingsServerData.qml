@@ -6,13 +6,21 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ProtocolEnum 1.0
+import Style 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Components"
+import "../Config"
 
 PageType {
     id: root
+
+    signal lastItemTabClickedSignal()
+
+    onFocusChanged: content.isServerWithWriteAccess ?
+                        labelWithButton.forceActiveFocus() :
+                        labelWithButton3.forceActiveFocus()
 
     Connections {
         target: InstallController
@@ -85,11 +93,14 @@ PageType {
             property bool isServerWithWriteAccess: ServersModel.isProcessedServerHasWriteAccess()
 
             LabelWithButtonType {
+                id: labelWithButton
                 visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
                 text: qsTr("Check the server for previously installed Amnezia services")
                 descriptionText: qsTr("Add them to the application if they were not displayed")
+
+                KeyNavigation.tab: labelWithButton2
 
                 clickedFunction: function() {
                     PageController.showBusyIndicator(true)
@@ -103,11 +114,14 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: labelWithButton2
                 visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
                 text: qsTr("Reboot server")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
+
+                KeyNavigation.tab: labelWithButton3
 
                 clickedFunction: function() {
                     var headerText = qsTr("Do you want to reboot the server?")
@@ -123,8 +137,14 @@ PageType {
                             InstallController.rebootProcessedServer()
                             PageController.showBusyIndicator(false)
                         }
+                        if (!GC.isMobile()) {
+                            labelWithButton5.forceActiveFocus()
+                        }
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            labelWithButton2.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -136,10 +156,21 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: labelWithButton3
                 Layout.fillWidth: true
 
                 text: qsTr("Remove server from application")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
+
+                Keys.onTabPressed: {
+                    if (content.isServerWithWriteAccess) {
+                        labelWithButton4.forceActiveFocus()
+                    } else {
+                        labelWithButton5.visible ?
+                            labelWithButton5.forceActiveFocus() :
+                            lastItemTabClickedSignal()
+                    }
+                }
 
                 clickedFunction: function() {
                     var headerText = qsTr("Do you want to remove the server from application?")
@@ -155,8 +186,14 @@ PageType {
                             InstallController.removeProcessedServer()
                             PageController.showBusyIndicator(false)
                         }
+                        if (!GC.isMobile()) {
+                            labelWithButton5.forceActiveFocus()
+                        }
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            labelWithButton3.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -166,11 +203,16 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                id: labelWithButton4
                 visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
                 text: qsTr("Clear server from Amnezia software")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
+
+                Keys.onTabPressed: labelWithButton5.visible ?
+                                    labelWithButton5.forceActiveFocus() :
+                                    root.lastItemTabClickedSignal()
 
                 clickedFunction: function() {
                     var headerText = qsTr("Do you want to clear server from Amnezia software?")
@@ -185,8 +227,14 @@ PageType {
                             PageController.goToPage(PageEnum.PageDeinstalling)
                             InstallController.removeAllContainers()
                         }
+                        if (!GC.isMobile()) {
+                            labelWithButton5.forceActiveFocus()
+                        }
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            labelWithButton4.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -198,11 +246,14 @@ PageType {
             }
 
             LabelWithButtonType {
+                id: labelWithButton5
                 visible: ServersModel.getProcessedServerData("isServerFromApi")
                 Layout.fillWidth: true
 
                 text: qsTr("Reset API config")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
+
+                Keys.onTabPressed: root.lastItemTabClickedSignal()
 
                 clickedFunction: function() {
                     var headerText = qsTr("Do you want to reset API config?")
@@ -215,11 +266,18 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            InstallController.removeApiConfig()
+                            InstallController.removeApiConfig(ServersModel.processedIndex)
                             PageController.showBusyIndicator(false)
+                        }
+
+                        if (!GC.isMobile()) {
+                            labelWithButton5.forceActiveFocus()
                         }
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            labelWithButton5.forceActiveFocus()
+                        }
                     }
                     
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

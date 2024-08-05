@@ -14,7 +14,7 @@ DrawerType2 {
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
 
     anchors.fill: parent
-    expandedHeight: parent.height * 0.7
+    expandedHeight: parent.height * 0.9
 
     expandedContent: ColumnLayout {
         id: content
@@ -23,6 +23,14 @@ DrawerType2 {
         anchors.left: parent.left
         anchors.right: parent.right
         spacing: 0
+
+        Connections {
+            target: root
+            enabled: !GC.isMobile()
+            function onOpened() {
+                focusItem.forceActiveFocus()
+            }
+        }
 
         Header2Type {
             Layout.fillWidth: true
@@ -35,7 +43,13 @@ DrawerType2 {
             descriptionText:  qsTr("Allows you to connect to some sites or applications through a VPN connection and bypass others")
         }
 
+        Item {
+            id: focusItem
+            KeyNavigation.tab: splitTunnelingSwitch.visible ? splitTunnelingSwitch : siteBasedSplitTunnelingSwitch.rightButton
+        }
+
         LabelWithButtonType {
+            id: splitTunnelingSwitch
             Layout.fillWidth: true
             Layout.topMargin: 16
 
@@ -44,6 +58,8 @@ DrawerType2 {
             text: qsTr("Split tunneling on the server")
             descriptionText: qsTr("Enabled \nCan't be disabled for current server")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+            KeyNavigation.tab: siteBasedSplitTunnelingSwitch.visible ? siteBasedSplitTunnelingSwitch.rightButton : focusItem
 
             clickedFunction: function() {
 //                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
@@ -56,12 +72,17 @@ DrawerType2 {
         }
 
         LabelWithButtonType {
+            id: siteBasedSplitTunnelingSwitch
             Layout.fillWidth: true
             Layout.topMargin: 16
 
             text: qsTr("Site-based split tunneling")
             descriptionText: enabled && SitesModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+            KeyNavigation.tab: appSplitTunnelingSwitch.visible ?
+                                   appSplitTunnelingSwitch.rightButton :
+                                   focusItem
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
@@ -73,6 +94,7 @@ DrawerType2 {
         }
 
         LabelWithButtonType {
+            id: appSplitTunnelingSwitch
             visible: isAppSplitTinnelingEnabled
 
             Layout.fillWidth: true
@@ -80,6 +102,8 @@ DrawerType2 {
             text: qsTr("App-based split tunneling")
             descriptionText: AppSplitTunnelingModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+            KeyNavigation.tab: focusItem
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)

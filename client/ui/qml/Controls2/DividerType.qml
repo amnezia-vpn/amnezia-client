@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 
+import Style 1.0
+
 Rectangle {
     Layout.fillWidth: true
 
@@ -8,5 +10,5 @@ Rectangle {
     Layout.rightMargin: 16
 
     height: 1
-    color: "#2C2D30"
+    color: AmneziaStyle.color.greyDark
 }

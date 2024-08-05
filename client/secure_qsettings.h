@@ -47,6 +47,10 @@ private:
     mutable QMap<QString, QVariant> m_cache;
 
     QStringList encryptedKeys; // encode only key listed here
+    // only this fields need for backup
+    QStringList m_fieldsToBackup = {
+        "Conf/", "Servers/",
+    };
 
     mutable QByteArray m_key;
     mutable QByteArray m_iv;

@@ -14,6 +14,13 @@ import "../Config"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     SortFilterProxyModel {
         id: proxyContainersModel
         sourceModel: ContainersModel
@@ -27,10 +34,14 @@ PageType {
                 value: true
             }
         ]
+        sorters: RoleSorter {
+            roleName: "installPageOrder"
+            sortOrder: Qt.AscendingOrder
+        }
     }
 
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -39,12 +50,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: containers
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight + content.anchors.topMargin + content.anchors.bottomMargin
 
@@ -79,14 +92,48 @@ PageType {
                 id: containers
                 width: parent.width
                 height: containers.contentItem.height
-                currentIndex: -1
+                // currentIndex: -1
                 clip: true
                 interactive: false
                 model: proxyContainersModel
 
+                function ensureCurrentItemVisible() {
+                    if (currentIndex >= 0) {
+                        if (currentItem.y < fl.contentY) {
+                            fl.contentY = currentItem.y
+                        } else if (currentItem.y + currentItem.height + header.height > fl.contentY + fl.height) {
+                            fl.contentY = currentItem.y + currentItem.height  + header.height - fl.height + 40 // 40 is a bottom margin
+                        }
+                    }
+                }
+
+                activeFocusOnTab: true
+                Keys.onTabPressed: {
+                    if (currentIndex < this.count - 1) {
+                        this.incrementCurrentIndex()
+                    } else {
+                        this.currentIndex = 0
+                        focusItem.forceActiveFocus()
+                    }
+
+                    ensureCurrentItemVisible()
+                }
+
+                onVisibleChanged: {
+                    if (visible) {
+                        currentIndex = 0
+                    }
+                }
+
                 delegate: Item {
                     implicitWidth: containers.width
                     implicitHeight: delegateContent.implicitHeight
+
+                    onActiveFocusChanged: {
+                        if (activeFocus) {
+                            container.rightButton.forceActiveFocus()
+                        }
+                    }
 
                     ColumnLayout {
                         id: delegateContent

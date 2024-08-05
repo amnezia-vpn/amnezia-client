@@ -1,13 +1,20 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
+
+import Style 1.0
 
 import "TextTypes"
 
 Rectangle {
-    property string textColor: "#D7D8DB"
-    property string backGroundColor: "#1C1D21"
+    id: root
+
+    property string textColor: AmneziaStyle.color.white
+    property string backGroundColor: AmneziaStyle.color.blackLight
+    property string imageColor: AmneziaStyle.color.white
     property string textString
+    property int textFormat: Text.PlainText
 
     property string iconPath
     property real iconWidth: 16
@@ -36,6 +43,13 @@ Rectangle {
             height: iconHeight
 
             source: iconPath
+
+            layer {
+                enabled: true
+                effect: ColorOverlay {
+                    color: imageColor
+                }
+            }
         }
 
         CaptionTextType {
@@ -45,6 +59,7 @@ Rectangle {
             Layout.leftMargin: 8
 
             text: textString
+            textFormat: root.textFormat
             color: textColor
         }
     }

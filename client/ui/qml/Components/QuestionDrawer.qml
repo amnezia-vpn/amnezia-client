@@ -2,8 +2,12 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "../Controls2"
 import "../Controls2/TextTypes"
+
+import "../Config"
 
 DrawerType2 {
     id: root
@@ -29,6 +33,14 @@ DrawerType2 {
             root.expandedHeight = content.implicitHeight + 32
         }
 
+        Connections {
+            target: root
+            enabled: !GC.isMobile()
+            function onOpened() {
+                focusItem.forceActiveFocus()
+            }
+        }
+
         Header2TextType {
             Layout.fillWidth: true
             Layout.topMargin: 16
@@ -47,7 +59,13 @@ DrawerType2 {
             text: descriptionText
         }
 
+        Item {
+            id: focusItem
+            KeyNavigation.tab: yesButton
+        }
+
         BasicButtonType {
+            id: yesButton
             Layout.fillWidth: true
             Layout.topMargin: 16
             Layout.rightMargin: 16
@@ -60,18 +78,21 @@ DrawerType2 {
                     yesButtonFunction()
                 }
             }
+
+            KeyNavigation.tab: noButton
         }
 
         BasicButtonType {
+            id: noButton
             Layout.fillWidth: true
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
-            defaultColor: "transparent"
-            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-            disabledColor: "#878B91"
-            textColor: "#D7D8DB"
+            defaultColor: AmneziaStyle.color.transparent
+            hoveredColor: AmneziaStyle.color.blackHovered
+            pressedColor: AmneziaStyle.color.blackPressed
+            disabledColor: AmneziaStyle.color.grey
+            textColor: AmneziaStyle.color.white
             borderWidth: 1
 
             text: noButtonText
@@ -81,6 +102,8 @@ DrawerType2 {
                     noButtonFunction()
                 }
             }
+
+            KeyNavigation.tab: focusItem
         }
     }
 }

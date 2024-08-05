@@ -7,6 +7,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -78,7 +79,7 @@ PageType {
             }
             case PageShare.ConfigType.ShadowSocks: {
                 ExportController.generateShadowSocksConfig()
-                shareConnectionDrawer.configCaption = qsTr("Save ShadowSocks config")
+                shareConnectionDrawer.configCaption = qsTr("Save Shadowsocks config")
                 shareConnectionDrawer.configExtension = ".json"
                 shareConnectionDrawer.configFileName = "amnezia_for_shadowsocks"
                 break
@@ -102,9 +103,10 @@ PageType {
             PageController.showBusyIndicator(false)
         }
 
-        function onExportErrorOccurred(errorMessage) {
+        function onExportErrorOccurred(error) {
             shareConnectionDrawer.close()
-            PageController.showErrorMessage(errorMessage)
+
+            PageController.showErrorMessage(error)
         }
     }
 
@@ -122,7 +124,7 @@ PageType {
     }
     QtObject {
         id: openVpnConnectionFormat
-        property string name: qsTr("OpenVpn native format")
+        property string name: qsTr("OpenVPN native format")
         property var type: PageShare.ConfigType.OpenVpn
     }
     QtObject {
@@ -137,7 +139,7 @@ PageType {
     }
     QtObject {
         id: shadowSocksConnectionFormat
-        property string name: qsTr("ShadowSocks native format")
+        property string name: qsTr("Shadowsocks native format")
         property var type: PageShare.ConfigType.ShadowSocks
     }
     QtObject {
@@ -152,6 +154,8 @@ PageType {
     }
 
     FlickableType {
+        id: a
+
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         contentHeight: content.height + 10
@@ -168,7 +172,18 @@ PageType {
 
             spacing: 0
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: header.actionButton
+                onFocusChanged: {
+                    if (focusItem.activeFocus) {
+                        a.contentY = 0
+                    }
+                }
+            }
+
             HeaderType {
+                id: header
                 Layout.fillWidth: true
                 Layout.topMargin: 24
 
@@ -179,21 +194,41 @@ PageType {
                     shareFullAccessDrawer.open()
                 }
 
+                KeyNavigation.tab: connectionRadioButton
+
                 DrawerType2 {
                     id: shareFullAccessDrawer
 
                     parent: root
 
                     anchors.fill: parent
-                    expandedHeight: root.height * 0.45
+                    expandedHeight: root.height
+                    onClosed: {
+                        if (!GC.isMobile()) {
+                            clientNameTextField.textField.forceActiveFocus()
+                        }
+                    }
 
                     expandedContent: ColumnLayout {
+                        id: shareFullAccessDrawerContent
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.topMargin: 16
 
                         spacing: 0
+
+                        onImplicitHeightChanged: {
+                            shareFullAccessDrawer.expandedHeight = shareFullAccessDrawerContent.implicitHeight + 32
+                        }
+
+                        Connections {
+                            target: shareFullAccessDrawer
+                            enabled: !GC.isMobile()
+                            function onOpened() {
+                                focusItem.forceActiveFocus()
+                            }
+                        }
 
                         Header2Type {
                             Layout.fillWidth: true
@@ -205,17 +240,24 @@ PageType {
                             descriptionText: qsTr("Use for your own devices, or share with those you trust to manage the server.")
                         }
 
+                        Item {
+                            id: focusItem
+                            KeyNavigation.tab: shareFullAccessButton.rightButton
+                        }
 
                         LabelWithButtonType {
+                            id: shareFullAccessButton
                             Layout.fillWidth: true
 
                             text: qsTr("Share")
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                            KeyNavigation.tab: focusItem
 
                             clickedFunction: function() {
                                 PageController.goToPage(PageEnum.PageShareFullAccess)
                                 shareFullAccessDrawer.close()
                             }
+
                         }
                     }
                 }
@@ -231,7 +273,7 @@ PageType {
                 implicitWidth: accessTypeSelectorContent.implicitWidth
                 implicitHeight: accessTypeSelectorContent.implicitHeight
 
-                color: "#1C1D21"
+                color: AmneziaStyle.color.blackLight
                 radius: 16
 
                 RowLayout {
@@ -240,21 +282,30 @@ PageType {
                     spacing: 0
 
                     HorizontalRadioButton {
+                        id: connectionRadioButton
                         checked: accessTypeSelector.currentIndex === 0
 
                         implicitWidth: (root.width - 32) / 2
                         text: qsTr("Connection")
 
+                        KeyNavigation.tab: usersRadioButton
+
                         onClicked: {
                             accessTypeSelector.currentIndex = 0
+                            if (!GC.isMobile()) {
+                                clientNameTextField.textField.forceActiveFocus()
+                            }
                         }
                     }
 
                     HorizontalRadioButton {
+                        id: usersRadioButton
                         checked: accessTypeSelector.currentIndex === 1
 
                         implicitWidth: (root.width - 32) / 2
                         text: qsTr("Users")
+
+                        KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ? clientNameTextField.textField : serverSelector
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
@@ -262,6 +313,7 @@ PageType {
                             ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
+                            focusItem.forceActiveFocus()
                         }
                     }
                 }
@@ -275,7 +327,7 @@ PageType {
                 visible: accessTypeSelector.currentIndex === 0
 
                 text: qsTr("Share VPN access without the ability to manage the server")
-                color: "#878B91"
+                color: AmneziaStyle.color.grey
             }
 
             TextFieldWithHeaderType {
@@ -291,7 +343,8 @@ PageType {
 
                 checkEmptyText: true
 
-                KeyNavigation.tab: shareButton
+                KeyNavigation.tab: serverSelector
+
             }
 
             DropDownType {
@@ -311,7 +364,6 @@ PageType {
 
                 listView: ListViewWithRadioButtonType {
                     id: serverSelectorListView
-
                     rootWidth: root.width
                     imageSource: "qrc:/images/controls/check.svg"
 
@@ -356,6 +408,8 @@ PageType {
                         ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
                     }
                 }
+
+                KeyNavigation.tab: protocolSelector
             }
 
             DropDownType {
@@ -454,6 +508,12 @@ PageType {
                         }
                     }
                 }
+
+                KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ?
+                                       exportTypeSelector :
+                                       isSearchBarVisible ?
+                                           searchTextField.textField :
+                                           usersHeader.actionButton
             }
 
             DropDownType {
@@ -497,6 +557,9 @@ PageType {
                         exportTypeSelector.currentIndex = currentIndex
                     }
                 }
+
+                KeyNavigation.tab: shareButton
+
             }
 
             BasicButtonType {
@@ -510,16 +573,22 @@ PageType {
                 visible: accessTypeSelector.currentIndex === 0
 
                 text: qsTr("Share")
-                imageSource: "qrc:/images/controls/share-2.svg"
+                imageSource: "qrc:/images/controls/share-2.svg"                
+
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
+
+                parentFlickable: a
 
                 clickedFunc: function(){
                     if (clientNameTextField.textFieldText !== "") {
                         ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
                     }
                 }
+
             }
 
             Header2Type {
+                id: usersHeader
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
@@ -531,6 +600,11 @@ PageType {
                 actionButtonFunction: function() {
                     root.isSearchBarVisible = true
                 }
+
+                Keys.onTabPressed: clientsListView.model.count > 0 ?
+                                       clientsListView.forceActiveFocus() :
+                                       lastItemTabClicked(focusItem)
+
             }
 
             RowLayout {
@@ -543,16 +617,66 @@ PageType {
                     Layout.fillWidth: true
 
                     textFieldPlaceholderText: qsTr("Search")
+
+                    Connections {
+                        target: root
+                        function onIsSearchBarVisibleChanged() {
+                            if (root.isSearchBarVisible) {
+                                searchTextField.textField.forceActiveFocus()
+                            } else {
+                                searchTextField.textFieldText = ""
+                                if (!GC.isMobile()) {
+                                    usersHeader.actionButton.forceActiveFocus()
+                                }
+                            }
+                        }
+                    }
+
+                    Keys.onEscapePressed: {
+                        root.isSearchBarVisible = false
+                    }
+
+                    function navigateTo() {
+                        if (GC.isMobile()) {
+                            focusItem.forceActiveFocus()
+                            return;
+                        }
+
+                        if (searchTextField.textFieldText === "") {
+                            root.isSearchBarVisible = false
+                            usersHeader.actionButton.forceActiveFocus()
+                        } else {
+                            closeSearchButton.forceActiveFocus()
+                        }
+                    }
+
+                    Keys.onTabPressed: { navigateTo() }
+                    Keys.onEnterPressed: { navigateTo() }
+                    Keys.onReturnPressed: { navigateTo() }
                 }
 
                 ImageButtonType {
+                    id: closeSearchButton
                     image: "qrc:/images/controls/close.svg"
-                    imageColor: "#D7D8DB"
+                    imageColor: AmneziaStyle.color.white
 
-                    onClicked: function() {
-                        root.isSearchBarVisible = false
-                        searchTextField.textFieldText = ""
+                    Keys.onTabPressed: {
+                        if (!GC.isMobile()) {
+                            if (clientsListView.model.count > 0) {
+                                clientsListView.forceActiveFocus()
+                            } else {
+                                lastItemTabClicked(focusItem)
+                            }
+                        }
                     }
+
+                    function clickedFunc() {
+                        root.isSearchBarVisible = false
+                    }
+
+                    onClicked: clickedFunc()
+                    Keys.onEnterPressed: clickedFunc()
+                    Keys.onReturnPressed: clickedFunc()
                 }
             }
 
@@ -576,9 +700,42 @@ PageType {
                 clip: true
                 interactive: false
 
+                activeFocusOnTab: true
+                focus: true
+                Keys.onTabPressed: {
+                    if (!GC.isMobile()) {
+                        if (currentIndex < this.count - 1) {
+                            this.incrementCurrentIndex()
+                            currentItem.focusItem.forceActiveFocus()
+                        } else {
+                            this.currentIndex = 0
+                            lastItemTabClicked(focusItem)
+                        }
+                    }
+                }
+
+                onActiveFocusChanged: {
+                    if (focus && !GC.isMobile()) {
+                        currentIndex = 0
+                        currentItem.focusItem.forceActiveFocus()
+                    }
+                }
+
+                onCurrentIndexChanged: {
+                    if (currentItem) {
+                        if (currentItem.y < a.contentY) {
+                            a.contentY = currentItem.y
+                        } else if (currentItem.y + currentItem.height + clientsListView.y > a.contentY + a.height) {
+                            a.contentY = currentItem.y + clientsListView.y + currentItem.height - a.height
+                        }
+                    }
+                }
+
                 delegate: Item {
                     implicitWidth: clientsListView.width
                     implicitHeight: delegateContent.implicitHeight
+
+                    property alias focusItem: clientFocusItem.rightButton
 
                     ColumnLayout {
                         id: delegateContent
@@ -591,6 +748,7 @@ PageType {
                         anchors.leftMargin: -16
 
                         LabelWithButtonType {
+                            id: clientFocusItem
                             Layout.fillWidth: true
 
                             text: clientName
@@ -608,10 +766,16 @@ PageType {
 
                             parent: root
 
+                            onClosed: {
+                                if (!GC.isMobile()) {
+                                    focusItem.forceActiveFocus()
+                                }
+                            }
+
                             anchors.fill: parent
-                            expandedHeight: root.height * 0.5
 
                             expandedContent: ColumnLayout {
+                                id: expandedContent
                                 anchors.top: parent.top
                                 anchors.left: parent.left
                                 anchors.right: parent.right
@@ -621,26 +785,83 @@ PageType {
 
                                 spacing: 8
 
+                                onImplicitHeightChanged: {
+                                    clientInfoDrawer.expandedHeight = expandedContent.implicitHeight + 32
+                                }
+
+                                Connections {
+                                    target: clientInfoDrawer
+                                    enabled: !GC.isMobile()
+                                    function onOpened() {
+                                        focusItem1.forceActiveFocus()
+                                    }
+                                }
+
                                 Header2Type {
                                     Layout.fillWidth: true
-                                    Layout.bottomMargin: 24
 
                                     headerText: clientName
-                                    descriptionText: qsTr("Creation date: ") + creationDate
+                                }
+
+                                ColumnLayout
+                                {
+                                    id: textColumn
+                                    property string textColor: AmneziaStyle.color.grey
+                                    Layout.bottomMargin: 24
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: creationDate
+                                        Layout.fillWidth: true
+
+                                        text: qsTr("Creation date: %1").arg(creationDate)
+                                    }
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: latestHandshake
+                                        Layout.fillWidth: true
+
+                                        text: qsTr("Latest handshake: %1").arg(latestHandshake)
+                                    }
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: dataReceived
+                                        Layout.fillWidth: true
+
+                                        text: qsTr("Data received: %1").arg(dataReceived)
+                                    }
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: dataSent
+                                        Layout.fillWidth: true
+
+                                        text: qsTr("Data sent: %1").arg(dataSent)
+                                    }
+                                }
+
+                                Item {
+                                    id: focusItem1
+                                    KeyNavigation.tab: renameButton
                                 }
 
                                 BasicButtonType {
+                                    id: renameButton
                                     Layout.fillWidth: true
                                     Layout.topMargin: 24
 
-                                    defaultColor: "transparent"
-                                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                                    disabledColor: "#878B91"
-                                    textColor: "#D7D8DB"
+                                    defaultColor: AmneziaStyle.color.transparent
+                                    hoveredColor: AmneziaStyle.color.blackHovered
+                                    pressedColor: AmneziaStyle.color.blackPressed
+                                    disabledColor: AmneziaStyle.color.grey
+                                    textColor: AmneziaStyle.color.white
                                     borderWidth: 1
 
                                     text: qsTr("Rename")
+
+                                    KeyNavigation.tab: revokeButton
 
                                     clickedFunc: function() {
                                         clientNameEditDrawer.open()
@@ -653,6 +874,12 @@ PageType {
 
                                         anchors.fill: parent
                                         expandedHeight: root.height * 0.35
+
+                                        onClosed: {
+                                            if (!GC.isMobile()) {
+                                                focusItem1.forceActiveFocus()
+                                            }
+                                        }
 
                                         expandedContent: ColumnLayout {
                                             anchors.top: parent.top
@@ -668,6 +895,11 @@ PageType {
                                                 function onOpened() {
                                                     clientNameEditor.textField.forceActiveFocus()
                                                 }
+                                            }
+
+                                            Item {
+                                                id: focusItem2
+                                                KeyNavigation.tab: clientNameEditor.textField
                                             }
 
                                             TextFieldWithHeaderType {
@@ -687,6 +919,7 @@ PageType {
                                                 Layout.fillWidth: true
 
                                                 text: qsTr("Save")
+                                                KeyNavigation.tab: focusItem2
 
                                                 clickedFunc: function() {
                                                     if (clientNameEditor.textFieldText === "") {
@@ -709,16 +942,18 @@ PageType {
                                 }
 
                                 BasicButtonType {
+                                    id: revokeButton
                                     Layout.fillWidth: true
 
-                                    defaultColor: "transparent"
-                                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                                    disabledColor: "#878B91"
-                                    textColor: "#D7D8DB"
+                                    defaultColor: AmneziaStyle.color.transparent
+                                    hoveredColor: AmneziaStyle.color.blackHovered
+                                    pressedColor: AmneziaStyle.color.blackPressed
+                                    disabledColor: AmneziaStyle.color.grey
+                                    textColor: AmneziaStyle.color.white
                                     borderWidth: 1
 
                                     text: qsTr("Revoke")
+                                    KeyNavigation.tab: focusItem1
 
                                     clickedFunc: function() {
                                         var headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
@@ -731,6 +966,9 @@ PageType {
                                             root.revokeConfig(index)
                                         }
                                         var noButtonFunction = function() {
+                                            if (!GC.isMobile()) {
+                                                focusItem1.forceActiveFocus()
+                                            }
                                         }
 
                                         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -748,6 +986,11 @@ PageType {
         id: shareConnectionDrawer
 
         anchors.fill: parent
+        onClosed: {
+            if (!GC.isMobile()) {
+                clientNameTextField.textField.forceActiveFocus()
+            }
+        }
     }
 
     MouseArea {

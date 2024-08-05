@@ -46,7 +46,6 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/MobileUtils.mm
 )
 
 
@@ -108,6 +107,7 @@ target_sources(${PROJECT} PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/ScreenProtection.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/VPNCController.swift
 )
 
 target_sources(${PROJECT} PRIVATE

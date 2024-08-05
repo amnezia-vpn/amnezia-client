@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
+import Style 1.0
+
 import "TextTypes"
 
 RadioButton {
@@ -12,23 +14,30 @@ RadioButton {
     property int textElide: Qt.ElideRight
     property string descriptionText
 
-    property string hoveredColor: Qt.rgba(1, 1, 1, 0.05)
-    property string defaultColor: Qt.rgba(1, 1, 1, 0)
-    property string disabledColor: Qt.rgba(1, 1, 1, 0)
-    property string selectedColor: Qt.rgba(1, 1, 1, 0)
+    property string hoveredColor: AmneziaStyle.color.blackHovered
+    property string defaultColor: AmneziaStyle.color.transparent
+    property string disabledColor: AmneziaStyle.color.transparent
+    property string selectedColor: AmneziaStyle.color.transparent
 
-    property string textColor: "#D7D8DB"
-    property string selectedTextColor: "#FBB26A"
+    property string textColor: AmneziaStyle.color.white
+    property string selectedTextColor: AmneziaStyle.color.orange
+
+    property string borderFocusedColor: AmneziaStyle.color.white
+    property int borderFocusedWidth: 1
 
     property string imageSource
     property bool showImage
 
     hoverEnabled: true
+    focusPolicy: Qt.TabFocus
 
     indicator: Rectangle {
         id: background
 
         anchors.verticalCenter: parent.verticalCenter
+
+        border.color: root.focus ? root.borderFocusedColor : AmneziaStyle.color.transparent
+        border.width: root.focus ? root.borderFocusedWidth : 0
 
         implicitWidth: 56
         implicitHeight: 56
@@ -48,6 +57,10 @@ RadioButton {
         }
 
         Behavior on color {
+            PropertyAnimation { duration: 200 }
+        }
+
+        Behavior on border.color {
             PropertyAnimation { duration: 200 }
         }
 
@@ -126,7 +139,7 @@ RadioButton {
             CaptionTextType {
                 id: description
 
-                color: "#878B91"
+                color: AmneziaStyle.color.grey
                 text: root.descriptionText
 
                 visible: root.descriptionText !== ""

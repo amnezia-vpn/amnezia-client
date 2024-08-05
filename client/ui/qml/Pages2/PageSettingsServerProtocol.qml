@@ -8,6 +8,7 @@ import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -17,6 +18,15 @@ import "../Components"
 
 PageType {
     id: root
+
+    property bool isClearCacheVisible: ServersModel.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ContainersModel.getProcessedContainerIndex())
+
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
 
     ColumnLayout {
         id: header
@@ -28,6 +38,8 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: protocols
         }
 
         HeaderType {
@@ -47,7 +59,28 @@ PageType {
             interactive: true
             model: ProtocolsModel
 
+            property int currentFocusIndex: 0
+
+            activeFocusOnTab: true
+            onActiveFocusChanged: {
+                if (activeFocus) {
+                    this.currentFocusIndex = 0
+                    protocols.itemAtIndex(currentFocusIndex).focusItem.forceActiveFocus()
+                }
+            }
+
+            Keys.onTabPressed: {
+                if (currentFocusIndex < this.count - 1) {
+                    currentFocusIndex += 1
+                    protocols.itemAtIndex(currentFocusIndex).focusItem.forceActiveFocus()
+                } else {
+                    clearCacheButton.forceActiveFocus()
+                }
+            }
+
             delegate: Item {
+                property var focusItem: button.rightButton
+
                 implicitWidth: protocols.width
                 implicitHeight: delegateContent.implicitHeight
 
@@ -72,7 +105,9 @@ PageType {
                             case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                            case ProtocolEnum.Sftp: SftpConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                            case ProtocolEnum.Socks5Proxy: Socks5ProxyConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             }
                             PageController.goToPage(protocolPage);
                         }
@@ -94,7 +129,8 @@ PageType {
 
             Layout.fillWidth: true
 
-            visible: ServersModel.isProcessedServerHasWriteAccess()
+            visible: root.isClearCacheVisible
+            KeyNavigation.tab: removeButton
 
             text: qsTr("Clear %1 profile").arg(ContainersModel.getProcessedContainerName())
 
@@ -105,11 +141,20 @@ PageType {
                 var noButtonText = qsTr("Cancel")
 
                 var yesButtonFunction = function() {
+                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                        var message = qsTr("Unable to clear %1 profile while there is an active connection").arg(ContainersModel.getProcessedContainerName())
+                        PageController.showNotificationMessage(message)
+                        return
+                    }
+
                     PageController.showBusyIndicator(true)
                     InstallController.clearCachedProfile()
                     PageController.showBusyIndicator(false)
                 }
                 var noButtonFunction = function() {
+                    if (!GC.isMobile()) {
+                        focusItem.forceActiveFocus()
+                    }
                 }
 
                 showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -127,7 +172,7 @@ PageType {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            visible: ServersModel.isProcessedServerHasWriteAccess()
+            visible: root.isClearCacheVisible
         }
 
         LabelWithButtonType {
@@ -136,9 +181,10 @@ PageType {
             Layout.fillWidth: true
 
             visible: ServersModel.isProcessedServerHasWriteAccess()
+            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
             text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-            textColor: "#EB5757"
+            textColor: AmneziaStyle.color.red
 
             clickedFunction: function() {
                 var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
@@ -157,6 +203,9 @@ PageType {
                     }
                 }
                 var noButtonFunction = function() {
+                    if (!GC.isMobile()) {
+                        focusItem.forceActiveFocus()
+                    }
                 }
 
                 showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -178,3 +227,4 @@ PageType {
         }
     }
 }
+

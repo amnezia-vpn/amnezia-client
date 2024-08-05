@@ -10,6 +10,7 @@ import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -19,6 +20,8 @@ import "../Components"
 
 PageType {
     id: root
+
+    defaultActiveFocusItem: focusItem
 
     property bool pageEnabled
 
@@ -45,12 +48,12 @@ PageType {
 
     QtObject {
         id: onlyForwardApps
-        property string name: qsTr("Only the Apps listed here will be accessed through the VPN")
+        property string name: qsTr("Only the apps from the list should have access via VPN")
         property int type: routeMode.onlyForwardApps
     }
     QtObject {
         id: allExceptApps
-        property string name: qsTr("Apps from the list should not be accessed via VPN")
+        property string name: qsTr("Apps from the list should not have access via VPN")
         property int type: routeMode.allExceptApps
     }
 
@@ -63,6 +66,11 @@ PageType {
         }
     }
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
         id: header
 
@@ -73,6 +81,8 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: switcher
         }
 
         RowLayout {
@@ -92,6 +102,10 @@ PageType {
                 Layout.rightMargin: 16
 
                 enabled: root.pageEnabled
+
+                KeyNavigation.tab: selector.enabled ?
+                                       selector :
+                                       searchField.textField
 
                 checked: AppSplitTunnelingModel.isTunnelingEnabled
                 onToggled: {                    
@@ -115,6 +129,8 @@ PageType {
             headerText: qsTr("Mode")
 
             enabled: Qt.platform.os === "android" && root.pageEnabled
+
+            KeyNavigation.tab: searchField.textField
 
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
@@ -175,6 +191,9 @@ PageType {
                         pattern: ".*" + searchField.textField.text + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
+                    sorters: [
+                        RoleSorter { roleName: "appPath"; sortOrder: Qt.AscendingOrder }
+                    ]
                 }
 
                 clip: true
@@ -196,7 +215,7 @@ PageType {
 
                             text: appPath
                             rightImageSource: "qrc:/images/controls/trash.svg"
-                            rightImageColor: "#D7D8DB"
+                            rightImageColor: AmneziaStyle.color.white
 
                             clickedFunction: function() {
                                 var headerText = qsTr("Remove ") + appPath + "?"
@@ -223,7 +242,7 @@ PageType {
     Rectangle {
         anchors.fill: addAppButton
         anchors.bottomMargin: -24
-        color: "#0E0E11"
+        color: AmneziaStyle.color.black
         opacity: 0.8
     }
 
@@ -248,13 +267,16 @@ PageType {
             textFieldPlaceholderText: qsTr("application name")
             buttonImageSource: "qrc:/images/controls/plus.svg"
 
+            Keys.onTabPressed: lastItemTabClicked(focusItem)
+            rightButtonClickedOnEnter: true
+
             clickedFunc: function() {
                 searchField.focus = false
                 PageController.showBusyIndicator(true)
 
                 if (Qt.platform.os === "windows") {
                     var fileName = SystemController.getFileName(qsTr("Open executable file"),
-                                                                qsTr("Executable file (*.*)"))
+                                                                qsTr("Executable files (*.*)"))
                     if (fileName !== "") {
                         AppSplitTunnelingController.addApp(fileName)
                     }

@@ -6,6 +6,7 @@ import QtQuick.Dialogs
 import QtCore
 
 import PageEnum 1.0
+import Style 1.0
 
 import "../Controls2"
 import "../Config"
@@ -27,6 +28,13 @@ disabled after 14 days, and all log files will be deleted.")
         }
     }
 
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -34,6 +42,8 @@ disabled after 14 days, and all log files will be deleted.")
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: switcher
     }
 
     FlickableType {
@@ -57,17 +67,19 @@ disabled after 14 days, and all log files will be deleted.")
                 Layout.fillWidth: true
 
                 headerText: qsTr("Logging")
-                descriptionText: qsTr("Enabling this function will save application's logs automatically, " +
+                descriptionText: qsTr("Enabling this function will save application's logs automatically. " +
                                       "By default, logging functionality is disabled. Enable log saving in case of application malfunction.")
             }
 
             SwitcherType {
+                id: switcher
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
                 text: qsTr("Save logs")
 
                 checked: SettingsController.isLoggingEnabled
+                KeyNavigation.tab: openFolderButton
                 onCheckedChanged: {
                     if (checked !== SettingsController.isLoggingEnabled) {
                         SettingsController.isLoggingEnabled = checked
@@ -84,14 +96,18 @@ disabled after 14 days, and all log files will be deleted.")
                     visible: !GC.isMobile()
 
                     ImageButtonType {
+                        id: openFolderButton
                         Layout.alignment: Qt.AlignHCenter
 
                         implicitWidth: 56
                         implicitHeight: 56
 
                         image: "qrc:/images/controls/folder-open.svg"
+                        KeyNavigation.tab: saveButton
 
                         onClicked: SettingsController.openLogsFolder()
+                        Keys.onReturnPressed: openFolderButton.clicked()
+                        Keys.onEnterPressed: openFolderButton.clicked()
                     }
 
                     CaptionTextType {
@@ -99,7 +115,7 @@ disabled after 14 days, and all log files will be deleted.")
                         Layout.fillWidth: true
 
                         text: qsTr("Open folder with logs")
-                        color: "#D7D8DB"
+                        color: AmneziaStyle.color.white
                     }
                 }
 
@@ -108,13 +124,17 @@ disabled after 14 days, and all log files will be deleted.")
                     Layout.preferredWidth: root.width / ( GC.isMobile() ? 2 : 3 )
 
                     ImageButtonType {
+                        id: saveButton
                         Layout.alignment: Qt.AlignHCenter
 
                         implicitWidth: 56
                         implicitHeight: 56
 
                         image: "qrc:/images/controls/save.svg"
+                        KeyNavigation.tab: clearButton
 
+                        Keys.onReturnPressed: saveButton.clicked()
+                        Keys.onEnterPressed: saveButton.clicked()
                         onClicked: {
                             var fileName = ""
                             if (GC.isMobile()) {
@@ -140,7 +160,7 @@ disabled after 14 days, and all log files will be deleted.")
                         Layout.fillWidth: true
 
                         text: qsTr("Save logs to file")
-                        color: "#D7D8DB"
+                        color: AmneziaStyle.color.white
                     }
                 }
 
@@ -149,13 +169,17 @@ disabled after 14 days, and all log files will be deleted.")
                     Layout.preferredWidth: root.width / ( GC.isMobile() ? 2 : 3 )
 
                     ImageButtonType {
+                        id: clearButton
                         Layout.alignment: Qt.AlignHCenter
 
                         implicitWidth: 56
                         implicitHeight: 56
 
                         image: "qrc:/images/controls/delete.svg"
+                        Keys.onTabPressed: lastItemTabClicked(focusItem)
 
+                        Keys.onReturnPressed: clearButton.clicked()
+                        Keys.onEnterPressed: clearButton.clicked()
                         onClicked: function() {
                             var headerText = qsTr("Clear logs?")
                             var yesButtonText = qsTr("Continue")
@@ -166,8 +190,14 @@ disabled after 14 days, and all log files will be deleted.")
                                 SettingsController.clearLogs()
                                 PageController.showBusyIndicator(false)
                                 PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
+                                if (!GC.isMobile()) {
+                                    focusItem.forceActiveFocus()
+                                }
                             }
                             var noButtonFunction = function() {
+                                if (!GC.isMobile()) {
+                                    focusItem.forceActiveFocus()
+                                }
                             }
 
                             showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -179,7 +209,7 @@ disabled after 14 days, and all log files will be deleted.")
                         Layout.fillWidth: true
 
                         text: qsTr("Clear logs")
-                        color: "#D7D8DB"
+                        color: AmneziaStyle.color.white
                     }
                 }
             }

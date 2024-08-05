@@ -139,7 +139,7 @@ X509* QSimpleCrypto::QX509::verifyCertificate(X509* x509, X509_STORE* store)
 /// \param notAfter - X509 end date.
 /// \return Returns OpenSSL X509 structure or nullptr, if error happened. Returned value must be cleaned up with 'X509_free' to avoid memory leak.
 ///
-X509* QSimpleCrypto::QX509::generateSelfSignedCertificate(const RSA* rsa, const QMap<QByteArray, QByteArray>& additionalData,
+X509* QSimpleCrypto::QX509::generateSelfSignedCertificate(RSA* rsa, const QMap<QByteArray, QByteArray>& additionalData,
     const QByteArray& certificateFileName, const EVP_MD* md,
     const long& serialNumber, const long& version,
     const long& notBefore, const long& notAfter)

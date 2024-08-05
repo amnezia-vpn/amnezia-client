@@ -2,6 +2,7 @@
 #define AMNEZIA_APPLICATION_H
 
 #include <QCommandLineParser>
+#include <QNetworkAccessManager>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QThread>
@@ -13,8 +14,6 @@
 
 #include "settings.h"
 #include "vpnconnection.h"
-
-#include "core/controllers/apiController.h"
 
 #include "ui/controllers/connectionController.h"
 #include "ui/controllers/exportController.h"
@@ -28,7 +27,9 @@
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
-#include "ui/notificationhandler.h"
+#ifndef Q_OS_ANDROID
+    #include "ui/notificationhandler.h"
+#endif
 #ifdef Q_OS_WINDOWS
     #include "ui/models/protocols/ikev2ConfigModel.h"
 #endif
@@ -40,6 +41,7 @@
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
 #include "ui/models/services/sftpConfigModel.h"
+#include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/sites_model.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/appSplitTunnelingModel.h"
@@ -75,6 +77,7 @@ public:
     bool parseCommands();
 
     QQmlApplicationEngine *qmlEngine() const;
+    QNetworkAccessManager *manager() { return m_nam; }
 
 signals:
     void translationsUpdated();
@@ -112,10 +115,13 @@ private:
 #endif
 
     QScopedPointer<SftpConfigModel> m_sftpConfigModel;
+    QScopedPointer<Socks5ProxyConfigModel> m_socks5ConfigModel;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
     QThread m_vpnConnectionThread;
+#ifndef Q_OS_ANDROID
     QScopedPointer<NotificationHandler> m_notificationHandler;
+#endif
 
     QScopedPointer<ConnectionController> m_connectionController;
     QScopedPointer<PageController> m_pageController;
@@ -125,8 +131,9 @@ private:
     QScopedPointer<SettingsController> m_settingsController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
-    QScopedPointer<ApiController> m_apiController;
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
+
+    QNetworkAccessManager *m_nam;
 };
 
 #endif // AMNEZIA_APPLICATION_H

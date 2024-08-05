@@ -8,6 +8,7 @@ import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerProps 1.0
 import ContainersModelFilters 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -17,6 +18,8 @@ import "../Components"
 
 PageType {
     id: root
+
+    defaultActiveFocusItem: focusItem
 
     Connections {
         target: PageController
@@ -38,22 +41,35 @@ PageType {
             anchors.topMargin: 34
             anchors.bottomMargin: 34
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: loggingButton.visible ?
+                                       loggingButton :
+                                       connectButton
+            }
+
             BasicButtonType {
+                id: loggingButton
                 property bool isLoggingEnabled: SettingsController.isLoggingEnabled
 
                 Layout.alignment: Qt.AlignHCenter
 
                 implicitHeight: 36
 
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#878B91"
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.blackHovered
+                pressedColor: AmneziaStyle.color.blackPressed
+                disabledColor: AmneziaStyle.color.grey
+                textColor: AmneziaStyle.color.grey
                 borderWidth: 0
 
                 visible: isLoggingEnabled ? true : false
                 text: qsTr("Logging enabled")
+
+                Keys.onEnterPressed: loggingButton.clicked()
+                Keys.onReturnPressed: loggingButton.clicked()
+
+                KeyNavigation.tab: connectButton
 
                 onClicked: {
                     PageController.goToPage(PageEnum.PageSettingsLogging)
@@ -64,9 +80,12 @@ PageType {
                 id: connectButton
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignCenter
+                KeyNavigation.tab: splitTunnelingButton
             }
 
             BasicButtonType {
+                id: splitTunnelingButton
+
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
                 Layout.bottomMargin: 34
                 leftPadding: 16
@@ -74,13 +93,17 @@ PageType {
 
                 implicitHeight: 36
 
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#878B91"
-                leftImageColor: "transparent"
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.blackHovered
+                pressedColor: AmneziaStyle.color.blackPressed
+                disabledColor: AmneziaStyle.color.grey
+                textColor: AmneziaStyle.color.grey
+                leftImageColor: AmneziaStyle.color.transparent
                 borderWidth: 0
+
+                buttonTextLabel.lineHeight: 20
+                buttonTextLabel.font.pixelSize: 14
+                buttonTextLabel.font.weight: 500
 
                 property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled || AppSplitTunnelingModel.isTunnelingEnabled ||
                                                        (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
@@ -90,6 +113,11 @@ PageType {
                 imageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
                 rightImageSource: "qrc:/images/controls/chevron-down.svg"
 
+                Keys.onEnterPressed: splitTunnelingButton.clicked()
+                Keys.onReturnPressed: splitTunnelingButton.clicked()
+
+                KeyNavigation.tab: drawer
+
                 onClicked: {
                     homeSplitTunnelingDrawer.open()
                 }
@@ -97,6 +125,12 @@ PageType {
                 HomeSplitTunnelingDrawer {
                     id: homeSplitTunnelingDrawer
                     parent: root
+
+                    onClosed: {
+                        if (!GC.isMobile()) {
+                            focusItem.forceActiveFocus()
+                        }
+                    }
                 }
             }
         }
@@ -107,10 +141,25 @@ PageType {
         id: drawer
         anchors.fill: parent
 
-        collapsedContent:  Item {
+        onClosed: {
+            if (!GC.isMobile()) {
+                focusItem.forceActiveFocus()
+            }
+        }
+
+        collapsedContent: Item {
             implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
             Component.onCompleted: {
                 drawer.expandedHeight = implicitHeight
+            }
+            Connections {
+                target: drawer
+                enabled: !GC.isMobile()
+                function onActiveFocusChanged() {
+                    if (drawer.activeFocus && !drawer.isOpened) {
+                        collapsedButtonChevron.forceActiveFocus()
+                    }
+                }
             }
             ColumnLayout {
                 id: collapsed
@@ -178,6 +227,8 @@ PageType {
                         text: ServersModel.defaultServerName
                         horizontalAlignment: Qt.AlignHCenter
 
+                        KeyNavigation.tab: tabBar
+
                         Behavior on opacity {
                             PropertyAnimation { duration: 200 }
                         }
@@ -192,7 +243,7 @@ PageType {
 
                         hoverEnabled: false
                         image: "qrc:/images/controls/chevron-down.svg"
-                        imageColor: "#d7d8db"
+                        imageColor: AmneziaStyle.color.white
 
                         icon.width: 18
                         icon.height: 18
@@ -200,6 +251,11 @@ PageType {
                         horizontalPadding: 4
                         topPadding: 4
                         bottomPadding: 3
+
+                        Keys.onEnterPressed: collapsedButtonChevron.clicked()
+                        Keys.onReturnPressed: collapsedButtonChevron.clicked()
+                        Keys.onTabPressed: lastItemTabClicked()
+
 
                         onClicked: {
                             if (drawer.isCollapsed) {
@@ -217,6 +273,16 @@ PageType {
                 }
             }
 
+            Connections {
+                target: drawer
+                enabled: !GC.isMobile()
+                function onIsCollapsedChanged() {
+                    if (!drawer.isCollapsed) {
+                        focusItem1.forceActiveFocus()
+                    }
+                }
+            }
+
             ColumnLayout {
                 id: serversMenuHeader
 
@@ -230,20 +296,25 @@ PageType {
 
                     visible: !ServersModel.isDefaultServerFromApi
 
+                    Item {
+                        id: focusItem1
+                        KeyNavigation.tab: containersDropDown
+                    }
+
                     DropDownType {
                         id: containersDropDown
 
-                        rootButtonImageColor: "#0E0E11"
-                        rootButtonBackgroundColor: "#D7D8DB"
+                        rootButtonImageColor: AmneziaStyle.color.black
+                        rootButtonBackgroundColor: AmneziaStyle.color.white
                         rootButtonBackgroundHoveredColor: Qt.rgba(215, 216, 219, 0.8)
                         rootButtonBackgroundPressedColor: Qt.rgba(215, 216, 219, 0.65)
-                        rootButtonHoveredBorderColor: "transparent"
-                        rootButtonDefaultBorderColor: "transparent"
+                        rootButtonHoveredBorderColor: AmneziaStyle.color.transparent
+                        rootButtonDefaultBorderColor: AmneziaStyle.color.transparent
                         rootButtonTextTopMargin: 8
                         rootButtonTextBottomMargin: 8
 
                         text: ServersModel.defaultServerDefaultContainerName
-                        textColor: "#0E0E11"
+                        textColor: AmneziaStyle.color.black
                         headerText: qsTr("VPN protocol")
                         headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
@@ -252,9 +323,16 @@ PageType {
                         }
 
                         drawerParent: root
+                        KeyNavigation.tab: serversMenuContent
 
                         listView: HomeContainersListView {
+                            id: containersListView
                             rootWidth: root.width
+                            onVisibleChanged: {
+                                if (containersDropDown.visible && !GC.isMobile()) {
+                                    focusItem1.forceActiveFocus()
+                                }
+                            }
 
                             Connections {
                                 target: ServersModel
@@ -317,8 +395,42 @@ PageType {
                     policy: serversMenuContent.height >= serversMenuContent.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
                 }
 
+
+                activeFocusOnTab: true
+                focus: true
+
+                property int focusItemIndex: 0
+                onActiveFocusChanged: {
+                    if (activeFocus) {
+                        serversMenuContent.focusItemIndex = 0
+                        serversMenuContent.itemAtIndex(focusItemIndex).forceActiveFocus()
+                    }
+                }
+
+                onFocusItemIndexChanged: {
+                    const focusedElement = serversMenuContent.itemAtIndex(focusItemIndex)
+                    if (focusedElement) {
+                        if (focusedElement.y + focusedElement.height > serversMenuContent.height) {
+                            serversMenuContent.contentY = focusedElement.y + focusedElement.height - serversMenuContent.height
+                        } else {
+                            serversMenuContent.contentY = 0
+                        }
+                    }
+                }
+
                 Keys.onUpPressed: scrollBar.decrease()
                 Keys.onDownPressed: scrollBar.increase()
+
+                Connections {
+                    target: drawer
+                    enabled: !GC.isMobile()
+                    function onIsCollapsedChanged() {
+                        if (drawer.isCollapsed) {
+                            const item = serversMenuContent.itemAtIndex(serversMenuContent.focusItemIndex)
+                            if (item) { item.serverRadioButtonProperty.focus = false }
+                        }
+                    }
+                }
 
                 Connections {
                     target: ServersModel
@@ -333,9 +445,16 @@ PageType {
                     id: menuContentDelegate
 
                     property variant delegateData: model
+                    property VerticalRadioButton serverRadioButtonProperty: serverRadioButton
 
                     implicitWidth: serversMenuContent.width
                     implicitHeight: serverRadioButtonContent.implicitHeight
+
+                    onActiveFocusChanged: {
+                        if (activeFocus) {
+                            serverRadioButton.forceActiveFocus()
+                        }
+                    }
 
                     ColumnLayout {
                         id: serverRadioButtonContent
@@ -377,16 +496,33 @@ PageType {
                                     cursorShape: Qt.PointingHandCursor
                                     enabled: false
                                 }
+
+                                Keys.onTabPressed: serverInfoButton.forceActiveFocus()
+                                Keys.onEnterPressed: serverRadioButton.clicked()
+                                Keys.onReturnPressed: serverRadioButton.clicked()
                             }
 
                             ImageButtonType {
+                                id: serverInfoButton
                                 image: "qrc:/images/controls/settings.svg"
-                                imageColor: "#D7D8DB"
+                                imageColor: AmneziaStyle.color.white
 
                                 implicitWidth: 56
                                 implicitHeight: 56
 
                                 z: 1
+
+                                Keys.onTabPressed: {
+                                    if (serversMenuContent.focusItemIndex < serversMenuContent.count - 1) {
+                                        serversMenuContent.focusItemIndex++
+                                        serversMenuContent.itemAtIndex(serversMenuContent.focusItemIndex).forceActiveFocus()
+                                    } else {
+                                        focusItem1.forceActiveFocus()
+                                        serversMenuContent.contentY = 0
+                                    }
+                                }
+                                Keys.onEnterPressed: serverInfoButton.clicked()
+                                Keys.onReturnPressed: serverInfoButton.clicked()
 
                                 onClicked: function() {
                                     ServersModel.processedIndex = index

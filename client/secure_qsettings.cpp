@@ -1,5 +1,4 @@
 #include "secure_qsettings.h"
-#include "platforms/ios/MobileUtils.h"
 
 #include "QAead.h"
 #include "QBlockCipher.h"
@@ -124,7 +123,30 @@ QByteArray SecureQSettings::backupAppConfig() const
 {
     QJsonObject cfg;
 
+    const auto needToBackup = [this](const auto &key) {
+      for (const auto &item : m_fieldsToBackup)
+      {
+        if (key == "Conf/installationUuid")
+        {
+          return false;
+        }
+
+        if (key.startsWith(item))
+        {
+            return true;
+        }
+      }
+
+      return false;
+    };
+
     for (const QString &key : m_settings.allKeys()) {
+
+        if (!needToBackup(key))
+        {
+            continue;
+        }
+
         cfg.insert(key, QJsonValue::fromVariant(value(key)));
     }
 
@@ -138,6 +160,10 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
         return false;
 
     for (const QString &key : cfg.keys()) {
+        if (key == "Conf/installationUuid") {
+            continue;
+        }
+
         setValue(key, cfg.value(key).toVariant());
     }
 

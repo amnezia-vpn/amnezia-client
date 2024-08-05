@@ -39,6 +39,9 @@ class AmneziaTileService : TileService() {
 
     @Volatile
     private var isServiceConnected = false
+
+    @Volatile
+    private var vpnProto: VpnProto? = null
     private var isInBoundState = false
     @Volatile
     private var isVpnConfigExists = false
@@ -94,16 +97,21 @@ class AmneziaTileService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
-        Log.d(TAG, "Start listening")
-        if (AmneziaVpnService.isRunning(applicationContext)) {
-            Log.d(TAG, "Vpn service is running")
-            doBindService()
-        } else {
-            Log.d(TAG, "Vpn service is not running")
-            isServiceConnected = false
-            updateVpnState(DISCONNECTED)
+        scope.launch {
+            Log.d(TAG, "Start listening")
+            vpnProto = VpnStateStore.getVpnState().vpnProto
+            vpnProto.also { proto ->
+                if (proto != null && AmneziaVpnService.isRunning(applicationContext, proto.processName)) {
+                    Log.d(TAG, "Vpn service is running")
+                    doBindService()
+                } else {
+                    Log.d(TAG, "Vpn service is not running")
+                    isServiceConnected = false
+                    updateVpnState(DISCONNECTED)
+                }
+            }
+            vpnStateListeningJob = launchVpnStateListening()
         }
-        vpnStateListeningJob = launchVpnStateListening()
     }
 
     override fun onStopListening() {
@@ -124,7 +132,7 @@ class AmneziaTileService : TileService() {
     }
 
     private fun onClickInternal() {
-        if (isVpnConfigExists) {
+        if (isVpnConfigExists && vpnProto != null) {
             Log.d(TAG, "Change VPN state")
             if (qsTile.state == Tile.STATE_INACTIVE) {
                 Log.d(TAG, "Start VPN")
@@ -147,10 +155,12 @@ class AmneziaTileService : TileService() {
 
     private fun doBindService() {
         Log.d(TAG, "Bind service")
-        Intent(this, AmneziaVpnService::class.java).also {
-            bindService(it, serviceConnection, BIND_ABOVE_CLIENT)
+        vpnProto?.let { proto ->
+            Intent(this, proto.serviceClass).also {
+                bindService(it, serviceConnection, BIND_ABOVE_CLIENT)
+            }
+            isInBoundState = true
         }
-        isInBoundState = true
     }
 
     private fun doUnbindService() {
@@ -180,6 +190,7 @@ class AmneziaTileService : TileService() {
         if (VpnService.prepare(applicationContext) != null) {
             Intent(this, VpnRequestActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra(EXTRA_PROTOCOL, vpnProto)
             }.also {
                 startActivityAndCollapseCompat(it)
             }
@@ -188,11 +199,18 @@ class AmneziaTileService : TileService() {
             true
         }
 
-    private fun startVpnService() =
-        ContextCompat.startForegroundService(
-            applicationContext,
-            Intent(this, AmneziaVpnService::class.java)
-        )
+    private fun startVpnService() {
+        vpnProto?.let { proto ->
+            try {
+                ContextCompat.startForegroundService(
+                    applicationContext,
+                    Intent(this, proto.serviceClass)
+                )
+            } catch (e: SecurityException) {
+                Log.e(TAG, "Failed to start ${proto.serviceClass.simpleName}: $e")
+            }
+        } ?: Log.e(TAG, "Failed to start vpn service: vpnProto is null")
+    }
 
     private fun connectToVpn() = vpnServiceMessenger.send(Action.CONNECT)
 
@@ -215,11 +233,8 @@ class AmneziaTileService : TileService() {
         }
     }
 
-    private fun updateVpnState(state: ProtocolState) {
-        scope.launch {
-            VpnStateStore.store { it.copy(protocolState = state) }
-        }
-    }
+    private fun updateVpnState(state: ProtocolState) =
+        scope.launch { VpnStateStore.store { it.copy(protocolState = state) } }
 
     private fun launchVpnStateListening() =
         scope.launch { VpnStateStore.dataFlow().collectLatest(::updateTile) }
@@ -227,10 +242,11 @@ class AmneziaTileService : TileService() {
     private fun updateTile(vpnState: VpnState) {
         Log.d(TAG, "Update tile: $vpnState")
         isVpnConfigExists = vpnState.serverName != null
+        vpnProto = vpnState.vpnProto
         val tile = qsTile ?: return
         tile.apply {
-            label = vpnState.serverName ?: DEFAULT_TILE_LABEL
-            when (vpnState.protocolState) {
+            label = (vpnState.serverName ?: DEFAULT_TILE_LABEL) + (vpnProto?.let { " ${it.label}" } ?: "")
+            when (val protocolState = vpnState.protocolState) {
                 CONNECTED -> {
                     state = Tile.STATE_ACTIVE
                     subtitleCompat = null
@@ -241,14 +257,9 @@ class AmneziaTileService : TileService() {
                     subtitleCompat = null
                 }
 
-                CONNECTING, RECONNECTING -> {
+                CONNECTING, DISCONNECTING, RECONNECTING -> {
                     state = Tile.STATE_UNAVAILABLE
-                    subtitleCompat = resources.getString(R.string.connecting)
-                }
-
-                DISCONNECTING -> {
-                    state = Tile.STATE_UNAVAILABLE
-                    subtitleCompat = resources.getString(R.string.disconnecting)
+                    subtitleCompat = getString(protocolState)
                 }
             }
             updateTile()

@@ -83,7 +83,7 @@ void MacOSPingSender::sendPing(const QHostAddress& dest, quint16 sequence) {
   packet.icmp_seq = htons(sequence);
   packet.icmp_cksum = inetChecksum(&packet, sizeof(packet));
 
-  if (sendto(m_socket, (char*)&packet, sizeof(packet), 0,
+  if (sendto(m_socket, (char*)&packet, sizeof(packet), MSG_NOSIGNAL,
              (struct sockaddr*)&addr, sizeof(addr)) != sizeof(packet)) {
     logger.error() << "ping sending failed:" << strerror(errno);
     emit criticalPingError();
@@ -107,9 +107,9 @@ void MacOSPingSender::socketReady() {
   iov.iov_base = packet;
   iov.iov_len = IP_MAXPACKET;
 
-  ssize_t rc = recvmsg(m_socket, &msg, MSG_DONTWAIT);
+  ssize_t rc = recvmsg(m_socket, &msg, MSG_DONTWAIT | MSG_NOSIGNAL);
   if (rc <= 0) {
-    logger.error() << "Recvmsg failed";
+    logger.error() << "Recvmsg failed:" << strerror(errno);
     return;
   }
 

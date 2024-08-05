@@ -14,6 +14,11 @@ PageType {
 
     defaultActiveFocusItem: hostname.textField
 
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     BackButtonType {
         id: backButton
 
@@ -21,6 +26,8 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        KeyNavigation.tab: hostname.textField
     }
 
     FlickableType {
@@ -106,6 +113,8 @@ PageType {
                 Layout.topMargin: 24
 
                 text: qsTr("Continue")
+
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunc: function() {
                     forceActiveFocus()

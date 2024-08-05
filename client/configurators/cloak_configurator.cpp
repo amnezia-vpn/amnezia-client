@@ -1,33 +1,30 @@
 #include "cloak_configurator.h"
 
 #include <QFile>
-#include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonObject>
 
-#include "core/controllers/serverController.h"
 #include "containers/containers_defs.h"
+#include "core/controllers/serverController.h"
 
-CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, QObject *parent):
-    ConfiguratorBase(settings, parent)
+CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
+    : ConfiguratorBase(settings, serverController, parent)
 {
-
 }
 
-QString CloakConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                        const QJsonObject &containerConfig, ErrorCode errorCode)
+QString CloakConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
+                                        ErrorCode &errorCode)
 {
-    ServerController serverController(m_settings);
-
-    QString cloakPublicKey = serverController.getTextFileFromContainer(container, credentials,
-        amnezia::protocols::cloak::ckPublicKeyPath, errorCode);
+    QString cloakPublicKey =
+            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::cloak::ckPublicKeyPath, errorCode);
     cloakPublicKey.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {
         return "";
     }
 
-    QString cloakBypassUid = serverController.getTextFileFromContainer(container, credentials,
-        amnezia::protocols::cloak::ckBypassUidKeyPath, errorCode);
+    QString cloakBypassUid =
+            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::cloak::ckBypassUidKeyPath, errorCode);
     cloakBypassUid.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {
@@ -47,8 +44,8 @@ QString CloakConfigurator::createConfig(const ServerCredentials &credentials, Do
     config.insert("RemoteHost", credentials.hostName);
     config.insert("RemotePort", "$CLOAK_SERVER_PORT");
 
-    QString textCfg = serverController.replaceVars(QJsonDocument(config).toJson(),
-                                                   serverController.genVarsForScript(credentials, container, containerConfig));
+    QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(),
+                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));
 
     return textCfg;
 }

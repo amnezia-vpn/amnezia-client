@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
+import Style 1.0
+
 Item {
     id: root
 
@@ -13,6 +15,12 @@ Item {
 
     visible: backButtonImage !== ""
 
+    onActiveFocusChanged: {
+        if (activeFocus) {
+            backButton.forceActiveFocus()
+        }
+    }
+
     RowLayout {
         id: content
 
@@ -20,8 +28,9 @@ Item {
         anchors.leftMargin: 8
 
         ImageButtonType {
+            id: backButton
             image: backButtonImage
-            imageColor: "#D7D8DB"
+            imageColor: AmneziaStyle.color.white
 
             implicitWidth: 40
             implicitHeight: 40
@@ -39,7 +48,10 @@ Item {
             id: background
             Layout.fillWidth: true
 
-            color: "transparent"
+            color: AmneziaStyle.color.transparent
         }
     }
+
+    Keys.onEnterPressed: backButton.clicked()
+    Keys.onReturnPressed: backButton.clicked()
 }

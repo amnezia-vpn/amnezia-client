@@ -83,6 +83,8 @@ namespace amnezia
         constexpr char sftp[] = "sftp";
         constexpr char awg[] = "awg";
         constexpr char xray[] = "xray";
+        constexpr char ssxray[] = "ssxray";
+        constexpr char socks5proxy[] = "socks5proxy";
 
         constexpr char configVersion[] = "config_version";
 
@@ -91,6 +93,8 @@ namespace amnezia
 
         constexpr char splitTunnelApps[] = "splitTunnelApps";
         constexpr char appSplitTunnelType[] = "appSplitTunnelType";
+
+        constexpr char killSwitchOption[] = "killSwitchOption";
 
         constexpr char crc[] = "crc";
 
@@ -171,7 +175,12 @@ namespace amnezia
             constexpr char defaultSubnetCidr[] = "24";
 
             constexpr char defaultPort[] = "51820";
-            constexpr char defaultMtu[] = "1420";
+
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+            constexpr char defaultMtu[] = "1280";
+#else
+            constexpr char defaultMtu[] = "1376";
+#endif
             constexpr char serverConfigPath[] = "/opt/amnezia/wireguard/wg0.conf";
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/wireguard/wireguard_server_public_key.key";
             constexpr char serverPskKeyPath[] = "/opt/amnezia/wireguard/wireguard_psk.key";
@@ -187,7 +196,11 @@ namespace amnezia
         namespace awg
         {
             constexpr char defaultPort[] = "55424";
-            constexpr char defaultMtu[] = "1420";
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+            constexpr char defaultMtu[] = "1280";
+#else
+            constexpr char defaultMtu[] = "1376";
+#endif
 
             constexpr char serverConfigPath[] = "/opt/amnezia/awg/wg0.conf";
             constexpr char serverPublicKeyPath[] = "/opt/amnezia/awg/wireguard_server_public_key.key";
@@ -204,6 +217,14 @@ namespace amnezia
             constexpr char defaultUnderloadPacketMagicHeader[] = "1766607858";
         }
 
+        namespace socks5Proxy
+        {
+            constexpr char defaultUserName[] = "proxy_user";
+            constexpr char defaultPort[] = "38080";
+
+            constexpr char proxyConfigPath[] = "/usr/local/3proxy/conf/3proxy.cfg";
+        }
+
     } // namespace protocols
 
     namespace ProtocolEnumNS
@@ -212,7 +233,8 @@ namespace amnezia
 
         enum TransportProto {
             Udp,
-            Tcp
+            Tcp,
+            TcpAndUdp
         };
         Q_ENUM_NS(TransportProto)
 
@@ -226,11 +248,13 @@ namespace amnezia
             Ikev2,
             L2tp,
             Xray,
+            SSXray,
 
             // non-vpn
             TorWebSite,
             Dns,
-            Sftp
+            Sftp,
+            Socks5Proxy
         };
         Q_ENUM_NS(Proto)
 

@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 
+import Style 1.0
+
 Rectangle {
     id: root
 
@@ -9,15 +11,24 @@ Rectangle {
     property alias textArea: textArea
     property alias textAreaText: textArea.text
 
-    property string borderHoveredColor: "#494B50"
-    property string borderNormalColor: "#2C2D30"
-    property string borderFocusedColor: "#d7d8db"
+    property string borderHoveredColor: AmneziaStyle.color.greyDisabled
+    property string borderNormalColor: AmneziaStyle.color.greyDark
+    property string borderFocusedColor: AmneziaStyle.color.white
 
     height: 148
-    color: "#1C1D21"
+    color: AmneziaStyle.color.blackLight
     border.width: 1
     border.color: getBorderColor(borderNormalColor)
     radius: 16
+
+    property FlickableType parentFlickable: null
+    onFocusChanged: {
+        if (root.activeFocus) {
+            if (root.parentFlickable) {
+                root.parentFlickable.ensureVisible(root)
+            }
+        }
+    }
 
     MouseArea {
         id: parentMouse
@@ -43,10 +54,10 @@ Rectangle {
                 anchors.topMargin: 16
                 anchors.bottomMargin: 16
 
-                color: "#D7D8DB"
-                selectionColor:  "#633303"
-                selectedTextColor: "#D7D8DB"
-                placeholderTextColor: "#878B91"
+                color: AmneziaStyle.color.white
+                selectionColor:  AmneziaStyle.color.brown
+                selectedTextColor: AmneziaStyle.color.white
+                placeholderTextColor: AmneziaStyle.color.grey
 
                 font.pixelSize: 16
                 font.weight: Font.Medium

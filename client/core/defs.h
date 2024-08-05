@@ -36,12 +36,17 @@ namespace amnezia
         }
     };
 
-    enum ErrorCode {
+    namespace error_code_ns
+    {
+      Q_NAMESPACE
+      // TODO: change to enum class
+      enum ErrorCode {
         // General error codes
         NoError = 0,
         UnknownError = 100,
         InternalError = 101,
         NotImplementedError = 102,
+        AmneziaServiceNotRunning = 103,
 
         // Server errors
         ServerCheckFailed = 200,
@@ -74,7 +79,7 @@ namespace amnezia
         AmneziaServiceConnectionFailed = 603,
         ExecutableMissing = 604,
         XrayExecutableMissing = 605,
-        Tun2SockExecutableMissing = 606,        
+        Tun2SockExecutableMissing = 606,
 
         // VPN errors
         OpenVpnAdaptersInUseError = 700,
@@ -98,6 +103,9 @@ namespace amnezia
         // Api errors
         ApiConfigDownloadError = 1100,
         ApiConfigAlreadyAdded = 1101,
+        ApiConfigEmptyError = 1102,
+        ApiConfigTimeoutError = 1103,
+        ApiConfigSslError = 1104,
 
         // QFile errors
         OpenError = 1200,
@@ -106,7 +114,11 @@ namespace amnezia
         UnspecifiedError = 1203,
         FatalError = 1204,
         AbortError = 1205
-    };
+      };
+      Q_ENUM_NS(ErrorCode)
+    }
+
+    using ErrorCode = error_code_ns::ErrorCode;
 
 } // namespace amnezia
 

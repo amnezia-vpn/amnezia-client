@@ -2,26 +2,43 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 Button {
     id: root
 
     property string image
 
-    property string hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-    property string defaultColor: "transparent"
-    property string pressedColor: Qt.rgba(1, 1, 1, 0.12)
-    property string disableColor: "#2C2D30"
+    property string hoveredColor: AmneziaStyle.color.blackHovered
+    property string defaultColor: AmneziaStyle.color.transparent
+    property string pressedColor: AmneziaStyle.color.blackPressed
+    property string disableColor: AmneziaStyle.color.greyDark
 
-    property string imageColor: "#878B91"
-    property string disableImageColor: "#2C2D30"
+    property string imageColor: AmneziaStyle.color.grey
+    property string disableImageColor: AmneziaStyle.color.greyDark
 
     property alias backgroundColor: background.color
     property alias backgroundRadius: background.radius
 
+    property string borderFocusedColor: AmneziaStyle.color.white
+    property int borderFocusedWidth: 1
+
     hoverEnabled: true
+    focus: true
+    focusPolicy: Qt.TabFocus
 
     icon.source: image
     icon.color: root.enabled ? imageColor : disableImageColor
+
+    property Flickable parentFlickable
+
+    onFocusChanged: {
+        if (root.activeFocus) {
+            if (root.parentFlickable) {
+                root.parentFlickable.ensureVisible(this)
+            }
+        }
+    }
 
     Behavior on icon.color {
         PropertyAnimation { duration: 200 }
@@ -31,6 +48,9 @@ Button {
         id: background
 
         anchors.fill: parent
+        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
+        border.width: root.activeFocus ? root.borderFocusedWidth : 0
+
         color: {
             if (root.enabled) {
                 if (root.pressed) {
@@ -42,6 +62,9 @@ Button {
         }
         radius: 12
         Behavior on color {
+            PropertyAnimation { duration: 200 }
+        }
+        Behavior on border.color {
             PropertyAnimation { duration: 200 }
         }
     }

@@ -2,17 +2,20 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "TextTypes"
 
 Item {
     id: root
 
     property string headerText
-    property string headerTextDisabledColor: "#494B50"
-    property string headerTextColor: "#878b91"
+    property string headerTextDisabledColor: AmneziaStyle.color.greyDisabled
+    property string headerTextColor: AmneziaStyle.color.grey
 
     property alias errorText: errorField.text
     property bool checkEmptyText: false
+    property bool rightButtonClickedOnEnter: false
 
     property string buttonText
     property string buttonImageSource
@@ -20,21 +23,33 @@ Item {
 
     property alias textField: textField
     property alias textFieldText: textField.text
-    property string textFieldTextColor: "#d7d8db"
-    property string textFieldTextDisabledColor: "#878B91"
+    property string textFieldTextColor: AmneziaStyle.color.white
+    property string textFieldTextDisabledColor: AmneziaStyle.color.grey
 
     property string textFieldPlaceholderText
     property bool textFieldEditable: true
 
-    property string borderColor: "#2C2D30"
-    property string borderFocusedColor: "#d7d8db"
+    property string borderColor: AmneziaStyle.color.greyDark
+    property string borderFocusedColor: AmneziaStyle.color.white
 
-    property string backgroundColor: "#1c1d21"
-    property string backgroundDisabledColor: "transparent"
-    property string bgBorderHoveredColor: "#494B50"
+    property string backgroundColor: AmneziaStyle.color.blackLight
+    property string backgroundDisabledColor: AmneziaStyle.color.transparent
+    property string bgBorderHoveredColor: AmneziaStyle.color.greyDisabled
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
+
+    property FlickableType parentFlickable
+    Connections {
+        target: textField
+        function onFocusChanged() {
+            if (textField.activeFocus) {
+                if (root.parentFlickable) {
+                    root.parentFlickable.ensureVisible(root)
+                }
+            }
+        }
+    }
 
     ColumnLayout {
         id: content
@@ -77,10 +92,10 @@ Item {
                         inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
 
                         placeholderText: root.textFieldPlaceholderText
-                        placeholderTextColor: "#494B50"
+                        placeholderTextColor: AmneziaStyle.color.greyDisabled
 
-                        selectionColor:  "#633303"
-                        selectedTextColor: "#D7D8DB"
+                        selectionColor:  AmneziaStyle.color.brown
+                        selectedTextColor: AmneziaStyle.color.white
 
                         font.pixelSize: 16
                         font.weight: 400
@@ -134,7 +149,7 @@ Item {
 
             text: root.errorText
             visible: root.errorText !== ""
-            color: "#EB5757"
+            color: AmneziaStyle.color.red
         }
     }
 
@@ -188,10 +203,22 @@ Item {
     }
 
     Keys.onEnterPressed: {
-         KeyNavigation.tab.forceActiveFocus();
+        if (root.rightButtonClickedOnEnter && root.clickedFunc && typeof root.clickedFunc === "function") {
+            clickedFunc()
+        }
+
+        if (KeyNavigation.tab) {
+            KeyNavigation.tab.forceActiveFocus();
+        }
     }
 
     Keys.onReturnPressed: {
-         KeyNavigation.tab.forceActiveFocus();
+        if (root.rightButtonClickedOnEnter &&root.clickedFunc && typeof root.clickedFunc === "function") {
+            clickedFunc()
+        }
+
+        if (KeyNavigation.tab) {
+            KeyNavigation.tab.forceActiveFocus();
+        }
     }
 }

@@ -1,19 +1,19 @@
 package org.amnezia.vpn.protocol.openvpn
 
-import android.content.Context
 import android.net.VpnService.Builder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import net.openvpn.ovpn3.ClientAPI_Config
 import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.Protocol
-import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.VpnStartException
+import org.amnezia.vpn.util.net.InetNetwork
 import org.amnezia.vpn.util.net.getLocalNetworks
+import org.amnezia.vpn.util.net.parseInetAddress
 import org.json.JSONObject
 
 /**
@@ -35,7 +35,6 @@ import org.json.JSONObject
 
 open class OpenVpn : Protocol() {
 
-    private lateinit var context: Context
     private var openVpnClient: OpenVpnClient? = null
     private lateinit var scope: CoroutineScope
 
@@ -51,10 +50,11 @@ open class OpenVpn : Protocol() {
             return Statistics.EMPTY_STATISTICS
         }
 
-    override fun initialize(context: Context, state: MutableStateFlow<ProtocolState>, onError: (String) -> Unit) {
-        super.initialize(context, state, onError)
-        loadSharedLibrary(context, "ovpn3")
-        this.context = context
+    override fun internalInit() {
+        if (!isInitialized) loadSharedLibrary(context, "ovpn3")
+        if (this::scope.isInitialized) {
+            scope.cancel()
+        }
         scope = CoroutineScope(Dispatchers.IO)
     }
 
@@ -77,6 +77,12 @@ open class OpenVpn : Protocol() {
                 if (evalConfig.error) {
                     throw BadConfigException("OpenVPN config parse error: ${evalConfig.message}")
                 }
+
+                // exclude remote server ip from vpn routes
+                val remoteServer = config.getString("hostName")
+                val remoteServerAddress = InetNetwork(parseInetAddress(remoteServer))
+                configBuilder.excludeRoute(remoteServerAddress)
+
                 configPluggableTransport(configBuilder, config)
                 configBuilder.configSplitTunneling(config)
                 configBuilder.configAppSplitTunneling(config)

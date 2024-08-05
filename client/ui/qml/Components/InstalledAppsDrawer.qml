@@ -8,6 +8,7 @@ import "../Controls2/TextTypes"
 import SortFilterProxyModel 0.2
 
 import InstalledAppsModel 1.0
+import Style 1.0
 
 DrawerType2 {
     id: root
@@ -101,7 +102,7 @@ DrawerType2 {
                                 Layout.fillWidth: true
 
                                 text: appName
-
+                                checked: isAppSelected
                                 onCheckedChanged: {
                                     installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
                                 }
@@ -133,7 +134,7 @@ DrawerType2 {
             anchors.rightMargin: 16
             anchors.leftMargin: 16
 
-            backgroundColor: "#2C2D30"
+            backgroundColor: AmneziaStyle.color.greyDark
 
             textFieldPlaceholderText: qsTr("application name")
         }

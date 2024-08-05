@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -15,8 +16,15 @@ import "../Components"
 PageType {
     id: root
 
+    defaultActiveFocusItem: focusItem
+
+    Item {
+        id: focusItem
+        KeyNavigation.tab: backButton
+    }
+
     ColumnLayout {
-        id: backButton
+        id: backButtonLayout
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -25,12 +33,14 @@ PageType {
         anchors.topMargin: 20
 
         BackButtonType {
+            id: backButton
+            KeyNavigation.tab: removeButton
         }
     }
 
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
+        anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.implicitHeight
 
@@ -48,7 +58,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: "Amnezia DNS"
+                headerText: "AmneziaDNS"
                 descriptionText: qsTr("A DNS service is installed on your server, and it is only accessible via VPN.\n") +
                                  qsTr("The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.")
             }
@@ -60,7 +70,9 @@ PageType {
                 width: parent.width
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.red
+
+                Keys.onTabPressed: root.lastItemTabClicked()
 
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
@@ -70,7 +82,7 @@ PageType {
                     var yesButtonFunction = function() {
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
                         && SettingsController.isAmneziaDnsEnabled()) {
-                            PageController.showNotificationMessage(qsTr("Cannot remove Amnezia DNS from running server"))
+                            PageController.showNotificationMessage(qsTr("Cannot remove AmneziaDNS from running server"))
                         } else
                         {
                             PageController.goToPage(PageEnum.PageDeinstalling)
@@ -78,6 +90,9 @@ PageType {
                         }
                     }
                     var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            removeButton.rightButton.forceActiveFocus()
+                        }
                     }
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -89,8 +104,6 @@ PageType {
                     enabled: false
                 }
             }
-
-            DividerType {}
         }
     }
 }

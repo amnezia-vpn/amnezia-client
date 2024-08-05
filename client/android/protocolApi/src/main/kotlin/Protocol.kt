@@ -27,13 +27,20 @@ private const val SPLIT_TUNNEL_EXCLUDE = 2
 abstract class Protocol {
 
     abstract val statistics: Statistics
+    protected lateinit var context: Context
     protected lateinit var state: MutableStateFlow<ProtocolState>
     protected lateinit var onError: (String) -> Unit
+    protected var isInitialized: Boolean = false
 
-    open fun initialize(context: Context, state: MutableStateFlow<ProtocolState>, onError: (String) -> Unit) {
+    fun initialize(context: Context, state: MutableStateFlow<ProtocolState>, onError: (String) -> Unit) {
+        this.context = context
         this.state = state
         this.onError = onError
+        internalInit()
+        isInitialized = true
     }
+
+    protected abstract fun internalInit()
 
     abstract fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean)
 
@@ -105,25 +112,27 @@ abstract class Protocol {
             vpnBuilder.addSearchDomain(it)
         }
 
-        for (addr in config.routes) {
-            Log.d(TAG, "addRoute: $addr")
-            vpnBuilder.addRoute(addr)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            for (addr in config.excludedRoutes) {
-                Log.d(TAG, "excludeRoute: $addr")
-                vpnBuilder.excludeRoute(addr)
+        for ((inetNetwork, include) in config.routes) {
+            if (include) {
+                Log.d(TAG, "addRoute: $inetNetwork")
+                vpnBuilder.addRoute(inetNetwork)
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Log.d(TAG, "excludeRoute: $inetNetwork")
+                    vpnBuilder.excludeRoute(inetNetwork)
+                } else {
+                    Log.e(TAG, "Trying to exclude route $inetNetwork on old Android")
+                }
             }
         }
 
         for (app in config.includedApplications) {
-            Log.d(TAG, "addAllowedApplication: $app")
+            Log.d(TAG, "addAllowedApplication")
             vpnBuilder.addAllowedApplication(app)
         }
 
         for (app in config.excludedApplications) {
-            Log.d(TAG, "addDisallowedApplication: $app")
+            Log.d(TAG, "addDisallowedApplication")
             vpnBuilder.addDisallowedApplication(app)
         }
 

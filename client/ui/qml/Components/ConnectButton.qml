@@ -6,13 +6,14 @@ import Qt5Compat.GraphicalEffects
 
 import ConnectionState 1.0
 import PageEnum 1.0
+import Style 1.0
 
 Button {
     id: root
 
-    property string defaultButtonColor: "#D7D8DB"
-    property string progressButtonColor: "#D7D8DB"
-    property string connectedButtonColor: "#FBB26A"
+    property string defaultButtonColor: AmneziaStyle.color.white
+    property string progressButtonColor: AmneziaStyle.color.white
+    property string connectedButtonColor: AmneziaStyle.color.orange
 
     implicitWidth: 190
     implicitHeight: 190
@@ -49,29 +50,45 @@ Button {
                 verticalOffset: 0
                 radius: 10
                 samples: 25
-                color: "#FBB26A"
+                color: root.activeFocus ? AmneziaStyle.color.white : AmneziaStyle.color.orange
                 source: backgroundCircle
             }
 
             ShapePath {
-                fillColor: "transparent"
+                fillColor: AmneziaStyle.color.transparent
+                strokeColor: AmneziaStyle.color.white
+                strokeWidth: root.activeFocus ? 1 : 0
+                capStyle: ShapePath.RoundCap
+
+                PathAngleArc {
+                    centerX: backgroundCircle.width / 2
+                    centerY: backgroundCircle.height / 2
+                    radiusX: 94
+                    radiusY: 94
+                    startAngle: 0
+                    sweepAngle: 360
+                }
+            }
+
+            ShapePath {
+                fillColor: AmneziaStyle.color.transparent
                 strokeColor: {
                     if (ConnectionController.isConnectionInProgress) {
-                        return "#261E1A"
+                        return AmneziaStyle.color.connectionInProgress
                     } else if (ConnectionController.isConnected) {
                         return connectedButtonColor
                     } else {
                         return defaultButtonColor
                     }
                 }
-                strokeWidth: 3
+                strokeWidth: root.activeFocus ? 2 : 3
                 capStyle: ShapePath.RoundCap
 
                 PathAngleArc {
                     centerX: backgroundCircle.width / 2
                     centerY: backgroundCircle.height / 2
-                    radiusX: 93
-                    radiusY: 93
+                    radiusX: 93 - (root.activeFocus ? 2 : 0)
+                    radiusY: 93 - (root.activeFocus ? 2 : 0)
                     startAngle: 0
                     sweepAngle: 360
                 }
@@ -97,8 +114,8 @@ Button {
             visible: ConnectionController.isConnectionInProgress
 
             ShapePath {
-                fillColor: "transparent"
-                strokeColor: "#D7D8DB"
+                fillColor: AmneziaStyle.color.transparent
+                strokeColor: AmneziaStyle.color.white
                 strokeWidth: 3
                 capStyle: ShapePath.RoundCap
 
@@ -141,4 +158,7 @@ Button {
         ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
         ConnectionController.connectButtonClicked()
     }
+
+    Keys.onEnterPressed: this.clicked()
+    Keys.onReturnPressed: this.clicked()
 }

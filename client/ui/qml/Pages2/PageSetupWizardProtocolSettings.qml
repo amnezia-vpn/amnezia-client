@@ -7,6 +7,7 @@ import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import ContainerProps 1.0
 import ProtocolProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -61,12 +62,19 @@ PageType {
                         anchors.rightMargin: 16
                         anchors.leftMargin: 16
 
+                        Item {
+                            id: focusItem
+                            KeyNavigation.tab: backButton
+                        }
+
                         BackButtonType {
                             id: backButton
 
                             Layout.topMargin: 20
                             Layout.rightMargin: -16
                             Layout.leftMargin: -16
+
+                            KeyNavigation.tab: showDetailsButton
                         }
 
                         HeaderType {
@@ -86,13 +94,14 @@ PageType {
 
                             implicitHeight: 32
 
-                            defaultColor: "transparent"
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                            disabledColor: "#878B91"
-                            textColor: "#FBB26A"
+                            defaultColor: AmneziaStyle.color.transparent
+                            hoveredColor: AmneziaStyle.color.blackHovered
+                            pressedColor: AmneziaStyle.color.blackPressed
+                            disabledColor: AmneziaStyle.color.grey
+                            textColor: AmneziaStyle.color.orange
 
                             text: qsTr("More detailed")
+                            KeyNavigation.tab: transportProtoSelector
 
                             clickedFunc: function() {
                                 showDetailsDrawer.open()
@@ -102,11 +111,34 @@ PageType {
                         DrawerType2 {
                             id: showDetailsDrawer
                             parent: root
+                            onClosed: {
+                                if (!GC.isMobile()) {
+                                    defaultActiveFocusItem.forceActiveFocus()
+                                }
+                            }
 
                             anchors.fill: parent
                             expandedHeight: parent.height * 0.9
                             expandedContent: Item {
+                                Connections {
+                                    target: showDetailsDrawer
+                                    enabled: !GC.isMobile()
+                                    function onOpened() {
+                                        focusItem2.forceActiveFocus()
+                                    }
+                                }
+
                                 implicitHeight: showDetailsDrawer.expandedHeight
+
+                                Item {
+                                    id: focusItem2
+                                    KeyNavigation.tab: showDetailsBackButton
+                                    onFocusChanged: {
+                                        if (focusItem2.activeFocus) {
+                                            fl.contentY = 0
+                                        }
+                                    }
+                                }
 
                                 BackButtonType {
                                     id: showDetailsBackButton
@@ -116,12 +148,15 @@ PageType {
                                     anchors.right: parent.right
                                     anchors.topMargin: 16
 
+                                    KeyNavigation.tab: showDetailsCloseButton
+
                                     backButtonFunction: function() {
                                         showDetailsDrawer.close()
                                     }
                                 }
 
                                 FlickableType {
+                                    id: fl
                                     anchors.top: showDetailsBackButton.bottom
                                     anchors.left: parent.left
                                     anchors.right: parent.right
@@ -158,17 +193,19 @@ PageType {
                                             textFormat: Text.MarkdownText
                                         }
 
-
                                         Rectangle {
                                             Layout.fillHeight: true
-                                            color: "transparent"
+                                            color: AmneziaStyle.color.transparent
                                         }
 
                                         BasicButtonType {
+                                            id: showDetailsCloseButton
                                             Layout.fillWidth: true
                                             Layout.bottomMargin: 32
+                                            parentFlickable: fl
 
                                             text: qsTr("Close")
+                                            Keys.onTabPressed: lastItemTabClicked(focusItem2)
 
 											clickedFunc: function()  {
                                                 showDetailsDrawer.close()
@@ -192,6 +229,8 @@ PageType {
 
                             Layout.fillWidth: true
                             rootWidth: root.width
+
+                            KeyNavigation.tab: (port.visible && port.enabled) ? port.textField : installButton
                         }
 
                         TextFieldWithHeaderType {
@@ -209,7 +248,7 @@ PageType {
 
                         Rectangle {
                             Layout.fillHeight: true
-                            color: "transparent"
+                            color: AmneziaStyle.color.transparent
                         }
 
                         BasicButtonType {
@@ -220,7 +259,15 @@ PageType {
 
                             text: qsTr("Install")
 
+                            Keys.onTabPressed: lastItemTabClicked(focusItem)
+
                             clickedFunc: function() {
+                                if (!port.textField.acceptableInput &&
+                                        ContainerProps.containerTypeToString(dockerContainer) !== "torwebsite") {
+                                    port.errorText = qsTr("The port must be in the range of 1 to 65535")
+                                    return
+                                }
+
                                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                                 InstallController.install(dockerContainer, port.textFieldText, transportProtoSelector.currentIndex)
                             }
@@ -241,7 +288,10 @@ PageType {
                             transportProtoSelector.visible = protocolSelectorVisible
                             transportProtoHeader.visible = protocolSelectorVisible
 
-                            defaultActiveFocusItem = port.textField
+                            if (port.visible && port.enabled)
+                                defaultActiveFocusItem = port.textField
+                            else
+                                defaultActiveFocusItem = focusItem
                         }
                     }
                 }

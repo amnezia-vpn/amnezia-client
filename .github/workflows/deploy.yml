@@ -65,6 +65,13 @@ jobs:
         path: deploy/AppDir
         retention-days: 7
 
+    - name: 'Upload translations artifact'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_translations
+        path: client/translations
+        retention-days: 7
+
 # ------------------------------------------------------
 
   Build-Windows:
@@ -233,7 +240,7 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '13.4'
+        xcode-version: '14.3.1'
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3

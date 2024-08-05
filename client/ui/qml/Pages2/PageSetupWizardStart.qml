@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -14,6 +15,8 @@ PageType {
     id: root
 
     property bool isControlsDisabled: false
+
+    defaultActiveFocusItem: focusItem
 
     Connections {
         target: PageController
@@ -74,9 +77,9 @@ PageType {
     Connections {
         target: InstallController
 
-        function onInstallationErrorOccurred(errorMessage) {
+        function onInstallationErrorOccurred(error) {
             PageController.showBusyIndicator(false)
-            PageController.showErrorMessage(errorMessage)
+            PageController.showErrorMessage(error)
 
             var currentPageName = stackView.currentItem.objectName
 
@@ -95,8 +98,8 @@ PageType {
             PageController.showBusyIndicator(false)
         }
 
-        function onImportErrorOccurred(errorMessage, goToPageHome) {
-            PageController.showErrorMessage(errorMessage)
+        function onImportErrorOccurred(error, goToPageHome) {
+            PageController.showErrorMessage(error)
         }
     }
 
@@ -136,7 +139,13 @@ PageType {
                       qsTr(" Helps you access blocked content without revealing your privacy, even to VPN providers.")
             }
 
+            Item {
+                id: focusItem
+                KeyNavigation.tab: startButton
+            }
+
             BasicButtonType {
+                id: startButton
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.leftMargin: 16
@@ -147,19 +156,22 @@ PageType {
                 clickedFunc: function() {
                     connectionTypeSelection.open()
                 }
+
+                KeyNavigation.tab: startButton2
             }
 
             BasicButtonType {
+                id: startButton2
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#D7D8DB"
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.blackHovered
+                pressedColor: AmneziaStyle.color.blackPressed
+                disabledColor: AmneziaStyle.color.grey
+                textColor: AmneziaStyle.color.white
                 borderWidth: 1
 
                 text: qsTr("I have nothing")
@@ -167,11 +179,18 @@ PageType {
                 clickedFunc: function() {
                     Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
                 }
+
+                Keys.onTabPressed: lastItemTabClicked(focusItem)
             }
         }
     }
 
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
+
+        onClosed: {
+            PageController.forceTabBarActiveFocus()
+            root.defaultActiveFocusItem.forceActiveFocus()
+        }
     }
 }

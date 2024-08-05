@@ -5,6 +5,10 @@
 
 #include "configurators/openvpn_configurator.h"
 
+#ifdef Q_OS_IOS
+    #include "platforms/ios/ios_controller.h"
+#endif
+
 class ApiController : public QObject
 {
     Q_OBJECT
@@ -13,10 +17,15 @@ public:
     explicit ApiController(QObject *parent = nullptr);
 
 public slots:
-    ErrorCode updateServerConfigFromApi(QJsonObject &serverConfig);
+    void updateServerConfigFromApi(const QString &installationUuid, const int serverIndex, QJsonObject serverConfig);
+
+signals:
+    void errorOccurred(ErrorCode errorCode);
+    void configUpdated(const bool updateConfig, const QJsonObject &config, const int serverIndex);
 
 private:
-    struct ApiPayloadData {
+    struct ApiPayloadData
+    {
         OpenVpnConfigurator::ConnectionData certRequest;
 
         QString wireGuardClientPrivKey;
