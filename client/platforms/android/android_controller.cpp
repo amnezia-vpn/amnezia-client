@@ -136,7 +136,7 @@ ErrorCode AndroidController::start(const QJsonObject &vpnConfig)
     callActivityMethod("start", "(Ljava/lang/String;)V",
                        QJniObject::fromString(config).object<jstring>());
 
-    return NoError;
+    return ErrorCode::NoError;
 }
 
 void AndroidController::stop()

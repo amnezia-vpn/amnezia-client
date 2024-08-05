@@ -86,6 +86,7 @@ PageLoader::PageEnum ProtocolsModel::protocolPage(Proto protocol) const
     case Proto::TorWebSite: return PageLoader::PageEnum::PageServiceTorWebsiteSettings;
     case Proto::Dns: return PageLoader::PageEnum::PageServiceDnsSettings;
     case Proto::Sftp: return PageLoader::PageEnum::PageServiceSftpSettings;
+    case Proto::Socks5Proxy: return PageLoader::PageEnum::PageServiceSocksProxySettings;
     default: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
     }
 }

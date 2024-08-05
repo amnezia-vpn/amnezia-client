@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Shapes
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -99,9 +100,10 @@ PageType {
     Connections {
         target: InstallController
 
-        function onInstallationErrorOccurred(errorMessage) {
+        function onInstallationErrorOccurred(error) {
             PageController.showBusyIndicator(false)
-            PageController.showErrorMessage(errorMessage)
+
+            PageController.showErrorMessage(error)
 
             var needCloseCurrentPage = false
             var currentPageName = tabBarStackView.currentItem.objectName
@@ -146,8 +148,8 @@ PageType {
     Connections {
         target: ImportController
 
-        function onImportErrorOccurred(errorMessage, goToPageHome) {
-            PageController.showErrorMessage(errorMessage)
+        function onImportErrorOccurred(error, goToPageHome) {
+            PageController.showErrorMessage(error)
         }
     }
 
@@ -212,13 +214,13 @@ PageType {
                 startY: 0
 
                 PathLine { x: width; y: 0 }
-                PathLine { x: width; y: height - 1 }
-                PathLine { x: 0; y: height - 1 }
+                PathLine { x: width; y: tabBar.height - 1 }
+                PathLine { x: 0; y: tabBar.height - 1 }
                 PathLine { x: 0; y: 0 }
 
                 strokeWidth: 1
-                strokeColor: "#2C2D30"
-                fillColor: "#1C1D21"
+                strokeColor: AmneziaStyle.color.greyDark
+                fillColor: AmneziaStyle.color.blackLight
             }
         }
 

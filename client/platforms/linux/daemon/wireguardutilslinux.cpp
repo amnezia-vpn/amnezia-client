@@ -18,7 +18,7 @@
 #include "logger.h"
 
 constexpr const int WG_TUN_PROC_TIMEOUT = 5000;
-constexpr const char* WG_RUNTIME_DIR = "/var/run/wireguard";
+constexpr const char* WG_RUNTIME_DIR = "/var/run/amneziawg";
 
 namespace {
 Logger logger("WireguardUtilsLinux");
@@ -139,7 +139,7 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
         if (config.m_killSwitchEnabled) {
             FirewallParams params { };
             params.dnsServers.append(config.m_dnsServer);
-            if (config.m_allowedIPAddressRanges.at(0).toString() == "0.0.0.0/0"){
+            if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
                 params.blockAll = true;
                 if (config.m_excludedAddresses.size()) {
                     params.allowNets = true;

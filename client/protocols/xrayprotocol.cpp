@@ -233,6 +233,9 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
 {
     m_configData = configuration;
     QJsonObject xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::Xray)).toObject();
+    if (xrayConfiguration.isEmpty()) {
+        xrayConfiguration = configuration.value(ProtocolProps::key_proto_config_data(Proto::SSXray)).toObject();
+    }
     m_xrayConfig = xrayConfiguration;
     m_localPort = QString(amnezia::protocols::xray::defaultLocalProxyPort).toInt();
     m_remoteAddress = configuration.value(amnezia::config_key::hostName).toString();

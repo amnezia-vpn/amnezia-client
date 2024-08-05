@@ -33,6 +33,10 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, cons
     }
 
     // Skip annoying messages from Qt
+    if (msg.contains("OpenType support missing for")) {
+        return;
+    }
+
     if (msg.startsWith("Unknown property") || msg.startsWith("Could not create pixmap") || msg.startsWith("Populating font") || msg.startsWith("stale focus object")) {
         return;
     }

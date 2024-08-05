@@ -1,0 +1,15 @@
+Get your own self-hosted VPN!
+
+AmneziaVPN is a multi-protocol, open-source VPN client that offers the option to set up your own server. 
+
+Free open-source software to create a personal VPN on your server. Helps to access blocked content without revealing privacy even to VPN providers. Specify IP address, credentials for your server and Amnezia will configure it to connect via VPN automatically.
+
+We are not a VPN service, you don't have to connect to our servers and pay us anything. You free to use your own self-hosted VPS or you could purchase any VPS from any provider. To connect, use your own or purchase any VPS from any provider.
+
+Useful links
+
+• https://amnezia.org - project website
+• https://www.reddit.com/r/AmneziaVPN - Reddit
+• https://t.me/amnezia_vpn_en - Telegram support channel (English)
+• https://t.me/amnezia_vpn - Telegram support channel (Russian)
+• https://t.me/amnezia_free_myanmar_bot - Telegram support channel (Burmese)
