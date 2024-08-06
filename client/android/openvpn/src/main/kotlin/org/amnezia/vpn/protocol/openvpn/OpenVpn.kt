@@ -16,23 +16,6 @@ import org.amnezia.vpn.util.net.getLocalNetworks
 import org.amnezia.vpn.util.net.parseInetAddress
 import org.json.JSONObject
 
-/**
- *    Config Example:
- *    {
- *     "protocol": "openvpn",
- *     "description": "Server 1",
- *     "dns1": "1.1.1.1",
- *     "dns2": "1.0.0.1",
- *     "hostName": "100.100.100.0",
- *     "splitTunnelSites": [
- *     ],
- *     "splitTunnelType": 0,
- *     "openvpn_config_data": {
- *           "config": "openVpnConfig"
- *     }
- * }
- */
-
 open class OpenVpn : Protocol() {
 
     private var openVpnClient: OpenVpnClient? = null
