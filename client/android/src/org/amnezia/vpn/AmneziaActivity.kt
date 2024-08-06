@@ -1,6 +1,7 @@
 package org.amnezia.vpn
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
@@ -556,7 +557,11 @@ class AmneziaActivity : QtActivity() {
     }
 
     @Suppress("unused")
+    @SuppressLint("UnsupportedChromeOsCameraSystemFeature")
     fun isCameraPresent(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
+
+    @Suppress("unused")
+    fun isOnTv(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
 
     @Suppress("unused")
     fun startQrCodeReader() {

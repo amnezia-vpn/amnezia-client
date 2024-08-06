@@ -179,6 +179,11 @@ bool AndroidController::isCameraPresent()
     return callActivityMethod<jboolean>("isCameraPresent", "()Z");
 }
 
+bool AndroidController::isOnTv()
+{
+    return callActivityMethod<jboolean>("isOnTv", "()Z");
+}
+
 void AndroidController::startQrReaderActivity()
 {
     callActivityMethod("startQrCodeReader", "()V");
