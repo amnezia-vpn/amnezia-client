@@ -88,16 +88,24 @@ class NetworkState(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             connectivityManager.registerBestMatchingNetworkCallback(networkRequest, networkCallback, handler)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            try {
-                connectivityManager.requestNetwork(networkRequest, networkCallback, handler)
-            } catch (e: SecurityException) {
-                Log.e(TAG, "Failed to bind network listener: $e")
-                // Android 11 bug: https://issuetracker.google.com/issues/175055271
-                if (e.message?.startsWith("Package android does not belong to") == true) {
-                    delay(1000)
+            val numberAttempts = 3
+            var attemptCount = 0
+            while(true) {
+                try {
                     connectivityManager.requestNetwork(networkRequest, networkCallback, handler)
-                } else {
-                    throw e
+                    break
+                } catch (e: SecurityException) {
+                    Log.e(TAG, "Failed to bind network listener: $e")
+                    // Android 11 bug: https://issuetracker.google.com/issues/175055271
+                    if (e.message?.startsWith("Package android does not belong to") == true) {
+                        if (++attemptCount > numberAttempts) {
+                            throw e
+                        }
+                        delay(1000)
+                        continue
+                    } else {
+                        throw e
+                    }
                 }
             }
         } else {

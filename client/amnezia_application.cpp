@@ -157,6 +157,7 @@ void AmneziaApplication::init()
     connect(this, &AmneziaApplication::translationsUpdated, m_notificationHandler.get(), &NotificationHandler::onTranslationsUpdated);
 #endif
 
+    m_engine->addImportPath("qrc:/ui/qml/Modules/");
     m_engine->load(url);
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
 
@@ -350,6 +351,9 @@ void AmneziaApplication::initModels()
 
     m_sftpConfigModel.reset(new SftpConfigModel(this));
     m_engine->rootContext()->setContextProperty("SftpConfigModel", m_sftpConfigModel.get());
+
+    m_socks5ConfigModel.reset(new Socks5ProxyConfigModel(this));
+    m_engine->rootContext()->setContextProperty("Socks5ProxyConfigModel", m_socks5ConfigModel.get());
 
     m_clientManagementModel.reset(new ClientManagementModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());

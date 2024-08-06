@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "TextTypes"
 import "../Config"
 
@@ -9,31 +11,31 @@ Item {
     id: root
 
     property string text
-    property string textColor: "#d7d8db"
-    property string textDisabledColor: "#878B91"
+    property string textColor: AmneziaStyle.color.white
+    property string textDisabledColor: AmneziaStyle.color.grey
     property int textMaximumLineCount: 2
     property int textElide: Qt.ElideRight
 
     property string descriptionText
-    property string descriptionTextColor: "#878B91"
-    property string descriptionTextDisabledColor: "#494B50"
+    property string descriptionTextColor: AmneziaStyle.color.grey
+    property string descriptionTextDisabledColor: AmneziaStyle.color.greyDisabled
 
     property string headerText
     property string headerBackButtonImage
 
     property var rootButtonClickedFunction
     property string rootButtonImage: "qrc:/images/controls/chevron-down.svg"
-    property string rootButtonImageColor: "#D7D8DB"
-    property string rootButtonBackgroundColor: "#1C1D21"
-    property string rootButtonBackgroundHoveredColor: "#1C1D21"
-    property string rootButtonBackgroundPressedColor: "#1C1D21"
+    property string rootButtonImageColor: AmneziaStyle.color.white
+    property string rootButtonBackgroundColor: AmneziaStyle.color.blackLight
+    property string rootButtonBackgroundHoveredColor: AmneziaStyle.color.blackLight
+    property string rootButtonBackgroundPressedColor: AmneziaStyle.color.blackLight
 
-    property string borderFocusedColor: "#D7D8DB"
+    property string borderFocusedColor: AmneziaStyle.color.white
     property int borderFocusedWidth: 1
 
-    property string rootButtonHoveredBorderColor: "#494B50"
-    property string rootButtonDefaultBorderColor: "#2C2D30"
-    property string rootButtonPressedBorderColor: "#D7D8DB"
+    property string rootButtonHoveredBorderColor: AmneziaStyle.color.greyDisabled
+    property string rootButtonDefaultBorderColor: AmneziaStyle.color.greyDark
+    property string rootButtonPressedBorderColor: AmneziaStyle.color.white
 
     property int rootButtonTextLeftMargins: 16
     property int rootButtonTextTopMargin: 16
@@ -75,8 +77,8 @@ Item {
     Rectangle {
         id: focusBorder
 
-        color: "transparent"
-        border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
+        color: AmneziaStyle.color.transparent
+        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
         border.width: root.activeFocus ? root.borderFocusedWidth : 0
         anchors.fill: rootButtonContent
         radius: 16
@@ -96,7 +98,7 @@ Item {
                     }
                     return root.hovered ? root.rootButtonBackgroundHoveredColor : root.rootButtonBackgroundColor
                 } else {
-                    return "transparent"
+                    return AmneziaStyle.color.transparent
                 }
             }
 

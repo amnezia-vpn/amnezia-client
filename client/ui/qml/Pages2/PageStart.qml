@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Shapes
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -213,13 +214,13 @@ PageType {
                 startY: 0
 
                 PathLine { x: width; y: 0 }
-                PathLine { x: width; y: height - 1 }
-                PathLine { x: 0; y: height - 1 }
+                PathLine { x: width; y: tabBar.height - 1 }
+                PathLine { x: 0; y: tabBar.height - 1 }
                 PathLine { x: 0; y: 0 }
 
                 strokeWidth: 1
-                strokeColor: "#2C2D30"
-                fillColor: "#1C1D21"
+                strokeColor: AmneziaStyle.color.greyDark
+                fillColor: AmneziaStyle.color.blackLight
             }
         }
 

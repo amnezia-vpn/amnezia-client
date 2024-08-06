@@ -65,6 +65,13 @@ jobs:
         path: deploy/AppDir
         retention-days: 7
 
+    - name: 'Upload translations artifact'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_translations
+        path: client/translations
+        retention-days: 7
+
 # ------------------------------------------------------
 
   Build-Windows:

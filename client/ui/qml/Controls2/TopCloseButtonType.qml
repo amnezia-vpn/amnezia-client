@@ -18,14 +18,14 @@ Popup {
     }
 
     background: Rectangle {
-        color: "transparent"
+        color: AmneziaStyle.color.transparent
     }
 
     ImageButtonType {
         id: button
 
         image: "qrc:/images/svg/close_black_24dp.svg"
-        imageColor: "#D7D8DB"
+        imageColor: AmneziaStyle.color.white
 
         implicitWidth: 40
         implicitHeight: 40

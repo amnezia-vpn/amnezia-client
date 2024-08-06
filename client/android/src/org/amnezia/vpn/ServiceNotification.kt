@@ -59,14 +59,14 @@ class ServiceNotification(private val context: Context) {
         formatSpeedString(rxString, txString)
     }
 
-    fun buildNotification(serverName: String?, state: ProtocolState): Notification {
+    fun buildNotification(serverName: String?, protocol: String?, state: ProtocolState): Notification {
         val speedString = if (state == CONNECTED) zeroSpeed else null
 
         Log.d(TAG, "Build notification: $serverName, $state")
 
         return notificationBuilder
             .setSmallIcon(R.drawable.ic_amnezia_round)
-            .setContentTitle(serverName ?: "AmneziaVPN")
+            .setContentTitle((serverName ?: "AmneziaVPN") + (protocol?.let { " $it" } ?: ""))
             .setContentText(context.getString(state))
             .setSubText(speedString)
             .setWhen(System.currentTimeMillis())
@@ -96,10 +96,10 @@ class ServiceNotification(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun updateNotification(serverName: String?, state: ProtocolState) {
+    fun updateNotification(serverName: String?, protocol: String?, state: ProtocolState) {
         if (context.isNotificationPermissionGranted()) {
             Log.d(TAG, "Update notification: $serverName, $state")
-            notificationManager.notify(NOTIFICATION_ID, buildNotification(serverName, state))
+            notificationManager.notify(NOTIFICATION_ID, buildNotification(serverName, protocol, state))
         }
     }
 
@@ -125,7 +125,7 @@ class ServiceNotification(private val context: Context) {
                         context,
                         DISCONNECT_REQUEST_CODE,
                         Intent(ACTION_DISCONNECT).apply {
-                            setPackage("org.amnezia.vpn")
+                            setPackage(context.packageName)
                         },
                         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                     )
@@ -135,10 +135,12 @@ class ServiceNotification(private val context: Context) {
             DISCONNECTED -> {
                 Action(
                     0, context.getString(R.string.connect),
-                    createServicePendingIntent(
+                    PendingIntent.getBroadcast(
                         context,
                         CONNECT_REQUEST_CODE,
-                        Intent(context, AmneziaVpnService::class.java),
+                        Intent(ACTION_CONNECT).apply {
+                            setPackage(context.packageName)
+                        },
                         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                     )
                 )
@@ -147,13 +149,6 @@ class ServiceNotification(private val context: Context) {
             else -> null
         }
     }
-
-    private val createServicePendingIntent: (Context, Int, Intent, Int) -> PendingIntent =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            PendingIntent::getForegroundService
-        } else {
-            PendingIntent::getService
-        }
 
     companion object {
         fun createNotificationChannel(context: Context) {

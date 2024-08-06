@@ -92,9 +92,9 @@ int LanguageModel::getCurrentLanguageIndex()
 
 int LanguageModel::getLineHeightAppend()
 {
-    int langIndex = getCurrentLanguageIndex();
-    switch (langIndex) {
-    case 5: return 10; break; // Burmese
+    auto language = static_cast<LanguageSettings::AvailableLanguageEnum>(getCurrentLanguageIndex());
+    switch (language) {
+    case LanguageSettings::AvailableLanguageEnum::Burmese: return 10; break;
     default: return 0; break;
     }
 }
