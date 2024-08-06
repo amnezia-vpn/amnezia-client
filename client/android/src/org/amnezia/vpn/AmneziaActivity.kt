@@ -231,7 +231,10 @@ class AmneziaActivity : QtActivity() {
     override fun onStop() {
         Log.d(TAG, "Stop Amnezia activity")
         doUnbindService()
-        QtAndroidController.onServiceDisconnected()
+        mainScope.launch {
+            qtInitialized.await()
+            QtAndroidController.onServiceDisconnected()
+        }
         super.onStop()
     }
 
@@ -543,7 +546,7 @@ class AmneziaActivity : QtActivity() {
                 }
             }.also {
                 startActivityForResult(it, OPEN_FILE_ACTION_CODE, ActivityResultHandler(
-                    onSuccess = {
+                    onAny = {
                         val uri = it?.data?.toString() ?: ""
                         Log.d(TAG, "Open file: $uri")
                         mainScope.launch {
