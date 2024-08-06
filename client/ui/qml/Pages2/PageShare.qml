@@ -154,7 +154,7 @@ PageType {
     }
 
     FlickableType {
-        id: a
+        id: fl
 
         anchors.top: parent.top
         anchors.bottom: parent.bottom
@@ -177,7 +177,7 @@ PageType {
                 KeyNavigation.tab: header.actionButton
                 onFocusChanged: {
                     if (focusItem.activeFocus) {
-                        a.contentY = 0
+                        fl.contentY = 0
                     }
                 }
             }
@@ -577,7 +577,7 @@ PageType {
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
 
-                parentFlickable: a
+                parentFlickable:fl
 
                 clickedFunc: function(){
                     if (clientNameTextField.textFieldText !== "") {
@@ -723,10 +723,10 @@ PageType {
 
                 onCurrentIndexChanged: {
                     if (currentItem) {
-                        if (currentItem.y < a.contentY) {
-                            a.contentY = currentItem.y
-                        } else if (currentItem.y + currentItem.height + clientsListView.y > a.contentY + a.height) {
-                            a.contentY = currentItem.y + clientsListView.y + currentItem.height - a.height
+                        if (currentItem.y < fl.contentY) {
+                            fl.contentY = currentItem.y
+                        } else if (currentItem.y + currentItem.height + clientsListView.y > fl.contentY + fl.height) {
+                            fl.contentY = currentItem.y + clientsListView.y + currentItem.height - fl.height
                         }
                     }
                 }

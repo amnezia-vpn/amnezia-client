@@ -18,8 +18,11 @@ import "../Components"
 
 PageType {
     id: root
+    focus: true
 
-    defaultActiveFocusItem: focusItem
+    defaultActiveFocusItem: loggingButton.visible ?
+                                loggingButton :
+                                connectButton
 
     Connections {
         target: PageController
@@ -32,7 +35,7 @@ PageType {
         }
     }
 
-    Item {
+    FocusScope {
         anchors.fill: parent
         anchors.bottomMargin: drawer.collapsedHeight
 
@@ -41,12 +44,6 @@ PageType {
             anchors.topMargin: 34
             anchors.bottomMargin: 34
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: loggingButton.visible ?
-                                       loggingButton :
-                                       connectButton
-            }
 
             BasicButtonType {
                 id: loggingButton
@@ -68,8 +65,9 @@ PageType {
 
                 Keys.onEnterPressed: loggingButton.clicked()
                 Keys.onReturnPressed: loggingButton.clicked()
+                // activeFocusOnTab: true
 
-                KeyNavigation.tab: connectButton
+                // KeyNavigation.tab: connectButton
 
                 onClicked: {
                     PageController.goToPage(PageEnum.PageSettingsLogging)
@@ -78,9 +76,10 @@ PageType {
 
             ConnectButton {
                 id: connectButton
+                activeFocusOnTab: true
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignCenter
-                KeyNavigation.tab: splitTunnelingButton
+                // KeyNavigation.tab: splitTunnelingButton
             }
 
             BasicButtonType {
@@ -116,7 +115,7 @@ PageType {
                 Keys.onEnterPressed: splitTunnelingButton.clicked()
                 Keys.onReturnPressed: splitTunnelingButton.clicked()
 
-                KeyNavigation.tab: drawer
+                // KeyNavigation.tab: drawer
 
                 onClicked: {
                     homeSplitTunnelingDrawer.open()
@@ -126,41 +125,42 @@ PageType {
                     id: homeSplitTunnelingDrawer
                     parent: root
 
-                    onClosed: {
-                        if (!GC.isMobile()) {
-                            focusItem.forceActiveFocus()
-                        }
-                    }
+                    // onClosed: {
+                    //     if (!GC.isMobile()) {
+                    //         focusItem.forceActiveFocus()
+                    //     }
+                    // }
                 }
             }
         }
     }
 
-
     DrawerType2 {
         id: drawer
+        objectName: "drawer"
         anchors.fill: parent
+        focus: true
+        parentPage: root
 
-        onClosed: {
-            if (!GC.isMobile()) {
-                focusItem.forceActiveFocus()
-            }
-        }
-
-        collapsedContent: Item {
+        collapsedContent: FocusScope {
+            id: collapsed123
+            focus: true
             implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
             Component.onCompleted: {
                 drawer.expandedHeight = implicitHeight
             }
-            Connections {
-                target: drawer
-                enabled: !GC.isMobile()
-                function onActiveFocusChanged() {
-                    if (drawer.activeFocus && !drawer.isOpened) {
-                        collapsedButtonChevron.forceActiveFocus()
-                    }
-                }
-            }
+
+            // Connections {
+            //     target: drawer
+            //     enabled: !GC.isMobile()
+            //     function onActiveFocusChanged() {
+            //         if (drawer.activeFocus && !drawer.isOpened) {
+            //             collapsed123.forceActiveFocus()
+            //             // collapsedButtonChevron.forceActiveFocus()
+            //         }
+            //     }
+            // }
+
             ColumnLayout {
                 id: collapsed
 
@@ -227,8 +227,6 @@ PageType {
                         text: ServersModel.defaultServerName
                         horizontalAlignment: Qt.AlignHCenter
 
-                        KeyNavigation.tab: tabBar
-
                         Behavior on opacity {
                             PropertyAnimation { duration: 200 }
                         }
@@ -254,12 +252,14 @@ PageType {
 
                         Keys.onEnterPressed: collapsedButtonChevron.clicked()
                         Keys.onReturnPressed: collapsedButtonChevron.clicked()
-                        Keys.onTabPressed: lastItemTabClicked()
+                        // Keys.onTabPressed: lastItemTabClicked()
 
+                        focus: true
 
                         onClicked: {
                             if (drawer.isCollapsed) {
                                 drawer.open()
+                                focusItem1.forceActiveFocus()
                             }
                         }
                     }
@@ -273,15 +273,15 @@ PageType {
                 }
             }
 
-            Connections {
-                target: drawer
-                enabled: !GC.isMobile()
-                function onIsCollapsedChanged() {
-                    if (!drawer.isCollapsed) {
-                        focusItem1.forceActiveFocus()
-                    }
-                }
-            }
+            // Connections {
+            //     target: drawer
+            //     enabled: !GC.isMobile()
+            //     function onIsCollapsedChanged() {
+            //         if (!drawer.isCollapsed) {
+            //             focusItem1.forceActiveFocus()
+            //         }
+            //     }
+            // }
 
             ColumnLayout {
                 id: serversMenuHeader
@@ -292,76 +292,78 @@ PageType {
 
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                    focus: false
                     spacing: 8
 
                     visible: !ServersModel.isDefaultServerFromApi
 
                     Item {
                         id: focusItem1
-                        KeyNavigation.tab: containersDropDown
+                        KeyNavigation.tab: serversMenuContent /*containersDropDown*/
                     }
 
-                    DropDownType {
-                        id: containersDropDown
+                    // DropDownType {
+                    //     id: containersDropDown
 
-                        rootButtonImageColor: AmneziaStyle.color.black
-                        rootButtonBackgroundColor: AmneziaStyle.color.white
-                        rootButtonBackgroundHoveredColor: Qt.rgba(215, 216, 219, 0.8)
-                        rootButtonBackgroundPressedColor: Qt.rgba(215, 216, 219, 0.65)
-                        rootButtonHoveredBorderColor: AmneziaStyle.color.transparent
-                        rootButtonDefaultBorderColor: AmneziaStyle.color.transparent
-                        rootButtonTextTopMargin: 8
-                        rootButtonTextBottomMargin: 8
+                    //     rootButtonImageColor: AmneziaStyle.color.black
+                    //     rootButtonBackgroundColor: AmneziaStyle.color.white
+                    //     rootButtonBackgroundHoveredColor: Qt.rgba(215, 216, 219, 0.8)
+                    //     rootButtonBackgroundPressedColor: Qt.rgba(215, 216, 219, 0.65)
+                    //     rootButtonHoveredBorderColor: AmneziaStyle.color.transparent
+                    //     rootButtonDefaultBorderColor: AmneziaStyle.color.transparent
+                    //     rootButtonTextTopMargin: 8
+                    //     rootButtonTextBottomMargin: 8
 
-                        text: ServersModel.defaultServerDefaultContainerName
-                        textColor: AmneziaStyle.color.black
-                        headerText: qsTr("VPN protocol")
-                        headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
+                    //     text: ServersModel.defaultServerDefaultContainerName
+                    //     textColor: AmneziaStyle.color.black
+                    //     headerText: qsTr("VPN protocol")
+                    //     headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
-                        rootButtonClickedFunction: function() {
-                            containersDropDown.open()
-                        }
+                    //     rootButtonClickedFunction: function() {
+                    //         containersDropDown.open()
+                    //     }
 
-                        drawerParent: root
-                        KeyNavigation.tab: serversMenuContent
+                    //     drawerParent: root
+                    //     KeyNavigation.tab: serversMenuContent
 
-                        listView: HomeContainersListView {
-                            id: containersListView
-                            rootWidth: root.width
-                            onVisibleChanged: {
-                                if (containersDropDown.visible && !GC.isMobile()) {
-                                    focusItem1.forceActiveFocus()
-                                }
-                            }
+                    //     listView: HomeContainersListView {
+                    //         id: containersListView
+                    //         rootWidth: root.width
+                    //         // onVisibleChanged: {
+                    //         //     if (containersDropDown.visible && !GC.isMobile()) {
+                    //         //         focusItem1.forceActiveFocus()
+                    //         //     }
+                    //         // }
 
-                            Connections {
-                                target: ServersModel
+                    //         Connections {
+                    //             target: ServersModel
 
-                                function onDefaultServerIndexChanged() {
-                                    updateContainersModelFilters()
-                                }
-                            }
+                    //             function onDefaultServerIndexChanged() {
+                    //                 updateContainersModelFilters()
+                    //             }
+                    //         }
 
-                            function updateContainersModelFilters() {
-                                if (ServersModel.isDefaultServerHasWriteAccess()) {
-                                    proxyDefaultServerContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
-                                } else {
-                                    proxyDefaultServerContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
-                                }
-                            }
+                    //         function updateContainersModelFilters() {
+                    //             if (ServersModel.isDefaultServerHasWriteAccess()) {
+                    //                 proxyDefaultServerContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
+                    //             } else {
+                    //                 proxyDefaultServerContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
+                    //             }
+                    //         }
 
-                            model: SortFilterProxyModel {
-                                id: proxyDefaultServerContainersModel
-                                sourceModel: DefaultServerContainersModel
+                    //         model: SortFilterProxyModel {
+                    //             id: proxyDefaultServerContainersModel
+                    //             sourceModel: DefaultServerContainersModel
 
-                                sorters: [
-                                    RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
-                                ]
-                            }
+                    //             sorters: [
+                    //                 RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
+                    //             ]
+                    //         }
 
-                            Component.onCompleted: updateContainersModelFilters()
-                        }
-                    }
+                    //         Component.onCompleted: updateContainersModelFilters()
+                    //     }
+                    // }
+
                 }
 
                 Header2Type {
@@ -500,6 +502,8 @@ PageType {
                                 Keys.onTabPressed: serverInfoButton.forceActiveFocus()
                                 Keys.onEnterPressed: serverRadioButton.clicked()
                                 Keys.onReturnPressed: serverRadioButton.clicked()
+
+                                KeyNavigation.tab: serverInfoButton
                             }
 
                             ImageButtonType {
@@ -540,6 +544,8 @@ PageType {
                     }
                 }
             }
+
         }
+
     }
 }

@@ -19,6 +19,7 @@ TabButton {
 
     property var clickedFunc
 
+    focus: true
     hoverEnabled: true
     focusPolicy: Qt.TabFocus
 

@@ -17,12 +17,7 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
+    defaultActiveFocusItem: backButton
 
     ColumnLayout {
         id: header
@@ -35,7 +30,7 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: servers
+            // KeyNavigation.tab: servers
         }
 
         HeaderType {
@@ -69,8 +64,8 @@ PageType {
                 clip: true
                 interactive: false
 
-                activeFocusOnTab: true
-                focus: true
+                // activeFocusOnTab: true
+                // focus: true
                 Keys.onTabPressed: {
                     if (currentIndex < servers.count - 1) {
                         servers.incrementCurrentIndex()
@@ -93,11 +88,11 @@ PageType {
                     implicitWidth: servers.width
                     implicitHeight: delegateContent.implicitHeight
 
-                    onFocusChanged: {
-                        if (focus) {
-                            server.rightButton.forceActiveFocus()
-                        }
-                    }
+                    // onFocusChanged: {
+                    //     if (focus) {
+                    //         server.rightButton.forceActiveFocus()
+                    //     }
+                    // }
 
                     ColumnLayout {
                         id: delegateContent

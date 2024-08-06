@@ -14,18 +14,7 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-
-        onFocusChanged: {
-            if (focusItem.activeFocus) {
-                fl.contentY = 0
-            }
-        }
-    }
+    defaultActiveFocusItem: backButton
 
     BackButtonType {
         id: backButton
@@ -35,7 +24,7 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20
 
-        KeyNavigation.tab: GC.isMobile() ? switcher : switcherAutoStart
+        // KeyNavigation.tab: GC.isMobile() ? switcher : switcherAutoStart
     }
 
     FlickableType {
@@ -77,8 +66,8 @@ PageType {
                     }
                 }
 
-                KeyNavigation.tab: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted ?
-                    labelWithButtonNotification.rightButton : labelWithButtonLanguage.rightButton
+                // KeyNavigation.tab: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted ?
+                    // labelWithButtonNotification.rightButton : labelWithButtonLanguage.rightButton
                 parentFlickable: fl
             }
 
@@ -95,7 +84,7 @@ PageType {
                 descriptionText: qsTr("Enable notifications to show the VPN state in the status bar")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                KeyNavigation.tab: labelWithButtonLanguage.rightButton
+                // KeyNavigation.tab: labelWithButtonLanguage.rightButton
                 parentFlickable: fl
 
                 clickedFunction: function() {
@@ -117,7 +106,7 @@ PageType {
                 text: qsTr("Auto start")
                 descriptionText: qsTr("Launch the application every time the device is starts")
 
-                KeyNavigation.tab: switcherAutoConnect
+                // KeyNavigation.tab: switcherAutoConnect
                 parentFlickable: fl
 
                 checked: SettingsController.isAutoStartEnabled()
@@ -142,7 +131,7 @@ PageType {
                 text: qsTr("Auto connect")
                 descriptionText: qsTr("Connect to VPN on app start")
 
-                KeyNavigation.tab: switcherStartMinimized
+                // KeyNavigation.tab: switcherStartMinimized
                 parentFlickable: fl
 
                 checked: SettingsController.isAutoConnectEnabled()
@@ -167,7 +156,7 @@ PageType {
                 text: qsTr("Start minimized")
                 descriptionText: qsTr("Launch application minimized")
 
-                KeyNavigation.tab: labelWithButtonLanguage.rightButton
+                // KeyNavigation.tab: labelWithButtonLanguage.rightButton
                 parentFlickable: fl
 
                 checked: SettingsController.isStartMinimizedEnabled()
@@ -190,7 +179,7 @@ PageType {
                 descriptionText: LanguageModel.currentLanguageName
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                KeyNavigation.tab: labelWithButtonLogging.rightButton
+                // KeyNavigation.tab: labelWithButtonLogging.rightButton
                 parentFlickable: fl
 
                 clickedFunction: function() {
@@ -208,7 +197,7 @@ PageType {
                 descriptionText: SettingsController.isLoggingEnabled ? qsTr("Enabled") : qsTr("Disabled")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                KeyNavigation.tab: labelWithButtonReset.rightButton
+                // KeyNavigation.tab: labelWithButtonReset.rightButton
                 parentFlickable: fl
 
                 clickedFunction: function() {
@@ -225,9 +214,6 @@ PageType {
                 text: qsTr("Reset settings and remove all data from the application")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 textColor: AmneziaStyle.color.red
-
-                Keys.onTabPressed: lastItemTabClicked()
-                parentFlickable: fl
 
                 clickedFunction: function() {
                     var headerText = qsTr("Reset settings and remove all data from the application?")

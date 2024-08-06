@@ -24,13 +24,20 @@ DrawerType2 {
         anchors.right: parent.right
         spacing: 0
 
-        Connections {
-            target: root
-            enabled: !GC.isMobile()
-            function onOpened() {
-                focusItem.forceActiveFocus()
-            }
-        }
+        // onActiveFocusChanged: {
+        //     console.log("onActiveFocusChanged ========================")
+        //     if (activeFocus) {
+        //         focusItem.forceActiveFocus()
+        //     }
+        // }
+
+        // Connections {
+        //     target: root
+        //     enabled: !GC.isMobile()
+        //     function onOpened() {
+        //         focusItem.forceActiveFocus()
+        //     }
+        // }
 
         Header2Type {
             Layout.fillWidth: true

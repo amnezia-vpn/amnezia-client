@@ -4,10 +4,13 @@ import QtQuick.Layouts
 
 import Style 1.0
 
+import "../Config"
 import "TextTypes"
 
-Item {
+FocusScope {
     id: root
+
+    /*required*/ property var parentPage
 
     readonly property string drawerExpanded: "expanded"
     readonly property string drawerCollapsed: "collapsed"
@@ -39,6 +42,50 @@ Item {
     signal open
     signal closed
     signal opened
+
+    onClosed: {
+        console.log("Drawer closed============================")
+        if (GC.isMobile()) {
+            return
+        }
+
+        if (parentPage) {
+            parentPage.forceActiveFocus()
+        }
+        // PageController.forceStackActiveFocus()
+    }
+
+    onOpened: {
+        console.log("Drawer opened============================")
+        if (GC.isMobile()) {
+            return
+        }
+
+        if (root.expandedContent) {
+            expandedLoader.item.forceActiveFocus()
+        }
+    }
+
+    onActiveFocusChanged: {
+        console.log("Drawer active focus changed============================")
+        if (GC.isMobile()) {
+            return
+        }
+
+        if (root.activeFocus && !root.isOpened && root.collapsedContent) {
+            collapsedLoader.item.forceActiveFocus()
+        }
+    }
+
+    // onOpened: {
+    //     if (isOpened) {
+    //         if (drawerContent.state === root.drawerExpanded) {
+    //             expandedLoader.item.forceActiveFocus()
+    //         } else {
+    //             collapsedLoader.item.forceActiveFocus()
+    //         }
+    //     }
+    // }
 
     Connections {
         target: PageController
@@ -175,6 +222,7 @@ Item {
     Item {
         id: drawerContent
 
+        focus: true
         Drag.active: dragArea.drag.active
         anchors.right: root.right
         anchors.left: root.left

@@ -13,7 +13,7 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: header
+    defaultActiveFocusItem: account
 
     FlickableType {
         id: fl
@@ -38,8 +38,6 @@ PageType {
                 Layout.leftMargin: 16
 
                 headerText: qsTr("Settings")
-
-                KeyNavigation.tab: account.rightButton
             }
 
             LabelWithButtonType {
@@ -55,7 +53,7 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsServersList)
                 }
 
-                KeyNavigation.tab: connection.rightButton
+                // KeyNavigation.tab: connection.rightButton
             }
 
             DividerType {}
@@ -72,7 +70,7 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsConnection)
                 }
 
-                KeyNavigation.tab: application.rightButton
+                // KeyNavigation.tab: application.rightButton
             }
 
             DividerType {}
@@ -89,7 +87,7 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsApplication)
                 }
 
-                KeyNavigation.tab: backup.rightButton
+                // KeyNavigation.tab: backup.rightButton
             }
 
             DividerType {}
@@ -106,7 +104,7 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsBackup)
                 }
 
-                KeyNavigation.tab: about.rightButton
+                // KeyNavigation.tab: about.rightButton
             }
 
             DividerType {}
@@ -122,7 +120,7 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsAbout)
                 }
-                KeyNavigation.tab: close
+                // KeyNavigation.tab: close
 
             }
 
@@ -136,9 +134,9 @@ PageType {
 
                 text: qsTr("Close application")
                 leftImageSource: "qrc:/images/controls/x-circle.svg"
-                isLeftImageHoverEnabled: false                
+                isLeftImageHoverEnabled: false
 
-                Keys.onTabPressed: lastItemTabClicked(header)
+                // Keys.onTabPressed: lastItemTabClicked()
 
                 clickedFunction: function() {
                     PageController.closeApplication()

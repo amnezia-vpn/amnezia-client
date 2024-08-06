@@ -17,7 +17,7 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
+    defaultActiveFocusItem: backButton
 
     Connections {
         target: SettingsController
@@ -37,11 +37,6 @@ PageType {
         }
     }
 
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -50,7 +45,7 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20
 
-        KeyNavigation.tab: makeBackupButton
+        // KeyNavigation.tab: makeBackupButton
     }
 
     FlickableType {
@@ -113,7 +108,7 @@ PageType {
                     }
                 }
 
-                KeyNavigation.tab: restoreBackupButton
+                // KeyNavigation.tab: restoreBackupButton
             }
 
             BasicButtonType {
@@ -138,7 +133,7 @@ PageType {
                     }
                 }
 
-                Keys.onTabPressed: lastItemTabClicked()
+                // Keys.onTabPressed: lastItemTabClicked()
             }
         }
     }

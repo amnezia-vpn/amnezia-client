@@ -1,37 +1,19 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
 
 import "../Config"
+import "../Components"
 
-Item {
+FocusChainType {
     id: root
 
     property StackView stackView: StackView.view
 
-    property var defaultActiveFocusItem: null
-
-    onVisibleChanged: {
-        if (visible && !GC.isMobile()) {
-            timer.start()
-        }
-    }
-
-    function lastItemTabClicked(focusItem) {
-        if (GC.isMobile()) {
-            return
-        }
-
-        if (focusItem) {
-            focusItem.forceActiveFocus()
-            PageController.forceTabBarActiveFocus()
-        } else {
-            if (defaultActiveFocusItem) {
-                defaultActiveFocusItem.forceActiveFocus()
-            }
-            PageController.forceTabBarActiveFocus()
-        }
-    }
+    // onVisibleChanged: {
+    //     if (visible && !GC.isMobile()) {
+    //         timer.start()
+    //     }
+    // }
 
 //    MouseArea {
 //        id: globalMouseArea
@@ -47,15 +29,13 @@ Item {
 //    }
 
     // Set a timer to set focus after a short delay
-    Timer {
-        id: timer
-        interval: 100 // Milliseconds
-        onTriggered: {
-            if (defaultActiveFocusItem) {
-                defaultActiveFocusItem.forceActiveFocus()
-            }
-        }
-        repeat: false // Stop the timer after one trigger
-        running: !GC.isMobile()  // Start the timer
-    }
+    // Timer {
+    //     id: timer
+    //     interval: 100 // Milliseconds
+    //     onTriggered: {
+    //         focusItem.forceActiveFocus()
+    //     }
+    //     repeat: false // Stop the timer after one trigger
+    //     running: !GC.isMobile()  // Start the timer
+    // }
 }

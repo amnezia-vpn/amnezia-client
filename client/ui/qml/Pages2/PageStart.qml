@@ -12,10 +12,10 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
-PageType {
+FocusScope {
     id: root
 
-    defaultActiveFocusItem: homeTabButton
+    // defaultActiveFocusItem: homeTabButton
 
     property bool isControlsDisabled: false
     property bool isTabBarDisabled: false
@@ -88,10 +88,11 @@ PageType {
 
         function onForceTabBarActiveFocus() {
             homeTabButton.focus = true
-            tabBar.forceActiveFocus()
+            homeTabButton.forceActiveFocus()
         }
 
         function onForceStackActiveFocus() {
+            console.log("onForceStackActiveFocus")
             homeTabButton.focus = true
             tabBarStackView.forceActiveFocus()
         }
@@ -168,11 +169,24 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: tabBar.top
+        focus: true
 
         width: parent.width
         height: root.height - tabBar.implicitHeight
 
         enabled: !root.isControlsDisabled
+
+        onActiveFocusChanged: {
+            // console.log("tabBarStackView activeFocusChanged", activeFocus)
+        }
+
+        // KeyNavigation.tab: homeTabButton
+        Keys.onTabPressed: tabBarStackView.currentItem.lastItemTabClicked()
+        onCurrentItemChanged: {
+            if (currentItem) {
+                currentItem.forceActiveFocus()
+            }
+        }
 
         function goToTabBarPage(page) {
             connectionTypeSelection.close()
@@ -193,6 +207,10 @@ PageType {
         id: tabBar
 
         property int previousIndex: 0
+
+        onActiveFocusChanged: {
+            console.log("tabBar activeFocusChanged", activeFocus)
+        }
 
         anchors.right: parent.right
         anchors.left: parent.left
@@ -236,6 +254,8 @@ PageType {
             }
 
             KeyNavigation.tab: shareTabButton
+            KeyNavigation.backtab: tabBarStackView
+
             Keys.onEnterPressed: this.clicked()
             Keys.onReturnPressed: this.clicked()
         }
@@ -289,6 +309,8 @@ PageType {
             }
 
             Keys.onTabPressed: PageController.forceStackActiveFocus()
+
+            // KeysNavigation.tab: tabBarStackView.currentItem
         }
     }
 

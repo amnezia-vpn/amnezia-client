@@ -43,21 +43,13 @@ Item {
     implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
     implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
 
-    onFocusChanged: {
+    onActiveFocusChanged: {
         if (root.activeFocus) {
+            if (rightImage.visible) {
+                rightImage.forceActiveFocus()
+            }
             if (root.parentFlickable) {
                 root.parentFlickable.ensureVisible(root)
-            }
-        }
-    }
-
-    Connections {
-        target: rightImage
-        function onFocusChanged() {
-            if (rightImage.activeFocus) {
-                if (root.parentFlickable) {
-                    root.parentFlickable.ensureVisible(root)
-                }
             }
         }
     }
@@ -251,6 +243,7 @@ Item {
             hoverEnabled: false
             image: rightImageSource
             imageColor: rightImageColor
+            // focus: visible
             visible: rightImageSource ? true : false
 
             Layout.alignment: Qt.AlignRight
@@ -277,6 +270,7 @@ Item {
         id: background
         anchors.fill: root
         color: AmneziaStyle.color.transparent
+        visible: !rightImageSource
 
         border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
         border.width: root.activeFocus ? root.borderFocusedWidth : 0

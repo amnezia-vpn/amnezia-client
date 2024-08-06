@@ -25,11 +25,15 @@ Window  {
     color: AmneziaStyle.color.black
 
     onClosing: function() {
-        console.debug("QML onClosing signal")
+        // console.debug("QML onClosing signal")
         PageController.closeWindow()
     }
 
     title: "AmneziaVPN"
+
+    onActiveFocusItemChanged: {
+        console.debug("onActiveFocusItemChanged", activeFocusItem)
+    }
 
     StackViewType {
         id: rootStackView
@@ -220,6 +224,8 @@ Window  {
             id: questionDrawer
 
             anchors.fill: parent
+
+            onClosed: PageController.forceStackActiveFocus()
         }
     }
 

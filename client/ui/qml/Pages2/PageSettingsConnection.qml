@@ -11,14 +11,9 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
+    defaultActiveFocusItem: backButton
 
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
 
     BackButtonType {
         id: backButton
@@ -28,7 +23,7 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20
 
-        KeyNavigation.tab: amneziaDnsSwitch
+        // KeyNavigation.tab: amneziaDnsSwitch
     }
 
     FlickableType {
@@ -67,7 +62,7 @@ PageType {
                     }
                 }
 
-                KeyNavigation.tab: dnsServersButton.rightButton
+                // KeyNavigation.tab: dnsServersButton.rightButton
             }
 
             DividerType {}
@@ -84,7 +79,7 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsDns)
                 }
 
-                KeyNavigation.tab: splitTunnelingButton.rightButton
+                // KeyNavigation.tab: splitTunnelingButton.rightButton
             }
 
             DividerType {}
@@ -166,7 +161,7 @@ PageType {
                     }
                 }
 
-                Keys.onTabPressed: lastItemTabClicked()
+                // Keys.onTabPressed: lastItemTabClicked()
             }
 
             DividerType {

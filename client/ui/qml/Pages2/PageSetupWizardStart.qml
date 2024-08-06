@@ -16,7 +16,7 @@ PageType {
 
     property bool isControlsDisabled: false
 
-    defaultActiveFocusItem: focusItem
+    defaultActiveFocusItem: startButton
 
     Connections {
         target: PageController
@@ -139,11 +139,6 @@ PageType {
                       qsTr(" Helps you access blocked content without revealing your privacy, even to VPN providers.")
             }
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: startButton
-            }
-
             BasicButtonType {
                 id: startButton
                 Layout.fillWidth: true
@@ -156,8 +151,6 @@ PageType {
                 clickedFunc: function() {
                     connectionTypeSelection.open()
                 }
-
-                KeyNavigation.tab: startButton2
             }
 
             BasicButtonType {
@@ -179,18 +172,18 @@ PageType {
                 clickedFunc: function() {
                     Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
                 }
-
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
             }
         }
     }
 
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
+        parentPage: root
 
         onClosed: {
-            PageController.forceTabBarActiveFocus()
-            root.defaultActiveFocusItem.forceActiveFocus()
+        //     PageController.forceTabBarActiveFocus()
+        //     root.defaultActiveFocusItem.forceActiveFocus()
+            PageController.forceStackActiveFocus()
         }
     }
 }

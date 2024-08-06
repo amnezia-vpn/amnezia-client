@@ -16,6 +16,8 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    defaultActiveFocusItem: backButton
+
     Connections {
         target: SettingsController
 
@@ -28,13 +30,6 @@ disabled after 14 days, and all log files will be deleted.")
         }
     }
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -42,8 +37,6 @@ disabled after 14 days, and all log files will be deleted.")
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: switcher
     }
 
     FlickableType {
@@ -79,7 +72,6 @@ disabled after 14 days, and all log files will be deleted.")
                 text: qsTr("Save logs")
 
                 checked: SettingsController.isLoggingEnabled
-                KeyNavigation.tab: openFolderButton
                 onCheckedChanged: {
                     if (checked !== SettingsController.isLoggingEnabled) {
                         SettingsController.isLoggingEnabled = checked
@@ -103,7 +95,6 @@ disabled after 14 days, and all log files will be deleted.")
                         implicitHeight: 56
 
                         image: "qrc:/images/controls/folder-open.svg"
-                        KeyNavigation.tab: saveButton
 
                         onClicked: SettingsController.openLogsFolder()
                         Keys.onReturnPressed: openFolderButton.clicked()
@@ -131,7 +122,6 @@ disabled after 14 days, and all log files will be deleted.")
                         implicitHeight: 56
 
                         image: "qrc:/images/controls/save.svg"
-                        KeyNavigation.tab: clearButton
 
                         Keys.onReturnPressed: saveButton.clicked()
                         Keys.onEnterPressed: saveButton.clicked()
@@ -176,7 +166,6 @@ disabled after 14 days, and all log files will be deleted.")
                         implicitHeight: 56
 
                         image: "qrc:/images/controls/delete.svg"
-                        Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                         Keys.onReturnPressed: clearButton.clicked()
                         Keys.onEnterPressed: clearButton.clicked()
@@ -190,14 +179,14 @@ disabled after 14 days, and all log files will be deleted.")
                                 SettingsController.clearLogs()
                                 PageController.showBusyIndicator(false)
                                 PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
-                                if (!GC.isMobile()) {
-                                    focusItem.forceActiveFocus()
-                                }
+                                // if (!GC.isMobile()) {
+                                //     focusItem.forceActiveFocus()
+                                // }
                             }
                             var noButtonFunction = function() {
-                                if (!GC.isMobile()) {
-                                    focusItem.forceActiveFocus()
-                                }
+                                // if (!GC.isMobile()) {
+                                //     focusItem.forceActiveFocus()
+                                // }
                             }
 
                             showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

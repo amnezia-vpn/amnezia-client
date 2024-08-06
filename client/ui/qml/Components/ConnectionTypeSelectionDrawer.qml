@@ -14,74 +14,70 @@ DrawerType2 {
     width: parent.width
     height: parent.height
 
-    expandedContent: ColumnLayout {
-        id: content
+    expandedContent: FocusChainType {
+        defaultActiveFocusItem: ip
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        spacing: 0
+        ColumnLayout {
+            id: content
 
-        Component.onCompleted: {
-            root.expandedHeight = content.implicitHeight + 32
-        }
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            spacing: 0
 
-        Connections {
-            target: root
-            enabled: !GC.isMobile()
-            function onOpened() {
-                focusItem.forceActiveFocus()
-            }
-        }
-
-        Header2Type {
-            Layout.fillWidth: true
-            Layout.topMargin: 24
-            Layout.rightMargin: 16
-            Layout.leftMargin: 16
-            Layout.bottomMargin: 16
-
-            headerText: qsTr("Add new connection")
-        }
-
-        Item {
-            id: focusItem
-            KeyNavigation.tab: ip.rightButton
-        }
-
-        LabelWithButtonType {
-            id: ip
-            Layout.fillWidth: true
-            Layout.topMargin: 16
-
-            text: qsTr("Configure your server")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-            clickedFunction: function() {
-                PageController.goToPage(PageEnum.PageSetupWizardCredentials)
-                root.close()
+            Component.onCompleted: {
+                root.expandedHeight = content.implicitHeight + 32
             }
 
-            KeyNavigation.tab: qrCode.rightButton
-        }
+            Header2Type {
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 16
 
-        DividerType {}
-
-        LabelWithButtonType {
-            id: qrCode
-            Layout.fillWidth: true
-
-            text: qsTr("Open config file, key or QR code")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-            clickedFunction: function() {
-                PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
-                root.close()
+                headerText: qsTr("Add new connection")
             }
 
-            KeyNavigation.tab: focusItem
-        }
+            // Item {
+            //     id: focusItem
+            //     KeyNavigation.tab: ip.rightButton
+            // }
 
-        DividerType {}
+            LabelWithButtonType {
+                id: ip
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+
+                text: qsTr("Configure your server")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSetupWizardCredentials)
+                    root.close()
+                }
+
+                // KeyNavigation.tab: qrCode.rightButton
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                id: qrCode
+                Layout.fillWidth: true
+
+                text: qsTr("Open config file, key or QR code")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
+                    root.close()
+                }
+
+                // KeyNavigation.tab: focusItem
+            }
+
+            DividerType {}
+        }
     }
 }

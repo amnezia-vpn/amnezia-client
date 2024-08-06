@@ -12,6 +12,7 @@ import "../Config"
 
 PageType {
     id: root
+    defaultActiveFocusItem: backButton
 
     Connections {
         target: ImportController
@@ -21,8 +22,6 @@ PageType {
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
     }
-
-    defaultActiveFocusItem: focusItem
 
     FlickableType {
         id: fl
@@ -39,15 +38,9 @@ PageType {
 
             spacing: 0
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: backButton
-            }
-
             BackButtonType {
                 id: backButton
                 Layout.topMargin: 20
-                KeyNavigation.tab: fileButton.rightButton
             }
 
             HeaderType {
@@ -78,8 +71,6 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
 
-                KeyNavigation.tab: qrButton.visible ? qrButton.rightButton : textButton.rightButton
-
                 clickedFunction: function() {
                     var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
                                                                        "Config files (*.vpn *.ovpn *.conf *.json)"
@@ -103,8 +94,6 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/qr-code.svg"
 
-                KeyNavigation.tab: textButton.rightButton
-
                 clickedFunction: function() {
                     ImportController.startDecodingQr()
                     if (Qt.platform.os === "ios") {
@@ -124,8 +113,6 @@ PageType {
                 text: qsTr("Key as text")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/text-cursor.svg"
-
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSetupWizardTextKey)
