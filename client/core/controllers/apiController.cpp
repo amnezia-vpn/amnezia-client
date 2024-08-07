@@ -342,7 +342,7 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
 
         EVP_PKEY *publicKey = nullptr;
         try {
-            QByteArray key = qgetenv("PROD_AGW_PUBLIC_KEY");
+            QByteArray key = PROD_AGW_PUBLIC_KEY;
             QSimpleCrypto::QRsa rsa;
             publicKey = rsa.getPublicKeyFromByteArray(key);
         } catch (...) {

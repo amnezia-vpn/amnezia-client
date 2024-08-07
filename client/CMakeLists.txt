@@ -23,6 +23,7 @@ execute_process(
 )
 
 add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
+add_definitions(-DPROD_AGW_PUBLIC_KEY="${PROD_AGW_PUBLIC_KEY}")
 
 if(IOS)
     set(PACKAGES ${PACKAGES} Multimedia)
