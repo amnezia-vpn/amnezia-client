@@ -89,6 +89,9 @@ PageType {
 
                     anchors.fill: parent
 
+                    property bool isClientSettingsVisible: protocolIndex === ProtocolEnum.WireGuard || protocolIndex === ProtocolEnum.Awg
+                    property bool isServerSettingsVisible: ServersModel.isProcessedServerHasWriteAccess()
+
                     LabelWithButtonType {
                         id: clientSettings
 
@@ -96,7 +99,7 @@ PageType {
 
                         text: protocolName + qsTr(" connection settings")
                         rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                        visible: protocolIndex === ProtocolEnum.WireGuard || protocolIndex === ProtocolEnum.Awg
+                        visible: isClientSettingsVisible
 
                         clickedFunction: function() {
                             if (isClientProtocolExists) {
@@ -117,7 +120,9 @@ PageType {
                         }
                     }
 
-                    DividerType {}
+                    DividerType {
+                        visible: isClientSettingsVisible
+                    }
 
                     LabelWithButtonType {
                         id: serverSettings
@@ -126,7 +131,7 @@ PageType {
 
                         text: protocolName + qsTr(" server settings")
                         rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                        visible: ServersModel.isProcessedServerHasWriteAccess()
+                        visible: isServerSettingsVisible
 
                         clickedFunction: function() {
                             switch (protocolIndex) {
@@ -150,7 +155,9 @@ PageType {
                         }
                     }
 
-                    DividerType {}
+                    DividerType {
+                        visible: isServerSettingsVisible
+                    }
                 }
             }
         }
