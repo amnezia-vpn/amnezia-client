@@ -11,7 +11,7 @@ struct WgConfig
     WgConfig(const QJsonObject &jsonConfig);
 
     QString port;
-    QString mtu;
+    QString clientMtu;
 
     bool hasEqualServerSettings(const WgConfig &other) const;
     bool hasEqualClientSettings(const WgConfig &other) const;
@@ -25,7 +25,7 @@ class WireGuardConfigModel : public QAbstractListModel
 public:
     enum Roles {
         PortRole = Qt::UserRole + 1,
-        MtuRole
+        ClientMtuRole
     };
 
     explicit WireGuardConfigModel(QObject *parent = nullptr);
@@ -46,8 +46,8 @@ protected:
 
 private:
     DockerContainer m_container;
-    QJsonObject m_protocolConfig;
-    QString m_mtu;
+    QJsonObject m_serverProtocolConfig;
+    QJsonObject m_clientProtocolConfig;
     QJsonObject m_fullConfig;
 };
 

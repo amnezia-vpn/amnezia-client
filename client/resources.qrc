@@ -236,5 +236,7 @@
         <file>server_scripts/socks5_proxy/Dockerfile</file>
         <file>server_scripts/socks5_proxy/configure_container.sh</file>
         <file>server_scripts/socks5_proxy/start.sh</file>
+        <file>ui/qml/Pages2/PageProtocolAwgClientSettings.qml</file>
+        <file>ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml</file>
     </qresource>
 </RCC>

@@ -73,7 +73,7 @@ PageType {
                 delegate: Item {
                     id: delegateItem
 
-                    property alias focusItemId: mtuTextField.textField
+                    property alias focusItemId: portTextField.textField
                     property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
 
                     implicitWidth: listview.width
@@ -96,46 +96,10 @@ PageType {
                             headerText: qsTr("WG settings")
                         }
 
-                        Header2TextType {
-                            Layout.fillWidth: true
-                            Layout.topMargin: 40
-
-                            text: qsTr("Local settings")
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: mtuTextField
-                            Layout.fillWidth: true
-                            Layout.topMargin: 8
-
-                            headerText: qsTr("MTU")
-                            textFieldText: mtu
-                            textField.validator: IntValidator { bottom: 576; top: 65535 }
-
-                            KeyNavigation.tab: delegateItem.isEnabled ? portTextField.textField : saveButton
-
-                            textField.onEditingFinished: {
-                                if (textFieldText === "") {
-                                    textFieldText = "0"
-                                }
-                                if (textFieldText !== mtu) {
-                                    mtu = textFieldText
-                                }
-                            }
-                            checkEmptyText: true
-                        }
-
-                        Header2TextType {
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
-
-                            text: qsTr("General settings")
-                        }
-
                         TextFieldWithHeaderType {
                             id: portTextField
                             Layout.fillWidth: true
-                            Layout.topMargin: 8
+                            Layout.topMargin: 40
 
                             enabled: delegateItem.isEnabled
 
@@ -161,8 +125,7 @@ PageType {
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
-                            enabled: mtuTextField.errorText === "" &&
-                                     portTextField.errorText === ""
+                            enabled: portTextField.errorText === ""
 
                             text: qsTr("Save")
 
@@ -172,9 +135,7 @@ PageType {
                                 forceActiveFocus()
 
                                 var headerText = qsTr("Save settings?")
-                                var descriptionText = delegateItem.isEnabled && !WireGuardConfigModel.isServerSettingsEqual() ?
-                                            qsTr("All users with whom you shared a connection with will no longer be able to connect to it.") :
-                                            qsTr("Only the settings for this device will be changed")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                                 var yesButtonText = qsTr("Continue")
                                 var noButtonText = qsTr("Cancel")
 

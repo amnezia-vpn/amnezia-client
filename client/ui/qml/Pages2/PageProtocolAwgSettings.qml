@@ -16,7 +16,7 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.mtuTextField.textField
+    defaultActiveFocusItem: listview.currentItem.portTextField.textField
 
     Item {
         id: focusItem
@@ -39,7 +39,7 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listview.currentItem.mtuTextField.textField
+            KeyNavigation.tab: listview.currentItem.portTextField.textField
         }
     }
 
@@ -72,7 +72,7 @@ PageType {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
-                    property alias mtuTextField: mtuTextField
+                    property alias portTextField: portTextField
                     property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
 
                     ColumnLayout {
@@ -93,45 +93,10 @@ PageType {
                             headerText: qsTr("AmneziaWG settings")
                         }
 
-                        Header2TextType {
-                            Layout.fillWidth: true
-                            Layout.topMargin: 40
-
-                            text: qsTr("Local settings")
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: mtuTextField
-                            Layout.fillWidth: true
-                            Layout.topMargin: 8
-
-                            headerText: qsTr("MTU")
-                            textFieldText: mtu
-                            textField.validator: IntValidator { bottom: 576; top: 65535 }
-
-                            textField.onEditingFinished: {
-                                if (textFieldText === "") {
-                                    textFieldText = "0"
-                                }
-                                if (textFieldText !== mtu) {
-                                    mtu = textFieldText
-                                }
-                            }
-                            checkEmptyText: true
-                            KeyNavigation.tab: delegateItem.isEnabled ? portTextField.textField : saveRestartButton
-                        }
-
-                        Header2TextType {
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
-
-                            text: qsTr("General settings")
-                        }
-
                         TextFieldWithHeaderType {
                             id: portTextField
                             Layout.fillWidth: true
-                            Layout.topMargin: 8
+                            Layout.topMargin: 40
 
                             enabled: delegateItem.isEnabled
 
@@ -160,7 +125,7 @@ PageType {
                             enabled: delegateItem.isEnabled
 
                             headerText: "Jc - Junk packet count"
-                            textFieldText: junkPacketCount
+                            textFieldText: serverJunkPacketCount
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
@@ -169,8 +134,8 @@ PageType {
                                     textFieldText = "0"
                                 }
 
-                                if (textFieldText !== junkPacketCount) {
-                                    junkPacketCount = textFieldText
+                                if (textFieldText !== serverJunkPacketCount) {
+                                    serverJunkPacketCount = textFieldText
                                 }
                             }
 
@@ -187,13 +152,13 @@ PageType {
                             enabled: delegateItem.isEnabled
 
                             headerText: "Jmin - Junk packet minimum size"
-                            textFieldText: junkPacketMinSize
+                            textFieldText: serverJunkPacketMinSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== junkPacketMinSize) {
-                                    junkPacketMinSize = textFieldText
+                                if (textFieldText !== serverJunkPacketMinSize) {
+                                    serverJunkPacketMinSize = textFieldText
                                 }
                             }
 
@@ -210,13 +175,13 @@ PageType {
                             enabled: delegateItem.isEnabled
 
                             headerText: "Jmax - Junk packet maximum size"
-                            textFieldText: junkPacketMaxSize
+                            textFieldText: serverJunkPacketMaxSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== junkPacketMaxSize) {
-                                    junkPacketMaxSize = textFieldText
+                                if (textFieldText !== serverJunkPacketMaxSize) {
+                                    serverJunkPacketMaxSize = textFieldText
                                 }
                             }
 
@@ -233,13 +198,13 @@ PageType {
                             enabled: delegateItem.isEnabled
 
                             headerText: "S1 - Init packet junk size"
-                            textFieldText: initPacketJunkSize
+                            textFieldText: serverInitPacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== initPacketJunkSize) {
-                                    initPacketJunkSize = textFieldText
+                                if (textFieldText !== serverInitPacketJunkSize) {
+                                    serverInitPacketJunkSize = textFieldText
                                 }
                             }
 
@@ -256,13 +221,13 @@ PageType {
                             enabled: delegateItem.isEnabled
 
                             headerText: "S2 - Response packet junk size"
-                            textFieldText: responsePacketJunkSize
+                            textFieldText: serverResponsePacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== responsePacketJunkSize) {
-                                    responsePacketJunkSize = textFieldText
+                                if (textFieldText !== serverResponsePacketJunkSize) {
+                                    serverResponsePacketJunkSize = textFieldText
                                 }
                             }
 
@@ -279,13 +244,13 @@ PageType {
                             enabled: delegateItem.isEnabled
 
                             headerText: "H1 - Init packet magic header"
-                            textFieldText: initPacketMagicHeader
+                            textFieldText: serverInitPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== initPacketMagicHeader) {
-                                    initPacketMagicHeader = textFieldText
+                                if (textFieldText !== serverInitPacketMagicHeader) {
+                                    serverInitPacketMagicHeader = textFieldText
                                 }
                             }
 
@@ -302,36 +267,13 @@ PageType {
                             enabled: delegateItem.isEnabled
 
                             headerText: "H2 - Response packet magic header"
-                            textFieldText: responsePacketMagicHeader
+                            textFieldText: serverResponsePacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== responsePacketMagicHeader) {
-                                    responsePacketMagicHeader = textFieldText
-                                }
-                            }
-
-                            checkEmptyText: true
-
-                            KeyNavigation.tab: transportPacketMagicHeaderTextField.textField
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: transportPacketMagicHeaderTextField
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
-
-                            enabled: delegateItem.isEnabled
-
-                            headerText: "H4 - Transport packet magic header"
-                            textFieldText: transportPacketMagicHeader
-                            textField.validator: IntValidator { bottom: 0 }
-                            parentFlickable: fl
-
-                            textField.onEditingFinished: {
-                                if (textFieldText !== transportPacketMagicHeader) {
-                                    transportPacketMagicHeader = textFieldText
+                                if (textFieldText !== serverResponsePacketMagicHeader) {
+                                    serverResponsePacketMagicHeader = textFieldText
                                 }
                             }
 
@@ -349,12 +291,35 @@ PageType {
                             enabled: delegateItem.isEnabled
 
                             headerText: "H3 - Underload packet magic header"
-                            textFieldText: underloadPacketMagicHeader
+                            textFieldText: serverUnderloadPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== underloadPacketMagicHeader) {
-                                    underloadPacketMagicHeader = textFieldText
+                                if (textFieldText !== serverUnderloadPacketMagicHeader) {
+                                    serverUnderloadPacketMagicHeader = textFieldText
+                                }
+                            }
+
+                            checkEmptyText: true
+
+                            KeyNavigation.tab: transportPacketMagicHeaderTextField.textField
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: transportPacketMagicHeaderTextField
+                            Layout.fillWidth: true
+                            Layout.topMargin: 16
+
+                            enabled: delegateItem.isEnabled
+
+                            headerText: "H4 - Transport packet magic header"
+                            textFieldText: serverTransportPacketMagicHeader
+                            textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
+
+                            textField.onEditingFinished: {
+                                if (textFieldText !== serverTransportPacketMagicHeader) {
+                                    serverTransportPacketMagicHeader = textFieldText
                                 }
                             }
 
@@ -406,9 +371,7 @@ PageType {
                                 }
 
                                 var headerText = qsTr("Save settings?")
-                                var descriptionText = delegateItem.isEnabled && !AwgConfigModel.isServerSettingsEqual() ?
-                                            qsTr("All users with whom you shared a connection with will no longer be able to connect to it.") :
-                                            qsTr("Only the settings for this device will be changed")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                                 var yesButtonText = qsTr("Continue")
                                 var noButtonText = qsTr("Cancel")
 
