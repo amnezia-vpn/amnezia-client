@@ -34,7 +34,10 @@ public:
     static void cleanUp();
 
     static QString userLogsFilePath();
+    static QString serviceLogsFilePath();
+
     static QString getLogFile();
+    static QString getServiceLogFile();
 
     // compat with Mozilla logger
     Logger(const QString &className) { m_className = className; }
@@ -96,6 +99,7 @@ private:
     static QFile m_file;
     static QTextStream m_textStream;
     static QString m_logFileName;
+    static QString m_serviceLogFileName;
 
     friend void debugMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
 

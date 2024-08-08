@@ -91,12 +91,26 @@ void SettingsController::openLogsFolder()
     Logger::openLogsFolder();
 }
 
+void SettingsController::openServiceLogsFolder()
+{
+    Logger::openServiceLogsFolder();
+}
+
 void SettingsController::exportLogsFile(const QString &fileName)
 {
 #ifdef Q_OS_ANDROID
     AndroidController::instance()->exportLogsFile(fileName);
 #else
     SystemController::saveFile(fileName, Logger::getLogFile());
+#endif
+}
+
+void SettingsController::exportServiceLogsFile(const QString &fileName)
+{
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->exportLogsFile(fileName);
+#else
+    SystemController::saveFile(fileName, Logger::getServiceLogFile());
 #endif
 }
 

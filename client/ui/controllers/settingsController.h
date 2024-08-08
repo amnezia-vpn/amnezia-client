@@ -39,7 +39,9 @@ public slots:
     void toggleLogging(bool enable);
 
     void openLogsFolder();
+    void openServiceLogsFolder();
     void exportLogsFile(const QString &fileName);
+    void exportServiceLogsFile(const QString &fileName);
     void clearLogs();
 
     void backupAppConfig(const QString &fileName);
