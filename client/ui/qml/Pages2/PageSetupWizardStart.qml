@@ -177,7 +177,7 @@ PageType {
                 text: qsTr("I have nothing")
 
                 clickedFunc: function() {
-                    Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
+                    Qt.openUrlExternally(qsTr("https://amnezia.org/"))
                 }
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
