@@ -143,7 +143,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: "Jc - Junk packet count"
+                            headerText: qsTr("Jc - Junk packet count")
                             textFieldText: junkPacketCount
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -168,7 +168,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: "Jmin - Junk packet minimum size"
+                            headerText: qsTr("Jmin - Junk packet minimum size")
                             textFieldText: junkPacketMinSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -189,7 +189,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: "Jmax - Junk packet maximum size"
+                            headerText: qsTr("Jmax - Junk packet maximum size")
                             textFieldText: junkPacketMaxSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -210,7 +210,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: "S1 - Init packet junk size"
+                            headerText: qsTr("S1 - Init packet junk size")
                             textFieldText: initPacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -231,7 +231,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: "S2 - Response packet junk size"
+                            headerText: qsTr("S2 - Response packet junk size")
                             textFieldText: responsePacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -252,7 +252,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: "H1 - Init packet magic header"
+                            headerText: qsTr("H1 - Init packet magic header")
                             textFieldText: initPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -273,7 +273,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: "H2 - Response packet magic header"
+                            headerText: qsTr("H2 - Response packet magic header")
                             textFieldText: responsePacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -294,7 +294,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            headerText: "H4 - Transport packet magic header"
+                            headerText: qsTr("H4 - Transport packet magic header")
                             textFieldText: transportPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -316,7 +316,7 @@ PageType {
                             Layout.topMargin: 16
                             parentFlickable: fl
 
-                            headerText: "H3 - Underload packet magic header"
+                            headerText: qsTr("H3 - Underload packet magic header")
                             textFieldText: underloadPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 
