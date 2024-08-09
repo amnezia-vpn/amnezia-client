@@ -106,7 +106,8 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
     if (e)
         return e;
 
-    QString runner = QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, (container == DockerContainer::Socks5Proxy ? "sh" : "bash"));
+    QString runner =
+            QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, (container == DockerContainer::Socks5Proxy ? "sh" : "bash"));
     e = runScript(credentials, replaceVars(runner, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
 
     QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);
@@ -426,7 +427,7 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
     if (errorCode)
         return errorCode;
 
-    errorCode = uploadFileToHost(credentials, amnezia::scriptData(ProtocolScriptType::dockerfile, container).toUtf8(),dockerFilePath);
+    errorCode = uploadFileToHost(credentials, amnezia::scriptData(ProtocolScriptType::dockerfile, container).toUtf8(), dockerFilePath);
 
     if (errorCode)
         return errorCode;
@@ -437,9 +438,10 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         return ErrorCode::NoError;
     };
 
-    errorCode = runScript(credentials,
-                  replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
-                  cbReadStdOut);
+    errorCode =
+            runScript(credentials,
+                      replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
+                      cbReadStdOut);
     if (errorCode)
         return errorCode;
 
@@ -620,13 +622,15 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
     // Socks5 proxy vars
     vars.append({ { "$SOCKS5_PROXY_PORT", socks5ProxyConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort) } });
-    auto username =  socks5ProxyConfig.value(config_key:: userName).toString();
+    auto username = socks5ProxyConfig.value(config_key::userName).toString();
     auto password = socks5ProxyConfig.value(config_key::password).toString();
     QString socks5user = (!username.isEmpty() && !password.isEmpty()) ? QString("users %1:CL:%2").arg(username, password) : "";
-    vars.append({ { "$SOCKS5_USER",  socks5user } });
-    vars.append({ { "$SOCKS5_AUTH_TYPE",  socks5user.isEmpty() ? "none" : "strong" } });
+    vars.append({ { "$SOCKS5_USER", socks5user } });
+    vars.append({ { "$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong" } });
 
-    QString serverIp = NetworkUtilities::getIPAddress(credentials.hostName);
+    QString serverIp = (container != DockerContainer::Awg && container != DockerContainer::WireGuard)
+            ? NetworkUtilities::getIPAddress(credentials.hostName)
+            : credentials.hostName;
     if (!serverIp.isEmpty()) {
         vars.append({ { "$SERVER_IP_ADDRESS", serverIp } });
     } else {
@@ -712,7 +716,8 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         udpProtoScript.append("' | grep -i udp");
         tcpProtoScript.append(" | grep LISTEN");
 
-        ErrorCode errorCode = runScript(credentials, replaceVars(tcpProtoScript, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+        ErrorCode errorCode =
+                runScript(credentials, replaceVars(tcpProtoScript, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }

@@ -4,12 +4,12 @@
 #include <QFileInfo>
 #include <QQuickItem>
 #include <QRandomGenerator>
-#include <QUrlQuery>
 #include <QStandardPaths>
+#include <QUrlQuery>
 
-#include "utilities.h"
-#include "core/serialization/serialization.h"
 #include "core/errorstrings.h"
+#include "core/serialization/serialization.h"
+#include "utilities.h"
 
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
@@ -96,36 +96,40 @@ bool ImportController::extractConfigFromData(QString data)
 
     if (config.startsWith("vless://")) {
         m_configType = ConfigTypes::Xray;
-        m_config = extractXrayConfig(Utils::JsonToString(serialization::vless::Deserialize(config, &prefix, &errormsg),
-                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        m_config = extractXrayConfig(
+                Utils::JsonToString(serialization::vless::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                prefix);
         return m_config.empty() ? false : true;
     }
 
     if (config.startsWith("vmess://") && config.contains("@")) {
         m_configType = ConfigTypes::Xray;
-        m_config = extractXrayConfig(Utils::JsonToString(serialization::vmess_new::Deserialize(config, &prefix, &errormsg),
-                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        m_config = extractXrayConfig(
+                Utils::JsonToString(serialization::vmess_new::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                prefix);
         return m_config.empty() ? false : true;
     }
 
     if (config.startsWith("vmess://")) {
         m_configType = ConfigTypes::Xray;
-        m_config = extractXrayConfig(Utils::JsonToString(serialization::vmess::Deserialize(config, &prefix, &errormsg),
-                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        m_config = extractXrayConfig(
+                Utils::JsonToString(serialization::vmess::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                prefix);
         return m_config.empty() ? false : true;
     }
 
     if (config.startsWith("trojan://")) {
         m_configType = ConfigTypes::Xray;
-        m_config = extractXrayConfig(Utils::JsonToString(serialization::trojan::Deserialize(config, &prefix, &errormsg),
-                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        m_config = extractXrayConfig(
+                Utils::JsonToString(serialization::trojan::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                prefix);
         return m_config.empty() ? false : true;
     }
 
     if (config.startsWith("ss://") && !config.contains("plugin=")) {
         m_configType = ConfigTypes::ShadowSocks;
-        m_config = extractXrayConfig(Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg),
-                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        m_config = extractXrayConfig(
+                Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact), prefix);
         return m_config.empty() ? false : true;
     }
 
@@ -353,20 +357,19 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     QJsonObject lastConfig;
     lastConfig[config_key::config] = data;
 
-    const static QRegularExpression hostNameAndPortRegExp("Endpoint = (.*):([0-9]*)");
-    QRegularExpressionMatch hostNameAndPortMatch = hostNameAndPortRegExp.match(data);
+    auto url { QUrl::fromUserInput(configMap.value("Endpoint")) };
     QString hostName;
     QString port;
-    if (hostNameAndPortMatch.hasCaptured(1)) {
-        hostName = hostNameAndPortMatch.captured(1);
+    if (!url.host().isEmpty()) {
+        hostName = url.host();
     } else {
-        qDebug() << "Key parameter 'Endpoint' is missing";
+        qDebug() << "Key parameter 'Endpoint' is missing or has an invalid format";
         emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
         return QJsonObject();
     }
 
-    if (hostNameAndPortMatch.hasCaptured(2)) {
-        port = hostNameAndPortMatch.captured(2);
+    if (url.port() != -1) {
+        port = QString::number(url.port());
     } else {
         port = protocols::wireguard::defaultPort;
     }
@@ -488,7 +491,7 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, const QStri
     if (m_configType == ConfigTypes::ShadowSocks) {
         config[config_key::defaultContainer] = "amnezia-ssxray";
     } else {
-       config[config_key::defaultContainer] = "amnezia-xray";
+        config[config_key::defaultContainer] = "amnezia-xray";
     }
     if (description.isEmpty()) {
         config[config_key::description] = m_settings->nextAvailableServerName();
