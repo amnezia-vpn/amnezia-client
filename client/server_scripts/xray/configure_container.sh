@@ -29,7 +29,7 @@ cat > /opt/amnezia/xray/server.json <<EOF
     },
     "inbounds": [
         {
-            "port": 443,
+            "port": "$XRAY_PORT",
             "protocol": "vless",
             "settings": {
                 "clients": [
@@ -44,7 +44,7 @@ cat > /opt/amnezia/xray/server.json <<EOF
                 "network": "tcp",
                 "security": "reality",
                 "realitySettings": {
-                    "dest": "$XRAY_SITE_NAME:443",
+                    "dest": "$XRAY_SITE_NAME:$XRAY_PORT",
                     "serverNames": [
                         "$XRAY_SITE_NAME"
                     ],
