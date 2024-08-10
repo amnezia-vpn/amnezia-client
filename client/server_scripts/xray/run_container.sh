@@ -4,7 +4,7 @@ sudo docker run -d \
 --log-driver none \
 --restart always \
 --cap-add=NET_ADMIN \
--p 443:443/tcp \
+-p $XRAY_PORT:$XRAY_PORT/tcp \
 --name $CONTAINER_NAME $CONTAINER_NAME
 
 sudo docker network connect amnezia-dns-net $CONTAINER_NAME
