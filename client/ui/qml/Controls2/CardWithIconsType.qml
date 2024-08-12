@@ -21,6 +21,8 @@ Button {
     property string rightImageSource
     property string rightImageColor: AmneziaStyle.color.paleGray
 
+    property string leftImageSource
+
     property real textOpacity: 1.0
 
     hoverEnabled: true
@@ -45,6 +47,16 @@ Button {
         RowLayout {
             id: content
             anchors.fill: parent
+
+            Image {
+                id: leftImage
+                source: leftImageSource
+
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                Layout.topMargin: 24
+                Layout.bottomMargin: 24
+                Layout.leftMargin: 24
+            }
 
             ColumnLayout {
                 ListItemTitleType {

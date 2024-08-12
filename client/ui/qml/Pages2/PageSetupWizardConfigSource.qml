@@ -42,7 +42,7 @@ PageType {
 
             Item {
                 id: focusItem
-                KeyNavigation.tab: textKey.textArea
+                KeyNavigation.tab: textKey.textField
             }
 
 
@@ -65,34 +65,19 @@ PageType {
                 text: qsTr("Insert the key, add a configuration file or scan the QR-code")
             }
 
-            TextAreaWithFooterType {
+            TextFieldWithHeaderType {
                 id: textKey
 
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.leftMargin: 16
 
                 headerText: qsTr("Insert key")
+                buttonText: qsTr("Insert")
 
-                firstButtonImage: SettingsController.isCameraPresent() ? "qrc:/images/controls/scan-line.svg" : ""
-                secondButtonImage: "qrc:/images/controls/folder-search-2.svg"
-
-                firstButtonClickedFunc: function() {
-                    ImportController.startDecodingQr()
-                    if (Qt.platform.os === "ios") {
-                        PageController.goToPage(PageEnum.PageSetupWizardQrReader)
-                    }
-                }
-
-                secondButtonClickedFunc: function() {
-                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
-                                                                       "Config files (*.vpn *.ovpn *.conf *.json)"
-                    var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
-                    if (fileName !== "") {
-                        if (ImportController.extractConfigFromFile(fileName)) {
-                            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
-                        }
-                    }
+                clickedFunc: function() {
+                    textField.text = ""
+                    textField.paste()
                 }
 
                 KeyNavigation.tab: continueButton
@@ -110,7 +95,7 @@ PageType {
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunc: function() {
-                    if (ImportController.extractConfigFromData(textKey.textAreaText)) {
+                    if (ImportController.extractConfigFromData(textKey.textFieldText)) {
                         PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
                     }
                 }
@@ -118,7 +103,7 @@ PageType {
 
             ParagraphTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 40
+                Layout.topMargin: 32
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
                 Layout.bottomMargin: 24
@@ -139,6 +124,7 @@ PageType {
                 bodyText: qsTr("Connect to classic paid and free VPN services from Amnezia")
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/amnezia.svg"
 
                 onClicked: {
                     PageController.showBusyIndicator(true)
@@ -162,6 +148,7 @@ PageType {
                 bodyText: qsTr("Configure Amnezia VPN on your own server")
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/server.svg"
 
                 onClicked: {
                     PageController.goToPage(PageEnum.PageSetupWizardCredentials)
@@ -179,6 +166,7 @@ PageType {
                 headerText: qsTr("Restore from backup")
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/archive-restore.svg"
 
                 onClicked: {
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),
@@ -187,6 +175,52 @@ PageType {
                         PageController.showBusyIndicator(true)
                         SettingsController.restoreAppConfig(filePath)
                         PageController.showBusyIndicator(false)
+                    }
+                }
+            }
+
+            CardWithIconsType {
+                id: openFile
+
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 16
+
+                headerText: qsTr("File with connection settings")
+
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/folder-search-2.svg"
+
+                onClicked: {
+                    var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
+                                                                       "Config files (*.vpn *.ovpn *.conf *.json)"
+                    var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
+                    if (fileName !== "") {
+                        if (ImportController.extractConfigFromFile(fileName)) {
+                            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                        }
+                    }
+                }
+            }
+
+            CardWithIconsType {
+                id: scanQr
+
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 16
+
+                headerText: qsTr("QR code")
+
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/scan-line.svg"
+
+                onClicked: {
+                    ImportController.startDecodingQr()
+                    if (Qt.platform.os === "ios") {
+                        PageController.goToPage(PageEnum.PageSetupWizardQrReader)
                     }
                 }
             }

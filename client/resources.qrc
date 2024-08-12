@@ -253,6 +253,7 @@
         <file>ui/qml/Pages2/PageDevMenu.qml</file>
         <file>images/controls/refresh-cw.svg</file>
         <file>ui/qml/Pages2/PageSettingsApiLanguageList.qml</file>
+        <file>images/controls/archive-restore.svg</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>
