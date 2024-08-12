@@ -85,9 +85,9 @@ void InstallController::install(DockerContainer container, int port, TransportPr
             containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, protocol));
 
             if (container == DockerContainer::Awg) {
-                QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(3, 10));
-                QString junkPacketMinSize = QString::number(50);
-                QString junkPacketMaxSize = QString::number(1000);
+                QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
+                QString junkPacketMinSize = QString::number(10);
+                QString junkPacketMaxSize = QString::number(50);
 
                 int s1 = QRandomGenerator::global()->bounded(15, 150);
                 int s2 = QRandomGenerator::global()->bounded(15, 150);
