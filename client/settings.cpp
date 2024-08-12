@@ -226,6 +226,8 @@ void Settings::setSaveLogs(bool enabled)
         }
     }
 #endif
+    Logger::setServiceLogsEnabled(enabled);
+
     if (enabled) {
         setLogEnableDate(QDateTime::currentDateTime());
     }

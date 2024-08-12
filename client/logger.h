@@ -26,6 +26,7 @@ public:
 
     static bool init();
     static void deInit();
+    static bool setServiceLogsEnabled(bool enabled);
     static bool openLogsFolder();
     static bool openServiceLogsFolder();
     static QString appLogFileNamePath();
