@@ -23,7 +23,8 @@ execute_process(
 )
 
 add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
-add_definitions(-DPROD_AGW_PUBLIC_KEY="${PROD_AGW_PUBLIC_KEY}")
+string(REPLACE "\n" "\\n" PROD_AGW_PUBLIC_KEY_ESCAPED "$ENV{PROD_AGW_PUBLIC_KEY}")
+add_definitions(-DPROD_AGW_PUBLIC_KEY="${PROD_AGW_PUBLIC_KEY_ESCAPED}")
 
 if(IOS)
     set(PACKAGES ${PACKAGES} Multimedia)
