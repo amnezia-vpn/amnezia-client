@@ -128,11 +128,8 @@ bool Utils::processIsRunning(const QString &fileName, const bool fullFlag)
     QProcess process;
     process.setReadChannel(QProcess::StandardOutput);
     process.setProcessChannelMode(QProcess::MergedChannels);
-    process.start("wmic.exe",
-                  QStringList() << "/OUTPUT:STDOUT"
-                                << "PROCESS"
-                                << "get"
-                                << "Caption");
+    process.start("powershell.exe",
+                QStringList() << "-Command" << "Get-Process | Select-Object -ExpandProperty Name");
     process.waitForStarted();
     process.waitForFinished();
     QString processData(process.readAll());
