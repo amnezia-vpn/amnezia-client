@@ -23,6 +23,8 @@ namespace
         constexpr char region[] = "region";
 
         constexpr char availableCountries[] = "available_countries";
+
+        constexpr char storeEndpoint[] = "store_endpoint";
     }
 
     namespace serviceType
@@ -163,6 +165,12 @@ QJsonArray ApiServicesModel::getSelectedServiceCountries()
 QString ApiServicesModel::getCountryCode()
 {
     return m_countryCode;
+}
+
+QString ApiServicesModel::getStoreEndpoint()
+{
+    QJsonObject service = m_services.at(m_selectedServiceIndex).toObject();
+    return service.value(configKey::storeEndpoint).toString();
 }
 
 QVariant ApiServicesModel::getSelectedServiceData(const QString roleString)

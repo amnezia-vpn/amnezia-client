@@ -178,6 +178,12 @@ PageType {
         function onImportErrorOccurred(error, goToPageHome) {
             PageController.showErrorMessage(error)
         }
+
+        function onRestoreAppConfig(data) {
+            PageController.showBusyIndicator(true)
+            SettingsController.restoreAppConfigFromData(data)
+            PageController.showBusyIndicator(false)
+        }
     }
 
     Connections {
@@ -185,6 +191,11 @@ PageType {
 
         function onLoggingDisableByWatcher() {
             PageController.showNotificationMessage(qsTr("Logging was disabled after 14 days, log files were deleted"))
+        }
+
+        function onRestoreBackupFinished() {
+            PageController.showNotificationMessage(qsTr("Settings restored from backup file"))
+            PageController.goToPageHome()
         }
     }
 
@@ -235,6 +246,8 @@ PageType {
         bottomPadding: 8
         leftPadding: 96
         rightPadding: 96
+
+        height: visible ? homeTabButton.implicitHeight + tabBar.topPadding + tabBar.bottomPadding : 0
 
         enabled: !root.isControlsDisabled && !root.isTabBarDisabled
 

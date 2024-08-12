@@ -136,9 +136,16 @@ PageType {
         text: qsTr("Connect")
 
         clickedFunc: function() {
-            PageController.showBusyIndicator(true)
-            InstallController.installServiceFromApi()
-            PageController.showBusyIndicator(false)
+            var endpoint = ApiServicesModel.getStoreEndpoint()
+            if (endpoint !== undefined && endpoint !== "") {
+                Qt.openUrlExternally(endpoint)
+                PageController.closePage()
+                PageController.closePage()
+            } else {
+                PageController.showBusyIndicator(true)
+                InstallController.installServiceFromApi()
+                PageController.showBusyIndicator(false)
+            }
         }
     }
 }

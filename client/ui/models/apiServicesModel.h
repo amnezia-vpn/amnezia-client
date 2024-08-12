@@ -39,6 +39,8 @@ public slots:
 
     QString getCountryCode();
 
+    QString getStoreEndpoint();
+
     QVariant getSelectedServiceData(const QString roleString);
 
 protected:

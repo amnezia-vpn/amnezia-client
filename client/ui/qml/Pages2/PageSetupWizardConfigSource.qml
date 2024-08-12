@@ -126,7 +126,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/amnezia.svg"
 
-                onClicked: {
+                onClicked: function() {
                     PageController.showBusyIndicator(true)
                     var result = InstallController.fillAvailableServices()
                     PageController.showBusyIndicator(false)
@@ -162,6 +162,8 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
                 Layout.bottomMargin: 16
+
+                visible: PageController.isStartPageVisible()
 
                 headerText: qsTr("Restore from backup")
 

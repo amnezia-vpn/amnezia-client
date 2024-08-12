@@ -52,6 +52,8 @@ Button {
                 id: leftImage
                 source: leftImageSource
 
+                visible: leftImageSource !== ""
+
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 Layout.topMargin: 24
                 Layout.bottomMargin: 24

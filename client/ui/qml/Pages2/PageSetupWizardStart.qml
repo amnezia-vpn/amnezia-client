@@ -14,75 +14,7 @@ import "../Components"
 PageType {
     id: root
 
-    property bool isControlsDisabled: false
-
     defaultActiveFocusItem: focusItem
-
-    Connections {
-        target: PageController
-
-        function onGoToPageViewConfig() {
-            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
-        }
-
-        function onClosePage() {
-            if (stackView.depth <= 1) {
-                PageController.hideWindow()
-                return
-            }
-            stackView.pop()
-        }
-
-        function onGoToPage(page, slide) {
-            var pagePath = PageController.getPagePath(page)
-            if (slide) {
-                stackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
-            } else {
-                stackView.push(pagePath, { "objectName" : pagePath }, StackView.Immediate)
-            }
-        }
-
-        function onGoToStartPage() {
-            while (stackView.depth > 1) {
-                stackView.pop()
-            }
-        }
-
-        function onDisableControls(disabled) {
-            isControlsDisabled = disabled
-        }
-
-        function onDisableTabBar(disabled) {
-            isControlsDisabled = disabled
-        }
-
-        function onEscapePressed() {
-            if (isControlsDisabled) {
-                return
-            }
-
-            PageController.closePage()
-        }
-    }
-
-    Connections {
-        target: SettingsController
-
-        function onRestoreBackupFinished() {
-            PageController.showNotificationMessage(qsTr("Settings restored from backup file"))
-            PageController.goToPageHome()
-        }
-    }
-
-    Connections {
-        target: ImportController
-
-        function onRestoreAppConfig(data) {
-            PageController.showBusyIndicator(true)
-            SettingsController.restoreAppConfigFromData(data)
-            PageController.showBusyIndicator(false)
-        }
-    }
 
     ColumnLayout {
         id: content
