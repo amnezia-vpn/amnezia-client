@@ -62,11 +62,15 @@ private:
                             const QSharedPointer<ServerController> &serverController);
     ErrorCode revokeWireGuard(const int row, const DockerContainer container, const ServerCredentials &credentials,
                               const QSharedPointer<ServerController> &serverController);
+    ErrorCode revokeXray(const int row, const DockerContainer container, const ServerCredentials &credentials,
+                         const QSharedPointer<ServerController> &serverController);
 
     ErrorCode getOpenVpnClients(const DockerContainer container, const ServerCredentials &credentials,
                                 const QSharedPointer<ServerController> &serverController, int &count);
     ErrorCode getWireGuardClients(const DockerContainer container, const ServerCredentials &credentials,
                                   const QSharedPointer<ServerController> &serverController, int &count);
+    ErrorCode getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
+                             const QSharedPointer<ServerController> &serverController, int &count);
 
     ErrorCode wgShow(const DockerContainer container, const ServerCredentials &credentials,
                      const QSharedPointer<ServerController> &serverController, std::vector<WgShowData> &data);

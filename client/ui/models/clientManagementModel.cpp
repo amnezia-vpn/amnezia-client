@@ -103,6 +103,8 @@ ErrorCode ClientManagementModel::updateModel(const DockerContainer container, co
             error = getOpenVpnClients(container, credentials, serverController, count);
         } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
             error = getWireGuardClients(container, credentials, serverController, count);
+        } else if (container == DockerContainer::Xray) {
+            error = getXrayClients(container, credentials, serverController, count);
         }
         if (error != ErrorCode::NoError) {
             endResetModel();
@@ -224,6 +226,35 @@ ErrorCode ClientManagementModel::getWireGuardClients(const DockerContainer conta
             QJsonObject userData;
             userData[configKey::clientName] = QString("Client %1").arg(count);
             client[configKey::userData] = userData;
+
+            m_clientsTable.push_back(client);
+
+            count++;
+        }
+    }
+    return error;
+}
+ErrorCode ClientManagementModel::getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
+                                                const QSharedPointer<ServerController> &serverController, int &count)
+{
+    ErrorCode error = ErrorCode::NoError;
+
+    const QString xrayClientIdFile = QStringLiteral("/opt/amnezia/xray/xray_uuid.key");
+    const QString xrayClientId = serverController->getTextFileFromContainer(container, credentials, xrayClientIdFile, error);
+    if (error != ErrorCode::NoError) {
+        logger.error() << "Failed to get the xray client id file from the server";
+        return error;
+    }
+    QStringList xrayClientIds { xrayClientId };
+
+    for (auto &xrayClientId : xrayClientIds) {
+        if (!isClientExists(xrayClientId)) {
+            QJsonObject client;
+            client[configKey::clientId] = xrayClientId;
+
+            QJsonObject userData;
+            userData[configKey::clientName] = QStringLiteral("Client %1").arg(count);
+            userData[configKey::userData] = userData;
 
             m_clientsTable.push_back(client);
 
@@ -413,10 +444,27 @@ ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContain
     auto client = m_clientsTable.at(row).toObject();
     QString clientId = client.value(configKey::clientId).toString();
 
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
-        errorCode = revokeOpenVpn(row, container, credentials, serverIndex, serverController);
-    } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
-        errorCode = revokeWireGuard(row, container, credentials, serverController);
+    switch(container)
+    {
+        case DockerContainer::OpenVpn:
+        case DockerContainer::ShadowSocks:
+        case DockerContainer::Cloak: {
+            errorCode = revokeOpenVpn(row, container, credentials, serverIndex, serverController);
+            break;
+        }
+        case DockerContainer::WireGuard:
+        case DockerContainer::Awg: {
+            errorCode = revokeWireGuard(row, container, credentials, serverController);
+            break;
+        }
+        case DockerContainer::Xray: {
+            errorCode = revokeXray(row, container, credentials, serverController);
+            break;
+        }
+        default: {
+            logger.warning() << "Unknown container type was received";
+            break;
+        }
     }
 
     if (errorCode == ErrorCode::NoError) {
@@ -454,12 +502,25 @@ ErrorCode ClientManagementModel::revokeClient(const QJsonObject &containerConfig
     }
 
     Proto protocol;
-    if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+
+    switch(container)
+    {
+    case DockerContainer::ShadowSocks:
+    case DockerContainer::Cloak: {
         protocol = Proto::OpenVpn;
-    } else if (container == DockerContainer::OpenVpn || container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
+        break;
+    }
+    case DockerContainer::OpenVpn:
+    case DockerContainer::WireGuard:
+    case DockerContainer::Awg:
+    case DockerContainer::Xray: {
         protocol = ContainerProps::defaultProtocol(container);
-    } else {
+        break;
+    }
+    default: {
+        logger.warning() << "Unknown container type was received";
         return ErrorCode::NoError;
+    }
     }
 
     auto protocolConfig = ContainerProps::getProtocolConfigFromContainer(protocol, containerConfig);
@@ -478,11 +539,28 @@ ErrorCode ClientManagementModel::revokeClient(const QJsonObject &containerConfig
         return errorCode;
     }
 
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+    switch (container)
+    {
+    case DockerContainer::OpenVpn:
+    case DockerContainer::ShadowSocks:
+    case DockerContainer::Cloak: {
         errorCode = revokeOpenVpn(row, container, credentials, serverIndex, serverController);
-    } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
-        errorCode = revokeWireGuard(row, container, credentials, serverController);
+        break;
     }
+    case DockerContainer::WireGuard:
+    case DockerContainer::Awg: {
+        errorCode = revokeWireGuard(row, container, credentials, serverController);
+        break;
+    }
+    case DockerContainer::Xray: {
+        errorCode = revokeXray(row, container, credentials, serverController);
+        break;
+    }
+    default:
+        logger.warning() << "Unknown container type was received";
+        break;
+    }
+
     return errorCode;
 }
 
@@ -583,6 +661,32 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
     }
 
     return ErrorCode::NoError;
+}
+
+ErrorCode ClientManagementModel::revokeXray(const int row,
+                                            const DockerContainer container,
+                                            const ServerCredentials &credentials,
+                                            const QSharedPointer<ServerController> &serverController)
+{
+    ErrorCode error = ErrorCode::NoError;
+
+    const QString xrayClientIdFile = QStringLiteral("/opt/amnezia/xray/xray_uuid.key");
+    const QString xrayClientId = serverController->getTextFileFromContainer(container, credentials, xrayClientIdFile, error);
+    if (error != ErrorCode::NoError) {
+        logger.error() << "Failed to get the xray client id file from the server";
+        return error;
+    }
+
+    auto client = m_clientsTable.at(row).toObject();
+    QString clientId = client.value(configKey::clientId).toString();
+
+    // remove from /opt/amnezia/xray/server.json
+
+    beginRemoveRows(QModelIndex(), row, row);
+    m_clientsTable.removeAt(row);
+    endRemoveRows();
+
+    return error;
 }
 
 QHash<int, QByteArray> ClientManagementModel::roleNames() const
