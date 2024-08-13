@@ -159,8 +159,21 @@ QStringList ApiController::getProxyUrls()
         reply->deleteLater();
     }
 
-    auto responseBody = reply->readAll();
+    auto encryptedResponseBody = reply->readAll();
     reply->deleteLater();
+
+    EVP_PKEY *privateKey = nullptr;
+    QByteArray responseBody;
+    try {
+        QByteArray key = PROD_PROXY_STORAGE_KEY;
+        QSimpleCrypto::QRsa rsa;
+        privateKey = rsa.getPrivateKeyFromByteArray(key, "");
+        responseBody = rsa.decrypt(encryptedResponseBody, privateKey, RSA_PKCS1_PADDING);
+    } catch (...) {
+        qCritical() << "error loading private key from environment variables or decrypting payload";
+        return {};
+    }
+
     auto endpointsArray = QJsonDocument::fromJson(responseBody).array();
 
     QStringList endpoints;

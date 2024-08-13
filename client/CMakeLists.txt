@@ -23,8 +23,12 @@ execute_process(
 )
 
 add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
+
 string(REPLACE "\n" "\\n" PROD_AGW_PUBLIC_KEY_ESCAPED "$ENV{PROD_AGW_PUBLIC_KEY}")
 add_definitions(-DPROD_AGW_PUBLIC_KEY="${PROD_AGW_PUBLIC_KEY_ESCAPED}")
+
+string(REPLACE "\n" "\\n" PROD_PROXY_STORAGE_KEY_ESCAPED "$ENV{PROD_PROXY_STORAGE_KEY}")
+add_definitions(-DPROD_PROXY_STORAGE_KEY="${PROD_PROXY_STORAGE_KEY_ESCAPED}")
 
 if(IOS)
     set(PACKAGES ${PACKAGES} Multimedia)
@@ -36,7 +40,7 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
-set(LIBS ${LIBS} 
+set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
@@ -255,7 +259,7 @@ set(SOURCES ${SOURCES}
 
 if(WIN32)
     configure_file(
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc.in 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc.in
         ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
     )
 
