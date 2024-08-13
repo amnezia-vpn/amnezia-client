@@ -15,8 +15,6 @@ import "../Components"
 FocusScope {
     id: root
 
-    // defaultActiveFocusItem: homeTabButton
-
     property bool isControlsDisabled: false
     property bool isTabBarDisabled: false
 
@@ -92,7 +90,6 @@ FocusScope {
         }
 
         function onForceStackActiveFocus() {
-            console.log("onForceStackActiveFocus")
             homeTabButton.focus = true
             tabBarStackView.forceActiveFocus()
         }
@@ -176,17 +173,19 @@ FocusScope {
 
         enabled: !root.isControlsDisabled
 
-        onActiveFocusChanged: {
-            // console.log("tabBarStackView activeFocusChanged", activeFocus)
-        }
+        // onActiveFocusChanged: {
+        //     if (currentItem) {
+        //         currentItem.forceActiveFocus()
+        //     }
+        // }
 
         // KeyNavigation.tab: homeTabButton
-        Keys.onTabPressed: tabBarStackView.currentItem.lastItemTabClicked()
-        onCurrentItemChanged: {
-            if (currentItem) {
-                currentItem.forceActiveFocus()
-            }
-        }
+        // Keys.onTabPressed: tabBarStackView.currentItem.lastItemTabClicked()
+        // onCurrentItemChanged: {
+        //     if (currentItem) {
+        //         currentItem.forceActiveFocus()
+        //     }
+        // }
 
         function goToTabBarPage(page) {
             connectionTypeSelection.close()
@@ -207,10 +206,6 @@ FocusScope {
         id: tabBar
 
         property int previousIndex: 0
-
-        onActiveFocusChanged: {
-            console.log("tabBar activeFocusChanged", activeFocus)
-        }
 
         anchors.right: parent.right
         anchors.left: parent.left

@@ -17,8 +17,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     Connections {
         target: InstallController
 

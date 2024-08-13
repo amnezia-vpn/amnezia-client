@@ -16,8 +16,6 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    defaultActiveFocusItem: backButton
-
     Connections {
         target: SettingsController
 

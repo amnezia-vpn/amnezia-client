@@ -17,8 +17,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: backButton
-
     ColumnLayout {
         id: header
 

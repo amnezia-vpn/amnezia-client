@@ -14,7 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: backButton
 
     BackButtonType {
         id: backButton
@@ -231,12 +230,12 @@ PageType {
                         }
 
                         if (!GC.isMobile()) {
-                            root.defaultActiveFocusItem.forceActiveFocus()
+                            // root.defaultActiveFocusItem.forceActiveFocus()
                         }
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {
-                            root.defaultActiveFocusItem.forceActiveFocus()
+                            // root.defaultActiveFocusItem.forceActiveFocus()
                         }
                     }
 

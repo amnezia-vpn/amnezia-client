@@ -11,8 +11,6 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: backButton
-
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
 
     BackButtonType {

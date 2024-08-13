@@ -19,13 +19,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: header
 
@@ -122,7 +115,7 @@ PageType {
 
                             onClosed: {
                                 if (!GC.isMobile()) {
-                                    defaultActiveFocusItem.forceActiveFocus()
+                                    // defaultActiveFocusItem.forceActiveFocus()
                                 }
                             }
 
@@ -226,7 +219,6 @@ PageType {
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: AmneziaStyle.color.red
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                     var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
@@ -239,7 +231,7 @@ PageType {
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {
-                            focusItem.forceActiveFocus()
+                            // focusItem.forceActiveFocus()
                         }
                     }
 

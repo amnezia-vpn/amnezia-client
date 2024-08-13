@@ -21,8 +21,6 @@ PageType {
 
     property bool isClearCacheVisible: ServersModel.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ContainersModel.getProcessedContainerIndex())
 
-    defaultActiveFocusItem: focusItem
-
     Item {
         id: focusItem
         KeyNavigation.tab: backButton

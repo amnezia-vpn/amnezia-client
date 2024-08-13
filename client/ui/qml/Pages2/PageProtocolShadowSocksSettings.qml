@@ -15,9 +15,9 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.focusItemId.enabled ?
-                                listview.currentItem.focusItemId.textField :
-                                focusItem
+    // defaultActiveFocusItem: listview.currentItem.focusItemId.enabled ?
+    //                             listview.currentItem.focusItemId.textField :
+    //                             focusItem
 
     Item {
         id: focusItem

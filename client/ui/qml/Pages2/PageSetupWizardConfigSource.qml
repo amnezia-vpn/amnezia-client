@@ -12,7 +12,6 @@ import "../Config"
 
 PageType {
     id: root
-    defaultActiveFocusItem: backButton
 
     Connections {
         target: ImportController

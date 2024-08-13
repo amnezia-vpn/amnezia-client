@@ -15,7 +15,8 @@ DrawerType2 {
     height: parent.height
 
     expandedContent: FocusChainType {
-        defaultActiveFocusItem: ip
+        focus: root.visible
+        focusTabBarOnLastItem: false
 
         ColumnLayout {
             id: content

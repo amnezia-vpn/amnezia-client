@@ -10,8 +10,6 @@ import "TextTypes"
 FocusScope {
     id: root
 
-    /*required*/ property var parentPage
-
     readonly property string drawerExpanded: "expanded"
     readonly property string drawerCollapsed: "collapsed"
 
@@ -44,30 +42,30 @@ FocusScope {
     signal opened
 
     onClosed: {
-        console.log("Drawer closed============================")
         if (GC.isMobile()) {
             return
         }
 
-        if (parentPage) {
-            parentPage.forceActiveFocus()
-        }
+        // if (parent && parent instanceof PageType) {
+        //     parent.focusItem_.forceActiveFocus()
+        // }
+
+        // tabBarStackView.currentItem.focusItem_.forceActiveFocus()
+
         // PageController.forceStackActiveFocus()
     }
 
-    onOpened: {
-        console.log("Drawer opened============================")
-        if (GC.isMobile()) {
-            return
-        }
+    // onOpened: {
+    //     if (GC.isMobile()) {
+    //         return
+    //     }
 
-        if (root.expandedContent) {
-            expandedLoader.item.forceActiveFocus()
-        }
-    }
+    //     if (root.expandedContent) {
+    //         expandedLoader.item.forceActiveFocus()
+    //     }
+    // }
 
     onActiveFocusChanged: {
-        console.log("Drawer active focus changed============================")
         if (GC.isMobile()) {
             return
         }
@@ -77,15 +75,15 @@ FocusScope {
         }
     }
 
-    // onOpened: {
-    //     if (isOpened) {
-    //         if (drawerContent.state === root.drawerExpanded) {
-    //             expandedLoader.item.forceActiveFocus()
-    //         } else {
-    //             collapsedLoader.item.forceActiveFocus()
-    //         }
-    //     }
-    // }
+    onOpened: {
+        if (isOpened) {
+            if (drawerContent.state === root.drawerExpanded) {
+                expandedLoader.item.forceActiveFocus()
+            } else {
+                collapsedLoader.item.forceActiveFocus()
+            }
+        }
+    }
 
     Connections {
         target: PageController

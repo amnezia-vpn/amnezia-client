@@ -17,7 +17,7 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.vpnAddressSubnetTextField.textField
+    // defaultActiveFocusItem: listview.currentItem.vpnAddressSubnetTextField.textField
 
     Item {
         id: focusItem

@@ -14,8 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: backButton
-
     BackButtonType {
         id: backButton
 

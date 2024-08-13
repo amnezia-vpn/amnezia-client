@@ -13,10 +13,9 @@ import "../Components"
 
 PageType {
     id: root
+    objectName: "PageStart"
 
     property bool isControlsDisabled: false
-
-    defaultActiveFocusItem: startButton
 
     Connections {
         target: PageController
@@ -178,12 +177,13 @@ PageType {
 
     ConnectionTypeSelectionDrawer {
         id: connectionTypeSelection
-        parentPage: root
 
-        onClosed: {
+        // onClosed: {
         //     PageController.forceTabBarActiveFocus()
         //     root.defaultActiveFocusItem.forceActiveFocus()
-            PageController.forceStackActiveFocus()
-        }
+            // PageController.forceStackActiveFocus()
+
+            // startButton2.forceActiveFocus()
+        // }
     }
 }

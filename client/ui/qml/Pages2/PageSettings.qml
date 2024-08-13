@@ -13,8 +13,6 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: account
-
     FlickableType {
         id: fl
         anchors.top: parent.top

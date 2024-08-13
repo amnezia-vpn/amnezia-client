@@ -16,8 +16,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.portTextField.textField
-
     Item {
         id: focusItem
         onFocusChanged: {

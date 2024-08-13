@@ -23,8 +23,6 @@ PageType {
 
     property var isServerFromApi: ServersModel.getDefaultServerData("isServerFromApi")
     
-    defaultActiveFocusItem: searchField.textField
-
     Item {
         id: focusItem
         KeyNavigation.tab: backButton
@@ -360,11 +358,11 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.4375
 
-        onClosed: {
-            if (root.defaultActiveFocusItem && !GC.isMobile()) {
-                root.defaultActiveFocusItem.forceActiveFocus()
-            }
-        }
+        // onClosed: {
+            // if (root.defaultActiveFocusItem && !GC.isMobile()) {
+            //     root.defaultActiveFocusItem.forceActiveFocus()
+            // }
+        // }
 
         expandedContent: ColumnLayout {
             id: moreActionsDrawerContent

@@ -113,7 +113,7 @@ PageType {
                             parent: root
                             onClosed: {
                                 if (!GC.isMobile()) {
-                                    defaultActiveFocusItem.forceActiveFocus()
+                                    // defaultActiveFocusItem.forceActiveFocus()
                                 }
                             }
 
@@ -288,10 +288,10 @@ PageType {
                             transportProtoSelector.visible = protocolSelectorVisible
                             transportProtoHeader.visible = protocolSelectorVisible
 
-                            if (port.visible && port.enabled)
-                                defaultActiveFocusItem = port.textField
-                            else
-                                defaultActiveFocusItem = focusItem
+                            // if (port.visible && port.enabled)
+                            //     defaultActiveFocusItem = port.textField
+                            // else
+                            //     defaultActiveFocusItem = focusItem
                         }
                     }
                 }

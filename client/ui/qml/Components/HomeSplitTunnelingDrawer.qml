@@ -16,110 +16,109 @@ DrawerType2 {
     anchors.fill: parent
     expandedHeight: parent.height * 0.9
 
-    expandedContent: ColumnLayout {
-        id: content
+    expandedContent: FocusChainType {
+        focus: root.visible
+        focusTabBarOnLastItem: false
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        spacing: 0
+        ColumnLayout {
+            id: content
 
-        // onActiveFocusChanged: {
-        //     console.log("onActiveFocusChanged ========================")
-        //     if (activeFocus) {
-        //         focusItem.forceActiveFocus()
-        //     }
-        // }
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            spacing: 0
 
-        // Connections {
-        //     target: root
-        //     enabled: !GC.isMobile()
-        //     function onOpened() {
-        //         focusItem.forceActiveFocus()
-        //     }
-        // }
+            // onActiveFocusChanged: {
+            //     if (activeFocus) {
+            //         focusItem.forceActiveFocus()
+            //     }
+            // }
 
-        Header2Type {
-            Layout.fillWidth: true
-            Layout.topMargin: 24
-            Layout.rightMargin: 16
-            Layout.leftMargin: 16
-            Layout.bottomMargin: 16
+            // Connections {
+            //     target: root
+            //     enabled: !GC.isMobile()
+            //     function onOpened() {
+            //         focusItem.forceActiveFocus()
+            //     }
+            // }
 
-            headerText: qsTr("Split tunneling")
-            descriptionText:  qsTr("Allows you to connect to some sites or applications through a VPN connection and bypass others")
-        }
+            Header2Type {
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 16
 
-        Item {
-            id: focusItem
-            KeyNavigation.tab: splitTunnelingSwitch.visible ? splitTunnelingSwitch : siteBasedSplitTunnelingSwitch.rightButton
-        }
-
-        LabelWithButtonType {
-            id: splitTunnelingSwitch
-            Layout.fillWidth: true
-            Layout.topMargin: 16
-
-            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi")
-
-            text: qsTr("Split tunneling on the server")
-            descriptionText: qsTr("Enabled \nCan't be disabled for current server")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-            KeyNavigation.tab: siteBasedSplitTunnelingSwitch.visible ? siteBasedSplitTunnelingSwitch.rightButton : focusItem
-
-            clickedFunction: function() {
-//                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-//                root.close()
+                headerText: qsTr("Split tunneling")
+                descriptionText:  qsTr("Allows you to connect to some sites or applications through a VPN connection and bypass others")
             }
-        }
 
-        DividerType {
-            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi")
-        }
+            LabelWithButtonType {
+                id: splitTunnelingSwitch
+                Layout.fillWidth: true
+                Layout.topMargin: 16
 
-        LabelWithButtonType {
-            id: siteBasedSplitTunnelingSwitch
-            Layout.fillWidth: true
-            Layout.topMargin: 16
+                visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi")
 
-            text: qsTr("Site-based split tunneling")
-            descriptionText: enabled && SitesModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                text: qsTr("Split tunneling on the server")
+                descriptionText: qsTr("Enabled \nCan't be disabled for current server")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-            KeyNavigation.tab: appSplitTunnelingSwitch.visible ?
-                                   appSplitTunnelingSwitch.rightButton :
-                                   focusItem
+                // KeyNavigation.tab: siteBasedSplitTunnelingSwitch.visible ? siteBasedSplitTunnelingSwitch.rightButton : focusItem
 
-            clickedFunction: function() {
-                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-                root.close()
+                clickedFunction: function() {
+                    //                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
+                    //                root.close()
+                }
             }
-        }
 
-        DividerType {
-        }
-
-        LabelWithButtonType {
-            id: appSplitTunnelingSwitch
-            visible: isAppSplitTinnelingEnabled
-
-            Layout.fillWidth: true
-
-            text: qsTr("App-based split tunneling")
-            descriptionText: AppSplitTunnelingModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-            KeyNavigation.tab: focusItem
-
-            clickedFunction: function() {
-                PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
-                root.close()
+            DividerType {
+                visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi")
             }
-        }
 
-        DividerType {
-            visible: isAppSplitTinnelingEnabled
+            LabelWithButtonType {
+                id: siteBasedSplitTunnelingSwitch
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+
+                text: qsTr("Site-based split tunneling")
+                descriptionText: enabled && SitesModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                // KeyNavigation.tab: appSplitTunnelingSwitch.visible ?
+                //                        appSplitTunnelingSwitch.rightButton :
+                //                        focusItem
+
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
+                    root.close()
+                }
+            }
+
+            DividerType {
+            }
+
+            LabelWithButtonType {
+                id: appSplitTunnelingSwitch
+                visible: isAppSplitTinnelingEnabled
+
+                Layout.fillWidth: true
+
+                text: qsTr("App-based split tunneling")
+                descriptionText: AppSplitTunnelingModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                // KeyNavigation.tab: focusItem
+
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
+                    root.close()
+                }
+            }
+
+            DividerType {
+                visible: isAppSplitTinnelingEnabled
+            }
         }
     }
 }

@@ -18,8 +18,6 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: clientNameTextField.textField
-
     enum ConfigType {
         AmneziaConnection,
         OpenVpn,
@@ -288,7 +286,7 @@ PageType {
                         implicitWidth: (root.width - 32) / 2
                         text: qsTr("Connection")
 
-                        KeyNavigation.tab: usersRadioButton
+                        // KeyNavigation.tab: usersRadioButton
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 0
@@ -305,7 +303,7 @@ PageType {
                         implicitWidth: (root.width - 32) / 2
                         text: qsTr("Users")
 
-                        KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ? clientNameTextField.textField : serverSelector
+                        // KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ? clientNameTextField.textField : serverSelector
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
@@ -343,7 +341,7 @@ PageType {
 
                 checkEmptyText: true
 
-                KeyNavigation.tab: serverSelector
+                // KeyNavigation.tab: serverSelector
 
             }
 
@@ -409,7 +407,7 @@ PageType {
                     }
                 }
 
-                KeyNavigation.tab: protocolSelector
+                // KeyNavigation.tab: protocolSelector
             }
 
             DropDownType {
@@ -509,11 +507,11 @@ PageType {
                     }
                 }
 
-                KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ?
-                                       exportTypeSelector :
-                                       isSearchBarVisible ?
-                                           searchTextField.textField :
-                                           usersHeader.actionButton
+                // KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ?
+                                       // exportTypeSelector :
+                                       // isSearchBarVisible ?
+                                       //     searchTextField.textField :
+                                       //     usersHeader.actionButton
             }
 
             DropDownType {

@@ -14,8 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: primaryDns.textField
-
     Item {
         id: focusItem
         KeyNavigation.tab: backButton
@@ -29,7 +27,7 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20
 
-        KeyNavigation.tab: root.defaultActiveFocusItem
+        // KeyNavigation.tab: root.defaultActiveFocusItem
     }
 
     FlickableType {
@@ -124,12 +122,12 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Settings have been reset"))
 
                         if (!GC.isMobile()) {
-                            defaultActiveFocusItem.forceActiveFocus()
+                            // defaultActiveFocusItem.forceActiveFocus()
                         }
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {
-                            defaultActiveFocusItem.forceActiveFocus()
+                            // defaultActiveFocusItem.forceActiveFocus()
                         }
                     }
 

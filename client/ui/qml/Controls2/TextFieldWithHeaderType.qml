@@ -6,7 +6,7 @@ import Style 1.0
 
 import "TextTypes"
 
-Item {
+FocusScope {
     id: root
 
     property string headerText
@@ -40,16 +40,17 @@ Item {
     implicitHeight: content.implicitHeight
 
     property FlickableType parentFlickable
-    Connections {
-        target: textField
-        function onFocusChanged() {
-            if (textField.activeFocus) {
-                if (root.parentFlickable) {
-                    root.parentFlickable.ensureVisible(root)
-                }
-            }
-        }
-    }
+
+    // Connections {
+    //     target: textField
+    //     function onFocusChanged() {
+    //         if (textField.activeFocus) {
+    //             if (root.parentFlickable) {
+    //                 root.parentFlickable.ensureVisible(root)
+    //             }
+    //         }
+    //     }
+    // }
 
     ColumnLayout {
         id: content
@@ -85,6 +86,7 @@ Item {
                     TextField {
                         id: textField
                         activeFocusOnTab: false
+                        focus: true
 
                         enabled: root.textFieldEditable
                         color: root.enabled ? root.textFieldTextColor : root.textFieldTextDisabledColor
@@ -119,6 +121,7 @@ Item {
                         }
 
                         onActiveFocusChanged: {
+                            backgroud.border.color = getBackgroundBorderColor(root.borderColor)
                             if (checkEmptyText && textFieldText === "") {
                                 errorText = qsTr("The field can't be empty")
                             }
@@ -136,9 +139,6 @@ Item {
                             textObj: textField
                         }
 
-                        onFocusChanged: {
-                            backgroud.border.color = getBackgroundBorderColor(root.borderColor)
-                        }
                     }
                 }
             }
@@ -199,7 +199,7 @@ Item {
     }
 
     function getBackgroundBorderColor(noneFocusedColor) {
-        return textField.focus ? root.borderFocusedColor : noneFocusedColor
+        return textField.activeFocus ? root.borderFocusedColor : noneFocusedColor
     }
 
     Keys.onEnterPressed: {

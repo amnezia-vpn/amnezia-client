@@ -15,12 +15,7 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.trafficFromField.textField
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
+    // defaultActiveFocusItem: listview.currentItem.trafficFromField.textField
 
     ColumnLayout {
         id: backButtonLayout
@@ -183,7 +178,6 @@ PageType {
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save")
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()

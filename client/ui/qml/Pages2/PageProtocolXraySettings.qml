@@ -16,8 +16,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview
-
     Item {
         id: focusItem
         KeyNavigation.tab: backButton

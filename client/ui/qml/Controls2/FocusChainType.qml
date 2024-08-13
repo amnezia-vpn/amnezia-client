@@ -6,18 +6,23 @@ import "../Components"
 FocusScope {
     id: root
 
-    required property var defaultActiveFocusItem
+    property bool focusTabBarOnLastItem: true
+    property alias focusItem_: focusItem
 
-    property var focusChain: []
+    QtObject {
+        id: internal
 
-    onActiveFocusChanged: {
-        // console.log("root activeFocusChanged=-=--=-=-=-=--", activeFocus)
+        property var firstActiveFocusItem: null
+        property var focusChain: []
+    }
+
+    onVisibleChanged: {
+        focusItem_.focus = true
     }
 
     function getChildren(parent) {
         for (var i = 0; i < parent.children.length; i++) {
             var child = parent.children[i]
-            // console.log(child)
 
             if (child.children) {
                 getChildren(child)
@@ -26,33 +31,33 @@ FocusScope {
     }
 
     function isFocusableItem(item) {
-        // if (!item) { return false }
+        if (!item || !item.visible || !item.enabled) {
+            return false
+        }
 
         return item instanceof BasicButtonType ||
                 item instanceof ConnectButton ||
                 item instanceof LabelWithButtonType ||
                 item instanceof SwitcherType ||
                 item instanceof ImageButtonType ||
+                item instanceof TextFieldWithHeaderType ||
                 item instanceof BackButtonType ||
+                item instanceof HorizontalRadioButton ||
                 item instanceof DrawerType2 && !item.isOpened && item.collapsedContent
     }
 
     function getFocusChain(parent) {
         let focusChain = []
-        // console.log("-------------->", parent.children.length)
-        // console.log(parent.children)
-        // console.log("-------------->")
         for (var i = 0; i < parent.children.length; i++) {
             var child = parent.children[i]
 
-            if (
-                    child instanceof DropDownType ||
+            if (child instanceof DropDownType ||
                     child instanceof HomeSplitTunnelingDrawer ||
                     child instanceof ConnectionTypeSelectionDrawer
                     ) {
                 continue
             }
-            // console.log(child, isFocusableItem(child), child.objectName)
+
             if (isFocusableItem(child)) {
                 focusChain.push(child)
 
@@ -67,65 +72,60 @@ FocusScope {
         return focusChain
     }
 
-
-
     Component.onCompleted: {
-        root.focusChain = getFocusChain(root)
-        console.log("focusChain------------------>", focusChain)
-        for (let i = 0; i < focusChain.length; i++) {
-            focusChain[i].KeyNavigation.tab = focusChain[(i + 1) % focusChain.length]
-            focusChain[i].KeyNavigation.backtab = focusChain[(i + focusChain.length - 1) % focusChain.length]
+        internal.focusChain = getFocusChain(root)
+
+        if (internal.focusChain.length === 0) {
+            return
         }
 
-        const lastItem = focusChain[focusChain.length - 1]
+        for (let i = 0; i < internal.focusChain.length; i++) {
+            internal.focusChain[i].KeyNavigation.tab = internal.focusChain[(i + 1) % internal.focusChain.length]
+            internal.focusChain[i].KeyNavigation.backtab = internal.focusChain[(i + internal.focusChain.length - 1) % internal.focusChain.length]
+        }
+
+        internal.firstActiveFocusItem = internal.focusChain[0]
+
+        const lastItem = internal.focusChain[internal.focusChain.length - 1]
         lastItem.Keys.onTabPressed.connect(function() {
             lastItemTabClicked(lastItem)
         })
+
+        for (let j = 0; j < internal.focusChain.length; j++) {
+            if (internal.focusChain[j] instanceof TextFieldWithHeaderType) {
+                internal.focusChain[j].forceActiveFocus()
+                break
+            }
+        }
     }
-
-
 
     Item {
         id: focusItem
         focus: true
-        // KeyNavigation.tab: defaultActiveFocusItem ? defaultActiveFocusItem : focusItem
 
         Keys.onTabPressed: {
-            // console.log("tab pressed", defaultActiveFocusItem)
-            defaultActiveFocusItem.forceActiveFocus()
-        }
-
-        onActiveFocusChanged: {
-            // console.log("focusItem activeFocusChanged")
-
+            if (internal.firstActiveFocusItem) {
+                internal.firstActiveFocusItem.focus = true
+                internal.firstActiveFocusItem.forceActiveFocus()
+            }
         }
     }
 
 
-    function lastItemTabClicked(lastItem = null) {
-        console.log("lastItemTabClicked", lastItem)
+    function lastItemTabClicked() {
+        focusItem.focus = true
+
         if (GC.isMobile()) {
             return
         }
 
-        focusItem.forceActiveFocus()
-        PageController.forceTabBarActiveFocus()
-
-        if (lastItem && lastItem.parentFlickable) {
-            console.log("lastItemTabClicked", lastItem.parentFlickable)
-            lastItem.parentFlickable.contentY = 0
+        if (focusTabBarOnLastItem) {
+            PageController.forceTabBarActiveFocus()
         }
 
-        // if (focusItem) {
-        //     focusItem.forceActiveFocus()
-        //     PageController.forceTabBarActiveFocus()
-        // } else {
-        //     if (defaultActiveFocusItem) {
-        //         defaultActiveFocusItem.forceActiveFocus()
-        //     }
-        //     PageController.forceTabBarActiveFocus()
-        // }
+
+        if (lastItem && lastItem.parentFlickable) {
+            lastItem.parentFlickable.contentY = 0
+        }
     }
-
-
 }

@@ -11,7 +11,7 @@ import "Config"
 import "Controls2"
 import "Components"
 
-Window  {
+Window {
     id: root
     objectName: "mainWindow"
     visible: true
