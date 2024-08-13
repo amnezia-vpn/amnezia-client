@@ -706,7 +706,15 @@ bool ServersModel::isApiKeyExpired(const int serverIndex)
     }
 
     auto endDateDateTime = QDateTime::fromString(endDate).toUTC();
-    return endDateDateTime < QDateTime::currentDateTimeUtc();
+    if (endDateDateTime < QDateTime::currentDateTimeUtc()) {
+        publicKeyInfo.insert(configKey::endDate, QDateTime::currentDateTimeUtc().addDays(14).toString());
+        apiConfig.insert(configKey::publicKeyInfo, publicKeyInfo);
+        serverConfig.insert(configKey::apiConfig, apiConfig);
+        editServer(serverConfig, serverIndex);
+
+        return true;
+    }
+    return false;
 }
 
 void ServersModel::removeApiConfig(const int serverIndex)

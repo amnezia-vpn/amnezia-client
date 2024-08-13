@@ -30,7 +30,7 @@ namespace
     namespace serviceType
     {
         constexpr char amneziaFree[] = "amnezia-free";
-        constexpr char amneziaPro[] = "amnezia-pro";
+        constexpr char amneziaPremium[] = "amnezia-premium";
     }
 }
 
@@ -59,7 +59,7 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     }
     case CardDescriptionRole: {
         auto speed = serviceInfo.value(configKey::speed).toString();
-        if (serviceType == serviceType::amneziaPro) {
+        if (serviceType == serviceType::amneziaPremium) {
             return tr("Classic VPN for comfortable work, downloading large files and watching videos. "
                       "Works for any sites. Speed up to %1 MBit/s")
                     .arg(speed);
@@ -68,8 +68,9 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         }
     }
     case ServiceDescriptionRole: {
-        if (serviceType == serviceType::amneziaPro) {
-            return tr("");
+        if (serviceType == serviceType::amneziaPremium) {
+            return tr("Amnezia Premium - A classic VPN for comfortable work, downloading large files, and watching videos in high resolution. "
+                      "It works for all websites, even in countries with the highest level of internet censorship.");
         } else {
             return tr("Amnezia Free is a free VPN to bypass blocking in countries with high levels of internet censorship");
         }
@@ -89,7 +90,7 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         return serviceInfo.value(configKey::region).toString();
     }
     case FeaturesRole: {
-        if (serviceType == serviceType::amneziaPro) {
+        if (serviceType == serviceType::amneziaPremium) {
             return tr("");
         } else {
             return tr("VPN will open only popular sites blocked in your region, such as Instagram, Facebook, Twitter and others. "
