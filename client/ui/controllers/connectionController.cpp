@@ -36,13 +36,13 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 
 void ConnectionController::openConnection()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
-    {
-        emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
-        return;
-    }
-#endif
+// #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+//     if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
+//     {
+//         emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
+//         return;
+//     }
+// #endif
 
     int serverIndex = m_serversModel->getDefaultServerIndex();
     QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
