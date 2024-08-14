@@ -16,6 +16,7 @@ jobs:
     env:
       QT_VERSION: 6.6.2
       QIF_VERSION: 4.7
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
 
     steps:
     - name: 'Install Qt'
@@ -82,6 +83,7 @@ jobs:
       QT_VERSION: 6.6.2
       QIF_VERSION: 4.7
       BUILD_ARCH: 64
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
 
     steps:
     - name: 'Get sources'
@@ -144,6 +146,7 @@ jobs:
       QT_VERSION: 6.6.2
       CC: cc
       CXX: c++
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
 
     steps:
     - name: 'Setup xcode'
@@ -235,6 +238,7 @@ jobs:
       # Keep compat with MacOS 10.15 aka Catalina by Qt 6.4
       QT_VERSION: 6.4.3
       QIF_VERSION: 4.6
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
 
     steps:
     - name: 'Setup xcode'
@@ -300,6 +304,7 @@ jobs:
       ANDROID_BUILD_PLATFORM: android-34
       QT_VERSION: 6.6.2
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
 
     steps:
     - name: 'Install desktop Qt'
