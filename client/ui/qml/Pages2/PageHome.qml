@@ -106,7 +106,7 @@ PageType {
                 buttonTextLabel.font.weight: 500
 
                 property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled || AppSplitTunnelingModel.isTunnelingEnabled ||
-                                                       (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.isDefaultServerFromApi)
+                                                       ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
 
                 text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
 

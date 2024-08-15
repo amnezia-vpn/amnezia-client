@@ -848,7 +848,8 @@ bool InstallController::installServiceFromApi()
     return true;
 }
 
-bool InstallController::updateServiceFromApi(const int serverIndex, const QString &newCountryCode, const QString &newCountryName)
+bool InstallController::updateServiceFromApi(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
+                                             bool reloadServiceConfig)
 {
     ApiController apiController(m_settings->getGatewayEndpoint());
 
@@ -880,7 +881,9 @@ bool InstallController::updateServiceFromApi(const int serverIndex, const QStrin
     newServerConfig.insert(configKey::apiConfig, newApiConfig);
     m_serversModel->editServer(newServerConfig, serverIndex);
 
-    if (newCountryName.isEmpty()) {
+    if (reloadServiceConfig) {
+        emit reloadServerFromApiFinished(tr("API config reloaded"));
+    } else if (newCountryName.isEmpty()) {
         emit updateServerFromApiFinished();
     } else {
         emit changeApiCountryFinished(tr("Successfully changed the country of connection to %1").arg(newCountryName));

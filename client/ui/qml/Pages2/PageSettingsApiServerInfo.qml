@@ -118,9 +118,49 @@ PageType {
             }
 
             BasicButtonType {
-                id: removeButton
+                id: resetButton
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 24
+                Layout.bottomMargin: 16
+                Layout.leftMargin: 8
+                implicitHeight: 32
+
+                defaultColor: "transparent"
+                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
+                pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                textColor: AmneziaStyle.color.vibrantRed
+
+                text: qsTr("Reload API config")
+
+//                Keys.onTabPressed: lastItemTabClicked(focusItem)
+
+                clickedFunc: function() {
+                    var headerText = qsTr("Reload API config?")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot reload API config during active connection"))
+                        } else {
+                            PageController.showBusyIndicator(true)
+                            InstallController.updateServiceFromApi(ServersModel.processedIndex, "", "", true)
+                            PageController.showBusyIndicator(false)
+                        }
+                    }
+                    var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            removeButton.forceActiveFocus()
+                        }
+                    }
+
+                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+            }
+
+            BasicButtonType {
+                id: removeButton
+                Layout.alignment: Qt.AlignHCenter
                 Layout.bottomMargin: 16
                 Layout.leftMargin: 8
                 implicitHeight: 32
@@ -135,7 +175,7 @@ PageType {
 //                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunc: function() {
-                    var headerText = qsTr("The site with all data will be removed from the tor network.")
+                    var headerText = qsTr("Remove from application?")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 

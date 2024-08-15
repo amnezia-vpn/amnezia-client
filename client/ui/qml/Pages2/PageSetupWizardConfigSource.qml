@@ -91,6 +91,8 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
+                visible: textKey.textFieldText !== ""
+
                 text: qsTr("Continue")
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
 
@@ -115,12 +117,14 @@ PageType {
             CardWithIconsType {
                 id: apiInstalling
 
+                // visible: false
+
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
                 Layout.bottomMargin: 16
 
-                headerText: qsTr("VPN from Amnezia")
+                headerText: qsTr("VPN by Amnezia")
                 bodyText: qsTr("Connect to classic paid and free VPN services from Amnezia")
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
@@ -213,6 +217,8 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
                 Layout.bottomMargin: 16
+
+                visible: SettingsController.isCameraPresent()
 
                 headerText: qsTr("QR code")
 

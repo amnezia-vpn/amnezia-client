@@ -1,7 +1,7 @@
 #include "servers_model.h"
 
-#include "core/enums/apiEnums.h"
 #include "core/controllers/serverController.h"
+#include "core/enums/apiEnums.h"
 #include "core/networkUtilities.h"
 
 #ifdef Q_OS_IOS
@@ -672,12 +672,15 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
     for (auto i = 0; i < containers.size(); i++) {
         auto container = containers.at(i).toObject();
         if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
-            auto containerConfig = container.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
-            return !(containerConfig.value(config_key::last_config).toString().contains("AllowedIPs = 0.0.0.0/0, ::/0"));
+            QJsonObject serverProtocolConfig = container.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
+            QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
+            QJsonObject clientProtocolConfig = QJsonDocument::fromJson(clientProtocolConfigString.toUtf8()).object();
+            return !clientProtocolConfigString.contains("AllowedIPs = 0.0.0.0/0, ::/0")
+                    || !clientProtocolConfig.value(config_key::allowed_ips).toArray().contains("0.0.0.0/0");
         } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn
                    || defaultContainer == DockerContainer::ShadowSocks) {
-            auto containerConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
-            return !(containerConfig.value(config_key::last_config).toString().contains("redirect-gateway"));
+            auto serverProtocolConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
+            return !(serverProtocolConfig.value(config_key::last_config).toString().contains("redirect-gateway"));
         }
     }
     return false;
@@ -685,8 +688,7 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
 
 bool ServersModel::isServerFromApi(const int serverIndex)
 {
-    return data(serverIndex, IsServerFromTelegramApiRole).toBool()
-            || data(serverIndex, IsServerFromGatewayApiRole).toBool();
+    return data(serverIndex, IsServerFromTelegramApiRole).toBool() || data(serverIndex, IsServerFromGatewayApiRole).toBool();
 }
 
 bool ServersModel::isApiKeyExpired(const int serverIndex)
@@ -697,7 +699,7 @@ bool ServersModel::isApiKeyExpired(const int serverIndex)
     auto publicKeyInfo = apiConfig.value(configKey::publicKeyInfo).toObject();
     const auto endDate = publicKeyInfo.value(configKey::endDate).toString();
     if (endDate.isEmpty()) {
-        publicKeyInfo.insert(configKey::endDate, QDateTime::currentDateTimeUtc().addDays(14).toString());
+        publicKeyInfo.insert(configKey::endDate, QDateTime::currentDateTimeUtc().addDays(1).toString());
         apiConfig.insert(configKey::publicKeyInfo, publicKeyInfo);
         serverConfig.insert(configKey::apiConfig, apiConfig);
         editServer(serverConfig, serverIndex);
@@ -707,7 +709,7 @@ bool ServersModel::isApiKeyExpired(const int serverIndex)
 
     auto endDateDateTime = QDateTime::fromString(endDate).toUTC();
     if (endDateDateTime < QDateTime::currentDateTimeUtc()) {
-        publicKeyInfo.insert(configKey::endDate, QDateTime::currentDateTimeUtc().addDays(14).toString());
+        publicKeyInfo.insert(configKey::endDate, QDateTime::currentDateTimeUtc().addDays(1).toString());
         apiConfig.insert(configKey::publicKeyInfo, publicKeyInfo);
         serverConfig.insert(configKey::apiConfig, apiConfig);
         editServer(serverConfig, serverIndex);

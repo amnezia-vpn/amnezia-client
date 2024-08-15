@@ -36,7 +36,7 @@ PageType {
         if (ConnectionController.isConnected) {
             PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
             root.pageEnabled = false
-        } else if (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && isServerFromTelegramApi) {
+        } else if (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling) {
             PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
             root.pageEnabled = false
         } else {

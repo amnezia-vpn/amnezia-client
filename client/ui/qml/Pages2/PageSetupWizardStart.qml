@@ -26,26 +26,15 @@ PageType {
             id: image
             source: "qrc:/images/amneziaBigLogo.png"
 
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
             Layout.topMargin: 32
             Layout.preferredWidth: 360
             Layout.preferredHeight: 287
         }
 
-        ParagraphTextType {
-            Layout.fillWidth: true
-            Layout.topMargin: 16
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            text: qsTr("Free service for creating a personal VPN on your server.") +
-                  qsTr(" Helps you access blocked content without revealing your privacy, even to VPN providers.")
-        }
-
         Item {
             id: focusItem
             KeyNavigation.tab: startButton
-            Layout.fillHeight: true
         }
 
         BasicButtonType {

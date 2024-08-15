@@ -54,7 +54,7 @@ public slots:
 
     bool fillAvailableServices();
     bool installServiceFromApi();
-    bool updateServiceFromApi(const int serverIndex, const QString &newCountryCode, const QString &newCountryName);
+    bool updateServiceFromApi(const int serverIndex, const QString &newCountryCode, const QString &newCountryName, bool reloadServiceConfig = false);
 
     void updateServiceFromTelegram(const int serverIndex);
 
@@ -66,6 +66,7 @@ signals:
     void updateContainerFinished(const QString &message);
     void updateServerFromApiFinished();
     void changeApiCountryFinished(const QString &message);
+    void reloadServerFromApiFinished(const QString &message);
 
     void scanServerFinished(bool isInstalledContainerFound);
 

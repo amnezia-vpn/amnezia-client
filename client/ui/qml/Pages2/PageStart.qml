@@ -153,6 +153,11 @@ PageType {
             PageController.goToPageHome()
             PageController.showNotificationMessage(message)
         }
+
+        function onReloadServerFromApiFinished(message) {
+            PageController.goToPageHome()
+            PageController.showNotificationMessage(message)
+        }
     }
 
     Connections {
