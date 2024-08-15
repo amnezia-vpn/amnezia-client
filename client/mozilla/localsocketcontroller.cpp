@@ -149,7 +149,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   QJsonArray jsAllowedIPAddesses;
 
   QJsonArray plainAllowedIP = wgConfig.value(amnezia::config_key::allowed_ips).toArray();
-  QJsonArray defaultAllowedIP = { "0.0.0.0/0, ::/0" };
+  QJsonArray defaultAllowedIP = { "0.0.0.0/0", "::/0" };
 
   if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
     // Use AllowedIP list from WG config because of higher priority
