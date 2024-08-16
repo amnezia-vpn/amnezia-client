@@ -446,6 +446,17 @@ QString Settings::getInstallationUuid(const bool needCreate)
     auto uuid = value("Conf/installationUuid", "").toString();
     if (needCreate && uuid.isEmpty()) {
         uuid = QUuid::createUuid().toString();
+
+        //remove {} from uuid
+        uuid.removeFirst();
+        uuid.removeLast();
+
+        setInstallationUuid(uuid);
+    } else if (uuid.contains("{") && uuid.contains("}")) {
+        //remove {} from old uuid
+        uuid.removeFirst();
+        uuid.removeLast();
+
         setInstallationUuid(uuid);
     }
     return uuid;
