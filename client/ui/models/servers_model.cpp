@@ -17,6 +17,9 @@ namespace
         constexpr char availableCountries[] = "available_countries";
         constexpr char serverCountryCode[] = "server_country_code";
         constexpr char serverCountryName[] = "server_country_name";
+        constexpr char userCountryCode[] = "user_country_code";
+        constexpr char serviceType[] = "service_type";
+        constexpr char serviceProtocol[] = "service_protocol";
 
         constexpr char publicKeyInfo[] = "public_key";
         constexpr char endDate[] = "end_date";
@@ -617,6 +620,19 @@ bool ServersModel::isServerFromApiAlreadyExists(const quint16 crc)
 {
     for (const auto &server : std::as_const(m_servers)) {
         if (static_cast<quint16>(server.toObject().value(config_key::crc).toInt()) == crc) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ServersModel::isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol)
+{
+    for (const auto &server : std::as_const(m_servers)) {
+        const auto apiConfig = server.toObject().value(configKey::apiConfig).toObject();
+        if (apiConfig.value(configKey::userCountryCode).toString() == userCountryCode
+            && apiConfig.value(configKey::serviceType).toString() == serviceType
+            && apiConfig.value(configKey::serviceProtocol).toString() == serviceProtocol) {
             return true;
         }
     }

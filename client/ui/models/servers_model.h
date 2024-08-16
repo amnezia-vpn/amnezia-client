@@ -3,8 +3,8 @@
 
 #include <QAbstractListModel>
 
-#include "settings.h"
 #include "core/controllers/serverController.h"
+#include "settings.h"
 
 class ServersModel : public QAbstractListModel
 {
@@ -57,7 +57,8 @@ public:
     Q_PROPERTY(QString defaultServerDescriptionCollapsed READ getDefaultServerDescriptionCollapsed NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerImagePathCollapsed READ getDefaultServerImagePathCollapsed NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerDescriptionExpanded READ getDefaultServerDescriptionExpanded NOTIFY defaultServerDefaultContainerChanged)
-    Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ isDefaultServerDefaultContainerHasSplitTunneling NOTIFY defaultServerDefaultContainerChanged)
+    Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ isDefaultServerDefaultContainerHasSplitTunneling NOTIFY
+                       defaultServerDefaultContainerChanged)
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
 
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
@@ -109,6 +110,7 @@ public slots:
     QPair<QString, QString> getDnsPair(const int serverIndex);
 
     bool isServerFromApiAlreadyExists(const quint16 crc);
+    bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol);
 
     QVariant getDefaultServerData(const QString roleString);
 

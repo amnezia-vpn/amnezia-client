@@ -815,6 +815,12 @@ bool InstallController::fillAvailableServices()
 
 bool InstallController::installServiceFromApi()
 {
+    if (m_serversModel->isServerFromApiAlreadyExists(m_apiServicesModel->getCountryCode(), m_apiServicesModel->getSelectedServiceType(),
+                                                     m_apiServicesModel->getSelectedServiceProtocol())) {
+        emit installationErrorOccurred(ErrorCode::ApiConfigAlreadyAdded);
+        return false;
+    }
+
     ApiController apiController(m_settings->getGatewayEndpoint());
     QJsonObject serverConfig;
 
