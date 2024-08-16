@@ -448,14 +448,14 @@ QString Settings::getInstallationUuid(const bool needCreate)
         uuid = QUuid::createUuid().toString();
 
         //remove {} from uuid
-        uuid.removeFirst();
-        uuid.removeLast();
+        uuid.removeAt(uuid.indexOf("{"));
+        uuid.removeAt(uuid.indexOf("}"));
 
         setInstallationUuid(uuid);
     } else if (uuid.contains("{") && uuid.contains("}")) {
         //remove {} from old uuid
-        uuid.removeFirst();
-        uuid.removeLast();
+        uuid.removeAt(uuid.indexOf("{"));
+        uuid.removeAt(uuid.indexOf("}"));
 
         setInstallationUuid(uuid);
     }

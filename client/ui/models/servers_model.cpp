@@ -691,7 +691,6 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
             QJsonObject serverProtocolConfig = container.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
             QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
             QJsonObject clientProtocolConfig = QJsonDocument::fromJson(clientProtocolConfigString.toUtf8()).object();
-            qDebug() << !clientProtocolConfigString.contains("AllowedIPs = 0.0.0.0/0, ::/0");
             return !clientProtocolConfigString.contains("AllowedIPs = 0.0.0.0/0, ::/0")
                     || (!clientProtocolConfig.value(config_key::allowed_ips).toArray().isEmpty()
                         && !clientProtocolConfig.value(config_key::allowed_ips).toArray().contains("0.0.0.0/0"));
