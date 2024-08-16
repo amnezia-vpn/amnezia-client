@@ -154,6 +154,7 @@ bool ProtocolProps::defaultPortChangeable(Proto p)
     case Proto::Awg: return true;
     case Proto::Ikev2: return false;
     case Proto::L2tp: return false;
+    case Proto::Xray: return true;
 
     case Proto::TorWebSite: return false;
     case Proto::Dns: return false;
