@@ -232,6 +232,26 @@ PageType {
                     }
                 }
             }
+
+            CardWithIconsType {
+                id: siteLink
+
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 16
+
+                visible: PageController.isStartPageVisible()
+
+                headerText: qsTr("I have nothing")
+
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/help-circle.svg"
+
+                onClicked: {
+                    Qt.openUrlExternally(qsTr("https://amnezia.org/instructions/0_starter-guide"))
+                }
+            }
         }
     }
 }
