@@ -10,7 +10,6 @@ env:
 
 jobs:
   Build-Linux-Ubuntu:
-    name: 'Build-Linux-Ubuntu'
     runs-on: ubuntu-20.04
 
     env:
@@ -75,7 +74,6 @@ jobs:
 # ------------------------------------------------------
 
   Build-Windows:
-    name: Build-Windows
     runs-on: windows-latest
 
     env:
@@ -137,7 +135,6 @@ jobs:
 # ------------------------------------------------------
 
   Build-iOS:
-    name: 'Build-iOS'
     runs-on: macos-13
 
     env:
@@ -228,7 +225,6 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
-    name: 'Build-MacOS'
     runs-on: macos-latest
 
     env:
@@ -293,7 +289,6 @@ jobs:
 # ------------------------------------------------------
 
   Build-Android:
-    name: 'Build-Android'
     runs-on: ubuntu-latest
 
     env:
@@ -439,3 +434,21 @@ jobs:
         path: deploy/build/AmneziaVPN-release.aab
         compression-level: 0
         retention-days: 7
+
+  Extra:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Search a corresponding PR
+        uses: octokit/request-action@v2.x
+        id: pull_request
+        with:
+          route: GET /repos/${{ github.repository }}/pulls
+          head: ${{ github.repository_owner }}:${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add PR link to build summary
+        if: ${{ fromJSON(steps.pull_request.outputs.data)[0].number != '' }}
+        run: | 
+          echo "Pull request:" >> $GITHUB_STEP_SUMMARY
+          echo "[[#${{ fromJSON(steps.pull_request.outputs.data)[0].number }}] ${{ fromJSON(steps.pull_request.outputs.data)[0].title }}](${{ fromJSON(steps.pull_request.outputs.data)[0].html_url }})" >> $GITHUB_STEP_SUMMARY
