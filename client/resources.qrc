@@ -1,18 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/close.png</file>
-        <file>images/settings.png</file>
-        <file>images/favorites_disabled.png</file>
-        <file>images/favorites_enabled.png</file>
-        <file>images/favorites_hover.png</file>
-        <file>images/download.png</file>
-        <file>images/upload.png</file>
         <file>images/tray/active.png</file>
         <file>images/tray/default.png</file>
         <file>images/tray/error.png</file>
-        <file>images/arrow_left.png</file>
         <file>images/AmneziaVPN.png</file>
-        <file>images/share.png</file>
         <file>server_scripts/remove_container.sh</file>
         <file>server_scripts/setup_host_firewall.sh</file>
         <file>server_scripts/openvpn_cloak/Dockerfile</file>
@@ -22,9 +13,6 @@
         <file>server_scripts/install_docker.sh</file>
         <file>server_scripts/build_container.sh</file>
         <file>server_scripts/prepare_host.sh</file>
-        <file>images/check.png</file>
-        <file>images/uncheck.png</file>
-        <file>images/settings_grey.png</file>
         <file>server_scripts/check_connection.sh</file>
         <file>server_scripts/remove_all_containers.sh</file>
         <file>server_scripts/openvpn_cloak/run_container.sh</file>
@@ -38,7 +26,6 @@
         <file>server_scripts/openvpn_shadowsocks/run_container.sh</file>
         <file>server_scripts/openvpn_shadowsocks/start.sh</file>
         <file>server_scripts/openvpn_shadowsocks/template.ovpn</file>
-        <file>images/folder.png</file>
         <file>server_scripts/wireguard/configure_container.sh</file>
         <file>server_scripts/wireguard/Dockerfile</file>
         <file>server_scripts/wireguard/run_container.sh</file>
@@ -61,26 +48,6 @@
         <file>server_scripts/ipsec/start.sh</file>
         <file>server_scripts/ipsec/mobileconfig.plist</file>
         <file>server_scripts/ipsec/strongswan.profile</file>
-        <file>images/background_connected.png</file>
-        <file>images/background_connected@2x.png</file>
-        <file>images/delete.png</file>
-        <file>images/animation.gif</file>
-        <file>images/connected.png</file>
-        <file>images/disconnected.png</file>
-        <file>images/svg/gpp_good_black_24dp.svg</file>
-        <file>images/svg/gpp_maybe_black_24dp.svg</file>
-        <file>images/svg/close_black_24dp.svg</file>
-        <file>images/svg/delete_black_24dp.svg</file>
-        <file>images/svg/done_black_24dp.svg</file>
-        <file>images/svg/format_list_bulleted_black_24dp.svg</file>
-        <file>images/svg/logout_black_24dp.svg</file>
-        <file>images/svg/miscellaneous_services_black_24dp.svg</file>
-        <file>images/svg/refresh_black_24dp.svg</file>
-        <file>images/svg/settings_black_24dp.svg</file>
-        <file>images/svg/share_black_24dp.svg</file>
-        <file>images/svg/vpn_key_black_24dp.svg</file>
-        <file>images/svg/control_point_black_24dp.svg</file>
-        <file>images/svg/settings_suggest_black_24dp.svg</file>
         <file>server_scripts/website_tor/Dockerfile</file>
         <file>server_scripts/check_user_in_sudo.sh</file>
         <file>ui/qml/Controls2/BasicButtonType.qml</file>
@@ -96,7 +63,6 @@
         <file>ui/qml/Pages2/PageSetupWizardStart.qml</file>
         <file>ui/qml/main2.qml</file>
         <file>images/amneziaBigLogo.png</file>
-        <file>images/amneziaBigLogo.svg</file>
         <file>ui/qml/Controls2/FlickableType.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardCredentials.qml</file>
         <file>ui/qml/Controls2/HeaderType.qml</file>
@@ -132,9 +98,6 @@
         <file>ui/qml/Controls2/Header2Type.qml</file>
         <file>images/controls/plus.svg</file>
         <file>ui/qml/Components/ConnectButton.qml</file>
-        <file>images/connectionProgress.svg</file>
-        <file>images/connectionOff.svg</file>
-        <file>images/connectionOn.svg</file>
         <file>images/controls/download.svg</file>
         <file>ui/qml/Controls2/ProgressBarType.qml</file>
         <file>ui/qml/Components/ConnectionTypeSelectionDrawer.qml</file>
@@ -254,6 +217,7 @@
         <file>images/controls/refresh-cw.svg</file>
         <file>ui/qml/Pages2/PageSettingsApiLanguageList.qml</file>
         <file>images/controls/archive-restore.svg</file>
+        <file>images/controls/help-circle.svg</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>
