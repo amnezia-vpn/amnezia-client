@@ -311,6 +311,7 @@ bool IpcServer::disableKillSwitch()
 
 bool IpcServer::writeIPsecConfig(QString config)
 {
+#ifdef Q_OS_LINUX
     qDebug() << "IPSEC: IPSec config file";
     QString configFile = QString("/etc/ipsec.conf");
     QFile ipSecConfFile(configFile);
@@ -318,10 +319,13 @@ bool IpcServer::writeIPsecConfig(QString config)
         ipSecConfFile.write(config.toUtf8());
         ipSecConfFile.close();
     }
+#endif
+    return true;
 }
 
 bool IpcServer::writeIPsecUserCert(QString usercert, QString uuid)
 {
+#ifdef Q_OS_LINUX
     qDebug() << "IPSEC: Write user cert " << uuid;
     QString certName = QString("/etc/ipsec.d/certs/%1.crt").arg(uuid);
     QFile userCertFile(certName);
@@ -329,10 +333,13 @@ bool IpcServer::writeIPsecUserCert(QString usercert, QString uuid)
         userCertFile.write(usercert.toUtf8());
         userCertFile.close();
     }
+#endif
+    return true;
 }
 
 bool IpcServer::writeIPsecCaCert(QString cacert, QString uuid)
 {
+#ifdef Q_OS_LINUX
     qDebug() << "IPSEC: Write CA cert user " << uuid;
     QString certName = QString("/etc/ipsec.d/cacerts/%1.crt").arg(uuid);
     QFile caCertFile(certName);
@@ -340,10 +347,13 @@ bool IpcServer::writeIPsecCaCert(QString cacert, QString uuid)
         caCertFile.write(cacert.toUtf8());
         caCertFile.close();
     }
+#endif
+    return true;
 }
 
 bool IpcServer::writeIPsecPrivate(QString privKey, QString uuid)
 {
+#ifdef Q_OS_LINUX
     qDebug() << "IPSEC: User private key " << uuid;
     QString privateKey = QString("/etc/ipsec.d/private/%1.p12").arg(uuid);
     QFile pKeyFile(privateKey);
@@ -351,11 +361,14 @@ bool IpcServer::writeIPsecPrivate(QString privKey, QString uuid)
         pKeyFile.write(QByteArray::fromBase64(privKey.toUtf8()));
         pKeyFile.close();
     }
+#endif
+    return true;
 }
 
 
 bool IpcServer::writeIPsecPrivatePass(QString pass, QString uuid)
 {
+#ifdef Q_OS_LINUX
     qDebug() << "IPSEC: User private key " << uuid;
     QFile secretsFile("/etc/ipsec.secrets");
     QString P12 = QString(": P12 %1.p12 \"%2\" \n").arg(uuid, pass);
@@ -363,6 +376,8 @@ bool IpcServer::writeIPsecPrivatePass(QString pass, QString uuid)
         secretsFile.write(P12.toUtf8());
         secretsFile.close();
     }
+#endif
+    return true;
 }
 
 bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
