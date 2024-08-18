@@ -687,6 +687,9 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
     auto containers = server.value(config_key::containers).toArray();
     for (auto i = 0; i < containers.size(); i++) {
         auto container = containers.at(i).toObject();
+        if (container.value(config_key::container).toString() != ContainerProps::containerToString(defaultContainer)) {
+            continue;
+        }
         if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
             QJsonObject serverProtocolConfig = container.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
             QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
@@ -697,7 +700,8 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
         } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn
                    || defaultContainer == DockerContainer::ShadowSocks) {
             auto serverProtocolConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn)).toObject();
-            return !(serverProtocolConfig.value(config_key::last_config).toString().contains("redirect-gateway"));
+            QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
+            return !clientProtocolConfigString.isEmpty() && !clientProtocolConfigString.contains("redirect-gateway");
         }
     }
     return false;
