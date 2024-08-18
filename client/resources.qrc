@@ -33,6 +33,7 @@
         <file>server_scripts/openvpn/template.ovpn</file>
         <file>server_scripts/openvpn/Dockerfile</file>
         <file>server_scripts/openvpn/start.sh</file>
+        <file>server_scripts/openvpn/password_auth.sh</file>
         <file>server_scripts/openvpn_shadowsocks/configure_container.sh</file>
         <file>server_scripts/openvpn_shadowsocks/Dockerfile</file>
         <file>server_scripts/openvpn_shadowsocks/run_container.sh</file>

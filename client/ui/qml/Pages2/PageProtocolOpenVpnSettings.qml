@@ -427,6 +427,68 @@ PageType {
                             }
                         }
 
+                        SwitcherType {
+                            id: authCredentialsSwitcher
+                            Layout.fillWidth: true
+                            Layout.topMargin: 24
+                            parentFlickable: fl
+
+                            checked: authLogin !== "" && authPassword !== ""
+
+                            text: qsTr("Authentication credentials")
+
+                            onCheckedChanged: {
+                                //if (!checked) {
+                                //    additionalServerCommands = ""
+                                //}
+                            }
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: loginTextField
+
+                            Layout.fillWidth: true
+                            parentFlickable: fl
+
+                            //enabled: isPortEditable
+
+                            headerText: qsTr("Login")
+                            textFieldText: authLogin
+                            //textField.maximumLength: 5
+                            //textField.validator: IntValidator { bottom: 1; top: 65535 }
+
+                            textField.onEditingFinished: {
+                                if (textFieldText !== authLogin) {
+                                    authLogin = textFieldText
+                                }
+                            }
+
+                           // KeyNavigation.tab: autoNegotiateEncryprionSwitcher
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: passwordTextField
+
+                            Layout.fillWidth: true
+                            Layout.topMargin: 20
+                            parentFlickable: fl
+
+                            //enabled: isPortEditable
+
+                            headerText: qsTr("Password")
+                             textFieldText: authPassword
+                            //textField.maximumLength: 5
+                            //textField.validator: IntValidator { bottom: 1; top: 65535 }
+
+                            textField.onEditingFinished: {
+                                  if (textFieldText !== authPassword) {
+                                      authPassword = textFieldText
+                                 }
+                            }
+
+                            // KeyNavigation.tab: autoNegotiateEncryprionSwitcher
+                        }
+
                         BasicButtonType {
                             id: saveRestartButton
 
@@ -450,6 +512,7 @@ PageType {
                                 InstallController.updateContainer(OpenVpnConfigModel.getConfig())
                             }
                         }
+
                     }
                 }
             }

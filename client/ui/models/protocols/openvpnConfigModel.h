@@ -26,7 +26,10 @@ public:
         IsPortEditable,
         IsTransportProtoEditable,
 
-        HasRemoveButton
+        HasRemoveButton,
+
+        AuthLogin,
+        AuthPassword,
     };
 
     explicit OpenVpnConfigModel(QObject *parent = nullptr);

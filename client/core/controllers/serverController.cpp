@@ -504,6 +504,19 @@ ErrorCode ServerController::startupContainerWorker(const ServerCredentials &cred
     if (e)
         return e;
 
+    if (container == DockerContainer::OpenVpn)
+    {
+        QFile file(":/server_scripts/openvpn/password_auth.sh");
+        file.open(QIODevice::ReadOnly);
+        QString scriptContent = QString(file.readAll());
+        const QString serverScriptPath = "/opt/amnezia/password_auth.sh";
+
+        uploadTextFileToContainer(container, credentials, scriptContent, serverScriptPath);
+        runScript(credentials,
+                  replaceVars(QStringLiteral("sudo docker exec -d $CONTAINER_NAME sh -c \"chmod +rx %1\"").arg(serverScriptPath),
+                              genVarsForScript(credentials, container, config)));
+    }
+
     return runScript(credentials,
                      replaceVars("sudo docker exec -d $CONTAINER_NAME sh -c \"chmod a+x /opt/amnezia/start.sh && "
                                  "/opt/amnezia/start.sh\"",
