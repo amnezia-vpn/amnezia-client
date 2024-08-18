@@ -159,6 +159,7 @@ bool ProtocolProps::defaultPortChangeable(Proto p)
     case Proto::Dns: return false;
     case Proto::Sftp: return true;
     case Proto::Socks5Proxy: return true;
+    case Proto::Xray: return true;
     default: return false;
     }
 }
