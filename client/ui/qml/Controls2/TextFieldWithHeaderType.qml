@@ -150,6 +150,8 @@ Item {
             text: root.errorText
             visible: root.errorText !== ""
             color: AmneziaStyle.color.vibrantRed
+
+            Layout.fillWidth: true
         }
     }
 
