@@ -718,9 +718,9 @@ bool ServersModel::isApiKeyExpired(const int serverIndex)
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
     auto publicKeyInfo = apiConfig.value(configKey::publicKeyInfo).toObject();
-    const auto endDate = publicKeyInfo.value(configKey::endDate).toString();
+    const QString endDate = publicKeyInfo.value(configKey::endDate).toString();
     if (endDate.isEmpty()) {
-        publicKeyInfo.insert(configKey::endDate, QDateTime::currentDateTimeUtc().addDays(1).toString());
+        publicKeyInfo.insert(configKey::endDate, QDateTime::currentDateTimeUtc().addDays(1).toString(Qt::ISODate));
         apiConfig.insert(configKey::publicKeyInfo, publicKeyInfo);
         serverConfig.insert(configKey::apiConfig, apiConfig);
         editServer(serverConfig, serverIndex);
@@ -728,7 +728,7 @@ bool ServersModel::isApiKeyExpired(const int serverIndex)
         return false;
     }
 
-    auto endDateDateTime = QDateTime::fromString(endDate).toUTC();
+    auto endDateDateTime = QDateTime::fromString(endDate, Qt::ISODate).toUTC();
     if (endDateDateTime < QDateTime::currentDateTimeUtc()) {
         return true;
     }
