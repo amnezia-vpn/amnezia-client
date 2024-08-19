@@ -730,11 +730,6 @@ bool ServersModel::isApiKeyExpired(const int serverIndex)
 
     auto endDateDateTime = QDateTime::fromString(endDate).toUTC();
     if (endDateDateTime < QDateTime::currentDateTimeUtc()) {
-        publicKeyInfo.insert(configKey::endDate, QDateTime::currentDateTimeUtc().addDays(1).toString());
-        apiConfig.insert(configKey::publicKeyInfo, publicKeyInfo);
-        serverConfig.insert(configKey::apiConfig, apiConfig);
-        editServer(serverConfig, serverIndex);
-
         return true;
     }
     return false;
@@ -757,6 +752,10 @@ void ServersModel::removeApiConfig(const int serverIndex)
     serverConfig.remove(config_key::dns2);
     serverConfig.remove(config_key::containers);
     serverConfig.remove(config_key::hostName);
+
+    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+    apiConfig.remove(configKey::publicKeyInfo);
+    serverConfig.insert(configKey::apiConfig, apiConfig);
 
     serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
 
