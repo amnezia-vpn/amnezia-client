@@ -18,7 +18,9 @@ PageType {
         target: ImportController
 
         function onQrDecodingFinished() {
-            PageController.closePage()
+            if (Qt.platform.os === "ios") {
+                PageController.closePage()
+            }
             PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
         }
     }
