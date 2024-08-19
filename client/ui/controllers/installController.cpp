@@ -833,19 +833,11 @@ bool InstallController::installServiceFromApi()
     }
 
     auto serviceInfo = m_apiServicesModel->getSelectedServiceInfo();
-    QJsonObject apiConfig; // serverConfig.value(configKey::apiConfig).toObject();
+    QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
     apiConfig.insert(configKey::serviceInfo, serviceInfo);
     apiConfig.insert(configKey::userCountryCode, m_apiServicesModel->getCountryCode());
     apiConfig.insert(configKey::serviceType, m_apiServicesModel->getSelectedServiceType());
     apiConfig.insert(configKey::serviceProtocol, m_apiServicesModel->getSelectedServiceProtocol());
-
-    // todo remore
-    auto countries = m_apiServicesModel->getSelectedServiceCountries();
-    if (!countries.isEmpty()) {
-        apiConfig.insert(configKey::availableCountries, countries);
-        apiConfig.insert(configKey::serverCountryCode, "RU");
-        apiConfig.insert(configKey::serverCountryName, "Russian Federation");
-    }
 
     serverConfig.insert(configKey::apiConfig, apiConfig);
 
@@ -873,16 +865,10 @@ bool InstallController::updateServiceFromApi(const int serverIndex, const QStrin
     }
 
     QJsonObject newApiConfig = newServerConfig.value(configKey::apiConfig).toObject();
-    newApiConfig.insert(configKey::serviceInfo, apiConfig.value(configKey::apiConfig));
+    newApiConfig.insert(configKey::serviceInfo, apiConfig.value(configKey::serviceInfo));
     newApiConfig.insert(configKey::userCountryCode, apiConfig.value(configKey::userCountryCode));
     newApiConfig.insert(configKey::serviceType, apiConfig.value(configKey::serviceType));
     newApiConfig.insert(configKey::serviceProtocol, apiConfig.value(configKey::serviceProtocol));
-
-    if (!apiConfig.value(configKey::availableCountries).toArray().isEmpty()) {
-        newApiConfig.insert(configKey::availableCountries, apiConfig.value(configKey::availableCountries));
-        newApiConfig.insert(configKey::serverCountryCode, newCountryCode);
-        newApiConfig.insert(configKey::serverCountryName, newCountryName);
-    }
 
     newServerConfig.insert(configKey::apiConfig, newApiConfig);
     m_serversModel->editServer(newServerConfig, serverIndex);
