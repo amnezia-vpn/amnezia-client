@@ -84,7 +84,13 @@ PageType {
                     Qt.openUrlExternally(link)
                 }
                 textFormat: Text.RichText
-                text: ApiServicesModel.getSelectedServiceData("features")
+                text: {
+                    var text = ApiServicesModel.getSelectedServiceData("features")
+                    if (text === undefined) {
+                        return ""
+                    }
+                    return text.replace("%1", LanguageModel.getCurrentSiteUrl())
+                }
 
                 MouseArea {
                     anchors.fill: parent

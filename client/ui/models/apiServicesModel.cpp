@@ -95,7 +95,7 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         } else {
             return tr("VPN will open only popular sites blocked in your region, such as Instagram, Facebook, Twitter and others. "
                       "Other sites will be opened from your real IP address, "
-                      "<a href=\"https://amnezia.org/free\" style=\"color: #FBB26A;\">more details on the website.</a>");
+                      "<a href=\"%1/free\" style=\"color: #FBB26A;\">more details on the website.</a>");
         }
     }
     case PriceRole: {

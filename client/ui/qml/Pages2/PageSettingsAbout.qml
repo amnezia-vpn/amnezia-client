@@ -163,7 +163,7 @@ PageType {
                 parentFlickable: fl
 
                 clickedFunction: function() {
-                    Qt.openUrlExternally(qsTr("https://amnezia.org"))
+                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
                 }
 
             }
@@ -234,7 +234,7 @@ PageType {
               parentFlickable: fl
 
               clickedFunc: function() {
-                Qt.openUrlExternally("https://amnezia.org/en/policy")
+                Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl() + "/policy")
               }
             }
         }
