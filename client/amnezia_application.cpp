@@ -161,13 +161,15 @@ void AmneziaApplication::init()
     m_engine->load(url);
     m_systemController->setQmlRoot(m_engine->rootObjects().value(0));
 
+    bool enabled = m_settings->isSaveLogs();
 #ifndef Q_OS_ANDROID
-    if (m_settings->isSaveLogs()) {
+    if (enabled) {
         if (!Logger::init()) {
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
 #endif
+    Logger::setServiceLogsEnabled(enabled);
 
 #ifdef Q_OS_WIN
     if (m_parser.isSet("a"))

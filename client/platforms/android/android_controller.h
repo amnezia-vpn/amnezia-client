@@ -35,6 +35,7 @@ public:
     void saveFile(const QString &fileName, const QString &data);
     QString openFile(const QString &filter);
     bool isCameraPresent();
+    bool isOnTv();
     void startQrReaderActivity();
     void setSaveLogs(bool enabled);
     void exportLogsFile(const QString &fileName);

@@ -35,8 +35,7 @@ QVariant ShadowSocksConfigModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort);
-    case Roles::CipherRole:
-        return m_protocolConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher);
+    case Roles::CipherRole: return m_protocolConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher);
     case Roles::IsPortEditableRole: return m_container == DockerContainer::ShadowSocks ? true : false;
     case Roles::IsCipherEditableRole: return m_container == DockerContainer::ShadowSocks ? true : false;
     }
@@ -52,11 +51,11 @@ void ShadowSocksConfigModel::updateModel(const QJsonObject &config)
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::shadowsocks).toObject();
 
-    m_protocolConfig.insert(config_key::cipher,
-                            protocolConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher));
-
-    m_protocolConfig.insert(config_key::port,
-                            protocolConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort));
+    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::ShadowSocks), Proto::ShadowSocks);
+    m_protocolConfig.insert(config_key::transport_proto,
+                            protocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
+    m_protocolConfig.insert(config_key::cipher, protocolConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher));
+    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort));
 
     endResetModel();
 }

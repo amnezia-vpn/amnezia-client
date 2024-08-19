@@ -1,6 +1,7 @@
 package org.amnezia.vpn
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
@@ -230,7 +231,10 @@ class AmneziaActivity : QtActivity() {
     override fun onStop() {
         Log.d(TAG, "Stop Amnezia activity")
         doUnbindService()
-        QtAndroidController.onServiceDisconnected()
+        mainScope.launch {
+            qtInitialized.await()
+            QtAndroidController.onServiceDisconnected()
+        }
         super.onStop()
     }
 
@@ -542,7 +546,7 @@ class AmneziaActivity : QtActivity() {
                 }
             }.also {
                 startActivityForResult(it, OPEN_FILE_ACTION_CODE, ActivityResultHandler(
-                    onSuccess = {
+                    onAny = {
                         val uri = it?.data?.toString() ?: ""
                         Log.d(TAG, "Open file: $uri")
                         mainScope.launch {
@@ -556,7 +560,11 @@ class AmneziaActivity : QtActivity() {
     }
 
     @Suppress("unused")
+    @SuppressLint("UnsupportedChromeOsCameraSystemFeature")
     fun isCameraPresent(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
+
+    @Suppress("unused")
+    fun isOnTv(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
 
     @Suppress("unused")
     fun startQrCodeReader() {
