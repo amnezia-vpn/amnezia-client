@@ -35,7 +35,12 @@ void SitesController::addSite(QString hostname)
     }
 
     const auto &processSite = [this](const QString &hostname, const QString &ip) {
-        m_sitesModel->addSite(hostname, ip);
+        bool isAdded = m_sitesModel->addSite(hostname, ip);
+
+        if (!isAdded)
+        {
+          return false;
+        }
 
         if (!ip.isEmpty()) {
             QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
@@ -45,6 +50,8 @@ void SitesController::addSite(QString hostname)
                                       Q_ARG(QStringList, QStringList() << hostname));
         }
         QMetaObject::invokeMethod(m_vpnConnection.get(), "flushDns", Qt::QueuedConnection);
+
+        return true;
     };
 
     const auto &resolveCallback = [this, processSite](const QHostInfo &hostInfo) {
@@ -57,14 +64,20 @@ void SitesController::addSite(QString hostname)
         }
     };
 
+    bool isSiteAdded = false;
     if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
-        processSite(hostname, "");
+        isSiteAdded = processSite(hostname, "");
     } else {
-        processSite(hostname, "");
+        isSiteAdded = processSite(hostname, "");
         QHostInfo::lookupHost(hostname, this, resolveCallback);
     }
 
-    emit finished(tr("New site added: %1").arg(hostname));
+    if (isSiteAdded) {
+        emit finished(tr("New site added: %1").arg(hostname));
+    } else
+    {
+        emit finished(tr("Invalid address or ip matches either of localhost/multicast/broadcast: %1").arg(hostname));
+    }
 }
 
 void SitesController::removeSite(int index)
