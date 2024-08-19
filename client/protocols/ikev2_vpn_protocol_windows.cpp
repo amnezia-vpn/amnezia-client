@@ -172,7 +172,8 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
 
 void Ikev2Protocol::readIkev2Configuration(const QJsonObject &configuration)
 {
-    m_config = configuration.value(ProtocolProps::key_proto_config_data(Proto::Ikev2)).toObject();
+    QJsonObject ikev2_data = configuration.value(ProtocolProps::key_proto_config_data(Proto::Ikev2)).toObject();
+    m_config = QJsonDocument::fromJson(ikev2_data.value(config_key::config).toString().toUtf8()).object();
 }
 
 ErrorCode Ikev2Protocol::start()
@@ -201,6 +202,7 @@ ErrorCode Ikev2Protocol::start()
             return ErrorCode::AmneziaServiceConnectionFailed;
         }
         certInstallProcess->setProgram(PermittedProcess::CertUtil);
+
         QString password = QString("-p %1").arg(m_config[config_key::password].toString());
         QStringList arguments({"-f", "-importpfx", password,
                                QDir::toNativeSeparators(certFile.fileName()), "NoExport"
