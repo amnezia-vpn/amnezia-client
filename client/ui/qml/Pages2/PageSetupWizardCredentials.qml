@@ -157,7 +157,7 @@ PageType {
                 leftImageSource: "qrc:/images/controls/help-circle.svg"
 
                 onClicked: {
-                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl() + "/instructions/0_starter-guide")
+                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl() + "/starter-guide")
                 }
             }
         }
