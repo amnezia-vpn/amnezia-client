@@ -25,7 +25,7 @@ Popup {
         id: button
 
         image: "qrc:/images/svg/close_black_24dp.svg"
-        imageColor: AmneziaStyle.color.white
+        imageColor: AmneziaStyle.color.paleGray
 
         implicitWidth: 40
         implicitHeight: 40

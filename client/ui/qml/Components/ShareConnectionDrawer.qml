@@ -113,10 +113,10 @@ DrawerType2 {
                     Layout.topMargin: 8
 
                     defaultColor: AmneziaStyle.color.transparent
-                    hoveredColor: AmneziaStyle.color.blackHovered
-                    pressedColor: AmneziaStyle.color.blackPressed
-                    disabledColor: AmneziaStyle.color.grey
-                    textColor: AmneziaStyle.color.white
+                    hoveredColor: AmneziaStyle.color.translucentWhite
+                    pressedColor: AmneziaStyle.color.sheerWhite
+                    disabledColor: AmneziaStyle.color.mutedGray
+                    textColor: AmneziaStyle.color.paleGray
                     borderWidth: 1
 
                     text: qsTr("Copy")
@@ -136,10 +136,10 @@ DrawerType2 {
                     visible: false
 
                     defaultColor: AmneziaStyle.color.transparent
-                    hoveredColor: AmneziaStyle.color.blackHovered
-                    pressedColor: AmneziaStyle.color.blackPressed
-                    disabledColor: AmneziaStyle.color.grey
-                    textColor: AmneziaStyle.color.white
+                    hoveredColor: AmneziaStyle.color.translucentWhite
+                    pressedColor: AmneziaStyle.color.sheerWhite
+                    disabledColor: AmneziaStyle.color.mutedGray
+                    textColor: AmneziaStyle.color.paleGray
                     borderWidth: 1
 
                     text: qsTr("Copy config string")
@@ -155,10 +155,10 @@ DrawerType2 {
                     Layout.topMargin: 24
 
                     defaultColor: AmneziaStyle.color.transparent
-                    hoveredColor: AmneziaStyle.color.blackHovered
-                    pressedColor: AmneziaStyle.color.blackPressed
-                    disabledColor: AmneziaStyle.color.grey
-                    textColor: AmneziaStyle.color.white
+                    hoveredColor: AmneziaStyle.color.translucentWhite
+                    pressedColor: AmneziaStyle.color.sheerWhite
+                    disabledColor: AmneziaStyle.color.mutedGray
+                    textColor: AmneziaStyle.color.paleGray
                     borderWidth: 1
 
                     text: qsTr("Show connection settings")
@@ -282,9 +282,9 @@ DrawerType2 {
                                     readOnly: true
                                     activeFocusOnTab: false
 
-                                    color: AmneziaStyle.color.white
-                                    selectionColor:  AmneziaStyle.color.brown
-                                    selectedTextColor: AmneziaStyle.color.white
+                                    color: AmneziaStyle.color.paleGray
+                                    selectionColor:  AmneziaStyle.color.richBrown
+                                    selectedTextColor: AmneziaStyle.color.paleGray
 
                                     font.pixelSize: 16
                                     font.weight: Font.Medium

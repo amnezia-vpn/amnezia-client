@@ -295,7 +295,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 32
                             Layout.preferredHeight: checkboxLayout.implicitHeight
-                            color: AmneziaStyle.color.blackLight
+                            color: AmneziaStyle.color.onyxBlack
                             radius: 16
 
                             Connections {

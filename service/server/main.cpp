@@ -46,8 +46,6 @@ int main(int argc, char **argv)
 {
     Utils::initializePath(Utils::systemLogPath());
 
-    Logger::init();
-
     if (argc >= 2) {
         qInfo() << "Started as console application";
         return runApplication(argc, argv);

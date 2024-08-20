@@ -6,7 +6,7 @@ Text {
     lineHeight: 38 + LanguageModel.getLineHeightAppend()
     lineHeightMode: Text.FixedHeight
 
-    color: AmneziaStyle.color.white
+    color: AmneziaStyle.color.paleGray
     font.pixelSize: 32
     font.weight: 700
     font.family: "PT Root UI VF"

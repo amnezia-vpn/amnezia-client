@@ -6,13 +6,13 @@ import Style 1.0
 TabButton {
     id: root
 
-    property string hoveredColor: AmneziaStyle.color.brown
-    property string defaultColor: AmneziaStyle.color.greyDark
-    property string selectedColor: AmneziaStyle.color.orange
+    property string hoveredColor: AmneziaStyle.color.richBrown
+    property string defaultColor: AmneziaStyle.color.slateGray
+    property string selectedColor: AmneziaStyle.color.goldenApricot
 
-    property string textColor: AmneziaStyle.color.white
+    property string textColor: AmneziaStyle.color.paleGray
 
-    property string borderFocusedColor: AmneziaStyle.color.white
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
     property bool isSelected: false

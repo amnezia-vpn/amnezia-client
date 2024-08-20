@@ -10,6 +10,7 @@
 #include "ui/models/containers_model.h"
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
+#include "ui/models/apiServicesModel.h"
 
 class InstallController : public QObject
 {
@@ -18,6 +19,7 @@ public:
     explicit InstallController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                const QSharedPointer<ProtocolsModel> &protocolsModel,
                                const QSharedPointer<ClientManagementModel> &clientManagementModel,
+                               const QSharedPointer<ApiServicesModel> &apiServicesModel,
                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
     ~InstallController();
 
@@ -50,11 +52,21 @@ public slots:
 
     void addEmptyServer();
 
+    bool fillAvailableServices();
+    bool installServiceFromApi();
+    bool updateServiceFromApi(const int serverIndex, const QString &newCountryCode, const QString &newCountryName, bool reloadServiceConfig = false);
+
+    void updateServiceFromTelegram(const int serverIndex);
+
 signals:
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
     void installServerFinished(const QString &finishMessage);
+    void installServerFromApiFinished(const QString &message);
 
     void updateContainerFinished(const QString &message);
+    void updateServerFromApiFinished();
+    void changeApiCountryFinished(const QString &message);
+    void reloadServerFromApiFinished(const QString &message);
 
     void scanServerFinished(bool isInstalledContainerFound);
 
@@ -77,6 +89,7 @@ signals:
     void currentContainerUpdated();
 
     void cachedProfileCleared(const QString &message);
+    void apiConfigRemoved(const QString &message);
 
 private:
     void installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
@@ -95,6 +108,8 @@ private:
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ProtocolsModel> m_protocolModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
+    QSharedPointer<ApiServicesModel> m_apiServicesModel;
+
     std::shared_ptr<Settings> m_settings;
 
     ServerCredentials m_processedServerCredentials;

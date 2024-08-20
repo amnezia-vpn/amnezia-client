@@ -57,10 +57,10 @@ PageType {
                 implicitHeight: 36
 
                 defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.blackHovered
-                pressedColor: AmneziaStyle.color.blackPressed
-                disabledColor: AmneziaStyle.color.grey
-                textColor: AmneziaStyle.color.grey
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.mutedGray
                 borderWidth: 0
 
                 visible: isLoggingEnabled ? true : false
@@ -94,10 +94,10 @@ PageType {
                 implicitHeight: 36
 
                 defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.blackHovered
-                pressedColor: AmneziaStyle.color.blackPressed
-                disabledColor: AmneziaStyle.color.grey
-                textColor: AmneziaStyle.color.grey
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.mutedGray
                 leftImageColor: AmneziaStyle.color.transparent
                 borderWidth: 0
 
@@ -106,7 +106,7 @@ PageType {
                 buttonTextLabel.font.weight: 500
 
                 property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled || AppSplitTunnelingModel.isTunnelingEnabled ||
-                                                       (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi"))
+                                                       ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
 
                 text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
 
@@ -243,7 +243,7 @@ PageType {
 
                         hoverEnabled: false
                         image: "qrc:/images/controls/chevron-down.svg"
-                        imageColor: AmneziaStyle.color.white
+                        imageColor: AmneziaStyle.color.paleGray
 
                         icon.width: 18
                         icon.height: 18
@@ -265,11 +265,21 @@ PageType {
                     }
                 }
 
-                LabelTextType {
-                    id: collapsedServerMenuDescription
-                    Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 89 : 44
+                RowLayout {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    text: drawer.isCollapsed ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
+                    Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 89 : 44
+                    spacing: 0
+
+                    Image {
+                        Layout.rightMargin: 8
+                        visible: source !== ""
+                        source: ServersModel.defaultServerImagePathCollapsed
+                    }
+
+                    LabelTextType {
+                        id: collapsedServerMenuDescription
+                        text: drawer.isCollapsed ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
+                    }
                 }
             }
 
@@ -304,8 +314,8 @@ PageType {
                     DropDownType {
                         id: containersDropDown
 
-                        rootButtonImageColor: AmneziaStyle.color.black
-                        rootButtonBackgroundColor: AmneziaStyle.color.white
+                        rootButtonImageColor: AmneziaStyle.color.midnightBlack
+                        rootButtonBackgroundColor: AmneziaStyle.color.paleGray
                         rootButtonBackgroundHoveredColor: Qt.rgba(215, 216, 219, 0.8)
                         rootButtonBackgroundPressedColor: Qt.rgba(215, 216, 219, 0.65)
                         rootButtonHoveredBorderColor: AmneziaStyle.color.transparent
@@ -314,7 +324,7 @@ PageType {
                         rootButtonTextBottomMargin: 8
 
                         text: ServersModel.defaultServerDefaultContainerName
-                        textColor: AmneziaStyle.color.black
+                        textColor: AmneziaStyle.color.midnightBlack
                         headerText: qsTr("VPN protocol")
                         headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
@@ -505,7 +515,7 @@ PageType {
                             ImageButtonType {
                                 id: serverInfoButton
                                 image: "qrc:/images/controls/settings.svg"
-                                imageColor: AmneziaStyle.color.white
+                                imageColor: AmneziaStyle.color.paleGray
 
                                 implicitWidth: 56
                                 implicitHeight: 56

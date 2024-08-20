@@ -133,7 +133,7 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
     int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
     auto dns = m_serversModel->getDnsPair(serverIndex);
-    bool isApiConfig = qvariant_cast<bool>(m_serversModel->data(serverIndex, ServersModel::IsServerFromApiRole));
+    bool isApiConfig = qvariant_cast<bool>(m_serversModel->data(serverIndex, ServersModel::IsServerFromTelegramApiRole));
 
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     containerConfig.insert(config_key::container, ContainerProps::containerToString(container));

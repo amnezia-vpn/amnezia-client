@@ -115,7 +115,7 @@ PageType {
                             descriptionOnTop: true
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: AmneziaStyle.color.white
+                            rightImageColor: AmneziaStyle.color.paleGray
 
                             clickedFunction: function() {
                                 GC.copyToClipBoard(descriptionText)
@@ -139,7 +139,7 @@ PageType {
                             KeyNavigation.tab: usernameLabel.rightButton
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: AmneziaStyle.color.white
+                            rightImageColor: AmneziaStyle.color.paleGray
 
                             clickedFunction: function() {
                                 GC.copyToClipBoard(descriptionText)
@@ -163,7 +163,7 @@ PageType {
                             KeyNavigation.tab: passwordLabel.eyeButton
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: AmneziaStyle.color.white
+                            rightImageColor: AmneziaStyle.color.paleGray
 
                             clickedFunction: function() {
                                 GC.copyToClipBoard(descriptionText)
@@ -194,7 +194,7 @@ PageType {
                             }
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: AmneziaStyle.color.white
+                            rightImageColor: AmneziaStyle.color.paleGray
 
                             buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
 
@@ -218,10 +218,10 @@ PageType {
                             Layout.rightMargin: 16
 
                             defaultColor: AmneziaStyle.color.transparent
-                            hoveredColor: AmneziaStyle.color.blackHovered
-                            pressedColor: AmneziaStyle.color.blackPressed
-                            disabledColor: AmneziaStyle.color.grey
-                            textColor: AmneziaStyle.color.white
+                            hoveredColor: AmneziaStyle.color.translucentWhite
+                            pressedColor: AmneziaStyle.color.sheerWhite
+                            disabledColor: AmneziaStyle.color.mutedGray
+                            textColor: AmneziaStyle.color.paleGray
                             borderWidth: 1
 
                             parentFlickable: fl
@@ -282,10 +282,10 @@ PageType {
                             implicitHeight: 32
 
                             defaultColor: AmneziaStyle.color.transparent
-                            hoveredColor: AmneziaStyle.color.blackHovered
-                            pressedColor: AmneziaStyle.color.blackPressed
-                            disabledColor: AmneziaStyle.color.grey
-                            textColor: AmneziaStyle.color.orange
+                            hoveredColor: AmneziaStyle.color.translucentWhite
+                            pressedColor: AmneziaStyle.color.sheerWhite
+                            disabledColor: AmneziaStyle.color.mutedGray
+                            textColor: AmneziaStyle.color.goldenApricot
 
                             text: qsTr("Detailed instructions")
 

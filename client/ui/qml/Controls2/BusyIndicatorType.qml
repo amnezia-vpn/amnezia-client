@@ -43,7 +43,7 @@ Popup {
 
                 ShapePath {
                     fillColor: AmneziaStyle.color.transparent
-                    strokeColor: AmneziaStyle.color.greyDisabled
+                    strokeColor: AmneziaStyle.color.charcoalGray
                     strokeWidth: 3
                     capStyle: ShapePath.RoundCap
 

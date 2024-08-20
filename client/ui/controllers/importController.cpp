@@ -240,9 +240,9 @@ void ImportController::processNativeWireGuardConfig()
         auto containerConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::WireGuard)).toObject();
         auto protocolConfig = QJsonDocument::fromJson(containerConfig.value(config_key::last_config).toString().toUtf8()).object();
 
-        QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(3, 10));
-        QString junkPacketMinSize = QString::number(50);
-        QString junkPacketMaxSize = QString::number(1000);
+        QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
+        QString junkPacketMinSize = QString::number(10);
+        QString junkPacketMaxSize = QString::number(50);
         protocolConfig[config_key::junkPacketCount] = junkPacketCount;
         protocolConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
         protocolConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;

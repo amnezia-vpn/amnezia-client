@@ -154,9 +154,11 @@ The Android app has the following requirements:
 * Android platform SDK 33
 * CMake 3.25.0
 
-After you have installed QT, QT Creator, and Android Studio, you need to configure QT Creator correctly. Click in the top menu bar on `QT Creator` -> `Preferences` -> `Devices` and select the tab `Android`. 
-    * set path to JDK 11
-    * set path to Android SDK ($ANDROID_HOME)
+After you have installed QT, QT Creator, and Android Studio, you need to configure QT Creator correctly.
+
+- Click in the top menu bar on `QT Creator` -> `Preferences` -> `Devices` and select the tab `Android`.
+- Set path to JDK 11
+- Set path to Android SDK (`$ANDROID_HOME`)
 
 In case you get errors regarding missing SDK or 'SDK manager not running', you cannot fix them by correcting the paths. If you have some spare GBs on your disk, you can let QT Creator install all requirements by choosing an empty folder for `Android SDK location` and clicking on `Set Up SDK`. Be aware: This will install a second Android SDK and NDK on your machine! 
 Double-check that the right CMake version is configured:  Click on `QT Creator` -> `Preferences` and click on the side menu on `Kits`. Under the center content view's `Kits` tab, you'll find an entry for `CMake Tool`. If the default selected CMake version is lower than 3.25.0, install on your system CMake >= 3.25.0 and choose `System CMake at <path>` from the drop-down list. If this entry is missing, you either have not installed CMake yet or QT Creator hasn't found the path to it. In that case, click in the preferences window on the side menu item `CMake`, then on the tab `Tools` in the center content view, and finally on the button `Add` to set the path to your installed CMake. 
@@ -179,6 +181,7 @@ GPL v3.0
 
 Patreon: [https://www.patreon.com/amneziavpn](https://www.patreon.com/amneziavpn)
 
+Bitcoin: bc1q26eevjcg9j0wuyywd2e3uc9cs2w58lpkpjxq6p <br>
 USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4 <br>
 USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d <br>
 XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3  

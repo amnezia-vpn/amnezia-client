@@ -7,6 +7,7 @@ import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -119,7 +120,11 @@ PageType {
                                     servicesNameString += servicesName[i] + " · "
                                 }
 
-                                return servicesNameString + hostName
+                                if (ServersModel.isServerFromApi(index)) {
+                                    return servicesNameString + serverDescription
+                                } else {
+                                    return servicesNameString + hostName
+                                }
                             }
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
