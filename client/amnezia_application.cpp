@@ -371,9 +371,8 @@ void AmneziaApplication::initModels()
         m_apiCountryModel->updateModel(m_serversModel->getProcessedServerData("apiAvailableCountries").toJsonArray(),
                                        m_serversModel->getProcessedServerData("apiServerCountryCode").toString());
     });
-    connect(m_serversModel.get(), &ServersModel::updateApiServicesModel, this, [this]() {
-        m_apiServicesModel->updateModel(m_serversModel->getProcessedServerData("apiConfig").toJsonObject());
-    });
+    connect(m_serversModel.get(), &ServersModel::updateApiServicesModel, this,
+            [this]() { m_apiServicesModel->updateModel(m_serversModel->getProcessedServerData("apiConfig").toJsonObject()); });
 }
 
 void AmneziaApplication::initControllers()
@@ -410,23 +409,25 @@ void AmneziaApplication::initControllers()
     connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
             &ConnectionController::onCurrentContainerUpdated);
 
-    connect(m_installController.get(), &InstallController::updateServerFromApiFinished, m_connectionController.get(),
-            &ConnectionController::configFromApiUpdated);
+    connect(m_installController.get(), &InstallController::updateServerFromApiFinished, this, [this]() {
+        disconnect(m_reloadConfigErrorOccurredConnection);
+        emit m_connectionController->configFromApiUpdated();
+    });
 
     connect(m_connectionController.get(), &ConnectionController::updateApiConfigFromGateway, this, [this]() {
-        QObject *context = new QObject(this);
-        auto connection = connect(m_installController.get(), qOverload<ErrorCode>(&InstallController::installationErrorOccurred), context, [this, context]() {
-            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-            context->deleteLater();
-        });
+        m_reloadConfigErrorOccurredConnection = connect(
+                m_installController.get(), qOverload<ErrorCode>(&InstallController::installationErrorOccurred), this,
+                [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected); },
+                static_cast<Qt::ConnectionType>(Qt::AutoConnection || Qt::SingleShotConnection));
         m_installController->updateServiceFromApi(m_serversModel->getDefaultServerIndex(), "", "");
     });
+
     connect(m_connectionController.get(), &ConnectionController::updateApiConfigFromTelegram, this, [this]() {
-        QObject *context = new QObject(this);
-        auto connection = connect(m_installController.get(), qOverload<ErrorCode>(&InstallController::installationErrorOccurred), context, [this, context]() {
-            emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-            context->deleteLater();
-        });
+        m_reloadConfigErrorOccurredConnection = connect(
+                m_installController.get(), qOverload<ErrorCode>(&InstallController::installationErrorOccurred), this,
+                [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected); },
+                static_cast<Qt::ConnectionType>(Qt::AutoConnection || Qt::SingleShotConnection));
+        m_serversModel->removeApiConfig(m_serversModel->getDefaultServerIndex());
         m_installController->updateServiceFromTelegram(m_serversModel->getDefaultServerIndex());
     });
 

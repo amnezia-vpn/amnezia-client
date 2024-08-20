@@ -138,6 +138,8 @@ private:
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
 
     QNetworkAccessManager *m_nam;
+
+    QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 };
 
 #endif // AMNEZIA_APPLICATION_H
