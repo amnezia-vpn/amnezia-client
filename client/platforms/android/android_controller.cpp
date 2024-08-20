@@ -210,6 +210,11 @@ void AndroidController::setScreenshotsEnabled(bool enabled)
     callActivityMethod("setScreenshotsEnabled", "(Z)V", enabled);
 }
 
+void AndroidController::setNavigationBarColor(unsigned int color)
+{
+    callActivityMethod("setNavigationBarColor", "(I)V", color);
+}
+
 void AndroidController::minimizeApp()
 {
     callActivityMethod("minimizeApp", "()V");
