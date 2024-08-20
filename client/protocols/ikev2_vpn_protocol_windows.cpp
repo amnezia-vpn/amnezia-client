@@ -181,11 +181,13 @@ ErrorCode Ikev2Protocol::start()
     QByteArray cert = QByteArray::fromBase64(m_config[config_key::cert].toString().toUtf8());
     setConnectionState(Vpn::ConnectionState::Connecting);
 
-    QTemporaryFile certFile;
-    certFile.setAutoRemove(false);
-    certFile.open();
-    certFile.write(cert);
-    certFile.close();
+    QTemporaryFile * certFile = new QTemporaryFile;
+    certFile->setAutoRemove(false);
+    certFile->open();
+    QString m_filename = certFile->fileName();
+    certFile->write(cert);
+    certFile->close();
+    delete certFile;
 
     {
         auto certInstallProcess = IpcClient::CreatePrivilegedProcess();
@@ -203,14 +205,11 @@ ErrorCode Ikev2Protocol::start()
         }
         certInstallProcess->setProgram(PermittedProcess::CertUtil);
 
-        QString password = QString("-p \"%1\"").arg(m_config[config_key::password].toString());
-
-        QStringList arguments({"-f", "-importpfx", password,
-                               QDir::toNativeSeparators(certFile.fileName()), "NoExport"
+        QStringList arguments({"-f", "-importpfx", "-p", m_config[config_key::password].toString(),
+                               QDir::toNativeSeparators(m_filename), "NoExport"
                               });
 
         certInstallProcess->setArguments(arguments);
-
         certInstallProcess->start();
     }
     // /*
