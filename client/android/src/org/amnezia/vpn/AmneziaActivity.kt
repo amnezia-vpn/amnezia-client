@@ -696,6 +696,17 @@ class AmneziaActivity : QtActivity() {
             .show()
     }
 
+    @Suppress("unused")
+    fun requestAuthentication() {
+        Log.v(TAG, "Request authentication")
+        mainScope.launch {
+            qtInitialized.await()
+            Intent(this@AmneziaActivity, AuthActivity::class.java).also {
+                startActivity(it)
+            }
+        }
+    }
+
     /**
      * Utils methods
      */
