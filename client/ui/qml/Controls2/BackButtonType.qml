@@ -30,7 +30,7 @@ Item {
         ImageButtonType {
             id: backButton
             image: backButtonImage
-            imageColor: AmneziaStyle.color.white
+            imageColor: AmneziaStyle.color.paleGray
 
             implicitWidth: 40
             implicitHeight: 40

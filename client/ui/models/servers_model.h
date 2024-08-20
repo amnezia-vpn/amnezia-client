@@ -3,8 +3,8 @@
 
 #include <QAbstractListModel>
 
-#include "settings.h"
 #include "core/controllers/serverController.h"
+#include "settings.h"
 
 class ServersModel : public QAbstractListModel
 {
@@ -30,7 +30,13 @@ public:
         DefaultContainerRole,
 
         HasInstalledContainers,
-        IsServerFromApiRole,
+
+        IsServerFromTelegramApiRole,
+        IsServerFromGatewayApiRole,
+        ApiConfigRole,
+        IsCountrySelectionAvailableRole,
+        ApiAvailableCountriesRole,
+        ApiServerCountryCodeRole,
 
         HasAmneziaDns
     };
@@ -49,8 +55,10 @@ public:
     Q_PROPERTY(QString defaultServerName READ getDefaultServerName NOTIFY defaultServerNameChanged)
     Q_PROPERTY(QString defaultServerDefaultContainerName READ getDefaultServerDefaultContainerName NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerDescriptionCollapsed READ getDefaultServerDescriptionCollapsed NOTIFY defaultServerDefaultContainerChanged)
+    Q_PROPERTY(QString defaultServerImagePathCollapsed READ getDefaultServerImagePathCollapsed NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(QString defaultServerDescriptionExpanded READ getDefaultServerDescriptionExpanded NOTIFY defaultServerDefaultContainerChanged)
-    Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ isDefaultServerDefaultContainerHasSplitTunneling NOTIFY defaultServerDefaultContainerChanged)
+    Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ isDefaultServerDefaultContainerHasSplitTunneling NOTIFY
+                       defaultServerDefaultContainerChanged)
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
 
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
@@ -60,6 +68,7 @@ public slots:
     const int getDefaultServerIndex();
     const QString getDefaultServerName();
     const QString getDefaultServerDescriptionCollapsed();
+    const QString getDefaultServerImagePathCollapsed();
     const QString getDefaultServerDescriptionExpanded();
     const QString getDefaultServerDefaultContainerName();
     bool isDefaultServerCurrentlyProcessed();
@@ -101,12 +110,17 @@ public slots:
     QPair<QString, QString> getDnsPair(const int serverIndex);
 
     bool isServerFromApiAlreadyExists(const quint16 crc);
+    bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol);
 
     QVariant getDefaultServerData(const QString roleString);
 
     QVariant getProcessedServerData(const QString roleString);
 
     bool isDefaultServerDefaultContainerHasSplitTunneling();
+
+    bool isServerFromApi(const int serverIndex);
+    bool isApiKeyExpired(const int serverIndex);
+    void removeApiConfig(const int serverIndex);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -120,6 +134,9 @@ signals:
     void containersUpdated(const QJsonArray &containers);
     void defaultServerContainersUpdated(const QJsonArray &containers);
     void defaultServerDefaultContainerChanged(const int containerIndex);
+
+    void updateApiLanguageModel();
+    void updateApiServicesModel();
 
 private:
     ServerCredentials serverCredentials(int index) const;

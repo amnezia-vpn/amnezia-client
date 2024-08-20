@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -127,6 +128,26 @@ PageType {
             }
 
             DividerType {}
+
+            LabelWithButtonType {
+                id: devConsole
+                visible: SettingsController.isDevModeEnabled
+                Layout.fillWidth: true
+
+                text: qsTr("Dev console")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/bug.svg"
+
+                // Keys.onTabPressed: lastItemTabClicked(header)
+
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageDevMenu)
+                }
+            }
+
+            DividerType {
+                visible: SettingsController.isDevModeEnabled
+            }
 
             LabelWithButtonType {
                 id: close

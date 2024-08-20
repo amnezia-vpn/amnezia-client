@@ -94,6 +94,26 @@ bool ContainersModel::isServiceContainer(const int containerIndex)
     return qvariant_cast<amnezia::ServiceType>(data(index(containerIndex), ServiceTypeRole) == ServiceType::Other);
 }
 
+bool ContainersModel::hasInstalledServices()
+{
+    for (const auto &container : m_containers.keys()) {
+        if (ContainerProps::containerService(container) == ServiceType::Other) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ContainersModel::hasInstalledProtocols()
+{
+    for (const auto &container : m_containers.keys()) {
+        if (ContainerProps::containerService(container) == ServiceType::Vpn) {
+            return true;
+        }
+    }
+    return false;
+}
+
 QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;

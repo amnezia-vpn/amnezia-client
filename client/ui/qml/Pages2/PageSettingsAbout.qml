@@ -85,7 +85,7 @@ PageType {
                 font.pixelSize: 14
 
                 text: qsTr("Amnezia is a free and open-source application. You can support the developers if you like it.")
-                color: AmneziaStyle.color.white
+                color: AmneziaStyle.color.paleGray
             }
 
             ParagraphTextType {
@@ -163,7 +163,7 @@ PageType {
                 parentFlickable: fl
 
                 clickedFunction: function() {
-                    Qt.openUrlExternally(qsTr("https://amnezia.org"))
+                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
                 }
 
             }
@@ -177,7 +177,19 @@ PageType {
                 horizontalAlignment: Text.AlignHCenter
 
                 text: qsTr("Software version: %1").arg(SettingsController.getAppVersion())
-                color: AmneziaStyle.color.grey
+                color: AmneziaStyle.color.mutedGray
+
+                MouseArea {
+                    property int clickCount: 0
+                    anchors.fill: parent
+                    onClicked: {
+                        if (clickCount > 10) {
+                            SettingsController.enableDevMode()
+                        } else {
+                            clickCount++
+                        }
+                    }
+                }
             }
 
             BasicButtonType {
@@ -188,10 +200,10 @@ PageType {
                 implicitHeight: 32
 
                 defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.blackHovered
-                pressedColor: AmneziaStyle.color.blackPressed
-                disabledColor: AmneziaStyle.color.grey
-                textColor: AmneziaStyle.color.orange
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.goldenApricot
 
                 text: qsTr("Check for updates")
 
@@ -211,10 +223,10 @@ PageType {
               implicitHeight: 25
 
               defaultColor: AmneziaStyle.color.transparent
-              hoveredColor: AmneziaStyle.color.blackHovered
-              pressedColor: AmneziaStyle.color.blackPressed
-              disabledColor: AmneziaStyle.color.grey
-              textColor: AmneziaStyle.color.orange
+              hoveredColor: AmneziaStyle.color.translucentWhite
+              pressedColor: AmneziaStyle.color.sheerWhite
+              disabledColor: AmneziaStyle.color.mutedGray
+              textColor: AmneziaStyle.color.goldenApricot
 
               text: qsTr("Privacy Policy")
 
@@ -222,7 +234,7 @@ PageType {
               parentFlickable: fl
 
               clickedFunc: function() {
-                Qt.openUrlExternally("https://amnezia.org/en/policy")
+                Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl() + "/policy")
               }
             }
         }

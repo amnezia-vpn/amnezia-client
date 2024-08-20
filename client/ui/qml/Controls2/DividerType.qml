@@ -10,5 +10,5 @@ Rectangle {
     Layout.rightMargin: 16
 
     height: 1
-    color: AmneziaStyle.color.greyDark
+    color: AmneziaStyle.color.slateGray
 }

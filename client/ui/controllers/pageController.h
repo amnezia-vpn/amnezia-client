@@ -47,6 +47,8 @@ namespace PageLoader
         PageSetupWizardTextKey,
         PageSetupWizardViewConfig,
         PageSetupWizardQrReader,
+        PageSetupWizardApiServicesList,
+        PageSetupWizardApiServiceInfo,
 
         PageProtocolOpenVpnSettings,
         PageProtocolShadowSocksSettings,
@@ -57,7 +59,9 @@ namespace PageLoader
         PageProtocolIKev2Settings,
         PageProtocolRaw,
 
-        PageShareFullAccess
+        PageShareFullAccess,
+
+        PageDevMenu
     };
     Q_ENUM_NS(PageEnum)
 
@@ -75,7 +79,7 @@ public:
                             QObject *parent = nullptr);
 
 public slots:
-    QString getInitialPage();
+    bool isStartPageVisible();
     QString getPagePath(PageLoader::PageEnum page);
 
     void closeWindow();
@@ -110,7 +114,6 @@ signals:
     void closePage();
 
     void restorePageHomeState(bool isContainerInstalled = false);
-    void replaceStartPage();
 
     void showErrorMessage(amnezia::ErrorCode);
     void showErrorMessage(const QString &errorMessage);

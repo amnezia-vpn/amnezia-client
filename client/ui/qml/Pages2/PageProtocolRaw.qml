@@ -192,9 +192,9 @@ PageType {
                                             leftPadding: 0
                                             height: 24
 
-                                            color: AmneziaStyle.color.white
-                                            selectionColor: AmneziaStyle.color.brown
-                                            selectedTextColor: AmneziaStyle.color.white
+                                            color: AmneziaStyle.color.paleGray
+                                            selectionColor: AmneziaStyle.color.richBrown
+                                            selectedTextColor: AmneziaStyle.color.paleGray
 
                                             font.pixelSize: 16
                                             font.weight: Font.Medium
@@ -224,7 +224,7 @@ PageType {
                 visible: ServersModel.isProcessedServerHasWriteAccess()
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-                textColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
                 clickedFunction: function() {

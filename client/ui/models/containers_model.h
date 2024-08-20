@@ -54,6 +54,9 @@ public slots:
     bool isSupportedByCurrentPlatform(const int containerIndex);
     bool isServiceContainer(const int containerIndex);
 
+    bool hasInstalledServices();
+    bool hasInstalledProtocols();
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 

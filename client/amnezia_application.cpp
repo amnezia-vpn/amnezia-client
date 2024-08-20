@@ -3,13 +3,13 @@
 #include <QClipboard>
 #include <QFontDatabase>
 #include <QMimeData>
+#include <QQuickItem>
 #include <QQuickStyle>
 #include <QResource>
 #include <QStandardPaths>
 #include <QTextDocument>
 #include <QTimer>
 #include <QTranslator>
-#include <QQuickItem>
 
 #include "logger.h"
 #include "ui/models/installedAppsModel.h"
@@ -116,7 +116,7 @@ void AmneziaApplication::init()
     }
 
     connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, [this](QString data) {
-        m_pageController->replaceStartPage();
+        m_pageController->goToPageHome();
         m_importController->extractConfigFromData(data);
         m_pageController->goToPageViewConfig();
     });
@@ -127,13 +127,13 @@ void AmneziaApplication::init()
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
     connect(IosController::Instance(), &IosController::importConfigFromOutside, [this](QString data) {
-        m_pageController->replaceStartPage();
+        m_pageController->goToPageHome();
         m_importController->extractConfigFromData(data);
         m_pageController->goToPageViewConfig();
     });
 
     connect(IosController::Instance(), &IosController::importBackupFromOutside, [this](QString filePath) {
-        m_pageController->replaceStartPage();
+        m_pageController->goToPageHome();
         m_pageController->goToPageSettingsBackup();
         m_settingsController->importBackupFromOutside(filePath);
     });
@@ -361,6 +361,18 @@ void AmneziaApplication::initModels()
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
     connect(m_clientManagementModel.get(), &ClientManagementModel::adminConfigRevoked, m_serversModel.get(),
             &ServersModel::clearCachedProfile);
+
+    m_apiServicesModel.reset(new ApiServicesModel(this));
+    m_engine->rootContext()->setContextProperty("ApiServicesModel", m_apiServicesModel.get());
+
+    m_apiCountryModel.reset(new ApiCountryModel(this));
+    m_engine->rootContext()->setContextProperty("ApiCountryModel", m_apiCountryModel.get());
+    connect(m_serversModel.get(), &ServersModel::updateApiLanguageModel, this, [this]() {
+        m_apiCountryModel->updateModel(m_serversModel->getProcessedServerData("apiAvailableCountries").toJsonArray(),
+                                       m_serversModel->getProcessedServerData("apiServerCountryCode").toString());
+    });
+    connect(m_serversModel.get(), &ServersModel::updateApiServicesModel, this,
+            [this]() { m_apiServicesModel->updateModel(m_serversModel->getProcessedServerData("apiConfig").toJsonObject()); });
 }
 
 void AmneziaApplication::initControllers()
@@ -369,25 +381,26 @@ void AmneziaApplication::initControllers()
             new ConnectionController(m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_settings));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
-    connect(m_connectionController.get(), qOverload<const QString &>(&ConnectionController::connectionErrorOccurred), this, [this](const QString &errorMessage) {
-        emit m_pageController->showErrorMessage(errorMessage);
-        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-    });
+    connect(m_connectionController.get(), qOverload<const QString &>(&ConnectionController::connectionErrorOccurred), this,
+            [this](const QString &errorMessage) {
+                emit m_pageController->showErrorMessage(errorMessage);
+                emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+            });
 
-    connect(m_connectionController.get(), qOverload<ErrorCode>(&ConnectionController::connectionErrorOccurred), this, [this](ErrorCode errorCode) {
-      emit m_pageController->showErrorMessage(errorCode);
-      emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-    });
+    connect(m_connectionController.get(), qOverload<ErrorCode>(&ConnectionController::connectionErrorOccurred), this,
+            [this](ErrorCode errorCode) {
+                emit m_pageController->showErrorMessage(errorCode);
+                emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
+            });
 
     connect(m_connectionController.get(), &ConnectionController::connectButtonClicked, m_connectionController.get(),
             &ConnectionController::toggleConnection, Qt::QueuedConnection);
 
-    connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
-
     m_pageController.reset(new PageController(m_serversModel, m_settings));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
 
-    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_settings));
+    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel,
+                                                    m_apiServicesModel, m_settings));
     m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
     connect(m_installController.get(), &InstallController::passphraseRequestStarted, m_pageController.get(),
             &PageController::showPassphraseRequestDrawer);
@@ -395,6 +408,30 @@ void AmneziaApplication::initControllers()
             &InstallController::setEncryptedPassphrase);
     connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
             &ConnectionController::onCurrentContainerUpdated);
+
+    connect(m_installController.get(), &InstallController::updateServerFromApiFinished, this, [this]() {
+        disconnect(m_reloadConfigErrorOccurredConnection);
+        emit m_connectionController->configFromApiUpdated();
+    });
+
+    connect(m_connectionController.get(), &ConnectionController::updateApiConfigFromGateway, this, [this]() {
+        m_reloadConfigErrorOccurredConnection = connect(
+                m_installController.get(), qOverload<ErrorCode>(&InstallController::installationErrorOccurred), this,
+                [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected); },
+                static_cast<Qt::ConnectionType>(Qt::AutoConnection || Qt::SingleShotConnection));
+        m_installController->updateServiceFromApi(m_serversModel->getDefaultServerIndex(), "", "");
+    });
+
+    connect(m_connectionController.get(), &ConnectionController::updateApiConfigFromTelegram, this, [this]() {
+        m_reloadConfigErrorOccurredConnection = connect(
+                m_installController.get(), qOverload<ErrorCode>(&InstallController::installationErrorOccurred), this,
+                [this]() { emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected); },
+                static_cast<Qt::ConnectionType>(Qt::AutoConnection || Qt::SingleShotConnection));
+        m_serversModel->removeApiConfig(m_serversModel->getDefaultServerIndex());
+        m_installController->updateServiceFromTelegram(m_serversModel->getDefaultServerIndex());
+    });
+
+    connect(this, &AmneziaApplication::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
 
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());

@@ -38,7 +38,7 @@ PageType {
 
         function onRemoveProcessedServerFinished(finishedMessage) {
             if (!ServersModel.getServersCount()) {
-                PageController.replaceStartPage()
+                PageController.goToPageHome()
             } else {
                 PageController.goToStartPage()
                 PageController.goToPage(PageEnum.PageSettingsServersList)
@@ -119,7 +119,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Reboot server")
-                textColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
 
                 KeyNavigation.tab: labelWithButton3
 
@@ -160,7 +160,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Remove server from application")
-                textColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: {
                     if (content.isServerWithWriteAccess) {
@@ -208,7 +208,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Clear server from Amnezia software")
-                textColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: labelWithButton5.visible ?
                                     labelWithButton5.forceActiveFocus() :
@@ -247,11 +247,11 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButton5
-                visible: ServersModel.getProcessedServerData("isServerFromApi")
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
                 Layout.fillWidth: true
 
                 text: qsTr("Reset API config")
-                textColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: root.lastItemTabClickedSignal()
 
@@ -285,7 +285,7 @@ PageType {
             }
 
             DividerType {
-                visible: ServersModel.getProcessedServerData("isServerFromApi")
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
             }
         }
     }

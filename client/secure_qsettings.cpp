@@ -200,7 +200,7 @@ QByteArray SecureQSettings::getEncKey() const
     if (m_key.isEmpty()) {
         // Create new key
         QSimpleCrypto::QBlockCipher cipher;
-        QByteArray key = cipher.generateSecureRandomBytes(32);
+        QByteArray key = cipher.generatePrivateSalt(32);
         if (key.isEmpty()) {
             qCritical() << "SecureQSettings::getEncKey Unable to generate new enc key";
         }
@@ -226,7 +226,7 @@ QByteArray SecureQSettings::getEncIv() const
     if (m_iv.isEmpty()) {
         // Create new IV
         QSimpleCrypto::QBlockCipher cipher;
-        QByteArray iv = cipher.generateSecureRandomBytes(32);
+        QByteArray iv = cipher.generatePrivateSalt(32);
         if (iv.isEmpty()) {
             qCritical() << "SecureQSettings::getEncIv Unable to generate new enc IV";
         }
