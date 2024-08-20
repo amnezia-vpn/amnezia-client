@@ -303,18 +303,18 @@ jobs:
 
     steps:
     - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
         target: 'desktop'
-        arch: 'gcc_64'
+        arch: 'linux_gcc_64'
         modules: ${{ env.QT_MODULES }}
         dir: ${{ runner.temp }}
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_x86_64 Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -325,7 +325,7 @@ jobs:
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_x86 Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -336,7 +336,7 @@ jobs:
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_armv7 Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -347,7 +347,7 @@ jobs:
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_arm64_v8a Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
