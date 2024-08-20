@@ -1,15 +1,15 @@
 [versions]
-agp = "8.2.0"
-kotlin = "1.9.20"
-androidx-core = "1.12.0"
-androidx-activity = "1.8.1"
-androidx-annotation = "1.7.0"
-androidx-camera = "1.3.0"
+agp = "8.5.2"
+kotlin = "1.9.24"
+androidx-core = "1.13.1"
+androidx-activity = "1.9.1"
+androidx-annotation = "1.8.2"
+androidx-camera = "1.3.4"
 androidx-security-crypto = "1.1.0-alpha06"
-androidx-datastore = "1.1.0-beta01"
-kotlinx-coroutines = "1.7.3"
+androidx-datastore = "1.1.1"
+kotlinx-coroutines = "1.8.1"
 kotlinx-serialization = "1.6.3"
-google-mlkit = "17.2.0"
+google-mlkit = "17.3.0"
 
 [libraries]
 androidx-core = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
