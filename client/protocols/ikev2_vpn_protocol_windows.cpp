@@ -203,10 +203,12 @@ ErrorCode Ikev2Protocol::start()
         }
         certInstallProcess->setProgram(PermittedProcess::CertUtil);
 
-        QString password = QString("-p %1").arg(m_config[config_key::password].toString());
+        QString password = QString("-p \"%1\"").arg(m_config[config_key::password].toString());
+
         QStringList arguments({"-f", "-importpfx", password,
                                QDir::toNativeSeparators(certFile.fileName()), "NoExport"
                               });
+
         certInstallProcess->setArguments(arguments);
 
         certInstallProcess->start();
