@@ -156,13 +156,13 @@ get_filename_component(QT_BIN_DIR_DETECTED "${QtCore_location}/../../../../../bi
         COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:AmneziaVPN> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR}
     )
 
-    SET(SIGN_CMD codesign --deep --force --sign 'Apple Distribution: Privacy Technologies OU \(X7UJ388FXK\)' --timestamp --options runtime $<TARGET_BUNDLE_DIR:AmneziaVPN>)
-    message(${SIGN_CMD})
+    # SET(SIGN_CMD codesign --deep --force --sign 'Apple Distribution: Privacy Technologies OU \(X7UJ388FXK\)' --timestamp --options runtime $<TARGET_BUNDLE_DIR:AmneziaVPN>)
+    # message(${SIGN_CMD})
 
 
-    add_custom_command(TARGET ${PROJECT} POST_BUILD
-        COMMAND ${SIGN_CMD}
-    )
+    # add_custom_command(TARGET ${PROJECT} POST_BUILD
+    #     COMMAND ${SIGN_CMD}
+    # )
 
     # add_custom_command(TARGET ${PROJECT} POST_BUILD
     #     COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/ios/scripts/sign_macos_appstore.sh $<TARGET_BUNDLE_DIR:AmneziaVPN>
