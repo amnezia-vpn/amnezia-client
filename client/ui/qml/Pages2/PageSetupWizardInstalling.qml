@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -46,14 +47,7 @@ PageType {
                 ServersModel.processedIndex = ServersModel.defaultIndex
             }
 
-            PageController.goToStartPage()
-            if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardStart)) {
-                PageController.replaceStartPage()
-            }
-            if (stackView.currentItem.objectName !== PageController.getPagePath(PageEnum.PageHome)) {
-                PageController.goToPageHome()
-            }
-
+            PageController.goToPageHome()
             PageController.showNotificationMessage(finishedMessage)
         }
 

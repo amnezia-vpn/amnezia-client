@@ -11,26 +11,26 @@ CheckBox {
     id: root
 
     property string descriptionText
-    property string descriptionTextColor: AmneziaStyle.color.grey
-    property string descriptionTextDisabledColor: AmneziaStyle.color.greyDisabled
+    property string descriptionTextColor: AmneziaStyle.color.mutedGray
+    property string descriptionTextDisabledColor: AmneziaStyle.color.charcoalGray
 
-    property string textColor: AmneziaStyle.color.white
-    property string textDisabledColor: AmneziaStyle.color.grey
+    property string textColor: AmneziaStyle.color.paleGray
+    property string textDisabledColor: AmneziaStyle.color.mutedGray
 
-    property string hoveredColor: AmneziaStyle.color.blackHovered
+    property string hoveredColor: AmneziaStyle.color.barelyTranslucentWhite
     property string defaultColor: AmneziaStyle.color.transparent
-    property string pressedColor: AmneziaStyle.color.blackPressed
+    property string pressedColor: AmneziaStyle.color.barelyTranslucentWhite
 
-    property string defaultBorderColor: AmneziaStyle.color.white
-    property string checkedBorderColor: AmneziaStyle.color.orange
-    property string checkedBorderDisabledColor: AmneziaStyle.color.brownDark
+    property string defaultBorderColor: AmneziaStyle.color.paleGray
+    property string checkedBorderColor: AmneziaStyle.color.goldenApricot
+    property string checkedBorderDisabledColor: AmneziaStyle.color.deepBrown
 
-    property string borderFocusedColor: AmneziaStyle.color.white
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
 
-    property string checkedImageColor: AmneziaStyle.color.orange
-    property string pressedImageColor: AmneziaStyle.color.orangeDark
+    property string checkedImageColor: AmneziaStyle.color.goldenApricot
+    property string pressedImageColor: AmneziaStyle.color.burntOrange
     property string defaultImageColor: AmneziaStyle.color.transparent
-    property string checkedDisabledImageColor: AmneziaStyle.color.brownLight
+    property string checkedDisabledImageColor: AmneziaStyle.color.mutedBrown
 
     property string imageSource: "qrc:/images/controls/check.svg"
 

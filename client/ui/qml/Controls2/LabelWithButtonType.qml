@@ -26,16 +26,16 @@ Item {
     property alias eyeButton: eyeImage
     property FlickableType parentFlickable
 
-    property string textColor: AmneziaStyle.color.white
-    property string textDisabledColor: AmneziaStyle.color.grey
-    property string descriptionColor: AmneziaStyle.color.grey
-    property string descriptionDisabledColor: AmneziaStyle.color.greyDisabled
+    property string textColor: AmneziaStyle.color.paleGray
+    property string textDisabledColor: AmneziaStyle.color.mutedGray
+    property string descriptionColor: AmneziaStyle.color.mutedGray
+    property string descriptionDisabledColor: AmneziaStyle.color.charcoalGray
     property real textOpacity: 1.0
 
-    property string borderFocusedColor: AmneziaStyle.color.white
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
-    property string rightImageColor: AmneziaStyle.color.white
+    property string rightImageColor: AmneziaStyle.color.paleGray
 
     property bool descriptionOnTop: false
     property bool hideDescription: true

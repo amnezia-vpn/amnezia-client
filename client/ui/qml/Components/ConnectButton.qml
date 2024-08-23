@@ -11,9 +11,9 @@ import Style 1.0
 Button {
     id: root
 
-    property string defaultButtonColor: AmneziaStyle.color.white
-    property string progressButtonColor: AmneziaStyle.color.white
-    property string connectedButtonColor: AmneziaStyle.color.orange
+    property string defaultButtonColor: AmneziaStyle.color.paleGray
+    property string progressButtonColor: AmneziaStyle.color.paleGray
+    property string connectedButtonColor: AmneziaStyle.color.goldenApricot
 
     implicitWidth: 190
     implicitHeight: 190
@@ -50,13 +50,13 @@ Button {
                 verticalOffset: 0
                 radius: 10
                 samples: 25
-                color: root.activeFocus ? AmneziaStyle.color.white : AmneziaStyle.color.orange
+                color: root.activeFocus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.goldenApricot
                 source: backgroundCircle
             }
 
             ShapePath {
                 fillColor: AmneziaStyle.color.transparent
-                strokeColor: AmneziaStyle.color.white
+                strokeColor: AmneziaStyle.color.paleGray
                 strokeWidth: root.activeFocus ? 1 : 0
                 capStyle: ShapePath.RoundCap
 
@@ -74,7 +74,7 @@ Button {
                 fillColor: AmneziaStyle.color.transparent
                 strokeColor: {
                     if (ConnectionController.isConnectionInProgress) {
-                        return AmneziaStyle.color.connectionInProgress
+                        return AmneziaStyle.color.darkCharcoal
                     } else if (ConnectionController.isConnected) {
                         return connectedButtonColor
                     } else {
@@ -115,7 +115,7 @@ Button {
 
             ShapePath {
                 fillColor: AmneziaStyle.color.transparent
-                strokeColor: AmneziaStyle.color.white
+                strokeColor: AmneziaStyle.color.paleGray
                 strokeWidth: 3
                 capStyle: ShapePath.RoundCap
 

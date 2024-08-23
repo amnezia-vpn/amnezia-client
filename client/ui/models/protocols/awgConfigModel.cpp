@@ -88,6 +88,9 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
 
     QJsonObject serverProtocolConfig = config.value(config_key::awg).toObject();
 
+    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Awg), Proto::Awg);
+    m_serverProtocolConfig.insert(config_key::transport_proto,
+                                  serverProtocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
     m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);
     m_serverProtocolConfig[config_key::port] = serverProtocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
     m_serverProtocolConfig[config_key::junkPacketCount] =

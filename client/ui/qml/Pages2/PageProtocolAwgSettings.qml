@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -122,9 +123,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            enabled: delegateItem.isEnabled
-
-                            headerText: "Jc - Junk packet count"
+                            headerText: qsTr("Jc - Junk packet count")
                             textFieldText: serverJunkPacketCount
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -149,9 +148,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            enabled: delegateItem.isEnabled
-
-                            headerText: "Jmin - Junk packet minimum size"
+                            headerText: qsTr("Jmin - Junk packet minimum size")
                             textFieldText: serverJunkPacketMinSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -172,9 +169,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            enabled: delegateItem.isEnabled
-
-                            headerText: "Jmax - Junk packet maximum size"
+                            headerText: qsTr("Jmax - Junk packet maximum size")
                             textFieldText: serverJunkPacketMaxSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -195,9 +190,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            enabled: delegateItem.isEnabled
-
-                            headerText: "S1 - Init packet junk size"
+                            headerText: qsTr("S1 - Init packet junk size")
                             textFieldText: serverInitPacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -218,9 +211,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            enabled: delegateItem.isEnabled
-
-                            headerText: "S2 - Response packet junk size"
+                            headerText: qsTr("S2 - Response packet junk size")
                             textFieldText: serverResponsePacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -241,9 +232,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            enabled: delegateItem.isEnabled
-
-                            headerText: "H1 - Init packet magic header"
+                            headerText: qsTr("H1 - Init packet magic header")
                             textFieldText: serverInitPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -264,9 +253,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            enabled: delegateItem.isEnabled
-
-                            headerText: "H2 - Response packet magic header"
+                            headerText: qsTr("H2 - Response packet magic header")
                             textFieldText: serverResponsePacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
@@ -274,6 +261,27 @@ PageType {
                             textField.onEditingFinished: {
                                 if (textFieldText !== serverResponsePacketMagicHeader) {
                                     serverResponsePacketMagicHeader = textFieldText
+                                }
+                            }
+
+                            checkEmptyText: true
+
+                            KeyNavigation.tab: transportPacketMagicHeaderTextField.textField
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: transportPacketMagicHeaderTextField
+                            Layout.fillWidth: true
+                            Layout.topMargin: 16
+
+                            headerText: qsTr("H4 - Transport packet magic header")
+                            textFieldText: serverTransportPacketMagicHeader
+                            textField.validator: IntValidator { bottom: 0 }
+                            parentFlickable: fl
+
+                            textField.onEditingFinished: {
+                                if (textFieldText !== serverTransportPacketMagicHeader) {
+                                    serverTransportPacketMagicHeader = textFieldText
                                 }
                             }
 
@@ -288,38 +296,13 @@ PageType {
                             Layout.topMargin: 16
                             parentFlickable: fl
 
-                            enabled: delegateItem.isEnabled
-
-                            headerText: "H3 - Underload packet magic header"
+                            headerText: qsTr("H3 - Underload packet magic header")
                             textFieldText: serverUnderloadPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== serverUnderloadPacketMagicHeader) {
                                     serverUnderloadPacketMagicHeader = textFieldText
-                                }
-                            }
-
-                            checkEmptyText: true
-
-                            KeyNavigation.tab: transportPacketMagicHeaderTextField.textField
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: transportPacketMagicHeaderTextField
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
-
-                            enabled: delegateItem.isEnabled
-
-                            headerText: "H4 - Transport packet magic header"
-                            textFieldText: serverTransportPacketMagicHeader
-                            textField.validator: IntValidator { bottom: 0 }
-                            parentFlickable: fl
-
-                            textField.onEditingFinished: {
-                                if (textFieldText !== serverTransportPacketMagicHeader) {
-                                    serverTransportPacketMagicHeader = textFieldText
                                 }
                             }
 

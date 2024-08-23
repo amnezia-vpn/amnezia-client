@@ -1,18 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/close.png</file>
-        <file>images/settings.png</file>
-        <file>images/favorites_disabled.png</file>
-        <file>images/favorites_enabled.png</file>
-        <file>images/favorites_hover.png</file>
-        <file>images/download.png</file>
-        <file>images/upload.png</file>
         <file>images/tray/active.png</file>
         <file>images/tray/default.png</file>
         <file>images/tray/error.png</file>
-        <file>images/arrow_left.png</file>
         <file>images/AmneziaVPN.png</file>
-        <file>images/share.png</file>
         <file>server_scripts/remove_container.sh</file>
         <file>server_scripts/setup_host_firewall.sh</file>
         <file>server_scripts/openvpn_cloak/Dockerfile</file>
@@ -22,9 +13,6 @@
         <file>server_scripts/install_docker.sh</file>
         <file>server_scripts/build_container.sh</file>
         <file>server_scripts/prepare_host.sh</file>
-        <file>images/check.png</file>
-        <file>images/uncheck.png</file>
-        <file>images/settings_grey.png</file>
         <file>server_scripts/check_connection.sh</file>
         <file>server_scripts/remove_all_containers.sh</file>
         <file>server_scripts/openvpn_cloak/run_container.sh</file>
@@ -38,7 +26,6 @@
         <file>server_scripts/openvpn_shadowsocks/run_container.sh</file>
         <file>server_scripts/openvpn_shadowsocks/start.sh</file>
         <file>server_scripts/openvpn_shadowsocks/template.ovpn</file>
-        <file>images/folder.png</file>
         <file>server_scripts/wireguard/configure_container.sh</file>
         <file>server_scripts/wireguard/Dockerfile</file>
         <file>server_scripts/wireguard/run_container.sh</file>
@@ -61,26 +48,6 @@
         <file>server_scripts/ipsec/start.sh</file>
         <file>server_scripts/ipsec/mobileconfig.plist</file>
         <file>server_scripts/ipsec/strongswan.profile</file>
-        <file>images/background_connected.png</file>
-        <file>images/background_connected@2x.png</file>
-        <file>images/delete.png</file>
-        <file>images/animation.gif</file>
-        <file>images/connected.png</file>
-        <file>images/disconnected.png</file>
-        <file>images/svg/gpp_good_black_24dp.svg</file>
-        <file>images/svg/gpp_maybe_black_24dp.svg</file>
-        <file>images/svg/close_black_24dp.svg</file>
-        <file>images/svg/delete_black_24dp.svg</file>
-        <file>images/svg/done_black_24dp.svg</file>
-        <file>images/svg/format_list_bulleted_black_24dp.svg</file>
-        <file>images/svg/logout_black_24dp.svg</file>
-        <file>images/svg/miscellaneous_services_black_24dp.svg</file>
-        <file>images/svg/refresh_black_24dp.svg</file>
-        <file>images/svg/settings_black_24dp.svg</file>
-        <file>images/svg/share_black_24dp.svg</file>
-        <file>images/svg/vpn_key_black_24dp.svg</file>
-        <file>images/svg/control_point_black_24dp.svg</file>
-        <file>images/svg/settings_suggest_black_24dp.svg</file>
         <file>server_scripts/website_tor/Dockerfile</file>
         <file>server_scripts/check_user_in_sudo.sh</file>
         <file>ui/qml/Controls2/BasicButtonType.qml</file>
@@ -96,7 +63,6 @@
         <file>ui/qml/Pages2/PageSetupWizardStart.qml</file>
         <file>ui/qml/main2.qml</file>
         <file>images/amneziaBigLogo.png</file>
-        <file>images/amneziaBigLogo.svg</file>
         <file>ui/qml/Controls2/FlickableType.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardCredentials.qml</file>
         <file>ui/qml/Controls2/HeaderType.qml</file>
@@ -132,9 +98,6 @@
         <file>ui/qml/Controls2/Header2Type.qml</file>
         <file>images/controls/plus.svg</file>
         <file>ui/qml/Components/ConnectButton.qml</file>
-        <file>images/connectionProgress.svg</file>
-        <file>images/connectionOff.svg</file>
-        <file>images/connectionOn.svg</file>
         <file>images/controls/download.svg</file>
         <file>ui/qml/Controls2/ProgressBarType.qml</file>
         <file>ui/qml/Components/ConnectionTypeSelectionDrawer.qml</file>
@@ -238,5 +201,274 @@
         <file>server_scripts/socks5_proxy/start.sh</file>
         <file>ui/qml/Pages2/PageProtocolAwgClientSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardApiServicesList.qml</file>
+        <file>ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml</file>
+        <file>ui/qml/Controls2/CardWithIconsType.qml</file>
+        <file>images/controls/tag.svg</file>
+        <file>images/controls/history.svg</file>
+        <file>images/controls/gauge.svg</file>
+        <file>images/controls/map-pin.svg</file>
+        <file>ui/qml/Controls2/LabelWithImageType.qml</file>
+        <file>images/controls/info.svg</file>
+        <file>ui/qml/Controls2/TextAreaWithFooterType.qml</file>
+        <file>images/controls/scan-line.svg</file>
+        <file>images/controls/folder-search-2.svg</file>
+        <file>ui/qml/Pages2/PageSettingsApiServerInfo.qml</file>
+        <file>images/controls/bug.svg</file>
+        <file>ui/qml/Pages2/PageDevMenu.qml</file>
+        <file>images/controls/refresh-cw.svg</file>
+        <file>ui/qml/Pages2/PageSettingsApiLanguageList.qml</file>
+        <file>images/controls/archive-restore.svg</file>
+        <file>images/controls/help-circle.svg</file>
+    </qresource>
+    <qresource prefix="/countriesFlags">
+        <file>images/flagKit/ZW.svg</file>
+        <file>images/flagKit/ZM.svg</file>
+        <file>images/flagKit/ZA.svg</file>
+        <file>images/flagKit/YT.svg</file>
+        <file>images/flagKit/YE.svg</file>
+        <file>images/flagKit/XK.svg</file>
+        <file>images/flagKit/WS.svg</file>
+        <file>images/flagKit/WF.svg</file>
+        <file>images/flagKit/VU.svg</file>
+        <file>images/flagKit/VN.svg</file>
+        <file>images/flagKit/VI.svg</file>
+        <file>images/flagKit/VG.svg</file>
+        <file>images/flagKit/VE.svg</file>
+        <file>images/flagKit/VC.svg</file>
+        <file>images/flagKit/VA.svg</file>
+        <file>images/flagKit/UZ.svg</file>
+        <file>images/flagKit/UY.svg</file>
+        <file>images/flagKit/US.svg</file>
+        <file>images/flagKit/UM.svg</file>
+        <file>images/flagKit/UG.svg</file>
+        <file>images/flagKit/UA.svg</file>
+        <file>images/flagKit/TZ.svg</file>
+        <file>images/flagKit/TW.svg</file>
+        <file>images/flagKit/TV.svg</file>
+        <file>images/flagKit/TT.svg</file>
+        <file>images/flagKit/TR.svg</file>
+        <file>images/flagKit/TO.svg</file>
+        <file>images/flagKit/TN.svg</file>
+        <file>images/flagKit/TM.svg</file>
+        <file>images/flagKit/TL.svg</file>
+        <file>images/flagKit/TK.svg</file>
+        <file>images/flagKit/TJ.svg</file>
+        <file>images/flagKit/TH.svg</file>
+        <file>images/flagKit/TG.svg</file>
+        <file>images/flagKit/TF.svg</file>
+        <file>images/flagKit/TD.svg</file>
+        <file>images/flagKit/TC.svg</file>
+        <file>images/flagKit/SZ.svg</file>
+        <file>images/flagKit/SY.svg</file>
+        <file>images/flagKit/SX.svg</file>
+        <file>images/flagKit/SV.svg</file>
+        <file>images/flagKit/ST.svg</file>
+        <file>images/flagKit/SS.svg</file>
+        <file>images/flagKit/SR.svg</file>
+        <file>images/flagKit/SO.svg</file>
+        <file>images/flagKit/SN.svg</file>
+        <file>images/flagKit/SM.svg</file>
+        <file>images/flagKit/SL.svg</file>
+        <file>images/flagKit/SK.svg</file>
+        <file>images/flagKit/SJ.svg</file>
+        <file>images/flagKit/SI.svg</file>
+        <file>images/flagKit/SH.svg</file>
+        <file>images/flagKit/SG.svg</file>
+        <file>images/flagKit/SE.svg</file>
+        <file>images/flagKit/SD.svg</file>
+        <file>images/flagKit/SC.svg</file>
+        <file>images/flagKit/SB.svg</file>
+        <file>images/flagKit/SA.svg</file>
+        <file>images/flagKit/RW.svg</file>
+        <file>images/flagKit/RU.svg</file>
+        <file>images/flagKit/RS.svg</file>
+        <file>images/flagKit/RO.svg</file>
+        <file>images/flagKit/RE.svg</file>
+        <file>images/flagKit/QA.svg</file>
+        <file>images/flagKit/PY.svg</file>
+        <file>images/flagKit/PW.svg</file>
+        <file>images/flagKit/PT.svg</file>
+        <file>images/flagKit/PS.svg</file>
+        <file>images/flagKit/PR.svg</file>
+        <file>images/flagKit/PN.svg</file>
+        <file>images/flagKit/PM.svg</file>
+        <file>images/flagKit/PL.svg</file>
+        <file>images/flagKit/PK.svg</file>
+        <file>images/flagKit/PH.svg</file>
+        <file>images/flagKit/PG.svg</file>
+        <file>images/flagKit/PF.svg</file>
+        <file>images/flagKit/PE.svg</file>
+        <file>images/flagKit/PA.svg</file>
+        <file>images/flagKit/OM.svg</file>
+        <file>images/flagKit/NZ.svg</file>
+        <file>images/flagKit/NU.svg</file>
+        <file>images/flagKit/NR.svg</file>
+        <file>images/flagKit/NP.svg</file>
+        <file>images/flagKit/NO.svg</file>
+        <file>images/flagKit/NL.svg</file>
+        <file>images/flagKit/NI.svg</file>
+        <file>images/flagKit/NG.svg</file>
+        <file>images/flagKit/NF.svg</file>
+        <file>images/flagKit/NE.svg</file>
+        <file>images/flagKit/NC.svg</file>
+        <file>images/flagKit/NA.svg</file>
+        <file>images/flagKit/MZ.svg</file>
+        <file>images/flagKit/MY.svg</file>
+        <file>images/flagKit/MX.svg</file>
+        <file>images/flagKit/MW.svg</file>
+        <file>images/flagKit/MV.svg</file>
+        <file>images/flagKit/MU.svg</file>
+        <file>images/flagKit/MT.svg</file>
+        <file>images/flagKit/MS.svg</file>
+        <file>images/flagKit/MR.svg</file>
+        <file>images/flagKit/MQ.svg</file>
+        <file>images/flagKit/MP.svg</file>
+        <file>images/flagKit/MO.svg</file>
+        <file>images/flagKit/MN.svg</file>
+        <file>images/flagKit/MM.svg</file>
+        <file>images/flagKit/ML.svg</file>
+        <file>images/flagKit/MK.svg</file>
+        <file>images/flagKit/MH.svg</file>
+        <file>images/flagKit/MG.svg</file>
+        <file>images/flagKit/MF.svg</file>
+        <file>images/flagKit/ME.svg</file>
+        <file>images/flagKit/MD.svg</file>
+        <file>images/flagKit/MC.svg</file>
+        <file>images/flagKit/MA.svg</file>
+        <file>images/flagKit/LY.svg</file>
+        <file>images/flagKit/LV.svg</file>
+        <file>images/flagKit/LU.svg</file>
+        <file>images/flagKit/LT.svg</file>
+        <file>images/flagKit/LS.svg</file>
+        <file>images/flagKit/LR.svg</file>
+        <file>images/flagKit/LK.svg</file>
+        <file>images/flagKit/LI.svg</file>
+        <file>images/flagKit/LC.svg</file>
+        <file>images/flagKit/LB.svg</file>
+        <file>images/flagKit/LA.svg</file>
+        <file>images/flagKit/KZ.svg</file>
+        <file>images/flagKit/KY.svg</file>
+        <file>images/flagKit/KW.svg</file>
+        <file>images/flagKit/KR.svg</file>
+        <file>images/flagKit/KP.svg</file>
+        <file>images/flagKit/KN.svg</file>
+        <file>images/flagKit/KM.svg</file>
+        <file>images/flagKit/KI.svg</file>
+        <file>images/flagKit/KH.svg</file>
+        <file>images/flagKit/KG.svg</file>
+        <file>images/flagKit/KE.svg</file>
+        <file>images/flagKit/JP.svg</file>
+        <file>images/flagKit/JO.svg</file>
+        <file>images/flagKit/JM.svg</file>
+        <file>images/flagKit/JE.svg</file>
+        <file>images/flagKit/IT.svg</file>
+        <file>images/flagKit/IS.svg</file>
+        <file>images/flagKit/IR.svg</file>
+        <file>images/flagKit/IQ.svg</file>
+        <file>images/flagKit/IO.svg</file>
+        <file>images/flagKit/IN.svg</file>
+        <file>images/flagKit/IM.svg</file>
+        <file>images/flagKit/IL.svg</file>
+        <file>images/flagKit/IE.svg</file>
+        <file>images/flagKit/ID.svg</file>
+        <file>images/flagKit/HU.svg</file>
+        <file>images/flagKit/HT.svg</file>
+        <file>images/flagKit/HR.svg</file>
+        <file>images/flagKit/HN.svg</file>
+        <file>images/flagKit/HM.svg</file>
+        <file>images/flagKit/HK.svg</file>
+        <file>images/flagKit/GY.svg</file>
+        <file>images/flagKit/GW.svg</file>
+        <file>images/flagKit/GU.svg</file>
+        <file>images/flagKit/GT.svg</file>
+        <file>images/flagKit/GS.svg</file>
+        <file>images/flagKit/GR.svg</file>
+        <file>images/flagKit/GQ.svg</file>
+        <file>images/flagKit/GP.svg</file>
+        <file>images/flagKit/GN.svg</file>
+        <file>images/flagKit/GM.svg</file>
+        <file>images/flagKit/GL.svg</file>
+        <file>images/flagKit/GI.svg</file>
+        <file>images/flagKit/GH.svg</file>
+        <file>images/flagKit/GG.svg</file>
+        <file>images/flagKit/GF.svg</file>
+        <file>images/flagKit/GE.svg</file>
+        <file>images/flagKit/GD.svg</file>
+        <file>images/flagKit/GB.svg</file>
+        <file>images/flagKit/GA.svg</file>
+        <file>images/flagKit/FR.svg</file>
+        <file>images/flagKit/FO.svg</file>
+        <file>images/flagKit/FM.svg</file>
+        <file>images/flagKit/FK.svg</file>
+        <file>images/flagKit/FJ.svg</file>
+        <file>images/flagKit/FI.svg</file>
+        <file>images/flagKit/EU.svg</file>
+        <file>images/flagKit/ET.svg</file>
+        <file>images/flagKit/ES.svg</file>
+        <file>images/flagKit/ER.svg</file>
+        <file>images/flagKit/EG.svg</file>
+        <file>images/flagKit/EE.svg</file>
+        <file>images/flagKit/EC.svg</file>
+        <file>images/flagKit/DZ.svg</file>
+        <file>images/flagKit/DO.svg</file>
+        <file>images/flagKit/DM.svg</file>
+        <file>images/flagKit/DK.svg</file>
+        <file>images/flagKit/DJ.svg</file>
+        <file>images/flagKit/DE.svg</file>
+        <file>images/flagKit/CZ.svg</file>
+        <file>images/flagKit/CY.svg</file>
+        <file>images/flagKit/CX.svg</file>
+        <file>images/flagKit/CW.svg</file>
+        <file>images/flagKit/CV.svg</file>
+        <file>images/flagKit/CU.svg</file>
+        <file>images/flagKit/CR.svg</file>
+        <file>images/flagKit/CO.svg</file>
+        <file>images/flagKit/CN.svg</file>
+        <file>images/flagKit/CM.svg</file>
+        <file>images/flagKit/CL.svg</file>
+        <file>images/flagKit/CK.svg</file>
+        <file>images/flagKit/CI.svg</file>
+        <file>images/flagKit/CH.svg</file>
+        <file>images/flagKit/CG.svg</file>
+        <file>images/flagKit/CF.svg</file>
+        <file>images/flagKit/CD.svg</file>
+        <file>images/flagKit/CC.svg</file>
+        <file>images/flagKit/CA.svg</file>
+        <file>images/flagKit/BZ.svg</file>
+        <file>images/flagKit/BY.svg</file>
+        <file>images/flagKit/BW.svg</file>
+        <file>images/flagKit/BV.svg</file>
+        <file>images/flagKit/BT.svg</file>
+        <file>images/flagKit/BS.svg</file>
+        <file>images/flagKit/BR.svg</file>
+        <file>images/flagKit/BO.svg</file>
+        <file>images/flagKit/BN.svg</file>
+        <file>images/flagKit/BM.svg</file>
+        <file>images/flagKit/BL.svg</file>
+        <file>images/flagKit/BJ.svg</file>
+        <file>images/flagKit/BI.svg</file>
+        <file>images/flagKit/BH.svg</file>
+        <file>images/flagKit/BG.svg</file>
+        <file>images/flagKit/BF.svg</file>
+        <file>images/flagKit/BE.svg</file>
+        <file>images/flagKit/BD.svg</file>
+        <file>images/flagKit/BB.svg</file>
+        <file>images/flagKit/BA.svg</file>
+        <file>images/flagKit/AZ.svg</file>
+        <file>images/flagKit/AX.svg</file>
+        <file>images/flagKit/AW.svg</file>
+        <file>images/flagKit/AU.svg</file>
+        <file>images/flagKit/AT.svg</file>
+        <file>images/flagKit/AS.svg</file>
+        <file>images/flagKit/AR.svg</file>
+        <file>images/flagKit/AO.svg</file>
+        <file>images/flagKit/AM.svg</file>
+        <file>images/flagKit/AL.svg</file>
+        <file>images/flagKit/AI.svg</file>
+        <file>images/flagKit/AG.svg</file>
+        <file>images/flagKit/AF.svg</file>
+        <file>images/flagKit/AE.svg</file>
+        <file>images/flagKit/AD.svg</file>
     </qresource>
 </RCC>

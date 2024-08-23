@@ -569,6 +569,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
     // Xray vars
     vars.append({ { "$XRAY_SITE_NAME", xrayConfig.value(config_key::site).toString(protocols::xray::defaultSite) } });
+    vars.append({ { "$XRAY_SERVER_PORT", xrayConfig.value(config_key::port).toString(protocols::xray::defaultPort) } });
 
     // Wireguard vars
     vars.append({ { "$WIREGUARD_SUBNET_IP",

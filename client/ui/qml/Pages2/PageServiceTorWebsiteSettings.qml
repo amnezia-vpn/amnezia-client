@@ -83,10 +83,10 @@ PageType {
                 }
 
                 descriptionOnTop: true
-                textColor: AmneziaStyle.color.orange
+                textColor: AmneziaStyle.color.goldenApricot
 
                 rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.white
+                rightImageColor: AmneziaStyle.color.paleGray
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
 

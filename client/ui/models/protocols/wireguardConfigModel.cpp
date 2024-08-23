@@ -21,8 +21,8 @@ bool WireGuardConfigModel::setData(const QModelIndex &index, const QVariant &val
     }
 
     switch (role) {
-        case Roles::PortRole: m_serverProtocolConfig.insert(config_key::port, value.toString()); break;
-        case Roles::ClientMtuRole: m_clientProtocolConfig.insert(config_key::junkPacketCount, value.toString()); break;
+    case Roles::PortRole: m_serverProtocolConfig.insert(config_key::port, value.toString()); break;
+    case Roles::ClientMtuRole: m_clientProtocolConfig.insert(config_key::junkPacketCount, value.toString()); break;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -36,8 +36,8 @@ QVariant WireGuardConfigModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
-        case Roles::PortRole: return m_serverProtocolConfig.value(config_key::port).toString();
-        case Roles::ClientMtuRole: return m_clientProtocolConfig.value(config_key::mtu);
+    case Roles::PortRole: return m_serverProtocolConfig.value(config_key::port).toString();
+    case Roles::ClientMtuRole: return m_clientProtocolConfig.value(config_key::mtu);
     }
 
     return QVariant();
@@ -51,9 +51,12 @@ void WireGuardConfigModel::updateModel(const QJsonObject &config)
     m_fullConfig = config;
     QJsonObject serverProtocolConfig = config.value(config_key::wireguard).toObject();
 
+    auto defaultTransportProto =
+            ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::WireGuard), Proto::WireGuard);
+    m_serverProtocolConfig.insert(config_key::transport_proto,
+                                  serverProtocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
     m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);
-    m_serverProtocolConfig[config_key::port] =
-        serverProtocolConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
+    m_serverProtocolConfig[config_key::port] = serverProtocolConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
 
     auto lastConfig = m_serverProtocolConfig.value(config_key::last_config).toString();
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();

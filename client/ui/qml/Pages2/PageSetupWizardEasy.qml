@@ -187,10 +187,10 @@ PageType {
                 anchors.bottomMargin: 24
 
                 defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.blackHovered
-                pressedColor: AmneziaStyle.color.blackPressed
-                disabledColor: AmneziaStyle.color.grey
-                textColor: AmneziaStyle.color.white
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.paleGray
                 borderWidth: 1
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)

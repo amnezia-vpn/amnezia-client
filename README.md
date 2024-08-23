@@ -28,11 +28,12 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 ## Features
 
-- Very easy to use - enter your IP address, SSH login, and password, and Amnezia will automatically install VPN docker containers to your server and connect to the VPN.
-- OpenVPN, Shadowsocks, WireGuard, and IKEv2 protocols support.
-- Masking VPN with OpenVPN over Cloak plugin
-- Split tunneling support - add any sites to the client to enable VPN only for them (only for desktops)
+- Very easy to use - enter your IP address, SSH login, password and Amnezia will automatically install VPN docker containers to your server and connect to the VPN.
+- Classic VPN-protocols: OpenVPN, WireGuard and IKEv2 protocols.
+- Protocols with traffic Masking (Obfuscation): OpenVPN over [Cloak](https://github.com/cbeuw/Cloak) plugin, Shadowsocks (OpenVPN over Shadowsocks), [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/) and XRay.
+- Split tunneling support - add any sites to the client to enable VPN only for them or add Apps (only for Android and Desktop).
 - Windows, MacOS, Linux, Android, iOS releases.
+- Support for AmneziaWG protocol configuration on [Keenetic beta firmware](https://docs.keenetic.com/ua/air/kn-1611/en/6319-latest-development-release.html#UUID-186c4108-5afd-c10b-f38a-cdff6c17fab3_section-idm33192196168192-improved).
 
 ## Links
 
@@ -41,7 +42,8 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 - [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English) 
 - [https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Telegram support channel (Farsi) 
 - [https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Telegram support channel (Myanmar)  
-- [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
+- [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)
+- [https://vpnpay.io/en/amnezia-premium/](https://vpnpay.io/en/amnezia-premium/) - Amnezia Premium
 
 ## Tech
 
@@ -154,9 +156,11 @@ The Android app has the following requirements:
 * Android platform SDK 33
 * CMake 3.25.0
 
-After you have installed QT, QT Creator, and Android Studio, you need to configure QT Creator correctly. Click in the top menu bar on `QT Creator` -> `Preferences` -> `Devices` and select the tab `Android`. 
-    * set path to JDK 11
-    * set path to Android SDK ($ANDROID_HOME)
+After you have installed QT, QT Creator, and Android Studio, you need to configure QT Creator correctly.
+
+- Click in the top menu bar on `QT Creator` -> `Preferences` -> `Devices` and select the tab `Android`.
+- Set path to JDK 11
+- Set path to Android SDK (`$ANDROID_HOME`)
 
 In case you get errors regarding missing SDK or 'SDK manager not running', you cannot fix them by correcting the paths. If you have some spare GBs on your disk, you can let QT Creator install all requirements by choosing an empty folder for `Android SDK location` and clicking on `Set Up SDK`. Be aware: This will install a second Android SDK and NDK on your machine! 
 Double-check that the right CMake version is configured:  Click on `QT Creator` -> `Preferences` and click on the side menu on `Kits`. Under the center content view's `Kits` tab, you'll find an entry for `CMake Tool`. If the default selected CMake version is lower than 3.25.0, install on your system CMake >= 3.25.0 and choose `System CMake at <path>` from the drop-down list. If this entry is missing, you either have not installed CMake yet or QT Creator hasn't found the path to it. In that case, click in the preferences window on the side menu item `CMake`, then on the tab `Tools` in the center content view, and finally on the button `Add` to set the path to your installed CMake. 
@@ -179,6 +183,7 @@ GPL v3.0
 
 Patreon: [https://www.patreon.com/amneziavpn](https://www.patreon.com/amneziavpn)
 
+Bitcoin: bc1q26eevjcg9j0wuyywd2e3uc9cs2w58lpkpjxq6p <br>
 USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4 <br>
 USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d <br>
 XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3  

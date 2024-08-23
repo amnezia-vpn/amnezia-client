@@ -99,7 +99,7 @@ PageType {
 
                         text: protocolName + qsTr(" connection settings")
                         rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                        visible: isClientSettingsVisible
+                        visible: delegateContent.isClientSettingsVisible
 
                         clickedFunction: function() {
                             if (isClientProtocolExists) {
@@ -121,7 +121,7 @@ PageType {
                     }
 
                     DividerType {
-                        visible: isClientSettingsVisible
+                        visible: delegateContent.isClientSettingsVisible
                     }
 
                     LabelWithButtonType {
@@ -131,7 +131,7 @@ PageType {
 
                         text: protocolName + qsTr(" server settings")
                         rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                        visible: isServerSettingsVisible
+                        visible: delegateContent.isServerSettingsVisible
 
                         clickedFunction: function() {
                             switch (protocolIndex) {
@@ -156,7 +156,7 @@ PageType {
                     }
 
                     DividerType {
-                        visible: isServerSettingsVisible
+                        visible: delegateContent.isServerSettingsVisible
                     }
                 }
             }
@@ -221,8 +221,8 @@ PageType {
             visible: ServersModel.isProcessedServerHasWriteAccess()
             Keys.onTabPressed: lastItemTabClicked(focusItem)
 
-            text: qsTr("Remove")
-            textColor: AmneziaStyle.color.red
+            text: qsTr("Remove ")
+            textColor: AmneziaStyle.color.vibrantRed
 
             clickedFunction: function() {
                 var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
