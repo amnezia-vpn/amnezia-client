@@ -118,7 +118,7 @@
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="209"/>
         <source>The selected protocol is not supported on the current platform</source>
-        <translation>پروتکل انتخاب شده بر روی این پلتفرم پشتیبانی نمی‎‎شودپروتکل انتخاب شده در پلتفرم فعلی پشتیبانی نمی‌شود.</translation>
+        <translation>پروتکل انتخاب‌شده در پلتفرم فعلی پشتیبانی نمی‌شود.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="233"/>
