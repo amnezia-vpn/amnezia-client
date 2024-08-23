@@ -6,8 +6,7 @@
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="63"/>
         <source>Classic VPN for comfortable work, downloading large files and watching videos. Works for any sites. Speed up to %1 MBit/s</source>
-        <translation>Для перевода на персидский:
-وی پی ان کلاسیک برای کار راحت، دانلود فایل‌های بزرگ و تماشای ویدیو. قابل استفاده برای هر سایتی. سرعت تا %1 مگابیت بر ثانیه.</translation>
+        <translation>برای کار راحت، دانلود فایل‌های بزرگ و تماشای ویدیوها، از VPN کلاسیک استفاده کنید. این VPN برای هر سایتی کار می‌کند و سرعت آن تا %1 مگابیت بر ثانیه است.</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="67"/>
