@@ -11,7 +11,7 @@ import "../Config"
 DrawerType2 {
     id: root
 
-    property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
+    property bool isAppSplitTunnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
 
     anchors.fill: parent
     expandedHeight: parent.height * 0.9
@@ -23,6 +23,8 @@ DrawerType2 {
         anchors.left: parent.left
         anchors.right: parent.right
         spacing: 0
+
+        property bool isServerSplitTunnelingEnabled: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
 
         Connections {
             target: root
@@ -53,7 +55,7 @@ DrawerType2 {
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
+            visible: isServerSplitTunnelingEnabled
 
             text: qsTr("Split tunneling on the server")
             descriptionText: qsTr("Enabled \nCan't be disabled for current server")
@@ -68,7 +70,7 @@ DrawerType2 {
         }
 
         DividerType {
-            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
+            visible: isServerSplitTunnelingEnabled
         }
 
         LabelWithButtonType {
@@ -95,7 +97,7 @@ DrawerType2 {
 
         LabelWithButtonType {
             id: appSplitTunnelingSwitch
-            visible: isAppSplitTinnelingEnabled
+            visible: isAppSplitTunnelingEnabled
 
             Layout.fillWidth: true
 
@@ -112,7 +114,7 @@ DrawerType2 {
         }
 
         DividerType {
-            visible: isAppSplitTinnelingEnabled
+            visible: isAppSplitTunnelingEnabled
         }
     }
 }
