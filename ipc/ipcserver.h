@@ -39,8 +39,9 @@ public:
     virtual bool writeIPsecPrivate(QString privKey, QString uuid) override;
     virtual bool writeIPsecConfig(QString config) override;
     virtual bool writeIPsecUserCert(QString usercert, QString uuid) override;
-    virtual bool writeIPsecPrivatePass(QString pass, QString uuid) override;
-
+    virtual bool writeIPsecPrivatePass(QString pass, QString host, QString uuid) override;
+    virtual bool stopIPsec(QString tunnelName) override;
+    virtual bool startIPsec(QString tunnelName) override;
 
 private:
     int m_localpid = 0;

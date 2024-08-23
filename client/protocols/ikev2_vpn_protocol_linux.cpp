@@ -28,13 +28,13 @@ Ikev2Protocol::Ikev2Protocol(const QJsonObject &configuration, QObject* parent) 
 Ikev2Protocol::~Ikev2Protocol()
 {
     qDebug() << "IpsecProtocol::~IpsecProtocol()";
-    disconnect_vpn();
     Ikev2Protocol::stop();
 }
 
 void Ikev2Protocol::stop()
 {
     setConnectionState(Vpn::ConnectionState::Disconnected);
+    Ikev2Protocol::disconnect_vpn();
     qDebug() << "IpsecProtocol::stop()";
 }
 
@@ -74,9 +74,10 @@ ErrorCode Ikev2Protocol::start()
     IpcClient::Interface()->writeIPsecConfig(m_config[config_key::config].toString());
     IpcClient::Interface()->writeIPsecCaCert(m_config[config_key::cacert].toString(), m_config[config_key::userName].toString());
     IpcClient::Interface()->writeIPsecPrivate(m_config[config_key::cert].toString(), m_config[config_key::userName].toString());
-    IpcClient::Interface()->writeIPsecPrivatePass(m_config[config_key::password].toString(), m_config[config_key::userName].toString());
+    IpcClient::Interface()->writeIPsecPrivatePass(m_config[config_key::password].toString(), m_config[config_key::hostName].toString(),
+                                                  m_config[config_key::userName].toString());
 
-
+    connect_to_vpn("ikev2-vpn");
     setConnectionState(Vpn::ConnectionState::Connected);
     return ErrorCode::NoError;
 }
@@ -92,10 +93,12 @@ bool Ikev2Protocol::delete_vpn_connection(const QString &vpn_name){
     return false;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bool Ikev2Protocol::connect_to_vpn(const QString & vpn_name){
-    return false;
+bool Ikev2Protocol::connect_to_vpn(const QString &vpn_name) {
+    IpcClient::Interface()->startIPsec(vpn_name);
+    return true;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bool Ikev2Protocol::disconnect_vpn(){
+bool Ikev2Protocol::disconnect_vpn() {
+    IpcClient::Interface()->stopIPsec("ikev2-vpn");
     return true;
 }

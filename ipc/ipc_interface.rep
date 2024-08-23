@@ -37,6 +37,10 @@ class IpcInterface
     SLOT( bool writeIPsecPrivate(QString privKey, QString uuid) );
     SLOT( bool writeIPsecConfig(QString config) );
     SLOT( bool writeIPsecUserCert(QString usercert, QString uuid) );
-    SLOT( bool writeIPsecPrivatePass(QString pass, QString uuid) );
+    SLOT( bool writeIPsecPrivatePass(QString pass, QString host, QString uuid) );
+
+    SLOT( bool stopIPsec(QString tunnelName) );
+    SLOT( bool startIPsec(QString tunnelName) );
+
 };
 

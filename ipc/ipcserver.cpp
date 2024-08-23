@@ -182,6 +182,7 @@ void IpcServer::StartRoutingIpv6()
 {
     Router::StartRoutingIpv6();
 }
+
 void IpcServer::StopRoutingIpv6()
 {
     Router::StopRoutingIpv6();
@@ -200,7 +201,6 @@ void IpcServer::setLogsEnabled(bool enabled)
         Logger::deinit();
     }
 }
-
 
 bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex)
 {
@@ -288,7 +288,6 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
     MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
     MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), dnsServers);
 #endif
-
     return true;
 }
 
@@ -307,6 +306,44 @@ bool IpcServer::disableKillSwitch()
 #endif
 
     return true;
+}
+
+bool IpcServer::startIPsec(QString tunnelName)
+{
+    QProcess process;
+    QStringList commands;
+    commands << "ipsec" << "up" << QString("%1").arg(tunnelName);
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not start ipsec tunnel!\n";
+        return false;
+    }
+    else if (!process.waitForFinished(2000))
+    {
+        qDebug().noquote() << "Could not start ipsec tunnel\n";
+        return false;
+    }
+    commands.clear();
+}
+
+bool IpcServer::stopIPsec(QString tunnelName)
+{
+    QProcess process;
+    QStringList commands;
+    commands << "ipsec" << "down" << QString("%1").arg(tunnelName);
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not stop ipsec tunnel\n";
+        return false;
+    }
+    else if (!process.waitForFinished(2000))
+    {
+        qDebug().noquote() << "Could not stop ipsec tunnel\n";
+        return false;
+    }
+    commands.clear();
 }
 
 bool IpcServer::writeIPsecConfig(QString config)
@@ -366,12 +403,12 @@ bool IpcServer::writeIPsecPrivate(QString privKey, QString uuid)
 }
 
 
-bool IpcServer::writeIPsecPrivatePass(QString pass, QString uuid)
+bool IpcServer::writeIPsecPrivatePass(QString pass, QString host, QString uuid)
 {
 #ifdef Q_OS_LINUX
     qDebug() << "IPSEC: User private key " << uuid;
     QFile secretsFile("/etc/ipsec.secrets");
-    QString P12 = QString(": P12 %1.p12 \"%2\" \n").arg(uuid, pass);
+    QString P12 = QString("%any %1 : P12 %2.p12 \"%3\" \n").arg(host, uuid, pass);
     if (secretsFile.open(QIODevice::WriteOnly | QIODevice::Append)) {
         secretsFile.write(P12.toUtf8());
         secretsFile.close();
