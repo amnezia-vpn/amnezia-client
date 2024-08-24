@@ -35,6 +35,8 @@ private:
 
 private:
     QJsonObject m_config;
+    QString m_remoteAddress;
+    int m_routeMode;
 
 
     bool create_new_vpn(const QString & vpn_name,

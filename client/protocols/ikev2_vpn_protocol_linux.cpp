@@ -6,6 +6,8 @@
 
 #include <chrono>
 
+#include "core/networkUtilities.h"
+
 #include "logger.h"
 #include "ikev2_vpn_protocol_linux.h"
 #include "utilities.h"
@@ -23,6 +25,11 @@ Ikev2Protocol::Ikev2Protocol(const QJsonObject &configuration, QObject* parent) 
 {
     self = this;
     readIkev2Configuration(configuration);
+    m_routeGateway = NetworkUtilities::getGatewayAndIface();
+    m_vpnGateway = "192.168.43.10";
+    m_vpnLocalAddress = "192.168.43.10";
+    m_remoteAddress = configuration.value(amnezia::config_key::hostName).toString();
+    m_routeMode = configuration.value(amnezia::config_key::splitTunnelType).toInt();
 }
 
 Ikev2Protocol::~Ikev2Protocol()
@@ -43,7 +50,6 @@ void Ikev2Protocol::readIkev2Configuration(const QJsonObject &configuration)
 {
     QJsonObject ikev2_data = configuration.value(ProtocolProps::key_proto_config_data(Proto::Ikev2)).toObject();
     m_config = QJsonDocument::fromJson(ikev2_data.value(config_key::config).toString().toUtf8()).object();
-
 }
 
 ErrorCode Ikev2Protocol::start()
@@ -95,10 +101,27 @@ bool Ikev2Protocol::delete_vpn_connection(const QString &vpn_name){
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Ikev2Protocol::connect_to_vpn(const QString &vpn_name) {
     IpcClient::Interface()->startIPsec(vpn_name);
+
+    QThread::msleep(3000);
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    // killSwitch toggle
+    if (QVariant(m_config.value(config_key::killSwitchOption).toString()).toBool()) {
+        IpcClient::Interface()->enableKillSwitch(m_config, 0);
+    }
+#endif
+    if (m_routeMode == 0) {
+        IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
+        IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
+        IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
+    }
+    IpcClient::Interface()->StopRoutingIpv6();
     return true;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Ikev2Protocol::disconnect_vpn() {
     IpcClient::Interface()->stopIPsec("ikev2-vpn");
+    IpcClient::Interface()->disableKillSwitch();
+    IpcClient::Interface()->StartRoutingIpv6();
     return true;
 }

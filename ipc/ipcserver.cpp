@@ -310,6 +310,25 @@ bool IpcServer::disableKillSwitch()
 
 bool IpcServer::startIPsec(QString tunnelName)
 {
+#ifdef Q_OS_LINUX
+/*  QProcess processSystemd;
+    QStringList commandsSystemd;
+    commandsSystemd << "systemctl" << "restart" << "ipsec";
+    processSystemd.start("sudo", commandsSystemd);
+    if (!processSystemd.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not start ipsec tunnel!\n";
+        return false;
+    }
+    else if (!processSystemd.waitForFinished(2000))
+    {
+        qDebug().noquote() << "Could not start ipsec tunnel\n";
+        return false;
+    }
+    commandsSystemd.clear();
+
+    QThread::msleep(2000);
+*/
     QProcess process;
     QStringList commands;
     commands << "ipsec" << "up" << QString("%1").arg(tunnelName);
@@ -325,10 +344,13 @@ bool IpcServer::startIPsec(QString tunnelName)
         return false;
     }
     commands.clear();
+#endif
+    return true;
 }
 
 bool IpcServer::stopIPsec(QString tunnelName)
 {
+#ifdef Q_OS_LINUX
     QProcess process;
     QStringList commands;
     commands << "ipsec" << "down" << QString("%1").arg(tunnelName);
@@ -344,6 +366,8 @@ bool IpcServer::stopIPsec(QString tunnelName)
         return false;
     }
     commands.clear();
+#endif
+    return true;
 }
 
 bool IpcServer::writeIPsecConfig(QString config)
