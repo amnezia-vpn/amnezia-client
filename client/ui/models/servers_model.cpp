@@ -694,9 +694,10 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
             QJsonObject serverProtocolConfig = container.value(ContainerProps::containerTypeToString(defaultContainer)).toObject();
             QString clientProtocolConfigString = serverProtocolConfig.value(config_key::last_config).toString();
             QJsonObject clientProtocolConfig = QJsonDocument::fromJson(clientProtocolConfigString.toUtf8()).object();
+            QString nativeProtocolConfigString = clientProtocolConfig.value(config_key::config).toString();
 
-            const static QRegularExpression allowedIpsRegExp("AllowedIPs = (.*)$");
-            QRegularExpressionMatch allowedIpsMatch = allowedIpsRegExp.match(clientProtocolConfigString);
+            const static QRegularExpression allowedIpsRegExp("AllowedIPs\\s*=\\s*([^\n]*)");
+            QRegularExpressionMatch allowedIpsMatch = allowedIpsRegExp.match(nativeProtocolConfigString);
             QString allowedIpsString;
             if (allowedIpsMatch.hasCaptured(1)) {
                 allowedIpsString = allowedIpsMatch.captured(1);
