@@ -371,7 +371,7 @@ void Settings::clearSettings()
 {
     auto uuid = getInstallationUuid(false);
     m_settings.clearSettings();
-    setInstallationUuid(uuid);
+    // setInstallationUuid(uuid);
     emit settingsCleared();
 }
 
