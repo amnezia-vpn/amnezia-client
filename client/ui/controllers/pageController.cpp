@@ -135,6 +135,8 @@ void PageController::showOnStartup()
         emit hideMainWindow();
 #elif defined Q_OS_MACX
         setDockIconVisible(false);
+#elif defined Q_OS_LINUX
+        emit hideMainWindow();
 #endif
     }
 }
