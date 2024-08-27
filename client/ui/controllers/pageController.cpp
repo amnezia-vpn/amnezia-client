@@ -46,16 +46,16 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
     m_isTriggeredByConnectButton = false;
 }
 
-QString PageController::getInitialPage()
+bool PageController::isStartPageVisible()
 {
     if (m_serversModel->getServersCount()) {
         if (m_serversModel->getDefaultServerIndex() < 0) {
             auto defaultServerIndex = m_serversModel->index(0);
             m_serversModel->setData(defaultServerIndex, true, ServersModel::Roles::IsDefaultRole);
         }
-        return getPagePath(PageLoader::PageEnum::PageStart);
+        return false;
     } else {
-        return getPagePath(PageLoader::PageEnum::PageSetupWizardStart);
+        return true;
     }
 }
 

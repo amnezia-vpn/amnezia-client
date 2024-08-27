@@ -3,7 +3,7 @@
 
 #ifndef Q_OS_IOS
 #include <QDialog>
-#include <QWidget>
+#include <QWidget>  
 
 void setDockIconVisible(bool visible);
 void fixWidget(QWidget *widget);

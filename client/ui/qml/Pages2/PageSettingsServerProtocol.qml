@@ -184,7 +184,7 @@ PageType {
             Keys.onTabPressed: lastItemTabClicked(focusItem)
 
             text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-            textColor: AmneziaStyle.color.red
+            textColor: AmneziaStyle.color.vibrantRed
 
             clickedFunction: function() {
                 var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())

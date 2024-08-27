@@ -19,13 +19,19 @@ import "../Components"
 PageType {
     id: root
 
+    property int pageSettingsServerProtocols: 0
+    property int pageSettingsServerServices: 1
+    property int pageSettingsServerData: 2
+    property int pageSettingsApiServerInfo: 3
+    property int pageSettingsApiLanguageList: 4
+
     defaultActiveFocusItem: focusItem
 
     Connections {
         target: PageController
 
         function onGoToPageSettingsServerServices() {
-            tabBar.currentIndex = 1
+            tabBar.currentIndex = root.pageSettingsServerServices
         }
     }
 
@@ -70,6 +76,15 @@ PageType {
                 BackButtonType {
                     id: backButton
                     KeyNavigation.tab: headerContent.actionButton
+
+                    backButtonFunction: function() {
+                        if (nestedStackView.currentIndex === root.pageSettingsApiServerInfo &&
+                                ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
+                            nestedStackView.currentIndex = root.pageSettingsApiLanguageList
+                        } else {
+                            PageController.closePage()
+                        }
+                    }
                 }
 
                 HeaderType {
@@ -78,11 +93,15 @@ PageType {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
 
-                    actionButtonImage: "qrc:/images/controls/edit-3.svg"
+                    actionButtonImage: nestedStackView.currentIndex === root.pageSettingsApiLanguageList ? "qrc:/images/controls/settings.svg" : "qrc:/images/controls/edit-3.svg"
 
                     headerText: name
                     descriptionText: {
-                        if (ServersModel.isProcessedServerHasWriteAccess()) {
+                        if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
+                            return ApiServicesModel.getSelectedServiceData("serviceDescription")
+                        } else if (ServersModel.getProcessedServerData("isServerFromTelegramApi")) {
+                            return serverDescription
+                        } else if (ServersModel.isProcessedServerHasWriteAccess()) {
                             return credentialsLogin + " · " + hostName
                         } else {
                             return hostName
@@ -92,7 +111,11 @@ PageType {
                     KeyNavigation.tab: tabBar
 
                     actionButtonFunction: function() {
-                        serverNameEditDrawer.open()
+                        if (nestedStackView.currentIndex === root.pageSettingsApiLanguageList) {
+                            nestedStackView.currentIndex = root.pageSettingsApiServerInfo
+                        } else {
+                            serverNameEditDrawer.open()
+                        }
                     }
                 }
 
@@ -172,12 +195,15 @@ PageType {
 
             Layout.fillWidth: true
 
-            currentIndex: (ServersModel.getProcessedServerData("isServerFromApi")
-                           && !ServersModel.getProcessedServerData("hasInstalledContainers")) ? 2 : 0
+            currentIndex: (ServersModel.getProcessedServerData("isServerFromTelegramApi")
+                           && !ServersModel.getProcessedServerData("hasInstalledContainers")) ?
+                              root.pageSettingsServerData : root.pageSettingsServerProtocols
 
             background: Rectangle {
                 color: AmneziaStyle.color.transparent
             }
+
+            visible: !ServersModel.getProcessedServerData("isServerFromGatewayApi")
 
             activeFocusOnTab: true
             onFocusChanged: {
@@ -190,45 +216,53 @@ PageType {
                 id: protocolsTab
                 visible: protocolsPage.installedProtocolsCount
                 width: protocolsPage.installedProtocolsCount ? undefined : 0
-                isSelected: tabBar.currentIndex === 0
+                isSelected: tabBar.currentIndex === root.pageSettingsServerProtocols
                 text: qsTr("Protocols")
 
                 KeyNavigation.tab: servicesTab
-                Keys.onReturnPressed: tabBar.currentIndex = 0
-                Keys.onEnterPressed: tabBar.currentIndex = 0
+                Keys.onReturnPressed: tabBar.currentIndex = root.pageSettingsServerProtocols
+                Keys.onEnterPressed: tabBar.currentIndex = root.pageSettingsServerProtocols
             }
+
             TabButtonType {
                 id: servicesTab
                 visible: servicesPage.installedServicesCount
                 width: servicesPage.installedServicesCount ? undefined : 0
-                isSelected: tabBar.currentIndex === 1
+                isSelected: tabBar.currentIndex === root.pageSettingsServerServices
                 text: qsTr("Services")
 
                 KeyNavigation.tab: dataTab
-                Keys.onReturnPressed: tabBar.currentIndex = 1
-                Keys.onEnterPressed: tabBar.currentIndex = 1
+                Keys.onReturnPressed: tabBar.currentIndex = root.pageSettingsServerServices
+                Keys.onEnterPressed: tabBar.currentIndex = root.pageSettingsServerServices
             }
+
             TabButtonType {
                 id: dataTab
-                isSelected: tabBar.currentIndex === 2
+                isSelected: tabBar.currentIndex === root.pageSettingsServerData
                 text: qsTr("Management")
 
-                Keys.onReturnPressed: tabBar.currentIndex = 2
-                Keys.onEnterPressed: tabBar.currentIndex = 2
-                KeyNavigation.tab: stackView.currentIndex === 0 ?
-                                       protocolsPage :
-                                       stackView.currentIndex === 1 ?
-                                           servicesPage :
-                                           dataPage
+                Keys.onReturnPressed: tabBar.currentIndex = root.pageSettingsServerData
+                Keys.onEnterPressed: tabBar.currentIndex = root.pageSettingsServerData
+                Keys.onTabPressed: function() {
+                    if (nestedStackView.currentIndex === root.pageSettingsServerProtocols) {
+                        return protocolsPage
+                    } else if (nestedStackView.currentIndex === root.pageSettingsServerProtocols) {
+                        return servicesPage
+                    } else {
+                        return dataPage
+                    }
+                }
             }
         }
 
         StackLayout {
-            id: stackView
+            id: nestedStackView
             Layout.preferredWidth: root.width
             Layout.preferredHeight: root.height - tabBar.implicitHeight - header.implicitHeight
 
-            currentIndex: tabBar.currentIndex
+            currentIndex: ServersModel.getProcessedServerData("isServerFromGatewayApi") ?
+                              (ServersModel.getProcessedServerData("isCountrySelectionAvailable") ?
+                                   root.pageSettingsApiLanguageList : root.pageSettingsApiServerInfo) : tabBar.currentIndex
 
             PageSettingsServerProtocols {
                 id: protocolsPage
@@ -236,17 +270,33 @@ PageType {
 
                 onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
+
             PageSettingsServerServices {
                 id: servicesPage
                 stackView: root.stackView
 
                 onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
+
             PageSettingsServerData {
                 id: dataPage
                 stackView: root.stackView
 
                 onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
+            }
+
+            PageSettingsApiServerInfo {
+                id: apiInfoPage
+                stackView: root.stackView
+
+//                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
+            }
+
+            PageSettingsApiLanguageList {
+                id: apiLanguageListPage
+                stackView: root.stackView
+
+//                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
         }
 

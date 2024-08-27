@@ -28,11 +28,12 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 ## Features
 
-- Very easy to use - enter your IP address, SSH login, and password, and Amnezia will automatically install VPN docker containers to your server and connect to the VPN.
-- OpenVPN, Shadowsocks, WireGuard, and IKEv2 protocols support.
-- Masking VPN with OpenVPN over Cloak plugin
-- Split tunneling support - add any sites to the client to enable VPN only for them (only for desktops)
+- Very easy to use - enter your IP address, SSH login, password and Amnezia will automatically install VPN docker containers to your server and connect to the VPN.
+- Classic VPN-protocols: OpenVPN, WireGuard and IKEv2 protocols.
+- Protocols with traffic Masking (Obfuscation): OpenVPN over [Cloak](https://github.com/cbeuw/Cloak) plugin, Shadowsocks (OpenVPN over Shadowsocks), [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/) and XRay.
+- Split tunneling support - add any sites to the client to enable VPN only for them or add Apps (only for Android and Desktop).
 - Windows, MacOS, Linux, Android, iOS releases.
+- Support for AmneziaWG protocol configuration on [Keenetic beta firmware](https://docs.keenetic.com/ua/air/kn-1611/en/6319-latest-development-release.html#UUID-186c4108-5afd-c10b-f38a-cdff6c17fab3_section-idm33192196168192-improved).
 
 ## Links
 
@@ -41,7 +42,8 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 - [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English) 
 - [https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Telegram support channel (Farsi) 
 - [https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Telegram support channel (Myanmar)  
-- [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)  
+- [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Telegram support channel (Russian)
+- [https://vpnpay.io/en/amnezia-premium/](https://vpnpay.io/en/amnezia-premium/) - Amnezia Premium
 
 ## Tech
 
@@ -181,6 +183,7 @@ GPL v3.0
 
 Patreon: [https://www.patreon.com/amneziavpn](https://www.patreon.com/amneziavpn)
 
+Bitcoin: bc1q26eevjcg9j0wuyywd2e3uc9cs2w58lpkpjxq6p <br>
 USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4 <br>
 USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d <br>
 XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3  

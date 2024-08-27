@@ -48,7 +48,7 @@ Item {
                 Layout.alignment: Qt.AlignRight
 
                 image: root.actionButtonImage
-                imageColor: AmneziaStyle.color.white
+                imageColor: AmneziaStyle.color.paleGray
 
                 visible: image ? true : false
 
@@ -68,7 +68,7 @@ Item {
 
             text: root.descriptionText
 
-            color: AmneziaStyle.color.grey
+            color: AmneziaStyle.color.mutedGray
 
             visible: root.descriptionText !== ""
         }

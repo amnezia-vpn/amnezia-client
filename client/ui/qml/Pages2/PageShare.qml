@@ -273,7 +273,7 @@ PageType {
                 implicitWidth: accessTypeSelectorContent.implicitWidth
                 implicitHeight: accessTypeSelectorContent.implicitHeight
 
-                color: AmneziaStyle.color.blackLight
+                color: AmneziaStyle.color.onyxBlack
                 radius: 16
 
                 RowLayout {
@@ -327,7 +327,7 @@ PageType {
                 visible: accessTypeSelector.currentIndex === 0
 
                 text: qsTr("Share VPN access without the ability to manage the server")
-                color: AmneziaStyle.color.grey
+                color: AmneziaStyle.color.mutedGray
             }
 
             TextFieldWithHeaderType {
@@ -658,7 +658,7 @@ PageType {
                 ImageButtonType {
                     id: closeSearchButton
                     image: "qrc:/images/controls/close.svg"
-                    imageColor: AmneziaStyle.color.white
+                    imageColor: AmneziaStyle.color.paleGray
 
                     Keys.onTabPressed: {
                         if (!GC.isMobile()) {
@@ -806,7 +806,7 @@ PageType {
                                 ColumnLayout
                                 {
                                     id: textColumn
-                                    property string textColor: AmneziaStyle.color.grey
+                                    property string textColor: AmneziaStyle.color.mutedGray
                                     Layout.bottomMargin: 24
 
                                     ParagraphTextType {
@@ -853,10 +853,10 @@ PageType {
                                     Layout.topMargin: 24
 
                                     defaultColor: AmneziaStyle.color.transparent
-                                    hoveredColor: AmneziaStyle.color.blackHovered
-                                    pressedColor: AmneziaStyle.color.blackPressed
-                                    disabledColor: AmneziaStyle.color.grey
-                                    textColor: AmneziaStyle.color.white
+                                    hoveredColor: AmneziaStyle.color.translucentWhite
+                                    pressedColor: AmneziaStyle.color.sheerWhite
+                                    disabledColor: AmneziaStyle.color.mutedGray
+                                    textColor: AmneziaStyle.color.paleGray
                                     borderWidth: 1
 
                                     text: qsTr("Rename")
@@ -946,10 +946,10 @@ PageType {
                                     Layout.fillWidth: true
 
                                     defaultColor: AmneziaStyle.color.transparent
-                                    hoveredColor: AmneziaStyle.color.blackHovered
-                                    pressedColor: AmneziaStyle.color.blackPressed
-                                    disabledColor: AmneziaStyle.color.grey
-                                    textColor: AmneziaStyle.color.white
+                                    hoveredColor: AmneziaStyle.color.translucentWhite
+                                    pressedColor: AmneziaStyle.color.sheerWhite
+                                    disabledColor: AmneziaStyle.color.mutedGray
+                                    textColor: AmneziaStyle.color.paleGray
                                     borderWidth: 1
 
                                     text: qsTr("Revoke")

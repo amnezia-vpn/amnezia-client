@@ -1,7 +1,7 @@
 #include "settings.h"
 
-#include "QThread"
 #include "QCoreApplication"
+#include "QThread"
 
 #include "core/networkUtilities.h"
 #include "version.h"
@@ -9,8 +9,13 @@
 #include "containers/containers_defs.h"
 #include "logger.h"
 
-const char Settings::cloudFlareNs1[] = "1.1.1.1";
-const char Settings::cloudFlareNs2[] = "1.0.0.1";
+namespace
+{
+    const char cloudFlareNs1[] = "1.1.1.1";
+    const char cloudFlareNs2[] = "1.0.0.1";
+
+    constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
+}
 
 Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_NAME, APPLICATION_NAME, this)
 {
@@ -37,6 +42,8 @@ Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_N
             m_settings.remove("Server/serverPort");
         }
     }
+
+    m_gatewayEndpoint = gatewayEndpoint;
 }
 
 int Settings::serversCount() const
@@ -109,8 +116,7 @@ QMap<DockerContainer, QJsonObject> Settings::containers(int serverIndex) const
 
     QMap<DockerContainer, QJsonObject> containersMap;
     for (const QJsonValue &val : containers) {
-        containersMap.insert(ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()),
-                             val.toObject());
+        containersMap.insert(ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()), val.toObject());
     }
 
     return containersMap;
@@ -442,6 +448,17 @@ QString Settings::getInstallationUuid(const bool needCreate)
     auto uuid = value("Conf/installationUuid", "").toString();
     if (needCreate && uuid.isEmpty()) {
         uuid = QUuid::createUuid().toString();
+
+        //remove {} from uuid
+        uuid.remove(0, 1);
+        uuid.chop(1);
+
+        setInstallationUuid(uuid);
+    } else if (uuid.contains("{") && uuid.contains("}")) {
+        //remove {} from old uuid
+        uuid.remove(0, 1);
+        uuid.chop(1);
+
         setInstallationUuid(uuid);
     }
     return uuid;
@@ -476,11 +493,8 @@ QVariant Settings::value(const QString &key, const QVariant &defaultValue) const
     if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
         returnValue = m_settings.value(key, defaultValue);
     } else {
-        QMetaObject::invokeMethod(&m_settings, "value",
-                                  Qt::BlockingQueuedConnection,
-                                  Q_RETURN_ARG(QVariant, returnValue),
-                                  Q_ARG(const QString&, key),
-                                  Q_ARG(const QVariant&, defaultValue));
+        QMetaObject::invokeMethod(&m_settings, "value", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, returnValue),
+                                  Q_ARG(const QString &, key), Q_ARG(const QVariant &, defaultValue));
     }
     return returnValue;
 }
@@ -490,9 +504,22 @@ void Settings::setValue(const QString &key, const QVariant &value)
     if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
         m_settings.setValue(key, value);
     } else {
-        QMetaObject::invokeMethod(&m_settings, "setValue",
-                                  Qt::BlockingQueuedConnection,
-                                  Q_ARG(const QString&, key),
-                                  Q_ARG(const QVariant&, value));
+        QMetaObject::invokeMethod(&m_settings, "setValue", Qt::BlockingQueuedConnection, Q_ARG(const QString &, key),
+                                  Q_ARG(const QVariant &, value));
     }
+}
+
+void Settings::resetGatewayEndpoint()
+{
+    m_gatewayEndpoint = gatewayEndpoint;
+}
+
+void Settings::setGatewayEndpoint(const QString &endpoint)
+{
+    m_gatewayEndpoint = endpoint;
+}
+
+QString Settings::getGatewayEndpoint()
+{
+    return m_gatewayEndpoint;
 }

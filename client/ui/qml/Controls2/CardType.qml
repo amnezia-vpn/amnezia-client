@@ -11,16 +11,16 @@ RadioButton {
     property string bodyText
     property string footerText
 
-    property string hoveredColor: AmneziaStyle.color.blackHovered
+    property string hoveredColor: AmneziaStyle.color.barelyTranslucentWhite
     property string defaultColor: AmneziaStyle.color.transparent
     property string disabledColor: AmneziaStyle.color.transparent
-    property string pressedColor: AmneziaStyle.color.blackPressed
+    property string pressedColor: AmneziaStyle.color.barelyTranslucentWhite
     property string selectedColor: AmneziaStyle.color.transparent
 
-    property string textColor: AmneziaStyle.color.black
+    property string textColor: AmneziaStyle.color.midnightBlack
 
     property string pressedBorderColor: Qt.rgba(251/255, 178/255, 106/255, 0.3)
-    property string selectedBorderColor: AmneziaStyle.color.orange
+    property string selectedBorderColor: AmneziaStyle.color.goldenApricot
     property string defaultBodredColor: AmneziaStyle.color.transparent
     property int borderWidth: 0
 
@@ -84,7 +84,7 @@ RadioButton {
         Text {
             text: root.headerText
             wrapMode: Text.WordWrap
-            color: AmneziaStyle.color.white
+            color: AmneziaStyle.color.paleGray
             font.pixelSize: 25
             font.weight: 700
             font.family: "PT Root UI VF"
@@ -99,7 +99,7 @@ RadioButton {
         Text {
             text: root.bodyText
             wrapMode: Text.WordWrap
-            color: AmneziaStyle.color.white
+            color: AmneziaStyle.color.paleGray
             font.pixelSize: 16
             font.weight: 400
             font.family: "PT Root UI VF"
@@ -115,7 +115,7 @@ RadioButton {
             text: root.footerText
             wrapMode: Text.WordWrap
             visible: root.footerText !== ""
-            color: AmneziaStyle.color.grey
+            color: AmneziaStyle.color.mutedGray
             font.pixelSize: 13
             font.weight: 400
             font.family: "PT Root UI VF"

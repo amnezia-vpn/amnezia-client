@@ -14,15 +14,15 @@ RadioButton {
     property int textElide: Qt.ElideRight
     property string descriptionText
 
-    property string hoveredColor: AmneziaStyle.color.blackHovered
+    property string hoveredColor: AmneziaStyle.color.barelyTranslucentWhite
     property string defaultColor: AmneziaStyle.color.transparent
     property string disabledColor: AmneziaStyle.color.transparent
     property string selectedColor: AmneziaStyle.color.transparent
 
-    property string textColor: AmneziaStyle.color.white
-    property string selectedTextColor: AmneziaStyle.color.orange
+    property string textColor: AmneziaStyle.color.paleGray
+    property string selectedTextColor: AmneziaStyle.color.goldenApricot
 
-    property string borderFocusedColor: AmneziaStyle.color.white
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
     property string imageSource
@@ -139,7 +139,7 @@ RadioButton {
             CaptionTextType {
                 id: description
 
-                color: AmneziaStyle.color.grey
+                color: AmneziaStyle.color.mutedGray
                 text: root.descriptionText
 
                 visible: root.descriptionText !== ""

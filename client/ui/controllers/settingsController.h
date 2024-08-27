@@ -25,6 +25,9 @@ public:
     Q_PROPERTY(bool isLoggingEnabled READ isLoggingEnabled WRITE toggleLogging NOTIFY loggingStateChanged)
     Q_PROPERTY(bool isNotificationPermissionGranted READ isNotificationPermissionGranted NOTIFY onNotificationStateChanged)
 
+    Q_PROPERTY(bool isDevModeEnabled READ isDevModeEnabled NOTIFY devModeEnabled)
+    Q_PROPERTY(QString gatewayEndpoint READ getGatewayEndpoint WRITE setGatewayEndpoint NOTIFY gatewayEndpointChanged)
+
 public slots:
     void toggleAmneziaDns(bool enable);
     bool isAmneziaDnsEnabled();
@@ -72,6 +75,15 @@ public slots:
     bool isNotificationPermissionGranted();
     void requestNotificationPermission();
 
+    QString getInstallationUuid();
+
+    void enableDevMode();
+    bool isDevModeEnabled();
+
+    void resetGatewayEndpoint();
+    void setGatewayEndpoint(const QString &endpoint);
+    QString getGatewayEndpoint();
+
 signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();
@@ -91,6 +103,9 @@ signals:
 
     void onNotificationStateChanged();
 
+    void devModeEnabled();
+    void gatewayEndpointChanged(const QString &endpoint);
+
 private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
@@ -102,6 +117,8 @@ private:
     QString m_appVersion;
 
     QDateTime m_loggingDisableDate;
+
+    bool m_isDevModeEnabled = false;
 
     void checkIfNeedDisableLogs();
 };

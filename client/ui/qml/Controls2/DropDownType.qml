@@ -11,31 +11,31 @@ Item {
     id: root
 
     property string text
-    property string textColor: AmneziaStyle.color.white
-    property string textDisabledColor: AmneziaStyle.color.grey
+    property string textColor: AmneziaStyle.color.paleGray
+    property string textDisabledColor: AmneziaStyle.color.mutedGray
     property int textMaximumLineCount: 2
     property int textElide: Qt.ElideRight
 
     property string descriptionText
-    property string descriptionTextColor: AmneziaStyle.color.grey
-    property string descriptionTextDisabledColor: AmneziaStyle.color.greyDisabled
+    property string descriptionTextColor: AmneziaStyle.color.mutedGray
+    property string descriptionTextDisabledColor: AmneziaStyle.color.charcoalGray
 
     property string headerText
     property string headerBackButtonImage
 
     property var rootButtonClickedFunction
     property string rootButtonImage: "qrc:/images/controls/chevron-down.svg"
-    property string rootButtonImageColor: AmneziaStyle.color.white
-    property string rootButtonBackgroundColor: AmneziaStyle.color.blackLight
-    property string rootButtonBackgroundHoveredColor: AmneziaStyle.color.blackLight
-    property string rootButtonBackgroundPressedColor: AmneziaStyle.color.blackLight
+    property string rootButtonImageColor: AmneziaStyle.color.paleGray
+    property string rootButtonBackgroundColor: AmneziaStyle.color.onyxBlack
+    property string rootButtonBackgroundHoveredColor: AmneziaStyle.color.onyxBlack
+    property string rootButtonBackgroundPressedColor: AmneziaStyle.color.onyxBlack
 
-    property string borderFocusedColor: AmneziaStyle.color.white
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
-    property string rootButtonHoveredBorderColor: AmneziaStyle.color.greyDisabled
-    property string rootButtonDefaultBorderColor: AmneziaStyle.color.greyDark
-    property string rootButtonPressedBorderColor: AmneziaStyle.color.white
+    property string rootButtonHoveredBorderColor: AmneziaStyle.color.charcoalGray
+    property string rootButtonDefaultBorderColor: AmneziaStyle.color.slateGray
+    property string rootButtonPressedBorderColor: AmneziaStyle.color.paleGray
 
     property int rootButtonTextLeftMargins: 16
     property int rootButtonTextTopMargin: 16
