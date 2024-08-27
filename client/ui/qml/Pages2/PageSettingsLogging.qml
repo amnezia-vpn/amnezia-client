@@ -58,8 +58,7 @@ disabled after 14 days, and all log files will be deleted.")
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-
-            spacing: 16
+            spacing: 0
 
             HeaderType {
                 Layout.fillWidth: true
@@ -94,98 +93,10 @@ disabled after 14 days, and all log files will be deleted.")
             LabelWithButtonType {
                 // id: labelWithButton2
                 Layout.fillWidth: true
-
-                text: qsTr("Open client logs folder")
-
-                // KeyNavigation.tab: labelWithButton3
-
-                clickedFunction: function() {
-                    SettingsController.openLogsFolder()
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                // id: labelWithButton2
-                Layout.fillWidth: true
-
-                text: qsTr("Save client logs to file")
-
-                // KeyNavigation.tab: labelWithButton3
-
-                clickedFunction: function() {
-                    var fileName = ""
-                    if (GC.isMobile()) {
-                        fileName = "AmneziaVPN.log"
-                    } else {
-                        fileName = SystemController.getFileName(qsTr("Save"),
-                                                                qsTr("Logs files (*.log)"),
-                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
-                                                                true,
-                                                                ".log")
-                    }
-                    if (fileName !== "") {
-                        PageController.showBusyIndicator(true)
-                        SettingsController.exportLogsFile(fileName)
-                        PageController.showBusyIndicator(false)
-                        PageController.showNotificationMessage(qsTr("Logs file saved"))
-                    }
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                // id: labelWithButton2
-                Layout.fillWidth: true
-
-                text: qsTr("Open service logs folder")
-
-                // KeyNavigation.tab: labelWithButton3
-
-                clickedFunction: function() {
-                    SettingsController.openServiceLogsFolder()
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                // id: labelWithButton2
-                Layout.fillWidth: true
-
-                text: qsTr("Save service logs to folder")
-
-                // KeyNavigation.tab: labelWithButton3
-
-                clickedFunction: function() {
-                    var fileName = ""
-                    if (GC.isMobile()) {
-                        fileName = "AmneziaVPN-service.log"
-                    } else {
-                        fileName = SystemController.getFileName(qsTr("Save"),
-                                                                qsTr("Logs files (*.log)"),
-                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN-service",
-                                                                true,
-                                                                ".log")
-                    }
-                    if (fileName !== "") {
-                        PageController.showBusyIndicator(true)
-                        SettingsController.exportServiceLogsFile(fileName)
-                        PageController.showBusyIndicator(false)
-                        PageController.showNotificationMessage(qsTr("Logs file saved"))
-                    }
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                // id: labelWithButton2
-                Layout.fillWidth: true
+                Layout.topMargin: -8
 
                 text: qsTr("Clear logs")
+                rightImageSource: "qrc:/images/controls/trash.svg"
 
                 // KeyNavigation.tab: labelWithButton3
 
@@ -212,6 +123,146 @@ disabled after 14 days, and all log files will be deleted.")
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
+
+            ListItemTitleType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Client logs")
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                color: AmneziaStyle.color.mutedGray
+                text: qsTr("AmneziaVPN logs")
+            }
+
+            LabelWithButtonType {
+                // id: labelWithButton2
+                Layout.fillWidth: true
+                Layout.topMargin: -8
+                Layout.bottomMargin: -8
+
+                text: qsTr("Open logs folder")
+                rightImageSource: "qrc:/images/controls/folder-open.svg"
+
+                // KeyNavigation.tab: labelWithButton3
+
+                clickedFunction: function() {
+                    SettingsController.openLogsFolder()
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                // id: labelWithButton2
+                Layout.fillWidth: true
+                Layout.topMargin: -8
+                Layout.bottomMargin: -8
+
+                text: qsTr("Export logs")
+                rightImageSource: "qrc:/images/controls/save.svg"
+
+                // KeyNavigation.tab: labelWithButton3
+
+                clickedFunction: function() {
+                    var fileName = ""
+                    if (GC.isMobile()) {
+                        fileName = "AmneziaVPN.log"
+                    } else {
+                        fileName = SystemController.getFileName(qsTr("Save"),
+                                                                qsTr("Logs files (*.log)"),
+                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
+                                                                true,
+                                                                ".log")
+                    }
+                    if (fileName !== "") {
+                        PageController.showBusyIndicator(true)
+                        SettingsController.exportLogsFile(fileName)
+                        PageController.showBusyIndicator(false)
+                        PageController.showNotificationMessage(qsTr("Logs file saved"))
+                    }
+                }
+            }
+
+            DividerType {}
+
+            ListItemTitleType {
+                Layout.fillWidth: true
+                Layout.topMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Service logs")
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                color: AmneziaStyle.color.mutedGray
+                text: qsTr("AmneziaVPN-service logs")
+            }
+
+            LabelWithButtonType {
+                // id: labelWithButton2
+                Layout.fillWidth: true
+                Layout.topMargin: -8
+                Layout.bottomMargin: -8
+
+                text: qsTr("Open logs folder")
+                rightImageSource: "qrc:/images/controls/save.svg"
+
+                // KeyNavigation.tab: labelWithButton3
+
+                clickedFunction: function() {
+                    SettingsController.openServiceLogsFolder()
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                // id: labelWithButton2
+                Layout.fillWidth: true
+                Layout.topMargin: -8
+                Layout.bottomMargin: -8
+
+                text: qsTr("Export logs")
+                rightImageSource: "qrc:/images/controls/save.svg"
+
+                // KeyNavigation.tab: labelWithButton3
+
+                clickedFunction: function() {
+                    var fileName = ""
+                    if (GC.isMobile()) {
+                        fileName = "AmneziaVPN-service.log"
+                    } else {
+                        fileName = SystemController.getFileName(qsTr("Save"),
+                                                                qsTr("Logs files (*.log)"),
+                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN-service",
+                                                                true,
+                                                                ".log")
+                    }
+                    if (fileName !== "") {
+                        PageController.showBusyIndicator(true)
+                        SettingsController.exportServiceLogsFile(fileName)
+                        PageController.showBusyIndicator(false)
+                        PageController.showNotificationMessage(qsTr("Logs file saved"))
+                    }
+                }
+            }
+
+            DividerType {}
         }
     }
 }
