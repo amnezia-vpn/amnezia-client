@@ -431,12 +431,43 @@ bool IpcServer::writeIPsecPrivatePass(QString pass, QString host, QString uuid)
 {
 #ifdef Q_OS_LINUX
     qDebug() << "IPSEC: User private key " << uuid;
-    QFile secretsFile("/etc/ipsec.secrets");
-    QString P12 = QString("%any %1 : P12 %2.p12 \"%3\" \n").arg(host, uuid, pass);
-    if (secretsFile.open(QIODevice::WriteOnly | QIODevice::Append)) {
+    const QString secretsFilename = "/etc/ipsec.secrets";
+    QStringList lines;
+
+    {
+        QFile secretsFile(secretsFilename);
+        if (secretsFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QTextStream edit(&secretsFile);
+            while (!edit.atEnd()) lines.push_back(edit.readLine());
+        }
+        secretsFile.close();
+    }
+
+    for (auto iter = lines.begin(); iter!=lines.end();)
+    {
+        if (iter->contains(host))
+        {
+            iter = lines.erase(iter);
+        }
+        else
+        {
+            ++iter;
+        }
+    }
+
+    {
+        QFile secretsFile(secretsFilename);
+        if (secretsFile.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QTextStream edit(&secretsFile);
+            for (int i=0; i<lines.size(); i++) edit << lines[i] << Qt::endl;
+        }
+        QString P12 = QString("%any %1 : P12 %2.p12 \"%3\" \n").arg(host, uuid, pass);
         secretsFile.write(P12.toUtf8());
         secretsFile.close();
     }
+
 #endif
     return true;
 }
