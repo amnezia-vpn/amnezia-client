@@ -45,7 +45,6 @@ void Ikev2Protocol::stop()
     qDebug() << "IpsecProtocol::stop()";
 }
 
-
 void Ikev2Protocol::readIkev2Configuration(const QJsonObject &configuration)
 {
     QJsonObject ikev2_data = configuration.value(ProtocolProps::key_proto_config_data(Proto::Ikev2)).toObject();
@@ -89,12 +88,12 @@ ErrorCode Ikev2Protocol::start()
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Ikev2Protocol::create_new_vpn(const QString & vpn_name,
-                                   const QString & serv_addr){
+                                   const QString & serv_addr) {
    qDebug() << "Ikev2Protocol::create_new_vpn()";
    return true;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bool Ikev2Protocol::delete_vpn_connection(const QString &vpn_name){
+bool Ikev2Protocol::delete_vpn_connection(const QString &vpn_name) {
 
     return false;
 }

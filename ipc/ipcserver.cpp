@@ -311,7 +311,7 @@ bool IpcServer::disableKillSwitch()
 bool IpcServer::startIPsec(QString tunnelName)
 {
 #ifdef Q_OS_LINUX
-/*  QProcess processSystemd;
+    QProcess processSystemd;
     QStringList commandsSystemd;
     commandsSystemd << "systemctl" << "restart" << "ipsec";
     processSystemd.start("sudo", commandsSystemd);
@@ -327,8 +327,8 @@ bool IpcServer::startIPsec(QString tunnelName)
     }
     commandsSystemd.clear();
 
-    QThread::msleep(2000);
-*/
+    QThread::msleep(5000);
+
     QProcess process;
     QStringList commands;
     commands << "ipsec" << "up" << QString("%1").arg(tunnelName);
