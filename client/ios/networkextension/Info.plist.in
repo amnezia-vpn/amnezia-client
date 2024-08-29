@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
+	<string>AmneziaVPNNetworkExtension</string>
 
 	<key>CFBundleIdentifier</key>
 	<string>${BUILD_IOS_APP_IDENTIFIER}.network-extension</string>

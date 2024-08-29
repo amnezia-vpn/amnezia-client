@@ -18,6 +18,7 @@ set_target_properties(networkextension PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${APPLE_PROJECT_VERSION}"
 
     XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}.network-extension"
+    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_NAME "${BUILD_IOS_APP_IDENTIFIER}.network-extension"
     XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS ${CMAKE_CURRENT_SOURCE_DIR}/AmneziaVPNNetworkExtension.entitlements
     XCODE_ATTRIBUTE_MARKETING_VERSION "${APP_MAJOR_VERSION}"
     XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${BUILD_ID}"
@@ -29,19 +30,40 @@ set_target_properties(networkextension PROPERTIES
 
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../Frameworks"
 
-    #XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
-    XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
+    # XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
+    # #XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
 
-    XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution: Privacy Technologies OU (X7UJ388FXK)"
-    #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
+    # #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution: Privacy Technologies OU (X7UJ388FXK)"
+    # #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
 
 
-    XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "Mac AppStore AmneziaVPN.network-extension"
-    #XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "Mac AppStore AmneziaVPN.network-extension"
+    # #XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "Mac AppStore AmneziaVPN.network-extension"
+    # #XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "Mac AppStore AmneziaVPN.network-extension"
 
     XCODE_ATTRIBUTE_INFOPLIST_FILE "${CMAKE_CURRENT_BINARY_DIR}/Info.plist"
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../../../Frameworks @loader_path/../../../../Frameworks"
 )
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set_target_properties(networkextension PROPERTIES
+        XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
+    )
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set_target_properties(networkextension PROPERTIES
+        XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
+        #XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
+
+        #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution: Privacy Technologies OU (X7UJ388FXK)"
+        #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
+
+
+        #XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "Mac AppStore AmneziaVPN.network-extension"
+        #XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "Mac AppStore AmneziaVPN.network-extension"
+    )
+endif()
+
 
 set_target_properties(networkextension PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
