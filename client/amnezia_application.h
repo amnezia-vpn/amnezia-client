@@ -53,9 +53,9 @@
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     #define AMNEZIA_BASE_CLASS QGuiApplication
 #else
-    #define AMNEZIA_BASE_CLASS SingleApplication
-    #define QAPPLICATION_CLASS QApplication
     #include "singleapplication.h"
+    #define AMNEZIA_BASE_CLASS SingleApplication
+    //#define QAPPLICATION_CLASS QGuiApplication
 #endif
 
 class AmneziaApplication : public AMNEZIA_BASE_CLASS

@@ -3,7 +3,10 @@ set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules;${CMAKE_MODULE_PATH}")
 
 if(NOT IOS AND NOT ANDROID)
-   include(${CLIENT_ROOT_DIR}/3rd/SingleApplication/singleapplication.cmake)
+    message(${QT_DEFAULT_MAJOR_VERSION})
+    set(QAPPLICATION_CLASS QGuiApplication)
+    add_subdirectory(${CLIENT_ROOT_DIR}/3rd/SingleApplication)
+    set(LIBS ${LIBS} SingleApplication::SingleApplication)
 endif()
 
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/SortFilterProxyModel)
