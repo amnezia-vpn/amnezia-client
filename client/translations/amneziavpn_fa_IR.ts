@@ -1112,13 +1112,13 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="162"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="189"/>
         <source>Copied</source>
-        <translation>کپی شدکپی شد</translation>
+        <translation>کپی شد</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="125"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="260"/>
         <source>Port</source>
-        <translation>پورتپورت</translation>
+        <translation>پورت</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="149"/>
@@ -1384,7 +1384,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="146"/>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="186"/>
         <source>Cancel</source>
-        <translation>کنسللغو کنید</translation>
+        <translation>لغو</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="150"/>
@@ -1432,7 +1432,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="129"/>
         <source>Mode</source>
-        <translation>حالتمدل</translation>
+        <translation>حالت</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="221"/>
@@ -1457,7 +1457,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="278"/>
         <source>Open executable file</source>
-        <translation></translation>
+        <translation>فایل اجرایی را باز کنید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="279"/>
@@ -1485,7 +1485,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="95"/>
         <source>Enable notifications to show the VPN state in the status bar</source>
-        <translation></translation>
+        <translation>اعلان ها را فعال کنید تا وضعیت VPN را در نوار وضعیت ببینید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="117"/>
