@@ -110,7 +110,7 @@ QString VpnProtocol::vpnGateway() const
 VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &configuration)
 {
     switch (container) {
-#if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX)
+#if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     case DockerContainer::Ipsec: return new Ikev2Protocol(configuration);
 #endif
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
