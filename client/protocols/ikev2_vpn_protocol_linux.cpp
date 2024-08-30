@@ -107,7 +107,9 @@ ErrorCode Ikev2Protocol::start()
                 m_routeGateway = iter->split("===", Qt::SkipEmptyParts).first();
                 m_routeGateway = m_routeGateway.split("   ").at(2);
                 m_routeGateway = m_routeGateway.split("/").first();
+                m_vpnLocalAddress = m_routeGateway;
                 qDebug() << "m_routeGateway " << m_routeGateway;
+
 
                 // killSwitch toggle
                 if (QVariant(m_config.value(config_key::killSwitchOption).toString()).toBool()) {
@@ -145,7 +147,6 @@ bool Ikev2Protocol::delete_vpn_connection(const QString &vpn_name) {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Ikev2Protocol::connect_to_vpn(const QString &vpn_name) {
     IpcClient::Interface()->startIPsec(vpn_name);
-
     QThread::msleep(3000);
     return true;
 }
