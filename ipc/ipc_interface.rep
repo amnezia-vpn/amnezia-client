@@ -42,5 +42,7 @@ class IpcInterface
     SLOT( bool stopIPsec(QString tunnelName) );
     SLOT( bool startIPsec(QString tunnelName) );
 
+    SLOT( QString getTunnelStatus(QString tunnelName) );
+
 };
 

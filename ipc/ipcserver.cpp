@@ -467,9 +467,35 @@ bool IpcServer::writeIPsecPrivatePass(QString pass, QString host, QString uuid)
         secretsFile.write(P12.toUtf8());
         secretsFile.close();
     }
-
 #endif
     return true;
+}
+
+QString IpcServer::getTunnelStatus(QString tunnelName)
+{
+#ifdef Q_OS_LINUX
+    QProcess process;
+    QStringList commands;
+    commands << "ipsec" << "status" << QString("%1").arg(tunnelName);
+    process.start("sudo", commands);
+    if (!process.waitForStarted(1000))
+    {
+        qDebug().noquote() << "Could not stop ipsec tunnel\n";
+        return "";
+    }
+    else if (!process.waitForFinished(2000))
+    {
+        qDebug().noquote() << "Could not stop ipsec tunnel\n";
+        return "";
+    }
+    commands.clear();
+
+
+    QString status = process.readAll();
+    return status;
+#endif
+    return QString();
+
 }
 
 bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)

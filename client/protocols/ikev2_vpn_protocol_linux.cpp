@@ -71,8 +71,6 @@ ErrorCode Ikev2Protocol::start()
     BIO_get_mem_ptr(bio, &mem);
 
     std::string pem(mem->data, mem->length);
-    qDebug() << pem;
-
     QString alias(pem.c_str());
 
     IpcClient::Interface()->writeIPsecUserCert(alias, m_config[config_key::userName].toString());
@@ -83,7 +81,54 @@ ErrorCode Ikev2Protocol::start()
                                                   m_config[config_key::userName].toString());
 
     connect_to_vpn("ikev2-vpn");
-    setConnectionState(Vpn::ConnectionState::Connected);
+
+    if (!IpcClient::Interface()) {
+        return ErrorCode::AmneziaServiceConnectionFailed;
+    }
+
+    QString connectionStatus;
+
+    auto futureResult = IpcClient::Interface()->getTunnelStatus("ikev2-vpn");
+    futureResult.waitForFinished();
+
+    if (futureResult.returnValue().isEmpty()) {
+        auto futureResult = IpcClient::Interface()->getTunnelStatus("ikev2-vpn");
+        futureResult.waitForFinished();
+    }
+
+    connectionStatus = futureResult.returnValue();
+
+    if (connectionStatus.contains("ESTABLISHED")) {
+        QStringList lines = connectionStatus.split('\n');
+        for (auto iter = lines.begin(); iter!=lines.end(); iter++)
+        {
+            if (iter->contains("0.0.0.0/0")) {
+
+                m_routeGateway = iter->split("===", Qt::SkipEmptyParts).first();
+                m_routeGateway = m_routeGateway.split("   ").at(2);
+                m_routeGateway = m_routeGateway.split("/").first();
+                qDebug() << "m_routeGateway " << m_routeGateway;
+
+                // killSwitch toggle
+                if (QVariant(m_config.value(config_key::killSwitchOption).toString()).toBool()) {
+                    IpcClient::Interface()->enableKillSwitch(m_config, 0);
+                }
+
+                if (m_routeMode == 0) {
+                    IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
+                    IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
+                    IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
+                }
+
+                IpcClient::Interface()->StopRoutingIpv6();
+
+            }
+        }
+        setConnectionState(Vpn::ConnectionState::Connected);
+    } else {
+        setConnectionState(Vpn::ConnectionState::Disconnected);
+    }
+
     return ErrorCode::NoError;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,19 +147,6 @@ bool Ikev2Protocol::connect_to_vpn(const QString &vpn_name) {
     IpcClient::Interface()->startIPsec(vpn_name);
 
     QThread::msleep(3000);
-
-#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-    // killSwitch toggle
-    if (QVariant(m_config.value(config_key::killSwitchOption).toString()).toBool()) {
-        IpcClient::Interface()->enableKillSwitch(m_config, 0);
-    }
-#endif
-    if (m_routeMode == 0) {
-        IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
-        IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
-        IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
-    }
-    IpcClient::Interface()->StopRoutingIpv6();
     return true;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
