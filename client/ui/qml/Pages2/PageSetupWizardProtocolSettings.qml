@@ -95,10 +95,10 @@ PageType {
                             implicitHeight: 32
 
                             defaultColor: AmneziaStyle.color.transparent
-                            hoveredColor: AmneziaStyle.color.blackHovered
-                            pressedColor: AmneziaStyle.color.blackPressed
-                            disabledColor: AmneziaStyle.color.grey
-                            textColor: AmneziaStyle.color.orange
+                            hoveredColor: AmneziaStyle.color.translucentWhite
+                            pressedColor: AmneziaStyle.color.sheerWhite
+                            disabledColor: AmneziaStyle.color.mutedGray
+                            textColor: AmneziaStyle.color.goldenApricot
 
                             text: qsTr("More detailed")
                             KeyNavigation.tab: transportProtoSelector

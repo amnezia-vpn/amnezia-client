@@ -96,7 +96,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::Awg, "AmneziaWG" },
              { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
-             { DockerContainer::SSXray, "ShadowSocks"},
+             { DockerContainer::SSXray, "Shadowsocks"},
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
              { DockerContainer::Dns, QObject::tr("AmneziaDNS") },

@@ -224,7 +224,7 @@ PageType {
 
                 text: qsTr("Reset settings and remove all data from the application")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                textColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: lastItemTabClicked()
                 parentFlickable: fl
@@ -241,7 +241,7 @@ PageType {
                         } else
                         {
                             SettingsController.clearSettings()
-                            PageController.replaceStartPage()
+                            PageController.goToPageHome()
                         }
 
                         if (!GC.isMobile()) {

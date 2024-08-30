@@ -134,7 +134,7 @@ DrawerType2 {
             anchors.rightMargin: 16
             anchors.leftMargin: 16
 
-            backgroundColor: AmneziaStyle.color.greyDark
+            backgroundColor: AmneziaStyle.color.slateGray
 
             textFieldPlaceholderText: qsTr("application name")
         }

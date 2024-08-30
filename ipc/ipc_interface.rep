@@ -21,6 +21,7 @@ class IpcInterface
 
     SLOT( void cleanUp() );
     SLOT( void setLogsEnabled(bool enabled) );
+    SLOT( void clearLogs() );
 
     SLOT( bool createTun(const QString &dev, const QString &subnet) );
     SLOT( bool deleteTun(const QString &dev) );

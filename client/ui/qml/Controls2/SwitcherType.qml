@@ -10,29 +10,29 @@ Switch {
     id: root
 
     property alias descriptionText: description.text
-    property string descriptionTextColor: AmneziaStyle.color.grey
-    property string descriptionTextDisabledColor: AmneziaStyle.color.greyDisabled
+    property string descriptionTextColor: AmneziaStyle.color.mutedGray
+    property string descriptionTextDisabledColor: AmneziaStyle.color.charcoalGray
 
-    property string textColor: AmneziaStyle.color.white
-    property string textDisabledColor: AmneziaStyle.color.grey
+    property string textColor: AmneziaStyle.color.paleGray
+    property string textDisabledColor: AmneziaStyle.color.mutedGray
 
-    property string checkedIndicatorColor: AmneziaStyle.color.brown
+    property string checkedIndicatorColor: AmneziaStyle.color.richBrown
     property string defaultIndicatorColor: AmneziaStyle.color.transparent
-    property string checkedDisabledIndicatorColor: AmneziaStyle.color.brownDark
+    property string checkedDisabledIndicatorColor: AmneziaStyle.color.deepBrown
 
-    property string borderFocusedColor: AmneziaStyle.color.white
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
-    property string checkedIndicatorBorderColor: AmneziaStyle.color.brown
-    property string defaultIndicatorBorderColor: AmneziaStyle.color.greyDisabled
-    property string checkedDisabledIndicatorBorderColor: AmneziaStyle.color.brownDark
+    property string checkedIndicatorBorderColor: AmneziaStyle.color.richBrown
+    property string defaultIndicatorBorderColor: AmneziaStyle.color.charcoalGray
+    property string checkedDisabledIndicatorBorderColor: AmneziaStyle.color.deepBrown
 
-    property string checkedInnerCircleColor: AmneziaStyle.color.orange
-    property string defaultInnerCircleColor: AmneziaStyle.color.white
-    property string checkedDisabledInnerCircleColor: AmneziaStyle.color.brownLight
-    property string defaultDisabledInnerCircleColor: AmneziaStyle.color.greyDisabled
+    property string checkedInnerCircleColor: AmneziaStyle.color.goldenApricot
+    property string defaultInnerCircleColor: AmneziaStyle.color.paleGray
+    property string checkedDisabledInnerCircleColor: AmneziaStyle.color.mutedBrown
+    property string defaultDisabledInnerCircleColor: AmneziaStyle.color.charcoalGray
 
-    property string hoveredIndicatorBackgroundColor: AmneziaStyle.color.blackHovered
+    property string hoveredIndicatorBackgroundColor: AmneziaStyle.color.translucentWhite
     property string defaultIndicatorBackgroundColor: AmneziaStyle.color.transparent
 
     hoverEnabled: enabled ? true : false

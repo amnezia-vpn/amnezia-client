@@ -24,6 +24,9 @@ execute_process(
 
 add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
+add_definitions(-DPROD_AGW_PUBLIC_KEY="$ENV{PROD_AGW_PUBLIC_KEY}")
+add_definitions(-DPROD_PROXY_STORAGE_KEY="$ENV{PROD_PROXY_STORAGE_KEY}")
+
 if(IOS)
     set(PACKAGES ${PACKAGES} Multimedia)
 endif()
@@ -34,7 +37,7 @@ endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
-set(LIBS ${LIBS} 
+set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
@@ -136,6 +139,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.h
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/serialization.h
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/transfer.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/enums/apiEnums.h
 )
 
 # Mozilla headres
@@ -252,7 +256,7 @@ set(SOURCES ${SOURCES}
 
 if(WIN32)
     configure_file(
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc.in 
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc.in
         ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
     )
 
