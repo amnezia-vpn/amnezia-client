@@ -17,7 +17,11 @@
 #endif
 
 #ifdef Q_OS_LINUX
-#include "ikev2_vpn_protocol_linux.h"
+    #include "ikev2_vpn_protocol_linux.h"
+#endif
+
+#ifdef Q_OS_MACX
+    #include "ikev2_vpn_protocol_mac.h"
 #endif
 
 VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject *parent)
@@ -110,9 +114,6 @@ QString VpnProtocol::vpnGateway() const
 VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &configuration)
 {
     switch (container) {
-#if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    case DockerContainer::Ipsec: return new Ikev2Protocol(configuration);
-#endif
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
     case DockerContainer::OpenVpn: return new OpenVpnProtocol(configuration);
     case DockerContainer::Cloak: return new OpenVpnOverCloakProtocol(configuration);
@@ -121,6 +122,7 @@ VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &
     case DockerContainer::Awg: return new WireguardProtocol(configuration);
     case DockerContainer::Xray: return new XrayProtocol(configuration);
     case DockerContainer::SSXray: return new XrayProtocol(configuration);
+    case DockerContainer::Ipsec: return new Ikev2Protocol(configuration);
 #endif
     default: return nullptr;
     }
