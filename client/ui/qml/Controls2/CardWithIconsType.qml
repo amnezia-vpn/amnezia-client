@@ -79,6 +79,7 @@ Button {
                     visible: text !== ""
 
                     color: AmneziaStyle.color.mutedGray
+                    textFormat: Text.RichText
 
                     Layout.fillWidth: true
                     Layout.rightMargin: 16

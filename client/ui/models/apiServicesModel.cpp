@@ -25,6 +25,8 @@ namespace
         constexpr char availableCountries[] = "available_countries";
 
         constexpr char storeEndpoint[] = "store_endpoint";
+
+        constexpr char isAvailable[] = "is_available";
     }
 
     namespace serviceType
@@ -63,8 +65,12 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
             return tr("Classic VPN for comfortable work, downloading large files and watching videos. "
                       "Works for any sites. Speed up to %1 MBit/s")
                     .arg(speed);
-        } else {
-            return tr("VPN to access blocked sites in regions with high levels of Internet censorship. ");
+        } else if (serviceType == serviceType::amneziaFree){
+            QString description = tr("VPN to access blocked sites in regions with high levels of Internet censorship. ");
+            if (service.value(configKey::isAvailable).isBool() && !service.value(configKey::isAvailable).toBool()) {
+                description += tr("<p><a style=\"color: #EB5757;\">Not available in your region. If you have VPN enabled, disable it, return to the previous screen, and try again.</a>");
+            }
+            return description;
         }
     }
     case ServiceDescriptionRole: {
@@ -74,6 +80,14 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
         } else {
             return tr("Amnezia Free is a free VPN to bypass blocking in countries with high levels of internet censorship");
         }
+    }
+    case IsServiceAvailableRole: {
+        if (serviceType == serviceType::amneziaFree) {
+            if (service.value(configKey::isAvailable).isBool() && !service.value(configKey::isAvailable).toBool()) {
+                return false;
+            }
+        }
+        return true;
     }
     case SpeedRole: {
         auto speed = serviceInfo.value(configKey::speed).toString();
@@ -193,6 +207,7 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
     roles[NameRole] = "name";
     roles[CardDescriptionRole] = "cardDescription";
     roles[ServiceDescriptionRole] = "serviceDescription";
+    roles[IsServiceAvailableRole] = "isServiceAvailable";
     roles[SpeedRole] = "speed";
     roles[WorkPeriodRole] = "workPeriod";
     roles[RegionRole] = "region";
