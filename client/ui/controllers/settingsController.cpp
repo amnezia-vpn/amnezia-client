@@ -88,12 +88,12 @@ void SettingsController::toggleLogging(bool enable)
 
 void SettingsController::openLogsFolder()
 {
-    Logger::openLogsFolder();
+    Logger::openLogsFolder(false);
 }
 
 void SettingsController::openServiceLogsFolder()
 {
-    Logger::openServiceLogsFolder();
+    Logger::openLogsFolder(true);
 }
 
 void SettingsController::exportLogsFile(const QString &fileName)
@@ -119,7 +119,7 @@ void SettingsController::clearLogs()
 #ifdef Q_OS_ANDROID
     AndroidController::instance()->clearLogs();
 #else
-    Logger::clearLogs();
+    Logger::clearLogs(false);
     Logger::clearServiceLogs();
 #endif
 }

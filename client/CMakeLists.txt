@@ -110,6 +110,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/3rdparty.cmake)
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/../ipc
+    ${CMAKE_CURRENT_LIST_DIR}/../common/logger
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -131,7 +132,6 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/qml_register_protocols.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/pages.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/property_helper.h
     ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
     ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
@@ -140,6 +140,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/serialization.h
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/transfer.h
     ${CMAKE_CURRENT_LIST_DIR}/core/enums/apiEnums.h
+    ${CMAKE_CURRENT_LIST_DIR}/../common/logger/logger.h
 )
 
 # Mozilla headres
@@ -190,6 +191,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/trojan.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess_new.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../common/logger/logger.cpp
 )
 
 # Mozilla sources
