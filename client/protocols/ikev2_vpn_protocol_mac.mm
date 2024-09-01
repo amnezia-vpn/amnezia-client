@@ -62,8 +62,7 @@ CFDataRef CreatePersistentRefForIdentity(SecIdentityRef identity)
     const void *values[] = { kCFBooleanTrue,          identity };
     CFDictionaryRef dict = CFDictionaryCreate(NULL, keys, values,
                                               sizeof(keys) / sizeof(*keys), NULL, NULL);
-    
-    
+
     if (SecItemCopyMatching(dict, &persistent_ref) != 0) {
         SecItemAdd(dict, &persistent_ref);
     }
@@ -74,6 +73,19 @@ CFDataRef CreatePersistentRefForIdentity(SecIdentityRef identity)
     return (CFDataRef)persistent_ref;
 }
 
+NSData *searchKeychainCopyMatching(const char *certName)
+{
+        NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+        [dict setObject:(__bridge id)kSecClassCertificate forKey:(__bridge id)kSecClass];
+        [dict setObject:[NSString stringWithUTF8String:certName] forKey:(__bridge id)kSecAttrLabel];
+        [dict setObject:(__bridge id)kSecMatchLimitOne forKey:(__bridge id)kSecMatchLimit];
+        [dict setObject:@YES forKey:(__bridge id)kSecReturnPersistentRef];
+
+        CFTypeRef result = NULL;
+        SecItemCopyMatching((__bridge CFDictionaryRef)dict, &result);
+
+        return (NSData *)result;
+}
 
 ErrorCode Ikev2Protocol::start()
 {
@@ -85,10 +97,6 @@ ErrorCode Ikev2Protocol::start()
     
     setConnectionState(Vpn::ConnectionState::Disconnected);
     NEVPNManager *manager = [NEVPNManager sharedManager];
-
-    NSString *nsUsername = m_config.value(amnezia::config_key::hostName).toString().toNSString();
-    NSString *nsIp = m_config.value(amnezia::config_key::hostName).toString().toNSString();
-    NSString *nsRemoteId = m_config.value(amnezia::config_key::hostName).toString().toNSString();
 
     [manager loadFromPreferencesWithCompletionHandler:^(NSError *err)
     {
@@ -107,7 +115,6 @@ ErrorCode Ikev2Protocol::start()
 
             BIO *ibio, *obio = NULL;
             BUF_MEM *bptr;
-
 
             STACK_OF(X509) *certstack = sk_X509_new_null();
             BIO *p12 = BIO_new(BIO_s_mem());
@@ -161,15 +168,14 @@ ErrorCode Ikev2Protocol::start()
             SecIdentityRef identity = (__bridge SecIdentityRef)(firstItem[(__bridge id)kSecImportItemIdentity]);
 
             NEVPNProtocolIKEv2 *protocol = [[NEVPNProtocolIKEv2 alloc] init];
-            protocol.serverAddress = nsIp;
+            protocol.serverAddress = m_config.value(amnezia::config_key::hostName).toString().toNSString();
             protocol.certificateType = NEVPNIKEv2CertificateTypeRSA;
             
             protocol.remoteIdentifier = m_config.value(amnezia::config_key::hostName).toString().toNSString();
-            
             protocol.authenticationMethod = NEVPNIKEAuthenticationMethodCertificate;
-            protocol.identityReference = (__bridge NSData *)CreatePersistentRefForIdentity(identity);
-            
-            protocol.useExtendedAuthentication = YES;
+            protocol.identityReference = searchKeychainCopyMatching(m_config.value(amnezia::config_key::userName).toString().toLocal8Bit().data());
+
+            protocol.useExtendedAuthentication = NO;
             protocol.enablePFS = YES;
             
             protocol.IKESecurityAssociationParameters.encryptionAlgorithm = NEVPNIKEv2EncryptionAlgorithmAES256;
@@ -339,12 +345,11 @@ void Ikev2Protocol::handleNotificationImpl(int status)
         qDebug() << "Connection status changed: NEVPNStatusInvalid";
         [[NSNotificationCenter defaultCenter] removeObserver: (id)notificationId_ name: (NSString *)NEVPNStatusDidChangeNotification object: manager.connection];
         setConnectionState(Vpn::ConnectionState::Disconnected);
-
     }
     else if (status == NEVPNStatusDisconnected)
     {
         qDebug() << "Connection status changed: NEVPNStatusDisconnected";
-
+        setConnectionState(Vpn::ConnectionState::Disconnected);
         if (state_ == STATE_DISCONNECTING_ANY_ERROR)
         {
             [[NSNotificationCenter defaultCenter] removeObserver: (id)notificationId_ name: (NSString *)NEVPNStatusDidChangeNotification object: manager.connection];
