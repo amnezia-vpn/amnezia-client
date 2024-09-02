@@ -29,6 +29,13 @@
     #include <netinet/in.h>
     #include <arpa/inet.h>
     #include <net/route.h>
+    #include <arpa/inet.h>
+    #include <ifaddrs.h>
+    #include <libproc.h>
+    #include <netdb.h>
+    #include <netinet/in.h>
+    #include <semaphore.h>
+    #include <unistd.h>
 #endif
 
 #include <QHostAddress>
@@ -460,3 +467,112 @@ QString NetworkUtilities::getGatewayAndIface()
     return gateway;
 #endif
 }
+
+#if defined(Q_OS_MAC)
+QString NetworkUtilities::ipAddressByInterfaceName(const QString &interfaceName)
+{
+    struct ifaddrs *ifaddr, *ifa;
+    char host[NI_MAXHOST];
+
+    if (getifaddrs(&ifaddr) == -1)
+    {
+        return "";
+    }
+
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
+    {
+        if (ifa->ifa_addr == NULL)
+        {
+            continue;
+        }
+        int family = ifa->ifa_addr->sa_family;
+        QString iname = QString::fromStdString(ifa->ifa_name);
+
+        if (family == AF_INET && iname == interfaceName)
+        {
+            int s = getnameinfo(ifa->ifa_addr,
+                            (family == AF_INET) ? sizeof(struct sockaddr_in) :
+                                                  sizeof(struct sockaddr_in6),
+                            host, NI_MAXHOST,
+                            NULL, 0, NI_NUMERICHOST);
+            if (s != 0)
+            {
+                continue;
+            }
+
+            return QString::fromStdString(host);
+        }
+    }
+
+    freeifaddrs(ifaddr);
+    return "";
+}
+
+QString NetworkUtilities::lastConnectedNetworkInterfaceName()
+{
+    QString ifname("");
+
+    struct ifaddrs * interfaces = NULL;
+    struct ifaddrs * temp_addr = NULL;
+
+    if( getifaddrs(&interfaces) == 0 )
+    {
+        //Loop through linked list of interfaces
+        temp_addr = interfaces;
+        while( temp_addr != NULL )
+        {
+            if( temp_addr->ifa_addr->sa_family == AF_INET )
+            {
+                QString tname = temp_addr->ifa_name;
+                if( tname.startsWith("utun") )
+                    ifname = tname;
+                else if( tname.startsWith("ipsec") )
+                    ifname = tname;
+                else if( tname.startsWith("ppp") )
+                    ifname = tname;
+            }
+
+            temp_addr = temp_addr->ifa_next;
+        }
+
+        freeifaddrs(interfaces);
+    }
+    return ifname;
+}
+
+QString execCmd(const QString &cmd)
+{
+    char buffer[1024];
+    QString result = "";
+    FILE* pipe = popen(cmd.toStdString().c_str(), "r");
+    if (!pipe) return "";
+    while (!feof(pipe))
+    {
+        if (fgets(buffer, 1024, pipe) != NULL)
+        {
+            result += buffer;
+        }
+    }
+    pclose(pipe);
+    return result;
+}
+
+QStringList NetworkUtilities::getListOfDnsNetworkServiceEntries()
+{
+    QStringList result;
+    QString command = "echo 'list' | scutil | grep /Network/Service | grep DNS";
+    QString cmdOutput = execCmd(command).trimmed();
+    // qDebug() << "Raw result: " << cmdOutput;
+
+    QStringList lines = cmdOutput.split('\n');
+    for (QString line : lines)
+    {
+        if (line.contains("="))
+        {
+            QString entry = line.mid(line.indexOf("=")+1).trimmed();
+            result.append(entry);
+        }
+    }
+    return result;
+}
+#endif
