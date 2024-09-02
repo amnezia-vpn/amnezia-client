@@ -12,7 +12,7 @@
 #include "Winsvc.h"
 
 /**
- * @brief The WindowsServiceManager provides controll over the MozillaVPNBroker
+ * @brief The WindowsServiceManager provides control over the MozillaVPNBroker
  * service via SCM
  */
 class WindowsServiceManager : public QObject {
