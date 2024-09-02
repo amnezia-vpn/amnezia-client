@@ -56,16 +56,16 @@ Logger &Logger::Instance()
 
 bool Logger::init(bool isServiceLogger)
 {
-    QString path = isServiceLogger ? userLogsDir() : systemLogDir();
-    QString logFileName = isServiceLogger ? m_logFileName : m_serviceLogFileName;
+    QString path = isServiceLogger ? systemLogDir() : userLogsDir();
+    QString logFileName = isServiceLogger ? m_serviceLogFileName : m_logFileName ;
     QDir appDir(path);
     if (!appDir.mkpath(path)) {
         return false;
     }
 
-    m_file.setFileName(appDir.filePath(m_logFileName));
+    m_file.setFileName(appDir.filePath(logFileName));
     if (!m_file.open(QIODevice::Append)) {
-        qWarning() << "Cannot open log file:" << m_logFileName;
+        qWarning() << "Cannot open log file:" << logFileName;
         return false;
     }
 
