@@ -371,12 +371,6 @@ void Ikev2Protocol::handleNotificationImpl(int status)
             IpcClient::Interface()->enableKillSwitch(m_config, 0);
         }
 
-        if (m_config.value(amnezia::config_key::splitTunnelType).toInt() == 0) {
-            IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
-            IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
-            IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_config.value(amnezia::config_key::hostName).toString());
-        }
-   
         setConnectionState(Vpn::ConnectionState::Connected);
     }
     else if (status == NEVPNStatusReasserting)
