@@ -6,47 +6,47 @@
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="63"/>
         <source>Classic VPN for comfortable work, downloading large files and watching videos. Works for any sites. Speed up to %1 MBit/s</source>
-        <translation type="unfinished"></translation>
+        <translation>برای کار راحت، دانلود فایل‌های بزرگ و تماشای ویدیوها، از VPN کلاسیک استفاده کنید. این VPN برای هر سایتی کار می‌کند و سرعت آن تا %1 مگابیت بر ثانیه است.</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="67"/>
         <source>VPN to access blocked sites in regions with high levels of Internet censorship. </source>
-        <translation type="unfinished"></translation>
+        <translation>وی پی ان برای دسترسی به سایت‌های مسدود شده در مناطق با سانسور شدید اینترنت.</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="72"/>
         <source>Amnezia Premium - A classic VPN for comfortable work, downloading large files, and watching videos in high resolution. It works for all websites, even in countries with the highest level of internet censorship.</source>
-        <translation type="unfinished"></translation>
+        <translation>امنزیا پریمیوم - یک وی پی ان کلاسیک برای کار راحت، دانلود فایل‌های بزرگ و تماشای ویدیو با کیفیت بالا. قابل استفاده برای تمامی سایت‌ها، حتی در کشورهایی با بالاترین سطح سانسور اینترنت.</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="75"/>
         <source>Amnezia Free is a free VPN to bypass blocking in countries with high levels of internet censorship</source>
-        <translation type="unfinished"></translation>
+        <translation>امنزیا رایگان یک وی پی ان رایگان برای دور زدن مسدودیت‌ها در کشورهایی با سطح بالای سانسور اینترنت است.</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="80"/>
         <source>%1 MBit/s</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 MBit/s</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="87"/>
         <source>%1 days</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 روز</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="96"/>
         <source>VPN will open only popular sites blocked in your region, such as Instagram, Facebook, Twitter and others. Other sites will be opened from your real IP address, &lt;a href=&quot;%1/free&quot; style=&quot;color: #FBB26A;&quot;&gt;more details on the website.&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>وی پی ان فقط سایت‌های محبوبی را که در منطقه شما مسدود شده‌اند، مانند اینستاگرام، فیسبوک، توییتر و غیره باز می‌کند. سایر سایت‌ها با آدرس آی‌پی واقعی شما باز خواهند شد. &lt;a href=&quot;%1/free&quot; style=&quot;color: #FBB26A;&quot;&gt;more details on the website.&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="104"/>
         <source>Free</source>
-        <translation type="unfinished"></translation>
+        <translation>رایگان</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="106"/>
         <source>%1 $/month</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 $/ماه</translation>
     </message>
 </context>
 <context>
@@ -54,22 +54,22 @@
     <message>
         <location filename="../ui/controllers/appSplitTunnelingController.cpp" line="23"/>
         <source>Application added: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>برنامه اضافه شد: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/appSplitTunnelingController.cpp" line="26"/>
         <source>The application has already been added</source>
-        <translation type="unfinished"></translation>
+        <translation>برنامه از قبل اضافه شده است</translation>
     </message>
     <message>
         <location filename="../ui/controllers/appSplitTunnelingController.cpp" line="37"/>
         <source>The selected applications have been added</source>
-        <translation type="unfinished"></translation>
+        <translation>برنامه‌های انتخاب شده اضافه شدند</translation>
     </message>
     <message>
         <location filename="../ui/controllers/appSplitTunnelingController.cpp" line="48"/>
         <source>Application removed: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>برنامه حذف شد: %1</translation>
     </message>
 </context>
 <context>
@@ -77,7 +77,7 @@
     <message>
         <location filename="../ui/qml/Components/ConnectButton.qml" line="27"/>
         <source>Unable to disconnect during configuration preparation</source>
-        <translation type="unfinished"></translation>
+        <translation>در هنگام آماده‌سازی پیکربندی، نمی‌توان از اتصال خارج شد.</translation>
     </message>
 </context>
 <context>
@@ -102,7 +102,7 @@
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="110"/>
         <source>Preparing...</source>
-        <translation type="unfinished"></translation>
+        <translation>در حال آماده‌سازی...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="132"/>
@@ -118,12 +118,12 @@
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="209"/>
         <source>The selected protocol is not supported on the current platform</source>
-        <translation type="unfinished">پروتکل انتخاب شده بر روی این پلتفرم پشتیبانی نمی‎‎شود</translation>
+        <translation>پروتکل انتخاب‌شده در پلتفرم فعلی پشتیبانی نمی‌شود.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="233"/>
         <source>unable to create configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان پیکربندی را ایجاد کرد.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="95"/>
@@ -256,13 +256,13 @@ Can&apos;t be disabled for current server</source>
     <message>
         <location filename="../ui/controllers/importController.cpp" line="87"/>
         <source>Unable to open file</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان فایل را باز کرد.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/importController.cpp" line="186"/>
         <location filename="../ui/controllers/importController.cpp" line="191"/>
         <source>Invalid configuration file</source>
-        <translation type="unfinished"></translation>
+        <translation>فایل پیکربندی نامعتبر است.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/importController.cpp" line="606"/>
@@ -272,7 +272,7 @@ Can&apos;t be disabled for current server</source>
     <message>
         <location filename="../ui/controllers/importController.cpp" line="641"/>
         <source>In the imported configuration, potentially dangerous lines were found:</source>
-        <translation type="unfinished"></translation>
+        <translation>در پیکربندی وارد شده، خطوطی که ممکن است خطرناک باشند، یافت شدند:</translation>
     </message>
 </context>
 <context>
@@ -329,12 +329,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/controllers/installController.cpp" line="608"/>
         <source>Api config removed</source>
-        <translation type="unfinished"></translation>
+        <translation>پیکربندی API حذف شد.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="630"/>
         <source>%1 cached profile cleared</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 پروفایل ذخیره شده پاک شد.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="769"/>
@@ -349,17 +349,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/controllers/installController.cpp" line="845"/>
         <source>%1 installed successfully.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 با موفقیت نصب شد.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="877"/>
         <source>API config reloaded</source>
-        <translation type="unfinished"></translation>
+        <translation>پیکربندی API دوباره بارگذاری شد.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="881"/>
         <source>Successfully changed the country of connection to %1</source>
-        <translation type="unfinished"></translation>
+        <translation>کشور اتصال با موفقیت به %1 تغییر یافت.</translation>
     </message>
 </context>
 <context>
@@ -367,17 +367,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="57"/>
         <source>Choose application</source>
-        <translation type="unfinished"></translation>
+        <translation>انتخاب برنامه</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="139"/>
         <source>application name</source>
-        <translation type="unfinished"></translation>
+        <translation>نام برنامه</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="152"/>
         <source>Add selected</source>
-        <translation type="unfinished"></translation>
+        <translation>اضافه کردن انتخاب شده</translation>
     </message>
 </context>
 <context>
@@ -453,7 +453,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="67"/>
         <source>Logging enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>لاگ‌برداری فعال شد</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="111"/>
@@ -589,7 +589,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="382"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان تنظیمات را تغییر داد در حالی که اتصال فعال است.</translation>
     </message>
 </context>
 <context>
@@ -623,7 +623,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="193"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان تنظیمات را تغییر داد در حالی که اتصال فعال است.</translation>
     </message>
 </context>
 <context>
@@ -794,7 +794,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="445"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان تنظیمات را تغییر داد در حالی که اتصال فعال است.</translation>
     </message>
     <message>
         <source>Remove OpenVPN</source>
@@ -895,7 +895,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="181"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان تنظیمات را تغییر داد در حالی که اتصال فعال است.</translation>
     </message>
 </context>
 <context>
@@ -903,22 +903,22 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="94"/>
         <source>WG settings</source>
-        <translation type="unfinished"></translation>
+        <translation>تنظیمات WG</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="102"/>
         <source>Port</source>
-        <translation type="unfinished">پورت</translation>
+        <translation>پورت</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="123"/>
         <source>MTU</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="157"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان تنظیمات را تغییر داد در حالی که اتصال فعال است.</translation>
     </message>
     <message>
         <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
@@ -939,22 +939,22 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="95"/>
         <source>XRay settings</source>
-        <translation type="unfinished"></translation>
+        <translation>تنظیمات XRay</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="103"/>
         <source>Disguised as traffic from</source>
-        <translation type="unfinished">پنهان کردن به عنوان ترافیک از</translation>
+        <translation>به‌عنوان ترافیک از طرف زیر نمایش داده می‌شود</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="129"/>
         <source>Save</source>
-        <translation type="unfinished">ذخیره</translation>
+        <translation>ذخیره</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="137"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان تنظیمات را تغییر داد در حالی که اتصال فعال است.</translation>
     </message>
 </context>
 <context>
@@ -1001,7 +1001,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="85"/>
         <source>Cannot remove AmneziaDNS from running server</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان AmneziaDNS را از سرور در حال اجرا حذف کرد.</translation>
     </message>
 </context>
 <context>
@@ -1093,18 +1093,18 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="26"/>
         <source>Settings updated successfully</source>
-        <translation type="unfinished"></translation>
+        <translation>تنظیمات با موفقیت به‌روزرسانی شد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="93"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="250"/>
         <source>SOCKS5 settings</source>
-        <translation type="unfinished"></translation>
+        <translation>تنظیمات SOCKS5</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="104"/>
         <source>Host</source>
-        <translation type="unfinished">هاست</translation>
+        <translation>هاستمیزبان</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="114"/>
@@ -1112,50 +1112,50 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="162"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="189"/>
         <source>Copied</source>
-        <translation type="unfinished">کپی شد</translation>
+        <translation>کپی شد</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="125"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="260"/>
         <source>Port</source>
-        <translation type="unfinished">پورت</translation>
+        <translation>پورت</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="149"/>
         <source>User name</source>
-        <translation type="unfinished">نام کاربری</translation>
+        <translation>نام کاربری</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="173"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="306"/>
         <source>Password</source>
-        <translation type="unfinished">رمز عبور</translation>
+        <translation>رمز عبور</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="282"/>
         <source>Username</source>
-        <translation type="unfinished"></translation>
+        <translation>نام کاربری</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="336"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="374"/>
         <source>Change connection settings</source>
-        <translation type="unfinished"></translation>
+        <translation>تغییر تنظیمات اتصال</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="343"/>
         <source>The port must be in the range of 1 to 65535</source>
-        <translation type="unfinished"></translation>
+        <translation>پورت باید در محدوده ۱ تا ۶۵۵۳۵ باشد</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="347"/>
         <source>Password cannot be empty</source>
-        <translation type="unfinished"></translation>
+        <translation>رمز عبور نمی‌تواند خالی باشد</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="350"/>
         <source>Username cannot be empty</source>
-        <translation type="unfinished"></translation>
+        <translation>نام کاربری نمی‌تواند خالی باشد</translation>
     </message>
 </context>
 <context>
@@ -1285,7 +1285,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="113"/>
         <source>https://t.me/amnezia_vpn_en</source>
-        <translation>https://t.me/amnezia_vpn</translation>
+        <translation>https://t.me/amnezia_vpn_ir</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="123"/>
@@ -1337,22 +1337,22 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="45"/>
         <source>For the region</source>
-        <translation type="unfinished"></translation>
+        <translation>برای منطقه</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="54"/>
         <source>Price</source>
-        <translation type="unfinished"></translation>
+        <translation>قیمت</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="63"/>
         <source>Work period</source>
-        <translation type="unfinished"></translation>
+        <translation>مدت زمان کار</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="74"/>
         <source>Speed</source>
-        <translation type="unfinished"></translation>
+        <translation>سرعت</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="106"/>
@@ -1362,49 +1362,49 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="119"/>
         <source>Copied</source>
-        <translation type="unfinished">کپی شد</translation>
+        <translation>کپی شد</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="139"/>
         <source>Reload API config</source>
-        <translation type="unfinished"></translation>
+        <translation>بارگذاری مجدد پیکربندی API</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="144"/>
         <source>Reload API config?</source>
-        <translation type="unfinished"></translation>
+        <translation>آیا می‌خواهید پیکربندی API را دوباره بارگذاری کنید؟</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="145"/>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="185"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation>ادامه دهید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="146"/>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="186"/>
         <source>Cancel</source>
-        <translation type="unfinished">کنسل</translation>
+        <translation>لغو</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="150"/>
         <source>Cannot reload API config during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان پیکربندی API را در حین اتصال فعال دوباره بارگذاری کرد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="179"/>
         <source>Remove from application</source>
-        <translation type="unfinished"></translation>
+        <translation>حذف از برنامه</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="184"/>
         <source>Remove from application?</source>
-        <translation type="unfinished"></translation>
+        <translation>آیا می‌خواهید از برنامه حذف کنید؟</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="190"/>
         <source>Cannot remove server during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان سرور را در حین اتصال فعال حذف کرد.</translation>
     </message>
 </context>
 <context>
@@ -1412,57 +1412,57 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="30"/>
         <source>Cannot change split tunneling settings during active connection</source>
-        <translation type="unfinished">نمی توان تنظیمات تونل تقسیم را در طول اتصال فعال تغییر داد</translation>
+        <translation>نمی توان تنظیمات تونل تقسیم را در طول اتصال فعال تغییر دادنمی‌توان تنظیمات تقسیم تونلینگ را در حین اتصال فعال تغییر داد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="51"/>
         <source>Only the apps from the list should have access via VPN</source>
-        <translation type="unfinished"></translation>
+        <translation>فقط برنامه‌های موجود در لیست باید از طریق VPN دسترسی داشته باشند.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="56"/>
         <source>Apps from the list should not have access via VPN</source>
-        <translation type="unfinished"></translation>
+        <translation>برنامه‌های موجود در لیست نباید از طریق VPN دسترسی داشته باشند.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="93"/>
         <source>App split tunneling</source>
-        <translation type="unfinished"></translation>
+        <translation>تقسیم تونلینگ برنامه‌ها</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="129"/>
         <source>Mode</source>
-        <translation type="unfinished">حالت</translation>
+        <translation>حالت</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="221"/>
         <source>Remove </source>
-        <translation type="unfinished"></translation>
+        <translation>حذف </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="222"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation>ادامه دهید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="223"/>
         <source>Cancel</source>
-        <translation type="unfinished">کنسل</translation>
+        <translation>کنسل</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="267"/>
         <source>application name</source>
-        <translation type="unfinished"></translation>
+        <translation>نام برنامه</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="278"/>
         <source>Open executable file</source>
-        <translation type="unfinished"></translation>
+        <translation>فایل اجرایی را باز کنید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="279"/>
         <source>Executable files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>فایل‌های اجرایی (*.*)</translation>
     </message>
 </context>
 <context>
@@ -1480,12 +1480,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="94"/>
         <source>Enable notifications</source>
-        <translation type="unfinished"></translation>
+        <translation>فعال کردن اعلان‌ها</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="95"/>
         <source>Enable notifications to show the VPN state in the status bar</source>
-        <translation type="unfinished"></translation>
+        <translation>اعلان ها را فعال کنید تا وضعیت VPN را در نوار وضعیت ببینید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="117"/>
@@ -1565,7 +1565,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="240"/>
         <source>Cannot reset settings during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان تنظیمات را در حین اتصال فعال بازنشانی کرد.</translation>
     </message>
 </context>
 <context>
@@ -1644,7 +1644,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="153"/>
         <source>Cannot restore backup settings during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان تنظیمات پشتیبان را در حین اتصال فعال بازیابی کرد.</translation>
     </message>
 </context>
 <context>
@@ -1682,17 +1682,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="154"/>
         <source>KillSwitch</source>
-        <translation type="unfinished"></translation>
+        <translation>KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="155"/>
         <source>Disables your internet if your encrypted VPN connection drops out for any reason.</source>
-        <translation type="unfinished"></translation>
+        <translation>اگر به هر دلیلی اتصال VPN رمزگذاری شده شما قطع شود، اینترنت شما را غیرفعال می‌کند.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="166"/>
         <source>Cannot change killSwitch settings during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان تنظیمات Kill Switch را در حین اتصال فعال تغییر داد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="97"/>
@@ -1778,7 +1778,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="24"/>
         <source>Logging is enabled. Note that logs will be automatically disabled after 14 days, and all log files will be deleted.</source>
-        <translation type="unfinished"></translation>
+        <translation>ثبت وقایع فعال است. توجه داشته باشید که ثبت وقایع به‌طور خودکار پس از ۱۴ روز غیرفعال شده و تمام فایل‌های ثبت وقایع حذف خواهند شد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="69"/>
@@ -1919,7 +1919,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="134"/>
         <source>Cannot reboot server during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان سرور را در حین اتصال فعال راه‌اندازی مجدد کرد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="176"/>
@@ -1929,7 +1929,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="183"/>
         <source>Cannot remove server during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان سرور را در حین اتصال فعال حذف کرد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="218"/>
@@ -1944,7 +1944,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="225"/>
         <source>Cannot clear server from Amnezia software during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان سرور را در حین اتصال فعال از نرم‌افزار Amnezia پاک کرد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="253"/>
@@ -1959,7 +1959,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="266"/>
         <source>Cannot reset API config during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان پیکربندی API را در حین اتصال فعال بازنشانی کرد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="162"/>
@@ -2015,12 +2015,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="135"/>
         <source>Clear %1 profile</source>
-        <translation type="unfinished"></translation>
+        <translation>پاک کردن پروفایل %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="138"/>
         <source>Clear %1 profile?</source>
-        <translation type="unfinished"></translation>
+        <translation>آیا می‌خواهید پروفایل %1 را پاک کنید؟</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="137"/>
@@ -2030,7 +2030,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="145"/>
         <source>Unable to clear %1 profile while there is an active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان پروفایل %1 را در حین اتصال فعال پاک کرد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="186"/>
@@ -2050,7 +2050,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="198"/>
         <source>Cannot remove active container</source>
-        <translation type="unfinished"></translation>
+        <translation>نمی‌توان کانتینر فعال را حذف کرد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="140"/>
@@ -2179,32 +2179,32 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml" line="62"/>
         <source>For the region</source>
-        <translation type="unfinished"></translation>
+        <translation>برای منطقه</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml" line="71"/>
         <source>Price</source>
-        <translation type="unfinished"></translation>
+        <translation>قیمت</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml" line="80"/>
         <source>Work period</source>
-        <translation type="unfinished"></translation>
+        <translation>مدت زمان کار</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml" line="91"/>
         <source>Speed</source>
-        <translation type="unfinished"></translation>
+        <translation>سرعت</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml" line="100"/>
         <source>Features</source>
-        <translation type="unfinished"></translation>
+        <translation>ویژگی‌ها</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml" line="139"/>
         <source>Connect</source>
-        <translation type="unfinished">اتصال</translation>
+        <translation>اتصال</translation>
     </message>
 </context>
 <context>
@@ -2212,12 +2212,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="52"/>
         <source>VPN by Amnezia</source>
-        <translation type="unfinished"></translation>
+        <translation>VPN توسط Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="53"/>
         <source>Choose a VPN service that suits your needs.</source>
-        <translation type="unfinished"></translation>
+        <translation>یک سرویس VPN که مناسب نیازهای شما باشد را انتخاب کنید.</translation>
     </message>
 </context>
 <context>
@@ -2254,67 +2254,67 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="57"/>
         <source>Connection</source>
-        <translation type="unfinished">ارتباط</translation>
+        <translation>ارتباط</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="67"/>
         <source>Insert the key, add a configuration file or scan the QR-code</source>
-        <translation type="unfinished"></translation>
+        <translation>کلید را وارد کنید، فایل پیکربندی را اضافه کنید یا کد QR را اسکن کنید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
         <source>Insert key</source>
-        <translation type="unfinished"></translation>
+        <translation>کلید را وارد کنید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="78"/>
         <source>Insert</source>
-        <translation type="unfinished">وارد کردن</translation>
+        <translation>وارد کردن</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="98"/>
         <source>Continue</source>
-        <translation type="unfinished"></translation>
+        <translation>ادامه دهید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="116"/>
         <source>Other connection options</source>
-        <translation type="unfinished"></translation>
+        <translation>گزینه‌های اتصال دیگر</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="129"/>
         <source>VPN by Amnezia</source>
-        <translation type="unfinished"></translation>
+        <translation>VPN توسط Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="130"/>
         <source>Connect to classic paid and free VPN services from Amnezia</source>
-        <translation type="unfinished"></translation>
+        <translation>اتصال به سرویس‌های VPN کلاسیک پولی و رایگان از Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="153"/>
         <source>Self-hosted VPN</source>
-        <translation type="unfinished"></translation>
+        <translation>Self-hosted VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="154"/>
         <source>Configure Amnezia VPN on your own server</source>
-        <translation type="unfinished"></translation>
+        <translation>پیکربندی VPN Amnezia بر روی سرور خودتان</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="174"/>
         <source>Restore from backup</source>
-        <translation type="unfinished">بازیابی از پشتیبان</translation>
+        <translation>بازیابی از پشتیبان</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="180"/>
         <source>Open backup file</source>
-        <translation type="unfinished">باز کردن فایل پشتیبان</translation>
+        <translation>باز کردن فایل پشتیبان</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="181"/>
         <source>Backup files (*.backup)</source>
-        <translation type="unfinished">Backup files (*.backup)</translation>
+        <translation>Backup files (*.backup)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="206"/>
@@ -2329,7 +2329,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="248"/>
         <source>I have nothing</source>
-        <translation type="unfinished">من هیچی ندارم</translation>
+        <translation>من هیچی ندارم</translation>
     </message>
     <message>
         <source>Key as text</source>
@@ -2381,12 +2381,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="153"/>
         <source>How to run your VPN server</source>
-        <translation type="unfinished"></translation>
+        <translation>چگونه سرور VPN خود را اجرا کنید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="154"/>
         <source>Where to get connection data, step-by-step instructions for buying a VPS</source>
-        <translation type="unfinished"></translation>
+        <translation>داده‌های اتصال را از کجا دریافت کنید و دستورالعمل‌های مرحله به مرحله برای خرید یک VPS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="170"/>
@@ -2501,7 +2501,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="267"/>
         <source>The port must be in the range of 1 to 65535</source>
-        <translation type="unfinished"></translation>
+        <translation>پورت باید در محدوده ۱ تا ۶۵۵۳۵ باشد</translation>
     </message>
 </context>
 <context>
@@ -2550,7 +2550,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="48"/>
         <source>Let&apos;s get started</source>
-        <translation type="unfinished"></translation>
+        <translation>بیایید شروع کنیم</translation>
     </message>
 </context>
 <context>
@@ -2601,7 +2601,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="123"/>
         <source>Enable WireGuard obfuscation. It may be useful if WireGuard is blocked on your provider.</source>
-        <translation type="unfinished"></translation>
+        <translation>فعال‌سازی استتار WireGuard. این ممکن است مفید باشد اگر WireGuard توسط ارائه‌دهنده شما مسدود شده باشد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="144"/>
@@ -2680,7 +2680,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="96"/>
         <source>Save XRay config</source>
-        <translation type="unfinished"></translation>
+        <translation>ذخیره پیکربندی XRay</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="122"/>
@@ -2705,7 +2705,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="152"/>
         <source>XRay native format</source>
-        <translation type="unfinished"></translation>
+        <translation>فرمت بومی XRay</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
@@ -2741,22 +2741,22 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="817"/>
         <source>Creation date: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>تاریخ ایجاد: %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="825"/>
         <source>Latest handshake: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>آخرین ارتباط: %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="833"/>
         <source>Data received: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>داده‌های دریافت شده: %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="841"/>
         <source>Data sent: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>داده‌های ارسال شده: %1</translation>
     </message>
     <message>
         <source>Creation date: </source>
@@ -2882,12 +2882,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="198"/>
         <source>Logging was disabled after 14 days, log files were deleted</source>
-        <translation type="unfinished"></translation>
+        <translation>ثبت وقایع پس از ۱۴ روز غیرفعال شد و فایل‌های ثبت وقایع حذف شدند</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="202"/>
         <source>Settings restored from backup file</source>
-        <translation type="unfinished"></translation>
+        <translation>تنظیمات از فایل پشتیبان بازیابی شد</translation>
     </message>
 </context>
 <context>
@@ -3296,17 +3296,17 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="14"/>
         <source>Background service is not running</source>
-        <translation type="unfinished"></translation>
+        <translation>Background service is not running</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="23"/>
         <source>Server error: Packet manager error</source>
-        <translation type="unfinished"></translation>
+        <translation>Server error: Packet manager error</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="34"/>
         <source>SCP error: Generic failure</source>
-        <translation type="unfinished"></translation>
+        <translation>SCP error: Generic failure</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="38"/>
@@ -3356,17 +3356,17 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="60"/>
         <source>In the response from the server, an empty config was received</source>
-        <translation type="unfinished"></translation>
+        <translation>در پاسخ از سرور، پیکربندی خالی دریافت شد</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="61"/>
         <source>SSL error occurred</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">SSL error occurred</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="62"/>
         <source>Server response timeout on api request</source>
-        <translation type="unfinished"></translation>
+        <translation>Server response timeout on api request</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="63"/>
@@ -3426,12 +3426,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../containers/containers_defs.cpp" line="127"/>
         <source>XRay with REALITY - Suitable for countries with the highest level of internet censorship. Traffic masking as web traffic at the TLS level, and protection against detection by active probing methods.</source>
-        <translation type="unfinished"></translation>
+        <translation>XRay با REALITY - مناسب برای کشورهایی با بالاترین سطح سانسور اینترنت. استتار ترافیک به عنوان ترافیک وب در سطح TLS و حفاظت در برابر شناسایی با روش‌های پروب فعال.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="130"/>
         <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation type="unfinished"></translation>
+        <translation>IKEv2/IPsec - پروتکل مدرن و پایدار، کمی سریع‌تر از سایرین است و پس از قطع شدن سیگنال، اتصال را بازیابی می‌کند. از پشتیبانی بومی در آخرین نسخه‌های Android و iOS برخوردار است.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="137"/>
@@ -3504,7 +3504,11 @@ WireGuard به دلیل امضاهای بسته متمایز خود، بسیار
 It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
 This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
 Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
-        <translation type="unfinished"></translation>
+        <translation>پروتکل REALITY، یک توسعه پیشگامانه توسط خالقان XRay، به‌طور خاص برای مقابله با بالاترین سطح سانسور اینترنتی طراحی شده است و از رویکرد نوآورانه‌ای برای دور زدن محدودیت‌ها استفاده می‌کند.
+
+REALITY به‌طور منحصربه‌فردی سانسورچیان را در مرحله دست‌دهی TLS شناسایی می‌کند و به‌صورت یکپارچه به‌عنوان پراکسی برای کاربران قانونی عمل می‌کند، در حالی که سانسورچیان را به سایت‌های معتبر مانند google.com هدایت می‌کند و در نتیجه یک گواهی TLS واقعی و داده‌های اصلی ارائه می‌دهد.
+
+این قابلیت پیشرفته، REALITY را از فناوری‌های مشابه متمایز می‌کند، زیرا می‌تواند ترافیک وب را بدون نیاز به پیکربندی‌های خاص، به‌عنوان ترافیک از سایت‌های تصادفی و معتبر جا بزند. برخلاف پروتکل‌های قدیمی‌تر مانند VMess، VLESS و انتقال XTLS-Vision، تشخیص نوآورانه &quot;دوست یا دشمن&quot; REALITY در مرحله دست‌دهی TLS امنیت را افزایش داده و از شناسایی توسط سیستم‌های پیشرفته DPI که از تکنیک‌های پروب فعال استفاده می‌کنند، جلوگیری می‌کند. این ویژگی REALITY را به یک راه‌حل قوی برای حفظ آزادی اینترنت در محیط‌هایی با سانسور شدید تبدیل می‌کند.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="230"/>
@@ -3665,7 +3669,7 @@ For more detailed information, you can
         <location filename="../containers/containers_defs.cpp" line="104"/>
         <location filename="../containers/containers_defs.cpp" line="248"/>
         <source>SOCKS5 proxy server</source>
-        <translation type="unfinished"></translation>
+        <translation>سرور پروکسی SOCKS5</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/qtkeychain/libsecret.cpp" line="119"/>
