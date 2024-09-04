@@ -27,6 +27,7 @@ public:
 
     Q_PROPERTY(bool isDevModeEnabled READ isDevModeEnabled NOTIFY devModeEnabled)
     Q_PROPERTY(QString gatewayEndpoint READ getGatewayEndpoint WRITE setGatewayEndpoint NOTIFY gatewayEndpointChanged)
+    Q_PROPERTY(bool isDevGatewayEnv READ isDevGatewayEnv WRITE toggleDevGatewayEnv NOTIFY devGatewayEnvChanged)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -81,6 +82,8 @@ public slots:
     void resetGatewayEndpoint();
     void setGatewayEndpoint(const QString &endpoint);
     QString getGatewayEndpoint();
+    bool isDevGatewayEnv();
+    void toggleDevGatewayEnv(bool enabled);
 
 signals:
     void primaryDnsChanged();
@@ -103,6 +106,7 @@ signals:
 
     void devModeEnabled();
     void gatewayEndpointChanged(const QString &endpoint);
+    void devGatewayEnvChanged(bool enabled);
 
 private:
     QSharedPointer<ServersModel> m_serversModel;
