@@ -28,6 +28,7 @@ void GoodbyeDPIProtocol::stop()
     if (m_goodbyeDPIProcess) {
         m_goodbyeDPIProcess->close();
     }
+    setConnectionState(Vpn::ConnectionState::Disconnected);
 }
 
 ErrorCode GoodbyeDPIProtocol::start()
@@ -55,7 +56,8 @@ ErrorCode GoodbyeDPIProtocol::start()
 
     m_goodbyeDPIProcess->setProgram(PermittedProcess::GoodbyeDPI);
 
-    QStringList arguments({"-9", "--blacklist", "goodbyedpi/russia-blacklist.txt", "--blacklist", "goodbyedpi/russia-youtube.txt"});
+    QStringList arguments({"-9", "--blacklist", QCoreApplication::applicationDirPath() + "/goodbyedpi/russia-blacklist.txt",
+                           "--blacklist", QCoreApplication::applicationDirPath() + "/goodbyedpi/russia-youtube.txt"});
 
     m_goodbyeDPIProcess->setArguments(arguments);
     qDebug() << arguments.join(" ");
