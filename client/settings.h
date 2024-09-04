@@ -183,7 +183,7 @@ public:
 
     bool isScreenshotsEnabled() const
     {
-        return value("Conf/screenshotsEnabled", false).toBool();
+        return value("Conf/screenshotsEnabled", true).toBool();
     }
     void setScreenshotsEnabled(bool enabled)
     {
