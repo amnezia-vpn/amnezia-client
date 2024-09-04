@@ -10,10 +10,10 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 <br>
 
-<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.6.0.3/AmneziaVPN_4.6.0.3_x64.exe"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/win.png" width="150" style="max-width: 100%;"></a> 
-<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.6.0.3/AmneziaVPN_4.6.0.3.dmg"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/mac.png" width="150" style="max-width: 100%;"></a> 
-<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.6.0.3/AmneziaVPN_Linux_4.6.0.3.tar.zip"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/lin.png" width="150" style="max-width: 100%;"></a>
-<a href="https://github.com/amnezia-vpn/amnezia-client/releases/tag/4.6.0.3"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/andr.png" width="150" style="max-width: 100%;"></a>
+<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.7.0.0/AmneziaVPN_4.7.0.0_x64.exe"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/win.png" width="150" style="max-width: 100%;"></a> 
+<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.7.0.0/AmneziaVPN_4.7.0.0.dmg"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/mac.png" width="150" style="max-width: 100%;"></a> 
+<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.7.0.0/AmneziaVPN_Linux_4.7.0.0.tar.zip"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/lin.png" width="150" style="max-width: 100%;"></a>
+<a href="https://github.com/amnezia-vpn/amnezia-client/releases/tag/4.7.0.0"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/andr.png" width="150" style="max-width: 100%;"></a>
 
 <br>
 
