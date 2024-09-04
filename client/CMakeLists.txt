@@ -261,10 +261,12 @@ if(WIN32)
     )
 
     set(HEADERS ${HEADERS}
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/goodbyedpi.h
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_windows.h
     )
 
     set(SOURCES ${SOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/protocols/goodbyedpi.cpp
         ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_windows.cpp
     )
 

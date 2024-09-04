@@ -14,7 +14,8 @@ enum PermittedProcess {
     OpenVPN,
     Wireguard,
     Tun2Socks,
-    CertUtil
+    CertUtil,
+    GoodbyeDPI
 };
 
 inline QString permittedProcessPath(PermittedProcess pid)
@@ -27,6 +28,8 @@ inline QString permittedProcessPath(PermittedProcess pid)
         return Utils::certUtilPath();
     } else if (pid == PermittedProcess::Tun2Socks) {
         return Utils::tun2socksPath();
+    } else if (pid == PermittedProcess::GoodbyeDPI){
+        return Utils::goodbyedpiPath();
     }
     return "";
 }

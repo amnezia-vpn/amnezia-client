@@ -254,7 +254,8 @@ namespace amnezia
             TorWebSite,
             Dns,
             Sftp,
-            Socks5Proxy
+            Socks5Proxy,
+            GoodyeDPI
         };
         Q_ENUM_NS(Proto)
 

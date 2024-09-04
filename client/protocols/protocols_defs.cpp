@@ -75,6 +75,7 @@ QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
              { Proto::SSXray, "Shadowsocks"},
 
 
+             { Proto::GoodyeDPI, "GoodbyeDPI"},
              { Proto::TorWebSite, "Website in Tor network" },
              { Proto::Dns, "DNS Service" },
              { Proto::Sftp, QObject::tr("SFTP service") },
@@ -99,6 +100,7 @@ amnezia::ServiceType ProtocolProps::protocolService(Proto p)
     case Proto::Awg: return ServiceType::Vpn;
     case Proto::Ikev2: return ServiceType::Vpn;
     case Proto::Xray: return ServiceType::Vpn;
+    case Proto::GoodyeDPI: return ServiceType::Vpn;
 
     case Proto::TorWebSite: return ServiceType::Other;
     case Proto::Dns: return ServiceType::Other;

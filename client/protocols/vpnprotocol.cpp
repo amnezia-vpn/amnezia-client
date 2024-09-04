@@ -14,6 +14,7 @@
 
 #ifdef Q_OS_WINDOWS
     #include "ikev2_vpn_protocol_windows.h"
+    #include "goodbyedpi.h"
 #endif
 
 VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject *parent)
@@ -108,6 +109,7 @@ VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &
     switch (container) {
 #if defined(Q_OS_WINDOWS)
     case DockerContainer::Ipsec: return new Ikev2Protocol(configuration);
+    case DockerContainer::GoodbyeDPI: return new GoodbyeDPIProtocol(configuration);
 #endif
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
     case DockerContainer::OpenVpn: return new OpenVpnProtocol(configuration);
