@@ -141,7 +141,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
              { DockerContainer::Socks5Proxy,
                QObject::tr("") } ,
              { DockerContainer::GoodbyeDPI,
-               QObject::tr("GoodbueDPI --//DESRIPTION//--") }};
+               QObject::tr("GoodbyeDPI — Deep Packet Inspection circumvention utility") }};
 }
 
 QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
@@ -251,7 +251,9 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "as well as mount the disk on your device to access\n it directly from your device.\n\n"
                       "For more detailed information, you can\n find it in the support section under \"Create SFTP file storage.\" ") },
         { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") },
-        { DockerContainer::GoodbyeDPI, QObject::tr("GoodbyeDPI --//DETAILED DESRIPTION//--") }
+        { DockerContainer::GoodbyeDPI, QObject::tr("This software designed to bypass Deep Packet Inspection systems found in many Internet Service Providers which block access to certain websites. \n"
+                                                   "It handles DPI connected using optical splitter or port mirroring (Passive DPI) which do not block any data but just replying faster than requested destination,"
+                                                   "and Active DPI connected in sequence.") }
 
     };
 }
