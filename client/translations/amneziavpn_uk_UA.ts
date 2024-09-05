@@ -29,7 +29,7 @@
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="63"/>
         <source>Classic VPN for comfortable work, downloading large files and watching videos. Works for any sites. Speed up to %1 MBit/s</source>
-        <translation>Класичний VPN для комфортної роботи, завантаження великих файлів та перегляду відео. Працює для будь-яких сайтів. Швидкість до %1 MBit/s</translation>
+        <translation>Звичайний VPN для комфортної роботи, завантаження великих файлів та перегляду відео. Працює для будь-яких сайтів. Швидкість до %1 MBit/s</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="67"/>
@@ -39,7 +39,7 @@
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="72"/>
         <source>Amnezia Premium - A classic VPN for comfortable work, downloading large files, and watching videos in high resolution. It works for all websites, even in countries with the highest level of internet censorship.</source>
-        <translation>Amnezia Premium - класичний VPN для комфортної роботи, завантаження великих файлів та перегляду відео у високій роздільній здатності. Працює для всіх вебсайтів, навіть у країнах з найвищим рівнем інтернет-цензури.</translation>
+        <translation>Amnezia Premium - звичайний VPN для комфортної роботи, завантаження великих файлів та перегляду відео у високій роздільній здатності. Працює для всіх вебсайтів, навіть у країнах з найвищим рівнем інтернет-цензури.</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="75"/>
@@ -59,7 +59,7 @@
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="96"/>
         <source>VPN will open only popular sites blocked in your region, such as Instagram, Facebook, Twitter and others. Other sites will be opened from your real IP address, &lt;a href=&quot;%1/free&quot; style=&quot;color: #FBB26A;&quot;&gt;more details on the website.&lt;/a&gt;</source>
-        <translation>VPN відкриватиме лише популярні сайти, заблоковані у вашому регіоні, такі як Instagram, Facebook, Twitter та інші. Інші сайти будуть відкриватися з вашої реальної IP-адреси, &lt;a href=&quot;%1/free&quot; style=&quot;color: #FBB26A;&quot;&gt;more details on the website.&lt;/a&gt;</translation>
+        <translation>Лише популярні сайти, які заблоковані у вашому регіоні, будуть відкриватись за допомогою VPN підключення (Instagram, Facebook, Twitter та ін.). Звичайні сайти будуть відкриватися без використання VPN, &lt;a href=&quot;%1/free&quot; style=&quot;color: #FBB26A;&quot;&gt;більш детально на нашому сайті.&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="../ui/models/apiServicesModel.cpp" line="104"/>
@@ -479,7 +479,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="67"/>
         <source>Logging enabled</source>
-        <translation>Журналювання увімкнено</translation>
+        <translation>Логування увімкнено</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="111"/>
@@ -577,12 +577,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="363"/>
         <source>The values of the H1-H4 fields must be unique</source>
-        <translation>Значення полів H1-H4 повинні бути унікальними</translation>
+        <translation>Значення полів H1-H4 мають бути унікальними</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="369"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)</source>
-        <translation>Значення поля S1 плюс розмір ініціації повідомлення (148) не повинні дорівнювати значенню S2 плюс розмір відповіді на повідомлення (92)</translation>
+        <translation>Значення поля S1 + розмір повідомлення ініціалізації (148) не має бути рівним значенню S2 + розмір повідомлення відповіді (92)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="373"/>
@@ -597,7 +597,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="382"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Неможливо змінювати налаштування, поки є активне підключення</translation>
+        <translation>Неможливо змінити налаштування, поки є активне підключення</translation>
     </message>
     <message>
         <source>Remove AmneziaWG</source>
@@ -661,7 +661,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolCloakSettings.qml" line="193"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Неможливо змінювати налаштування, поки є активне підключення</translation>
+        <translation>Неможливо змінити налаштування, поки є активне підключення</translation>
     </message>
     <message>
         <source>Save and Restart Amnezia</source>
@@ -845,7 +845,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="445"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Неможливо змінювати налаштування, поки є активне підключення</translation>
+        <translation>Неможливо змінити налаштування, поки є активне підключення</translation>
     </message>
     <message>
         <source>Remove OpenVPN</source>
@@ -953,7 +953,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolShadowSocksSettings.qml" line="181"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Неможливо змінювати налаштування, поки є активне підключення</translation>
+        <translation>Неможливо змінити налаштування, поки є активне підключення</translation>
     </message>
     <message>
         <source>Save and Restart Amnezia</source>
@@ -985,7 +985,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="157"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Неможливо змінювати налаштування, поки є активне підключення</translation>
+        <translation>Неможливо змінити налаштування, поки є активне підключення</translation>
     </message>
 </context>
 <context>
@@ -1008,7 +1008,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="137"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Неможливо змінювати налаштування, поки є активне підключення</translation>
+        <translation>Неможливо змінити налаштування, поки є активне підключення</translation>
     </message>
 </context>
 <context>
@@ -1351,7 +1351,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="87"/>
         <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
-        <translation>Amnezia — це безкоштовний та відкритий додаток. Якщо вам він подобається, ви можете підтримати розробників.</translation>
+        <translation>Amnezia — це безкоштовний додаток з відкритим кодом. Якщо вам подобається цей додаток, ви можете підтримати розробників.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="97"/>
@@ -1503,12 +1503,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="51"/>
         <source>Only the apps from the list should have access via VPN</source>
-        <translation>Доступ через VPN повинні мати тільки програми зі списку</translation>
+        <translation>Доступ через VPN мають лише програми зі списку</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="56"/>
         <source>Apps from the list should not have access via VPN</source>
-        <translation>Програми зі списку не повинні мати доступ через VPN</translation>
+        <translation>Програми зі списку не мають доступ через VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="93"/>
@@ -1561,7 +1561,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="71"/>
         <source>Allow application screenshots</source>
-        <translation>Дозволити скріншоти в застосунку</translation>
+        <translation>Дозволити скріншоти у застосунку</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="94"/>
@@ -1571,7 +1571,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="95"/>
         <source>Enable notifications to show the VPN state in the status bar</source>
-        <translation>Увімкнути сповіщення, щоб показувати стан VPN у панелі стану</translation>
+        <translation>Увімкнути сповіщення (показує стан VPN у статус барі) </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="117"/>
@@ -1682,7 +1682,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="83"/>
         <source>The backup will contain your passwords and private keys for all servers added to AmneziaVPN. Keep this information in a secure place.</source>
-        <translation>Резервна копія міститиме ваші паролі та приватні ключі для всіх серверів, доданих до AmneziaVPN. Зберігайте цю інформацію в безпечному місці.</translation>
+        <translation>Резервна копія міститиме ваші паролі та приватні ключі для всіх серверів, доданих до AmneziaVPN. Зберігайте цю інформацію у безпечному місці.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="94"/>
@@ -1789,7 +1789,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="155"/>
         <source>Disables your internet if your encrypted VPN connection drops out for any reason.</source>
-        <translation>Вимикає ваш інтернет, якщо ваше зашифроване VPN-підключення зникає з будь-якої причини.</translation>
+        <translation>Вимикає ваш інтернет, якщо ваше захищене VPN-підключення зникає з будь-якої причини.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="166"/>
@@ -1888,7 +1888,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="24"/>
         <source>Logging is enabled. Note that logs will be automatically disabled after 14 days, and all log files will be deleted.</source>
-        <translation>Журналювання увімкнене. Зверніть увагу, що журналювання буде автоматично вимкнене через 14 днів, а всі файли журналів будуть видалені.</translation>
+        <translation>Логування увімкнене. Зверніть увагу, що логування буде автоматично вимкнене через 14 днів, а всі файли журналів будуть видалені.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="69"/>
@@ -1898,7 +1898,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="70"/>
         <source>Enabling this function will save application&apos;s logs automatically. By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
-        <translation>Увімкнення цієї функції автоматично зберігатиме журнали додатка. За замовчуванням функція журналювання вимкнена. Увімкніть збереження журналів у випадку збою додатка.</translation>
+        <translation>Увімкнення цієї функції автоматично зберігатиме журнали додатка. За замовчуванням функція логування вимкнена. Увімкніть збереження журналів у випадку збою додатка.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="79"/>
@@ -2049,12 +2049,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="210"/>
         <source>Clear server from Amnezia software</source>
-        <translation>Очистити сервер з програмного забезпечення Amnezia</translation>
+        <translation>Очистити сервер від програмного забезпечення Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="218"/>
         <source>Do you want to clear server from Amnezia software?</source>
-        <translation>Ви хочете очистити сервер з програмного забезпечення Amnezia?</translation>
+        <translation>Ви дійсно хочете очистити сервер від програмного забезпечення Amnezia?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="219"/>
@@ -2064,7 +2064,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="225"/>
         <source>Cannot clear server from Amnezia software during active connection</source>
-        <translation>Неможливо очистити сервер з програмного забезпечення Amnezia під час активного підключення</translation>
+        <translation>Неможливо очистити сервер від програмного забезпечення Amnezia під час активного підключення</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="266"/>
@@ -2439,7 +2439,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="130"/>
         <source>Connect to classic paid and free VPN services from Amnezia</source>
-        <translation>Підключайтеся до класичних платних та безкоштовних VPN-сервісів від Amnezia</translation>
+        <translation>Підключайтеся до звичайних платних та безкоштовних VPN-сервісів від Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="153"/>
@@ -2543,7 +2543,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="94"/>
         <source>Password or SSH private key</source>
-        <translation>Пароль або SSH private key</translation>
+        <translation>Пароль або SSH ключ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="144"/>
@@ -2742,7 +2742,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="48"/>
         <source>Let&apos;s get started</source>
-        <translation>Розпочнемо</translation>
+        <translation>Почнемо</translation>
     </message>
 </context>
 <context>
@@ -3101,7 +3101,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="198"/>
         <source>Logging was disabled after 14 days, log files were deleted</source>
-        <translation>Журналювання було вимкнене через 14 днів, файли журналів були видалені</translation>
+        <translation>Логування було вимкнене через 14 днів, файли журналів були видалені</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="202"/>
@@ -3649,7 +3649,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../containers/containers_defs.cpp" line="130"/>
         <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>IKEv2/IPsec — сучасний стабільний протокол, який дещо швидший за інші та відновлює підключення після втрати сигналу. Має рідну підтримку на останніх версіях Android та iOS.</translation>
+        <translation>IKEv2/IPsec — сучасний стабільний протокол, який дещо швидший за інші та відновлює підключення після втрати сигналу. Має нативну підтримку на останніх версіях Android та iOS.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="137"/>
@@ -3686,7 +3686,7 @@ Cloak може змінювати метадані пакетів так, що �
 
 Одразу після отримання першого пакета даних Cloak аутентифікує вхідне підключення. Якщо аутентифікація не вдається, плагін маскує сервер як фальшивий вебсайт, і ваш VPN стає невидимим для систем аналізу.
 
-Якщо у вашому регіоні є екстремальний рівень інтернет-цензури, ми радимо використовувати тільки OpenVPN через Cloak з самого початку підключення.
+Якщо у вашому регіоні екстремальний рівень інтернет-цензури, ми радимо використовувати тільки OpenVPN через Cloak з самого початку роботи з додатком.
 
     Доступний в AmneziaVPN на всіх платформах
     Високе споживання енергії на мобільних пристроях
@@ -3723,10 +3723,10 @@ WireGuard дуже чутливий до блокувань через свої 
 It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
 This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
 Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
-        <translation>Протокол **REALITY**, новаторська розробка творців XRay, спеціально розроблений для протидії найвищим рівням інтернет-цензури завдяки новому підходу до ухилення.
-REALITY унікально ідентифікує цензорів під час фази TLS-handshake, безперешкодно функціонуючи як проксі для легітимних клієнтів, при цьому перенаправляючи цензорів на справжні вебсайти, такі як google.com, надаючи справжній TLS-сертифікат і дані.
-Ця передова можливість відрізняє REALITY від подібних технологій своєю здатністю маскувати веб-трафік як такий, що походить з випадкових легітимних сайтів без необхідності спеціальних налаштувань.
-На відміну від старіших протоколів, таких як VMess, VLESS та XTLS-Vision transport, інноваційне розпізнавання &quot;друг чи ворог&quot; REALITY під час TLS-handshake підвищує безпеку та обминає виявлення складними системами DPI, що використовують активні техніки сканування. Це робить REALITY надійним рішенням для підтримання інтернет-свободи в середовищах з жорсткою цензурою.</translation>
+        <translation>Протокол **REALITY**, сучасна розробка XRay. Спеціально розроблений для протидії найвищим рівням інтернет-цензури завдяки новому підходу до маскування.
+REALITY унікально ідентифікує цензорів під час фази TLS-handshake, працюючи як проксі для VPN клієнтів, при цьому перенаправляючи цензорів на справжні вебсайти, такі як google.com, надаючи справжній TLS-сертифікат та інші дані.
+Цей функціонал, відрізняє REALITY від подібних технологій, своєю здатністю маскувати веб-трафік у такий такий, що походить із випадкових справжніх сайтів без необхідності спеціальних налаштувань.
+На відміну від старіших протоколів, таких як VMess, VLESS та XTLS-Vision transport, продвиуте розпізнавання &quot;Свій — Чужий&quot; REALITY під час TLS-handshake підвищує безпеку та протидіє виявленню складними системами DPI, що використовують активні техніки аналізу. Це робить REALITY надійним рішенням для підтримання інтернет-свободи в середовищах з жорсткою цензурою.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="230"/>
@@ -3788,7 +3788,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     <message>
         <location filename="../containers/containers_defs.cpp" line="127"/>
         <source>XRay with REALITY - Suitable for countries with the highest level of internet censorship. Traffic masking as web traffic at the TLS level, and protection against detection by active probing methods.</source>
-        <translation>XRay with REALITY — підходить для країн з найвищим рівнем інтернет-цензури. Маскування трафіку як веб-трафіку на рівні TLS та захист від виявлення за допомогою активних методів сканування.</translation>
+        <translation>XRay with REALITY — підходить для країн з найвищим рівнем інтернет-цензури. Маскування трафіку під веб-трафік на рівні TLS. Захист від виявлення активними методами сканування (active-probing).</translation>
     </message>
     <message>
         <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss.</source>
@@ -3851,7 +3851,7 @@ For more detailed information, you can
         <translation>Після встановлення Amnezia створить 
 
  файл-сховище на вашому сервері. Ви зможете отримати
- доступ до нього за допомогою FileZilla або інших SFTP-клієнтів, 
+ доступ до нього за допомогою FileZilla та інших SFTP-клієнтів, 
 а також змонтувати диск на вашому пристрої для безпосереднього доступу до нього.
 
 Для більш детальної інформації зверніться
