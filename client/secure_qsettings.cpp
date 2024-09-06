@@ -174,13 +174,25 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
 QByteArray SecureQSettings::encryptText(const QByteArray &value) const
 {
     QSimpleCrypto::QBlockCipher cipher;
-    return cipher.encryptAesBlockCipher(value, getEncKey(), getEncIv());
+    QByteArray result;
+    try {
+        result = cipher.encryptAesBlockCipher(value, getEncKey(), getEncIv());
+    } catch (...) { // todo change error handling in QSimpleCrypto?
+        qCritical() << "error when encrypting the settings value";
+    }
+    return result;
 }
 
 QByteArray SecureQSettings::decryptText(const QByteArray &ba) const
 {
     QSimpleCrypto::QBlockCipher cipher;
-    return cipher.decryptAesBlockCipher(ba, getEncKey(), getEncIv());
+    QByteArray result;
+    try {
+        result = cipher.decryptAesBlockCipher(ba, getEncKey(), getEncIv());
+    } catch (...) { // todo change error handling in QSimpleCrypto?
+        qCritical() << "error when decrypting the settings value";
+    }
+    return result;
 }
 
 bool SecureQSettings::encryptionRequired() const
