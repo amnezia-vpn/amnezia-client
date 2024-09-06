@@ -21,9 +21,9 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     }
 
     switch (role) {
-    case Roles::PortRole: m_serverProtocolConfig.insert(config_key::mtu, value.toString()); break;
+    case Roles::PortRole: m_serverProtocolConfig.insert(config_key::port, value.toString()); break;
 
-    case Roles::ClientMtuRole: m_clientProtocolConfig.insert(config_key::junkPacketCount, value.toString()); break;
+    case Roles::ClientMtuRole: m_clientProtocolConfig.insert(config_key::mtu, value.toString()); break;
     case Roles::ClientJunkPacketCountRole: m_clientProtocolConfig.insert(config_key::junkPacketCount, value.toString()); break;
     case Roles::ClientJunkPacketMinSizeRole: m_clientProtocolConfig.insert(config_key::junkPacketMinSize, value.toString()); break;
     case Roles::ClientJunkPacketMaxSizeRole: m_clientProtocolConfig.insert(config_key::junkPacketMaxSize, value.toString()); break;

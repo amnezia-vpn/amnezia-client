@@ -22,7 +22,7 @@ bool WireGuardConfigModel::setData(const QModelIndex &index, const QVariant &val
 
     switch (role) {
     case Roles::PortRole: m_serverProtocolConfig.insert(config_key::port, value.toString()); break;
-    case Roles::ClientMtuRole: m_clientProtocolConfig.insert(config_key::junkPacketCount, value.toString()); break;
+    case Roles::ClientMtuRole: m_clientProtocolConfig.insert(config_key::mtu, value.toString()); break;
     }
 
     emit dataChanged(index, index, QList { role });
