@@ -840,6 +840,14 @@ PageType {
 
                                         text: qsTr("Data sent: %1").arg(dataSent)
                                     }
+
+                                    ParagraphTextType {
+                                        color: textColumn.textColor
+                                        visible: allowedIPs
+                                        Layout.fillWidth: true
+
+                                        text: qsTr("Allowed IPs: %1").arg(allowedIPs)
+                                    }
                                 }
 
                                 Item {
