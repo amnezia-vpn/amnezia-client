@@ -97,22 +97,30 @@ open class Wireguard : Protocol() {
         withContext(Dispatchers.IO) {
             val time = String.format(Locale.ROOT,"%.3f", startTime / 1000.0)
             try {
-                while (true) {
+                delay(1000)
+                var log = getLogcat(time)
+                Log.d(TAG, "First waiting log: $log")
+                // check that there is a connection log,
+                // to avoid infinite connection
+                if (!log.contains("Attaching to interface")) {
+                    Log.w(TAG, "Logs do not contain a connection log")
+                    return@withContext
+                }
+                while (!log.contains("Received handshake response")) {
                     delay(1000)
-                    val log = ProcessBuilder("logcat", "--buffer=main", "--format=raw", "*:S AmneziaWG/awg0", "-t", time)
-                        .redirectErrorStream(true)
-                        .start()
-                        .inputStream.reader().readText()
-                    Log.d(TAG, "Waiting log: $log")
-                    if (log.contains("Received handshake response")) {
-                        return@withContext
-                    }
+                    log = getLogcat(time)
                 }
             } catch (e: IOException) {
                 Log.e(TAG, "Failed to get logcat: $e")
             }
         }
     }
+
+    private fun getLogcat(time: String): String =
+        ProcessBuilder("logcat", "--buffer=main", "--format=raw", "*:S AmneziaWG/awg0", "-t", time)
+            .redirectErrorStream(true)
+            .start()
+            .inputStream.reader().readText()
 
     protected open fun parseConfig(config: JSONObject): WireguardConfig {
         val configDataJson = config.getJSONObject("wireguard_config_data")
