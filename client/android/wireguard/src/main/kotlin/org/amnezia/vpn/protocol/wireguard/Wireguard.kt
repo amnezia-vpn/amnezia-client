@@ -1,7 +1,12 @@
 package org.amnezia.vpn.protocol.wireguard
 
 import android.net.VpnService.Builder
+import java.io.IOException
+import java.util.Locale
 import java.util.TreeMap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.amnezia.awg.GoBackend
 import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
@@ -79,10 +84,34 @@ open class Wireguard : Protocol() {
         if (!isInitialized) loadSharedLibrary(context, "wg-go")
     }
 
-    override fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
+    override suspend fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
         val wireguardConfig = parseConfig(config)
+        val startTime = System.currentTimeMillis()
         start(wireguardConfig, vpnBuilder, protect)
+        waitForConnection(startTime)
         state.value = CONNECTED
+    }
+
+    private suspend fun waitForConnection(startTime: Long) {
+        Log.d(TAG, "Waiting for connection")
+        withContext(Dispatchers.IO) {
+            val time = String.format(Locale.ROOT,"%.3f", startTime / 1000.0)
+            try {
+                while (true) {
+                    delay(1000)
+                    val log = ProcessBuilder("logcat", "--buffer=main", "--format=raw", "*:S AmneziaWG/awg0", "-t", time)
+                        .redirectErrorStream(true)
+                        .start()
+                        .inputStream.reader().readText()
+                    Log.d(TAG, "Waiting log: $log")
+                    if (log.contains("Received handshake response")) {
+                        return@withContext
+                    }
+                }
+            } catch (e: IOException) {
+                Log.e(TAG, "Failed to get logcat: $e")
+            }
+        }
     }
 
     protected open fun parseConfig(config: JSONObject): WireguardConfig {
