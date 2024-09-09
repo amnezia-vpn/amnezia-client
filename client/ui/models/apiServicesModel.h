@@ -13,6 +13,7 @@ public:
         NameRole = Qt::UserRole + 1,
         CardDescriptionRole,
         ServiceDescriptionRole,
+        IsServiceAvailableRole,
         SpeedRole,
         WorkPeriodRole,
         RegionRole,
