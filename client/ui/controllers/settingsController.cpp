@@ -285,3 +285,12 @@ QString SettingsController::getGatewayEndpoint()
 {
     return m_settings->getGatewayEndpoint();
 }
+
+bool SettingsController::isOnTv()
+{
+#ifdef Q_OS_ANDROID
+    return AndroidController::instance()->isOnTv();
+#else
+    return false;
+#endif
+}

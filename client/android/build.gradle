@@ -3,3 +3,6 @@
 // android.bundle.enableUncompressedNativeLibs is deprecated
 // disable adding gradle property android.bundle.enableUncompressedNativeLibs by androiddeployqt
 useLegacyPackaging
+
+// package name for androiddeployqt
+namespace = "org.amnezia.vpn"

@@ -82,6 +82,8 @@ public slots:
     void setGatewayEndpoint(const QString &endpoint);
     QString getGatewayEndpoint();
 
+    bool isOnTv();
+
 signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();

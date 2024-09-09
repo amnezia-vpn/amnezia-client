@@ -10,8 +10,6 @@
 
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
-    #include "platforms/android/android_utils.h"
-    #include <QJniObject>
 #endif
 #if defined Q_OS_MAC
     #include "ui/macos_util.h"
@@ -22,18 +20,8 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
     : QObject(parent), m_serversModel(serversModel), m_settings(settings)
 {
 #ifdef Q_OS_ANDROID
-    // Change color of navigation and status bar's
     auto initialPageNavigationBarColor = getInitialPageNavigationBarColor();
-    AndroidUtils::runOnAndroidThreadSync([&initialPageNavigationBarColor]() {
-        QJniObject activity = AndroidUtils::getActivity();
-        QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
-        if (window.isValid()) {
-            window.callMethod<void>("addFlags", "(I)V", 0x80000000);
-            window.callMethod<void>("clearFlags", "(I)V", 0x04000000);
-            window.callMethod<void>("setStatusBarColor", "(I)V", 0xFF0E0E11);
-            window.callMethod<void>("setNavigationBarColor", "(I)V", initialPageNavigationBarColor);
-        }
-    });
+    AndroidController::instance()->setNavigationBarColor(initialPageNavigationBarColor);
 #endif
 
 #if defined Q_OS_MACX
@@ -115,14 +103,7 @@ unsigned int PageController::getInitialPageNavigationBarColor()
 void PageController::updateNavigationBarColor(const int color)
 {
 #ifdef Q_OS_ANDROID
-    // Change color of navigation bar
-    AndroidUtils::runOnAndroidThreadSync([&color]() {
-        QJniObject activity = AndroidUtils::getActivity();
-        QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
-        if (window.isValid()) {
-            window.callMethod<void>("setNavigationBarColor", "(I)V", color);
-        }
-    });
+    AndroidController::instance()->setNavigationBarColor(color);
 #endif
 }
 

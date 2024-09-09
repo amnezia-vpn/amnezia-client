@@ -19,6 +19,7 @@ public slots:
 
     void setQmlRoot(QObject *qmlRoot);
 
+    bool isAuthenticated();
 signals:
     void fileDialogClosed(const bool isAccepted);
 

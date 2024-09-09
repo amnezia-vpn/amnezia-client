@@ -158,6 +158,10 @@ class AmneziaActivity : QtActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Create Amnezia activity: $intent")
+        window.apply {
+            addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            statusBarColor = getColor(R.color.black)
+        }
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         val proto = mainScope.async(Dispatchers.IO) {
             VpnStateStore.getVpnState().vpnProto
@@ -611,6 +615,14 @@ class AmneziaActivity : QtActivity() {
     }
 
     @Suppress("unused")
+    fun setNavigationBarColor(color: Int) {
+        Log.v(TAG, "Change navigation bar color: ${"#%08X".format(color)}")
+        mainScope.launch {
+            window.navigationBarColor = color
+        }
+    }
+
+    @Suppress("unused")
     fun minimizeApp() {
         Log.v(TAG, "Minimize application")
         mainScope.launch {
@@ -682,6 +694,17 @@ class AmneziaActivity : QtActivity() {
                 })
             }
             .show()
+    }
+
+    @Suppress("unused")
+    fun requestAuthentication() {
+        Log.v(TAG, "Request authentication")
+        mainScope.launch {
+            qtInitialized.await()
+            Intent(this@AmneziaActivity, AuthActivity::class.java).also {
+                startActivity(it)
+            }
+        }
     }
 
     /**
