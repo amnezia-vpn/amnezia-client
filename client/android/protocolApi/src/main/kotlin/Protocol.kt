@@ -42,7 +42,7 @@ abstract class Protocol {
 
     protected abstract fun internalInit()
 
-    abstract fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean)
+    abstract suspend fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean)
 
     abstract fun stopVpn()
 

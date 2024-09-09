@@ -58,7 +58,7 @@ open class OpenVpn : Protocol() {
         scope = CoroutineScope(Dispatchers.IO)
     }
 
-    override fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
+    override suspend fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
         val configBuilder = OpenVpnConfig.Builder()
 
         openVpnClient = OpenVpnClient(
