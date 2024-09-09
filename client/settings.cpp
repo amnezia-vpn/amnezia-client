@@ -227,7 +227,7 @@ void Settings::setSaveLogs(bool enabled)
     if (!isSaveLogs()) {
         Logger::deInit();
     } else {
-        if (!Logger::init()) {
+        if (!Logger::init(false)) {
             qWarning() << "Initialization of debug subsystem failed";
         }
     }

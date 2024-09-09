@@ -102,8 +102,7 @@ Switch {
     contentItem: ColumnLayout {
         id: content
 
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
+        anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
 
         ListItemTitleType {

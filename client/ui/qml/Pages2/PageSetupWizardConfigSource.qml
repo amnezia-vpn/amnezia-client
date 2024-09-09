@@ -55,6 +55,51 @@ PageType {
                 Layout.leftMargin: 16
 
                 headerText: qsTr("Connection")
+
+                actionButtonImage: PageController.isStartPageVisible() ? "qrc:/images/controls/more-vertical.svg" : ""
+                actionButtonFunction: function() {
+                    moreActionsDrawer.open()
+                }
+
+                DrawerType2 {
+                    id: moreActionsDrawer
+
+                    parent: root
+
+                    anchors.fill: parent
+                    expandedHeight: root.height * 0.35
+
+                    expandedContent: ColumnLayout {
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+
+                        HeaderType {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 32
+
+                            headerText: qsTr("Settings")
+                        }
+
+                        SwitcherType {
+                            id: switcher
+                            Layout.fillWidth: true
+                            Layout.topMargin: 16
+
+                            text: qsTr("Enable logs")
+
+                            checked: SettingsController.isLoggingEnabled
+                            onCheckedChanged: {
+                                if (checked !== SettingsController.isLoggingEnabled) {
+                                    SettingsController.isLoggingEnabled = checked
+                                }
+                            }
+                        }
+
+                    }
+                }
             }
 
             ParagraphTextType {
