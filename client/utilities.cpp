@@ -211,6 +211,25 @@ QString Utils::tun2socksPath()
 #endif
 }
 
+void Utils::logException(const std::exception &e)
+{
+    qCritical() << e.what();
+    try {
+        std::rethrow_if_nested(e);
+    } catch (const std::exception &nested) {
+        logException(nested);
+    } catch (...) {}
+}
+
+void Utils::logException(const std::exception_ptr &eptr)
+{
+    try {
+        if (eptr) std::rethrow_exception(eptr);
+    } catch (const std::exception &e) {
+        logException(e);
+    } catch (...) {}
+}
+
 #ifdef Q_OS_WIN
 // Inspired from http://stackoverflow.com/a/15281070/1529139
 // and http://stackoverflow.com/q/40059902/1529139

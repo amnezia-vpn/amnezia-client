@@ -12,6 +12,7 @@
 #include "configurators/wireguard_configurator.h"
 #include "core/enums/apiEnums.h"
 #include "version.h"
+#include "utilities.h"
 
 namespace
 {
@@ -362,6 +363,7 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
             publicKey = rsa.getPublicKeyFromByteArray(key);
         } catch (...) {
             qCritical() << "error loading public key from environment variables";
+            Utils::logException();
             return ErrorCode::ApiMissingAgwPublicKey;
         }
 
