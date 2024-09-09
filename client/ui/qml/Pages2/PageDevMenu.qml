@@ -89,6 +89,21 @@ PageType {
 
                 // KeyNavigation.tab: saveButton
             }
+
+            SwitcherType {
+                id: switcher
+
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.topMargin: 16
+
+                text: qsTr("Dev gateway environment")
+                checked: SettingsController.isDevGatewayEnv
+                onToggled: function() {
+                    SettingsController.isDevGatewayEnv = checked
+                }
+            }
         }
     }
 }

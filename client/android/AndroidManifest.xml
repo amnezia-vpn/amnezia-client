@@ -3,7 +3,6 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="org.amnezia.vpn"
     android:versionName="-- %%INSERT_VERSION_NAME%% --"
     android:versionCode="-- %%INSERT_VERSION_CODE%% --"
     android:installLocation="auto">
@@ -46,7 +45,7 @@
             android:configChanges="uiMode|screenSize|smallestScreenSize|screenLayout|orientation|density
                 |fontScale|layoutDirection|locale|keyboard|keyboardHidden|navigation|mcc|mnc"
             android:launchMode="singleInstance"
-            android:windowSoftInputMode="adjustResize"
+            android:windowSoftInputMode="stateUnchanged|adjustResize"
             android:exported="true">
 
             <intent-filter>
@@ -68,9 +67,6 @@
                 android:name="android.app.lib_name"
                 android:value="-- %%INSERT_APP_LIB_NAME%% --" />
 
-            <meta-data
-                android:name="android.app.extract_android_style"
-                android:value="minimal" />
         </activity>
 
         <activity
@@ -82,6 +78,13 @@
 
         <activity
             android:name=".VpnRequestActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:exported="false"
+            android:theme="@style/Translucent" />
+
+        <activity android:name=".AuthActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
             android:taskAffinity=""

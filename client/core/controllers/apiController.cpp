@@ -9,8 +9,8 @@
 #include "QRsa.h"
 
 #include "amnezia_application.h"
-#include "core/enums/apiEnums.h"
 #include "configurators/wireguard_configurator.h"
+#include "core/enums/apiEnums.h"
 #include "version.h"
 
 namespace
@@ -42,7 +42,7 @@ namespace
         constexpr char keyPayload[] = "key_payload";
     }
 
-    const QStringList proxyStorageUrl = {""};
+    const QStringList proxyStorageUrl = { "" };
 
     ErrorCode checkErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply)
     {
@@ -65,7 +65,8 @@ namespace
     }
 }
 
-ApiController::ApiController(const QString &gatewayEndpoint, QObject *parent) : QObject(parent), m_gatewayEndpoint(gatewayEndpoint)
+ApiController::ApiController(const QString &gatewayEndpoint, bool isDevEnvironment, QObject *parent)
+    : QObject(parent), m_gatewayEndpoint(gatewayEndpoint), m_isDevEnvironment(isDevEnvironment)
 {
 }
 
@@ -143,7 +144,7 @@ QStringList ApiController::getProxyUrls()
 
     QEventLoop wait;
     QList<QSslError> sslErrors;
-    QNetworkReply* reply;
+    QNetworkReply *reply;
 
     for (const auto &proxyStorageUrl : proxyStorageUrl) {
         request.setUrl(proxyStorageUrl);
@@ -281,7 +282,7 @@ ErrorCode ApiController::getServicesList(QByteArray &responseBody)
 
     request.setUrl(QString("%1v1/services").arg(m_gatewayEndpoint));
 
-    QNetworkReply* reply;
+    QNetworkReply *reply;
     reply = amnApp->manager()->get(request);
 
     QEventLoop wait;
@@ -300,7 +301,8 @@ ErrorCode ApiController::getServicesList(QByteArray &responseBody)
             QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
             connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
             wait.exec();
-            if (reply->error() != QNetworkReply::NetworkError::TimeoutError && reply->error() != QNetworkReply::NetworkError::OperationCanceledError) {
+            if (reply->error() != QNetworkReply::NetworkError::TimeoutError
+                && reply->error() != QNetworkReply::NetworkError::OperationCanceledError) {
                 break;
             }
             reply->deleteLater();
@@ -355,7 +357,7 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
 
         EVP_PKEY *publicKey = nullptr;
         try {
-            QByteArray key = PROD_AGW_PUBLIC_KEY;
+            QByteArray key = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
             QSimpleCrypto::QRsa rsa;
             publicKey = rsa.getPublicKeyFromByteArray(key);
         } catch (...) {
@@ -375,7 +377,7 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
     requestBody[configKey::keyPayload] = QString(encryptedKeyPayload.toBase64());
     requestBody[configKey::apiPayload] = QString(encryptedApiPayload.toBase64());
 
-    QNetworkReply* reply = manager.post(request, QJsonDocument(requestBody).toJson());
+    QNetworkReply *reply = manager.post(request, QJsonDocument(requestBody).toJson());
 
     QEventLoop wait;
     connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
@@ -395,7 +397,8 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
             QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
             connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
             wait.exec();
-            if (reply->error() != QNetworkReply::NetworkError::TimeoutError && reply->error() != QNetworkReply::NetworkError::OperationCanceledError) {
+            if (reply->error() != QNetworkReply::NetworkError::TimeoutError
+                && reply->error() != QNetworkReply::NetworkError::OperationCanceledError) {
                 break;
             }
             reply->deleteLater();

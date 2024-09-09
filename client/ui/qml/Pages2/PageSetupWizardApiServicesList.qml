@@ -88,8 +88,10 @@ PageType {
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             onClicked: {
-                                ApiServicesModel.setServiceIndex(index)
-                                PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
+                                if (isServiceAvailable) {
+                                    ApiServicesModel.setServiceIndex(index)
+                                    PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
+                                }
                             }
                         }
                     }

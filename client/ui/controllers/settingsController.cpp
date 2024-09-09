@@ -283,5 +283,31 @@ void SettingsController::setGatewayEndpoint(const QString &endpoint)
 
 QString SettingsController::getGatewayEndpoint()
 {
-    return m_settings->getGatewayEndpoint();
+    return m_settings->isDevGatewayEnv() ? "Dev endpoint" : m_settings->getGatewayEndpoint();
+}
+
+bool SettingsController::isDevGatewayEnv()
+{
+    return m_settings->isDevGatewayEnv();
+}
+
+void SettingsController::toggleDevGatewayEnv(bool enabled)
+{
+    m_settings->toggleDevGatewayEnv(enabled);
+    if (enabled) {
+        m_settings->setDevGatewayEndpoint();
+    } else {
+        m_settings->resetGatewayEndpoint();
+    }
+    emit gatewayEndpointChanged(m_settings->getGatewayEndpoint());
+    emit devGatewayEnvChanged(enabled);
+}
+
+bool SettingsController::isOnTv()
+{
+#ifdef Q_OS_ANDROID
+    return AndroidController::instance()->isOnTv();
+#else
+    return false;
+#endif
 }
