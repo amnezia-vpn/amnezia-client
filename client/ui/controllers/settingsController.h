@@ -8,7 +8,6 @@
 #include "ui/models/servers_model.h"
 #include "ui/models/sites_model.h"
 #include "ui/models/appSplitTunnelingModel.h"
-#include "localServices/goodByeDpi.h"
 
 class SettingsController : public QObject
 {
