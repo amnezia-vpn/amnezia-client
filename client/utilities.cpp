@@ -69,22 +69,6 @@ QString Utils::JsonToString(const QJsonArray &array, QJsonDocument::JsonFormat f
     return doc.toJson(format);
 }
 
-QString Utils::systemLogPath()
-{
-#ifdef Q_OS_WIN
-    QStringList locationList = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
-    QString primaryLocation = "ProgramData";
-    foreach (const QString &location, locationList) {
-        if (location.contains(primaryLocation)) {
-            return QString("%1/%2/log").arg(location).arg(APPLICATION_NAME);
-        }
-    }
-    return QString();
-#else
-    return QString("/var/log/%1").arg(APPLICATION_NAME);
-#endif
-}
-
 bool Utils::initializePath(const QString &path)
 {
     QDir dir;

@@ -6,9 +6,6 @@
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
-#ifdef Q_OS_ANDROID
-    #include "platforms/android/authResultReceiver.h"
-#endif
 
 class ExportController : public QObject
 {
@@ -25,9 +22,6 @@ public:
 
 public slots:
     void generateFullAccessConfig();
-#if defined(Q_OS_ANDROID)
-    void generateFullAccessConfigAndroid();
-#endif
     void generateConnectionConfig(const QString &clientName);
     void generateOpenVpnConfig(const QString &clientName);
     void generateWireGuardConfig(const QString &clientName);
@@ -74,11 +68,6 @@ private:
     QString m_config;
     QString m_nativeConfigString;
     QList<QString> m_qrCodes;
-
-#ifdef Q_OS_ANDROID
-    QSharedPointer<AuthResultNotifier> m_authResultNotifier;
-    QSharedPointer<QAndroidActivityResultReceiver> m_authResultReceiver;
-#endif
 };
 
 #endif // EXPORTCONTROLLER_H

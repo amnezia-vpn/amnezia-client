@@ -10,9 +10,6 @@
 
 #include "core/controllers/vpnConfigurationController.h"
 #include "systemController.h"
-#ifdef Q_OS_ANDROID
-    #include "platforms/android/android_utils.h"
-#endif
 #include "qrcodegen.hpp"
 
 ExportController::ExportController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
@@ -24,12 +21,6 @@ ExportController::ExportController(const QSharedPointer<ServersModel> &serversMo
       m_clientManagementModel(clientManagementModel),
       m_settings(settings)
 {
-#ifdef Q_OS_ANDROID
-    m_authResultNotifier.reset(new AuthResultNotifier);
-    m_authResultReceiver.reset(new AuthResultReceiver(m_authResultNotifier));
-    connect(m_authResultNotifier.get(), &AuthResultNotifier::authFailed, this, [this]() { emit exportErrorOccurred(tr("Access error!")); });
-    connect(m_authResultNotifier.get(), &AuthResultNotifier::authSuccessful, this, &ExportController::generateFullAccessConfig);
-#endif
 }
 
 void ExportController::generateFullAccessConfig()
@@ -62,26 +53,6 @@ void ExportController::generateFullAccessConfig()
     m_qrCodes = generateQrCodeImageSeries(compressedConfig);
     emit exportConfigChanged();
 }
-
-#if defined(Q_OS_ANDROID)
-void ExportController::generateFullAccessConfigAndroid()
-{
-    /* We use builtin keyguard for ssh key export protection on Android */
-    QJniObject activity = AndroidUtils::getActivity();
-    auto appContext = activity.callObjectMethod("getApplicationContext", "()Landroid/content/Context;");
-    if (appContext.isValid()) {
-        auto intent = QJniObject::callStaticObjectMethod("org/amnezia/vpn/AuthHelper", "getAuthIntent",
-                                                         "(Landroid/content/Context;)Landroid/content/Intent;", appContext.object());
-        if (intent.isValid()) {
-            if (intent.object<jobject>() != nullptr) {
-                QtAndroidPrivate::startActivity(intent.object<jobject>(), 1, m_authResultReceiver.get());
-            }
-        } else {
-            generateFullAccessConfig();
-        }
-    }
-}
-#endif
 
 void ExportController::generateConnectionConfig(const QString &clientName)
 {

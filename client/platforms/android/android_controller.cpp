@@ -98,6 +98,7 @@ bool AndroidController::initialize()
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
+        {"onAuthResult", "(Z)V", reinterpret_cast<void *>(onAuthResult)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)}
     };
 
@@ -210,6 +211,11 @@ void AndroidController::setScreenshotsEnabled(bool enabled)
     callActivityMethod("setScreenshotsEnabled", "(Z)V", enabled);
 }
 
+void AndroidController::setNavigationBarColor(unsigned int color)
+{
+    callActivityMethod("setNavigationBarColor", "(I)V", color);
+}
+
 void AndroidController::minimizeApp()
 {
     callActivityMethod("minimizeApp", "()V");
@@ -263,6 +269,22 @@ bool AndroidController::isNotificationPermissionGranted()
 void AndroidController::requestNotificationPermission()
 {
     callActivityMethod("requestNotificationPermission", "()V");
+}
+
+bool AndroidController::requestAuthentication()
+{
+    QEventLoop wait;
+    bool result;
+    connect(this, &AndroidController::authenticationResult, this,
+            [&result, &wait](const bool &authResult){
+                qDebug() << "Android authentication result:" << authResult;
+                result = authResult;
+                wait.quit();
+            },
+            static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
+    callActivityMethod("requestAuthentication", "()V");
+    wait.exec();
+    return result;
 }
 
 // Moving log processing to the Android side
@@ -460,6 +482,14 @@ void AndroidController::onConfigImported(JNIEnv *env, jobject thiz, jstring data
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->configImported(AndroidUtils::convertJString(env, data));
+}
+
+// static
+void AndroidController::onAuthResult(JNIEnv *env, jobject thiz, jboolean result)
+{
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->authenticationResult(result);
 }
 
 // static

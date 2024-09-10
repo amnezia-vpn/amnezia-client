@@ -41,11 +41,13 @@ public:
     void exportLogsFile(const QString &fileName);
     void clearLogs();
     void setScreenshotsEnabled(bool enabled);
+    void setNavigationBarColor(unsigned int color);
     void minimizeApp();
     QJsonArray getAppList();
     QPixmap getAppIcon(const QString &package, QSize *size, const QSize &requestedSize);
     bool isNotificationPermissionGranted();
     void requestNotificationPermission();
+    bool requestAuthentication();
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
@@ -63,6 +65,7 @@ signals:
     void configImported(QString config);
     void importConfigFromOutside(QString config);
     void initConnectionState(Vpn::ConnectionState state);
+    void authenticationResult(bool result);
 
 private:
     bool isWaitingStatus = true;
@@ -89,6 +92,7 @@ private:
     static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz, jstring data);
     static void onFileOpened(JNIEnv *env, jobject thiz, jstring uri);
+    static void onAuthResult(JNIEnv *env, jobject thiz, jboolean result);
     static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
 
     template <typename Ret, typename ...Args>

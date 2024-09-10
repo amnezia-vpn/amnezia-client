@@ -220,7 +220,10 @@ public:
 
     void resetGatewayEndpoint();
     void setGatewayEndpoint(const QString &endpoint);
+    void setDevGatewayEndpoint();
     QString getGatewayEndpoint();
+    bool isDevGatewayEnv();
+    void toggleDevGatewayEnv(bool enabled);
 
     void setGoodbyeDpiBlackListFile(const QString &file);
     QString getGoodbyeDpiBlackListFile() const;
@@ -246,6 +249,7 @@ private:
     mutable SecureQSettings m_settings;
 
     QString m_gatewayEndpoint;
+    bool m_isDevGatewayEnv;
 };
 
 #endif // SETTINGS_H

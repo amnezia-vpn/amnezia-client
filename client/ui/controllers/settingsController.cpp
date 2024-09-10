@@ -88,7 +88,12 @@ void SettingsController::toggleLogging(bool enable)
 
 void SettingsController::openLogsFolder()
 {
-    Logger::openLogsFolder();
+    Logger::openLogsFolder(false);
+}
+
+void SettingsController::openServiceLogsFolder()
+{
+    Logger::openLogsFolder(true);
 }
 
 void SettingsController::exportLogsFile(const QString &fileName)
@@ -100,12 +105,21 @@ void SettingsController::exportLogsFile(const QString &fileName)
 #endif
 }
 
+void SettingsController::exportServiceLogsFile(const QString &fileName)
+{
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->exportLogsFile(fileName);
+#else
+    SystemController::saveFile(fileName, Logger::getServiceLogFile());
+#endif
+}
+
 void SettingsController::clearLogs()
 {
 #ifdef Q_OS_ANDROID
     AndroidController::instance()->clearLogs();
 #else
-    Logger::clearLogs();
+    Logger::clearLogs(false);
     Logger::clearServiceLogs();
 #endif
 }
@@ -281,5 +295,31 @@ void SettingsController::setGatewayEndpoint(const QString &endpoint)
 
 QString SettingsController::getGatewayEndpoint()
 {
-    return m_settings->getGatewayEndpoint();
+    return m_settings->isDevGatewayEnv() ? "Dev endpoint" : m_settings->getGatewayEndpoint();
+}
+
+bool SettingsController::isDevGatewayEnv()
+{
+    return m_settings->isDevGatewayEnv();
+}
+
+void SettingsController::toggleDevGatewayEnv(bool enabled)
+{
+    m_settings->toggleDevGatewayEnv(enabled);
+    if (enabled) {
+        m_settings->setDevGatewayEndpoint();
+    } else {
+        m_settings->resetGatewayEndpoint();
+    }
+    emit gatewayEndpointChanged(m_settings->getGatewayEndpoint());
+    emit devGatewayEnvChanged(enabled);
+}
+
+bool SettingsController::isOnTv()
+{
+#ifdef Q_OS_ANDROID
+    return AndroidController::instance()->isOnTv();
+#else
+    return false;
+#endif
 }

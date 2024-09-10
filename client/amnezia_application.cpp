@@ -164,7 +164,7 @@ void AmneziaApplication::init()
     bool enabled = m_settings->isSaveLogs();
 #ifndef Q_OS_ANDROID
     if (enabled) {
-        if (!Logger::init()) {
+        if (!Logger::init(false)) {
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
