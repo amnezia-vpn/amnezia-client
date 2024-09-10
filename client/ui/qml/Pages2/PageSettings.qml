@@ -96,6 +96,20 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                Layout.fillWidth: true
+
+                text: qsTr("Local bypass services")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/app.svg"
+
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageGoodByeDpiSettings, PageEnum.LocalServices)
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
                 id: backup
                 Layout.fillWidth: true
 

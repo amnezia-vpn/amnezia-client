@@ -8,6 +8,7 @@
 #include "ui/models/servers_model.h"
 #include "ui/models/sites_model.h"
 #include "ui/models/appSplitTunnelingModel.h"
+#include "localServices/goodByeDpi.h"
 
 class SettingsController : public QObject
 {
@@ -111,6 +112,8 @@ private:
     QSharedPointer<SitesModel> m_sitesModel;
     QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
     std::shared_ptr<Settings> m_settings;
+
+    GoodByeDpi m_goodbyeDpiService;
 
     QString m_appVersion;
 

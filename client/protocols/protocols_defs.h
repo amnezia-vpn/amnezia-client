@@ -100,6 +100,8 @@ namespace amnezia
 
         constexpr char clientId[] = "clientId";
 
+        constexpr char isGoodbyeDpi[] = "is_goodbye_dpi";
+
     }
 
     namespace protocols

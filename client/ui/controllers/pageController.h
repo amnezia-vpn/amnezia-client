@@ -61,13 +61,28 @@ namespace PageLoader
 
         PageShareFullAccess,
 
-        PageDevMenu
+        PageDevMenu,
+
+        PageGoodByeDpiSettings
     };
     Q_ENUM_NS(PageEnum)
 
     static void declareQmlPageEnum()
     {
         qmlRegisterUncreatableMetaObject(PageLoader::staticMetaObject, "PageEnum", 1, 0, "PageEnum", "Error: only enums");
+    }
+
+    Q_NAMESPACE
+    enum class FolderEnum {
+        Root = 0,
+        LocalServices
+
+    };
+    Q_ENUM_NS(FolderEnum)
+
+    static void declareQmlFolderEnum()
+    {
+        qmlRegisterUncreatableMetaObject(PageLoader::staticMetaObject, "FolderEnum", 1, 0, "FolderEnum", "Error: only enums");
     }
 }
 
@@ -80,7 +95,7 @@ public:
 
 public slots:
     bool isStartPageVisible();
-    QString getPagePath(PageLoader::PageEnum page);
+    QString getPagePath(PageLoader::PageEnum page, PageLoader::FolderEnum folder = PageLoader::FolderEnum::Root);
 
     void closeWindow();
     void hideWindow();
@@ -103,7 +118,7 @@ public slots:
     void onShowErrorMessage(amnezia::ErrorCode errorCode);
 
 signals:
-    void goToPage(PageLoader::PageEnum page, bool slide = true);
+    void goToPage(PageLoader::PageEnum page, PageLoader::FolderEnum folder = PageLoader::FolderEnum::Root, bool slide = true);
     void goToStartPage();
     void goToPageHome();
     void goToPageSettings();

@@ -34,8 +34,7 @@ ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const Se
 {
     ErrorCode errorCode = ErrorCode::NoError;
 
-    if (ContainerProps::containerService(container) == ServiceType::Other ||
-        container == DockerContainer::GoodbyeDPI) {
+    if (ContainerProps::containerService(container) == ServiceType::Other) {
         return errorCode;
     }
 
@@ -62,8 +61,7 @@ ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isA
 {
     ErrorCode errorCode = ErrorCode::NoError;
 
-    if (ContainerProps::containerService(container) == ServiceType::Other ||
-        container == DockerContainer::GoodbyeDPI) {
+    if (ContainerProps::containerService(container) == ServiceType::Other) {
         return errorCode;
     }
 
@@ -84,8 +82,7 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
 {
     QJsonObject vpnConfiguration {};
 
-    if (ContainerProps::containerService(container) == ServiceType::Other ||
-        container == DockerContainer::GoodbyeDPI) {
+    if (ContainerProps::containerService(container) == ServiceType::Other) {
         return vpnConfiguration;
     }
 

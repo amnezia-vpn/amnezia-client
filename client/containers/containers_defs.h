@@ -24,7 +24,6 @@ namespace amnezia
             Ipsec,
             Xray,
             SSXray,
-            GoodbyeDPI,
 
             // non-vpn
             TorWebSite,

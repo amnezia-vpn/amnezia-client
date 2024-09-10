@@ -523,3 +523,33 @@ QString Settings::getGatewayEndpoint()
 {
     return m_gatewayEndpoint;
 }
+
+void Settings::setGoodbyeDpiBlackListFile(const QString &file)
+{
+    setValue("Conf/goodbyeDpiBlackListFile", file);
+}
+
+QString Settings::getGoodbyeDpiBlackListFile() const
+{
+    return value("Conf/goodbyeDpiBlackListFile").toString();
+}
+
+void Settings::toggleGoodbyeDpi(bool enable)
+{
+    setValue("Conf/isGoodbyeDpiEnabled", enable);
+}
+
+bool Settings::isGoodbyeDpiEnabled() const
+{
+    return value("Conf/isGoodbyeDpiEnabled", false).toBool();
+}
+
+void Settings::setGoodbyeDpiModset(const int modset)
+{
+    setValue("Conf/goodbyeDpiModset", modset);
+}
+
+int Settings::getGoodbyeDpiModset() const
+{
+    return value("Conf/goodbyeDpiModset", 9).toInt();
+}

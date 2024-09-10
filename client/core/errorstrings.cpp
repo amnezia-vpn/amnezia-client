@@ -43,6 +43,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::CloakExecutableMissing): errorMessage = QObject::tr("Cloak (ck-client) executable missing"); break;
     case (ErrorCode::AmneziaServiceConnectionFailed): errorMessage = QObject::tr("Amnezia helper service error"); break;
     case (ErrorCode::OpenSslFailed): errorMessage = QObject::tr("OpenSSL failed"); break;
+    case (ErrorCode::GoodByeDPIExecutableMissing): errorMessage = QObject::tr("GoodbyeDPI executable missing"); break;
 
     // VPN errors
     case (ErrorCode::OpenVpnAdaptersInUseError): errorMessage = QObject::tr("Can't connect: another VPN connection is active"); break;

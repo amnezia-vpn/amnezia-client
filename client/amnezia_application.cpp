@@ -235,6 +235,7 @@ void AmneziaApplication::registerTypes()
 
     Vpn::declareQmlVpnConnectionStateEnum();
     PageLoader::declareQmlPageEnum();
+    PageLoader::declareQmlFolderEnum();
 }
 
 void AmneziaApplication::loadFonts()
@@ -455,4 +456,13 @@ void AmneziaApplication::initControllers()
 
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
+
+    m_localServicesController.reset(new LocalServicesController(m_serversModel, m_settings));
+    m_engine->rootContext()->setContextProperty("LocalServicesController", m_localServicesController.get());
+    connect(m_connectionController.get(), &ConnectionController::startLocalService, m_localServicesController.get(),
+            &LocalServicesController::start);
+    connect(m_connectionController.get(), &ConnectionController::stopLocalService, m_localServicesController.get(),
+            &LocalServicesController::stop);
+    connect(m_localServicesController.get(), &LocalServicesController::serviceStateChanged, m_connectionController.get(),
+            &ConnectionController::connectionStateChanged);
 }

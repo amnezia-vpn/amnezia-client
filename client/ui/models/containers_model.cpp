@@ -37,13 +37,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case EasySetupHeaderRole: return ContainerProps::easySetupHeader(container);
     case EasySetupDescriptionRole: return ContainerProps::easySetupDescription(container);
     case EasySetupOrderRole: return ContainerProps::easySetupOrder(container);
-    case IsInstalledRole: {
-#ifdef Q_OS_WIN
-        if (container == DockerContainer::GoodbyeDPI)
-            return true;
-#endif
-        return m_containers.contains(container);
-    }
+    case IsInstalledRole: return m_containers.contains(container);
     case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_processedContainerIndex);
     case IsSupportedRole: return ContainerProps::isSupportedByCurrentPlatform(container);
     case IsShareableRole: return ContainerProps::isShareable(container);

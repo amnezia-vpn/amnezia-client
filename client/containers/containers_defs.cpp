@@ -53,8 +53,6 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
     switch (container) {
     case DockerContainer::None: return {};
 
-    case DockerContainer::GoodbyeDPI: return { Proto::GoodyeDPI };
-
     case DockerContainer::OpenVpn: return { Proto::OpenVpn };
 
     case DockerContainer::ShadowSocks: return { Proto::OpenVpn, Proto::ShadowSocks };
@@ -99,7 +97,6 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
              { DockerContainer::SSXray, "Shadowsocks"},
-             { DockerContainer::GoodbyeDPI, "GoodbyeDPI"},
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
              { DockerContainer::Dns, QObject::tr("AmneziaDNS") },
@@ -139,9 +136,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
              { DockerContainer::Sftp,
                QObject::tr("Create a file vault on your server to securely store and transfer files.") },
              { DockerContainer::Socks5Proxy,
-               QObject::tr("") } ,
-             { DockerContainer::GoodbyeDPI,
-               QObject::tr("GoodbyeDPI — Deep Packet Inspection circumvention utility") }};
+               QObject::tr("") } };
 }
 
 QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
@@ -250,10 +245,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "You will be able to access it using\n FileZilla or other SFTP clients, "
                       "as well as mount the disk on your device to access\n it directly from your device.\n\n"
                       "For more detailed information, you can\n find it in the support section under \"Create SFTP file storage.\" ") },
-        { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") },
-        { DockerContainer::GoodbyeDPI, QObject::tr("This software designed to bypass Deep Packet Inspection systems found in many Internet Service Providers which block access to certain websites. \n"
-                                                   "It handles DPI connected using optical splitter or port mirroring (Passive DPI) which do not block any data but just replying faster than requested destination,"
-                                                   "and Active DPI connected in sequence.") }
+        { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") } }
 
     };
 }
@@ -280,7 +272,6 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::Dns: return Proto::Dns;
     case DockerContainer::Sftp: return Proto::Sftp;
     case DockerContainer::Socks5Proxy: return Proto::Socks5Proxy;
-    case DockerContainer::GoodbyeDPI: return Proto::GoodyeDPI;
     default: return Proto::Any;
     }
 }
@@ -387,7 +378,6 @@ bool ContainerProps::isShareable(DockerContainer container)
     case DockerContainer::Dns: return false;
     case DockerContainer::Sftp: return false;
     case DockerContainer::Socks5Proxy: return false;
-    case DockerContainer::GoodbyeDPI: return false;
     default: return true;
     }
 }
@@ -413,7 +403,6 @@ int ContainerProps::installPageOrder(DockerContainer container)
     case DockerContainer::Xray: return 3;
     case DockerContainer::Ipsec: return 7;
     case DockerContainer::SSXray: return 8;
-    case DockerContainer::GoodbyeDPI: return 9;
     default: return 0;
     }
 }
