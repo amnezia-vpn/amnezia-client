@@ -98,6 +98,8 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
 
+                visible: Qt.platform.os === "windows"
+
                 text: qsTr("Local bypass services")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/app.svg"

@@ -113,8 +113,6 @@ private:
     QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
     std::shared_ptr<Settings> m_settings;
 
-    GoodByeDpi m_goodbyeDpiService;
-
     QString m_appVersion;
 
     QDateTime m_loggingDisableDate;

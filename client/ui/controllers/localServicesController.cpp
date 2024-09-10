@@ -9,24 +9,21 @@ LocalServicesController::LocalServicesController(const QSharedPointer<ServersMod
                                                  const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent), m_serversModel(serversModel), m_settings(settings)
 {
+#ifdef Q_OS_WINDOWS
     connect(&m_goodbyeDpiService, &GoodByeDpi::serviceStateChanged, this, &LocalServicesController::serviceStateChanged);
+#endif
 }
 
 LocalServicesController::~LocalServicesController()
 {
+#ifdef Q_OS_WINDOWS
     m_goodbyeDpiService.stop();
+#endif
 }
 
 void LocalServicesController::toggleGoodbyeDpi(bool enable)
 {
     if (enable) {
-        // auto file = getGoodbyeDpiBlackListFile();
-        // auto modset = getGoodbyeDpiModset();
-        // auto errorCode = ErrorCode::NoError;//m_goodbyeDpiService.start(file, modset);
-        // if (errorCode != ErrorCode::NoError) {
-        //     emit errorOccurred(errorCode);
-        // } else {
-
         QJsonObject server;
         server.insert(config_key::isGoodbyeDpi, true);
         server.insert(config_key::description, "GoodbyeDPI service");
@@ -36,10 +33,7 @@ void LocalServicesController::toggleGoodbyeDpi(bool enable)
 
         m_settings->toggleGoodbyeDpi(true);
         emit toggleGoodbyeDpiFinished(tr("GoodbyeDPI added to home page"));
-        // }
     } else {
-        // m_goodbyeDpiService.stop();
-
         for (int i = 0; i < m_serversModel->getServersCount(); i++) {
             if (m_serversModel->getServerConfig(i).value(config_key::isGoodbyeDpi).toBool(false)) {
                 m_serversModel->setProcessedServerIndex(i);
@@ -89,13 +83,17 @@ int LocalServicesController::getGoodbyeDpiModset()
 
 void LocalServicesController::start()
 {
+#ifdef Q_OS_WINDOWS
     auto errorCode = m_goodbyeDpiService.start(getGoodbyeDpiBlackListFile(), getGoodbyeDpiModset());
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
     }
+#endif
 }
 
 void LocalServicesController::stop()
 {
+#ifdef Q_OS_WINDOWS
     m_goodbyeDpiService.stop();
+#endif
 }
