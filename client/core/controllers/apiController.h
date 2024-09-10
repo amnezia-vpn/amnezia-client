@@ -44,7 +44,7 @@ private:
 
     QString m_gatewayEndpoint;
     QStringList m_proxyUrls;
-    bool m_isDevEnvironment;
+    bool m_isDevEnvironment = false;
 };
 
 #endif // APICONTROLLER_H
