@@ -10,12 +10,13 @@ env:
 
 jobs:
   Build-Linux-Ubuntu:
-    name: 'Build-Linux-Ubuntu'
     runs-on: ubuntu-20.04
 
     env:
       QT_VERSION: 6.6.2
       QIF_VERSION: 4.7
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
 
     steps:
     - name: 'Install Qt'
@@ -75,13 +76,14 @@ jobs:
 # ------------------------------------------------------
 
   Build-Windows:
-    name: Build-Windows
     runs-on: windows-latest
 
     env:
       QT_VERSION: 6.6.2
       QIF_VERSION: 4.7
       BUILD_ARCH: 64
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
 
     steps:
     - name: 'Get sources'
@@ -137,13 +139,14 @@ jobs:
 # ------------------------------------------------------
 
   Build-iOS:
-    name: 'Build-iOS'
     runs-on: macos-13
 
     env:
       QT_VERSION: 6.6.2
       CC: cc
       CXX: c++
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
 
     steps:
     - name: 'Setup xcode'
@@ -228,13 +231,14 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
-    name: 'Build-MacOS'
     runs-on: macos-latest
 
     env:
       # Keep compat with MacOS 10.15 aka Catalina by Qt 6.4
       QT_VERSION: 6.4.3
       QIF_VERSION: 4.6
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
 
     steps:
     - name: 'Setup xcode'
@@ -293,28 +297,29 @@ jobs:
 # ------------------------------------------------------
 
   Build-Android:
-    name: 'Build-Android'
     runs-on: ubuntu-latest
 
     env:
       ANDROID_BUILD_PLATFORM: android-34
-      QT_VERSION: 6.6.2
+      QT_VERSION: 6.7.2
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
 
     steps:
     - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
         target: 'desktop'
-        arch: 'gcc_64'
+        arch: 'linux_gcc_64'
         modules: ${{ env.QT_MODULES }}
         dir: ${{ runner.temp }}
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_x86_64 Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -325,7 +330,7 @@ jobs:
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_x86 Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -336,7 +341,7 @@ jobs:
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_armv7 Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -347,7 +352,7 @@ jobs:
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_arm64_v8a Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -439,3 +444,21 @@ jobs:
         path: deploy/build/AmneziaVPN-release.aab
         compression-level: 0
         retention-days: 7
+
+  Extra:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Search a corresponding PR
+        uses: octokit/request-action@v2.x
+        id: pull_request
+        with:
+          route: GET /repos/${{ github.repository }}/pulls
+          head: ${{ github.repository_owner }}:${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add PR link to build summary
+        if: ${{ fromJSON(steps.pull_request.outputs.data)[0].number != '' }}
+        run: | 
+          echo "Pull request:" >> $GITHUB_STEP_SUMMARY
+          echo "[[#${{ fromJSON(steps.pull_request.outputs.data)[0].number }}] ${{ fromJSON(steps.pull_request.outputs.data)[0].title }}](${{ fromJSON(steps.pull_request.outputs.data)[0].html_url }})" >> $GITHUB_STEP_SUMMARY

@@ -103,3 +103,12 @@ QString LanguageModel::getCurrentLanguageName()
 {
     return m_availableLanguages[getCurrentLanguageIndex()].name;
 }
+
+QString LanguageModel::getCurrentSiteUrl()
+{
+    auto language = static_cast<LanguageSettings::AvailableLanguageEnum>(getCurrentLanguageIndex());
+    switch (language) {
+    case LanguageSettings::AvailableLanguageEnum::Russian: return "https://storage.googleapis.com/kldscp/amnezia.org";
+    default: return "https://amnezia.org";
+    }
+}

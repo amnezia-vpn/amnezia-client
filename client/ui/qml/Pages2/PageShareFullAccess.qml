@@ -67,7 +67,7 @@ PageType {
 
                 text: qsTr("We recommend that you use full access to the server only for your own additional devices.\n") +
                       qsTr("If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. ")
-                color: AmneziaStyle.color.grey
+                color: AmneziaStyle.color.mutedGray
             }
 
             DropDownType {
@@ -140,22 +140,23 @@ PageType {
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunc: function() {
+                    PageController.showBusyIndicator(true)
+
+                    if (Qt.platform.os === "android" && !SystemController.isAuthenticated()) {
+                        PageController.showBusyIndicator(false)
+                        ExportController.exportErrorOccurred(qsTr("Access error!"))
+                        return
+                    } else {
+                        ExportController.generateFullAccessConfig()
+                    }
+
                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
                     shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
 
                     shareConnectionDrawer.open()
-                    shareConnectionDrawer.contentVisible = false
-                    PageController.showBusyIndicator(true)
-
-                    if (Qt.platform.os === "android") {
-                        ExportController.generateFullAccessConfigAndroid();
-                    } else {
-                        ExportController.generateFullAccessConfig();
-                    }
+                    shareConnectionDrawer.contentVisible = true
 
                     PageController.showBusyIndicator(false)
-
-                    shareConnectionDrawer.contentVisible = true
                 }
             }
         }

@@ -7,6 +7,7 @@
 #include <QRandomGenerator>
 #include <QStandardPaths>
 
+#include "core/controllers/apiController.h"
 #include "core/controllers/serverController.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/networkUtilities.h"
@@ -15,13 +16,23 @@
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "utilities.h"
 
-#ifdef Q_OS_IOS
-    #include <AmneziaVPN-Swift.h>
-#endif
-
 namespace
 {
     Logger logger("ServerController");
+
+    namespace configKey
+    {
+        constexpr char serviceInfo[] = "service_info";
+        constexpr char serviceType[] = "service_type";
+        constexpr char serviceProtocol[] = "service_protocol";
+        constexpr char userCountryCode[] = "user_country_code";
+
+        constexpr char serverCountryCode[] = "server_country_code";
+        constexpr char serverCountryName[] = "server_country_name";
+        constexpr char availableCountries[] = "available_countries";
+
+        constexpr char apiConfig[] = "api_config";
+    }
 
 #ifdef Q_OS_WINDOWS
     QString getNextDriverLetter()
@@ -52,12 +63,14 @@ namespace
 InstallController::InstallController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                      const QSharedPointer<ProtocolsModel> &protocolsModel,
                                      const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                     const std::shared_ptr<Settings> &settings, QObject *parent)
+                                     const QSharedPointer<ApiServicesModel> &apiServicesModel, const std::shared_ptr<Settings> &settings,
+                                     QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_protocolModel(protocolsModel),
       m_clientManagementModel(clientManagementModel),
+      m_apiServicesModel(apiServicesModel),
       m_settings(settings)
 {
 }
@@ -85,9 +98,9 @@ void InstallController::install(DockerContainer container, int port, TransportPr
             containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, protocol));
 
             if (container == DockerContainer::Awg) {
-                QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(3, 10));
-                QString junkPacketMinSize = QString::number(50);
-                QString junkPacketMaxSize = QString::number(1000);
+                QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
+                QString junkPacketMinSize = QString::number(10);
+                QString junkPacketMaxSize = QString::number(50);
 
                 int s1 = QRandomGenerator::global()->bounded(15, 150);
                 int s2 = QRandomGenerator::global()->bounded(15, 150);
@@ -432,7 +445,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         containerConfig.insert(config_key::password, password);
                     } else if (protocol == Proto::Socks5Proxy) {
                         QString proxyConfig = serverController->getTextFileFromContainer(container, credentials,
-                                                                                          protocols::socks5Proxy::proxyConfigPath, errorCode);
+                                                                                         protocols::socks5Proxy::proxyConfigPath, errorCode);
 
                         const static QRegularExpression usernameAndPasswordRegExp("users (\\w+):CL:(\\w+)");
                         QRegularExpressionMatch usernameAndPasswordMatch = usernameAndPasswordRegExp.match(proxyConfig);
@@ -591,25 +604,8 @@ void InstallController::removeProcessedContainer()
 
 void InstallController::removeApiConfig(const int serverIndex)
 {
-    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
-
-#ifdef Q_OS_IOS
-    QString vpncName = QString("%1 (%2) %3")
-        .arg(serverConfig[config_key::description].toString())
-        .arg(serverConfig[config_key::hostName].toString())
-        .arg(serverConfig[config_key::vpnproto].toString());
-
-    AmneziaVPN::removeVPNC(vpncName.toStdString());
-#endif
-
-    serverConfig.remove(config_key::dns1);
-    serverConfig.remove(config_key::dns2);
-    serverConfig.remove(config_key::containers);
-    serverConfig.remove(config_key::hostName);
-
-    serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
-
-    m_serversModel->editServer(serverConfig, serverIndex);
+    m_serversModel->removeApiConfig(serverIndex);
+    emit apiConfigRemoved(tr("Api config removed"));
 }
 
 void InstallController::clearCachedProfile(QSharedPointer<ServerController> serverController)
@@ -799,6 +795,110 @@ void InstallController::addEmptyServer()
     m_serversModel->addServer(server);
 
     emit installServerFinished(tr("Server added successfully"));
+}
+
+bool InstallController::fillAvailableServices()
+{
+    ApiController apiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
+
+    QByteArray responseBody;
+    ErrorCode errorCode = apiController.getServicesList(responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        emit installationErrorOccurred(errorCode);
+        return false;
+    }
+
+    QJsonObject data = QJsonDocument::fromJson(responseBody).object();
+    m_apiServicesModel->updateModel(data);
+    return true;
+}
+
+bool InstallController::installServiceFromApi()
+{
+    if (m_serversModel->isServerFromApiAlreadyExists(m_apiServicesModel->getCountryCode(), m_apiServicesModel->getSelectedServiceType(),
+                                                     m_apiServicesModel->getSelectedServiceProtocol())) {
+        emit installationErrorOccurred(ErrorCode::ApiConfigAlreadyAdded);
+        return false;
+    }
+
+    ApiController apiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
+    QJsonObject serverConfig;
+
+    ErrorCode errorCode = apiController.getConfigForService(m_settings->getInstallationUuid(true), m_apiServicesModel->getCountryCode(),
+                                                            m_apiServicesModel->getSelectedServiceType(),
+                                                            m_apiServicesModel->getSelectedServiceProtocol(), "", serverConfig);
+    if (errorCode != ErrorCode::NoError) {
+        emit installationErrorOccurred(errorCode);
+        return false;
+    }
+
+    auto serviceInfo = m_apiServicesModel->getSelectedServiceInfo();
+    QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+    apiConfig.insert(configKey::serviceInfo, serviceInfo);
+    apiConfig.insert(configKey::userCountryCode, m_apiServicesModel->getCountryCode());
+    apiConfig.insert(configKey::serviceType, m_apiServicesModel->getSelectedServiceType());
+    apiConfig.insert(configKey::serviceProtocol, m_apiServicesModel->getSelectedServiceProtocol());
+
+    serverConfig.insert(configKey::apiConfig, apiConfig);
+
+    m_serversModel->addServer(serverConfig);
+    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+    return true;
+}
+
+bool InstallController::updateServiceFromApi(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
+                                             bool reloadServiceConfig)
+{
+    ApiController apiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
+
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+
+    QJsonObject newServerConfig;
+    ErrorCode errorCode =
+            apiController.getConfigForService(m_settings->getInstallationUuid(true), apiConfig.value(configKey::userCountryCode).toString(),
+                                              apiConfig.value(configKey::serviceType).toString(),
+                                              apiConfig.value(configKey::serviceProtocol).toString(), newCountryCode, newServerConfig);
+    if (errorCode != ErrorCode::NoError) {
+        emit installationErrorOccurred(errorCode);
+        return false;
+    }
+
+    QJsonObject newApiConfig = newServerConfig.value(configKey::apiConfig).toObject();
+    newApiConfig.insert(configKey::serviceInfo, apiConfig.value(configKey::serviceInfo));
+    newApiConfig.insert(configKey::userCountryCode, apiConfig.value(configKey::userCountryCode));
+    newApiConfig.insert(configKey::serviceType, apiConfig.value(configKey::serviceType));
+    newApiConfig.insert(configKey::serviceProtocol, apiConfig.value(configKey::serviceProtocol));
+
+    newServerConfig.insert(configKey::apiConfig, newApiConfig);
+    m_serversModel->editServer(newServerConfig, serverIndex);
+
+    if (reloadServiceConfig) {
+        emit reloadServerFromApiFinished(tr("API config reloaded"));
+    } else if (newCountryName.isEmpty()) {
+        emit updateServerFromApiFinished();
+    } else {
+        emit changeApiCountryFinished(tr("Successfully changed the country of connection to %1").arg(newCountryName));
+    }
+    return true;
+}
+
+void InstallController::updateServiceFromTelegram(const int serverIndex)
+{
+    ApiController *apiController = new ApiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
+
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+
+    apiController->updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverIndex, serverConfig);
+    connect(apiController, &ApiController::finished, this, [this, apiController](const QJsonObject &config, const int serverIndex) {
+        m_serversModel->editServer(config, serverIndex);
+        emit updateServerFromApiFinished();
+        apiController->deleteLater();
+    });
+    connect(apiController, &ApiController::errorOccurred, this, [this, apiController](ErrorCode errorCode) {
+        emit installationErrorOccurred(errorCode);
+        apiController->deleteLater();
+    });
 }
 
 bool InstallController::isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig,

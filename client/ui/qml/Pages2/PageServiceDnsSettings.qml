@@ -70,7 +70,7 @@ PageType {
                 width: parent.width
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-                textColor: AmneziaStyle.color.red
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: root.lastItemTabClicked()
 

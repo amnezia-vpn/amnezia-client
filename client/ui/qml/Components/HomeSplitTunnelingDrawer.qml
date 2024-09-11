@@ -53,7 +53,7 @@ DrawerType2 {
             Layout.fillWidth: true
             Layout.topMargin: 16
 
-            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi")
+            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
 
             text: qsTr("Split tunneling on the server")
             descriptionText: qsTr("Enabled \nCan't be disabled for current server")
@@ -68,7 +68,7 @@ DrawerType2 {
         }
 
         DividerType {
-            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && ServersModel.getDefaultServerData("isServerFromApi")
+            visible: ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
         }
 
         LabelWithButtonType {

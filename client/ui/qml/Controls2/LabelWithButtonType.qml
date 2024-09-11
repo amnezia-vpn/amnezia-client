@@ -20,22 +20,23 @@ Item {
     property string buttonImageSource
     property string rightImageSource
     property string leftImageSource
-    property bool isLeftImageHoverEnabled: true //todo separete this qml file to 3
+    property bool isLeftImageHoverEnabled: true
+    property bool isSmallLeftImage: false
 
     property alias rightButton: rightImage
     property alias eyeButton: eyeImage
     property FlickableType parentFlickable
 
-    property string textColor: AmneziaStyle.color.white
-    property string textDisabledColor: AmneziaStyle.color.grey
-    property string descriptionColor: AmneziaStyle.color.grey
-    property string descriptionDisabledColor: AmneziaStyle.color.greyDisabled
+    property string textColor: AmneziaStyle.color.paleGray
+    property string textDisabledColor: AmneziaStyle.color.mutedGray
+    property string descriptionColor: AmneziaStyle.color.mutedGray
+    property string descriptionDisabledColor: AmneziaStyle.color.charcoalGray
     property real textOpacity: 1.0
 
-    property string borderFocusedColor: AmneziaStyle.color.white
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
-    property string rightImageColor: AmneziaStyle.color.white
+    property string rightImageColor: AmneziaStyle.color.paleGray
 
     property bool descriptionOnTop: false
     property bool hideDescription: true
@@ -114,9 +115,9 @@ Item {
 
             visible: leftImageSource ? true : false
 
-            Layout.preferredHeight: rightImageSource || !isLeftImageHoverEnabled ? leftImage.implicitHeight : 56
-            Layout.preferredWidth: rightImageSource || !isLeftImageHoverEnabled ? leftImage.implicitWidth : 56
-            Layout.rightMargin: rightImageSource || !isLeftImageHoverEnabled ? 16 : 0
+            Layout.preferredHeight: (rightImageSource || !isLeftImageHoverEnabled || isSmallLeftImage) ? 40 : 56
+            Layout.preferredWidth: (rightImageSource || !isLeftImageHoverEnabled || isSmallLeftImage)? 40 : 56
+            Layout.rightMargin: isSmallLeftImage ? 8 : (rightImageSource || !isLeftImageHoverEnabled) ? 16 : 0
 
             radius: 12
             color: AmneziaStyle.color.transparent

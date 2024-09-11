@@ -174,18 +174,30 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
 QByteArray SecureQSettings::encryptText(const QByteArray &value) const
 {
     QSimpleCrypto::QBlockCipher cipher;
-    return cipher.encryptAesBlockCipher(value, getEncKey(), getEncIv());
+    QByteArray result;
+    try {
+        result = cipher.encryptAesBlockCipher(value, getEncKey(), getEncIv());
+    } catch (...) { // todo change error handling in QSimpleCrypto?
+        qCritical() << "error when encrypting the settings value";
+    }
+    return result;
 }
 
 QByteArray SecureQSettings::decryptText(const QByteArray &ba) const
 {
     QSimpleCrypto::QBlockCipher cipher;
-    return cipher.decryptAesBlockCipher(ba, getEncKey(), getEncIv());
+    QByteArray result;
+    try {
+        result = cipher.decryptAesBlockCipher(ba, getEncKey(), getEncIv());
+    } catch (...) { // todo change error handling in QSimpleCrypto?
+        qCritical() << "error when decrypting the settings value";
+    }
+    return result;
 }
 
 bool SecureQSettings::encryptionRequired() const
 {
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     // QtKeyChain failing on Linux
     return false;
 #endif
@@ -200,7 +212,7 @@ QByteArray SecureQSettings::getEncKey() const
     if (m_key.isEmpty()) {
         // Create new key
         QSimpleCrypto::QBlockCipher cipher;
-        QByteArray key = cipher.generateSecureRandomBytes(32);
+        QByteArray key = cipher.generatePrivateSalt(32);
         if (key.isEmpty()) {
             qCritical() << "SecureQSettings::getEncKey Unable to generate new enc key";
         }
@@ -226,7 +238,7 @@ QByteArray SecureQSettings::getEncIv() const
     if (m_iv.isEmpty()) {
         // Create new IV
         QSimpleCrypto::QBlockCipher cipher;
-        QByteArray iv = cipher.generateSecureRandomBytes(32);
+        QByteArray iv = cipher.generatePrivateSalt(32);
         if (iv.isEmpty()) {
             qCritical() << "SecureQSettings::getEncIv Unable to generate new enc IV";
         }

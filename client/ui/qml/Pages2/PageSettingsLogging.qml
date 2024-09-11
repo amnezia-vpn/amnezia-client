@@ -16,18 +16,6 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    Connections {
-        target: SettingsController
-
-        function onLoggingStateChanged() {
-            if (SettingsController.isLoggingEnabled) {
-                var message = qsTr("Logging is enabled. Note that logs will be automatically \
-disabled after 14 days, and all log files will be deleted.")
-                PageController.showNotificationMessage(message)
-            }
-        }
-    }
-
     defaultActiveFocusItem: focusItem
 
     Item {
@@ -58,13 +46,12 @@ disabled after 14 days, and all log files will be deleted.")
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
-
-            spacing: 16
+            spacing: 0
 
             HeaderType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 headerText: qsTr("Logging")
                 descriptionText: qsTr("Enabling this function will save application's logs automatically. " +
@@ -75,11 +62,13 @@ disabled after 14 days, and all log files will be deleted.")
                 id: switcher
                 Layout.fillWidth: true
                 Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                text: qsTr("Save logs")
+                text: qsTr("Enable logs")
 
                 checked: SettingsController.isLoggingEnabled
-                KeyNavigation.tab: openFolderButton
+                //KeyNavigation.tab: openFolderButton
                 onCheckedChanged: {
                     if (checked !== SettingsController.isLoggingEnabled) {
                         SettingsController.isLoggingEnabled = checked
@@ -87,131 +76,199 @@ disabled after 14 days, and all log files will be deleted.")
                 }
             }
 
-            RowLayout {
+            DividerType {}
+
+            LabelWithButtonType {
+                // id: labelWithButton2
                 Layout.fillWidth: true
+                Layout.topMargin: -8
 
-                ColumnLayout {
-                    Layout.alignment: Qt.AlignBaseline
-                    Layout.preferredWidth: GC.isMobile() ? 0 : root.width / 3
-                    visible: !GC.isMobile()
+                text: qsTr("Clear logs")
+                leftImageSource: "qrc:/images/controls/trash.svg"
+                isSmallLeftImage: true
 
-                    ImageButtonType {
-                        id: openFolderButton
-                        Layout.alignment: Qt.AlignHCenter
+                // KeyNavigation.tab: labelWithButton3
 
-                        implicitWidth: 56
-                        implicitHeight: 56
+                clickedFunction: function() {
+                    var headerText = qsTr("Clear logs?")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                        image: "qrc:/images/controls/folder-open.svg"
-                        KeyNavigation.tab: saveButton
-
-                        onClicked: SettingsController.openLogsFolder()
-                        Keys.onReturnPressed: openFolderButton.clicked()
-                        Keys.onEnterPressed: openFolderButton.clicked()
+                    var yesButtonFunction = function() {
+                        PageController.showBusyIndicator(true)
+                        SettingsController.clearLogs()
+                        PageController.showBusyIndicator(false)
+                        PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
+                        if (!GC.isMobile()) {
+                            focusItem.forceActiveFocus()
+                        }
                     }
-
-                    CaptionTextType {
-                        horizontalAlignment: Text.AlignHCenter
-                        Layout.fillWidth: true
-
-                        text: qsTr("Open folder with logs")
-                        color: AmneziaStyle.color.white
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.alignment: Qt.AlignBaseline
-                    Layout.preferredWidth: root.width / ( GC.isMobile() ? 2 : 3 )
-
-                    ImageButtonType {
-                        id: saveButton
-                        Layout.alignment: Qt.AlignHCenter
-
-                        implicitWidth: 56
-                        implicitHeight: 56
-
-                        image: "qrc:/images/controls/save.svg"
-                        KeyNavigation.tab: clearButton
-
-                        Keys.onReturnPressed: saveButton.clicked()
-                        Keys.onEnterPressed: saveButton.clicked()
-                        onClicked: {
-                            var fileName = ""
-                            if (GC.isMobile()) {
-                                fileName = "AmneziaVPN.log"
-                            } else {
-                                fileName = SystemController.getFileName(qsTr("Save"),
-                                                                        qsTr("Logs files (*.log)"),
-                                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
-                                                                        true,
-                                                                        ".log")
-                            }
-                            if (fileName !== "") {
-                                PageController.showBusyIndicator(true)
-                                SettingsController.exportLogsFile(fileName)
-                                PageController.showBusyIndicator(false)
-                                PageController.showNotificationMessage(qsTr("Logs file saved"))
-                            }
+                    var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            focusItem.forceActiveFocus()
                         }
                     }
 
-                    CaptionTextType {
-                        horizontalAlignment: Text.AlignHCenter
-                        Layout.fillWidth: true
+                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+            }
 
-                        text: qsTr("Save logs to file")
-                        color: AmneziaStyle.color.white
+            ListItemTitleType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Client logs")
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                color: AmneziaStyle.color.mutedGray
+                text: qsTr("AmneziaVPN logs")
+            }
+
+            LabelWithButtonType {
+                // id: labelWithButton2
+                Layout.fillWidth: true
+                Layout.topMargin: -8
+                Layout.bottomMargin: -8
+
+                text: qsTr("Open logs folder")
+                leftImageSource: "qrc:/images/controls/folder-open.svg"
+                isSmallLeftImage: true
+
+                // KeyNavigation.tab: labelWithButton3
+
+                clickedFunction: function() {
+                    SettingsController.openLogsFolder()
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                // id: labelWithButton2
+                Layout.fillWidth: true
+                Layout.topMargin: -8
+                Layout.bottomMargin: -8
+
+                text: qsTr("Export logs")
+                leftImageSource: "qrc:/images/controls/save.svg"
+                isSmallLeftImage: true
+
+                // KeyNavigation.tab: labelWithButton3
+
+                clickedFunction: function() {
+                    var fileName = ""
+                    if (GC.isMobile()) {
+                        fileName = "AmneziaVPN.log"
+                    } else {
+                        fileName = SystemController.getFileName(qsTr("Save"),
+                                                                qsTr("Logs files (*.log)"),
+                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
+                                                                true,
+                                                                ".log")
+                    }
+                    if (fileName !== "") {
+                        PageController.showBusyIndicator(true)
+                        SettingsController.exportLogsFile(fileName)
+                        PageController.showBusyIndicator(false)
+                        PageController.showNotificationMessage(qsTr("Logs file saved"))
                     }
                 }
+            }
 
-                ColumnLayout {
-                    Layout.alignment: Qt.AlignBaseline
-                    Layout.preferredWidth: root.width / ( GC.isMobile() ? 2 : 3 )
+            DividerType {}
 
-                    ImageButtonType {
-                        id: clearButton
-                        Layout.alignment: Qt.AlignHCenter
+            ListItemTitleType {
+                visible: !GC.isMobile()
 
-                        implicitWidth: 56
-                        implicitHeight: 56
+                Layout.fillWidth: true
+                Layout.topMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                        image: "qrc:/images/controls/delete.svg"
-                        Keys.onTabPressed: lastItemTabClicked(focusItem)
+                text: qsTr("Service logs")
+            }
 
-                        Keys.onReturnPressed: clearButton.clicked()
-                        Keys.onEnterPressed: clearButton.clicked()
-                        onClicked: function() {
-                            var headerText = qsTr("Clear logs?")
-                            var yesButtonText = qsTr("Continue")
-                            var noButtonText = qsTr("Cancel")
+            ParagraphTextType {
+                visible: !GC.isMobile()
 
-                            var yesButtonFunction = function() {
-                                PageController.showBusyIndicator(true)
-                                SettingsController.clearLogs()
-                                PageController.showBusyIndicator(false)
-                                PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
-                                if (!GC.isMobile()) {
-                                    focusItem.forceActiveFocus()
-                                }
-                            }
-                            var noButtonFunction = function() {
-                                if (!GC.isMobile()) {
-                                    focusItem.forceActiveFocus()
-                                }
-                            }
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                            showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                        }
+                color: AmneziaStyle.color.mutedGray
+                text: qsTr("AmneziaVPN-service logs")
+            }
+
+            LabelWithButtonType {
+                // id: labelWithButton2
+
+                visible: !GC.isMobile()
+
+                Layout.fillWidth: true
+                Layout.topMargin: -8
+                Layout.bottomMargin: -8
+
+                text: qsTr("Open logs folder")
+                leftImageSource: "qrc:/images/controls/folder-open.svg"
+                isSmallLeftImage: true
+
+                // KeyNavigation.tab: labelWithButton3
+
+                clickedFunction: function() {
+                    SettingsController.openServiceLogsFolder()
+                }
+            }
+
+            DividerType {
+                visible: !GC.isMobile()
+            }
+
+            LabelWithButtonType {
+                // id: labelWithButton2
+
+                visible: !GC.isMobile()
+
+                Layout.fillWidth: true
+                Layout.topMargin: -8
+                Layout.bottomMargin: -8
+
+                text: qsTr("Export logs")
+                leftImageSource: "qrc:/images/controls/save.svg"
+                isSmallLeftImage: true
+
+                // KeyNavigation.tab: labelWithButton3
+
+                clickedFunction: function() {
+                    var fileName = ""
+                    if (GC.isMobile()) {
+                        fileName = "AmneziaVPN-service.log"
+                    } else {
+                        fileName = SystemController.getFileName(qsTr("Save"),
+                                                                qsTr("Logs files (*.log)"),
+                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN-service",
+                                                                true,
+                                                                ".log")
                     }
-
-                    CaptionTextType {
-                        horizontalAlignment: Text.AlignHCenter
-                        Layout.fillWidth: true
-
-                        text: qsTr("Clear logs")
-                        color: AmneziaStyle.color.white
+                    if (fileName !== "") {
+                        PageController.showBusyIndicator(true)
+                        SettingsController.exportServiceLogsFile(fileName)
+                        PageController.showBusyIndicator(false)
+                        PageController.showNotificationMessage(qsTr("Logs file saved"))
                     }
                 }
+            }
+
+            DividerType {
+                visible: !GC.isMobile()
             }
         }
     }

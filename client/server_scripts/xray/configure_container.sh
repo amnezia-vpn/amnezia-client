@@ -29,7 +29,7 @@ cat > /opt/amnezia/xray/server.json <<EOF
     },
     "inbounds": [
         {
-            "port": 443,
+            "port": $XRAY_SERVER_PORT,
             "protocol": "vless",
             "settings": {
                 "clients": [

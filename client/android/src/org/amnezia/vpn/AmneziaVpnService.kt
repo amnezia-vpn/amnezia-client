@@ -31,6 +31,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.drop
@@ -111,6 +112,10 @@ open class AmneziaVpnService : VpnService() {
         get() = clientMessengers.any { it.value.name == ACTIVITY_MESSENGER_NAME }
 
     private val connectionExceptionHandler = CoroutineExceptionHandler { _, e ->
+        connectionJob?.cancel()
+        connectionJob = null
+        disconnectionJob?.cancel()
+        disconnectionJob = null
         protocolState.value = DISCONNECTED
         when (e) {
             is IllegalArgumentException,
@@ -531,7 +536,7 @@ open class AmneziaVpnService : VpnService() {
         protocolState.value = DISCONNECTING
 
         disconnectionJob = connectionScope.launch {
-            connectionJob?.join()
+            connectionJob?.cancelAndJoin()
             connectionJob = null
 
             vpnProto?.protocol?.stopVpn()

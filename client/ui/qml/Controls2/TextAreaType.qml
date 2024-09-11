@@ -11,12 +11,12 @@ Rectangle {
     property alias textArea: textArea
     property alias textAreaText: textArea.text
 
-    property string borderHoveredColor: AmneziaStyle.color.greyDisabled
-    property string borderNormalColor: AmneziaStyle.color.greyDark
-    property string borderFocusedColor: AmneziaStyle.color.white
+    property string borderHoveredColor: AmneziaStyle.color.charcoalGray
+    property string borderNormalColor: AmneziaStyle.color.slateGray
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
 
     height: 148
-    color: AmneziaStyle.color.blackLight
+    color: AmneziaStyle.color.onyxBlack
     border.width: 1
     border.color: getBorderColor(borderNormalColor)
     radius: 16
@@ -54,10 +54,10 @@ Rectangle {
                 anchors.topMargin: 16
                 anchors.bottomMargin: 16
 
-                color: AmneziaStyle.color.white
-                selectionColor:  AmneziaStyle.color.brown
-                selectedTextColor: AmneziaStyle.color.white
-                placeholderTextColor: AmneziaStyle.color.grey
+                color: AmneziaStyle.color.paleGray
+                selectionColor:  AmneziaStyle.color.richBrown
+                selectedTextColor: AmneziaStyle.color.paleGray
+                placeholderTextColor: AmneziaStyle.color.mutedGray
 
                 font.pixelSize: 16
                 font.weight: Font.Medium

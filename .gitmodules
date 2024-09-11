@@ -13,3 +13,6 @@
 [submodule "client/3rd/amneziawg-apple"]
 	path = client/3rd/amneziawg-apple
 	url = https://github.com/amnezia-vpn/amneziawg-apple
+[submodule "client/3rd/QSimpleCrypto"]
+	path = client/3rd/QSimpleCrypto
+	url = https://github.com/amnezia-vpn/QSimpleCrypto.git

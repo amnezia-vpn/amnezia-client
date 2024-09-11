@@ -11,9 +11,10 @@ import Style 1.0
 Button {
     id: root
 
-    property string defaultButtonColor: AmneziaStyle.color.white
-    property string progressButtonColor: AmneziaStyle.color.white
-    property string connectedButtonColor: AmneziaStyle.color.orange
+    property string defaultButtonColor: AmneziaStyle.color.paleGray
+    property string progressButtonColor: AmneziaStyle.color.paleGray
+    property string connectedButtonColor: AmneziaStyle.color.goldenApricot
+    property bool buttonActiveFocus: activeFocus && (Qt.platform.os !== "android" || SettingsController.isOnTv())
 
     implicitWidth: 190
     implicitHeight: 190
@@ -50,14 +51,14 @@ Button {
                 verticalOffset: 0
                 radius: 10
                 samples: 25
-                color: root.activeFocus ? AmneziaStyle.color.white : AmneziaStyle.color.orange
+                color: root.buttonActiveFocus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.goldenApricot
                 source: backgroundCircle
             }
 
             ShapePath {
                 fillColor: AmneziaStyle.color.transparent
-                strokeColor: AmneziaStyle.color.white
-                strokeWidth: root.activeFocus ? 1 : 0
+                strokeColor: AmneziaStyle.color.paleGray
+                strokeWidth: root.buttonActiveFocus ? 1 : 0
                 capStyle: ShapePath.RoundCap
 
                 PathAngleArc {
@@ -74,21 +75,21 @@ Button {
                 fillColor: AmneziaStyle.color.transparent
                 strokeColor: {
                     if (ConnectionController.isConnectionInProgress) {
-                        return AmneziaStyle.color.connectionInProgress
+                        return AmneziaStyle.color.darkCharcoal
                     } else if (ConnectionController.isConnected) {
                         return connectedButtonColor
                     } else {
                         return defaultButtonColor
                     }
                 }
-                strokeWidth: root.activeFocus ? 2 : 3
+                strokeWidth: root.buttonActiveFocus ? 2 : 3
                 capStyle: ShapePath.RoundCap
 
                 PathAngleArc {
                     centerX: backgroundCircle.width / 2
                     centerY: backgroundCircle.height / 2
-                    radiusX: 93 - (root.activeFocus ? 2 : 0)
-                    radiusY: 93 - (root.activeFocus ? 2 : 0)
+                    radiusX: 93 - (root.buttonActiveFocus ? 2 : 0)
+                    radiusY: 93 - (root.buttonActiveFocus ? 2 : 0)
                     startAngle: 0
                     sweepAngle: 360
                 }
@@ -115,7 +116,7 @@ Button {
 
             ShapePath {
                 fillColor: AmneziaStyle.color.transparent
-                strokeColor: AmneziaStyle.color.white
+                strokeColor: AmneziaStyle.color.paleGray
                 strokeWidth: 3
                 capStyle: ShapePath.RoundCap
 

@@ -1,32 +1,32 @@
 #include "ipcserver.h"
 
-#include <QObject>
 #include <QDateTime>
-#include <QLocalSocket>
 #include <QFileInfo>
+#include <QLocalSocket>
+#include <QObject>
 
-#include "router.h"
 #include "logger.h"
+#include "router.h"
 
 #include "../client/protocols/protocols_defs.h"
 #ifdef Q_OS_WIN
-#include "tapcontroller_win.h"
-#include "../client/platforms/windows/daemon/windowsfirewall.h"
-#include "../client/platforms/windows/daemon/windowsdaemon.h"
+    #include "../client/platforms/windows/daemon/windowsdaemon.h"
+    #include "../client/platforms/windows/daemon/windowsfirewall.h"
+    #include "tapcontroller_win.h"
 #endif
 
 #ifdef Q_OS_LINUX
-#include "../client/platforms/linux/daemon/linuxfirewall.h"
+    #include "../client/platforms/linux/daemon/linuxfirewall.h"
 #endif
 
 #ifdef Q_OS_MACOS
-#include "../client/platforms/macos/daemon/macosfirewall.h"
+    #include "../client/platforms/macos/daemon/macosfirewall.h"
 #endif
 
-IpcServer::IpcServer(QObject *parent):
-    IpcInterfaceSource(parent)
+IpcServer::IpcServer(QObject *parent) : IpcInterfaceSource(parent)
 
-{}
+{
+}
 
 int IpcServer::createPrivilegedProcess()
 {
@@ -58,23 +58,10 @@ int IpcServer::createPrivilegedProcess()
         }
     });
 
-    QObject::connect(pd.serverNode.data(), &QRemoteObjectHost::error, this, [pd](QRemoteObjectNode::ErrorCode errorCode) {
-        qDebug() << "QRemoteObjectHost::error" << errorCode;
-    });
+    QObject::connect(pd.serverNode.data(), &QRemoteObjectHost::error, this,
+                     [pd](QRemoteObjectNode::ErrorCode errorCode) { qDebug() << "QRemoteObjectHost::error" << errorCode; });
 
-    QObject::connect(pd.serverNode.data(), &QRemoteObjectHost::destroyed, this, [pd]() {
-        qDebug() << "QRemoteObjectHost::destroyed";
-    });
-
-//    connect(pd.ipcProcess.data(), &IpcServerProcess::finished, this, [this, pid=m_localpid](int exitCode, QProcess::ExitStatus exitStatus){
-//        qDebug() << "IpcServerProcess finished" << exitCode << exitStatus;
-////        if (m_processes.contains(pid)) {
-////            m_processes[pid].ipcProcess.reset();
-////            m_processes[pid].serverNode.reset();
-////            m_processes[pid].localServer.reset();
-////            m_processes.remove(pid);
-////        }
-//    });
+    QObject::connect(pd.serverNode.data(), &QRemoteObjectHost::destroyed, this, [pd]() { qDebug() << "QRemoteObjectHost::destroyed"; });
 
     m_processes.insert(m_localpid, pd);
 
@@ -105,7 +92,7 @@ bool IpcServer::routeDeleteList(const QString &gw, const QStringList &ips)
     qDebug() << "IpcServer::routeDeleteList";
 #endif
 
-    return Router::routeDeleteList(gw ,ips);
+    return Router::routeDeleteList(gw, ips);
 }
 
 void IpcServer::flushDns()
@@ -158,12 +145,13 @@ void IpcServer::cleanUp()
     qDebug() << "IpcServer::cleanUp";
 #endif
 
-    Logger::deinit();
+    Logger::deInit();
     Logger::cleanUp();
 }
 
-void IpcServer::clearLogs() {
-    Logger::clearLogs();
+void IpcServer::clearLogs()
+{
+    Logger::clearLogs(true);
 }
 
 bool IpcServer::createTun(const QString &dev, const QString &subnet)
@@ -176,7 +164,7 @@ bool IpcServer::deleteTun(const QString &dev)
     return Router::deleteTun(dev);
 }
 
-bool IpcServer::updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers)
+bool IpcServer::updateResolvers(const QString &ifname, const QList<QHostAddress> &resolvers)
 {
     return Router::updateResolvers(ifname, resolvers);
 }
@@ -197,13 +185,11 @@ void IpcServer::setLogsEnabled(bool enabled)
 #endif
 
     if (enabled) {
-        Logger::init();
-    }
-    else {
-        Logger::deinit();
+        Logger::init(true);
+    } else {
+        Logger::deInit();
     }
 }
-
 
 bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex)
 {
@@ -220,13 +206,11 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
     QStringList allownets;
     QStringList blocknets;
 
-    if (splitTunnelType == 0)
-    {
+    if (splitTunnelType == 0) {
         blockAll = true;
         allowNets = true;
         allownets.append(configStr.value(amnezia::config_key::hostName).toString());
-    } else if (splitTunnelType == 1)
-    {
+    } else if (splitTunnelType == 1) {
         blockNets = true;
         for (auto v : splitTunnelSites) {
             blocknets.append(v.toString());
@@ -268,18 +252,17 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
 
     // double-check + ensure our firewall is installed and enabled. This is necessary as
     // other software may disable pfctl before re-enabling with their own rules (e.g other VPNs)
-    if (!MacOSFirewall::isInstalled()) MacOSFirewall::install();
+    if (!MacOSFirewall::isInstalled())
+        MacOSFirewall::install();
 
     MacOSFirewall::ensureRootAnchorPriority();
     MacOSFirewall::setAnchorEnabled(QStringLiteral("000.allowLoopback"), true);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("100.blockAll"), blockAll);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("110.allowNets"), allowNets);
-    MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), allowNets,
-                                  QStringLiteral("allownets"), allownets);
+    MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), allowNets, QStringLiteral("allownets"), allownets);
 
     MacOSFirewall::setAnchorEnabled(QStringLiteral("120.blockNets"), blockNets);
-    MacOSFirewall::setAnchorTable(QStringLiteral("120.blockNets"), blockNets,
-                                  QStringLiteral("blocknets"), blocknets);
+    MacOSFirewall::setAnchorTable(QStringLiteral("120.blockNets"), blockNets, QStringLiteral("blocknets"), blocknets);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
@@ -330,10 +313,8 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
 
     // Use APP split tunnel
     if (splitTunnelType == 0 || splitTunnelType == 2) {
-            config.m_allowedIPAddressRanges.append(
-                    IPAddress(QHostAddress("0.0.0.0"), 0));
-            config.m_allowedIPAddressRanges.append(
-                IPAddress(QHostAddress("::"), 0));
+        config.m_allowedIPAddressRanges.append(IPAddress(QHostAddress("0.0.0.0"), 0));
+        config.m_allowedIPAddressRanges.append(IPAddress(QHostAddress("::"), 0));
     }
 
     if (splitTunnelType == 1) {
@@ -341,10 +322,9 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
             QString ipRange = v.toString();
             if (ipRange.split('/').size() > 1) {
                 config.m_allowedIPAddressRanges.append(
-                    IPAddress(QHostAddress(ipRange.split('/')[0]), atoi(ipRange.split('/')[1].toLocal8Bit())));
+                        IPAddress(QHostAddress(ipRange.split('/')[0]), atoi(ipRange.split('/')[1].toLocal8Bit())));
             } else {
-                 config.m_allowedIPAddressRanges.append(
-                    IPAddress(QHostAddress(ipRange), 32));
+                config.m_allowedIPAddressRanges.append(IPAddress(QHostAddress(ipRange), 32));
             }
         }
     }
@@ -357,7 +337,7 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
         }
     }
 
-    for (const QJsonValue& i : configStr.value(amnezia::config_key::splitTunnelApps).toArray()) {
+    for (const QJsonValue &i : configStr.value(amnezia::config_key::splitTunnelApps).toArray()) {
         if (!i.isString()) {
             break;
         }

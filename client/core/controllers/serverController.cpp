@@ -83,7 +83,6 @@ ErrorCode ServerController::runScript(const ServerCredentials &credentials, QStr
         }
 
         qDebug().noquote() << lineToExec;
-        Logger::appendSshLog("Run command:" + lineToExec);
 
         error = m_sshClient.executeCommand(lineToExec, cbReadStdOut, cbReadStdErr);
         if (error != ErrorCode::NoError) {
@@ -100,7 +99,6 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
                                                const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr)
 {
     QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
-    Logger::appendSshLog("Run container script for " + ContainerProps::containerToString(container) + ":\n" + script);
 
     ErrorCode e = uploadTextFileToContainer(container, credentials, script, fileName);
     if (e)
@@ -571,6 +569,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
 
     // Xray vars
     vars.append({ { "$XRAY_SITE_NAME", xrayConfig.value(config_key::site).toString(protocols::xray::defaultSite) } });
+    vars.append({ { "$XRAY_SERVER_PORT", xrayConfig.value(config_key::port).toString(protocols::xray::defaultPort) } });
 
     // Wireguard vars
     vars.append({ { "$WIREGUARD_SUBNET_IP",

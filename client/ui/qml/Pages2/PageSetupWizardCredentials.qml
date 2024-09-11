@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -138,6 +139,23 @@ PageType {
                 Layout.topMargin: 12
 
                 text: qsTr("All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties")
+            }
+
+            CardWithIconsType {
+                id: siteLink
+
+                Layout.fillWidth: true
+                Layout.bottomMargin: 16
+
+                headerText: qsTr("How to run your VPN server")
+                bodyText: qsTr("Where to get connection data, step-by-step instructions for buying a VPS")
+
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/help-circle.svg"
+
+                onClicked: {
+                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl() + "/starter-guide")
+                }
             }
         }
     }

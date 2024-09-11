@@ -160,9 +160,6 @@ public:
         setValue("Conf/secondaryDns", secondaryDns);
     }
 
-    static const char cloudFlareNs1[];
-    static const char cloudFlareNs2[];
-
     //    static constexpr char openNicNs5[] = "94.103.153.176";
     //    static constexpr char openNicNs13[] = "144.76.103.143";
 
@@ -186,7 +183,7 @@ public:
 
     bool isScreenshotsEnabled() const
     {
-        return value("Conf/screenshotsEnabled", false).toBool();
+        return value("Conf/screenshotsEnabled", true).toBool();
     }
     void setScreenshotsEnabled(bool enabled)
     {
@@ -218,6 +215,13 @@ public:
     void setKillSwitchEnabled(bool enabled);
     QString getInstallationUuid(const bool needCreate);
 
+    void resetGatewayEndpoint();
+    void setGatewayEndpoint(const QString &endpoint);
+    void setDevGatewayEndpoint();
+    QString getGatewayEndpoint();
+    bool isDevGatewayEnv();
+    void toggleDevGatewayEnv(bool enabled);
+
 signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);
@@ -231,6 +235,9 @@ private:
     void setInstallationUuid(const QString &uuid);
 
     mutable SecureQSettings m_settings;
+
+    QString m_gatewayEndpoint;
+    bool m_isDevGatewayEnv;
 };
 
 #endif // SETTINGS_H
