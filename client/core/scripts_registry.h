@@ -28,7 +28,8 @@ enum ProtocolScriptType {
     openvpn_template,
     wireguard_template,
     awg_template,
-    xray_template
+    xray_template,
+    ipsec_template
 };
 
 

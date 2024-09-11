@@ -27,6 +27,10 @@ public:
     QString genIkev2Config(const ConnectionData &connData);
     QString genMobileConfig(const ConnectionData &connData);
     QString genStrongSwanConfig(const ConnectionData &connData);
+    QString genIPSecConfig(const ConnectionData &connData);
+
+    QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig, QString &protocolConfigString);
+    QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig, QString &protocolConfigString);
 
     ConnectionData prepareIkev2Config(const ServerCredentials &credentials,
         DockerContainer container, ErrorCode &errorCode);

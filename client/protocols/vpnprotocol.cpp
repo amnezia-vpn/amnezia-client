@@ -16,6 +16,10 @@
     #include "ikev2_vpn_protocol_windows.h"
 #endif
 
+#ifdef Q_OS_LINUX
+#include "ikev2_vpn_protocol_linux.h"
+#endif
+
 VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject *parent)
     : QObject(parent),
       m_connectionState(Vpn::ConnectionState::Unknown),
@@ -106,7 +110,7 @@ QString VpnProtocol::vpnGateway() const
 VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &configuration)
 {
     switch (container) {
-#if defined(Q_OS_WINDOWS)
+#if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     case DockerContainer::Ipsec: return new Ikev2Protocol(configuration);
 #endif
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))

@@ -33,5 +33,17 @@ class IpcInterface
     SLOT( bool enablePeerTraffic( const QJsonObject &configStr) );
     SLOT( bool enableKillSwitch( const QJsonObject &excludeAddr, int vpnAdapterIndex) );
     SLOT( bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) );
+
+    SLOT( bool writeIPsecCaCert(QString cacert, QString uuid) );
+    SLOT( bool writeIPsecPrivate(QString privKey, QString uuid) );
+    SLOT( bool writeIPsecConfig(QString config) );
+    SLOT( bool writeIPsecUserCert(QString usercert, QString uuid) );
+    SLOT( bool writeIPsecPrivatePass(QString pass, QString host, QString uuid) );
+
+    SLOT( bool stopIPsec(QString tunnelName) );
+    SLOT( bool startIPsec(QString tunnelName) );
+
+    SLOT( QString getTunnelStatus(QString tunnelName) );
+
 };
 

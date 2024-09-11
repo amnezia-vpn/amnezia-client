@@ -242,6 +242,7 @@ conn ikev2-cp
   dpdtimeout=120
   dpdaction=clear
   auto=add
+  authby=rsa-sha1
   ikev2=insist
   rekey=no
   pfs=no
