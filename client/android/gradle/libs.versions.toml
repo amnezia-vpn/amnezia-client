@@ -1,6 +1,7 @@
 [versions]
 agp = "8.5.2"
 kotlin = "1.9.24"
+android-billing = "7.0.0"
 androidx-core = "1.13.1"
 androidx-activity = "1.9.1"
 androidx-annotation = "1.8.2"
@@ -14,6 +15,7 @@ kotlinx-serialization = "1.6.3"
 google-mlkit = "17.3.0"
 
 [libraries]
+android-billing = { module = "com.android.billingclient:billing-ktx", version.ref = "android-billing" }
 androidx-core = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity" }
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }

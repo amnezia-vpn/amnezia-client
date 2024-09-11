@@ -122,4 +122,5 @@ dependencies {
     implementation(libs.google.mlkit)
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.biometric)
+    implementation(libs.android.billing)
 }
