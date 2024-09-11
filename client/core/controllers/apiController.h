@@ -14,7 +14,7 @@ class ApiController : public QObject
     Q_OBJECT
 
 public:
-    explicit ApiController(const QString &gatewayEndpoint, QObject *parent = nullptr);
+    explicit ApiController(const QString &gatewayEndpoint, bool isDevEnvironment, QObject *parent = nullptr);
 
 public slots:
     void updateServerConfigFromApi(const QString &installationUuid, const int serverIndex, QJsonObject serverConfig);
@@ -44,6 +44,7 @@ private:
 
     QString m_gatewayEndpoint;
     QStringList m_proxyUrls;
+    bool m_isDevEnvironment = false;
 };
 
 #endif // APICONTROLLER_H

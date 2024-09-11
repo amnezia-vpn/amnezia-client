@@ -20,7 +20,8 @@ Item {
     property string buttonImageSource
     property string rightImageSource
     property string leftImageSource
-    property bool isLeftImageHoverEnabled: true //todo separete this qml file to 3
+    property bool isLeftImageHoverEnabled: true
+    property bool isSmallLeftImage: false
 
     property alias rightButton: rightImage
     property alias eyeButton: eyeImage
@@ -114,9 +115,9 @@ Item {
 
             visible: leftImageSource ? true : false
 
-            Layout.preferredHeight: rightImageSource || !isLeftImageHoverEnabled ? leftImage.implicitHeight : 56
-            Layout.preferredWidth: rightImageSource || !isLeftImageHoverEnabled ? leftImage.implicitWidth : 56
-            Layout.rightMargin: rightImageSource || !isLeftImageHoverEnabled ? 16 : 0
+            Layout.preferredHeight: (rightImageSource || !isLeftImageHoverEnabled || isSmallLeftImage) ? 40 : 56
+            Layout.preferredWidth: (rightImageSource || !isLeftImageHoverEnabled || isSmallLeftImage)? 40 : 56
+            Layout.rightMargin: isSmallLeftImage ? 8 : (rightImageSource || !isLeftImageHoverEnabled) ? 16 : 0
 
             radius: 12
             color: AmneziaStyle.color.transparent

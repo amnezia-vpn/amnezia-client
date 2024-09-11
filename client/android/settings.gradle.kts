@@ -22,7 +22,7 @@ dependencyResolutionManagement {
 includeBuild("./gradle/plugins")
 
 plugins {
-    id("com.android.settings") version "8.2.0"
+    id("com.android.settings") version "8.5.2"
     id("settings-property-delegate")
 }
 

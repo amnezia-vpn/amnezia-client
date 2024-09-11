@@ -799,7 +799,7 @@ void InstallController::addEmptyServer()
 
 bool InstallController::fillAvailableServices()
 {
-    ApiController apiController(m_settings->getGatewayEndpoint());
+    ApiController apiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
 
     QByteArray responseBody;
     ErrorCode errorCode = apiController.getServicesList(responseBody);
@@ -821,7 +821,7 @@ bool InstallController::installServiceFromApi()
         return false;
     }
 
-    ApiController apiController(m_settings->getGatewayEndpoint());
+    ApiController apiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
     QJsonObject serverConfig;
 
     ErrorCode errorCode = apiController.getConfigForService(m_settings->getInstallationUuid(true), m_apiServicesModel->getCountryCode(),
@@ -849,7 +849,7 @@ bool InstallController::installServiceFromApi()
 bool InstallController::updateServiceFromApi(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                              bool reloadServiceConfig)
 {
-    ApiController apiController(m_settings->getGatewayEndpoint());
+    ApiController apiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
 
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
@@ -885,7 +885,7 @@ bool InstallController::updateServiceFromApi(const int serverIndex, const QStrin
 
 void InstallController::updateServiceFromTelegram(const int serverIndex)
 {
-    ApiController *apiController = new ApiController(m_settings->getGatewayEndpoint());
+    ApiController *apiController = new ApiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
 
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
 

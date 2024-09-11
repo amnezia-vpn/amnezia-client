@@ -125,3 +125,12 @@ void SystemController::setQmlRoot(QObject *qmlRoot)
 {
     m_qmlRoot = qmlRoot;
 }
+
+bool SystemController::isAuthenticated()
+{
+#ifdef Q_OS_ANDROID
+    return AndroidController::instance()->requestAuthentication();
+#else
+    return true;
+#endif
+}

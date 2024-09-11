@@ -227,7 +227,7 @@ void Settings::setSaveLogs(bool enabled)
     if (!isSaveLogs()) {
         Logger::deInit();
     } else {
-        if (!Logger::init()) {
+        if (!Logger::init(false)) {
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
@@ -519,7 +519,22 @@ void Settings::setGatewayEndpoint(const QString &endpoint)
     m_gatewayEndpoint = endpoint;
 }
 
+void Settings::setDevGatewayEndpoint()
+{
+    m_gatewayEndpoint = DEV_AGW_ENDPOINT;
+}
+
 QString Settings::getGatewayEndpoint()
 {
     return m_gatewayEndpoint;
+}
+
+bool Settings::isDevGatewayEnv()
+{
+    return m_isDevGatewayEnv;
+}
+
+void Settings::toggleDevGatewayEnv(bool enabled)
+{
+    m_isDevGatewayEnv = enabled;
 }

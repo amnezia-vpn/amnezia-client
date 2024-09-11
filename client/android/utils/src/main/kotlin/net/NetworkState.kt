@@ -88,7 +88,7 @@ class NetworkState(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             connectivityManager.registerBestMatchingNetworkCallback(networkRequest, networkCallback, handler)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val numberAttempts = 3
+            val numberAttempts = 300
             var attemptCount = 0
             while(true) {
                 try {

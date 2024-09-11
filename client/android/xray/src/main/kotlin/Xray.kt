@@ -46,7 +46,7 @@ class Xray : Protocol() {
         }
     }
 
-    override fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
+    override suspend fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
         if (isRunning) {
             Log.w(TAG, "XRay already running")
             return
