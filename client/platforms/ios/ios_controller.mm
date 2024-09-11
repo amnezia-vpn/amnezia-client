@@ -351,8 +351,6 @@ void IosController::vpnStatusDidChange(void *pNotification)
                                 }
                             }
                         }
-                    } else {
-                        qDebug() << "Disconnect error is absent";
                     }
                 }];
             } else {
@@ -835,7 +833,7 @@ QString IosController::openFile() {
 
 void IosController::requestInetAccess() {
     NSURL *url = [NSURL URLWithString:@"http://captive.apple.com/generate_204"];
-    if (url) {
+    if (!url) {
         qDebug() << "IosController::requestInetAccess URL error";
         return;
     }
@@ -847,7 +845,6 @@ void IosController::requestInetAccess() {
         } else {
             NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
             QString responseBody = QString::fromUtf8((const char*)data.bytes, data.length);
-            qDebug() << "IosController::requestInetAccess server response:" << httpResponse.statusCode << "\n\n" <<responseBody;
         }
     }];
     [task resume];
