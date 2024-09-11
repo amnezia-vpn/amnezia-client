@@ -120,7 +120,7 @@ PageType {
                 id: mailButton
                 Layout.fillWidth: true
 
-                text: qsTr("Mail")
+                text: qsTr("support@amnezia.org")
                 descriptionText: qsTr("For reviews and bug reports")
                 leftImageSource: "qrc:/images/controls/mail.svg"
 
@@ -128,6 +128,8 @@ PageType {
                 parentFlickable: fl
 
                 clickedFunction: function() {
+                    GC.copyToClipBoard(text)
+                    PageController.showNotificationMessage(qsTr("Copied"))
                 }
 
             }
