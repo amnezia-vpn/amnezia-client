@@ -18,17 +18,22 @@ set(LIBS ${LIBS}
     ${FW_NETWORK_EXTENSION}
 )
 
-set_target_properties(${PROJECT} PROPERTIES MACOSX_BUNDLE TRUE)
+set_target_properties(${PROJECT} PROPERTIES 
+    MACOSX_BUNDLE TRUE
+    XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/macos/app/AmneziaVPN.entitlements"
+)
 set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
 
 
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/protocols/ikev2_vpn_protocol_mac.h
 )
 
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/protocols/ikev2_vpn_protocol_mac.mm
 )
 
 set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/images/app.icns)
