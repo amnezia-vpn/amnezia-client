@@ -24,6 +24,7 @@
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
 #include "ui/controllers/appSplitTunnelingController.h"
+#include "ui/controllers/localServicesController.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
@@ -136,6 +137,7 @@ private:
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
+    QScopedPointer<LocalServicesController> m_localServicesController;
 
     QNetworkAccessManager *m_nam;
 

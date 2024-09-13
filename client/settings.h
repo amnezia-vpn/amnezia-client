@@ -113,7 +113,10 @@ public:
     QString routeModeString(RouteMode mode) const;
 
     RouteMode routeMode() const;
-    void setRouteMode(RouteMode mode) { setValue("Conf/routeMode", mode); }
+    void setRouteMode(RouteMode mode)
+    {
+        setValue("Conf/routeMode", mode);
+    }
 
     bool isSitesSplitTunnelingEnabled() const;
     void setSitesSplitTunnelingEnabled(bool enabled);
@@ -221,6 +224,15 @@ public:
     QString getGatewayEndpoint();
     bool isDevGatewayEnv();
     void toggleDevGatewayEnv(bool enabled);
+
+    void setGoodbyeDpiBlackListFile(const QString &file);
+    QString getGoodbyeDpiBlackListFile() const;
+
+    void toggleGoodbyeDpi(bool enable);
+    bool isGoodbyeDpiEnabled() const;
+
+    void setGoodbyeDpiModset(const int modset);
+    int getGoodbyeDpiModset() const;
 
 signals:
     void saveLogsChanged(bool enabled);

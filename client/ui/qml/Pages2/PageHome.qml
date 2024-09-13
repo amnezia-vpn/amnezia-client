@@ -105,6 +105,8 @@ PageType {
                 buttonTextLabel.font.pixelSize: 14
                 buttonTextLabel.font.weight: 500
 
+                visible: !ServersModel.getDefaultServerData("isGoodbyeDpi")
+
                 property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled || AppSplitTunnelingModel.isTunnelingEnabled ||
                                                        ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
 
@@ -304,7 +306,7 @@ PageType {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     spacing: 8
 
-                    visible: !ServersModel.isDefaultServerFromApi
+                    visible: !ServersModel.isDefaultServerFromApi && !ServersModel.getDefaultServerData("isGoodbyeDpi")
 
                     Item {
                         id: focusItem1
@@ -535,8 +537,12 @@ PageType {
                                 Keys.onReturnPressed: serverInfoButton.clicked()
 
                                 onClicked: function() {
-                                    ServersModel.processedIndex = index
-                                    PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                                    if (ServersModel.getDefaultServerData("isGoodbyeDpi")) {
+                                        PageController.goToPage(PageEnum.PageGoodByeDpiSettings, PageEnum.LocalServices)
+                                    } else {
+                                        ServersModel.processedIndex = index
+                                        PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                                    }
                                     drawer.close()
                                 }
                             }

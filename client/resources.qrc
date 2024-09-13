@@ -220,6 +220,7 @@
         <file>ui/qml/Pages2/PageSettingsApiLanguageList.qml</file>
         <file>images/controls/archive-restore.svg</file>
         <file>images/controls/help-circle.svg</file>
+        <file>ui/qml/Pages2/LocalServices/PageGoodByeDpiSettings.qml</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>

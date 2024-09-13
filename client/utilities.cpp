@@ -198,6 +198,15 @@ QString Utils::certUtilPath()
 #endif
 }
 
+QString Utils::goodbyedpiPath()
+{
+#ifdef Q_OS_WIN
+    return Utils::executable("goodbyedpi/goodbyedpi", true);
+#else
+    return "";
+#endif
+}
+
 QString Utils::tun2socksPath()
 {
 #ifdef Q_OS_WIN

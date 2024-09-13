@@ -16,8 +16,7 @@
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                        const QSharedPointer<ContainersModel> &containersModel,
-                                       const QSharedPointer<LanguageModel> &languageModel,
-                                       const QSharedPointer<SitesModel> &sitesModel,
+                                       const QSharedPointer<LanguageModel> &languageModel, const QSharedPointer<SitesModel> &sitesModel,
                                        const QSharedPointer<AppSplitTunnelingModel> &appSplitTunnelingModel,
                                        const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
@@ -31,7 +30,8 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
     checkIfNeedDisableLogs();
 #ifdef Q_OS_ANDROID
-    connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this, &SettingsController::onNotificationStateChanged);
+    connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this,
+            &SettingsController::onNotificationStateChanged);
 #endif
 }
 
@@ -145,8 +145,7 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
     bool ok = m_settings->restoreAppConfig(data);
     if (ok) {
         m_serversModel->resetModel();
-        m_languageModel->changeLanguage(
-                static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
+        m_languageModel->changeLanguage(static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
         emit restoreBackupFinished();
     } else {
         emit changeSettingsErrorOccurred(tr("Backup file is corrupted"));
@@ -162,8 +161,7 @@ void SettingsController::clearSettings()
 {
     m_settings->clearSettings();
     m_serversModel->resetModel();
-    m_languageModel->changeLanguage(
-            static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
+    m_languageModel->changeLanguage(static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
 
     m_sitesModel->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
     m_sitesModel->toggleSplitTunneling(false);

@@ -1,7 +1,7 @@
 #include "containers_defs.h"
 
-#include "QJsonObject"
 #include "QJsonDocument"
+#include "QJsonObject"
 
 QDebug operator<<(QDebug debug, const amnezia::DockerContainer &c)
 {
@@ -96,7 +96,7 @@ QMap<DockerContainer, QString> ContainerProps::containerHumanNames()
              { DockerContainer::Awg, "AmneziaWG" },
              { DockerContainer::Xray, "XRay" },
              { DockerContainer::Ipsec, QObject::tr("IPsec") },
-             { DockerContainer::SSXray, "Shadowsocks"},
+             { DockerContainer::SSXray, "Shadowsocks" },
 
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
              { DockerContainer::Dns, QObject::tr("AmneziaDNS") },
@@ -124,27 +124,24 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
                            "but very resistant to blockages. "
                            "Recommended for regions with high levels of censorship.") },
              { DockerContainer::Xray,
-               QObject::tr("XRay with REALITY - Suitable for countries with the highest level of internet censorship. "
-                           "Traffic masking as web traffic at the TLS level, and protection against detection by active probing methods.") },
+               QObject::tr(
+                       "XRay with REALITY - Suitable for countries with the highest level of internet censorship. "
+                       "Traffic masking as web traffic at the TLS level, and protection against detection by active probing methods.") },
              { DockerContainer::Ipsec,
                QObject::tr("IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after "
                            "signal loss. It has native support on the latest versions of Android and iOS.") },
 
              { DockerContainer::TorWebSite, QObject::tr("Deploy a WordPress site on the Tor network in two clicks.") },
-             { DockerContainer::Dns,
-               QObject::tr("Replace the current DNS server with your own. This will increase your privacy level.") },
-             { DockerContainer::Sftp,
-               QObject::tr("Create a file vault on your server to securely store and transfer files.") },
-             { DockerContainer::Socks5Proxy,
-               QObject::tr("") } };
+             { DockerContainer::Dns, QObject::tr("Replace the current DNS server with your own. This will increase your privacy level.") },
+             { DockerContainer::Sftp, QObject::tr("Create a file vault on your server to securely store and transfer files.") },
+             { DockerContainer::Socks5Proxy, QObject::tr("") } };
 }
 
 QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
 {
     return {
         { DockerContainer::OpenVpn,
-          QObject::tr(
-                      "OpenVPN stands as one of the most popular and time-tested VPN protocols available.\n"
+          QObject::tr("OpenVPN stands as one of the most popular and time-tested VPN protocols available.\n"
                       "It employs its unique security protocol, "
                       "leveraging the strength of SSL/TLS for encryption and key exchange. "
                       "Furthermore, OpenVPN's support for a multitude of authentication methods makes it versatile and adaptable, "
@@ -160,7 +157,8 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "* Can operate over both TCP and UDP network protocols.") },
         { DockerContainer::ShadowSocks,
           QObject::tr("Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. "
-                      "Although Shadowsocks is designed to be discreet and challenging to identify, it isn't identical to a standard HTTPS connection."
+                      "Although Shadowsocks is designed to be discreet and challenging to identify, it isn't identical to a standard HTTPS "
+                      "connection."
                       "However, certain traffic analysis systems might still detect a Shadowsocks connection. "
                       "Due to limited support in Amnezia, it's recommended to use AmneziaWG protocol.\n\n"
                       "* Available in the AmneziaVPN only on desktop platforms\n"
@@ -217,15 +215,18 @@ QMap<DockerContainer, QString> ContainerProps::containerDetailedDescriptions()
                       "* Works over UDP network protocol.") },
         { DockerContainer::Xray,
           QObject::tr("The REALITY protocol, a pioneering development by the creators of XRay, "
-                      "is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.\n"
-                      "It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, "
+                      "is specifically designed to counteract the highest levels of internet censorship through its novel approach to "
+                      "evasion.\n"
+                      "It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate "
+                      "clients while diverting censors to genuine websites like google.com, "
                       "thus presenting an authentic TLS certificate and data. \n"
-                      "This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, "
+                      "This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as "
+                      "coming from random, "
                       "legitimate sites without the need for specific configurations. \n"
                       "Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, "
-                      "REALITY's innovative \"friend or foe\" recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. "
-                      "This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.")
-        },
+                      "REALITY's innovative \"friend or foe\" recognition at the TLS handshake enhances security and circumvents detection "
+                      "by sophisticated DPI systems employing active probing techniques. "
+                      "This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.") },
         { DockerContainer::Ipsec,
           QObject::tr("IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.\n"
                       "One of its distinguishing features is its ability to swiftly switch between networks and devices, "
@@ -287,7 +288,8 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Awg: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::Cloak: return true;
-    case DockerContainer::SSXray: return true;
+    case DockerContainer::SSXray:
+        return true;
         //    case DockerContainer::ShadowSocks: return true;
     default: return false;
     }
@@ -383,10 +385,8 @@ bool ContainerProps::isShareable(DockerContainer container)
 
 QJsonObject ContainerProps::getProtocolConfigFromContainer(const Proto protocol, const QJsonObject &containerConfig)
 {
-    QString protocolConfigString = containerConfig.value(ProtocolProps::protoToString(protocol))
-                                           .toObject()
-                                           .value(config_key::last_config)
-                                           .toString();
+    QString protocolConfigString =
+            containerConfig.value(ProtocolProps::protoToString(protocol)).toObject().value(config_key::last_config).toString();
 
     return QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 }
