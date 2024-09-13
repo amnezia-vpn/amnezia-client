@@ -173,6 +173,7 @@ bool ImportController::extractConfigFromData(QString data)
     }
     case ConfigTypes::Amnezia: {
         m_config = QJsonDocument::fromJson(config.toUtf8()).object();
+        processAmneziaConfig(m_config);
         if (!m_config.empty()) {
             checkForMaliciousStrings(m_config);
             return true;
@@ -391,10 +392,6 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         return QJsonObject();
     }
 
-    if (!configMap.value("MTU").isEmpty()) {
-        lastConfig[config_key::mtu] = configMap.value("MTU");
-    }
-
     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(","));
 
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
@@ -417,6 +414,12 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
         protocolName = "awg";
         m_configType = ConfigTypes::Awg;
+    }
+
+    if (!configMap.value("MTU").isEmpty()) {
+        lastConfig[config_key::mtu] = configMap.value("MTU");
+    } else {
+        lastConfig[config_key::mtu] = protocolName == "awg" ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
     }
 
     QJsonObject wireguardConfig;
@@ -643,6 +646,31 @@ void ImportController::checkForMaliciousStrings(const QJsonObject &serverConfig)
                     m_maliciousWarningText.push_back(QString("<br><i>%1</i>").arg(string));
                 }
             }
+        }
+    }
+}
+
+void ImportController::processAmneziaConfig(QJsonObject &config)
+{
+    auto containers = config.value(config_key::containers).toArray();
+    for (auto i = 0; i < containers.size(); i++) {
+        auto container = containers.at(i).toObject();
+        auto dockerContainer = ContainerProps::containerFromString(container.value(config_key::container).toString());
+        if (dockerContainer == DockerContainer::Awg || dockerContainer == DockerContainer::WireGuard) {
+            auto containerConfig = container.value(ContainerProps::containerTypeToString(dockerContainer)).toObject();
+            auto protocolConfig = containerConfig.value(config_key::last_config).toString();
+            if (protocolConfig.isEmpty()) {
+                return;
+            }
+
+            QJsonObject jsonConfig = QJsonDocument::fromJson(protocolConfig.toUtf8()).object();
+            jsonConfig[config_key::mtu] = dockerContainer == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+
+            containerConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
+
+            container[ContainerProps::containerTypeToString(dockerContainer)] = containerConfig;
+            containers.replace(i, container);
+            config.insert(config_key::containers, containers);
         }
     }
 }

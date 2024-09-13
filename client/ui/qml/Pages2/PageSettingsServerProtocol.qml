@@ -79,7 +79,7 @@ PageType {
             }
 
             delegate: Item {
-                property var focusItem: button.rightButton
+                property var focusItem: clientSettings.rightButton
 
                 implicitWidth: protocols.width
                 implicitHeight: delegateContent.implicitHeight
@@ -89,13 +89,49 @@ PageType {
 
                     anchors.fill: parent
 
+                    property bool isClientSettingsVisible: protocolIndex === ProtocolEnum.WireGuard || protocolIndex === ProtocolEnum.Awg
+                    property bool isServerSettingsVisible: ServersModel.isProcessedServerHasWriteAccess()
+
                     LabelWithButtonType {
-                        id: button
+                        id: clientSettings
 
                         Layout.fillWidth: true
 
-                        text: protocolName
+                        text: protocolName + qsTr(" connection settings")
                         rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                        visible: delegateContent.isClientSettingsVisible
+
+                        clickedFunction: function() {
+                            if (isClientProtocolExists) {
+                                switch (protocolIndex) {
+                                case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                                }
+                                PageController.goToPage(clientProtocolPage);
+                            } else {
+                                PageController.showNotificationMessage(qsTr("Click the \"connect\" button to create a connection configuration"))
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: clientSettings
+                            cursorShape: Qt.PointingHandCursor
+                            enabled: false
+                        }
+                    }
+
+                    DividerType {
+                        visible: delegateContent.isClientSettingsVisible
+                    }
+
+                    LabelWithButtonType {
+                        id: serverSettings
+
+                        Layout.fillWidth: true
+
+                        text: protocolName + qsTr(" server settings")
+                        rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                        visible: delegateContent.isServerSettingsVisible
 
                         clickedFunction: function() {
                             switch (protocolIndex) {
@@ -109,17 +145,19 @@ PageType {
                             case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             case ProtocolEnum.Socks5Proxy: Socks5ProxyConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                             }
-                            PageController.goToPage(protocolPage);
+                            PageController.goToPage(serverProtocolPage);
                         }
 
                         MouseArea {
-                            anchors.fill: button
+                            anchors.fill: serverSettings
                             cursorShape: Qt.PointingHandCursor
                             enabled: false
                         }
                     }
 
-                    DividerType {}
+                    DividerType {
+                        visible: delegateContent.isServerSettingsVisible
+                    }
                 }
             }
         }
@@ -132,11 +170,11 @@ PageType {
             visible: root.isClearCacheVisible
             KeyNavigation.tab: removeButton
 
-            text: qsTr("Clear %1 profile").arg(ContainersModel.getProcessedContainerName())
+            text: qsTr("Clear profile")
 
             clickedFunction: function() {
                 var headerText = qsTr("Clear %1 profile?").arg(ContainersModel.getProcessedContainerName())
-                var descriptionText = qsTr("")
+                var descriptionText = qsTr("The connection configuration will be deleted for this device only")
                 var yesButtonText = qsTr("Continue")
                 var noButtonText = qsTr("Cancel")
 
@@ -183,7 +221,7 @@ PageType {
             visible: ServersModel.isProcessedServerHasWriteAccess()
             Keys.onTabPressed: lastItemTabClicked(focusItem)
 
-            text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
+            text: qsTr("Remove ")
             textColor: AmneziaStyle.color.vibrantRed
 
             clickedFunction: function() {
