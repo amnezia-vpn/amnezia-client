@@ -114,7 +114,7 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
     vpnConfiguration[config_key::dns1] = dns.first;
     vpnConfiguration[config_key::dns2] = dns.second;
 
-    vpnConfiguration[config_key::hostName] = serverConfig.value(config_key::hostName).toString();
+    vpnConfiguration[config_key::hostName] = NetworkUtilities::getIPAddress(serverConfig.value(config_key::hostName).toString());
     vpnConfiguration[config_key::description] = serverConfig.value(config_key::description).toString();
 
     vpnConfiguration[config_key::configVersion] = serverConfig.value(config_key::configVersion).toInt();

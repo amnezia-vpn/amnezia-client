@@ -26,6 +26,7 @@ private:
     static QString tun2SocksExecPath();
 private:
     int m_localPort;
+    QString m_remoteHost;
     QString m_remoteAddress;
     int m_routeMode;
     QJsonObject m_configData;
