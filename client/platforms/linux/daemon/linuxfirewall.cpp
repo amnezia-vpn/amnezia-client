@@ -264,12 +264,12 @@ void LinuxFirewall::install()
                                                         });
 
 
-    installAnchor(IPv4, QStringLiteral("290.allowDHCP"), {
-                                                             QStringLiteral("-p udp -d 255.255.255.255 --sport 68 --dport 67 -j ACCEPT"),
-                                                         });
-    installAnchor(IPv6, QStringLiteral("290.allowDHCP"), {
-                                                             QStringLiteral("-p udp -d ff00::/8 --sport 546 --dport 547 -j ACCEPT"),
-                                                         });
+ //   installAnchor(IPv4, QStringLiteral("290.allowDHCP"), {
+ //                                                            QStringLiteral("-p udp -d 255.255.255.255 --sport 68 --dport 67 -j ACCEPT"),
+ //                                                        });
+ //   installAnchor(IPv6, QStringLiteral("290.allowDHCP"), {
+ //                                                            QStringLiteral("-p udp -d ff00::/8 --sport 546 --dport 547 -j ACCEPT"),
+ //                                                        });
     installAnchor(IPv6, QStringLiteral("250.blockIPv6"), {
                                                              QStringLiteral("! -o lo+ -j REJECT"),
                                                          });
@@ -351,7 +351,7 @@ void LinuxFirewall::uninstall()
     uninstallAnchor(IPv4, QStringLiteral("320.allowDNS"));
     uninstallAnchor(Both, QStringLiteral("310.blockDNS"));
     uninstallAnchor(Both, QStringLiteral("300.allowLAN"));
-    uninstallAnchor(Both, QStringLiteral("290.allowDHCP"));
+  //  uninstallAnchor(Both, QStringLiteral("290.allowDHCP"));
     uninstallAnchor(IPv6, QStringLiteral("250.blockIPv6"));
     uninstallAnchor(Both, QStringLiteral("200.allowVPN"));
     uninstallAnchor(IPv4, QStringLiteral("120.blockNets"));

@@ -365,7 +365,7 @@ void WireguardUtilsMacos::applyFirewallRules(FirewallParams& params)
 
   MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
+//  MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
   MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), params.dnsServers);

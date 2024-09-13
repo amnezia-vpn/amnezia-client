@@ -235,7 +235,7 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
     LinuxFirewall::updateBlockNets(blocknets);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
+ //   LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
     QStringList dnsServers;
@@ -265,7 +265,7 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
     MacOSFirewall::setAnchorTable(QStringLiteral("120.blockNets"), blockNets, QStringLiteral("blocknets"), blocknets);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
-    MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
+//    MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
 
     QStringList dnsServers;

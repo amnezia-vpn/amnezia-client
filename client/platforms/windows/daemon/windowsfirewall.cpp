@@ -187,7 +187,7 @@ bool WindowsFirewall::enableKillSwitch(int vpnAdapterIndex) {
   logger.info() << "Enabling Killswitch Using Adapter:" << vpnAdapterIndex;
   FW_OK(allowTrafficOfAdapter(vpnAdapterIndex, MED_WEIGHT,
                               "Allow usage of VPN Adapter"));
-  FW_OK(allowDHCPTraffic(MED_WEIGHT, "Allow DHCP Traffic"));
+ // FW_OK(allowDHCPTraffic(MED_WEIGHT, "Allow DHCP Traffic"));
   FW_OK(allowHyperVTraffic(MED_WEIGHT, "Allow Hyper-V Traffic"));
   FW_OK(allowTrafficForAppOnAll(getCurrentPath(), MAX_WEIGHT,
                                 "Allow all for AmneziaVPN.exe"));
