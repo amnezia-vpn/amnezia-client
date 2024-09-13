@@ -5,36 +5,6 @@ import net.openvpn.ovpn3.ClientAPI_Config
 import org.amnezia.vpn.protocol.openvpn.OpenVpn
 import org.json.JSONObject
 
-/**
- *    Config Example:
- *    {
- *     "protocol": "cloak",
- *     "description": "Server 1",
- *     "dns1": "1.1.1.1",
- *     "dns2": "1.0.0.1",
- *     "hostName": "100.100.100.0",
- *     "splitTunnelSites": [
- *     ],
- *     "splitTunnelType": 0,
- *     "openvpn_config_data": {
- *           "config": "openVpnConfig"
- *     }
- *     "cloak_config_data": {
- *          "BrowserSig": "chrome",
- *          "EncryptionMethod": "aes-gcm",
- *          "NumConn": 1,
- *          "ProxyMethod": "openvpn",
- *          "PublicKey": "PublicKey=",
- *          "RemoteHost": "100.100.100.0",
- *          "RemotePort": "443",
- *          "ServerName": "servername",
- *          "StreamTimeout": 300,
- *          "Transport": "direct",
- *          "UID": "UID="
- *     }
- * }
- */
-
 class Cloak : OpenVpn() {
 
     override fun parseConfig(config: JSONObject): ClientAPI_Config {
