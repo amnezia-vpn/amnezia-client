@@ -101,6 +101,14 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
 
         QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
         vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+
+        // add mtu for old configs
+        if (container == DockerContainer::Awg || container == DockerContainer::WireGuard) {
+            if (vpnConfigData[config_key::mtu].toString().isEmpty()) {
+                vpnConfigData[config_key::mtu] = container == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+            }
+        }
+
         vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
     }
 

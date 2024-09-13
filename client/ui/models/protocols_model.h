@@ -13,9 +13,11 @@ class ProtocolsModel : public QAbstractListModel
 public:
     enum Roles {
         ProtocolNameRole = Qt::UserRole + 1,
-        ProtocolPageRole,
+        ServerProtocolPageRole,
+        ClientProtocolPageRole,
         ProtocolIndexRole,
-        RawConfigRole
+        RawConfigRole,
+        IsClientProtocolExistsRole
     };
 
     ProtocolsModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -33,7 +35,8 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    PageLoader::PageEnum protocolPage(Proto protocol) const;
+    PageLoader::PageEnum serverProtocolPage(Proto protocol) const;
+    PageLoader::PageEnum clientProtocolPage(Proto protocol) const;
 
     std::shared_ptr<Settings> m_settings;
 
