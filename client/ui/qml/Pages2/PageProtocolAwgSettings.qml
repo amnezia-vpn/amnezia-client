@@ -57,8 +57,6 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            enabled: ServersModel.isProcessedServerHasWriteAccess()
-
             ListView {
                 id: listview
 
@@ -71,12 +69,12 @@ PageType {
                 model: AwgConfigModel
 
                 delegate: Item {
-                    id: _delegate
-
+                    id: delegateItem
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
-                    property alias portTextField:portTextField
+                    property alias portTextField: portTextField
+                    property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
 
                     ColumnLayout {
                         id: col
@@ -101,6 +99,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
+                            enabled: delegateItem.isEnabled
+
                             headerText: qsTr("Port")
                             textFieldText: port
                             textField.maximumLength: 5
@@ -115,27 +115,6 @@ PageType {
 
                             checkEmptyText: true
 
-                            KeyNavigation.tab: mtuTextField.textField
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: mtuTextField
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
-
-                            headerText: qsTr("MTU")
-                            textFieldText: mtu
-                            textField.validator: IntValidator { bottom: 576; top: 65535 }
-
-                            textField.onEditingFinished: {
-                                if (textFieldText === "") {
-                                    textFieldText = "0"
-                                }
-                                if (textFieldText !== mtu) {
-                                    mtu = textFieldText
-                                }
-                            }
-                            checkEmptyText: true
                             KeyNavigation.tab: junkPacketCountTextField.textField
                         }
 
@@ -145,7 +124,7 @@ PageType {
                             Layout.topMargin: 16
 
                             headerText: qsTr("Jc - Junk packet count")
-                            textFieldText: junkPacketCount
+                            textFieldText: serverJunkPacketCount
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
@@ -154,8 +133,8 @@ PageType {
                                     textFieldText = "0"
                                 }
 
-                                if (textFieldText !== junkPacketCount) {
-                                    junkPacketCount = textFieldText
+                                if (textFieldText !== serverJunkPacketCount) {
+                                    serverJunkPacketCount = textFieldText
                                 }
                             }
 
@@ -170,13 +149,13 @@ PageType {
                             Layout.topMargin: 16
 
                             headerText: qsTr("Jmin - Junk packet minimum size")
-                            textFieldText: junkPacketMinSize
+                            textFieldText: serverJunkPacketMinSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== junkPacketMinSize) {
-                                    junkPacketMinSize = textFieldText
+                                if (textFieldText !== serverJunkPacketMinSize) {
+                                    serverJunkPacketMinSize = textFieldText
                                 }
                             }
 
@@ -191,13 +170,13 @@ PageType {
                             Layout.topMargin: 16
 
                             headerText: qsTr("Jmax - Junk packet maximum size")
-                            textFieldText: junkPacketMaxSize
+                            textFieldText: serverJunkPacketMaxSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== junkPacketMaxSize) {
-                                    junkPacketMaxSize = textFieldText
+                                if (textFieldText !== serverJunkPacketMaxSize) {
+                                    serverJunkPacketMaxSize = textFieldText
                                 }
                             }
 
@@ -212,13 +191,13 @@ PageType {
                             Layout.topMargin: 16
 
                             headerText: qsTr("S1 - Init packet junk size")
-                            textFieldText: initPacketJunkSize
+                            textFieldText: serverInitPacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== initPacketJunkSize) {
-                                    initPacketJunkSize = textFieldText
+                                if (textFieldText !== serverInitPacketJunkSize) {
+                                    serverInitPacketJunkSize = textFieldText
                                 }
                             }
 
@@ -233,13 +212,13 @@ PageType {
                             Layout.topMargin: 16
 
                             headerText: qsTr("S2 - Response packet junk size")
-                            textFieldText: responsePacketJunkSize
+                            textFieldText: serverResponsePacketJunkSize
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== responsePacketJunkSize) {
-                                    responsePacketJunkSize = textFieldText
+                                if (textFieldText !== serverResponsePacketJunkSize) {
+                                    serverResponsePacketJunkSize = textFieldText
                                 }
                             }
 
@@ -254,13 +233,13 @@ PageType {
                             Layout.topMargin: 16
 
                             headerText: qsTr("H1 - Init packet magic header")
-                            textFieldText: initPacketMagicHeader
+                            textFieldText: serverInitPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== initPacketMagicHeader) {
-                                    initPacketMagicHeader = textFieldText
+                                if (textFieldText !== serverInitPacketMagicHeader) {
+                                    serverInitPacketMagicHeader = textFieldText
                                 }
                             }
 
@@ -275,13 +254,13 @@ PageType {
                             Layout.topMargin: 16
 
                             headerText: qsTr("H2 - Response packet magic header")
-                            textFieldText: responsePacketMagicHeader
+                            textFieldText: serverResponsePacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== responsePacketMagicHeader) {
-                                    responsePacketMagicHeader = textFieldText
+                                if (textFieldText !== serverResponsePacketMagicHeader) {
+                                    serverResponsePacketMagicHeader = textFieldText
                                 }
                             }
 
@@ -296,13 +275,13 @@ PageType {
                             Layout.topMargin: 16
 
                             headerText: qsTr("H4 - Transport packet magic header")
-                            textFieldText: transportPacketMagicHeader
+                            textFieldText: serverTransportPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
                             parentFlickable: fl
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== transportPacketMagicHeader) {
-                                    transportPacketMagicHeader = textFieldText
+                                if (textFieldText !== serverTransportPacketMagicHeader) {
+                                    serverTransportPacketMagicHeader = textFieldText
                                 }
                             }
 
@@ -318,12 +297,12 @@ PageType {
                             parentFlickable: fl
 
                             headerText: qsTr("H3 - Underload packet magic header")
-                            textFieldText: underloadPacketMagicHeader
+                            textFieldText: serverUnderloadPacketMagicHeader
                             textField.validator: IntValidator { bottom: 0 }
 
                             textField.onEditingFinished: {
-                                if (textFieldText !== underloadPacketMagicHeader) {
-                                    underloadPacketMagicHeader = textFieldText
+                                if (textFieldText !== serverUnderloadPacketMagicHeader) {
+                                    serverUnderloadPacketMagicHeader = textFieldText
                                 }
                             }
 
@@ -356,18 +335,22 @@ PageType {
                             Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
-                                if (AwgConfigModel.isHeadersEqual(underloadPacketMagicHeaderTextField.textField.text,
-                                                                  transportPacketMagicHeaderTextField.textField.text,
-                                                                  responsePacketMagicHeaderTextField.textField.text,
-                                                                  initPacketMagicHeaderTextField.textField.text)) {
-                                    PageController.showErrorMessage(qsTr("The values of the H1-H4 fields must be unique"))
-                                    return
-                                }
+                                forceActiveFocus()
 
-                                if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
-                                                                     parseInt(responsePacketJunkSizeTextField.textField.text))) {
-                                    PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)"))
-                                    return
+                                if (delegateItem.isEnabled) {
+                                    if (AwgConfigModel.isHeadersEqual(underloadPacketMagicHeaderTextField.textField.text,
+                                                                      transportPacketMagicHeaderTextField.textField.text,
+                                                                      responsePacketMagicHeaderTextField.textField.text,
+                                                                      initPacketMagicHeaderTextField.textField.text)) {
+                                        PageController.showErrorMessage(qsTr("The values of the H1-H4 fields must be unique"))
+                                        return
+                                    }
+
+                                    if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
+                                                                         parseInt(responsePacketJunkSizeTextField.textField.text))) {
+                                        PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)"))
+                                        return
+                                    }
                                 }
 
                                 var headerText = qsTr("Save settings?")
@@ -376,8 +359,6 @@ PageType {
                                 var noButtonText = qsTr("Cancel")
 
                                 var yesButtonFunction = function() {
-                                    forceActiveFocus()
-
                                     if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
                                         PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                                         return
