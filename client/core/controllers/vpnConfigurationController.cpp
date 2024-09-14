@@ -7,7 +7,6 @@
 #include "configurators/shadowsocks_configurator.h"
 #include "configurators/wireguard_configurator.h"
 #include "configurators/xray_configurator.h"
-#include "core/networkUtilities.h"
 
 VpnConfigurationsController::VpnConfigurationsController(const std::shared_ptr<Settings> &settings,
                                                          QSharedPointer<ServerController> serverController, QObject *parent)
@@ -102,8 +101,6 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
 
         QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
         if (container == DockerContainer::Awg || container == DockerContainer::WireGuard) {
-            vpnConfigData[config_key::hostName] = NetworkUtilities::getIPAddress(vpnConfigData.value(config_key::hostName).toString());
-
             // add mtu for old configs
             if (vpnConfigData[config_key::mtu].toString().isEmpty()) {
                 vpnConfigData[config_key::mtu] = container == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
@@ -119,7 +116,7 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
     vpnConfiguration[config_key::dns1] = dns.first;
     vpnConfiguration[config_key::dns2] = dns.second;
 
-    vpnConfiguration[config_key::hostName] = NetworkUtilities::getIPAddress(serverConfig.value(config_key::hostName).toString());
+    vpnConfiguration[config_key::hostName] = serverConfig.value(config_key::hostName).toString();
     vpnConfiguration[config_key::description] = serverConfig.value(config_key::description).toString();
 
     vpnConfiguration[config_key::configVersion] = serverConfig.value(config_key::configVersion).toInt();
