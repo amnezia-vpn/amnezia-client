@@ -34,12 +34,25 @@ Button {
 
     property alias buttonTextLabel: buttonText
 
+    property bool isFocusable: true
+
+    Keys.onTabPressed: {
+        console.debug("--> Tab is pressed on BasicButtonType: ", objectName)
+        FocusController.nextKeyTabItem()
+    }
+    
+    Keys.onBacktabPressed: {
+        console.debug("--> Shift+Tab is pressed on ", objectName)
+        FocusController.previousKeyTabItem()
+    }
+    
     implicitHeight: 56
 
     hoverEnabled: true
     focusPolicy: Qt.TabFocus
 
     onFocusChanged: {
+        console.debug("===>> BUTTON: active.focus: ", root.activeFocus, " parentFlickable: ", root.parentFlickable )
         if (root.activeFocus) {
             if (root.parentFlickable) {
                 root.parentFlickable.ensureVisible(this)

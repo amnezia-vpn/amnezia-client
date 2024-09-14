@@ -23,13 +23,6 @@ PageType {
 
     property var isServerFromTelegramApi: ServersModel.getDefaultServerData("isServerFromTelegramApi")
     
-    defaultActiveFocusItem: searchField.textField
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     property bool pageEnabled
 
     Component.onCompleted: {
@@ -99,7 +92,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: switcher
         }
 
         RowLayout {
@@ -129,8 +121,6 @@ PageType {
                 onToggled: { onToggledFunc() }
                 Keys.onEnterPressed: { onToggledFunc() }
                 Keys.onReturnPressed: { onToggledFunc() }
-
-                KeyNavigation.tab: selector
             }
         }
 
@@ -180,11 +170,11 @@ PageType {
                 }
             }
 
-            KeyNavigation.tab: {
-                return sites.count > 0 ?
-                            sites :
-                            searchField.textField
-            }
+            // KeyNavigation.tab: {
+            //     return sites.count > 0 ?
+            //                 sites :
+            //                 searchField.textField
+            // }
         }
     }
 
@@ -325,7 +315,7 @@ PageType {
 
             textFieldPlaceholderText: qsTr("website or IP")
             buttonImageSource: "qrc:/images/controls/plus.svg"
-            KeyNavigation.tab: GC.isMobile() ? focusItem : addSiteButtonImage
+            // KeyNavigation.tab: GC.isMobile() ? focusItem : addSiteButtonImage
 
             clickedFunc: function() {
                 PageController.showBusyIndicator(true)
@@ -344,7 +334,7 @@ PageType {
             imageColor: AmneziaStyle.color.paleGray
 
             onClicked: function () {
-                moreActionsDrawer.open()
+                moreActionsDrawer.openTriggered()
             }
 
             Keys.onReturnPressed: addSiteButtonImage.clicked()
@@ -361,12 +351,12 @@ PageType {
         expandedHeight: parent.height * 0.4375
 
         onClosed: {
-            if (root.defaultActiveFocusItem && !GC.isMobile()) {
-                root.defaultActiveFocusItem.forceActiveFocus()
-            }
+            // if (root.defaultActiveFocusItem && !GC.isMobile()) {
+                // root.defaultActiveFocusItem.forceActiveFocus()
+            // }
         }
 
-        expandedContent: ColumnLayout {
+        expandedStateContent: ColumnLayout {
             id: moreActionsDrawerContent
 
             anchors.top: parent.top
@@ -387,11 +377,6 @@ PageType {
                 }
             }
 
-            Item {
-                id: focusItem1
-                KeyNavigation.tab: importSitesButton.rightButton
-            }
-
             Header2Type {
                 Layout.fillWidth: true
                 Layout.margins: 16
@@ -407,10 +392,8 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    importSitesDrawer.open()
+                    importSitesDrawer.openTriggered()
                 }
-
-                KeyNavigation.tab: exportSitesButton
             }
 
             DividerType {}
@@ -419,8 +402,6 @@ PageType {
                 id: exportSitesButton
                 Layout.fillWidth: true
                 text: qsTr("Save site list")
-
-                KeyNavigation.tab: focusItem1
 
                 clickedFunction: function() {
                     var fileName = ""
@@ -436,7 +417,7 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         SitesController.exportSites(fileName)
-                        moreActionsDrawer.close()
+                        moreActionsDrawer.closeTriggered()
                         PageController.showBusyIndicator(false)
                     }
                 }
@@ -458,7 +439,7 @@ PageType {
             }
         }
 
-        expandedContent: Item {
+        expandedStateContent: Item {
             implicitHeight: importSitesDrawer.expandedHeight
 
             Connections {
@@ -469,11 +450,6 @@ PageType {
                 }
             }
 
-            Item {
-                id: focusItem2
-                KeyNavigation.tab: importSitesDrawerBackButton
-            }
-
             BackButtonType {
                 id: importSitesDrawerBackButton
 
@@ -482,10 +458,8 @@ PageType {
                 anchors.right: parent.right
                 anchors.topMargin: 16
 
-                KeyNavigation.tab: importSitesButton2
-
                 backButtonFunction: function() {
-                    importSitesDrawer.close()
+                    importSitesDrawer.closeTriggered()
                 }
             }
 
@@ -516,7 +490,6 @@ PageType {
                         Layout.fillWidth: true
 
                         text: qsTr("Replace site list")
-                        KeyNavigation.tab: importSitesButton3
 
                         clickedFunction: function() {
                             var fileName = SystemController.getFileName(qsTr("Open sites file"),
@@ -533,7 +506,6 @@ PageType {
                         id: importSitesButton3
                         Layout.fillWidth: true
                         text: qsTr("Add imported sites to existing ones")
-                        KeyNavigation.tab: focusItem2
 
                         clickedFunction: function() {
                             var fileName = SystemController.getFileName(qsTr("Open sites file"),
@@ -548,8 +520,8 @@ PageType {
                         PageController.showBusyIndicator(true)
                         SitesController.importSites(fileName, replaceExistingSites)
                         PageController.showBusyIndicator(false)
-                        importSitesDrawer.close()
-                        moreActionsDrawer.close()
+                        importSitesDrawer.closeTriggered()
+                        moreActionsDrawer.closeTriggered()
                     }
 
                     DividerType {}

@@ -20,7 +20,7 @@ DrawerType2 {
     property var yesButtonFunction
     property var noButtonFunction
 
-    expandedContent: ColumnLayout {
+    expandedStateContent: ColumnLayout {
         id: content
 
         anchors.top: parent.top
@@ -37,7 +37,11 @@ DrawerType2 {
             target: root
             enabled: !GC.isMobile()
             function onOpened() {
-                focusItem.forceActiveFocus()
+                FocusController.setRoot(root)
+            }
+            
+            function onClosed() {
+                FocusController.setRoot(null)
             }
         }
 
@@ -59,11 +63,6 @@ DrawerType2 {
             text: descriptionText
         }
 
-        Item {
-            id: focusItem
-            KeyNavigation.tab: yesButton
-        }
-
         BasicButtonType {
             id: yesButton
             Layout.fillWidth: true
@@ -78,8 +77,6 @@ DrawerType2 {
                     yesButtonFunction()
                 }
             }
-
-            KeyNavigation.tab: noButton
         }
 
         BasicButtonType {
@@ -102,8 +99,6 @@ DrawerType2 {
                     noButtonFunction()
                 }
             }
-
-            KeyNavigation.tab: focusItem
         }
     }
 }

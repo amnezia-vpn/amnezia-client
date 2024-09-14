@@ -17,19 +17,12 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     Connections {
         target: InstallController
 
         function onUpdateContainerFinished() {
             PageController.showNotificationMessage(qsTr("Settings updated successfully"))
         }
-    }
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
     }
 
     ColumnLayout {
@@ -43,7 +36,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: websiteName.rightButton
         }
     }
 

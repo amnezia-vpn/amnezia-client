@@ -11,7 +11,7 @@ import "../Config"
 DrawerType2 {
     id: root
 
-    expandedContent: Item {
+    expandedStateContent: Item {
         id: container
 
         implicitHeight: root.height * 0.9
@@ -24,13 +24,12 @@ DrawerType2 {
             target: root
             enabled: !GC.isMobile()
             function onOpened() {
-                focusItem.forceActiveFocus()
+                FocusController.setRoot(root)
             }
-        }
 
-        Item {
-            id: focusItem
-            KeyNavigation.tab: backButton
+            function onClosed() {
+                FocusController.setRoot(null)
+            }
         }
 
         ColumnLayout {
@@ -44,8 +43,7 @@ DrawerType2 {
             BackButtonType {
                 id: backButton
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
-                backButtonFunction: function() { root.close() }
-                KeyNavigation.tab: listView
+                backButtonFunction: function() { root.closeTriggered() }
             }
         }
 
@@ -97,15 +95,15 @@ DrawerType2 {
                         }
                     }
 
-                    Keys.onTabPressed: {
-                        if (currentFocusIndex < this.count - 1) {
-                            currentFocusIndex += 1
-                            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
-                        } else {
-                            listViewFocusItem.forceActiveFocus()
-                            focusItem.forceActiveFocus()
-                        }
-                    }
+                    // Keys.onTabPressed: {
+                    //     if (currentFocusIndex < this.count - 1) {
+                    //         currentFocusIndex += 1
+                    //         this.itemAtIndex(currentFocusIndex).forceActiveFocus()
+                    //     } else {
+                    //         listViewFocusItem.forceActiveFocus()
+                    //         focusItem.forceActiveFocus()
+                    //     }
+                    // }
 
                     Item {
                         id: listViewFocusItem
@@ -195,7 +193,7 @@ DrawerType2 {
                                 onClicked: {
                                     listView.currentIndex = index
                                     LanguageModel.changeLanguage(languageIndex)
-                                    root.close()
+                                    root.closeTriggered()
                                 }
                             }
                         }

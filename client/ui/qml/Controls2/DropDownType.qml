@@ -45,33 +45,51 @@ Item {
     property Item drawerParent
     property Component listView
 
-    signal open
-    signal close
+    signal openTriggered
+    signal closeTriggered
 
-    function popupClosedFunc() {
-        if (!GC.isMobile()) {
-            this.forceActiveFocus()
-        }
+    readonly property bool isFocusable: true
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
     }
 
-    property var parentFlickable
-    onFocusChanged: {
-        if (root.activeFocus) {
-            if (root.parentFlickable) {
-                root.parentFlickable.ensureVisible(root)
-            }
-        }
-    }
+    // function popupClosedFunc() {
+    //     if (!GC.isMobile()) {
+    //         this.forceActiveFocus()
+    //     }
+    // }
+
+    // property var parentFlickable
+    // onFocusChanged: {
+    //     if (root.activeFocus) {
+    //         if (root.parentFlickable) {
+    //             root.parentFlickable.ensureVisible(root)
+    //         }
+    //     }
+    // }
 
     implicitWidth: rootButtonContent.implicitWidth
     implicitHeight: rootButtonContent.implicitHeight
 
-    onOpen: {
-        menu.open()
+    onOpenTriggered: {
+        menu.openTriggered()
     }
 
-    onClose: {
-        menu.close()
+    onCloseTriggered: {
+        menu.closeTriggered()
+    }
+
+    Keys.onEnterPressed: {
+        if (menu.isClosed) {
+            menu.openTriggered()
+        }
+    }
+
+    Keys.onReturnPressed: {
+        if (menu.isClosed) {
+            menu.openTriggered()
+        }
     }
 
     Rectangle {
@@ -153,6 +171,8 @@ Item {
         }
 
         ImageButtonType {
+            // isFocusable: false
+            
             Layout.rightMargin: 16
 
             implicitWidth: 40
@@ -173,7 +193,7 @@ Item {
             if (rootButtonClickedFunction && typeof rootButtonClickedFunction === "function") {
                 rootButtonClickedFunction()
             } else {
-                menu.open()
+                menu.openTriggered()
             }
         }
     }
@@ -186,26 +206,13 @@ Item {
         anchors.fill: parent
         expandedHeight: drawerParent.height * drawerHeight
 
-        onClosed: {
-            root.popupClosedFunc()
-        }
+        // onClosed: {
+        //     root.popupClosedFunc()
+        // }
 
-        expandedContent: Item {
+        expandedStateContent: Item {
             id: container
             implicitHeight: menu.expandedHeight
-
-            Connections {
-                target: menu
-                enabled: !GC.isMobile()
-                function onOpened() {
-                    focusItem.forceActiveFocus()
-                }
-            }
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: backButton
-            }
 
             ColumnLayout {
                 id: header
@@ -218,61 +225,43 @@ Item {
                 BackButtonType {
                     id: backButton
                     backButtonImage: root.headerBackButtonImage
-                    backButtonFunction: function() { menu.close() }
-                    KeyNavigation.tab: listViewLoader.item
+                    backButtonFunction: function() { menu.closeTriggered() }
+                    // KeyNavigation.tab: listViewLoader.item
                 }
             }
 
-            FlickableType {
-                id: flickable
-                anchors.top: header.bottom
-                anchors.topMargin: 16
-                contentHeight: col.implicitHeight
+            Column {
+                id: col
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
 
-                Column {
-                    id: col
-                    anchors.top: parent.top
+                spacing: 16
+
+                Header2Type {
                     anchors.left: parent.left
                     anchors.right: parent.right
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
 
-                    spacing: 16
+                    headerText: root.headerText
 
-                    Header2Type {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
+                    width: parent.width
+                }
 
-                        headerText: root.headerText
+                Loader {
+                    id: listViewLoader
+                    sourceComponent: root.listView
 
-                        width: parent.width
-                    }
-
-                    Loader {
-                        id: listViewLoader
-                        sourceComponent: root.listView
-
-                        onLoaded: {
-                            listViewLoader.item.parentFlickable = flickable
-                            listViewLoader.item.lastItemTabClicked = function() {
-                                focusItem.forceActiveFocus()
-                            }
-                        }
+                    onLoaded: {
+                        // listViewLoader.item.parentFlickable = flickable
+                        // FocusController.reload()
+                        // listViewLoader.item.lastItemTabClicked = function() {
+                        //     focusItem.forceActiveFocus()
+                        // }
                     }
                 }
             }
-        }
-    }
-
-    Keys.onEnterPressed: {
-        if (menu.isClosed) {
-            menu.open()
-        }
-    }
-
-    Keys.onReturnPressed: {
-        if (menu.isClosed) {
-            menu.open()
         }
     }
 }

@@ -7,7 +7,7 @@ Flickable {
 
     function ensureVisible(item) {
         if (item.y < fl.contentY) {
-            fl.contentY = item.y
+            fl.contentY = item.y - 40 // 40 is a top margin
         } else if (item.y + item.height > fl.contentY + fl.height) {
             fl.contentY = item.y + item.height - fl.height + 40 // 40 is a bottom margin
         }

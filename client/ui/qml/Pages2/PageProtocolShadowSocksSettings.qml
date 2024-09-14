@@ -16,15 +16,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.focusItemId.enabled ?
-                                listview.currentItem.focusItemId.textField :
-                                focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: backButtonLayout
 
@@ -36,9 +27,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listview.currentItem.focusItemId.enabled ?
-                                   listview.currentItem.focusItemId.textField :
-                                   focusItem
         }
     }
 
@@ -114,8 +102,6 @@ PageType {
                                     port = textFieldText
                                 }
                             }
-
-                            KeyNavigation.tab: cipherDropDown
                         }
 
                         DropDownType {
@@ -129,9 +115,9 @@ PageType {
                             headerText: qsTr("Cipher")
 
                             drawerParent: root
-                            KeyNavigation.tab: saveRestartButton
 
                             listView: ListViewWithRadioButtonType {
+
                                 id: cipherListView
 
                                 rootWidth: root.width

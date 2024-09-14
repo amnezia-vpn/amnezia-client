@@ -25,7 +25,7 @@ PageType {
     property int pageSettingsApiServerInfo: 3
     property int pageSettingsApiLanguageList: 4
 
-    defaultActiveFocusItem: focusItem
+    // defaultActiveFocusItem: focusItem
 
     Connections {
         target: PageController
@@ -44,11 +44,6 @@ PageType {
                 value: true
             }
         ]
-    }
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: header
     }
 
     ColumnLayout {
@@ -75,7 +70,6 @@ PageType {
 
                 BackButtonType {
                     id: backButton
-                    KeyNavigation.tab: headerContent.actionButton
 
                     backButtonFunction: function() {
                         if (nestedStackView.currentIndex === root.pageSettingsApiServerInfo &&
@@ -108,13 +102,11 @@ PageType {
                         }
                     }
 
-                    KeyNavigation.tab: tabBar
-
                     actionButtonFunction: function() {
                         if (nestedStackView.currentIndex === root.pageSettingsApiLanguageList) {
                             nestedStackView.currentIndex = root.pageSettingsApiServerInfo
                         } else {
-                            serverNameEditDrawer.open()
+                            serverNameEditDrawer.openTriggered()
                         }
                     }
                 }
@@ -133,7 +125,7 @@ PageType {
                         }
                     }
 
-                    expandedContent: ColumnLayout {
+                    expandedStateContent: ColumnLayout {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -149,11 +141,6 @@ PageType {
                             }
                         }
 
-                        Item {
-                            id: focusItem1
-                            KeyNavigation.tab: serverName.textField
-                        }
-
                         TextFieldWithHeaderType {
                             id: serverName
 
@@ -162,8 +149,6 @@ PageType {
                             textFieldText: name
                             textField.maximumLength: 30
                             checkEmptyText: true
-
-                            KeyNavigation.tab: saveButton
                         }
 
                         BasicButtonType {
@@ -172,7 +157,6 @@ PageType {
                             Layout.fillWidth: true
 
                             text: qsTr("Save")
-                            KeyNavigation.tab: focusItem1
 
                             clickedFunc: function() {
                                 if (serverName.textFieldText === "") {
@@ -182,7 +166,7 @@ PageType {
                                 if (serverName.textFieldText !== name) {
                                     name = serverName.textFieldText
                                 }
-                                serverNameEditDrawer.close()
+                                serverNameEditDrawer.closeTriggered()
                             }
                         }
                     }
@@ -219,7 +203,6 @@ PageType {
                 isSelected: tabBar.currentIndex === root.pageSettingsServerProtocols
                 text: qsTr("Protocols")
 
-                KeyNavigation.tab: servicesTab
                 Keys.onReturnPressed: tabBar.currentIndex = root.pageSettingsServerProtocols
                 Keys.onEnterPressed: tabBar.currentIndex = root.pageSettingsServerProtocols
             }
@@ -231,7 +214,6 @@ PageType {
                 isSelected: tabBar.currentIndex === root.pageSettingsServerServices
                 text: qsTr("Services")
 
-                KeyNavigation.tab: dataTab
                 Keys.onReturnPressed: tabBar.currentIndex = root.pageSettingsServerServices
                 Keys.onEnterPressed: tabBar.currentIndex = root.pageSettingsServerServices
             }

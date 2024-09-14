@@ -13,14 +13,6 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: textKey.textField
-
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -39,7 +31,6 @@ PageType {
             BackButtonType {
                 id: backButton
                 Layout.topMargin: 20
-                KeyNavigation.tab: textKey.textField
             }
 
             HeaderType {
@@ -67,8 +58,6 @@ PageType {
                     textField.text = ""
                     textField.paste()
                 }
-
-                KeyNavigation.tab: continueButton
             }
         }
     }

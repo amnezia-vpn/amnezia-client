@@ -14,9 +14,7 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: header
-
-    FlickableType {
+    FlickableType { // TODO: refactor either replace with ListView or Repeater
         id: fl
         anchors.top: parent.top
         anchors.bottom: parent.bottom
@@ -39,8 +37,6 @@ PageType {
                 Layout.leftMargin: 16
 
                 headerText: qsTr("Settings")
-
-                KeyNavigation.tab: account.rightButton
             }
 
             LabelWithButtonType {
@@ -55,8 +51,6 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsServersList)
                 }
-
-                KeyNavigation.tab: connection.rightButton
             }
 
             DividerType {}
@@ -72,8 +66,6 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsConnection)
                 }
-
-                KeyNavigation.tab: application.rightButton
             }
 
             DividerType {}
@@ -89,8 +81,6 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsApplication)
                 }
-
-                KeyNavigation.tab: backup.rightButton
             }
 
             DividerType {}
@@ -106,8 +96,6 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsBackup)
                 }
-
-                KeyNavigation.tab: about.rightButton
             }
 
             DividerType {}
@@ -123,8 +111,6 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsAbout)
                 }
-                KeyNavigation.tab: close
-
             }
 
             DividerType {}
@@ -137,8 +123,6 @@ PageType {
                 text: qsTr("Dev console")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/bug.svg"
-
-                // Keys.onTabPressed: lastItemTabClicked(header)
 
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageDevMenu)
@@ -156,10 +140,9 @@ PageType {
                 Layout.preferredHeight: about.height
 
                 text: qsTr("Close application")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/x-circle.svg"
-                isLeftImageHoverEnabled: false                
-
-                Keys.onTabPressed: lastItemTabClicked(header)
+                // isLeftImageHoverEnabled: false
 
                 clickedFunction: function() {
                     PageController.closeApplication()

@@ -12,14 +12,7 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
 
     BackButtonType {
         id: backButton
@@ -28,8 +21,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: amneziaDnsSwitch
     }
 
     FlickableType {
@@ -67,8 +58,6 @@ PageType {
                         SettingsController.toggleAmneziaDns(checked)
                     }
                 }
-
-                KeyNavigation.tab: dnsServersButton.rightButton
             }
 
             DividerType {}
@@ -84,8 +73,6 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsDns)
                 }
-
-                KeyNavigation.tab: splitTunnelingButton.rightButton
             }
 
             DividerType {}

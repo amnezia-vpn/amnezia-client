@@ -62,19 +62,12 @@ PageType {
                         anchors.rightMargin: 16
                         anchors.leftMargin: 16
 
-                        Item {
-                            id: focusItem
-                            KeyNavigation.tab: backButton
-                        }
-
                         BackButtonType {
                             id: backButton
 
                             Layout.topMargin: 20
                             Layout.rightMargin: -16
                             Layout.leftMargin: -16
-
-                            KeyNavigation.tab: showDetailsButton
                         }
 
                         HeaderType {
@@ -113,13 +106,13 @@ PageType {
                             parent: root
                             onClosed: {
                                 if (!GC.isMobile()) {
-                                    defaultActiveFocusItem.forceActiveFocus()
+                                    // defaultActiveFocusItem.forceActiveFocus()
                                 }
                             }
 
                             anchors.fill: parent
                             expandedHeight: parent.height * 0.9
-                            expandedContent: Item {
+                            expandedStateContent: Item {
                                 Connections {
                                     target: showDetailsDrawer
                                     enabled: !GC.isMobile()
@@ -130,15 +123,15 @@ PageType {
 
                                 implicitHeight: showDetailsDrawer.expandedHeight
 
-                                Item {
-                                    id: focusItem2
-                                    KeyNavigation.tab: showDetailsBackButton
-                                    onFocusChanged: {
-                                        if (focusItem2.activeFocus) {
-                                            fl.contentY = 0
-                                        }
-                                    }
-                                }
+                                // Item {
+                                //     id: focusItem2
+                                //     KeyNavigation.tab: showDetailsBackButton
+                                //     onFocusChanged: {
+                                //         if (focusItem2.activeFocus) {
+                                //             fl.contentY = 0
+                                //         }
+                                //     }
+                                // }
 
                                 BackButtonType {
                                     id: showDetailsBackButton
@@ -147,8 +140,6 @@ PageType {
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.topMargin: 16
-
-                                    KeyNavigation.tab: showDetailsCloseButton
 
                                     backButtonFunction: function() {
                                         showDetailsDrawer.close()
@@ -230,7 +221,7 @@ PageType {
                             Layout.fillWidth: true
                             rootWidth: root.width
 
-                            KeyNavigation.tab: (port.visible && port.enabled) ? port.textField : installButton
+                            // KeyNavigation.tab: (port.visible && port.enabled) ? port.textField : installButton
                         }
 
                         TextFieldWithHeaderType {
@@ -242,8 +233,6 @@ PageType {
                             headerText: qsTr("Port")
                             textField.maximumLength: 5
                             textField.validator: IntValidator { bottom: 1; top: 65535 }
-
-                            KeyNavigation.tab: installButton
                         }
 
                         Rectangle {
@@ -289,10 +278,10 @@ PageType {
                             transportProtoSelector.visible = protocolSelectorVisible
                             transportProtoHeader.visible = protocolSelectorVisible
 
-                            if (port.visible && port.enabled)
-                                defaultActiveFocusItem = port.textField
-                            else
-                                defaultActiveFocusItem = focusItem
+                            // if (port.visible && port.enabled)
+                            //     defaultActiveFocusItem = port.textField
+                            // else
+                            //     defaultActiveFocusItem = focusItem
                         }
                     }
                 }

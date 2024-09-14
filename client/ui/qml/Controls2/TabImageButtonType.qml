@@ -14,13 +14,23 @@ TabButton {
 
     property bool isSelected: false
 
+	property bool isFocusable: true
+
+	Keys.onTabPressed: {
+		FocusController.nextKeyTabItem()
+	}
+
+	Keys.onBacktabPressed: {
+		FocusController.previousKeyTabItem()
+	}
+    
     property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
     property var clickedFunc
 
     hoverEnabled: true
-    focusPolicy: Qt.TabFocus
+    // focusPolicy: Qt.TabFocus
 
     icon.source: image
     icon.color: isSelected ? selectedColor : defaultColor
@@ -41,8 +51,9 @@ TabButton {
         cursorShape: Qt.PointingHandCursor
         enabled: false
     }
-
+    
     Keys.onEnterPressed: {
+        console.log("$$$$$$$$$ ENTER PRESSED INSIDE TABIMAGEBUTTONTYPE")
         if (root.clickedFunc && typeof root.clickedFunc === "function") {
             root.clickedFunc()
         }

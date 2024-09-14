@@ -41,27 +41,37 @@ Item {
     property bool descriptionOnTop: false
     property bool hideDescription: true
 
+    property bool isFocusable: !(eyeImage.visible || rightImage.visible) // TODO: this component already has focusable items
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+    
     implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
     implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
 
-    onFocusChanged: {
-        if (root.activeFocus) {
-            if (root.parentFlickable) {
-                root.parentFlickable.ensureVisible(root)
-            }
-        }
-    }
+    // onFocusChanged: {
+    //     if (root.activeFocus) {
+    //         if (root.parentFlickable) {
+    //             root.parentFlickable.ensureVisible(root)
+    //         }
+    //     }
+    // }
 
-    Connections {
-        target: rightImage
-        function onFocusChanged() {
-            if (rightImage.activeFocus) {
-                if (root.parentFlickable) {
-                    root.parentFlickable.ensureVisible(root)
-                }
-            }
-        }
-    }
+    // Connections {
+    //     target: rightImage
+    //     function onFocusChanged() {
+    //         if (rightImage.activeFocus) {
+    //             if (root.parentFlickable) {
+    //                 root.parentFlickable.ensureVisible(root)
+    //             }
+    //         }
+    //     }
+    // }
 
     MouseArea {
         anchors.fill: parent
