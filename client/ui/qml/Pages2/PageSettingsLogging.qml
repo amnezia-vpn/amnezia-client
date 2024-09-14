@@ -16,13 +16,6 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -30,8 +23,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: switcher
     }
 
     FlickableType {
@@ -68,10 +59,19 @@ PageType {
                 text: qsTr("Enable logs")
 
                 checked: SettingsController.isLoggingEnabled
-                //KeyNavigation.tab: openFolderButton
+                
                 onCheckedChanged: {
                     if (checked !== SettingsController.isLoggingEnabled) {
                         SettingsController.isLoggingEnabled = checked
+                    }
+                }
+
+                onFocusChanged: {
+                    console.debug("MOVE THIS LOGIC TO CPP!")
+                    if (activeFocus) {
+                        if (fl) {
+                            fl.ensureVisible(this)
+                        }
                     }
                 }
             }
@@ -86,8 +86,6 @@ PageType {
                 text: qsTr("Clear logs")
                 leftImageSource: "qrc:/images/controls/trash.svg"
                 isSmallLeftImage: true
-
-                // KeyNavigation.tab: labelWithButton3
 
                 clickedFunction: function() {
                     var headerText = qsTr("Clear logs?")
@@ -104,9 +102,9 @@ PageType {
                         }
                     }
                     var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            focusItem.forceActiveFocus()
-                        }
+                        // if (!GC.isMobile()) {
+                        //     focusItem.forceActiveFocus()
+                        // }
                     }
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -142,8 +140,6 @@ PageType {
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
                 isSmallLeftImage: true
 
-                // KeyNavigation.tab: labelWithButton3
-
                 clickedFunction: function() {
                     SettingsController.openLogsFolder()
                 }
@@ -161,7 +157,14 @@ PageType {
                 leftImageSource: "qrc:/images/controls/save.svg"
                 isSmallLeftImage: true
 
-                // KeyNavigation.tab: labelWithButton3
+                onFocusChanged: {
+                    console.debug("MOVE THIS LOGIC TO CPP!")
+                    if (activeFocus) {
+                        if (fl) {
+                            fl.ensureVisible(this)
+                        }
+                    }
+                }
 
                 clickedFunction: function() {
                     var fileName = ""
@@ -221,7 +224,14 @@ PageType {
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
                 isSmallLeftImage: true
 
-                // KeyNavigation.tab: labelWithButton3
+                onFocusChanged: {
+                    console.debug("MOVE THIS LOGIC TO CPP!")
+                    if (activeFocus) {
+                        if (fl) {
+                            fl.ensureVisible(this)
+                        }
+                    }
+                }
 
                 clickedFunction: function() {
                     SettingsController.openServiceLogsFolder()
@@ -245,7 +255,14 @@ PageType {
                 leftImageSource: "qrc:/images/controls/save.svg"
                 isSmallLeftImage: true
 
-                // KeyNavigation.tab: labelWithButton3
+                onFocusChanged: {
+                    console.debug("MOVE THIS LOGIC TO CPP!")
+                    if (activeFocus) {
+                        if (fl) {
+                            fl.ensureVisible(this)
+                        }
+                    }
+                }
 
                 clickedFunction: function() {
                     var fileName = ""

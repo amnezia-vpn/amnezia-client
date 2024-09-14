@@ -16,6 +16,16 @@ Button {
     property string connectedButtonColor: AmneziaStyle.color.goldenApricot
     property bool buttonActiveFocus: activeFocus && (Qt.platform.os !== "android" || SettingsController.isOnTv())
 
+    property bool isFocusable: true
+    
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+    
     implicitWidth: 190
     implicitHeight: 190
 

@@ -16,13 +16,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: backButtonLayout
 
@@ -34,7 +27,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listview
         }
     }
 
@@ -64,12 +56,12 @@ PageType {
 
                 model: WireGuardConfigModel
 
-                activeFocusOnTab: true
-                onActiveFocusChanged: {
-                    if (activeFocus) {
-                        listview.itemAtIndex(0)?.focusItemId.forceActiveFocus()
-                    }
-                }
+                // activeFocusOnTab: true
+                // onActiveFocusChanged: {
+                //     if (activeFocus) {
+                //         listview.itemAtIndex(0)?.focusItemId.forceActiveFocus()
+                //     }
+                // }
 
                 delegate: Item {
                     id: delegateItem
@@ -109,14 +101,32 @@ PageType {
                             textField.maximumLength: 5
                             textField.validator: IntValidator { bottom: 1; top: 65535 }
 
-                            KeyNavigation.tab: saveButton
-
                             textField.onEditingFinished: {
                                 if (textFieldText !== port) {
                                     port = textFieldText
                                 }
                             }
 
+                            checkEmptyText: true
+                        }
+
+                        TextFieldWithHeaderType {
+                            id: mtuTextField
+                            Layout.fillWidth: true
+                            Layout.topMargin: 16
+
+                            headerText: qsTr("MTU")
+                            textFieldText: mtu
+                            textField.validator: IntValidator { bottom: 576; top: 65535 }
+
+                            textField.onEditingFinished: {
+                                if (textFieldText === "") {
+                                    textFieldText = "0"
+                                }
+                                if (textFieldText !== mtu) {
+                                    mtu = textFieldText
+                                }
+                            }
                             checkEmptyText: true
                         }
 

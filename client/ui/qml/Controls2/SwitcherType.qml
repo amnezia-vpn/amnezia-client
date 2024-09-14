@@ -35,6 +35,16 @@ Switch {
     property string hoveredIndicatorBackgroundColor: AmneziaStyle.color.translucentWhite
     property string defaultIndicatorBackgroundColor: AmneziaStyle.color.transparent
 
+    property bool isFocusable: true
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+
     hoverEnabled: enabled ? true : false
     focusPolicy: Qt.TabFocus
 

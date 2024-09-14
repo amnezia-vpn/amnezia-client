@@ -14,7 +14,7 @@ DrawerType2 {
     width: parent.width
     height: parent.height
 
-    expandedContent: ColumnLayout {
+    expandedStateContent: ColumnLayout {
         id: content
 
         anchors.top: parent.top
@@ -26,14 +26,6 @@ DrawerType2 {
             root.expandedHeight = content.implicitHeight + 32
         }
 
-        Connections {
-            target: root
-            enabled: !GC.isMobile()
-            function onOpened() {
-                focusItem.forceActiveFocus()
-            }
-        }
-
         Header2Type {
             Layout.fillWidth: true
             Layout.topMargin: 24
@@ -42,11 +34,6 @@ DrawerType2 {
             Layout.bottomMargin: 16
 
             headerText: qsTr("Add new connection")
-        }
-
-        Item {
-            id: focusItem
-            KeyNavigation.tab: ip.rightButton
         }
 
         LabelWithButtonType {
@@ -61,8 +48,6 @@ DrawerType2 {
                 PageController.goToPage(PageEnum.PageSetupWizardCredentials)
                 root.close()
             }
-
-            KeyNavigation.tab: qrCode.rightButton
         }
 
         DividerType {}
@@ -78,8 +63,6 @@ DrawerType2 {
                 PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
                 root.close()
             }
-
-            KeyNavigation.tab: focusItem
         }
 
         DividerType {}

@@ -26,7 +26,7 @@ DrawerType2 {
         id: installedAppsModel
     }
 
-    expandedContent: Item {
+    expandedStateContent: Item {
         id: container
 
         implicitHeight: expandedHeight

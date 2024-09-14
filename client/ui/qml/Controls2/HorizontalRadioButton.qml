@@ -27,6 +27,18 @@ RadioButton {
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
+    property bool isFocusable: true
+
+    Keys.onTabPressed: {
+        console.debug("--> Tab is pressed on BasicButtonType: ", objectName)
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        console.debug("--> Shift+Tab is pressed on ", objectName)
+        FocusController.previousKeyTabItem()
+    }
+
     indicator: Rectangle {
         anchors.fill: parent
         radius: 16

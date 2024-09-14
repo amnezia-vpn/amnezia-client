@@ -4,22 +4,26 @@ import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
-Item {
+FocusScope {
     id: root
 
     property string backButtonImage: "qrc:/images/controls/arrow-left.svg"
     property var backButtonFunction
 
+    // property bool isFocusable: true
+
+    // Keys.onTabPressed: {
+    //     FocusController.nextKeyTabItem()
+    // }
+    
+    // Keys.onBacktabPressed: {
+    //     FocusController.previousKeyTabItem()
+    // }
+
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
     visible: backButtonImage !== ""
-
-    onActiveFocusChanged: {
-        if (activeFocus) {
-            backButton.forceActiveFocus()
-        }
-    }
 
     RowLayout {
         id: content
@@ -34,6 +38,8 @@ Item {
 
             implicitWidth: 40
             implicitHeight: 40
+
+            // focus: true
 
             onClicked: {
                 if (backButtonFunction && typeof backButtonFunction === "function") {

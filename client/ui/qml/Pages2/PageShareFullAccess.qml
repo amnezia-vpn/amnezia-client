@@ -18,12 +18,7 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
+    // defaultActiveFocusItem: focusItem
 
     BackButtonType {
         id: backButton
@@ -32,8 +27,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: serverSelector
     }
 
     FlickableType {
@@ -85,8 +78,6 @@ PageType {
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
 
-                KeyNavigation.tab: shareButton
-
                 listView: ListViewWithRadioButtonType {
                     id: serverSelectorListView
 
@@ -137,8 +128,6 @@ PageType {
                 text: qsTr("Share")
                 imageSource: "qrc:/images/controls/share-2.svg"
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
-
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
 
@@ -166,10 +155,5 @@ PageType {
         id: shareConnectionDrawer
 
         anchors.fill: parent
-        onClosed: {
-            if (!GC.isMobile()) {
-                focusItem.forceActiveFocus()
-            }
-        }
     }
 }

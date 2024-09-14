@@ -28,8 +28,14 @@ RadioButton {
     property string imageSource
     property bool showImage
 
+    property bool isFocusable: true
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
     hoverEnabled: true
-    focusPolicy: Qt.TabFocus
+    // focusPolicy: Qt.TabFocus
 
     indicator: Rectangle {
         id: background

@@ -15,13 +15,6 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     SortFilterProxyModel {
         id: proxyContainersModel
         sourceModel: ContainersModel
@@ -52,7 +45,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: containers
         }
     }
 

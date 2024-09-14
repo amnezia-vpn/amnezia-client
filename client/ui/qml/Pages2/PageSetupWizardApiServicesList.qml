@@ -14,8 +14,6 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -31,15 +29,9 @@ PageType {
 
             spacing: 0
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: backButton
-            }
-
             BackButtonType {
                 id: backButton
                 Layout.topMargin: 20
-//                KeyNavigation.tab: fileButton.rightButton
             }
 
             HeaderType {

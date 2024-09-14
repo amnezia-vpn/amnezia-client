@@ -33,6 +33,8 @@ Window  {
     title: "AmneziaVPN"
 
     Connections {
+        objectName: "pageControllerConnections"
+
         target: PageController
 
         function onRaiseMainWindow() {
@@ -72,6 +74,8 @@ Window  {
     }
 
     Connections {
+        objectName: "settingsControllerConnections"
+
         target: SettingsController
 
         function onChangeSettingsFinished(finishedMessage) {
@@ -80,11 +84,15 @@ Window  {
     }
 
     PageStart {
+        objectName: "pageStart"
+
         width: root.width
         height: root.height
     }
 
     Item {
+        objectName: "popupNotificationItem"
+
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
@@ -108,6 +116,8 @@ Window  {
     }
 
     Item {
+        objectName: "popupErrorMessageItem"
+
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
@@ -120,6 +130,8 @@ Window  {
     }
 
     Item {
+        objectName: "privateKeyPassphraseDrawerItem"
+
         anchors.fill: parent
 
         DrawerType2 {
@@ -128,7 +140,7 @@ Window  {
             anchors.fill: parent
             expandedHeight: root.height * 0.35
 
-            expandedContent: ColumnLayout {
+            expandedStateContent: ColumnLayout {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -168,7 +180,7 @@ Window  {
                         hidePassword = !hidePassword
                     }
 
-                    KeyNavigation.tab: saveButton
+                    // KeyNavigation.tab: saveButton
                 }
 
                 BasicButtonType {
@@ -195,6 +207,8 @@ Window  {
     }
 
     Item {
+        objectName: "questionDrawerItem"
+
         anchors.fill: parent
 
         QuestionDrawer {
@@ -205,6 +219,8 @@ Window  {
     }
 
     Item {
+        objectName: "busyIndicatorItem"
+
         anchors.fill: parent
 
         BusyIndicatorType {
@@ -221,26 +237,26 @@ Window  {
         questionDrawer.noButtonText = noButtonText
 
         questionDrawer.yesButtonFunction = function() {
-            questionDrawer.close()
+            questionDrawer.closeTriggered()
             if (yesButtonFunction && typeof yesButtonFunction === "function") {
                 yesButtonFunction()
             }
         }
         questionDrawer.noButtonFunction = function() {
-            questionDrawer.close()
+            questionDrawer.closeTriggered()
             if (noButtonFunction && typeof noButtonFunction === "function") {
                 noButtonFunction()
             }
         }
-        questionDrawer.open()
+        questionDrawer.openTriggered()
     }
 
     FileDialog {
         id: mainFileDialog
+        objectName: "mainFileDialog"
 
         property bool isSaveMode: false
 
-        objectName: "mainFileDialog"
         fileMode: isSaveMode ? FileDialog.SaveFile : FileDialog.OpenFile
 
         onAccepted: SystemController.fileDialogClosed(true)

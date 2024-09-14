@@ -25,10 +25,13 @@ Button {
 
     property real textOpacity: 1.0
 
+    property alias focusItem: rightImage
+
     hoverEnabled: true
 
     background: Rectangle {
         id: backgroundRect
+
         anchors.fill: parent
         radius: 16
 
@@ -44,8 +47,10 @@ Button {
         anchors.right: parent.right
 
         implicitHeight: content.implicitHeight
+
         RowLayout {
             id: content
+
             anchors.fill: parent
 
             Image {
@@ -61,6 +66,7 @@ Button {
             }
 
             ColumnLayout {
+
                 ListItemTitleType {
                     text: root.headerText
                     visible: text !== ""
@@ -123,6 +129,7 @@ Button {
 
                 Rectangle {
                     id: rightImageBackground
+
                     anchors.fill: parent
                     radius: 12
                     color: "transparent"
@@ -131,10 +138,9 @@ Button {
                         PropertyAnimation { duration: 200 }
                     }
                 }
+
                 onClicked: {
-                    if (clickedFunction && typeof clickedFunction === "function") {
-                        clickedFunction()
-                    }
+                    root.clicked()
                 }
             }
         }

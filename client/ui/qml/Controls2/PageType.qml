@@ -9,27 +9,9 @@ Item {
 
     property StackView stackView: StackView.view
 
-    property var defaultActiveFocusItem: null
-
     onVisibleChanged: {
         if (visible && !GC.isMobile()) {
             timer.start()
-        }
-    }
-
-    function lastItemTabClicked(focusItem) {
-        if (GC.isMobile()) {
-            return
-        }
-
-        if (focusItem) {
-            focusItem.forceActiveFocus()
-            PageController.forceTabBarActiveFocus()
-        } else {
-            if (defaultActiveFocusItem) {
-                defaultActiveFocusItem.forceActiveFocus()
-            }
-            PageController.forceTabBarActiveFocus()
         }
     }
 
@@ -49,11 +31,10 @@ Item {
     // Set a timer to set focus after a short delay
     Timer {
         id: timer
-        interval: 100 // Milliseconds
+        interval: 1000 // Milliseconds // TODO: return to 500
         onTriggered: {
-            if (defaultActiveFocusItem) {
-                defaultActiveFocusItem.forceActiveFocus()
-            }
+            console.debug("===>> Page creation completed")
+            FocusController.resetFocus()
         }
         repeat: false // Stop the timer after one trigger
         running: !GC.isMobile()  // Start the timer

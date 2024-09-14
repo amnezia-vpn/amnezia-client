@@ -14,13 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: primaryDns.textField
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -28,8 +21,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: root.defaultActiveFocusItem
     }
 
     FlickableType {
@@ -80,8 +71,6 @@ PageType {
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
-
-                KeyNavigation.tab: secondaryDns.textField
             }
 
             TextFieldWithHeaderType {
@@ -94,8 +83,6 @@ PageType {
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
-
-                KeyNavigation.tab: restoreDefaultButton
             }
 
             BasicButtonType {
@@ -124,19 +111,17 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Settings have been reset"))
 
                         if (!GC.isMobile()) {
-                            defaultActiveFocusItem.forceActiveFocus()
+                            // defaultActiveFocusItem.forceActiveFocus()
                         }
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {
-                            defaultActiveFocusItem.forceActiveFocus()
+                            // defaultActiveFocusItem.forceActiveFocus()
                         }
                     }
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
-
-                KeyNavigation.tab: saveButton
             }
 
             BasicButtonType {

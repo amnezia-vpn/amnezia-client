@@ -33,40 +33,14 @@ ListView {
 
     property int currentFocusIndex: 0
 
-    activeFocusOnTab: true
-    onActiveFocusChanged: {
-        if (activeFocus) {
-            this.currentFocusIndex = 0
-            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
-        }
-    }
+    property bool isFocusable: true
 
     Keys.onTabPressed: {
-        if (currentFocusIndex < this.count - 1) {
-            currentFocusIndex += 1
-        } else {
-            currentFocusIndex = 0
-        }
-        this.itemAtIndex(currentFocusIndex).forceActiveFocus()
+        FocusController.nextKeyTabItem()
     }
 
-    Item {
-        id: focusItem
-        Keys.onTabPressed: {
-            root.forceActiveFocus()
-        }
-    }
-
-    onVisibleChanged: {
-        if (visible) {
-            focusItem.forceActiveFocus()
-        }
-    }
-
-    onCurrentFocusIndexChanged: {
-        if (parentFlickable) {
-            parentFlickable.ensureVisible(this.itemAtIndex(currentFocusIndex))
-        }
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
     }
 
     ButtonGroup {
@@ -82,12 +56,6 @@ ListView {
     delegate: Item {
         implicitWidth: rootWidth
         implicitHeight: content.implicitHeight
-
-        onActiveFocusChanged: {
-            if (activeFocus) {
-                radioButton.forceActiveFocus()
-            }
-        }
 
         ColumnLayout {
             id: content

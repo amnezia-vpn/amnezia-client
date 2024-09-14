@@ -19,13 +19,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: header
 
@@ -37,7 +30,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listView
         }
 
         HeaderType {
@@ -104,8 +96,6 @@ PageType {
                                 configContentDrawer.open()
                             }
 
-                            KeyNavigation.tab: removeButton
-
                             MouseArea {
                                 anchors.fill: button
                                 cursorShape: Qt.PointingHandCursor
@@ -129,7 +119,7 @@ PageType {
                             parent: root
                             anchors.fill: parent
 
-                            expandedContent: Item {
+                            expandedStateContent: Item {
                                 implicitHeight: configContentDrawer.expandedHeight
 
                                 Connections {
@@ -138,11 +128,6 @@ PageType {
                                     function onOpened() {
                                         focusItem1.forceActiveFocus()
                                     }
-                                }
-
-                                Item {
-                                    id: focusItem1
-                                    KeyNavigation.tab: backButton1
                                 }
 
                                 BackButtonType {
@@ -156,8 +141,6 @@ PageType {
                                     backButtonFunction: function() {
                                         configContentDrawer.close()
                                     }
-
-                                    KeyNavigation.tab: focusItem1
                                 }
 
                                 FlickableType {

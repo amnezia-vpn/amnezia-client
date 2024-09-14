@@ -18,13 +18,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: header
 
@@ -36,7 +29,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: servers
         }
 
         HeaderType {
@@ -48,95 +40,88 @@ PageType {
         }
     }
 
-    FlickableType {
-        id: fl
+    ListView {
+        id: servers
+        objectName: "servers"
+
+        width: parent.width
         anchors.top: header.bottom
         anchors.topMargin: 16
-        contentHeight: col.implicitHeight
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        Column {
-            id: col
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        height: 500 // servers.contentItem.height // TODO: calculate height
 
-            ListView {
-                id: servers
-                width: parent.width
-                height: servers.contentItem.height
+        model: ServersModel
 
-                model: ServersModel
+        clip: true
+        interactive: false
 
-                clip: true
-                interactive: false
+        // activeFocusOnTab: true
+        // focus: true
+        // Keys.onTabPressed: {
+        //     if (currentIndex < servers.count - 1) {
+        //         servers.incrementCurrentIndex()
+        //     } else {
+        //         servers.currentIndex = 0
+        //         focusItem.forceActiveFocus()
+        //         root.lastItemTabClicked()
+        //     }
 
-                activeFocusOnTab: true
-                focus: true
-                Keys.onTabPressed: {
-                    if (currentIndex < servers.count - 1) {
-                        servers.incrementCurrentIndex()
-                    } else {
-                        servers.currentIndex = 0
-                        focusItem.forceActiveFocus()
-                        root.lastItemTabClicked()
-                    }
+        //     fl.ensureVisible(this.currentItem)
+        // }
 
-                    fl.ensureVisible(this.currentItem)
-                }
+        onVisibleChanged: {
+            if (visible) {
+                currentIndex = 0
+            }
+        }
 
-                onVisibleChanged: {
-                    if (visible) {
-                        currentIndex = 0
-                    }
-                }
+        delegate: Item {
+            implicitWidth: servers.width
+            implicitHeight: delegateContent.implicitHeight
 
-                delegate: Item {
-                    implicitWidth: servers.width
-                    implicitHeight: delegateContent.implicitHeight
+            // onFocusChanged: {
+            //     if (focus) {
+            //         server.rightButton.forceActiveFocus()
+            //     }
+            // }
 
-                    onFocusChanged: {
-                        if (focus) {
-                            server.rightButton.forceActiveFocus()
-                        }
-                    }
+            ColumnLayout {
+                id: delegateContent
 
-                    ColumnLayout {
-                        id: delegateContent
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
 
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                LabelWithButtonType {
+                    id: server
+                    Layout.fillWidth: true
 
-                        LabelWithButtonType {
-                            id: server
-                            Layout.fillWidth: true
-
-                            text: name
-                            parentFlickable: fl
-                            descriptionText: {
-                                var servicesNameString = ""
-                                var servicesName = ServersModel.getAllInstalledServicesName(index)
-                                for (var i = 0; i < servicesName.length; i++) {
-                                    servicesNameString += servicesName[i] + " · "
-                                }
-
-                                if (ServersModel.isServerFromApi(index)) {
-                                    return servicesNameString + serverDescription
-                                } else {
-                                    return servicesNameString + hostName
-                                }
-                            }
-                            rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                            clickedFunction: function() {
-                                ServersModel.processedIndex = index
-                                PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                            }
+                    text: name
+                    // parentFlickable: fl
+                    descriptionText: {
+                        var servicesNameString = ""
+                        var servicesName = ServersModel.getAllInstalledServicesName(index)
+                        for (var i = 0; i < servicesName.length; i++) {
+                            servicesNameString += servicesName[i] + " · "
                         }
 
-                        DividerType {}
+                        if (ServersModel.isServerFromApi(index)) {
+                            return servicesNameString + serverDescription
+                        } else {
+                            return servicesNameString + hostName
+                        }
+                    }
+                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                    clickedFunction: function() {
+                        ServersModel.processedIndex = index
+                        PageController.goToPage(PageEnum.PageSettingsServerInfo)
                     }
                 }
+
+                DividerType {}
             }
         }
     }

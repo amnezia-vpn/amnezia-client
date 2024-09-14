@@ -15,8 +15,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -31,11 +29,6 @@ PageType {
             anchors.right: parent.right
 
             spacing: 0
-
-            Item {
-                id: focusItem
-//                KeyNavigation.tab: backButton
-            }
 
             LabelWithImageType {
                 Layout.fillWidth: true

@@ -24,21 +24,22 @@ Button {
     property int borderFocusedWidth: 1
 
     hoverEnabled: true
-    focus: true
-    focusPolicy: Qt.TabFocus
 
     icon.source: image
     icon.color: root.enabled ? imageColor : disableImageColor
 
-    property Flickable parentFlickable
+    property bool isFocusable: true
 
-    onFocusChanged: {
-        if (root.activeFocus) {
-            if (root.parentFlickable) {
-                root.parentFlickable.ensureVisible(this)
-            }
-        }
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
     }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+
+    Keys.onEnterPressed: root.clicked()
+    Keys.onReturnPressed: root.clicked()
 
     Behavior on icon.color {
         PropertyAnimation { duration: 200 }

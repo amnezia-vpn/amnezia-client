@@ -17,10 +17,19 @@ TabButton {
 
     property bool isSelected: false
 
+    property bool isFocusable: true
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+    
     implicitHeight: 48
 
     hoverEnabled: true
-    focusPolicy: Qt.TabFocus
 
     background: Rectangle {
         id: background
