@@ -109,7 +109,10 @@ QStringList NetworkUtilities::summarizeRoutes(const QStringList &ips, const QStr
 
 QString NetworkUtilities::getIPAddress(const QString &host)
 {
-    if (ipAddressRegExp().match(host).hasMatch()) {
+    QHostAddress address(host);
+    if (QAbstractSocket::IPv4Protocol == address.protocol()) {
+        return host;
+    } else if (QAbstractSocket::IPv6Protocol == address.protocol()) {
         return host;
     }
 

@@ -35,7 +35,7 @@ fun getLocalNetworks(context: Context, ipv6: Boolean): List<InetNetwork> {
     return emptyList()
 }
 
-fun parseInetAddress(address: String): InetAddress = parseNumericAddressCompat(address)
+fun parseInetAddress(address: String): InetAddress = InetAddress.getByName(address)
 
 private val parseNumericAddressCompat: (String) -> InetAddress =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
