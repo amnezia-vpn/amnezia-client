@@ -18,7 +18,7 @@ public:
         LatestHandshakeRole,
         DataReceivedRole,
         DataSentRole,
-        AllowedIPsRole
+        AllowedIpsRole
     };
 
     struct WgShowData
@@ -27,7 +27,7 @@ public:
         QString latestHandshake;
         QString dataReceived;
         QString dataSent;
-        QString allowedIPs;
+        QString allowedIps;
     };
 
     ClientManagementModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);

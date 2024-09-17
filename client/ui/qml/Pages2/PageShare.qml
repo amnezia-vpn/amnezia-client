@@ -843,10 +843,10 @@ PageType {
 
                                     ParagraphTextType {
                                         color: textColumn.textColor
-                                        visible: allowedIPs
+                                        visible: allowedIps
                                         Layout.fillWidth: true
 
-                                        text: qsTr("Allowed IPs: %1").arg(allowedIPs)
+                                        text: qsTr("Allowed IPs: %1").arg(allowedIps)
                                     }
                                 }
 
