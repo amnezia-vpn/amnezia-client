@@ -15,7 +15,7 @@ struct WGConfig: Decodable {
   let serverPublicKey: String
   let presharedKey: String?
   var allowedIPs: [String]
-  var persistentKeepAlive: String
+  var persistentKeepAlive: Int
   let splitTunnelType: Int
   let splitTunnelSites: [String]
 
