@@ -42,17 +42,6 @@ android {
         resourceConfigurations += listOf("en", "ru", "b+zh+Hans")
     }
 
-    sourceSets {
-        getByName("main") {
-            manifest.srcFile("AndroidManifest.xml")
-            java.setSrcDirs(listOf("src"))
-            res.setSrcDirs(listOf("res"))
-            // androyddeployqt creates the folders below
-            assets.setSrcDirs(listOf("assets"))
-            jniLibs.setSrcDirs(listOf("libs"))
-        }
-    }
-
     signingConfigs {
         register("release") {
             storeFile = providers.environmentVariable("ANDROID_KEYSTORE_PATH").orNull?.let { file(it) }
@@ -75,6 +64,36 @@ android {
             initWith(getByName("release"))
             signingConfig = null
             matchingFallbacks += "release"
+        }
+    }
+
+    flavorDimensions += "billing"
+
+    productFlavors {
+        create("oss") {
+            dimension = "billing"
+        }
+        create("play") {
+            dimension = "billing"
+        }
+    }
+
+    sourceSets {
+        getByName("main") {
+            manifest.srcFile("AndroidManifest.xml")
+            java.setSrcDirs(listOf("src"))
+            res.setSrcDirs(listOf("res"))
+            // androyddeployqt creates the folders below
+            assets.setSrcDirs(listOf("assets"))
+            jniLibs.setSrcDirs(listOf("libs"))
+        }
+
+        getByName("oss") {
+            java.setSrcDirs(listOf("oss"))
+        }
+
+        getByName("play") {
+            java.setSrcDirs(listOf("play"))
         }
     }
 
@@ -123,5 +142,9 @@ dependencies {
     implementation(libs.google.mlkit)
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.biometric)
-    implementation(libs.android.billing)
+
+    playImplementation(project(":billing"))
 }
+
+fun DependencyHandler.playImplementation(dependency: Any): Dependency? =
+    add("playImplementation", dependency)
