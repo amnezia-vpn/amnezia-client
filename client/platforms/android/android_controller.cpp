@@ -350,6 +350,13 @@ void AndroidController::sendTouch(float x, float y)
     callActivityMethod("sendTouch", "(FF)V", x, y);
 }
 
+
+bool AndroidController::isPlay()
+{
+    return callActivityMethod<jboolean>("isPlay", "()Z");
+
+}
+
 // Moving log processing to the Android side
 jclass AndroidController::log;
 jmethodID AndroidController::logDebug;

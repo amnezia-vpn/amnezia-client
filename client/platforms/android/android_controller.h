@@ -55,6 +55,7 @@ public:
     void requestNotificationPermission();
     bool requestAuthentication();
     void sendTouch(float x, float y);
+    bool isPlay();
 
     void showUpdateCover();
     void hideUpdateCover();
