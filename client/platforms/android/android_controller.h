@@ -48,6 +48,7 @@ public:
     bool isNotificationPermissionGranted();
     void requestNotificationPermission();
     bool requestAuthentication();
+    bool isPlay();
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);

@@ -287,6 +287,11 @@ bool AndroidController::requestAuthentication()
     return result;
 }
 
+bool AndroidController::isPlay()
+{
+    return callActivityMethod<jboolean>("isPlay", "()Z");
+}
+
 // Moving log processing to the Android side
 jclass AndroidController::log;
 jmethodID AndroidController::logDebug;

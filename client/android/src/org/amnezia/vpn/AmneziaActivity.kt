@@ -708,6 +708,9 @@ class AmneziaActivity : QtActivity() {
         }
     }
 
+    @Suppress("unused")
+    fun isPlay(): Boolean = BuildConfig.FLAVOR == "play"
+
     /**
      * Utils methods
      */
