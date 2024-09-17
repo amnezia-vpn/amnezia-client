@@ -101,11 +101,11 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         //     AllowedIPs = 10.8.1.6/32, 192.168.1.0/24, 192.168.2.0/24, ...
         //     ...
         // without this code - next IP would be 1 if last item in 'ips' has format above
-        QStringList vpnIPs;
-        foreach(QString ip, ips) {
-          vpnIPs.append(ip.split(",", Qt::SkipEmptyParts).first().trimmed());
+        QStringList vpnIps;
+        for (const auto &ip : ips) {
+          vpnIps.append(ip.split(",", Qt::SkipEmptyParts).first().trimmed());
         }
-        ips = vpnIPs;
+        ips = vpnIps;
 
         // Calc next IP address
         if (ips.isEmpty()) {
