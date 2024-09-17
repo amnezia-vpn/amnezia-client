@@ -20,6 +20,7 @@ android {
     namespace = "org.amnezia.vpn"
 
     buildFeatures {
+        buildConfig = true
         viewBinding = true
     }
 
