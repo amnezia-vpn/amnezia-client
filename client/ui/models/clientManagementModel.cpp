@@ -20,6 +20,7 @@ namespace
         constexpr char latestHandshake[] = "latestHandshake";
         constexpr char dataReceived[] = "dataReceived";
         constexpr char dataSent[] = "dataSent";
+        constexpr char allowedIps[] = "allowedIps";
     }
 }
 
@@ -49,6 +50,7 @@ QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
     case LatestHandshakeRole: return userData.value(configKey::latestHandshake).toString();
     case DataReceivedRole: return userData.value(configKey::dataReceived).toString();
     case DataSentRole: return userData.value(configKey::dataSent).toString();
+    case AllowedIpsRole: return userData.value(configKey::allowedIps).toString();
     }
 
     return QVariant();
@@ -139,6 +141,10 @@ ErrorCode ClientManagementModel::updateModel(const DockerContainer container, co
 
                     if (!client.dataSent.isEmpty()) {
                         userData[configKey::dataSent] = client.dataSent;
+                    }
+
+                    if (!client.allowedIps.isEmpty()) {
+                        userData[configKey::allowedIps] = client.allowedIps;
                     }
 
                     obj[configKey::userData] = userData;
@@ -266,8 +272,9 @@ ErrorCode ClientManagementModel::wgShow(const DockerContainer container, const S
     const auto peerList = parts.filter("peer:");
     const auto latestHandshakeList = parts.filter("latest handshake:");
     const auto transferredDataList = parts.filter("transfer:");
+    const auto allowedIpsList = parts.filter("allowed ips:");
 
-    if (latestHandshakeList.isEmpty() || transferredDataList.isEmpty() || peerList.isEmpty()) {
+    if (allowedIpsList.isEmpty() || latestHandshakeList.isEmpty() || transferredDataList.isEmpty() || peerList.isEmpty()) {
         return error;
     }
 
@@ -281,19 +288,20 @@ ErrorCode ClientManagementModel::wgShow(const DockerContainer container, const S
         }
     };
 
-    for (int i = 0; i < peerList.size() && i < transferredDataList.size() && i < latestHandshakeList.size(); ++i) {
+    for (int i = 0; i < peerList.size() && i < transferredDataList.size() && i < latestHandshakeList.size() && i < allowedIpsList.size(); ++i) {
 
         const auto transferredData = getStrValue(transferredDataList[i]).split(",");
         auto latestHandshake = getStrValue(latestHandshakeList[i]);
         auto serverBytesReceived = transferredData.front().trimmed();
         auto serverBytesSent = transferredData.back().trimmed();
+        auto allowedIps = getStrValue(allowedIpsList[i]);
 
         changeHandshakeFormat(latestHandshake);
 
         serverBytesReceived.chop(QStringLiteral(" received").length());
         serverBytesSent.chop(QStringLiteral(" sent").length());
 
-        data.push_back({ getStrValue(peerList[i]), latestHandshake, serverBytesSent, serverBytesReceived });
+        data.push_back({ getStrValue(peerList[i]), latestHandshake, serverBytesSent, serverBytesReceived, allowedIps });
     }
 
     return error;

@@ -68,6 +68,8 @@ private:
 
     void checkForMaliciousStrings(const QJsonObject &protocolConfig);
 
+    void processAmneziaConfig(QJsonObject &config);
+
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void stopDecodingQr();
 #endif

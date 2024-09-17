@@ -3,7 +3,7 @@
 # This scripts copied from Amnezia client to Docker container to /opt/amnezia and launched every time container starts
 
 echo "Container startup"
-ifconfig eth0:0 $SERVER_IP_ADDRESS netmask 255.255.255.255 up
+#ifconfig eth0:0 $SERVER_IP_ADDRESS netmask 255.255.255.255 up
 
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT

@@ -4,12 +4,12 @@
 #include <QFileInfo>
 #include <QQuickItem>
 #include <QRandomGenerator>
-#include <QUrlQuery>
 #include <QStandardPaths>
+#include <QUrlQuery>
 
-#include "utilities.h"
-#include "core/serialization/serialization.h"
 #include "core/errorstrings.h"
+#include "core/serialization/serialization.h"
+#include "utilities.h"
 
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
@@ -96,36 +96,40 @@ bool ImportController::extractConfigFromData(QString data)
 
     if (config.startsWith("vless://")) {
         m_configType = ConfigTypes::Xray;
-        m_config = extractXrayConfig(Utils::JsonToString(serialization::vless::Deserialize(config, &prefix, &errormsg),
-                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        m_config = extractXrayConfig(
+                Utils::JsonToString(serialization::vless::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                prefix);
         return m_config.empty() ? false : true;
     }
 
     if (config.startsWith("vmess://") && config.contains("@")) {
         m_configType = ConfigTypes::Xray;
-        m_config = extractXrayConfig(Utils::JsonToString(serialization::vmess_new::Deserialize(config, &prefix, &errormsg),
-                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        m_config = extractXrayConfig(
+                Utils::JsonToString(serialization::vmess_new::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                prefix);
         return m_config.empty() ? false : true;
     }
 
     if (config.startsWith("vmess://")) {
         m_configType = ConfigTypes::Xray;
-        m_config = extractXrayConfig(Utils::JsonToString(serialization::vmess::Deserialize(config, &prefix, &errormsg),
-                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        m_config = extractXrayConfig(
+                Utils::JsonToString(serialization::vmess::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                prefix);
         return m_config.empty() ? false : true;
     }
 
     if (config.startsWith("trojan://")) {
         m_configType = ConfigTypes::Xray;
-        m_config = extractXrayConfig(Utils::JsonToString(serialization::trojan::Deserialize(config, &prefix, &errormsg),
-                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        m_config = extractXrayConfig(
+                Utils::JsonToString(serialization::trojan::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact),
+                prefix);
         return m_config.empty() ? false : true;
     }
 
     if (config.startsWith("ss://") && !config.contains("plugin=")) {
         m_configType = ConfigTypes::ShadowSocks;
-        m_config = extractXrayConfig(Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg),
-                                                         QJsonDocument::JsonFormat::Compact), prefix);
+        m_config = extractXrayConfig(
+                Utils::JsonToString(serialization::ss::Deserialize(config, &prefix, &errormsg), QJsonDocument::JsonFormat::Compact), prefix);
         return m_config.empty() ? false : true;
     }
 
@@ -173,6 +177,7 @@ bool ImportController::extractConfigFromData(QString data)
     }
     case ConfigTypes::Amnezia: {
         m_config = QJsonDocument::fromJson(config.toUtf8()).object();
+        processAmneziaConfig(m_config);
         if (!m_config.empty()) {
             checkForMaliciousStrings(m_config);
             return true;
@@ -353,20 +358,19 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     QJsonObject lastConfig;
     lastConfig[config_key::config] = data;
 
-    const static QRegularExpression hostNameAndPortRegExp("Endpoint = (.*):([0-9]*)");
-    QRegularExpressionMatch hostNameAndPortMatch = hostNameAndPortRegExp.match(data);
+    auto url { QUrl::fromUserInput(configMap.value("Endpoint")) };
     QString hostName;
     QString port;
-    if (hostNameAndPortMatch.hasCaptured(1)) {
-        hostName = hostNameAndPortMatch.captured(1);
+    if (!url.host().isEmpty()) {
+        hostName = url.host();
     } else {
-        qDebug() << "Key parameter 'Endpoint' is missing";
+        qDebug() << "Key parameter 'Endpoint' is missing or has an invalid format";
         emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
         return QJsonObject();
     }
 
-    if (hostNameAndPortMatch.hasCaptured(2)) {
-        port = hostNameAndPortMatch.captured(2);
+    if (url.port() != -1) {
+        port = QString::number(url.port());
     } else {
         port = protocols::wireguard::defaultPort;
     }
@@ -395,7 +399,11 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::mtu] = configMap.value("MTU");
     }
 
-    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(","));
+    if (!configMap.value("PersistentKeepalive").isEmpty()) {
+        lastConfig[config_key::persistent_keep_alive] = configMap.value("PersistentKeepalive");
+    }
+
+    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(", "));
 
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
 
@@ -417,6 +425,12 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
         protocolName = "awg";
         m_configType = ConfigTypes::Awg;
+    }
+
+    if (!configMap.value("MTU").isEmpty()) {
+        lastConfig[config_key::mtu] = configMap.value("MTU");
+    } else {
+        lastConfig[config_key::mtu] = protocolName == "awg" ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
     }
 
     QJsonObject wireguardConfig;
@@ -488,7 +502,7 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, const QStri
     if (m_configType == ConfigTypes::ShadowSocks) {
         config[config_key::defaultContainer] = "amnezia-ssxray";
     } else {
-       config[config_key::defaultContainer] = "amnezia-xray";
+        config[config_key::defaultContainer] = "amnezia-xray";
     }
     if (description.isEmpty()) {
         config[config_key::description] = m_settings->nextAvailableServerName();
@@ -643,6 +657,31 @@ void ImportController::checkForMaliciousStrings(const QJsonObject &serverConfig)
                     m_maliciousWarningText.push_back(QString("<br><i>%1</i>").arg(string));
                 }
             }
+        }
+    }
+}
+
+void ImportController::processAmneziaConfig(QJsonObject &config)
+{
+    auto containers = config.value(config_key::containers).toArray();
+    for (auto i = 0; i < containers.size(); i++) {
+        auto container = containers.at(i).toObject();
+        auto dockerContainer = ContainerProps::containerFromString(container.value(config_key::container).toString());
+        if (dockerContainer == DockerContainer::Awg || dockerContainer == DockerContainer::WireGuard) {
+            auto containerConfig = container.value(ContainerProps::containerTypeToString(dockerContainer)).toObject();
+            auto protocolConfig = containerConfig.value(config_key::last_config).toString();
+            if (protocolConfig.isEmpty()) {
+                return;
+            }
+
+            QJsonObject jsonConfig = QJsonDocument::fromJson(protocolConfig.toUtf8()).object();
+            jsonConfig[config_key::mtu] = dockerContainer == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+
+            containerConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
+
+            container[ContainerProps::containerTypeToString(dockerContainer)] = containerConfig;
+            containers.replace(i, container);
+            config.insert(config_key::containers, containers);
         }
     }
 }

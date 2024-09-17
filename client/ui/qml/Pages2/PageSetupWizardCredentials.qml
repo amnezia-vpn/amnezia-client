@@ -60,9 +60,6 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Server IP address [:port]")
                 textFieldPlaceholderText: qsTr("255.255.255.255:22")
-                textField.validator: RegularExpressionValidator {
-                    regularExpression: InstallController.ipAddressPortRegExp()
-                }
 
                 textField.onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '')

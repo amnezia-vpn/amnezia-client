@@ -59,6 +59,9 @@ namespace PageLoader
         PageProtocolIKev2Settings,
         PageProtocolRaw,
 
+        PageProtocolWireGuardClientSettings,
+        PageProtocolAwgClientSettings,
+
         PageShareFullAccess,
 
         PageDevMenu

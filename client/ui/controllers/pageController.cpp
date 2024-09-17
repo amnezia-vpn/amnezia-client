@@ -112,7 +112,7 @@ void PageController::showOnStartup()
     if (!m_settings->isStartMinimized()) {
         emit raiseMainWindow();
     } else {
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+#if defined(Q_OS_WIN) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
         emit hideMainWindow();
 #elif defined Q_OS_MACX
         setDockIconVisible(false);

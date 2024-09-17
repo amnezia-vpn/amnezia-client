@@ -20,69 +20,6 @@ import org.amnezia.vpn.util.net.InetNetwork
 import org.amnezia.vpn.util.net.parseInetAddress
 import org.json.JSONObject
 
-/**
- *    Config example:
- * {
- *     "appSplitTunnelType": 0,
- *     "config_version": 0,
- *     "description": "Server 1",
- *     "dns1": "1.1.1.1",
- *     "dns2": "1.0.0.1",
- *     "hostName": "100.100.100.0",
- *     "protocol": "xray",
- *     "splitTunnelApps": [],
- *     "splitTunnelSites": [],
- *     "splitTunnelType": 0,
- *     "xray_config_data": {
- *         "inbounds": [
- *             {
- *                 "listen": "127.0.0.1",
- *                 "port": 8080,
- *                 "protocol": "socks",
- *                 "settings": {
- *                     "udp": true
- *                 }
- *             }
- *         ],
- *         "log": {
- *             "loglevel": "error"
- *         },
- *         "outbounds": [
- *             {
- *                 "protocol": "vless",
- *                 "settings": {
- *                     "vnext": [
- *                         {
- *                             "address": "100.100.100.0",
- *                             "port": 443,
- *                             "users": [
- *                                 {
- *                                     "encryption": "none",
- *                                     "flow": "xtls-rprx-vision",
- *                                     "id": "id"
- *                                 }
- *                             ]
- *                         }
- *                     ]
- *                 },
- *                 "streamSettings": {
- *                     "network": "tcp",
- *                     "realitySettings": {
- *                         "fingerprint": "chrome",
- *                         "publicKey": "publicKey",
- *                         "serverName": "google.com",
- *                         "shortId": "id",
- *                         "spiderX": ""
- *                     },
- *                     "security": "reality"
- *                 }
- *             }
- *         ]
- *     }
- * }
- *
- */
-
 private const val TAG = "Xray"
 private const val LIBXRAY_TAG = "libXray"
 

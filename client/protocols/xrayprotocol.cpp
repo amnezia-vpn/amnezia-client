@@ -43,7 +43,9 @@ ErrorCode XrayProtocol::start()
     m_xrayCfgFile.setAutoRemove(false);
 #endif
     m_xrayCfgFile.open();
-    m_xrayCfgFile.write(QJsonDocument(m_xrayConfig).toJson());
+    QString config = QJsonDocument(m_xrayConfig).toJson();
+    config.replace(m_remoteHost, m_remoteAddress);
+    m_xrayCfgFile.write(config.toUtf8());
     m_xrayCfgFile.close();
 
     QStringList args = QStringList() << "-c" << m_xrayCfgFile.fileName() << "-format=json";
@@ -238,7 +240,8 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
     }
     m_xrayConfig = xrayConfiguration;
     m_localPort = QString(amnezia::protocols::xray::defaultLocalProxyPort).toInt();
-    m_remoteAddress = configuration.value(amnezia::config_key::hostName).toString();
+    m_remoteHost = configuration.value(amnezia::config_key::hostName).toString();
+    m_remoteAddress = NetworkUtilities::getIPAddress(m_remoteHost);
     m_routeMode = configuration.value(amnezia::config_key::splitTunnelType).toInt();
     m_primaryDNS = configuration.value(amnezia::config_key::dns1).toString();
     m_secondaryDNS = configuration.value(amnezia::config_key::dns2).toString();
