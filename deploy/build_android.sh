@@ -23,6 +23,7 @@ Options:
                                   By default, the latest available platform is used
  -m, --move                       Move the build result to the root of the build directory
  -f, --fdroid                     Build for F-Droid
+ -p, --play                       Build AAB for Google Play
  -h, --help                       Display this help
 
 EOT
@@ -30,7 +31,7 @@ EOT
 
 BUILD_TYPE="release"
 
-opts=$(getopt -l debug,aab,apk:,build-platform:,move,fdroid,help -o "dua:b:mfh" -- "$@")
+opts=$(getopt -l debug,aab,apk:,build-platform:,move,fdroid,play,help -o "dua:b:mfph" -- "$@")
 eval set -- "$opts"
 while true; do
   case "$1" in
@@ -40,6 +41,7 @@ while true; do
     -b | --build-platform) ANDROID_BUILD_PLATFORM=$2; shift 2;;
     -m | --move) MOVE_RESULT=1; shift;;
     -f | --fdroid) FDROID=1; shift;;
+    -p | --play) PLAY=1; shift;;
     -h | --help) usage; exit 0;;
     --) shift; break;;
   esac
@@ -149,11 +151,17 @@ if [ -v FDROID ]; then
   BUILD_TYPE="fdroid"
 fi
 
+if [ -v PLAY ]; then
+  AAB_FLAVOR="play"
+else
+  AAB_FLAVOR="oss"
+fi
+
 if [ -v AAB ]; then
-  gradle_opts+=(bundle"${BUILD_TYPE^}")
+  gradle_opts+=(bundle"${AAB_FLAVOR^}${BUILD_TYPE^}")
 fi
 if [ -v ABIS ]; then
-  gradle_opts+=(assemble"${BUILD_TYPE^}")
+  gradle_opts+=(assembleOss"${BUILD_TYPE^}")
 fi
 
 $OUT_APP_DIR/android-build/gradlew \
@@ -164,7 +172,7 @@ $OUT_APP_DIR/android-build/gradlew \
 if [[ -v CI || -v MOVE_RESULT ]]; then
   echo "Moving APK/AAB..."
   if [ -v AAB ]; then
-    mv -u $OUT_APP_DIR/android-build/build/outputs/bundle/$BUILD_TYPE/AmneziaVPN-$BUILD_TYPE.aab \
+    mv -u $OUT_APP_DIR/android-build/build/outputs/bundle/$AAB_FLAVOR"${BUILD_TYPE^}"/AmneziaVPN-$AAB_FLAVOR-$BUILD_TYPE.aab \
        $PROJECT_DIR/deploy/build/
   fi
 
@@ -181,7 +189,7 @@ if [[ -v CI || -v MOVE_RESULT ]]; then
     IFS=';' read -r -a abi_array <<< "$ABIS"
     for ABI in "${abi_array[@]}"
     do
-      mv -u $OUT_APP_DIR/android-build/build/outputs/apk/$BUILD_TYPE/AmneziaVPN-$ABI-$suffix.apk \
+      mv -u $OUT_APP_DIR/android-build/build/outputs/apk/oss/$BUILD_TYPE/AmneziaVPN-oss-$ABI-$suffix.apk \
        $PROJECT_DIR/deploy/build/
     done
   fi

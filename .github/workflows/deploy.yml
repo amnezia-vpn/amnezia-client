@@ -660,7 +660,7 @@ jobs:
         ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
         ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
       shell: bash
-      run: ./deploy/build_android.sh --aab --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+      run: ./deploy/build_android.sh --aab --play --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
     - name: 'Rename Android APKs'
       run: |
@@ -707,7 +707,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN-android
-        path: deploy/build/AmneziaVPN-release.aab
+        path: deploy/build/AmneziaVPN-play-release.aab
         compression-level: 0
         retention-days: 7
 
