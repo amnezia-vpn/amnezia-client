@@ -403,13 +403,13 @@ jobs:
         ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
         ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
       shell: bash
-      run: ./deploy/build_android.sh --aab --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+      run: ./deploy/build_android.sh --aab --play --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
     - name: 'Upload x86_64 apk'
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN-android-x86_64
-        path: deploy/build/AmneziaVPN-x86_64-release.apk
+        path: deploy/build/AmneziaVPN-oss-x86_64-release.apk
         compression-level: 0
         retention-days: 7
 
@@ -417,7 +417,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN-android-x86
-        path: deploy/build/AmneziaVPN-x86-release.apk
+        path: deploy/build/AmneziaVPN-oss-x86-release.apk
         compression-level: 0
         retention-days: 7
 
@@ -425,7 +425,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN-android-arm64-v8a
-        path: deploy/build/AmneziaVPN-arm64-v8a-release.apk
+        path: deploy/build/AmneziaVPN-oss-arm64-v8a-release.apk
         compression-level: 0
         retention-days: 7
 
@@ -433,7 +433,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN-android-armeabi-v7a
-        path: deploy/build/AmneziaVPN-armeabi-v7a-release.apk
+        path: deploy/build/AmneziaVPN-oss-armeabi-v7a-release.apk
         compression-level: 0
         retention-days: 7
 
@@ -441,7 +441,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN-android
-        path: deploy/build/AmneziaVPN-release.aab
+        path: deploy/build/AmneziaVPN-play-release.aab
         compression-level: 0
         retention-days: 7
 
