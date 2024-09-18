@@ -351,7 +351,6 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
 
     WindowsDaemon::instance()->prepareActivation(config, inetAdapterIndex);
     WindowsDaemon::instance()->activateSplitTunnel(config, vpnAdapterIndex);
-    return true;
 #endif
     return true;
 }

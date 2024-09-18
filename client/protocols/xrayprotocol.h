@@ -33,9 +33,10 @@ private:
     QString m_secondaryDNS;
 #ifndef Q_OS_IOS
     QProcess m_xrayProcess;
-    QSharedPointer<PrivilegedProcess> m_t2sProcess;
+    QSharedPointer<IpcProcessTun2SocksReplica> m_t2sProcess;
 #endif
     QTemporaryFile m_xrayCfgFile;
+
 };
 
 #endif // XRAYPROTOCOL_H

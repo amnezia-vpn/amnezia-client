@@ -29,6 +29,12 @@ QSharedPointer<IpcInterfaceReplica> IpcClient::Interface()
     return Instance()->m_ipcClient;
 }
 
+QSharedPointer<IpcProcessTun2SocksReplica> IpcClient::InterfaceTun2Socks()
+{
+    if (!Instance()) return nullptr;
+    return Instance()->m_Tun2SocksClient;
+}
+
 bool IpcClient::init(IpcClient *instance)
 {
     m_instance = instance;
@@ -44,6 +50,12 @@ bool IpcClient::init(IpcClient *instance)
             qWarning() << "IpcClient replica is not connected!";
         }
 
+        Instance()->m_Tun2SocksClient.reset(Instance()->m_ClientNode.acquire<IpcProcessTun2SocksReplica>());
+        Instance()->m_Tun2SocksClient->waitForSource(1000);
+
+        if (!Instance()->m_Tun2SocksClient->isReplicaValid()) {
+            qWarning() << "IpcClient::m_Tun2SocksClient replica is not connected!";
+        }
     });
 
     connect(Instance()->m_localSocket, &QLocalSocket::disconnected, [instance](){
@@ -51,16 +63,16 @@ bool IpcClient::init(IpcClient *instance)
     });
 
     Instance()->m_localSocket->connectToServer(amnezia::getIpcServiceUrl());
-
     Instance()->m_localSocket->waitForConnected();
 
     if (!Instance()->m_ipcClient) {
         qDebug() << "IpcClient::init failed";
         return false;
     }
+
     qDebug() << "IpcClient::init succeed";
 
-    return Instance()->m_ipcClient->isReplicaValid();
+    return (Instance()->m_ipcClient->isReplicaValid() && Instance()->m_Tun2SocksClient->isReplicaValid());
 }
 
 QSharedPointer<PrivilegedProcess> IpcClient::CreatePrivilegedProcess()
