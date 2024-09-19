@@ -379,6 +379,16 @@ PageType {
             ServersListView {
                 id: serversMenuContent
                 objectName: "serversMenuContent"
+
+                isFocusable: false
+
+                Connections {
+                    target: drawer
+
+                    function onIsOpenedChanged() {
+                        serversMenuContent.isFocusable = drawer.isOpened
+                    }
+                }
             }
         }
     }

@@ -46,6 +46,14 @@ ListView {
         FocusController.previousKeyTabItem()
     }
 
+    Keys.onRightPressed: {
+        FocusController.nextKeyTabItem()
+    }
+    
+    Keys.onLeftPressed: {
+        FocusController.previousKeyTabItem()
+    }
+
     // activeFocusOnTab: true
     // onActiveFocusChanged: {
         // console.log("===========================")

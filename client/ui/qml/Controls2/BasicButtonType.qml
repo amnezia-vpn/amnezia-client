@@ -37,13 +37,27 @@ Button {
     property bool isFocusable: true
 
     Keys.onTabPressed: {
-        console.debug("--> Tab is pressed on BasicButtonType: ", objectName)
         FocusController.nextKeyTabItem()
     }
-    
+
     Keys.onBacktabPressed: {
-        console.debug("--> Shift+Tab is pressed on ", objectName)
         FocusController.previousKeyTabItem()
+    }
+
+    Keys.onUpPressed: {
+        FocusController.nextKeyUpItem()
+    }
+    
+    Keys.onDownPressed: {
+        FocusController.nextKeyDownItem()
+    }
+    
+    Keys.onLeftPressed: {
+        FocusController.nextKeyLeftItem()
+    }
+
+    Keys.onRightPressed: {
+        FocusController.nextKeyRightItem()
     }
     
     implicitHeight: 56
