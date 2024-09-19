@@ -146,7 +146,7 @@ ErrorCode XrayProtocol::startTun2Sock()
             IpcClient::Interface()->updateResolvers("utun22", dnsAddr);
 #endif
 #ifdef Q_OS_WINDOWS
-            QThread::msleep(15000);
+            QThread::msleep(7000);
 #endif
 #ifdef Q_OS_LINUX
             QThread::msleep(1000);
