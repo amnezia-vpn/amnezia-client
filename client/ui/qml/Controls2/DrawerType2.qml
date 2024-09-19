@@ -56,8 +56,6 @@ Item {
         target: PageController
 
         function onCloseTopDrawer() {
-            console.debug("===>> onCloseTopDrawer function")
-
             if (depthIndex === PageController.getDrawerDepth()) {
                 if (isCollapsedStateActive()) {
                     return
@@ -76,8 +74,6 @@ Item {
         target: root
 
         function onCloseTriggered() {
-            console.debug("***>> onClose root connection")
-
             if (isCollapsedStateActive()) {
                 return
             }
@@ -88,8 +84,6 @@ Item {
         }
 
         function onClosed() {
-            console.debug("***>> onClosed root connection")
-
             drawerContent.state = root.drawerCollapsedStateName
             
             if (root.isCollapsedStateActive()) {
@@ -105,8 +99,6 @@ Item {
         }
 
         function onOpenTriggered() {
-            console.debug("===>> onOpen root connection")
-
             if (root.isExpandedStateActive()) {
                 return
             }
@@ -119,10 +111,7 @@ Item {
         function onOpened() {
             drawerContent.state = root.drawerExpandedStateName
 
-            console.debug("===>> onOpened root connection")
-
             if (isExpandedStateActive()) {
-                console.error("new state - extended")
                 if (PageController.getInitialPageNavigationBarColor() !== 0xFF1C1D21) {
                     PageController.updateNavigationBarColor(0xFF1C1D21)
                 }
@@ -130,7 +119,6 @@ Item {
 
             depthIndex = PageController.incrementDrawerDepth()
             FocusController.setRootItem(root)
-            console.debug("===>> Root item has changed to ", root)
         }
     }
 
@@ -149,7 +137,6 @@ Item {
         anchors.fill: parent
 
         onClicked: {
-            console.debug("===>> onClicked emptyArea")
             root.closeTriggered()
         }
     }
@@ -170,8 +157,6 @@ Item {
 
         /** If drag area is released at any point other than min or max y, transition to the other state */
         onReleased: {
-            console.debug("===>> onReleased dragArea")
-
             if (isCollapsedStateActive() && drawerContent.y < dragArea.drag.maximumY) {
                 root.openTriggered()
                 return
@@ -183,24 +168,16 @@ Item {
         }
 
         onEntered: {
-            console.debug("===>> onEntered dragArea")
-
             root.cursorEntered()
         }
         onExited: {
-            console.debug("===>> onExited dragArea")
-
             root.cursorExited()
         }
         onPressedChanged: {
-            console.debug("===>> onPressedChanged dragArea")
-
             root.pressed(pressed, entered)
         }
 
         onClicked: {
-            console.debug("===>> onClicked dragArea")
-
             if (isCollapsedStateActive()) {
                 root.openTriggered()
             }

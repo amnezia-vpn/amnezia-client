@@ -24,11 +24,11 @@ DrawerType2 {
             target: root
             enabled: !GC.isMobile()
             function onOpened() {
-                FocusController.setRoot(root)
+                FocusController.setRootItem(root)
             }
 
             function onClosed() {
-                FocusController.setRoot(null)
+                FocusController.setRootItem(null)
             }
         }
 
@@ -42,166 +42,187 @@ DrawerType2 {
 
             BackButtonType {
                 id: backButton
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
                 backButtonFunction: function() { root.closeTriggered() }
             }
+
+            Header2Type {
+                id: header
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                headerText: qsTr("Choose language")
+            }
         }
 
-        FlickableType {
+        ListView {
+            id: listView
+
             anchors.top: backButtonLayout.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            contentHeight: content.implicitHeight
 
-            ColumnLayout {
-                id: content
+            clip: true
+            interactive: true
 
-                anchors.fill: parent
+            property bool isFocusable: true
 
-                Header2Type {
-                    id: header
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.leftMargin: 16
+            model: LanguageModel
+            currentIndex: LanguageModel.currentLanguageIndex
 
-                    headerText: qsTr("Choose language")
-                }
+            ButtonGroup {
+                id: buttonGroup
+            }
 
-                ListView {
-                    id: listView
+            // activeFocusOnTab: true
+            // onActiveFocusChanged: {
+            //     if (activeFocus) {
+            //         this.currentFocusIndex = 0
+            //         this.itemAtIndex(currentFocusIndex).forceActiveFocus()
+            //     }
+            // }
 
-                    Layout.fillWidth: true
-                    height: listView.contentItem.height
+            // Keys.onTabPressed: {
+            //     if (currentFocusIndex < this.count - 1) {
+            //         currentFocusIndex += 1
+            //         this.itemAtIndex(currentFocusIndex).forceActiveFocus()
+            //     } else {
+            //         listViewFocusItem.forceActiveFocus()
+            //         focusItem.forceActiveFocus()
+            //     }
+            // }
 
-                    clip: true
-                    interactive: false
+            // Item {
+            //     id: listViewFocusItem // TODO: delete?
+            //     Keys.onTabPressed: {
+            //         root.forceActiveFocus()
+            //     }
+            // }
 
-                    model: LanguageModel
-                    currentIndex: LanguageModel.currentLanguageIndex
+            // onVisibleChanged: {
+            //     if (visible) {
+            //         listViewFocusItem.forceActiveFocus()
+            //         focusItem.forceActiveFocus()
+            //     }
+            // }
 
-                    ButtonGroup {
-                        id: buttonGroup
-                    }
+            delegate: Item {
+                implicitWidth: root.width
+                implicitHeight: delegateContent.implicitHeight
 
-                    property int currentFocusIndex: 0
+                // onActiveFocusChanged: {
+                //     if (activeFocus) {
+                //         radioButton.forceActiveFocus()
+                //     }
+                // }
 
-                    activeFocusOnTab: true
-                    onActiveFocusChanged: {
-                        if (activeFocus) {
-                            this.currentFocusIndex = 0
-                            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
-                        }
-                    }
+                ColumnLayout {
+                    id: delegateContent
 
-                    // Keys.onTabPressed: {
-                    //     if (currentFocusIndex < this.count - 1) {
-                    //         currentFocusIndex += 1
-                    //         this.itemAtIndex(currentFocusIndex).forceActiveFocus()
-                    //     } else {
-                    //         listViewFocusItem.forceActiveFocus()
-                    //         focusItem.forceActiveFocus()
-                    //     }
-                    // }
+                    anchors.fill: parent
 
-                    Item {
-                        id: listViewFocusItem
+                    RadioButton {
+                        id: radioButton
+
+                        implicitWidth: parent.width
+                        implicitHeight: radioButtonContent.implicitHeight
+
+                        hoverEnabled: true
+
+                        property bool isFocusable: true
+
                         Keys.onTabPressed: {
-                            root.forceActiveFocus()
+                            FocusController.nextKeyTabItem()
                         }
-                    }
 
-                    onVisibleChanged: {
-                        if (visible) {
-                            listViewFocusItem.forceActiveFocus()
-                            focusItem.forceActiveFocus()
+                        Keys.onBacktabPressed: {
+                            FocusController.previousKeyTabItem()
                         }
-                    }
 
-                    delegate: Item {
-                        implicitWidth: root.width
-                        implicitHeight: delegateContent.implicitHeight
+                        Keys.onUpPressed: {
+                            FocusController.nextKeyUpItem()
+                        }
 
-                        onActiveFocusChanged: {
-                            if (activeFocus) {
-                                radioButton.forceActiveFocus()
+                        Keys.onDownPressed: {
+                            FocusController.nextKeyDownItem()
+                        }
+
+                        Keys.onLeftPressed: {
+                            FocusController.nextKeyLeftItem()
+                        }
+
+                        Keys.onRightPressed: {
+                            FocusController.nextKeyRightItem()
+                        }
+
+                        indicator: Rectangle {
+                            width: parent.width - 1
+                            height: parent.height
+                            color: radioButton.hovered ? AmneziaStyle.color.slateGray : AmneziaStyle.color.onyxBlack
+                            border.color: radioButton.focus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.transparent
+                            border.width: radioButton.focus ? 1 : 0
+
+                            Behavior on color {
+                                PropertyAnimation { duration: 200 }
+                            }
+                            Behavior on border.color {
+                                PropertyAnimation { duration: 200 }
                             }
                         }
 
-                        ColumnLayout {
-                            id: delegateContent
-
+                        RowLayout {
+                            id: radioButtonContent
                             anchors.fill: parent
 
-                            RadioButton {
-                                id: radioButton
+                            anchors.rightMargin: 16
+                            anchors.leftMargin: 16
 
-                                implicitWidth: parent.width
-                                implicitHeight: radioButtonContent.implicitHeight
+                            spacing: 0
 
-                                hoverEnabled: true
+                            z: 1
 
-                                indicator: Rectangle {
-                                    width: parent.width - 1
-                                    height: parent.height
-                                    color: radioButton.hovered ? AmneziaStyle.color.slateGray : AmneziaStyle.color.onyxBlack
-                                    border.color: radioButton.focus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.transparent
-                                    border.width: radioButton.focus ? 1 : 0
+                            ParagraphTextType {
+                                Layout.fillWidth: true
+                                Layout.topMargin: 20
+                                Layout.bottomMargin: 20
 
-                                    Behavior on color {
-                                        PropertyAnimation { duration: 200 }
-                                    }
-                                    Behavior on border.color {
-                                        PropertyAnimation { duration: 200 }
-                                    }
-                                }
+                                text: languageName
+                            }
 
-                                RowLayout {
-                                    id: radioButtonContent
-                                    anchors.fill: parent
+                            Image {
+                                source: "qrc:/images/controls/check.svg"
+                                visible: radioButton.checked
 
-                                    anchors.rightMargin: 16
-                                    anchors.leftMargin: 16
+                                width: 24
+                                height: 24
 
-                                    spacing: 0
-
-                                    z: 1
-
-                                    ParagraphTextType {
-                                        Layout.fillWidth: true
-                                        Layout.topMargin: 20
-                                        Layout.bottomMargin: 20
-
-                                        text: languageName
-                                    }
-
-                                    Image {
-                                        source: "qrc:/images/controls/check.svg"
-                                        visible: radioButton.checked
-
-                                        width: 24
-                                        height: 24
-
-                                        Layout.rightMargin: 8
-                                    }
-                                }
-
-                                ButtonGroup.group: buttonGroup
-                                checked: listView.currentIndex === index
-
-                                onClicked: {
-                                    listView.currentIndex = index
-                                    LanguageModel.changeLanguage(languageIndex)
-                                    root.closeTriggered()
-                                }
+                                Layout.rightMargin: 8
                             }
                         }
 
-                        Keys.onEnterPressed: radioButton.clicked()
-                        Keys.onReturnPressed: radioButton.clicked()
+                        ButtonGroup.group: buttonGroup
+                        checked: listView.currentIndex === index
+
+                        onClicked: {
+                            listView.currentIndex = index
+                            LanguageModel.changeLanguage(languageIndex)
+                            root.closeTriggered()
+                        }
                     }
                 }
+
+                Keys.onEnterPressed: radioButton.clicked()
+                Keys.onReturnPressed: radioButton.clicked()
             }
         }
     }
