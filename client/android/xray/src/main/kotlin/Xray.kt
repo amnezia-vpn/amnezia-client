@@ -17,6 +17,7 @@ import org.amnezia.vpn.protocol.xray.libXray.Logger
 import org.amnezia.vpn.protocol.xray.libXray.Tun2SocksConfig
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.net.InetNetwork
+import org.amnezia.vpn.util.net.ip
 import org.amnezia.vpn.util.net.parseInetAddress
 import org.json.JSONObject
 
@@ -61,7 +62,15 @@ class Xray : Protocol() {
             .put("loglevel", "warning")
             .put("access", "none") // disable access log
 
-        start(xrayConfig, xrayJsonConfig.toString(), vpnBuilder, protect)
+        var xrayJsonConfigString = xrayJsonConfig.toString()
+        config.getString("hostName").let { hostName ->
+            val ipAddress = parseInetAddress(hostName).ip
+            if (hostName != ipAddress) {
+                xrayJsonConfigString = xrayJsonConfigString.replace(hostName, ipAddress)
+            }
+        }
+
+        start(xrayConfig, xrayJsonConfigString, vpnBuilder, protect)
         state.value = CONNECTED
         isRunning = true
     }
