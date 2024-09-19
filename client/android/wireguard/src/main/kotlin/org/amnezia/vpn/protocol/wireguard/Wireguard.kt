@@ -3,7 +3,6 @@ package org.amnezia.vpn.protocol.wireguard
 import android.net.VpnService.Builder
 import java.io.IOException
 import java.util.Locale
-import java.util.TreeMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -13,6 +12,7 @@ import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.VpnStartException
+import org.amnezia.vpn.util.LibraryLoader.loadSharedLibrary
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.asSequence
 import org.amnezia.vpn.util.net.InetEndpoint

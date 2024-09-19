@@ -43,6 +43,7 @@ import kotlinx.coroutines.withContext
 import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
+import org.amnezia.vpn.util.LibraryLoader.loadSharedLibrary
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.Prefs
 import org.json.JSONException
@@ -158,6 +159,7 @@ class AmneziaActivity : QtActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Create Amnezia activity: $intent")
+        loadLibs()
         window.apply {
             addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             statusBarColor = getColor(R.color.black)
@@ -177,6 +179,17 @@ class AmneziaActivity : QtActivity() {
         registerBroadcastReceivers()
         intent?.let(::processIntent)
         runBlocking { vpnProto = proto.await() }
+    }
+
+    private fun loadLibs() {
+        listOf(
+            "rsapss",
+            "crypto_3",
+            "ssl_3",
+            "ssh"
+        ).forEach {
+            loadSharedLibrary(this.applicationContext, it)
+        }
     }
 
     private fun registerBroadcastReceivers() {
