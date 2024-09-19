@@ -180,14 +180,14 @@ void AmneziaApplication::init()
 #endif
 
         // TODO - fix
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    if (isPrimary()) {
-        QObject::connect(this, &SingleApplication::instanceStarted, m_pageController.get(), [this]() {
-            qDebug() << "Secondary instance started, showing this window instead";
-            emit m_pageController->raiseMainWindow();
-        });
-    }
-#endif
+// #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+//     if (isPrimary()) {
+//         QObject::connect(this, &SingleApplication::instanceStarted, m_pageController.get(), [this]() {
+//             qDebug() << "Secondary instance started, showing this window instead";
+//             emit m_pageController->raiseMainWindow();
+//         });
+//     }
+// #endif
 
 // Android TextArea clipboard workaround
 // Text from TextArea always has "text/html" mime-type:

@@ -35,13 +35,12 @@ int main(int argc, char *argv[])
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     AmneziaApplication app(argc, argv);
 #else
-    AmneziaApplication app(argc, argv, true,
-                           SingleApplication::Mode::User | SingleApplication::Mode::SecondaryNotification);
+    AmneziaApplication app(argc, argv);
 
-    if (!app.isPrimary()) {
-        QTimer::singleShot(1000, &app, [&]() { app.quit(); });
-        return app.exec();
-    }
+    // if (!app.isPrimary()) {
+    //     QTimer::singleShot(1000, &app, [&]() { app.quit(); });
+    //     return app.exec();
+    // }
 #endif
 
 // Allow to raise app window if secondary instance launched
