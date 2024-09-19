@@ -40,6 +40,7 @@ Item {
     implicitHeight: content.implicitHeight
 
     property FlickableType parentFlickable
+
     Connections {
         target: textField
         function onFocusChanged() {
@@ -84,7 +85,7 @@ Item {
 
                     TextField {
                         id: textField
-                        // activeFocusOnTab: false
+
                         property bool isFocusable: true
 
                         Keys.onTabPressed: {

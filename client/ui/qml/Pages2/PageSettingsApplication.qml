@@ -14,16 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    // Item {
-    //     id: focusItem
-
-    //     onFocusChanged: {
-    //         if (focusItem.activeFocus) {
-    //             fl.contentY = 0
-    //         }
-    //     }
-    // }
-
     BackButtonType {
         id: backButton
 
@@ -31,8 +21,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        // KeyNavigation.tab: GC.isMobile() ? switcher : switcherAutoStart
     }
 
     FlickableType {
@@ -92,7 +80,6 @@ PageType {
                 descriptionText: qsTr("Enable notifications to show the VPN state in the status bar")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                // KeyNavigation.tab: labelWithButtonLanguage.rightButton
                 parentFlickable: fl
 
                 clickedFunction: function() {

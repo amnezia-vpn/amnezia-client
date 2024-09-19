@@ -23,14 +23,14 @@ ListView {
     interactive: false
 
     activeFocusOnTab: true
-    Keys.onTabPressed: {
-        if (currentIndex < this.count - 1) {
-            this.incrementCurrentIndex()
-        } else {
-            currentIndex = 0
-            lastItemTabClickedSignal()
-        }
-    }
+    // Keys.onTabPressed: {
+    //     if (currentIndex < this.count - 1) {
+    //         this.incrementCurrentIndex()
+    //     } else {
+    //         currentIndex = 0
+    //         lastItemTabClickedSignal()
+    //     }
+    // }
 
     onCurrentIndexChanged: {
         if (visible) {

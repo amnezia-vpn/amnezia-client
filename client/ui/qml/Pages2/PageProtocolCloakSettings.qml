@@ -171,7 +171,6 @@ PageType {
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save")
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()

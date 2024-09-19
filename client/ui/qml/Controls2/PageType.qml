@@ -31,9 +31,8 @@ Item {
     // Set a timer to set focus after a short delay
     Timer {
         id: timer
-        interval: 1000 // Milliseconds // TODO: return to 500
+        interval: 500 // Milliseconds
         onTriggered: {
-            console.debug("===>> Page creation completed")
             FocusController.resetFocus()
         }
         repeat: false // Stop the timer after one trigger

@@ -14,17 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    // Item {
-    //     id: focusItem
-    //     KeyNavigation.tab: backButton
-
-    //     onFocusChanged: {
-    //         if (focusItem.activeFocus) {
-    //             fl.contentY = 0
-    //         }
-    //     }
-    // }
-
     BackButtonType {
         id: backButton
 
@@ -223,7 +212,6 @@ PageType {
 
               text: qsTr("Privacy Policy")
 
-              Keys.onTabPressed: lastItemTabClicked()
               parentFlickable: fl
 
               clickedFunc: function() {

@@ -52,24 +52,12 @@ PageType {
 
         height: 500 // servers.contentItem.height // TODO: calculate height
 
+        property bool   isFocusable: true
+
         model: ServersModel
 
         clip: true
         interactive: false
-
-        // activeFocusOnTab: true
-        // focus: true
-        // Keys.onTabPressed: {
-        //     if (currentIndex < servers.count - 1) {
-        //         servers.incrementCurrentIndex()
-        //     } else {
-        //         servers.currentIndex = 0
-        //         focusItem.forceActiveFocus()
-        //         root.lastItemTabClicked()
-        //     }
-
-        //     fl.ensureVisible(this.currentItem)
-        // }
 
         onVisibleChanged: {
             if (visible) {
@@ -80,12 +68,6 @@ PageType {
         delegate: Item {
             implicitWidth: servers.width
             implicitHeight: delegateContent.implicitHeight
-
-            // onFocusChanged: {
-            //     if (focus) {
-            //         server.rightButton.forceActiveFocus()
-            //     }
-            // }
 
             ColumnLayout {
                 id: delegateContent
@@ -99,7 +81,7 @@ PageType {
                     Layout.fillWidth: true
 
                     text: name
-                    // parentFlickable: fl
+
                     descriptionText: {
                         var servicesNameString = ""
                         var servicesName = ServersModel.getAllInstalledServicesName(index)

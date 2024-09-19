@@ -99,6 +99,8 @@ PageType {
 
                 text: showContent ? qsTr("Collapse content") : qsTr("Show content")
 
+                parentFlickable: fl
+
                 clickedFunc: function() {
                     showContent = !showContent
                 }
