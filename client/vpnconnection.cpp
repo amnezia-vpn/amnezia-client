@@ -233,7 +233,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     }
 #endif
 
-    m_remoteAddress = credentials.hostName;
+    m_remoteAddress = NetworkUtilities::getIPAddress(credentials.hostName);
     emit connectionStateChanged(Vpn::ConnectionState::Connecting);
 
     m_vpnConfiguration = vpnConfiguration;

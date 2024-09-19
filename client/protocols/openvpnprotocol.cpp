@@ -6,6 +6,7 @@
 #include <QTcpSocket>
 #include <QNetworkInterface>
 
+#include "core/networkUtilities.h"
 #include "logger.h"
 #include "openvpnprotocol.h"
 #include "utilities.h"
@@ -127,7 +128,6 @@ void OpenVpnProtocol::sendManagementCommand(const QString &command)
 
 uint OpenVpnProtocol::selectMgmtPort()
 {
-
     for (int i = 0; i < 100; ++i) {
         quint32 port = QRandomGenerator::global()->generate();
         port = (double)(65000 - 15001) * port / UINT32_MAX + 15001;
@@ -137,7 +137,6 @@ uint OpenVpnProtocol::selectMgmtPort()
         if (ok)
             return port;
     }
-
     return m_managementPort;
 }
 
@@ -343,7 +342,8 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                             }
                             m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
                             m_configData.insert("vpnGateway", m_vpnGateway);
-                            m_configData.insert("vpnServer", m_configData.value(amnezia::config_key::hostName).toString());
+                            m_configData.insert("vpnServer",
+                                                NetworkUtilities::getIPAddress(m_configData.value(amnezia::config_key::hostName).toString()));
                             IpcClient::Interface()->enablePeerTraffic(m_configData);
                         }
                     }

@@ -109,7 +109,7 @@ ErrorCode XrayProtocol::startTun2Sock()
                     dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns1).toString()));
                     dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns2).toString()));
 #ifdef Q_OS_WIN
-                    QThread::msleep(10000);
+                    QThread::msleep(8000);
 #endif
 #ifdef Q_OS_MACOS
                     QThread::msleep(5000);
@@ -202,7 +202,7 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
     }
     m_xrayConfig = xrayConfiguration;
     m_localPort = QString(amnezia::protocols::xray::defaultLocalProxyPort).toInt();
-    m_remoteAddress = configuration.value(amnezia::config_key::hostName).toString();
+    m_remoteAddress = NetworkUtilities::getIPAddress(configuration.value(amnezia::config_key::hostName).toString());
     m_routeMode = configuration.value(amnezia::config_key::splitTunnelType).toInt();
     m_primaryDNS = configuration.value(amnezia::config_key::dns1).toString();
     m_secondaryDNS = configuration.value(amnezia::config_key::dns2).toString();
