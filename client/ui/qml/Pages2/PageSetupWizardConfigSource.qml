@@ -25,8 +25,6 @@ PageType {
         }
     }
 
-    // defaultActiveFocusItem: focusItem
-
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -108,6 +106,8 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "insertKeyLabel"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.rightMargin: 16
@@ -127,6 +127,8 @@ PageType {
                 headerText: qsTr("Insert key")
                 buttonText: qsTr("Insert")
 
+                parentFlickable: fl
+
                 clickedFunc: function() {
                     textField.text = ""
                     textField.paste()
@@ -141,14 +143,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                onFocusChanged: {
-                    console.debug("MOVE THIS LOGIC TO CPP!")
-                    if (activeFocus) {
-                        if (fl) {
-                            fl.ensureVisible(this)
-                        }
-                    }
-                }
+                parentFlickable: fl
 
                 visible: textKey.textFieldText !== ""
 
@@ -186,14 +181,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/amnezia.svg"
 
-                focusItem.onFocusChanged: {
-                    console.debug("MOVE THIS LOGIC TO CPP!")
-                    if (focusItem.activeFocus) {
-                        if (fl) {
-                            fl.ensureVisible(apiInstalling)
-                        }
-                    }
-                }
+                parentFlickable: fl
 
                 onClicked: function() {
                     PageController.showBusyIndicator(true)
@@ -219,14 +207,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/server.svg"
 
-                focusItem.onFocusChanged: {
-                    console.debug("MOVE THIS LOGIC TO CPP!")
-                    if (focusItem.activeFocus) {
-                        if (fl) {
-                            fl.ensureVisible(manualInstalling)
-                        }
-                    }
-                }
+                parentFlickable: fl
 
                 onClicked: {
                     PageController.goToPage(PageEnum.PageSetupWizardCredentials)
@@ -248,14 +229,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/archive-restore.svg"
 
-                focusItem.onFocusChanged: {
-                    console.debug("MOVE THIS LOGIC TO CPP!")
-                    if (focusItem.activeFocus) {
-                        if (fl) {
-                            fl.ensureVisible(backupRestore)
-                        }
-                    }
-                }
+                parentFlickable: fl
 
                 onClicked: {
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),
@@ -281,12 +255,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/folder-search-2.svg"
 
-                focusItem.onFocusChanged: {
-                    console.debug("MOVE THIS LOGIC TO CPP!")
-                    if (fl) {
-                        fl.ensureVisible(openFile)
-                    }
-                }
+                parentFlickable: fl
 
                 onClicked: {
                     var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
@@ -315,14 +284,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/scan-line.svg"
 
-                focusItem.onFocusChanged: {
-                    console.debug("MOVE THIS LOGIC TO CPP!")
-                    if (focusItem.activeFocus) {
-                        if (fl) {
-                            fl.ensureVisible(scanQr)
-                        }
-                    }
-                }
+                parentFlickable: fl
 
                 onClicked: {
                     ImportController.startDecodingQr()
@@ -347,14 +309,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/help-circle.svg"
 
-                focusItem.onFocusChanged: {
-                    console.debug("MOVE THIS LOGIC TO CPP!")
-                    if (focusItem.activeFocus) {
-                        if (fl) {
-                            fl.ensureVisible(siteLink)
-                        }
-                    }
-                }
+                parentFlickable: fl
 
                 onClicked: {
                     Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())

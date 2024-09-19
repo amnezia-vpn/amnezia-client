@@ -66,7 +66,6 @@ Button {
     focusPolicy: Qt.TabFocus
 
     onFocusChanged: {
-        console.debug("===>> BUTTON: active.focus: ", root.activeFocus, " parentFlickable: ", root.parentFlickable )
         if (root.activeFocus) {
             if (root.parentFlickable) {
                 root.parentFlickable.ensureVisible(this)

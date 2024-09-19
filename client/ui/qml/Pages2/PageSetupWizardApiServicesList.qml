@@ -51,6 +51,8 @@ PageType {
                 height: containers.contentItem.height
                 spacing: 16
 
+                property bool isFocusable: true
+
                 currentIndex: 1
                 interactive: false
                 model: ApiServicesModel
@@ -85,6 +87,9 @@ PageType {
                                     PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
                                 }
                             }
+
+                            Keys.onEnterPressed: clicked()
+                            Keys.onReturnPressed: clicked()
                         }
                     }
                 }

@@ -10,16 +10,6 @@ FocusScope {
     property string backButtonImage: "qrc:/images/controls/arrow-left.svg"
     property var backButtonFunction
 
-    // property bool isFocusable: true
-
-    // Keys.onTabPressed: {
-    //     FocusController.nextKeyTabItem()
-    // }
-    
-    // Keys.onBacktabPressed: {
-    //     FocusController.previousKeyTabItem()
-    // }
-
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
@@ -38,8 +28,6 @@ FocusScope {
 
             implicitWidth: 40
             implicitHeight: 40
-
-            // focus: true
 
             onClicked: {
                 if (backButtonFunction && typeof backButtonFunction === "function") {

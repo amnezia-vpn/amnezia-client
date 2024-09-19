@@ -23,10 +23,20 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        onFocusChanged: {
+            console.debug("MOVE THIS LOGIC TO CPP!")
+            if (activeFocus) {
+                if (fl) {
+                    fl.ensureVisible(this)
+                }
+            }
+        }
     }
 
     FlickableType {
         id: fl
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         contentHeight: content.height
@@ -51,6 +61,7 @@ PageType {
 
             SwitcherType {
                 id: switcher
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -66,14 +77,7 @@ PageType {
                     }
                 }
 
-                onFocusChanged: {
-                    console.debug("MOVE THIS LOGIC TO CPP!")
-                    if (activeFocus) {
-                        if (fl) {
-                            fl.ensureVisible(this)
-                        }
-                    }
-                }
+                parentFlickable: fl
             }
 
             DividerType {}

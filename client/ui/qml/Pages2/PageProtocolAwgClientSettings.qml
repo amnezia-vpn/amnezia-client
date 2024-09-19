@@ -174,7 +174,6 @@ PageType {
 
                             checkEmptyText: true
 
-                            Keys.onTabPressed: saveButton.forceActiveFocus()
                         }
 
                         Header2TextType {
@@ -283,7 +282,6 @@ PageType {
 
         text: qsTr("Save")
 
-        Keys.onTabPressed: lastItemTabClicked(focusItem)
 
         clickedFunc: function() {
             forceActiveFocus()

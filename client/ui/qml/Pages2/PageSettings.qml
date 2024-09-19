@@ -14,7 +14,7 @@ import "../Config"
 PageType {
     id: root
 
-    FlickableType { // TODO: refactor either replace with ListView or Repeater
+    FlickableType {
         id: fl
         anchors.top: parent.top
         anchors.bottom: parent.bottom
@@ -142,7 +142,6 @@ PageType {
                 text: qsTr("Close application")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/x-circle.svg"
-                // isLeftImageHoverEnabled: false
 
                 clickedFunction: function() {
                     PageController.closeApplication()

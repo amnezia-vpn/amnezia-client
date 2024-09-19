@@ -41,6 +41,11 @@ bool isLess(QObject* item1, QObject* item2)
     return (p1.y() == p2.y()) ? (p1.x() < p2.x()) : (p1.y() < p2.y());
 }
 
+bool isMore(QObject* item1, QObject* item2)
+{
+    return !isLess(item1, item2);
+}
+
 bool isListView(QObject* item)
 {
     return item->inherits("QQuickListView");
@@ -129,7 +134,7 @@ void printItems(const T& items, QObject* current_item)
         QQuickItem* i = qobject_cast<QQuickItem*>(item);
         QPointF coords {getItemCenterPointOnScene(i)};
         QString prefix = current_item == i ? "==>" : "   ";
-        // qDebug() << prefix << " Item: " << i << " with coords: " << coords; // Uncomment to visualize tab transitions
+        qDebug() << prefix << " Item: " << i << " with coords: " << coords;
     }
 }
 
@@ -236,12 +241,12 @@ QQuickItem* ListViewFocusController::focusedItem()
 void ListViewFocusController::focusNextItem()
 {
     if (m_focusChain.empty()) {
-        qWarning() << "Empty focusChain with current delegate: " << currentDelegate();
+        qDebug() << "Empty focusChain with current delegate: " << currentDelegate();
         m_focusChain = getSubChain(currentDelegate());
     }
     m_focusedItemIndex++;
     m_focusedItem = qobject_cast<QQuickItem*>(m_focusChain.at(m_focusedItemIndex));
-                m_focusedItem->forceActiveFocus();
+    m_focusedItem->forceActiveFocus();
 }
 
 void ListViewFocusController::focusPreviousItem()
@@ -287,6 +292,7 @@ void FocusController::resetFocus()
         qWarning() << "There is no focusable elements";
         return;
     }
+
     if(m_focusedItemIndex == -1) {
         m_focusedItemIndex = 0;
         m_focusedItem = qobject_cast<QQuickItem*>(m_focusChain.at(m_focusedItemIndex));
@@ -370,7 +376,7 @@ void FocusController::previousKeyTabItem()
     m_focusedItem = qobject_cast<QQuickItem*>(m_focusChain.at(m_focusedItemIndex));
     m_focusedItem->forceActiveFocus(Qt::TabFocusReason);
 
-    qDebug() << "--> Current focus was changed to " << m_focusedItem;
+    qDebug() << "===>> Current focus was changed to " << m_focusedItem;
 }
 
 void FocusController::nextKeyUpItem()
@@ -439,7 +445,8 @@ void FocusController::reload()
         return;
     }
 
-    m_focusedItemIndex = m_focusChain.indexOf(window->activeFocusItem());
+    m_focusedItemIndex = m_focusChain.indexOf(m_focusedItem);
+    // m_focusedItemIndex = m_focusChain.indexOf(window->activeFocusItem());
 
     if(m_focusedItemIndex == -1) {
         qInfo() << "No focus item in chain. Moving focus to begin...";
@@ -447,9 +454,9 @@ void FocusController::reload()
         return;
     }
 
-    m_focusedItem = qobject_cast<QQuickItem*>(m_focusChain.at(m_focusedItemIndex));
+    // m_focusedItem = qobject_cast<QQuickItem*>(m_focusChain.at(m_focusedItemIndex));
 
-    m_focusedItem->forceActiveFocus();
+    // m_focusedItem->forceActiveFocus();
 }
 
 void FocusController::setRootItem(QQuickItem* item)

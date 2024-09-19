@@ -17,8 +17,6 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    // defaultActiveFocusItem: focusItem
-
     Connections {
         target: SettingsController
 
@@ -86,6 +84,8 @@ PageType {
 
                 text: qsTr("Make a backup")
 
+                parentFlickable: fl
+
                 clickedFunc: function() {
                     var fileName = ""
                     if (GC.isMobile()) {
@@ -120,6 +120,8 @@ PageType {
 
                 text: qsTr("Restore from backup")
 
+                parentFlickable: fl
+
                 clickedFunc: function() {
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                                 qsTr("Backup files (*.backup)"))
@@ -127,8 +129,6 @@ PageType {
                         restoreBackup(filePath)
                     }
                 }
-
-                Keys.onTabPressed: lastItemTabClicked()
             }
         }
     }

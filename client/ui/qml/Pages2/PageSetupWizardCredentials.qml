@@ -13,8 +13,6 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    // defaultActiveFocusItem: hostname.textField
-
     BackButtonType {
         id: backButton
 
@@ -54,6 +52,8 @@ PageType {
                 headerText: qsTr("Server IP address [:port]")
                 textFieldPlaceholderText: qsTr("255.255.255.255:22")
 
+                parentFlickable: fl
+
                 textField.onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                 }
@@ -65,6 +65,8 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("SSH Username")
                 textFieldPlaceholderText: "root"
+
+                parentFlickable: fl
 
                 textField.onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '')
@@ -82,6 +84,8 @@ PageType {
                 buttonImageSource: textFieldText !== "" ? (hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg")
                                                         : ""
 
+                parentFlickable: fl
+
                 clickedFunc: function() {
                     hidePassword = !hidePassword
                 }
@@ -98,6 +102,8 @@ PageType {
                 Layout.topMargin: 24
 
                 text: qsTr("Continue")
+
+                parentFlickable: fl
 
                 clickedFunc: function() {
                     forceActiveFocus()
@@ -137,6 +143,8 @@ PageType {
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/help-circle.svg"
+
+                parentFlickable: fl
 
                 onClicked: {
                     Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl() + "/starter-guide")
