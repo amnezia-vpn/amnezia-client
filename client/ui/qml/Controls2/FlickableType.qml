@@ -11,6 +11,7 @@ Flickable {
         } else if (item.y + item.height > fl.contentY + fl.height) {
             fl.contentY = item.y + item.height - fl.height + 40 // 40 is a bottom margin
         }
+        fl.returnToBounds()
     }
 
     clip: true

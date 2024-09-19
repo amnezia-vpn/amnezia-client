@@ -25,7 +25,23 @@ Button {
     Keys.onBacktabPressed: {
         FocusController.previousKeyTabItem()
     }
+
+    Keys.onUpPressed: {
+        FocusController.nextKeyUpItem()
+    }
     
+    Keys.onDownPressed: {
+        FocusController.nextKeyDownItem()
+    }
+    
+    Keys.onLeftPressed: {
+        FocusController.nextKeyLeftItem()
+    }
+
+    Keys.onRightPressed: {
+        FocusController.nextKeyRightItem()
+    }
+        
     implicitWidth: 190
     implicitHeight: 190
 

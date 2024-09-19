@@ -50,28 +50,44 @@ Item {
     Keys.onBacktabPressed: {
         FocusController.previousKeyTabItem()
     }
+
+    Keys.onUpPressed: {
+        FocusController.nextKeyUpItem()
+    }
+    
+    Keys.onDownPressed: {
+        FocusController.nextKeyDownItem()
+    }
+    
+    Keys.onLeftPressed: {
+        FocusController.nextKeyLeftItem()
+    }
+
+    Keys.onRightPressed: {
+        FocusController.nextKeyRightItem()
+    }
     
     implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
     implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
 
-    // onFocusChanged: {
-    //     if (root.activeFocus) {
-    //         if (root.parentFlickable) {
-    //             root.parentFlickable.ensureVisible(root)
-    //         }
-    //     }
-    // }
+    onFocusChanged: {
+        if (root.activeFocus) {
+            if (root.parentFlickable) {
+                root.parentFlickable.ensureVisible(root)
+            }
+        }
+    }
 
-    // Connections {
-    //     target: rightImage
-    //     function onFocusChanged() {
-    //         if (rightImage.activeFocus) {
-    //             if (root.parentFlickable) {
-    //                 root.parentFlickable.ensureVisible(root)
-    //             }
-    //         }
-    //     }
-    // }
+    Connections {
+        target: rightImage
+        function onFocusChanged() {
+            if (rightImage.activeFocus) {
+                if (root.parentFlickable) {
+                    root.parentFlickable.ensureVisible(root)
+                }
+            }
+        }
+    }
 
     MouseArea {
         anchors.fill: parent

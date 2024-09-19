@@ -46,11 +46,9 @@ DrawerType2 {
             descriptionText: qsTr("Enabled \nCan't be disabled for current server")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-            // KeyNavigation.tab: siteBasedSplitTunnelingSwitch.visible ? siteBasedSplitTunnelingSwitch.rightButton : focusItem
-
             clickedFunction: function() {
-//                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-//                root.close()
+               PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
+               root.close()
             }
         }
 
@@ -66,10 +64,6 @@ DrawerType2 {
             text: qsTr("Site-based split tunneling")
             descriptionText: enabled && SitesModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-            // KeyNavigation.tab: appSplitTunnelingSwitch.visible ?
-            //                        appSplitTunnelingSwitch.rightButton :
-            //                        focusItem
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
@@ -89,8 +83,6 @@ DrawerType2 {
             text: qsTr("App-based split tunneling")
             descriptionText: AppSplitTunnelingModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-            // KeyNavigation.tab: focusItem
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)

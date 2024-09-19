@@ -18,7 +18,6 @@ bool isVisible(QObject* item)
 bool isFocusable(QObject* item)
 {
     const auto res = item->property("isFocusable").toBool();
-    // qDebug() << "==>> " << (res ? "FOCUSABLE" : "NOT focusable") << item;
     return res;
 }
 
@@ -60,28 +59,23 @@ bool isOnTheScene(QObject* object)
         return false;
     }
 
-    QRectF itemRect{}; // TODO: ListView couln't get into list because it's children's rect is too large
-    // if (isListView(item)) {
-        // itemRect = QRectF(item->x(), item->y(), item->width(), item->height());
-    // } else {
-        itemRect = item->mapRectToScene(item->childrenRect());
-    // }
+    QRectF itemRect = item->mapRectToScene(item->childrenRect());
+ 
     QQuickWindow* window = item->window();
     if (!window) {
         qWarning() << "Couldn't get the window on the Scene check";
         return false;
     }
 
-    // const auto contentItem = window->contentItem();
-    // if (!contentItem) {
-    //     qWarning() << "Couldn't get the content item on the Scene check";
-    //     return false;
-    // }
-    // QRectF windowRect = contentItem->childrenRect();
-    // const auto res = (windowRect.contains(itemRect) || isListView(item));
-    // // qDebug() << (res ? "===>> item is inside the Scene" : "===>> ITEM IS OUTSIDE THE SCENE") << " itemRect: " << itemRect << "; windowRect: " << windowRect;
-    // return res;
-    return true;
+    const auto contentItem = window->contentItem();
+    if (!contentItem) {
+        qWarning() << "Couldn't get the content item on the Scene check";
+        return false;
+    }
+    QRectF windowRect = contentItem->childrenRect();
+    const auto res = (windowRect.contains(itemRect) || isListView(item));
+    // qDebug() << (res ? "===>> item is inside the Scene" : "===>> ITEM IS OUTSIDE THE SCENE") << " itemRect: " << itemRect << "; windowRect: " << windowRect;
+    return res;
 }
 
 bool isEnabled(QObject* obj)
@@ -98,7 +92,6 @@ QQuickItem* getPageOfItem(QQuickItem* item) // TODO: remove?
     }
     const auto pagePattern = QString::fromLatin1("Page");
     QString className{item->metaObject()->className()};
-    qDebug() << "=====================>> Item: " << item << " with name: " << item->metaObject()->className();
     const auto isPage = className.contains(pagePattern, Qt::CaseSensitive);
     if(isPage) {
         return item;
@@ -122,9 +115,7 @@ QList<QObject*> getSubChain(QObject* item)
             && isEnabled(child)
         ) {
             res.append(child);
-            // qDebug() << "==>> [*** added ***] " << qobject_cast<QQuickItem*>(child);
         } else {
-            // qDebug() << "==>> [** skipped **] " << qobject_cast<QQuickItem*>(child);
             res.append(getSubChain(child));
         }
     }
@@ -134,14 +125,12 @@ QList<QObject*> getSubChain(QObject* item)
 template<typename T>
 void printItems(const T& items, QObject* current_item)
 {
-    qDebug() << "**********************************************";
     for(const auto& item : items) {
         QQuickItem* i = qobject_cast<QQuickItem*>(item);
         QPointF coords {getItemCenterPointOnScene(i)};
         QString prefix = current_item == i ? "==>" : "   ";
-        qDebug() << prefix << " Item: " << i << " with coords: " << coords;
+        // qDebug() << prefix << " Item: " << i << " with coords: " << coords; // Uncomment to visualize tab transitions
     }
-    qDebug() << "**********************************************";
 }
 
 /*!
@@ -308,7 +297,7 @@ void FocusController::resetFocus()
 void FocusController::nextKeyTabItem()
 {
     if (m_lvfc) {
-        focusNextListViewItem(); // Need to go on first element by default?
+        focusNextListViewItem();
         return;
     }
 
@@ -335,7 +324,6 @@ void FocusController::nextKeyTabItem()
     }
     
     if(isListView(m_focusedItem)) {
-        qDebug() << "===>> Found ListView Item: " << m_focusedItem; // TODO: remove?
         m_lvfc = new ListViewFocusController(m_focusedItem, this);
         focusNextListViewItem();
         return;
@@ -387,22 +375,22 @@ void FocusController::previousKeyTabItem()
 
 void FocusController::nextKeyUpItem()
 {
-    qDebug() << "nextKeyUpItem" << "triggered";
+    previousKeyTabItem();
 }
 
 void FocusController::nextKeyDownItem()
 {
-    qDebug() << "nextKeyDownItem" << "triggered";
+    nextKeyTabItem();
 }
 
 void FocusController::nextKeyLeftItem()
 {
-    qDebug() << "nextKeyLeftItem" << "triggered";
+    previousKeyTabItem();
 }
 
 void FocusController::nextKeyRightItem()
 {
-    qDebug() << "nextKeyRightItem" << "triggered";
+    nextKeyTabItem();
 }
 
 void FocusController::reload()
@@ -414,10 +402,8 @@ void FocusController::reload()
     const auto rootItem = m_rootItem;
 
     if (rootItem != nullptr) {
-        qDebug() << "*** root item: " << rootItem;
         rootObjects << qobject_cast<QObject*>(rootItem);
     } else {
-        qDebug() << "*** root item is null";
         rootObjects = m_engine->rootObjects();
     }
 
@@ -453,14 +439,10 @@ void FocusController::reload()
         return;
     }
 
-    // qDebug() << "==> Active Focused Item: " << window->activeFocusItem();
-    // qDebug() << "--> Active Focused Object: " << window->focusObject();
-    // qDebug() << ">>> Current Focused Item: " << m_focused_item;
-
     m_focusedItemIndex = m_focusChain.indexOf(window->activeFocusItem());
 
     if(m_focusedItemIndex == -1) {
-        qDebug() << "===>> No focus item in chain. Moving focus to begin...";
+        qInfo() << "No focus item in chain. Moving focus to begin...";
         // m_focused_item_index = 0; // if not in focus chain current
         return;
     }
