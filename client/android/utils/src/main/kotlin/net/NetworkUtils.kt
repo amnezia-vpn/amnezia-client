@@ -35,7 +35,7 @@ fun getLocalNetworks(context: Context, ipv6: Boolean): List<InetNetwork> {
     return emptyList()
 }
 
-fun parseInetAddress(address: String): InetAddress = parseNumericAddressCompat(address)
+fun parseInetAddress(address: String): InetAddress = InetAddress.getByName(address)
 
 private val parseNumericAddressCompat: (String) -> InetAddress =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -60,7 +60,7 @@ private val parseNumericAddressCompat: (String) -> InetAddress =
 internal fun convertIpv6ToCanonicalForm(ipv6: String): String = ipv6
     .replace("((?:(?:^|:)0+\\b){2,}):?(?!\\S*\\b\\1:0+\\b)(\\S*)".toRegex(), "::$2")
 
-internal val InetAddress.ip: String
+val InetAddress.ip: String
     get() = if (this is Inet4Address) {
         hostAddress!!
     } else {

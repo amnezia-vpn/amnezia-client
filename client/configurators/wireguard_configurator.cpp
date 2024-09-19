@@ -95,6 +95,18 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         stdOut.replace("/32", "");
         QStringList ips = stdOut.split("\n", Qt::SkipEmptyParts);
 
+        // remove extra IPs from each line for case when user manually edited the wg0.conf
+        // and added there more IPs for route his itnernal networks, like:
+        //     ...
+        //     AllowedIPs = 10.8.1.6/32, 192.168.1.0/24, 192.168.2.0/24, ...
+        //     ...
+        // without this code - next IP would be 1 if last item in 'ips' has format above
+        QStringList vpnIps;
+        for (const auto &ip : ips) {
+          vpnIps.append(ip.split(",", Qt::SkipEmptyParts).first().trimmed());
+        }
+        ips = vpnIps;
+
         // Calc next IP address
         if (ips.isEmpty()) {
             nextIpNumber = "2";
