@@ -46,7 +46,7 @@ void IpcProcessTun2Socks::start()
 
     connect(m_t2sProcess.data(), &QProcess::readyReadStandardOutput, this, [this]() {
         QString line = m_t2sProcess.data()->readAllStandardOutput();
-        if (line.contains("[STACK] tun://tun2 <-> socks5://127.0.0.1")){
+        if (line.contains("[STACK] tun://") && line.contains("<-> socks5://127.0.0.1")) {
             emit setConnectionState(Vpn::ConnectionState::Connected);
         }
     });
