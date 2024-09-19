@@ -53,9 +53,8 @@
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     #define AMNEZIA_BASE_CLASS QGuiApplication
 #else
-    #define AMNEZIA_BASE_CLASS SingleApplication
+    #define AMNEZIA_BASE_CLASS QApplication
     #define QAPPLICATION_CLASS QApplication
-    #include "singleapplication.h"
 #endif
 
 class AmneziaApplication : public AMNEZIA_BASE_CLASS
@@ -65,9 +64,7 @@ public:
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     AmneziaApplication(int &argc, char *argv[]);
 #else
-    AmneziaApplication(int &argc, char *argv[], bool allowSecondary = false,
-                       SingleApplication::Options options = SingleApplication::User, int timeout = 1000,
-                       const QString &userData = {});
+    AmneziaApplication(int &argc, char *argv[]);
 #endif
     virtual ~AmneziaApplication();
 

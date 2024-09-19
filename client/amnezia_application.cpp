@@ -31,9 +31,8 @@
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
 AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv)
 #else
-AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecondary, SingleApplication::Options options, int timeout,
-                                       const QString &userData)
-    : SingleApplication(argc, argv, allowSecondary, options, timeout, userData)
+AmneziaApplication::AmneziaApplication(int &argc, char *argv[])
+    : QApplication(argc, argv)
 #endif
 {
     setQuitOnLastWindowClosed(false);
