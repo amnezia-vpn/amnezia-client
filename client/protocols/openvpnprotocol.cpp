@@ -352,6 +352,8 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
                 // killSwitch toggle
                 if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
+                    m_configData.insert("vpnServer",
+                                        NetworkUtilities::getIPAddress(m_configData.value(amnezia::config_key::hostName).toString()));
                     IpcClient::Interface()->enableKillSwitch(m_configData, 0);
                 }
 #endif

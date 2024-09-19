@@ -44,7 +44,9 @@ ErrorCode XrayProtocol::start()
     m_xrayCfgFile.setAutoRemove(false);
 #endif
     m_xrayCfgFile.open();
-    m_xrayCfgFile.write(QJsonDocument(m_xrayConfig).toJson());
+    QString config = QJsonDocument(m_xrayConfig).toJson();
+    config.replace(m_remoteHost, m_remoteAddress);
+    m_xrayCfgFile.write(config.toUtf8());
     m_xrayCfgFile.close();
 
     QStringList args = QStringList() << "-c" << m_xrayCfgFile.fileName() << "-format=json";
@@ -124,6 +126,7 @@ ErrorCode XrayProtocol::startTun2Sock()
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
                     // killSwitch toggle
                     if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
+                        m_configData.insert("vpnServer", m_remoteAddress);
                         IpcClient::Interface()->enableKillSwitch(m_configData, 0);
                     }
 #endif
@@ -202,7 +205,8 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
     }
     m_xrayConfig = xrayConfiguration;
     m_localPort = QString(amnezia::protocols::xray::defaultLocalProxyPort).toInt();
-    m_remoteAddress = NetworkUtilities::getIPAddress(configuration.value(amnezia::config_key::hostName).toString());
+    m_remoteHost = configuration.value(amnezia::config_key::hostName).toString();
+    m_remoteAddress = NetworkUtilities::getIPAddress(m_remoteHost);
     m_routeMode = configuration.value(amnezia::config_key::splitTunnelType).toInt();
     m_primaryDNS = configuration.value(amnezia::config_key::dns1).toString();
     m_secondaryDNS = configuration.value(amnezia::config_key::dns2).toString();
