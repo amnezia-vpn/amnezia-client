@@ -40,7 +40,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.amnezia.vpn.protocol.BadConfigException
-import org.amnezia.vpn.protocol.LoadLibraryException
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTING
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
@@ -50,6 +49,7 @@ import org.amnezia.vpn.protocol.ProtocolState.UNKNOWN
 import org.amnezia.vpn.protocol.VpnException
 import org.amnezia.vpn.protocol.VpnStartException
 import org.amnezia.vpn.protocol.putStatus
+import org.amnezia.vpn.util.LoadLibraryException
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.Prefs
 import org.amnezia.vpn.util.net.NetworkState
