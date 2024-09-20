@@ -66,7 +66,7 @@ ErrorCode XrayProtocol::start()
     });
 
     connect(&m_xrayProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
-        qDebug().noquote() << "XrayProtocol finished, exitCode, exiStatus" << exitCode << exitStatus;
+        qDebug().noquote() << "XrayProtocol finished, exitCode, exitStatus" << exitCode << exitStatus;
         setConnectionState(Vpn::ConnectionState::Disconnected);
         if (exitStatus != QProcess::NormalExit) {
             emit protocolError(amnezia::ErrorCode::XrayExecutableCrashed);
@@ -98,10 +98,10 @@ ErrorCode XrayProtocol::startTun2Sock()
     m_configData.insert("inetAdapterIndex", NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress)));
 #endif
 
-    connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::stateChanged,
+    connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::stateChanged, this,
             [&](QProcess::ProcessState newState) { qDebug() << "PrivilegedProcess stateChanged" << newState; });
 
-    connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::setConnectionState,
+    connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::setConnectionState, this,
             [&](int vpnState) {
                 qDebug() << "PrivilegedProcess setConnectionState " << vpnState;
                 if (vpnState == Vpn::ConnectionState::Connected)
@@ -140,7 +140,7 @@ ErrorCode XrayProtocol::startTun2Sock()
                     IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
                     QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
                     for (int i = 0; i < netInterfaces.size(); i++) {
-                        for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
+                        for (int j = 0; j < netInterfaces.at(i).addressEntries().size(); j++)
                         {
                             // killSwitch toggle
                             if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
