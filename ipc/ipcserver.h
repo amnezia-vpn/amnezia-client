@@ -9,8 +9,10 @@
 
 #include "ipc.h"
 #include "ipcserverprocess.h"
+#include "ipctun2socksprocess.h"
 
 #include "rep_ipc_interface_source.h"
+#include "rep_ipc_process_tun2socks_source.h"
 
 class IpcServer : public IpcInterfaceSource
 {
@@ -44,10 +46,12 @@ private:
         ProcessDescriptor (QObject *parent = nullptr) {
             serverNode = QSharedPointer<QRemoteObjectHost>(new QRemoteObjectHost(parent));
             ipcProcess = QSharedPointer<IpcServerProcess>(new IpcServerProcess(parent));
+            tun2socksProcess = QSharedPointer<IpcProcessTun2Socks>(new IpcProcessTun2Socks(parent));
             localServer = QSharedPointer<QLocalServer>(new QLocalServer(parent));
         }
 
         QSharedPointer<IpcServerProcess> ipcProcess;
+        QSharedPointer<IpcProcessTun2Socks> tun2socksProcess;
         QSharedPointer<QRemoteObjectHost> serverNode;
         QSharedPointer<QLocalServer> localServer;
     };
