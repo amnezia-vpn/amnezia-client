@@ -135,10 +135,10 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 containerConfig[config_key::transportPacketMagicHeader] = transportPacketMagicHeader;
             } else if (container == DockerContainer::Sftp) {
                 containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
-                containerConfig.insert(config_key::password, Utils::getRandomString(10));
+                containerConfig.insert(config_key::password, Utils::getRandomString(16));
             } else if (container == DockerContainer::Socks5Proxy) {
                 containerConfig.insert(config_key::userName, protocols::socks5Proxy::defaultUserName);
-                containerConfig.insert(config_key::password, Utils::getRandomString(10));
+                containerConfig.insert(config_key::password, Utils::getRandomString(16));
             }
 
             config.insert(config_key::container, ContainerProps::containerToString(container));
