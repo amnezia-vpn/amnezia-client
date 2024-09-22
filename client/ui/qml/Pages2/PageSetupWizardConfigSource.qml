@@ -134,18 +134,15 @@ PageType {
                 id: continueButton
 
                 Layout.fillWidth: true
-                Layout.topMargin: visible ? 16 : 0
+                Layout.topMargin: visible ? 16 : -72
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                z: -1
 
                 visible: textKey.textFieldText !== ""
-                y: visible ? textKey.y+56+32 : textKey.y
 
-                Behavior on y {
-                    NumberAnimation { duration: 500 }
-                }
                 Behavior on Layout.topMargin {
-                    NumberAnimation { duration: 500 }
+                    NumberAnimation { duration: 800 }
                 }
 
                 text: qsTr("Continue")
