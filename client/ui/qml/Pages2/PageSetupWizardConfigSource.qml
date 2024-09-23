@@ -134,11 +134,16 @@ PageType {
                 id: continueButton
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: visible ? 16 : -72
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                z: -1
 
                 visible: textKey.textFieldText !== ""
+
+                Behavior on Layout.topMargin {
+                    NumberAnimation { duration: 800 }
+                }
 
                 text: qsTr("Continue")
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
