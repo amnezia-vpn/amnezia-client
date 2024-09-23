@@ -140,7 +140,7 @@ PageType {
                 z: -1
 
                 Behavior on Layout.topMargin {
-                    NumberAnimation { duration: 800 }
+                    NumberAnimation { duration: 200 }
                 }
 
                 text: qsTr("Continue")
