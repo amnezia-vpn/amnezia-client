@@ -134,12 +134,10 @@ PageType {
                 id: continueButton
 
                 Layout.fillWidth: true
-                Layout.topMargin: visible ? 16 : -72
+                Layout.topMargin: textKey.textFieldText !== "" ? 16 : -72
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
                 z: -1
-
-                visible: textKey.textFieldText !== ""
 
                 Behavior on Layout.topMargin {
                     NumberAnimation { duration: 800 }
