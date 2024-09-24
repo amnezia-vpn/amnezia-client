@@ -2,6 +2,9 @@
 #define FOCUSCONTROLLER_H
 
 #include <QObject>
+#include <QStack>
+#include <QSharedPointer>
+
 
 class QQuickItem;
 class QQmlApplicationEngine;
@@ -20,31 +23,23 @@ public:
     Q_INVOKABLE void nextKeyDownItem();
     Q_INVOKABLE void nextKeyLeftItem();
     Q_INVOKABLE void nextKeyRightItem();
-
-signals:
-    void nextTabItemChanged(QObject* item);
-    void previousTabItemChanged(QObject* item);
-    void nextKeyUpItemChanged(QObject* item);
-    void nextKeyDownItemChanged(QObject* item);
-    void nextKeyLeftItemChanged(QObject* item);
-    void nextKeyRightItemChanged(QObject* item);
-    void focusChainChanged();
-    void rootItemChanged();
-
-public slots:
-    void resetFocus();
-    void reload();
-    void setRootItem(QQuickItem* item);
+    Q_INVOKABLE void setFocusOnDefaultItem();
+    Q_INVOKABLE void resetRootObject();
+    Q_INVOKABLE void pushRootObject(QObject* object);
+    Q_INVOKABLE void dropRootObject(QObject* object);
 
 private:
+    void nextItem(bool isForwardOrder);
     void focusNextListViewItem();
     void focusPreviousListViewItem();
+    void reload(bool isForwardOrder);
 
-    QQmlApplicationEngine* m_engine; // Pointer to engine to get root object
+    QSharedPointer<QQmlApplicationEngine> m_engine; // Pointer to engine to get root object
     QList<QObject*> m_focusChain; // List of current objects to be focused
     QQuickItem* m_focusedItem; // Pointer to the active focus item
     qsizetype m_focusedItemIndex; // Active focus item's index in focus chain
-    QQuickItem* m_rootItem;
+    QStack<QObject*> m_rootObjects;
+    QSharedPointer<QQuickItem> m_defaultFocusItem;
 
     ListViewFocusController* m_lvfc; // ListView focus manager
 };
