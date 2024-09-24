@@ -242,24 +242,26 @@ void ImportController::processNativeWireGuardConfig()
     auto containers = m_config.value(config_key::containers).toArray();
     if (!containers.isEmpty()) {
         auto container = containers.at(0).toObject();
-        auto containerConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::WireGuard)).toObject();
-        auto protocolConfig = QJsonDocument::fromJson(containerConfig.value(config_key::last_config).toString().toUtf8()).object();
+        auto serverProtocolConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::WireGuard)).toObject();
+        auto clientProtocolConfig = QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
 
         QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
         QString junkPacketMinSize = QString::number(10);
         QString junkPacketMaxSize = QString::number(50);
-        protocolConfig[config_key::junkPacketCount] = junkPacketCount;
-        protocolConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
-        protocolConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
-        protocolConfig[config_key::initPacketJunkSize] = "0";
-        protocolConfig[config_key::responsePacketJunkSize] = "0";
-        protocolConfig[config_key::initPacketMagicHeader] = "1";
-        protocolConfig[config_key::responsePacketMagicHeader] = "2";
-        protocolConfig[config_key::underloadPacketMagicHeader] = "3";
-        protocolConfig[config_key::transportPacketMagicHeader] = "4";
+        clientProtocolConfig[config_key::junkPacketCount] = junkPacketCount;
+        clientProtocolConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
+        clientProtocolConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
+        clientProtocolConfig[config_key::initPacketJunkSize] = "0";
+        clientProtocolConfig[config_key::responsePacketJunkSize] = "0";
+        clientProtocolConfig[config_key::initPacketMagicHeader] = "1";
+        clientProtocolConfig[config_key::responsePacketMagicHeader] = "2";
+        clientProtocolConfig[config_key::underloadPacketMagicHeader] = "3";
+        clientProtocolConfig[config_key::transportPacketMagicHeader] = "4";
 
-        containerConfig[config_key::last_config] = QString(QJsonDocument(protocolConfig).toJson());
-        container["wireguard"] = containerConfig;
+        clientProtocolConfig[config_key::isObfuscationEnabled] = true;
+
+        serverProtocolConfig[config_key::last_config] = QString(QJsonDocument(clientProtocolConfig).toJson());
+        container["wireguard"] = serverProtocolConfig;
         containers.replace(0, container);
         m_config[config_key::containers] = containers;
     }

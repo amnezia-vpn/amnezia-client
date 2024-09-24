@@ -7,7 +7,6 @@
 class IpcInterface
 {
     SLOT( int createPrivilegedProcess() ); // return local pid
-    //SIGNAL(sendMessage(const QByteArray &message));
 
     // Route functions
     SLOT( int routeAddList(const QString &gw, const QStringList &ips) );

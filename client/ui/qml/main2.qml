@@ -80,7 +80,8 @@ Window  {
     }
 
     PageStart {
-        anchors.fill: parent
+        width: root.width
+        height: root.height
     }
 
     Item {

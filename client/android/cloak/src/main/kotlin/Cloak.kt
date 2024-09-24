@@ -3,9 +3,15 @@ package org.amnezia.vpn.protocol.cloak
 import android.util.Base64
 import net.openvpn.ovpn3.ClientAPI_Config
 import org.amnezia.vpn.protocol.openvpn.OpenVpn
+import org.amnezia.vpn.util.LibraryLoader.loadSharedLibrary
 import org.json.JSONObject
 
 class Cloak : OpenVpn() {
+
+    override fun internalInit() {
+        super.internalInit()
+        if (!isInitialized) loadSharedLibrary(context, "ck-ovpn-plugin")
+    }
 
     override fun parseConfig(config: JSONObject): ClientAPI_Config {
         val openVpnConfig = ClientAPI_Config()

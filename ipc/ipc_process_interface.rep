@@ -3,7 +3,6 @@
 
 class IpcProcessInterface
 {
-    //SLOT( start(const QString &program, const QStringList &args) );
     SLOT( start() );
     SLOT( close() );
 

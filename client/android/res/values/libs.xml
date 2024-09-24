@@ -3,7 +3,6 @@
     <!-- DO NOT EDIT THIS: This file is populated automatically by the deployment tool. -->
 
     <array name="bundled_libs">
-        <!-- %%INSERT_EXTRA_LIBS%% -->
     </array>
 
     <array name="qt_libs">

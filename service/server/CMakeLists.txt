@@ -18,6 +18,7 @@ set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipctun2socksprocess.h
     ${CMAKE_CURRENT_LIST_DIR}/localserver.h
     ${CMAKE_CURRENT_LIST_DIR}/../../common/logger/logger.h
     ${CMAKE_CURRENT_LIST_DIR}/router.h
@@ -30,6 +31,7 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/networkUtilities.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipctun2socksprocess.cpp
     ${CMAKE_CURRENT_LIST_DIR}/localserver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../common/logger/logger.cpp
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
@@ -279,6 +281,7 @@ endif()
 
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface.rep)
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_interface.rep)
+qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_tun2socks.rep)
 
 # copy deploy artifacts required to run the application to the debug build folder
 if(WIN32)

@@ -60,7 +60,7 @@ private val parseNumericAddressCompat: (String) -> InetAddress =
 internal fun convertIpv6ToCanonicalForm(ipv6: String): String = ipv6
     .replace("((?:(?:^|:)0+\\b){2,}):?(?!\\S*\\b\\1:0+\\b)(\\S*)".toRegex(), "::$2")
 
-internal val InetAddress.ip: String
+val InetAddress.ip: String
     get() = if (this is Inet4Address) {
         hostAddress!!
     } else {

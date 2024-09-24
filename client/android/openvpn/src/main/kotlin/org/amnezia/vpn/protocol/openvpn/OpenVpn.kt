@@ -11,6 +11,7 @@ import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
 import org.amnezia.vpn.protocol.Statistics
 import org.amnezia.vpn.protocol.VpnStartException
+import org.amnezia.vpn.util.LibraryLoader.loadSharedLibrary
 import org.amnezia.vpn.util.net.InetNetwork
 import org.amnezia.vpn.util.net.getLocalNetworks
 import org.amnezia.vpn.util.net.parseInetAddress
@@ -34,7 +35,10 @@ open class OpenVpn : Protocol() {
         }
 
     override fun internalInit() {
-        if (!isInitialized) loadSharedLibrary(context, "ovpn3")
+        if (!isInitialized) {
+            loadSharedLibrary(context, "ovpn3")
+            loadSharedLibrary(context, "ovpnutil")
+        }
         if (this::scope.isInitialized) {
             scope.cancel()
         }
