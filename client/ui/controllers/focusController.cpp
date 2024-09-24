@@ -60,12 +60,12 @@ bool isOnTheScene(QObject* object)
     }
 
     if (!item->isVisible()) {
-        qInfo() << "The item is not visible: " << item;
+        // qDebug() << "===>> The item is not visible: " << item;
         return false;
     }
 
     QRectF itemRect = item->mapRectToScene(item->childrenRect());
- 
+
     QQuickWindow* window = item->window();
     if (!window) {
         qWarning() << "Couldn't get the window on the Scene check";
@@ -118,7 +118,7 @@ QList<QObject*> getSubChain(QObject* item)
             && isFocusable(child)
             && (isOnTheScene(child))
             && isEnabled(child)
-        ) {
+            ) {
             res.append(child);
         } else {
             res.append(getSubChain(child));
@@ -153,13 +153,17 @@ public:
     ~ListViewFocusController();
 
     void incrementIndex();
-    void decrementCurrentIndex();
+    void decrementIndex();
     void positionViewAtIndex();
     void focusNextItem();
     void focusPreviousItem();
     void resetFocusChain();
+    bool isListViewFirstFocusItem();
+    bool isDelegateFirstFocusItem();
     bool isListViewLastFocusItem();
     bool isDelegateLastFocusItem();
+    bool isReturnNeeded();
+    void viewToBegin();
 
 private:
     int size() const;
@@ -173,6 +177,7 @@ private:
     QQuickItem* m_focusedItem;
     qsizetype m_focusedItemIndex;
     qsizetype m_delegateIndex;
+    bool m_isReturnNeeded;
 };
 
 ListViewFocusController::ListViewFocusController(QQuickItem* listView, QObject* parent)
@@ -182,6 +187,7 @@ ListViewFocusController::ListViewFocusController(QQuickItem* listView, QObject* 
     , m_focusedItem{nullptr}
     , m_focusedItemIndex{-1}
     , m_delegateIndex{0}
+    , m_isReturnNeeded{false}
 {
 }
 
@@ -212,7 +218,7 @@ void ListViewFocusController::incrementIndex()
     m_delegateIndex++;
 }
 
-void ListViewFocusController::decrementCurrentIndex()
+void ListViewFocusController::decrementIndex()
 {
     m_delegateIndex--;
 }
@@ -241,11 +247,17 @@ QQuickItem* ListViewFocusController::focusedItem()
 void ListViewFocusController::focusNextItem()
 {
     if (m_focusChain.empty()) {
-        qDebug() << "Empty focusChain with current delegate: " << currentDelegate();
+        qDebug() << "Empty focusChain with current delegate: " << currentDelegate() << "Scanning for elements...";
         m_focusChain = getSubChain(currentDelegate());
+    }
+    if (m_focusChain.empty()) {
+        qWarning() << "No elements found. Returning from ListView...";
+        m_isReturnNeeded = true;
+        return;
     }
     m_focusedItemIndex++;
     m_focusedItem = qobject_cast<QQuickItem*>(m_focusChain.at(m_focusedItemIndex));
+    qDebug() << "==>> Focused Item: " << m_focusedItem << " with Index: " << m_focusedItemIndex;
     m_focusedItem->forceActiveFocus();
 }
 
@@ -261,14 +273,34 @@ void ListViewFocusController::resetFocusChain()
     m_focusedItemIndex = -1;
 }
 
+bool ListViewFocusController::isDelegateFirstFocusItem()
+{
+    return m_focusedItem && (m_focusedItem == m_focusChain.first());
+}
+
 bool ListViewFocusController::isDelegateLastFocusItem()
 {
     return m_focusedItem && (m_focusedItem == m_focusChain.last());
 }
 
+bool ListViewFocusController::isListViewFirstFocusItem()
+{
+    return (m_delegateIndex == 0) && isDelegateFirstFocusItem();
+}
+
 bool ListViewFocusController::isListViewLastFocusItem()
 {
     return (m_delegateIndex == size() - 1) && isDelegateLastFocusItem();
+}
+
+bool ListViewFocusController::isReturnNeeded()
+{
+    return m_isReturnNeeded;
+}
+
+void ListViewFocusController::viewToBegin()
+{
+    QMetaObject::invokeMethod(m_listView, "positionViewAtBeginning", Qt::AutoConnection);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -279,35 +311,31 @@ FocusController::FocusController(QQmlApplicationEngine* engine, QObject *parent)
     , m_focusChain{}
     , m_focusedItem{nullptr}
     , m_focusedItemIndex{-1}
-    , m_rootItem{nullptr}
+    , m_rootObjects{}
+    , m_defaultFocusItem{QSharedPointer<QQuickItem>()}
     , m_lvfc{nullptr}
 {
-    connect(this, &FocusController::rootItemChanged, this, &FocusController::reload);
+    // connect(this, &FocusController::rootItemChanged, this, &FocusController::onReload);
+    QObject::connect(m_engine.get(), &QQmlApplicationEngine::objectCreated, this, [this](QObject *object, const QUrl &url){
+        qDebug() << "===>> () CREATED " << object << " : " << url;
+        QQuickItem* newDefaultFocusItem = object->findChild<QQuickItem*>("defaultFocusItem");
+        if(newDefaultFocusItem && m_defaultFocusItem != newDefaultFocusItem) {
+            m_defaultFocusItem.reset(newDefaultFocusItem);
+            qDebug() << "===>> [] NEW DEFAULT FOCUS ITEM " << m_defaultFocusItem;
+        }
+    });
 }
 
-void FocusController::resetFocus()
-{
-    reload();
-    if (m_focusChain.empty()) {
-        qWarning() << "There is no focusable elements";
-        return;
-    }
-
-    if(m_focusedItemIndex == -1) {
-        m_focusedItemIndex = 0;
-        m_focusedItem = qobject_cast<QQuickItem*>(m_focusChain.at(m_focusedItemIndex));
-        m_focusedItem->forceActiveFocus();
-    }
-}
-
-void FocusController::nextKeyTabItem()
+void FocusController::nextItem(bool isForwardOrder)
 {
     if (m_lvfc) {
-        focusNextListViewItem();
+        isForwardOrder ? focusNextListViewItem() : focusPreviousListViewItem();
+        qDebug() << "===>> [handling the ListView]";
+
         return;
     }
 
-    reload();
+    reload(isForwardOrder);
 
     if(m_focusChain.empty()) {
         qWarning() << "There are no items to navigate";
@@ -325,29 +353,49 @@ void FocusController::nextKeyTabItem()
     m_focusedItem = qobject_cast<QQuickItem*>(m_focusChain.at(m_focusedItemIndex));
 
     if(m_focusedItem == nullptr) {
-        qWarning() << "Failed to get item to focus on";
+        qWarning() << "Failed to get item to focus on. Setting focus on default";
+        m_focusedItem = m_defaultFocusItem.get();
         return;
     }
     
     if(isListView(m_focusedItem)) {
+        qDebug() << "===>> [Found ListView]";
         m_lvfc = new ListViewFocusController(m_focusedItem, this);
-        focusNextListViewItem();
+        if(isForwardOrder) {
+            m_lvfc->viewToBegin();
+            focusNextListViewItem();
+        } else {
+            focusPreviousListViewItem();
+        }
         return;
     }
 
+    qDebug() << "===>> Focused Item: " << m_focusedItem;
     m_focusedItem->forceActiveFocus(Qt::TabFocusReason);
 
     printItems(m_focusChain, m_focusedItem);
+
+    const auto w = m_defaultFocusItem->window();
+
+    qDebug() << "===>> CURRENT ACTIVE ITEM: " << w->activeFocusItem();
+    qDebug() << "===>> CURRENT FOCUS OBJECT: " << w->focusObject();
+    if(m_rootObjects.empty()) {
+        qDebug() << "===>> ROOT OBJECT IS DEFAULT";
+    } else {
+        qDebug() << "===>> ROOT OBJECT: " << m_rootObjects.top();
+    }
 }
 
 void FocusController::focusNextListViewItem()
 {
     m_lvfc->focusNextItem();
 
-    if (m_lvfc->isListViewLastFocusItem()) {
+    if (m_lvfc->isListViewLastFocusItem() || m_lvfc->isReturnNeeded()) {
+        qDebug() << "===>> [Last item in ListView was reached]";
         delete m_lvfc;
         m_lvfc = nullptr;
     } else if (m_lvfc->isDelegateLastFocusItem()) {
+        qDebug() << "===>> [End of delegate elements was reached. Going to the next delegate]";
         m_lvfc->resetFocusChain();
         m_lvfc->incrementIndex();
         m_lvfc->positionViewAtIndex();
@@ -356,110 +404,121 @@ void FocusController::focusNextListViewItem()
 
 void FocusController::focusPreviousListViewItem()
 {
-    // TODO: implement
+    m_lvfc->focusPreviousItem();
+
+    if (m_lvfc->isListViewFirstFocusItem() || m_lvfc->isReturnNeeded()) {
+        delete m_lvfc;
+        m_lvfc = nullptr;
+    } else if (m_lvfc->isDelegateFirstFocusItem()) {
+        m_lvfc->resetFocusChain();
+        m_lvfc->decrementIndex();
+        m_lvfc->positionViewAtIndex();
+    }
+}
+
+void FocusController::nextKeyTabItem()
+{
+    nextItem(true);
 }
 
 void FocusController::previousKeyTabItem()
 {
-    reload();
-
-    if(m_focusChain.empty()) {
-        return;
-    }
-
-    if (m_focusedItemIndex <= 0) {
-        m_focusedItemIndex = m_focusChain.size() - 1;
-    } else {
-        m_focusedItemIndex--;
-    }
-
-    m_focusedItem = qobject_cast<QQuickItem*>(m_focusChain.at(m_focusedItemIndex));
-    m_focusedItem->forceActiveFocus(Qt::TabFocusReason);
-
-    qDebug() << "===>> Current focus was changed to " << m_focusedItem;
+    nextItem(false);
 }
 
 void FocusController::nextKeyUpItem()
 {
-    previousKeyTabItem();
+    nextItem(false);
 }
 
 void FocusController::nextKeyDownItem()
 {
-    nextKeyTabItem();
+    nextItem(true);
 }
 
 void FocusController::nextKeyLeftItem()
 {
-    previousKeyTabItem();
+    nextItem(false);
 }
 
 void FocusController::nextKeyRightItem()
 {
-    nextKeyTabItem();
+    nextItem(true);
 }
 
-void FocusController::reload()
+void FocusController::setFocusOnDefaultItem()
 {
-    m_focusChain.clear();
+    qDebug() << "===>> Setting focus on DEFAULT FOCUS ITEM...";
+    m_defaultFocusItem->forceActiveFocus();
+}
 
-    QObjectList rootObjects;
+void FocusController::reload(bool isForwardOrder)
+{
+        m_focusChain.clear();
 
-    const auto rootItem = m_rootItem;
+    QObject* rootObject = (m_rootObjects.empty()
+                               ? m_engine->rootObjects().value(0)
+                               : m_rootObjects.top());
 
-    if (rootItem != nullptr) {
-        rootObjects << qobject_cast<QObject*>(rootItem);
-    } else {
-        rootObjects = m_engine->rootObjects();
-    }
-
-    if(rootObjects.empty()) {
-        qWarning() << "Empty focus chain detected!";
-        emit focusChainChanged();
+    if(!rootObject) {
+        qCritical() << "No ROOT OBJECT found!";
+        m_focusedItemIndex = -1;
+        resetRootObject();
+        setFocusOnDefaultItem();
         return;
     }
 
-    for(const auto object : rootObjects) {
-        m_focusChain.append(getSubChain(object));
-    }
+    qDebug() << "===>> ROOT OBJECTS: " << rootObject;
 
-    std::sort(m_focusChain.begin(), m_focusChain.end(), isLess);
+    m_focusChain.append(getSubChain(rootObject));
 
-    printItems(m_focusChain, m_focusedItem);
-
-    emit focusChainChanged();
+    std::sort(m_focusChain.begin(), m_focusChain.end(), isForwardOrder? isLess : isMore);
 
     if (m_focusChain.empty()) {
+        qWarning() << "Focus chain is empty!";
         m_focusedItemIndex = -1;
-        qWarning() << "reloaded to empty focus chain";
-        return;
-    }
-
-    QQuickWindow* window = qobject_cast<QQuickWindow*>(rootObjects[0]);
-    if (!window) {
-        window = qobject_cast<QQuickItem*>(rootObjects[0])->window();
-    }
-
-    if (!window) {
-        qCritical() << "Couldn't get the current window";
+        resetRootObject();
+        setFocusOnDefaultItem();
         return;
     }
 
     m_focusedItemIndex = m_focusChain.indexOf(m_focusedItem);
-    // m_focusedItemIndex = m_focusChain.indexOf(window->activeFocusItem());
 
     if(m_focusedItemIndex == -1) {
-        qInfo() << "No focus item in chain. Moving focus to begin...";
-        // m_focused_item_index = 0; // if not in focus chain current
+        qInfo() << "No focus item in chain.";
+        setFocusOnDefaultItem();
+        return;
+    }
+}
+
+void FocusController::pushRootObject(QObject* object)
+{
+    m_rootObjects.push(object);
+    qDebug() << "===>> ROOT OBJECT is changed to: " << m_rootObjects.top();
+}
+
+void FocusController::dropRootObject(QObject* object)
+{
+    if (m_rootObjects.empty()) {
+        qDebug() << "ROOT OBJECT is already NULL";
+
         return;
     }
 
-    // m_focusedItem = qobject_cast<QQuickItem*>(m_focusChain.at(m_focusedItemIndex));
-
-    // m_focusedItem->forceActiveFocus();
+    if (m_rootObjects.top() == object) {
+        m_rootObjects.pop();
+        if(m_rootObjects.size()) {
+            qDebug() << "===>> ROOT OBJECT is changed to: " << m_rootObjects.top();
+        } else {
+            qDebug() << "===>> ROOT OBJECT is changed to NULL";
+        }
+    } else {
+        qWarning() << "===>> TRY TO DROP WRONG ROOT OBJECT: " << m_rootObjects.top() << " SHOULD BE: " << object;
+    }
 }
 
-void FocusController::setRootItem(QQuickItem* item)
+void FocusController::resetRootObject()
 {
-    m_rootItem = item;
+    m_rootObjects.clear();
+    qDebug() << "===>> ROOT OBJECT IS RESETED";
 }
