@@ -9,6 +9,8 @@ deploy/build_32/*
 deploy/build_64/*
 winbuild*.bat
 .cache/
+client/3rd-prebuilt/
+client/3rd/OpenVPNAdapter/
 
 
 # Qt-es
