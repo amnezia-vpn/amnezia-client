@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(PROJECT AmneziaVPN)
 project(${PROJECT})
 
-set(IOS 1)
+# set(IOS 1)
 set(APPLE 1)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -63,7 +63,7 @@ qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 
 # -- i18n begin
 set(CMAKE_AUTORCC ON)
-
+# module language
 set(AMNEZIAVPN_TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru_RU.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_zh_CN.ts
@@ -94,6 +94,10 @@ if(IOS)
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/ios/scripts/openvpn.sh args
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
+
+# if(APPLE)
+#     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/macos/scripts/openvpn.sh args
+#         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 
 set(IS_CI ${CI})
 if(IS_CI)

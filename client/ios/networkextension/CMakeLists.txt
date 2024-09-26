@@ -1,5 +1,5 @@
 enable_language(Swift)
-
+message("Client message >> iOS build >> networkextension")
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
 add_executable(networkextension)
@@ -121,6 +121,9 @@ target_compile_options(networkextension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_I
 target_compile_options(networkextension PRIVATE -DNETWORK_EXTENSION=1)
 
 set(WG_APPLE_SOURCE_DIR ${CLIENT_ROOT_DIR}/3rd/amneziawg-apple/Sources)
+
+message("WG_APPLE_SOURCE_DIR is: ${WG_APPLE_SOURCE_DIR}")
+message("CLIENT_ROOT_DIR is: ${CLIENT_ROOT_DIR}")
 
 target_sources(networkextension PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/WireGuardAdapter.swift

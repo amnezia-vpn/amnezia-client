@@ -1,4 +1,4 @@
-message("MAC build")
+message("Client >> MacOS build")
 
 find_library(FW_SYSTEMCONFIG SystemConfiguration)
 find_library(FW_SERVICEMGMT ServiceManagement)
