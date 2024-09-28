@@ -1,4 +1,4 @@
-message("Client >> MacOS build")
+message("Client macos.cmake >> MacOS build")
 
 find_library(FW_SYSTEMCONFIG SystemConfiguration)
 find_library(FW_SERVICEMGMT ServiceManagement)

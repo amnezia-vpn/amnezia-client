@@ -26,7 +26,7 @@ execute_process(
 
 add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
-if(IOS)
+if(IOS OR APPLE)
     set(PACKAGES ${PACKAGES} Multimedia)
 endif()
 
@@ -43,7 +43,7 @@ set(LIBS ${LIBS}
     Qt6::Core5Compat Qt6::Concurrent
 )
 
-if(IOS)
+if(IOS OR APPLE)
     set(LIBS ${LIBS} Qt6::Multimedia)
 endif()
 
@@ -90,7 +90,8 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/translations/translations.qrc.in ${CMAK
 qt6_add_resources(QRC ${I18NQRC} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 # -- i18n end
 
-if(IOS)
+if(IOS OR APPLE)
+    message("Client >> Cmake build OpenVPN: iOS or OSX build")
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/ios/scripts/openvpn.sh args
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
@@ -108,7 +109,7 @@ if(IS_CI)
     endif()
 endif()
 
-
+message("Client >> Cmake build 3rdparty")
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/3rdparty.cmake)
 
 include_directories(
@@ -157,7 +158,7 @@ include_directories(mozilla)
 include_directories(mozilla/shared)
 include_directories(mozilla/models)
 
-if(NOT IOS)
+if(NOT IOS OR NOT APPLE)
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
     )
@@ -206,7 +207,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
 endif()
 
-if(NOT IOS)
+if(NOT IOS OR NOT APPLE)
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
     )
@@ -314,7 +315,8 @@ if(LINUX AND NOT ANDROID)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+# if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (LINUX AND NOT ANDROID))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
 
@@ -347,14 +349,15 @@ if(ANDROID)
     include(cmake/android.cmake)
 endif()
 
-if(IOS)
+if(IOS) # only for iOS or OSX
     message("Client >> Cmake: iOS build")
     include(cmake/ios.cmake)
     #include(cmake/ios-arch-fixup.cmake)
-elseif(APPLE AND NOT IOS)
+elseif(APPLE AND NOT IOS) # all version
     message("Client >> Cmake: OSX build")
-    include(cmake/osxtools.cmake)
-    include(cmake/macos.cmake)
+    include(cmake/apple.cmake)
+    # include(cmake/osxtools.cmake)
+    # include(cmake/macos.cmake)
 endif()
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
@@ -369,11 +372,11 @@ if(WIN32)
     endif()
 elseif(LINUX)
     set(DEPLOY_PLATFORM_PATH "linux/client")
-elseif(APPLE AND NOT IOS)
-    set(DEPLOY_PLATFORM_PATH "macos")
+# elseif(APPLE AND NOT IOS)
+#     set(DEPLOY_PLATFORM_PATH "macos")
 endif()
 
-if(NOT IOS AND NOT ANDROID)
+if(NOT IOS AND NOT ANDROID AND NOT APPLE)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
