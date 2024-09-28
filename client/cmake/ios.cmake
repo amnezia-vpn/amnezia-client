@@ -1,13 +1,13 @@
 message("Client ==> iOS build")
 
 # Đường dẫn tới thư mục chứa HevSocks5Tunnel.xcframework
-set(HEV_SOCKS5_TUNNEL_PATH "/Users/anhviet/Documents/VPN/new/amnezia-client/client/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework")
+set(HEV_SOCKS5_TUNNEL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/xray")
 
 # Đường dẫn tới thư viện .a
-set(HEV_SOCKS5_TUNNEL_LIB "${HEV_SOCKS5_TUNNEL_PATH}/ios-arm64/libhev-socks5-tunnel.a")
+set(HEV_SOCKS5_TUNNEL_LIB "${HEV_SOCKS5_TUNNEL_PATH}/ios/libhev-socks5-tunnel.a")
 
 # Đường dẫn tới tệp header
-set(HEV_SOCKS5_TUNNEL_INCLUDE_DIR "${HEV_SOCKS5_TUNNEL_PATH}/ios-arm64/Headers")
+set(HEV_SOCKS5_TUNNEL_INCLUDE_DIR "${HEV_SOCKS5_TUNNEL_PATH}/ios/Headers")
 
 # Thêm tệp header vào include directories
 target_include_directories(${PROJECT} PRIVATE ${HEV_SOCKS5_TUNNEL_INCLUDE_DIR})
