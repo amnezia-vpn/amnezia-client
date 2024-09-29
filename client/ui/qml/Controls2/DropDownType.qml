@@ -54,20 +54,25 @@ Item {
         FocusController.nextKeyTabItem()
     }
 
-    // function popupClosedFunc() {
-    //     if (!GC.isMobile()) {
-    //         this.forceActiveFocus()
-    //     }
-    // }
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
 
-    // property var parentFlickable
-    // onFocusChanged: {
-    //     if (root.activeFocus) {
-    //         if (root.parentFlickable) {
-    //             root.parentFlickable.ensureVisible(root)
-    //         }
-    //     }
-    // }
+    Keys.onUpPressed: {
+        FocusController.nextKeyUpItem()
+    }
+    
+    Keys.onDownPressed: {
+        FocusController.nextKeyDownItem()
+    }
+    
+    Keys.onLeftPressed: {
+        FocusController.nextKeyLeftItem()
+    }
+
+    Keys.onRightPressed: {
+        FocusController.nextKeyRightItem()
+    }
 
     implicitWidth: rootButtonContent.implicitWidth
     implicitHeight: rootButtonContent.implicitHeight
@@ -171,8 +176,6 @@ Item {
         }
 
         ImageButtonType {
-            // isFocusable: false
-            
             Layout.rightMargin: 16
 
             implicitWidth: 40
@@ -206,10 +209,6 @@ Item {
         anchors.fill: parent
         expandedHeight: drawerParent.height * drawerHeight
 
-        // onClosed: {
-        //     root.popupClosedFunc()
-        // }
-
         expandedStateContent: Item {
             id: container
             implicitHeight: menu.expandedHeight
@@ -226,7 +225,11 @@ Item {
                     id: backButton
                     backButtonImage: root.headerBackButtonImage
                     backButtonFunction: function() { menu.closeTriggered() }
-                    // KeyNavigation.tab: listViewLoader.item
+                    onActiveFocusChanged: {
+                        if(activeFocus) {
+                            root.listView.positionViewAtBeginning()
+                        }
+                    }
                 }
             }
 
@@ -252,14 +255,6 @@ Item {
                 Loader {
                     id: listViewLoader
                     sourceComponent: root.listView
-
-                    onLoaded: {
-                        // listViewLoader.item.parentFlickable = flickable
-                        // FocusController.reload()
-                        // listViewLoader.item.lastItemTabClicked = function() {
-                        //     focusItem.forceActiveFocus()
-                        // }
-                    }
                 }
             }
         }

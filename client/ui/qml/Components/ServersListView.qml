@@ -33,43 +33,7 @@ ListView {
         policy: root.height >= root.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
     }
 
-    readonly property bool isFocusable: true
-
-    // Keys.onTabPressed: {
-    //     FocusController.nextKeyTabItem()
-    // }
-
-    // activeFocusOnTab: true
-    // focus: true
-
-    property int focusItemIndex: 0
-
-    // onFocusItemIndexChanged: {
-    //     console.debug("===>> root onFocusItemIndexChanged")
-
-    //     // const focusedElement = root.itemAtIndex(focusItemIndex)
-    //     // if (focusedElement) {
-    //     //     if (focusedElement.y + focusedElement.height > root.height) {
-    //     //         root.contentY = focusedElement.y + focusedElement.height - root.height
-    //     //     } else {
-    //     //         root.contentY = 0
-    //     //     }
-    //     // }
-    // }
-
-    Keys.onUpPressed: scrollBar.decrease()
-    Keys.onDownPressed: scrollBar.increase()
-
-    // Connections {
-    //     target: drawer
-    //     enabled: !GC.isMobile()
-    //     function onIsCollapsedChanged() {
-    //         if (drawer.isCollapsedStateActive) {
-    //             const item = root.itemAtIndex(root.focusItemIndex)
-    //             if (item) { item.serverRadioButtonProperty.focus = false }
-    //         }
-    //     }
-    // }
+    property bool isFocusable: true
 
     Connections {
         target: ServersModel
@@ -135,7 +99,6 @@ ListView {
                         enabled: false
                     }
 
-                    // Keys.onTabPressed: serverInfoButton.forceActiveFocus()
                     Keys.onEnterPressed: serverRadioButton.clicked()
                     Keys.onReturnPressed: serverRadioButton.clicked()
                 }
@@ -143,10 +106,6 @@ ListView {
                 ImageButtonType {
                     id: serverInfoButton
                     objectName: "serverInfoButton"
-
-                    // signal keyTabOnLastElement
-
-                    // isFocusable: false
 
                     image: "qrc:/images/controls/settings.svg"
                     imageColor: AmneziaStyle.color.paleGray
@@ -156,41 +115,10 @@ ListView {
 
                     z: 1
 
-                    // onActiveFocusChanged: {
-                        // console.debug("===>> serverInfoButton::activeFocusChanged")
-
-                    //     if (activeFocus) {
-                    //         if (currentIndex === root.count - 1) {
-                    //             console.log("---> Latest element")
-                    //             keyTabOnLastElement()
-                    //         }
-
-                    //         console.log("--->>", currentIndex)
-                    // //         serverRadioButton.forceActiveFocus()
-                    //     }
-                    // }
-
-                    // onKeyTabOnLastElement: {
-                    //     console.log("*** Signal emmited! ***")
-                    //     FocusController.nextKeyTabItem()
-                    // }
-
-                    // Keys.onTabPressed: {
-                    //     console.log("===>> serverInfoButton::Keys.onTabPressed")
-                    //     if (root.focusItemIndex < root.count - 1) {
-                    //         root.focusItemIndex++
-                    //         root.itemAtIndex(root.focusItemIndex).forceActiveFocus()
-                    //     } else {
-                    //         FocusController.nextKeyTabItem()
-                    //         root.contentY = 0
-                    //     }
-                    // }
                     Keys.onEnterPressed: serverInfoButton.clicked()
                     Keys.onReturnPressed: serverInfoButton.clicked()
 
                     onClicked: function() {
-                        console.debug("===>> onClicked serverInfoButton")
-
                         ServersModel.processedIndex = index
                         PageController.goToPage(PageEnum.PageSettingsServerInfo)
                         drawer.closeTriggered()

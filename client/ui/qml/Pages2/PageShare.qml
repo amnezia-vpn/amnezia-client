@@ -236,11 +236,6 @@ PageType {
                             descriptionText: qsTr("Use for your own devices, or share with those you trust to manage the server.")
                         }
 
-                        // Item {
-                        //     id: focusItem
-                        //     // KeyNavigation.tab: shareFullAccessButton.rightButton
-                        // }
-
                         LabelWithButtonType {
                             id: shareFullAccessButton
                             Layout.fillWidth: true
@@ -253,7 +248,6 @@ PageType {
                                 PageController.goToPage(PageEnum.PageShareFullAccess)
                                 shareFullAccessDrawer.closeTriggered()
                             }
-
                         }
                     }
                 }
@@ -694,38 +688,38 @@ PageType {
                 }
 
                 clip: true
-                interactive: false
+                // interactive: false
 
-                activeFocusOnTab: true
-                focus: true
-                Keys.onTabPressed: {
-                    if (!GC.isMobile()) {
-                        if (currentIndex < this.count - 1) {
-                            this.incrementCurrentIndex()
-                            // currentItem.focusItem.forceActiveFocus()
-                        } else {
-                            this.currentIndex = 0
-                            // lastItemTabClicked(focusItem)
-                        }
-                    }
-                }
+                // activeFocusOnTab: true
+                // focus: true
+                // Keys.onTabPressed: {
+                //     if (!GC.isMobile()) {
+                //         if (currentIndex < this.count - 1) {
+                //             this.incrementCurrentIndex()
+                //             // currentItem.focusItem.forceActiveFocus()
+                //         } else {
+                //             this.currentIndex = 0
+                //             // lastItemTabClicked(focusItem)
+                //         }
+                //     }
+                // }
 
-                onActiveFocusChanged: {
-                    if (focus && !GC.isMobile()) {
-                        currentIndex = 0
-                        // currentItem.focusItem.forceActiveFocus()
-                    }
-                }
+                // onActiveFocusChanged: {
+                //     if (focus && !GC.isMobile()) {
+                //         currentIndex = 0
+                //         // currentItem.focusItem.forceActiveFocus()
+                //     }
+                // }
 
-                onCurrentIndexChanged: {
-                    if (currentItem) {
-                        if (currentItem.y < a.contentY) {
-                            a.contentY = currentItem.y
-                        } else if (currentItem.y + currentItem.height + clientsListView.y > a.contentY + a.height) {
-                            a.contentY = currentItem.y + clientsListView.y + currentItem.height - a.height
-                        }
-                    }
-                }
+                // onCurrentIndexChanged: {
+                //     if (currentItem) {
+                //         if (currentItem.y < a.contentY) {
+                //             a.contentY = currentItem.y
+                //         } else if (currentItem.y + currentItem.height + clientsListView.y > a.contentY + a.height) {
+                //             a.contentY = currentItem.y + clientsListView.y + currentItem.height - a.height
+                //         }
+                //     }
+                // }
 
                 delegate: Item {
                     implicitWidth: clientsListView.width

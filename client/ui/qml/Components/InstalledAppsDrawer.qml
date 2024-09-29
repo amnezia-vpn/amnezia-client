@@ -69,6 +69,8 @@ DrawerType2 {
                 clip: true
                 interactive: true
 
+                property bool isFocusable: true
+
                 model: SortFilterProxyModel {
                     id: proxyInstalledAppsModel
                     sourceModel: installedAppsModel
