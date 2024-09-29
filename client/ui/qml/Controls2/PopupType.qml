@@ -28,11 +28,11 @@ Popup {
     }
 
     onOpened: {
-        FocusController.setRootItem(root)
+        FocusController.pushRootObject(root)
     }
 
     onClosed: {
-        FocusController.setRootItem(null)
+        FocusController.dropRootObject(root)
     }
 
     background: Rectangle {

@@ -37,11 +37,11 @@ DrawerType2 {
             target: root
             enabled: !GC.isMobile()
             function onOpened() {
-                FocusController.setRootItem(root)
+                FocusController.pushRootObject(root)
             }
             
             function onClosed() {
-                FocusController.setRootItem(null)
+                FocusController.dropRootObject(root)
             }
         }
 

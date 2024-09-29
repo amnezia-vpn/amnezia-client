@@ -95,7 +95,7 @@ Item {
 
             depthIndex = 0
             PageController.decrementDrawerDepth()
-            FocusController.setRootItem(null)
+            FocusController.dropRootObject(root)
         }
 
         function onOpenTriggered() {
@@ -118,7 +118,7 @@ Item {
             }
 
             depthIndex = PageController.incrementDrawerDepth()
-            FocusController.setRootItem(root)
+            FocusController.pushRootObject(root)
         }
     }
 
