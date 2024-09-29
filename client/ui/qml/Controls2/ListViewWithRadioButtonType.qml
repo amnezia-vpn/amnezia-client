@@ -26,12 +26,6 @@ ListView {
     height: root.contentItem.height
 
     clip: true
-    interactive: false
-
-    property FlickableType parentFlickable
-    property var lastItemTabClicked
-
-    property int currentFocusIndex: 0
 
     property bool isFocusable: true
 
@@ -69,84 +63,80 @@ ListView {
         radioButton.clicked()
     }
 
-    delegate: Item {
+    delegate: ColumnLayout {
+        id: content
+
         implicitWidth: rootWidth
-        implicitHeight: content.implicitHeight
+        // implicitHeight: content.implicitHeight
 
-        ColumnLayout {
-            id: content
+        RadioButton {
+            id: radioButton
 
-            anchors.fill: parent
+            implicitWidth: parent.width
+            implicitHeight: radioButtonContent.implicitHeight
 
-            RadioButton {
-                id: radioButton
+            hoverEnabled: true
 
-                implicitWidth: parent.width
-                implicitHeight: radioButtonContent.implicitHeight
+            indicator: Rectangle {
+                width: parent.width - 1
+                height: parent.height
+                color: radioButton.hovered ? AmneziaStyle.color.slateGray : AmneziaStyle.color.onyxBlack
+                border.color: radioButton.focus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.transparent
+                border.width: radioButton.focus ? 1 : 0
 
-                hoverEnabled: true
-
-                indicator: Rectangle {
-                    width: parent.width - 1
-                    height: parent.height
-                    color: radioButton.hovered ? AmneziaStyle.color.slateGray : AmneziaStyle.color.onyxBlack
-                    border.color: radioButton.focus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.transparent
-                    border.width: radioButton.focus ? 1 : 0
-
-                    Behavior on color {
-                        PropertyAnimation { duration: 200 }
-                    }
-                    Behavior on border.color {
-                        PropertyAnimation { duration: 200 }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        enabled: false
-                    }
+                Behavior on color {
+                    PropertyAnimation { duration: 200 }
+                }
+                Behavior on border.color {
+                    PropertyAnimation { duration: 200 }
                 }
 
-                RowLayout {
-                    id: radioButtonContent
+                MouseArea {
                     anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
+                }
+            }
 
-                    anchors.rightMargin: 16
-                    anchors.leftMargin: 16
+            RowLayout {
+                id: radioButtonContent
+                anchors.fill: parent
 
-                    z: 1
+                anchors.rightMargin: 16
+                anchors.leftMargin: 16
 
-                    ParagraphTextType {
-                        Layout.fillWidth: true
-                        Layout.topMargin: 20
-                        Layout.bottomMargin: 20
+                z: 1
 
-                        text: name
-                        maximumLineCount: root.textMaximumLineCount
-                        elide: root.textElide
+                ParagraphTextType {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 20
+                    Layout.bottomMargin: 20
 
-                    }
+                    text: name
+                    maximumLineCount: root.textMaximumLineCount
+                    elide: root.textElide
 
-                    Image {
-                        source: imageSource
-                        visible: radioButton.checked
-
-                        width: 24
-                        height: 24
-
-                        Layout.rightMargin: 8
-                    }
                 }
 
-                ButtonGroup.group: buttonGroup
-                checked: root.currentIndex === index
+                Image {
+                    source: imageSource
+                    visible: radioButton.checked
 
-                onClicked: {
-                    root.currentIndex = index
-                    root.selectedText = name
-                    if (clickedFunction && typeof clickedFunction === "function") {
-                        clickedFunction()
-                    }
+                    width: 24
+                    height: 24
+
+                    Layout.rightMargin: 8
+                }
+            }
+
+            ButtonGroup.group: buttonGroup
+            checked: root.currentIndex === index
+
+            onClicked: {
+                root.currentIndex = index
+                root.selectedText = name
+                if (clickedFunction && typeof clickedFunction === "function") {
+                    clickedFunction()
                 }
             }
         }

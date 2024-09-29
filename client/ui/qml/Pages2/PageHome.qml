@@ -127,7 +127,6 @@ PageType {
 
                     onClosed: {
                         console.log(objectName, " was closed...")
-                        FocusController.setRootItem(null)
                     }
                 }
             }
@@ -257,7 +256,6 @@ PageType {
                             console.debug("onClicked collapsedButtonChevron")
                             if (drawer.isCollapsedStateActive()) {
                                 drawer.openTriggered()
-                                FocusController.setRootItem(drawer)
                             }
                         }
                     }
@@ -309,6 +307,8 @@ PageType {
                         rootButtonTextTopMargin: 8
                         rootButtonTextBottomMargin: 8
 
+                        enabled: drawer.isOpened
+
                         text: ServersModel.defaultServerDefaultContainerName
                         textColor: AmneziaStyle.color.midnightBlack
                         headerText: qsTr("VPN protocol")
@@ -326,8 +326,6 @@ PageType {
 
                             rootWidth: root.width
                             height: 500 // TODO: make calculated
-
-                            // isFocusable: false // TODO: this is a workaround. Need to remove it
 
                             Connections {
                                 objectName: "rowLayoutConnections"
