@@ -2,22 +2,28 @@ XCODEBUILD="/usr/bin/xcodebuild"
 WORKINGDIR=`pwd`
 PATCH="/usr/bin/patch"
 
-  cat $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/Project.xcconfig > $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/amnezia.xcconfig
-  cat << EOF >> $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/amnezia.xcconfig
-  PROJECT_TEMP_DIR = $WORKINGDIR/3rd/OpenVPNAdapter/build/OpenVPNAdapter.build
-  CONFIGURATION_BUILD_DIR = $WORKINGDIR/3rd/OpenVPNAdapter/build/Release-iphoneos
-  BUILT_PRODUCTS_DIR = $WORKINGDIR/3rd/OpenVPNAdapter/build/Release-iphoneos
+# Copy the Project.xcconfig settings to amnezia.xcconfig
+cat $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/Project.xcconfig > $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/amnezia.xcconfig
+
+# Append macOS-specific build directory configurations to amnezia.xcconfig
+cat << EOF >> $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/amnezia.xcconfig
+PROJECT_TEMP_DIR = $WORKINGDIR/3rd/OpenVPNAdapter/build/OpenVPNAdapter.build
+CONFIGURATION_BUILD_DIR = $WORKINGDIR/3rd/OpenVPNAdapter/build/Release-macos
+BUILT_PRODUCTS_DIR = $WORKINGDIR/3rd/OpenVPNAdapter/build/Release-macos
 EOF
 
-# Lấy phiên bản SDK macOS hiện tại
-MACOSX_SDK=$(xcodebuild -showsdks | grep macosx | sed -E 's/.*macosx([0-9]+\.[0-9]+).*/macosx\1/')
-
+# Fetch the current macOS SDK version dynamically
+MACOSX_SDK=macosx15.0
 cd 3rd/OpenVPNAdapter
-if $XCODEBUILD -scheme OpenVPNAdapter -configuration Release -xcconfig Configuration/amnezia.xcconfig -sdk $MACOSX_SDK -destination 'generic/platform=MacOS' -project OpenVPNAdapter.xcodeproj ; then
-  echo "OpenVPNAdapter built successfully"
+
+# Build for macOS using the correct SDK and destination
+if $XCODEBUILD -scheme OpenVPNAdapter -configuration Release -xcconfig Configuration/amnezia.xcconfig -sdk $MACOSX_SDK -destination 'generic/platform=macOS' -project OpenVPNAdapter.xcodeproj ; then
+  echo "OpenVPNAdapter built successfully for macOS"
 else
-  echo "OpenVPNAdapter build failed ..."
+  echo "OpenVPNAdapter macOS build failed ..."
 fi
 
-rm -rf ./build/Release-iphoneos/OpenVPNAdapter.framework/Versions/A/_CodeSignature
+# Remove CodeSignature if needed for macOS
+rm -rf ./build/Release-macos/OpenVPNAdapter.framework/Versions/A/_CodeSignature
+
 cd ../../
