@@ -10,6 +10,8 @@
 #include <QTextDocument>
 #include <QTimer>
 #include <QTranslator>
+#include <QLocalSocket>
+#include <QLocalServer>
 
 #include "logger.h"
 #include "ui/models/installedAppsModel.h"
@@ -28,13 +30,7 @@
     #include <AmneziaVPN-Swift.h>
 #endif
 
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
 AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv)
-#else
-AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecondary, SingleApplication::Options options, int timeout,
-                                       const QString &userData)
-    : SingleApplication(argc, argv, allowSecondary, options, timeout, userData)
-#endif
 {
     setQuitOnLastWindowClosed(false);
 
@@ -180,16 +176,6 @@ void AmneziaApplication::init()
     m_pageController->showOnStartup();
 #endif
 
-        // TODO - fix
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    if (isPrimary()) {
-        QObject::connect(this, &SingleApplication::instanceStarted, m_pageController.get(), [this]() {
-            qDebug() << "Secondary instance started, showing this window instead";
-            emit m_pageController->raiseMainWindow();
-        });
-    }
-#endif
-
 // Android TextArea clipboard workaround
 // Text from TextArea always has "text/html" mime-type:
 // /qt/6.6.1/Src/qtdeclarative/src/quick/items/qquicktextcontrol.cpp:1865
@@ -293,6 +279,24 @@ bool AmneziaApplication::parseCommands()
     }
     return true;
 }
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+void AmneziaApplication::startLocalServer() {
+    const QString serverName("AmneziaVPNInstance");
+    QLocalServer::removeServer(serverName);
+
+    QLocalServer* server = new QLocalServer(this);
+    server->listen(serverName);
+
+    QObject::connect(server, &QLocalServer::newConnection, this, [server, this]() {
+        if (server) {
+            QLocalSocket* clientConnection = server->nextPendingConnection();
+            clientConnection->deleteLater();
+        }
+        emit m_pageController->raiseMainWindow();
+    });
+}
+#endif
 
 QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
 {

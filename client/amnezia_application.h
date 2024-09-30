@@ -53,22 +53,14 @@
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     #define AMNEZIA_BASE_CLASS QGuiApplication
 #else
-    #define AMNEZIA_BASE_CLASS SingleApplication
-    #define QAPPLICATION_CLASS QApplication
-    #include "singleapplication.h"
+    #define AMNEZIA_BASE_CLASS QApplication
 #endif
 
 class AmneziaApplication : public AMNEZIA_BASE_CLASS
 {
     Q_OBJECT
 public:
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     AmneziaApplication(int &argc, char *argv[]);
-#else
-    AmneziaApplication(int &argc, char *argv[], bool allowSecondary = false,
-                       SingleApplication::Options options = SingleApplication::User, int timeout = 1000,
-                       const QString &userData = {});
-#endif
     virtual ~AmneziaApplication();
 
     void init();
@@ -77,6 +69,10 @@ public:
     void loadTranslator();
     void updateTranslator(const QLocale &locale);
     bool parseCommands();
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    void startLocalServer();
+#endif
 
     QQmlApplicationEngine *qmlEngine() const;
     QNetworkAccessManager *manager() { return m_nam; }
