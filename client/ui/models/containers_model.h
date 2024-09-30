@@ -31,7 +31,9 @@ public:
         IsCurrentlyProcessedRole,
         IsDefaultRole,
         IsSupportedRole,
-        IsShareableRole
+        IsShareableRole,
+
+        InstallPageOrderRole
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -51,6 +53,9 @@ public slots:
 
     bool isSupportedByCurrentPlatform(const int containerIndex);
     bool isServiceContainer(const int containerIndex);
+
+    bool hasInstalledServices();
+    bool hasInstalledProtocols();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

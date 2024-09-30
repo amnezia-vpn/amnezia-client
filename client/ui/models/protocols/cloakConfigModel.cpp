@@ -51,14 +51,11 @@ void CloakConfigModel::updateModel(const QJsonObject &config)
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::cloak).toObject();
 
-    m_protocolConfig.insert(config_key::cipher,
-                            protocolConfig.value(config_key::cipher).toString(protocols::cloak::defaultCipher));
-
-    m_protocolConfig.insert(config_key::port,
-                            protocolConfig.value(config_key::port).toString(protocols::cloak::defaultPort));
-
-    m_protocolConfig.insert(config_key::site,
-                            protocolConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite));
+    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Cloak), Proto::Cloak);
+    m_protocolConfig.insert(config_key::transport_proto, protocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
+    m_protocolConfig.insert(config_key::cipher, protocolConfig.value(config_key::cipher).toString(protocols::cloak::defaultCipher));
+    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(protocols::cloak::defaultPort));
+    m_protocolConfig.insert(config_key::site, protocolConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite));
 
     endResetModel();
 }

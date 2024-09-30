@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "TextTypes"
 
 Item {
@@ -19,8 +21,8 @@ Item {
     property Component collapsedContent
     property Component expandedContent
 
-    property string defaultColor: "#1C1D21"
-    property string borderColor: "#2C2D30"
+    property string defaultColor: AmneziaStyle.color.onyxBlack
+    property string borderColor: AmneziaStyle.color.slateGray
 
     property real expandedHeight
     property real collapsedHeight: 0
@@ -90,7 +92,7 @@ Item {
         id: background
 
         anchors.fill: parent
-        color: root.isCollapsed ? "transparent" : Qt.rgba(14/255, 14/255, 17/255, 0.8)
+        color: root.isCollapsed ? AmneziaStyle.color.transparent : Qt.rgba(14/255, 14/255, 17/255, 0.8)
 
         Behavior on color {
             PropertyAnimation { duration: 200 }

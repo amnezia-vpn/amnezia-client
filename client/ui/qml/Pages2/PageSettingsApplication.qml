@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -49,6 +50,8 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+
+            spacing: 0
 
             HeaderType {
                 Layout.fillWidth: true
@@ -221,7 +224,7 @@ PageType {
 
                 text: qsTr("Reset settings and remove all data from the application")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: lastItemTabClicked()
                 parentFlickable: fl
@@ -238,7 +241,7 @@ PageType {
                         } else
                         {
                             SettingsController.clearSettings()
-                            PageController.replaceStartPage()
+                            PageController.goToPageHome()
                         }
 
                         if (!GC.isMobile()) {

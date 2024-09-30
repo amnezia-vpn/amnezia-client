@@ -8,6 +8,7 @@ import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerProps 1.0
 import ContainersModelFilters 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -60,7 +61,8 @@ PageType {
                     id: proxyContainersModel
                     sourceModel: ContainersModel
                     sorters: [
-                        RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
+                        RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder },
+                        RoleSorter { roleName: "installPageOrder"; sortOrder: Qt.AscendingOrder }
                     ]
                 }
 

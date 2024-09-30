@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -84,7 +85,7 @@ PageType {
                 font.pixelSize: 14
 
                 text: qsTr("Amnezia is a free and open-source application. You can support the developers if you like it.")
-                color: "#CCCAC8"
+                color: AmneziaStyle.color.paleGray
             }
 
             ParagraphTextType {
@@ -119,7 +120,7 @@ PageType {
                 id: mailButton
                 Layout.fillWidth: true
 
-                text: qsTr("Mail")
+                text: qsTr("support@amnezia.org")
                 descriptionText: qsTr("For reviews and bug reports")
                 leftImageSource: "qrc:/images/controls/mail.svg"
 
@@ -127,6 +128,8 @@ PageType {
                 parentFlickable: fl
 
                 clickedFunction: function() {
+                    GC.copyToClipBoard(text)
+                    PageController.showNotificationMessage(qsTr("Copied"))
                 }
 
             }
@@ -162,7 +165,7 @@ PageType {
                 parentFlickable: fl
 
                 clickedFunction: function() {
-                    Qt.openUrlExternally(qsTr("https://amnezia.org"))
+                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
                 }
 
             }
@@ -176,7 +179,19 @@ PageType {
                 horizontalAlignment: Text.AlignHCenter
 
                 text: qsTr("Software version: %1").arg(SettingsController.getAppVersion())
-                color: "#878B91"
+                color: AmneziaStyle.color.mutedGray
+
+                MouseArea {
+                    property int clickCount: 0
+                    anchors.fill: parent
+                    onClicked: {
+                        if (clickCount > 10) {
+                            SettingsController.enableDevMode()
+                        } else {
+                            clickCount++
+                        }
+                    }
+                }
             }
 
             BasicButtonType {
@@ -186,11 +201,11 @@ PageType {
                 Layout.bottomMargin: 16
                 implicitHeight: 32
 
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#FBB26A"
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.goldenApricot
 
                 text: qsTr("Check for updates")
 
@@ -209,11 +224,11 @@ PageType {
               Layout.topMargin: -15
               implicitHeight: 25
 
-              defaultColor: "transparent"
-              hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-              pressedColor: Qt.rgba(1, 1, 1, 0.12)
-              disabledColor: "#878B91"
-              textColor: "#FBB26A"
+              defaultColor: AmneziaStyle.color.transparent
+              hoveredColor: AmneziaStyle.color.translucentWhite
+              pressedColor: AmneziaStyle.color.sheerWhite
+              disabledColor: AmneziaStyle.color.mutedGray
+              textColor: AmneziaStyle.color.goldenApricot
 
               text: qsTr("Privacy Policy")
 
@@ -221,7 +236,7 @@ PageType {
               parentFlickable: fl
 
               clickedFunc: function() {
-                Qt.openUrlExternally("https://amnezia.org/en/policy")
+                Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl() + "/policy")
               }
             }
         }

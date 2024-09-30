@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ProtocolEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -34,6 +35,10 @@ PageType {
                 value: true
             }
         ]
+        sorters: RoleSorter {
+            roleName: "installPageOrder"
+            sortOrder: Qt.AscendingOrder
+        }
     }
 
     ColumnLayout {

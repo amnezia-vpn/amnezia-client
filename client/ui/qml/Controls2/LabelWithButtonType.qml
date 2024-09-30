@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "TextTypes"
 
 Item {
@@ -24,16 +26,16 @@ Item {
     property alias eyeButton: eyeImage
     property FlickableType parentFlickable
 
-    property string textColor: "#d7d8db"
-    property string textDisabledColor: "#878B91"
-    property string descriptionColor: "#878B91"
-    property string descriptionDisabledColor: "#494B50"
+    property string textColor: AmneziaStyle.color.paleGray
+    property string textDisabledColor: AmneziaStyle.color.mutedGray
+    property string descriptionColor: AmneziaStyle.color.mutedGray
+    property string descriptionDisabledColor: AmneziaStyle.color.charcoalGray
     property real textOpacity: 1.0
 
-    property string borderFocusedColor: "#D7D8DB"
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
-    property string rightImageColor: "#d7d8db"
+    property string rightImageColor: AmneziaStyle.color.paleGray
 
     property bool descriptionOnTop: false
     property bool hideDescription: true
@@ -117,7 +119,7 @@ Item {
             Layout.rightMargin: rightImageSource || !isLeftImageHoverEnabled ? 16 : 0
 
             radius: 12
-            color: "transparent"
+            color: AmneziaStyle.color.transparent
 
             Behavior on color {
                 PropertyAnimation { duration: 200 }
@@ -220,7 +222,7 @@ Item {
                 id: eyeImageBackground
                 anchors.fill: parent
                 radius: 12
-                color: "transparent"
+                color: AmneziaStyle.color.transparent
 
                 Behavior on color {
                     PropertyAnimation { duration: 200 }
@@ -257,7 +259,7 @@ Item {
                 id: rightImageBackground
                 anchors.fill: parent
                 radius: 12
-                color: "transparent"
+                color: AmneziaStyle.color.transparent
 
                 Behavior on color {
                     PropertyAnimation { duration: 200 }
@@ -274,9 +276,9 @@ Item {
     Rectangle {
         id: background
         anchors.fill: root
-        color: "transparent"
+        color: AmneziaStyle.color.transparent
 
-        border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
+        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
         border.width: root.activeFocus ? root.borderFocusedWidth : 0
 
 

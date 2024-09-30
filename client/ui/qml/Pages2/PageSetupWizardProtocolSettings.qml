@@ -7,6 +7,7 @@ import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import ContainerProps 1.0
 import ProtocolProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -93,11 +94,11 @@ PageType {
 
                             implicitHeight: 32
 
-                            defaultColor: "transparent"
-                            hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                            pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                            disabledColor: "#878B91"
-                            textColor: "#FBB26A"
+                            defaultColor: AmneziaStyle.color.transparent
+                            hoveredColor: AmneziaStyle.color.translucentWhite
+                            pressedColor: AmneziaStyle.color.sheerWhite
+                            disabledColor: AmneziaStyle.color.mutedGray
+                            textColor: AmneziaStyle.color.goldenApricot
 
                             text: qsTr("More detailed")
                             KeyNavigation.tab: transportProtoSelector
@@ -194,7 +195,7 @@ PageType {
 
                                         Rectangle {
                                             Layout.fillHeight: true
-                                            color: "transparent"
+                                            color: AmneziaStyle.color.transparent
                                         }
 
                                         BasicButtonType {
@@ -247,7 +248,7 @@ PageType {
 
                         Rectangle {
                             Layout.fillHeight: true
-                            color: "transparent"
+                            color: AmneziaStyle.color.transparent
                         }
 
                         BasicButtonType {
@@ -261,7 +262,9 @@ PageType {
                             Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
-                                if (!port.textField.acceptableInput) {
+                                if (!port.textField.acceptableInput &&
+                                        ContainerProps.containerTypeToString(dockerContainer) !== "torwebsite" &&
+                                        ContainerProps.containerTypeToString(dockerContainer) !== "ikev2") {
                                     port.errorText = qsTr("The port must be in the range of 1 to 65535")
                                     return
                                 }

@@ -187,6 +187,10 @@ QString WireguardConfigurator::createConfig(const ServerCredentials &credentials
     jConfig[config_key::server_pub_key] = connData.serverPubKey;
     jConfig[config_key::mtu] = wireguarConfig.value(config_key::mtu).toString(protocols::wireguard::defaultMtu);
 
+    jConfig[config_key::persistent_keep_alive] = 25;
+    QJsonArray allowedIps { "0.0.0.0/0" };
+    jConfig[config_key::allowed_ips] = allowedIps;
+
     jConfig[config_key::clientId] = connData.clientPubKey;
 
     return QJsonDocument(jConfig).toJson();

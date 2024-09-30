@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
+import Style 1.0
+
 import "TextTypes"
 
 RadioButton {
@@ -12,15 +14,15 @@ RadioButton {
     property int textElide: Qt.ElideRight
     property string descriptionText
 
-    property string hoveredColor: Qt.rgba(1, 1, 1, 0.05)
-    property string defaultColor: Qt.rgba(1, 1, 1, 0)
-    property string disabledColor: Qt.rgba(1, 1, 1, 0)
-    property string selectedColor: Qt.rgba(1, 1, 1, 0)
+    property string hoveredColor: AmneziaStyle.color.barelyTranslucentWhite
+    property string defaultColor: AmneziaStyle.color.transparent
+    property string disabledColor: AmneziaStyle.color.transparent
+    property string selectedColor: AmneziaStyle.color.transparent
 
-    property string textColor: "#D7D8DB"
-    property string selectedTextColor: "#FBB26A"
+    property string textColor: AmneziaStyle.color.paleGray
+    property string selectedTextColor: AmneziaStyle.color.goldenApricot
 
-    property string borderFocusedColor: "#D7D8DB"
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
     property string imageSource
@@ -34,7 +36,7 @@ RadioButton {
 
         anchors.verticalCenter: parent.verticalCenter
 
-        border.color: root.focus ? root.borderFocusedColor : "transparent"
+        border.color: root.focus ? root.borderFocusedColor : AmneziaStyle.color.transparent
         border.width: root.focus ? root.borderFocusedWidth : 0
 
         implicitWidth: 56
@@ -137,7 +139,7 @@ RadioButton {
             CaptionTextType {
                 id: description
 
-                color: "#878B91"
+                color: AmneziaStyle.color.mutedGray
                 text: root.descriptionText
 
                 visible: root.descriptionText !== ""

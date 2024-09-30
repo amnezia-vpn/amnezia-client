@@ -5,7 +5,8 @@ import Darwin
 import OpenVPNAdapter
 
 enum TunnelProtoType: String {
-  case wireguard, openvpn
+  case wireguard, openvpn, xray
+
 }
 
 struct Constants {
@@ -13,6 +14,7 @@ struct Constants {
   static let processQueueName = "org.amnezia.process-packets"
   static let kActivationAttemptId = "activationAttemptId"
   static let ovpnConfigKey = "ovpn"
+  static let xrayConfigKey = "xray"
   static let wireGuardConfigKey = "wireguard"
   static let loggerTag = "NET"
   
@@ -91,6 +93,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 protoType = .openvpn
             } else if (providerConfiguration?[Constants.wireGuardConfigKey] as? Data) != nil {
                 protoType = .wireguard
+            } else if (providerConfiguration?[Constants.xrayConfigKey] as? Data) != nil {
+                protoType = .xray
             }
         }
 
@@ -107,6 +111,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                            completionHandler: completionHandler)
         case .openvpn:
             startOpenVPN(completionHandler: completionHandler)
+        case .xray:
+            startXray(completionHandler: completionHandler)
+
         }
     }
 
@@ -124,6 +131,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         case .openvpn:
             stopOpenVPN(with: reason,
                         completionHandler: completionHandler)
+        case .xray:
+            stopXray(completionHandler: completionHandler)
         }
     }
   
@@ -138,6 +147,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             handleWireguardStatusMessage(messageData, completionHandler: completionHandler)
         case .openvpn:
             handleOpenVPNStatusMessage(messageData, completionHandler: completionHandler)
+        case .xray:
+            break;
         }
     }
   

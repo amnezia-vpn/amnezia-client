@@ -10,6 +10,7 @@ import SortFilterProxyModel 0.2
 import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -20,7 +21,7 @@ import "../Components"
 PageType {
     id: root
 
-    property var isServerFromApi: ServersModel.getDefaultServerData("isServerFromApi")
+    property var isServerFromTelegramApi: ServersModel.getDefaultServerData("isServerFromTelegramApi")
     
     defaultActiveFocusItem: searchField.textField
 
@@ -35,7 +36,7 @@ PageType {
         if (ConnectionController.isConnected) {
             PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
             root.pageEnabled = false
-        } else if (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && isServerFromApi) {
+        } else if (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling) {
             PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
             root.pageEnabled = false
         } else {
@@ -265,7 +266,7 @@ PageType {
                             text: url
                             descriptionText: ip
                             rightImageSource: "qrc:/images/controls/trash.svg"
-                            rightImageColor: "#D7D8DB"
+                            rightImageColor: AmneziaStyle.color.paleGray
 
                             clickedFunction: function() {
                                 var headerText = qsTr("Remove ") + url + "?"
@@ -299,7 +300,7 @@ PageType {
     Rectangle {
         anchors.fill: addSiteButton
         anchors.bottomMargin: -24
-        color: "#0E0E11"
+        color: AmneziaStyle.color.midnightBlack
         opacity: 0.8
     }
 
@@ -340,7 +341,7 @@ PageType {
             implicitHeight: 56
 
             image: "qrc:/images/controls/more-vertical.svg"
-            imageColor: "#D7D8DB"
+            imageColor: AmneziaStyle.color.paleGray
 
             onClicked: function () {
                 moreActionsDrawer.open()

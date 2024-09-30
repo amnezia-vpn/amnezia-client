@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
+import Style 1.0
+
 Item {
     id: root
 
@@ -28,7 +30,7 @@ Item {
         ImageButtonType {
             id: backButton
             image: backButtonImage
-            imageColor: "#D7D8DB"
+            imageColor: AmneziaStyle.color.paleGray
 
             implicitWidth: 40
             implicitHeight: 40
@@ -46,7 +48,7 @@ Item {
             id: background
             Layout.fillWidth: true
 
-            color: "transparent"
+            color: AmneziaStyle.color.transparent
         }
     }
 

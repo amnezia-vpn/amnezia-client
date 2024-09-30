@@ -3,14 +3,16 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 
+import Style 1.0
+
 import "TextTypes"
 
 Rectangle {
     id: root
 
-    property string textColor: "#D7D8DB"
-    property string backGroundColor: "#1C1D21"
-    property string imageColor: "#D7D8DB"
+    property string textColor: AmneziaStyle.color.paleGray
+    property string backGroundColor: AmneziaStyle.color.onyxBlack
+    property string imageColor: AmneziaStyle.color.paleGray
     property string textString
     property int textFormat: Text.PlainText
 

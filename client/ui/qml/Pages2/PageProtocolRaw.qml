@@ -8,6 +8,7 @@ import PageEnum 1.0
 import ProtocolEnum 1.0
 import ContainerEnum 1.0
 import ContainerProps 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -191,9 +192,9 @@ PageType {
                                             leftPadding: 0
                                             height: 24
 
-                                            color: "#D7D8DB"
-                                            selectionColor:  "#633303"
-                                            selectedTextColor: "#D7D8DB"
+                                            color: AmneziaStyle.color.paleGray
+                                            selectionColor: AmneziaStyle.color.richBrown
+                                            selectedTextColor: AmneziaStyle.color.paleGray
 
                                             font.pixelSize: 16
                                             font.weight: Font.Medium
@@ -204,7 +205,7 @@ PageType {
                                             wrapMode: Text.Wrap
 
                                             background: Rectangle {
-                                                color: "transparent"
+                                                color: AmneziaStyle.color.transparent
                                             }
                                         }
                                     }
@@ -223,7 +224,7 @@ PageType {
                 visible: ServersModel.isProcessedServerHasWriteAccess()
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
                 clickedFunction: function() {

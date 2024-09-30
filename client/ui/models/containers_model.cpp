@@ -41,6 +41,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_processedContainerIndex);
     case IsSupportedRole: return ContainerProps::isSupportedByCurrentPlatform(container);
     case IsShareableRole: return ContainerProps::isShareable(container);
+    case InstallPageOrderRole: return ContainerProps::installPageOrder(container);
     }
 
     return QVariant();
@@ -93,6 +94,26 @@ bool ContainersModel::isServiceContainer(const int containerIndex)
     return qvariant_cast<amnezia::ServiceType>(data(index(containerIndex), ServiceTypeRole) == ServiceType::Other);
 }
 
+bool ContainersModel::hasInstalledServices()
+{
+    for (const auto &container : m_containers.keys()) {
+        if (ContainerProps::containerService(container) == ServiceType::Other) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ContainersModel::hasInstalledProtocols()
+{
+    for (const auto &container : m_containers.keys()) {
+        if (ContainerProps::containerService(container) == ServiceType::Vpn) {
+            return true;
+        }
+    }
+    return false;
+}
+
 QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -112,5 +133,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
     roles[IsSupportedRole] = "isSupported";
     roles[IsShareableRole] = "isShareable";
+
+    roles[InstallPageOrderRole] = "installPageOrder";
     return roles;
 }

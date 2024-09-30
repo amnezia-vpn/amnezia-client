@@ -149,9 +149,13 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   QJsonArray jsAllowedIPAddesses;
 
   QJsonArray plainAllowedIP = wgConfig.value(amnezia::config_key::allowed_ips).toArray();
-  QJsonArray defaultAllowedIP = QJsonArray::fromStringList(QString("0.0.0.0/0, ::/0").split(","));
 
-  if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
+  bool allowSplitTunnelFromAppSettings = false;
+  if (!plainAllowedIP.isEmpty() && plainAllowedIP.contains("0.0.0.0/0")) {
+    allowSplitTunnelFromAppSettings = true;
+  }
+
+  if (!allowSplitTunnelFromAppSettings) {
     // Use AllowedIP list from WG config because of higher priority
     for (auto v : plainAllowedIP) {
       QString ipRange = v.toString();
@@ -170,7 +174,6 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
       }
     }
   } else {
-
     // Use APP split tunnel
       if (splitTunnelType == 0 || splitTunnelType == 2) {
           QJsonObject range_ipv4;

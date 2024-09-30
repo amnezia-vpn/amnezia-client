@@ -6,13 +6,14 @@ import Qt5Compat.GraphicalEffects
 
 import ConnectionState 1.0
 import PageEnum 1.0
+import Style 1.0
 
 Button {
     id: root
 
-    property string defaultButtonColor: "#D7D8DB"
-    property string progressButtonColor: "#D7D8DB"
-    property string connectedButtonColor: "#FBB26A"
+    property string defaultButtonColor: AmneziaStyle.color.paleGray
+    property string progressButtonColor: AmneziaStyle.color.paleGray
+    property string connectedButtonColor: AmneziaStyle.color.goldenApricot
 
     implicitWidth: 190
     implicitHeight: 190
@@ -49,13 +50,13 @@ Button {
                 verticalOffset: 0
                 radius: 10
                 samples: 25
-                color: root.activeFocus ? "#D7D8DB" : "#FBB26A"
+                color: root.activeFocus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.goldenApricot
                 source: backgroundCircle
             }
 
             ShapePath {
-                fillColor: "transparent"
-                strokeColor: "#D7D8DB"
+                fillColor: AmneziaStyle.color.transparent
+                strokeColor: AmneziaStyle.color.paleGray
                 strokeWidth: root.activeFocus ? 1 : 0
                 capStyle: ShapePath.RoundCap
 
@@ -70,10 +71,10 @@ Button {
             }
 
             ShapePath {
-                fillColor: "transparent"
+                fillColor: AmneziaStyle.color.transparent
                 strokeColor: {
                     if (ConnectionController.isConnectionInProgress) {
-                        return "#261E1A"
+                        return AmneziaStyle.color.darkCharcoal
                     } else if (ConnectionController.isConnected) {
                         return connectedButtonColor
                     } else {
@@ -113,8 +114,8 @@ Button {
             visible: ConnectionController.isConnectionInProgress
 
             ShapePath {
-                fillColor: "transparent"
-                strokeColor: "#D7D8DB"
+                fillColor: AmneziaStyle.color.transparent
+                strokeColor: AmneziaStyle.color.paleGray
                 strokeWidth: 3
                 capStyle: ShapePath.RoundCap
 

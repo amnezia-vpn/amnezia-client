@@ -2,14 +2,16 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "TextTypes"
 
 Item {
     id: root
 
     property string headerText
-    property string headerTextDisabledColor: "#494B50"
-    property string headerTextColor: "#878b91"
+    property string headerTextDisabledColor: AmneziaStyle.color.charcoalGray
+    property string headerTextColor: AmneziaStyle.color.mutedGray
 
     property alias errorText: errorField.text
     property bool checkEmptyText: false
@@ -21,18 +23,18 @@ Item {
 
     property alias textField: textField
     property alias textFieldText: textField.text
-    property string textFieldTextColor: "#d7d8db"
-    property string textFieldTextDisabledColor: "#878B91"
+    property string textFieldTextColor: AmneziaStyle.color.paleGray
+    property string textFieldTextDisabledColor: AmneziaStyle.color.mutedGray
 
     property string textFieldPlaceholderText
     property bool textFieldEditable: true
 
-    property string borderColor: "#2C2D30"
-    property string borderFocusedColor: "#d7d8db"
+    property string borderColor: AmneziaStyle.color.slateGray
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
 
-    property string backgroundColor: "#1c1d21"
-    property string backgroundDisabledColor: "transparent"
-    property string bgBorderHoveredColor: "#494B50"
+    property string backgroundColor: AmneziaStyle.color.onyxBlack
+    property string backgroundDisabledColor: AmneziaStyle.color.transparent
+    property string bgBorderHoveredColor: AmneziaStyle.color.charcoalGray
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
@@ -90,10 +92,10 @@ Item {
                         inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
 
                         placeholderText: root.textFieldPlaceholderText
-                        placeholderTextColor: "#494B50"
+                        placeholderTextColor: AmneziaStyle.color.charcoalGray
 
-                        selectionColor:  "#633303"
-                        selectedTextColor: "#D7D8DB"
+                        selectionColor:  AmneziaStyle.color.richBrown
+                        selectedTextColor: AmneziaStyle.color.paleGray
 
                         font.pixelSize: 16
                         font.weight: 400
@@ -147,7 +149,9 @@ Item {
 
             text: root.errorText
             visible: root.errorText !== ""
-            color: "#EB5757"
+            color: AmneziaStyle.color.vibrantRed
+
+            Layout.fillWidth: true
         }
     }
 

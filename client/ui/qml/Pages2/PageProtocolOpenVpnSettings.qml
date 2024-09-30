@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ContainerEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -294,7 +295,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 32
                             Layout.preferredHeight: checkboxLayout.implicitHeight
-                            color: "#1C1D21"
+                            color: AmneziaStyle.color.onyxBlack
                             radius: 16
 
                             Connections {

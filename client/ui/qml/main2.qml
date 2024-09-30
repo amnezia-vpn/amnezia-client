@@ -5,10 +5,12 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 import PageEnum 1.0
+import Style 1.0
 
 import "Config"
 import "Controls2"
 import "Components"
+import "Pages2"
 
 Window  {
     id: root
@@ -21,7 +23,7 @@ Window  {
     maximumWidth: 600
     maximumHeight: 800
 
-    color: "#0E0E11"
+    color: AmneziaStyle.color.midnightBlack
 
     onClosing: function() {
         console.debug("QML onClosing signal")
@@ -30,33 +32,8 @@ Window  {
 
     title: "AmneziaVPN"
 
-    StackViewType {
-        id: rootStackView
-
-        width: root.width
-        height: root.height
-        focus: true
-
-        Component.onCompleted: {
-            var pagePath = PageController.getInitialPage()
-            rootStackView.push(pagePath, { "objectName" : pagePath })
-        }
-
-        Keys.onPressed: function(event) {
-            PageController.keyPressEvent(event.key)
-            event.accepted = true
-        }
-    }
-
     Connections {
         target: PageController
-
-        function onReplaceStartPage() {
-            var pagePath = PageController.getInitialPage()
-            rootStackView.clear()
-            PageController.updateNavigationBarColor(PageController.getInitialPageNavigationBarColor())
-            rootStackView.replace(pagePath, { "objectName" : pagePath })
-        }
 
         function onRaiseMainWindow() {
             root.show()
@@ -100,6 +77,10 @@ Window  {
         function onChangeSettingsFinished(finishedMessage) {
             PageController.showNotificationMessage(finishedMessage)
         }
+    }
+
+    PageStart {
+        anchors.fill: parent
     }
 
     Item {
@@ -194,11 +175,11 @@ Window  {
 
                     Layout.fillWidth: true
 
-                    defaultColor: "transparent"
-                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                    disabledColor: "#878B91"
-                    textColor: "#D7D8DB"
+                    defaultColor: AmneziaStyle.color.transparent
+                    hoveredColor: AmneziaStyle.color.translucentWhite
+                    pressedColor: AmneziaStyle.color.sheerWhite
+                    disabledColor: AmneziaStyle.color.mutedGray
+                    textColor: AmneziaStyle.color.paleGray
                     borderWidth: 1
 
                     text: qsTr("Save")

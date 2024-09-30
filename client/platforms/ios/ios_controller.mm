@@ -216,6 +216,12 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
     if (proto == amnezia::Proto::Awg) {
         return setupAwg();
     }
+    if (proto == amnezia::Proto::Xray) {
+        return setupXray();
+    }
+    if (proto == amnezia::Proto::SSXray) {
+        return setupSSXray();
+    }
 
     return false;
 }
@@ -485,7 +491,7 @@ bool IosController::setupWireGuard()
     if (config.contains(config_key::allowed_ips) && config[config_key::allowed_ips].isArray()) {
         wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
     } else {
-        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
+        QJsonArray allowed_ips { "0.0.0.0/0" };
         wgConfig.insert(config_key::allowed_ips, allowed_ips);
     }
 
@@ -499,6 +505,42 @@ bool IosController::setupWireGuard()
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
 
     return startWireGuard(wgConfigDocStr);
+}
+
+bool IosController::setupXray()
+{
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::Xray)].toObject();
+    QJsonDocument xrayConfigDoc(config);
+
+    QString xrayConfigStr(xrayConfigDoc.toJson(QJsonDocument::Compact));
+
+    QJsonObject finalConfig;
+    finalConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1].toString());
+    finalConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2].toString());
+    finalConfig.insert(config_key::config, xrayConfigStr);
+
+    QJsonDocument finalConfigDoc(finalConfig);
+    QString finalConfigStr(finalConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startXray(finalConfigStr);
+}
+
+bool IosController::setupSSXray()
+{
+    QJsonObject config = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::SSXray)].toObject();
+    QJsonDocument ssXrayConfigDoc(config);
+
+    QString ssXrayConfigStr(ssXrayConfigDoc.toJson(QJsonDocument::Compact));
+
+    QJsonObject finalConfig;
+    finalConfig.insert(config_key::dns1, m_rawConfig[config_key::dns1]);
+    finalConfig.insert(config_key::dns2, m_rawConfig[config_key::dns2]);
+    finalConfig.insert(config_key::config, ssXrayConfigStr);
+
+    QJsonDocument finalConfigDoc(finalConfig);
+    QString finalConfigStr(finalConfigDoc.toJson(QJsonDocument::Compact));
+
+    return startXray(finalConfigStr);
 }
 
 bool IosController::setupAwg()
@@ -534,7 +576,7 @@ bool IosController::setupAwg()
     if (config.contains(config_key::allowed_ips) && config[config_key::allowed_ips].isArray()) {
         wgConfig.insert(config_key::allowed_ips, config[config_key::allowed_ips]);
     } else {
-        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
+        QJsonArray allowed_ips { "0.0.0.0/0" };
         wgConfig.insert(config_key::allowed_ips, allowed_ips);
     }
 
@@ -583,6 +625,20 @@ bool IosController::startWireGuard(const QString &config)
     NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
     tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
     tunnelProtocol.providerConfiguration = @{@"wireguard": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
+    tunnelProtocol.serverAddress = m_serverAddress;
+
+    m_currentTunnel.protocolConfiguration = tunnelProtocol;
+
+    startTunnel();
+}
+
+bool IosController::startXray(const QString &config)
+{
+    qDebug() << "IosController::startXray";
+
+    NETunnelProviderProtocol *tunnelProtocol = [[NETunnelProviderProtocol alloc] init];
+    tunnelProtocol.providerBundleIdentifier = [NSString stringWithUTF8String:VPN_NE_BUNDLEID];
+    tunnelProtocol.providerConfiguration = @{@"xray": [[NSString stringWithUTF8String:config.toStdString().c_str()] dataUsingEncoding:NSUTF8StringEncoding]};
     tunnelProtocol.serverAddress = m_serverAddress;
 
     m_currentTunnel.protocolConfiguration = tunnelProtocol;

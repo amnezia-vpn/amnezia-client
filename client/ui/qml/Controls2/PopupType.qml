@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "TextTypes"
 
 Popup {
@@ -82,11 +84,11 @@ Popup {
                 implicitHeight: 32
 
                 defaultColor: "white"
-                hoveredColor: "#C1C2C5"
-                pressedColor: "#AEB0B7"
-                disabledColor: "#494B50"
+                hoveredColor: AmneziaStyle.color.lightGray
+                pressedColor: AmneziaStyle.color.lightGray
+                disabledColor: AmneziaStyle.color.charcoalGray
 
-                textColor: "#0E0E11"
+                textColor: AmneziaStyle.color.midnightBlack
                 borderWidth: 0
 
                 text: qsTr("Close")

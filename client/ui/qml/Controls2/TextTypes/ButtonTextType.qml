@@ -1,10 +1,12 @@
 import QtQuick
 
+import Style 1.0
+
 Text {
     lineHeight: 24
     lineHeightMode: Text.FixedHeight
 
-    color: "#D7D8DB"
+    color: AmneziaStyle.color.paleGray
     font.pixelSize: 16
     font.weight: 600
     font.family: "PT Root UI VF"

@@ -1,18 +1,20 @@
 import QtQuick
 import QtQuick.Controls
 
+import Style 1.0
+
 TabButton {
     id: root
 
-    property string hoveredColor: "#633303"
-    property string defaultColor: "#D7D8DB"
-    property string selectedColor: "#FBB26A"
+    property string hoveredColor: AmneziaStyle.color.richBrown
+    property string defaultColor: AmneziaStyle.color.paleGray
+    property string selectedColor: AmneziaStyle.color.goldenApricot
 
     property string image
 
     property bool isSelected: false
 
-    property string borderFocusedColor: "#D7D8DB"
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
     property var clickedFunc
@@ -26,10 +28,10 @@ TabButton {
     background: Rectangle {
         id: background
         anchors.fill: parent
-        color: "transparent"
+        color: AmneziaStyle.color.transparent
         radius: 10
 
-        border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
+        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
         border.width: root.activeFocus ? root.borderFocusedWidth : 0
 
     }

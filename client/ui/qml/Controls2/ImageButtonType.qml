@@ -2,23 +2,25 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 Button {
     id: root
 
     property string image
 
-    property string hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-    property string defaultColor: "transparent"
-    property string pressedColor: Qt.rgba(1, 1, 1, 0.12)
-    property string disableColor: "#2C2D30"
+    property string hoveredColor: AmneziaStyle.color.translucentWhite
+    property string defaultColor: AmneziaStyle.color.transparent
+    property string pressedColor: AmneziaStyle.color.sheerWhite
+    property string disableColor: AmneziaStyle.color.slateGray
 
-    property string imageColor: "#878B91"
-    property string disableImageColor: "#2C2D30"
+    property string imageColor: AmneziaStyle.color.mutedGray
+    property string disableImageColor: AmneziaStyle.color.slateGray
 
     property alias backgroundColor: background.color
     property alias backgroundRadius: background.radius
 
-    property string borderFocusedColor: "#D7D8DB"
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
     hoverEnabled: true
@@ -46,7 +48,7 @@ Button {
         id: background
 
         anchors.fill: parent
-        border.color: root.activeFocus ? root.borderFocusedColor : "transparent"
+        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
         border.width: root.activeFocus ? root.borderFocusedWidth : 0
 
         color: {

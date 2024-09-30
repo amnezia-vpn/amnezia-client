@@ -65,14 +65,14 @@ QString ProtocolProps::transportProtoToString(TransportProto proto, Proto p)
 QMap<amnezia::Proto, QString> ProtocolProps::protocolHumanNames()
 {
     return { { Proto::OpenVpn, "OpenVPN" },
-             { Proto::ShadowSocks, "ShadowSocks" },
+             { Proto::ShadowSocks, "Shadowsocks" },
              { Proto::Cloak, "Cloak" },
              { Proto::WireGuard, "WireGuard" },
              { Proto::Awg, "AmneziaWG" },
              { Proto::Ikev2, "IKEv2" },
              { Proto::L2tp, "L2TP" },
              { Proto::Xray, "XRay" },
-             { Proto::SSXray, "ShadowSocks"},
+             { Proto::SSXray, "Shadowsocks"},
 
 
              { Proto::TorWebSite, "Website in Tor network" },
@@ -154,6 +154,7 @@ bool ProtocolProps::defaultPortChangeable(Proto p)
     case Proto::Awg: return true;
     case Proto::Ikev2: return false;
     case Proto::L2tp: return false;
+    case Proto::Xray: return true;
 
     case Proto::TorWebSite: return false;
     case Proto::Dns: return false;

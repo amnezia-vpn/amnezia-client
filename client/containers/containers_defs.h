@@ -72,6 +72,8 @@ namespace amnezia
         static bool isShareable(amnezia::DockerContainer container);
 
         static QJsonObject getProtocolConfigFromContainer(const amnezia::Proto protocol, const QJsonObject &containerConfig);
+
+        static int installPageOrder(amnezia::DockerContainer container);
     };
 
     static void declareQmlContainerEnum()

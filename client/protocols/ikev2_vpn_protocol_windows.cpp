@@ -10,6 +10,7 @@
 #include "ikev2_vpn_protocol_windows.h"
 #include "utilities.h"
 
+
 static Ikev2Protocol* self = nullptr;
 static std::mutex rasDialFuncMutex;
 
@@ -80,10 +81,10 @@ void Ikev2Protocol::newConnectionStateEventReceived(UINT unMsg, tagRASCONNSTATE 
     case RASCS_AuthNotify:
         //qDebug()<<__FUNCTION__ << __LINE__;
         if (dwError != 0) {
-            //qDebug() << "have error" << dwError;
+            qDebug() << "have error" << dwError;
             setConnectionState(Vpn::ConnectionState::Disconnected);
         } else {
-            //qDebug() << "RASCS_AuthNotify but no error" << dwError;
+            qDebug() << "RASCS_AuthNotify but no error" << dwError;
         }
         break;
     case RASCS_AuthRetry:
@@ -179,11 +180,13 @@ ErrorCode Ikev2Protocol::start()
     QByteArray cert = QByteArray::fromBase64(m_config[config_key::cert].toString().toUtf8());
     setConnectionState(Vpn::ConnectionState::Connecting);
 
-    QTemporaryFile certFile;
-    certFile.setAutoRemove(false);
-    certFile.open();
-    certFile.write(cert);
-    certFile.close();
+    QTemporaryFile * certFile = new QTemporaryFile;
+    certFile->setAutoRemove(false);
+    certFile->open();
+    QString m_filename = certFile->fileName();
+    certFile->write(cert);
+    certFile->close();
+    delete certFile;
 
     {
         auto certInstallProcess = IpcClient::CreatePrivilegedProcess();
@@ -193,19 +196,19 @@ ErrorCode Ikev2Protocol::start()
             return ErrorCode::AmneziaServiceConnectionFailed;
         }
 
-        certInstallProcess->waitForSource(1000);
+        certInstallProcess->waitForSource();
         if (!certInstallProcess->isInitialized()) {
             qWarning() << "IpcProcess replica is not connected!";
             setLastError(ErrorCode::AmneziaServiceConnectionFailed);
             return ErrorCode::AmneziaServiceConnectionFailed;
         }
         certInstallProcess->setProgram(PermittedProcess::CertUtil);
-        QStringList arguments({"-f" , "-importpfx",
-                               "-p", m_config[config_key::password].toString(),
-                               certFile.fileName(), "NoExport"
-                              });
-        certInstallProcess->setArguments(arguments);
 
+        QStringList arguments({"-f", "-importpfx", "-p", m_config[config_key::password].toString(),
+            QDir::toNativeSeparators(m_filename), "NoExport"
+        });
+
+        certInstallProcess->setArguments(arguments);
         certInstallProcess->start();
     }
     // /*
@@ -219,40 +222,40 @@ ErrorCode Ikev2Protocol::start()
     }
 
     {
-        {
-            if ( !create_new_vpn(tunnelName(), m_config[config_key::hostName].toString())){
-                qDebug() <<"Can't create the VPN connect";
-            }
-        }
-    }
+     {
+      if ( !create_new_vpn(tunnelName(), m_config[config_key::hostName].toString())){
+                                                                                    qDebug() <<"Can't create the VPN connect";
+}
+}
+}
 
-    {
-        auto adapterConfigProcess = new QProcess;
+{
+    QProcess adapterConfigProcess;
+    adapterConfigProcess.setProgram("powershell");
+    QString arguments = QString("-command \"Set-VpnConnectionIPsecConfiguration\" "
+                                "-ConnectionName '%1' "
+                                "-AuthenticationTransformConstants GCMAES128 "
+                                "-CipherTransformConstants GCMAES128 "
+                                "-EncryptionMethod AES256 "
+                                "-IntegrityCheckMethod SHA256 "
+                                "-PfsGroup None "
+                                "-DHGroup Group14 "
+                                "-PassThru -Force\"")
+                            .arg(tunnelName());
 
-        adapterConfigProcess->setProgram("powershell");
-        QString arguments = QString("-command \"Set-VpnConnectionIPsecConfiguration\" "
-                                    "-ConnectionName '%1' "
-                                    "-AuthenticationTransformConstants GCMAES128 "
-                                    "-CipherTransformConstants GCMAES128 "
-                                    "-EncryptionMethod AES256 "
-                                    "-IntegrityCheckMethod SHA256 "
-                                    "-PfsGroup None "
-                                    "-DHGroup Group14 "
-                                    "-PassThru -Force\"")
-                .arg(tunnelName());
-        adapterConfigProcess->setNativeArguments(arguments);
+    adapterConfigProcess.setNativeArguments(arguments);
 
-        adapterConfigProcess->start();
-        adapterConfigProcess->waitForFinished(5000);
+    adapterConfigProcess.start();
+    adapterConfigProcess.waitForFinished(5000);
+}
+//*/
+{
+    if (!connect_to_vpn(tunnelName())) {
+        qDebug()<<"We can't connect to VPN";
     }
-    //*/
-    {
-        if (!connect_to_vpn(tunnelName())) {
-            qDebug()<<"We can't connect to VPN";
-        }
-    }
-    //setConnectionState(Connecting);
-    return ErrorCode::NoError;
+}
+//setConnectionState(Connecting);
+return ErrorCode::NoError;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Ikev2Protocol::create_new_vpn(const QString & vpn_name,
@@ -299,6 +302,7 @@ bool Ikev2Protocol::connect_to_vpn(const QString & vpn_name){
     auto ret = RasDial(NULL, NULL, &RasDialParams, 0,
                        &RasDialFuncCallback,
                        &hRasConn);
+
     if (ret == ERROR_SUCCESS){
         return true;
     }

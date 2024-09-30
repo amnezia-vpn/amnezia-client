@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Shapes
 
+import Style 1.0
+
 Popup {
     id: root
     anchors.centerIn: parent
@@ -16,7 +18,7 @@ Popup {
     }
 
     background: Rectangle {
-        color: "transparent"
+        color: AmneziaStyle.color.transparent
     }
 
     BusyIndicator {
@@ -40,8 +42,8 @@ Popup {
                 layer.samples: 4
 
                 ShapePath {
-                    fillColor: "transparent"
-                    strokeColor: "#787878"
+                    fillColor: AmneziaStyle.color.transparent
+                    strokeColor: AmneziaStyle.color.charcoalGray
                     strokeWidth: 3
                     capStyle: ShapePath.RoundCap
 

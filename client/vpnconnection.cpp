@@ -291,42 +291,67 @@ void VpnConnection::appendKillSwitchConfig()
 
 void VpnConnection::appendSplitTunnelingConfig()
 {
-    if (m_vpnConfiguration.value(config_key::configVersion).toInt()) {
-        auto protocolName = m_vpnConfiguration.value(config_key::vpnproto).toString();
-        if (protocolName == ProtocolProps::protoToString(Proto::Awg)) {
-            auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
-            QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configData.value("allowed_ips").toString().split(","));
-            QJsonArray defaultAllowedIP = QJsonArray::fromStringList(QString("0.0.0.0/0, ::/0").split(","));
-
-            if (allowedIpsJsonArray != defaultAllowedIP) {
-                allowedIpsJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
-                allowedIpsJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
-
-                m_vpnConfiguration.insert(config_key::splitTunnelType, Settings::RouteMode::VpnOnlyForwardSites);
-                m_vpnConfiguration.insert(config_key::splitTunnelSites, allowedIpsJsonArray);
-            }
-        }
-    } else {
-        Settings::RouteMode routeMode = Settings::RouteMode::VpnAllSites;
-        QJsonArray sitesJsonArray;
-        if (m_settings->isSitesSplitTunnelingEnabled()) {
-            routeMode = m_settings->routeMode();
-
-            auto sites = m_settings->getVpnIps(routeMode);
-            for (const auto &site : sites) {
-                sitesJsonArray.append(site);
-            }
-
-            // Allow traffic to Amnezia DNS
-            if (routeMode == Settings::VpnOnlyForwardSites) {
-                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
-                sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
+    // this block is for old native configs and for old self-hosted configs
+    auto protocolName = m_vpnConfiguration.value(config_key::vpnproto).toString();
+    if (protocolName == ProtocolProps::protoToString(Proto::Awg) || protocolName == ProtocolProps::protoToString(Proto::WireGuard)) {
+        auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
+        if (configData.value(config_key::allowed_ips).isString()) {
+            QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configData.value(config_key::allowed_ips).toString().split(", "));
+            configData.insert(config_key::allowed_ips, allowedIpsJsonArray);
+            m_vpnConfiguration.insert(protocolName + "_config_data", configData);
+        } else if (configData.value(config_key::allowed_ips).isUndefined()) {
+            auto nativeConfig = configData.value(config_key::config).toString();
+            auto nativeConfigLines = nativeConfig.split("\n");
+            for (auto &line : nativeConfigLines) {
+                if (line.contains("AllowedIPs")) {
+                    auto allowedIpsString = line.split(" = ");
+                    if (allowedIpsString.size() < 1) {
+                        break;
+                    }
+                    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIpsString.at(1).split(", "));
+                    configData.insert(config_key::allowed_ips, allowedIpsJsonArray);
+                    m_vpnConfiguration.insert(protocolName + "_config_data", configData);
+                    break;
+                }
             }
         }
 
-        m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
-        m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
+        if (configData.value(config_key::persistent_keep_alive).isUndefined()) {
+            auto nativeConfig = configData.value(config_key::config).toString();
+            auto nativeConfigLines = nativeConfig.split("\n");
+            for (auto &line : nativeConfigLines) {
+                if (line.contains("PersistentKeepalive")) {
+                    auto persistentKeepaliveString = line.split(" = ");
+                    if (persistentKeepaliveString.size() < 1) {
+                        break;
+                    }
+                    configData.insert(config_key::persistent_keep_alive, persistentKeepaliveString.at(1));
+                    m_vpnConfiguration.insert(protocolName + "_config_data", configData);
+                    break;
+                }
+            }
+        }
     }
+
+    Settings::RouteMode routeMode = Settings::RouteMode::VpnAllSites;
+    QJsonArray sitesJsonArray;
+    if (m_settings->isSitesSplitTunnelingEnabled()) {
+        routeMode = m_settings->routeMode();
+
+        auto sites = m_settings->getVpnIps(routeMode);
+        for (const auto &site : sites) {
+            sitesJsonArray.append(site);
+        }
+
+        // Allow traffic to Amnezia DNS
+        if (routeMode == Settings::VpnOnlyForwardSites) {
+            sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
+            sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
+        }
+    }
+
+    m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
+    m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
 
     Settings::AppsRouteMode appsRouteMode = Settings::AppsRouteMode::VpnAllApps;
     QJsonArray appsJsonArray;

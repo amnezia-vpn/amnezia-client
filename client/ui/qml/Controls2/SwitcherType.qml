@@ -2,36 +2,38 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "TextTypes"
 
 Switch {
     id: root
 
     property alias descriptionText: description.text
-    property string descriptionTextColor: "#878B91"
-    property string descriptionTextDisabledColor: "#494B50"
+    property string descriptionTextColor: AmneziaStyle.color.mutedGray
+    property string descriptionTextDisabledColor: AmneziaStyle.color.charcoalGray
 
-    property string textColor:  "#D7D8DB"
-    property string textDisabledColor: "#878B91"
+    property string textColor: AmneziaStyle.color.paleGray
+    property string textDisabledColor: AmneziaStyle.color.mutedGray
 
-    property string checkedIndicatorColor: "#633303"
-    property string defaultIndicatorColor: "transparent"
-    property string checkedDisabledIndicatorColor: "#402102"
+    property string checkedIndicatorColor: AmneziaStyle.color.richBrown
+    property string defaultIndicatorColor: AmneziaStyle.color.transparent
+    property string checkedDisabledIndicatorColor: AmneziaStyle.color.deepBrown
 
-    property string borderFocusedColor: "#D7D8DB"
+    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
-    property string checkedIndicatorBorderColor: "#633303"
-    property string defaultIndicatorBorderColor: "#494B50"
-    property string checkedDisabledIndicatorBorderColor: "#402102"
+    property string checkedIndicatorBorderColor: AmneziaStyle.color.richBrown
+    property string defaultIndicatorBorderColor: AmneziaStyle.color.charcoalGray
+    property string checkedDisabledIndicatorBorderColor: AmneziaStyle.color.deepBrown
 
-    property string checkedInnerCircleColor: "#FBB26A"
-    property string defaultInnerCircleColor: "#D7D8DB"
-    property string checkedDisabledInnerCircleColor: "#84603D"
-    property string defaultDisabledInnerCircleColor: "#494B50"
+    property string checkedInnerCircleColor: AmneziaStyle.color.goldenApricot
+    property string defaultInnerCircleColor: AmneziaStyle.color.paleGray
+    property string checkedDisabledInnerCircleColor: AmneziaStyle.color.mutedBrown
+    property string defaultDisabledInnerCircleColor: AmneziaStyle.color.charcoalGray
 
-    property string hoveredIndicatorBackgroundColor: Qt.rgba(1, 1, 1, 0.08)
-    property string defaultIndicatorBackgroundColor: "transparent"
+    property string hoveredIndicatorBackgroundColor: AmneziaStyle.color.translucentWhite
+    property string defaultIndicatorBackgroundColor: AmneziaStyle.color.transparent
 
     hoverEnabled: enabled ? true : false
     focusPolicy: Qt.TabFocus
@@ -100,7 +102,8 @@ Switch {
     contentItem: ColumnLayout {
         id: content
 
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
 
         ListItemTitleType {

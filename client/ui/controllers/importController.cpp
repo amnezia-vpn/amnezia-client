@@ -240,9 +240,9 @@ void ImportController::processNativeWireGuardConfig()
         auto containerConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::WireGuard)).toObject();
         auto protocolConfig = QJsonDocument::fromJson(containerConfig.value(config_key::last_config).toString().toUtf8()).object();
 
-        QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(3, 10));
-        QString junkPacketMinSize = QString::number(50);
-        QString junkPacketMaxSize = QString::number(1000);
+        QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
+        QString junkPacketMinSize = QString::number(10);
+        QString junkPacketMaxSize = QString::number(50);
         protocolConfig[config_key::junkPacketCount] = junkPacketCount;
         protocolConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
         protocolConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
@@ -395,7 +395,11 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::mtu] = configMap.value("MTU");
     }
 
-    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(","));
+    if (!configMap.value("PersistentKeepalive").isEmpty()) {
+        lastConfig[config_key::persistent_keep_alive] = configMap.value("PersistentKeepalive");
+    }
+
+    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(", "));
 
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
 

@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ProtocolEnum 1.0
+import Style 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
@@ -37,7 +38,7 @@ PageType {
 
         function onRemoveProcessedServerFinished(finishedMessage) {
             if (!ServersModel.getServersCount()) {
-                PageController.replaceStartPage()
+                PageController.goToPageHome()
             } else {
                 PageController.goToStartPage()
                 PageController.goToPage(PageEnum.PageSettingsServersList)
@@ -118,7 +119,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Reboot server")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.vibrantRed
 
                 KeyNavigation.tab: labelWithButton3
 
@@ -159,7 +160,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Remove server from application")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: {
                     if (content.isServerWithWriteAccess) {
@@ -207,7 +208,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Clear server from Amnezia software")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: labelWithButton5.visible ?
                                     labelWithButton5.forceActiveFocus() :
@@ -246,11 +247,11 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButton5
-                visible: ServersModel.getProcessedServerData("isServerFromApi")
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
                 Layout.fillWidth: true
 
                 text: qsTr("Reset API config")
-                textColor: "#EB5757"
+                textColor: AmneziaStyle.color.vibrantRed
 
                 Keys.onTabPressed: root.lastItemTabClickedSignal()
 
@@ -284,7 +285,7 @@ PageType {
             }
 
             DividerType {
-                visible: ServersModel.getProcessedServerData("isServerFromApi")
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
             }
         }
     }
