@@ -19,3 +19,7 @@ bool key_from_hex(uint8_t key[WG_KEY_LEN], const char* hex);
 bool key_eq(const uint8_t key1[WG_KEY_LEN], const uint8_t key2[WG_KEY_LEN]);
 
 void write_msg_to_log(const char* tag, const char* msg);
+
+// Khai báo hàm C để Swift có thể sử dụng
+void hev_socks5_tunnel_quit(void);
+void hev_socks5_tunnel_main(void);

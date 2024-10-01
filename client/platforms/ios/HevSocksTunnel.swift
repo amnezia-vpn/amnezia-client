@@ -1,4 +1,5 @@
-import HevSocks5Tunnel
+import Darwin
+import SystemConfiguration
 
 public enum Socks5Tunnel {
 
@@ -6,23 +7,23 @@ public enum Socks5Tunnel {
         var ctlInfo = ctl_info()
         withUnsafeMutablePointer(to: &ctlInfo.ctl_name) {
             $0.withMemoryRebound(to: CChar.self, capacity: MemoryLayout.size(ofValue: $0.pointee)) {
-                _ = strcpy($0, "com.apple.net.utun_control")
+                _ = strcpy($0, "com.apple.net.utun_control") // strcpy comes from Darwin
             }
         }
         for fd: Int32 in 0...1024 {
             var addr = sockaddr_ctl()
             var ret: Int32 = -1
-            var len = socklen_t(MemoryLayout.size(ofValue: addr))
+            var len = socklen_t(MemoryLayout.size(ofValue: addr)) // socklen_t comes from Darwin
             withUnsafeMutablePointer(to: &addr) {
-                $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                    ret = getpeername(fd, $0, &len)
+                $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { // sockaddr from Darwin
+                    ret = getpeername(fd, $0, &len) // getpeername from Darwin
                 }
             }
-            if ret != 0 || addr.sc_family != AF_SYSTEM {
+            if ret != 0 || addr.sc_family != AF_SYSTEM { // AF_SYSTEM from Darwin
                 continue
             }
             if ctlInfo.ctl_id == 0 {
-                ret = ioctl(fd, CTLIOCGINFO, &ctlInfo)
+                ret = ioctl(fd, CTLIOCGINFO, &ctlInfo) // ioctl from Darwin
                 if ret != 0 {
                     continue
                 }
@@ -38,12 +39,12 @@ public enum Socks5Tunnel {
         guard let tunnelFileDescriptor = self.tunnelFileDescriptor else {
             return nil
         }
-        var buffer = [UInt8](repeating: 0, count: Int(IFNAMSIZ))
+        var buffer = [UInt8](repeating: 0, count: Int(IFNAMSIZ)) // IFNAMSIZ from Darwin
         return buffer.withUnsafeMutableBufferPointer { mutableBufferPointer in
             guard let baseAddress = mutableBufferPointer.baseAddress else {
                 return nil
             }
-            var ifnameSize = socklen_t(IFNAMSIZ)
+            var ifnameSize = socklen_t(IFNAMSIZ) // socklen_t and IFNAMSIZ from Darwin
             let result = getsockopt(
                 tunnelFileDescriptor,
                 2 /* SYSPROTO_CONTROL */,
