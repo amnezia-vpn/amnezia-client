@@ -22,4 +22,5 @@ void write_msg_to_log(const char* tag, const char* msg);
 
 // Khai báo hàm C để Swift có thể sử dụng
 void hev_socks5_tunnel_quit(void);
-void hev_socks5_tunnel_main(void);
+// Updated function definition in C
+int hev_socks5_tunnel_main(const char* configFile, int fd);

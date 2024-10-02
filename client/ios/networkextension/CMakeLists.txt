@@ -103,12 +103,19 @@ find_library(FW_LIBRESOLV libresolv.9.tbd)
 
 
 
-set_property(TARGET networkextension PROPERTY XCODE_EMBED_FRAMEWORKS
-     "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-macos/OpenVPNAdapter.framework"
- )
+# Set the root directory
+set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
-set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-macos)
-target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-macos/OpenVPNAdapter.framework")
+# Embedding the framework using CLIENT_ROOT_DIR
+set_property(TARGET networkextension PROPERTY XCODE_EMBED_FRAMEWORKS
+    "${CLIENT_ROOT_DIR}/3rd/OpenVPNAdapter/build/Release-macos/OpenVPNAdapter.framework"
+)
+
+# Setting the framework search paths using CLIENT_ROOT_DIR
+set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS "${CLIENT_ROOT_DIR}/3rd/OpenVPNAdapter/build/Release-macos")
+
+# Linking the framework using CLIENT_ROOT_DIR
+target_link_libraries("networkextension" PRIVATE "${CLIENT_ROOT_DIR}/3rd/OpenVPNAdapter/build/Release-macos/OpenVPNAdapter.framework")
 
 
 
@@ -182,6 +189,10 @@ target_include_directories(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64/libwg-go.a)
 
-target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework/macos-arm64_x86_64/libhev-socks5-tunnel.a)
+# Print the root directory for debugging purposes
+message("---------")
+message(${CLIENT_ROOT_DIR})
+message(${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework/macos-arm64_x86_64/libhev-socks5-tunnel.a)
+target_link_libraries("networkextension" PRIVATE "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework/macos-arm64_x86_64/libhev-socks5-tunnel.a")
 
 target_include_directories(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework/macos-arm64_x86_64/Headers)

@@ -1,20 +1,5 @@
 message("Client ==> iOS build")
 
-# Đường dẫn tới thư mục chứa HevSocks5Tunnel.xcframework
-set(HEV_SOCKS5_TUNNEL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/xray")
-
-# Đường dẫn tới thư viện .a
-set(HEV_SOCKS5_TUNNEL_LIB "${HEV_SOCKS5_TUNNEL_PATH}/ios/libhev-socks5-tunnel.a")
-
-# Đường dẫn tới tệp header
-set(HEV_SOCKS5_TUNNEL_INCLUDE_DIR "${HEV_SOCKS5_TUNNEL_PATH}/ios/Headers")
-
-# Thêm tệp header vào include directories
-target_include_directories(${PROJECT} PRIVATE ${HEV_SOCKS5_TUNNEL_INCLUDE_DIR})
-
-# Liên kết thư viện tĩnh vào mục tiêu (target) của bạn
-target_link_libraries(${PROJECT} PRIVATE ${HEV_SOCKS5_TUNNEL_LIB})
-
 set_target_properties(${PROJECT} PROPERTIES MACOSX_BUNDLE TRUE)
 set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
