@@ -47,13 +47,7 @@ class NetworkState(
 
             override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
                 Log.d(TAG, "onCapabilitiesChanged: $network, $networkCapabilities")
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    checkNetworkState(network, networkCapabilities)
-                } else {
-                    handler.post {
-                        checkNetworkState(network, networkCapabilities)
-                    }
-                }
+                checkNetworkState(network, networkCapabilities)
             }
 
             private fun checkNetworkState(network: Network, networkCapabilities: NetworkCapabilities) {
@@ -87,7 +81,7 @@ class NetworkState(
         Log.d(TAG, "Bind network listener")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             connectivityManager.registerBestMatchingNetworkCallback(networkRequest, networkCallback, handler)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        } else {
             val numberAttempts = 300
             var attemptCount = 0
             while(true) {
@@ -108,8 +102,6 @@ class NetworkState(
                     }
                 }
             }
-        } else {
-            connectivityManager.requestNetwork(networkRequest, networkCallback)
         }
         isListenerBound = true
     }

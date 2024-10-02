@@ -88,11 +88,9 @@ class ServiceNotification(private val context: Context) {
     fun isNotificationEnabled(): Boolean {
         if (!context.isNotificationPermissionGranted()) return false
         if (!notificationManager.areNotificationsEnabled()) return false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID)
-                ?.let { it.importance != NotificationManager.IMPORTANCE_NONE } ?: true
-        }
-        return true
+        return notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID)?.let {
+            it.importance != NotificationManager.IMPORTANCE_NONE
+        } ?: true
     }
 
     @SuppressLint("MissingPermission")
