@@ -3,8 +3,6 @@ package org.amnezia.vpn
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.app.NotificationManager
-import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Intent
 import android.content.Intent.EXTRA_MIME_TYPES
@@ -68,7 +66,6 @@ class AmneziaActivity : QtActivity() {
     private var isWaitingStatus = true
     private var isServiceConnected = false
     private var isInBoundState = false
-    private var notificationStateReceiver: BroadcastReceiver? = null
     private lateinit var vpnServiceMessenger: IpcMessenger
 
     private val actionResultHandlers = mutableMapOf<Int, ActivityResultHandler>()
@@ -176,7 +173,6 @@ class AmneziaActivity : QtActivity() {
                 doBindService()
             }
         )
-        registerBroadcastReceivers()
         intent?.let(::processIntent)
         runBlocking { vpnProto = proto.await() }
     }
@@ -190,26 +186,6 @@ class AmneziaActivity : QtActivity() {
         ).forEach {
             loadSharedLibrary(this.applicationContext, it)
         }
-    }
-
-    private fun registerBroadcastReceivers() {
-        notificationStateReceiver = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            registerBroadcastReceiver(
-                arrayOf(
-                    NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED,
-                    NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED
-                )
-            ) {
-                Log.d(
-                    TAG, "Notification state changed: ${it?.action}, blocked = " +
-                        "${it?.getBooleanExtra(NotificationManager.EXTRA_BLOCKED_STATE, false)}"
-                )
-                mainScope.launch {
-                    qtInitialized.await()
-                    QtAndroidController.onNotificationStateChanged()
-                }
-            }
-        } else null
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -257,8 +233,6 @@ class AmneziaActivity : QtActivity() {
 
     override fun onDestroy() {
         Log.d(TAG, "Destroy Amnezia activity")
-        unregisterBroadcastReceiver(notificationStateReceiver)
-        notificationStateReceiver = null
         mainScope.cancel()
         super.onDestroy()
     }
@@ -664,7 +638,7 @@ class AmneziaActivity : QtActivity() {
     }
 
     @Suppress("unused")
-    fun isNotificationPermissionGranted(): Boolean = applicationContext.isNotificationPermissionGranted()
+    fun isNotificationPermissionGranted(): Boolean = true
 
     @Suppress("unused")
     fun requestNotificationPermission() {

@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.net.VpnService
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
@@ -31,12 +30,9 @@ class VpnRequestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Start request activity")
-        vpnProto = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.extras?.getSerializable(EXTRA_PROTOCOL, VpnProto::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            intent.extras?.getSerializable(EXTRA_PROTOCOL) as VpnProto
-        }
+        @Suppress("DEPRECATION")
+        vpnProto = intent.extras?.getSerializable(EXTRA_PROTOCOL) as VpnProto
+
         val requestIntent = VpnService.prepare(applicationContext)
         if (requestIntent != null) {
             if (getSystemService<KeyguardManager>()!!.isKeyguardLocked) {

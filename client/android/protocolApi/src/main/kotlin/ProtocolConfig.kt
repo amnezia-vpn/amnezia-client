@@ -145,7 +145,7 @@ open class ProtocolConfig protected constructor(
             }
             // for older versions of Android, build a list of subnets without excluded routes
             // and add them to routes
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && routes.any { !it.include }) {
+            if (routes.any { !it.include }) {
                 val ipRangeSet = IpRangeSet()
                 routes.forEach {
                     if (it.include) ipRangeSet.add(IpRange(it.inetNetwork))

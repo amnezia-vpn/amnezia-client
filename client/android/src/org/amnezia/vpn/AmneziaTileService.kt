@@ -1,12 +1,9 @@
 package org.amnezia.vpn
 
-import android.annotation.SuppressLint
-import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.net.VpnService
-import android.os.Build
 import android.os.IBinder
 import android.os.Messenger
 import android.service.quicksettings.Tile
@@ -148,7 +145,8 @@ class AmneziaTileService : TileService() {
             Intent(this, AmneziaActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }.also {
-                startActivityAndCollapseCompat(it)
+                @Suppress("DEPRECATION")
+                startActivityAndCollapse(it)
             }
         }
     }
@@ -192,7 +190,8 @@ class AmneziaTileService : TileService() {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 putExtra(EXTRA_PROTOCOL, vpnProto)
             }.also {
-                startActivityAndCollapseCompat(it)
+                @Suppress("DEPRECATION")
+                startActivityAndCollapse(it)
             }
             false
         } else {
@@ -216,23 +215,6 @@ class AmneziaTileService : TileService() {
 
     private fun stopVpn() = vpnServiceMessenger.send(Action.DISCONNECT)
 
-    @SuppressLint("StartActivityAndCollapseDeprecated")
-    private fun startActivityAndCollapseCompat(intent: Intent) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startActivityAndCollapse(
-                PendingIntent.getActivity(
-                    applicationContext,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_IMMUTABLE
-                )
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            startActivityAndCollapse(intent)
-        }
-    }
-
     private fun updateVpnState(state: ProtocolState) =
         scope.launch { VpnStateStore.store { it.copy(protocolState = state) } }
 
@@ -249,17 +231,14 @@ class AmneziaTileService : TileService() {
             when (val protocolState = vpnState.protocolState) {
                 CONNECTED -> {
                     state = Tile.STATE_ACTIVE
-                    subtitleCompat = null
                 }
 
                 DISCONNECTED, UNKNOWN -> {
                     state = Tile.STATE_INACTIVE
-                    subtitleCompat = null
                 }
 
                 CONNECTING, DISCONNECTING, RECONNECTING -> {
                     state = Tile.STATE_UNAVAILABLE
-                    subtitleCompat = getString(protocolState)
                 }
             }
             updateTile()
@@ -267,17 +246,4 @@ class AmneziaTileService : TileService() {
         // double update to fix weird visual glitches
         tile.updateTile()
     }
-
-    private var Tile.subtitleCompat: CharSequence?
-        set(value) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                this.subtitle = value
-            }
-        }
-        get() {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                return this.subtitle
-            }
-            return null
-        }
 }

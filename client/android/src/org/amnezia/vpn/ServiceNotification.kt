@@ -1,19 +1,15 @@
 package org.amnezia.vpn
 
-import android.Manifest.permission
 import android.annotation.SuppressLint
 import android.app.Notification
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.NotificationChannelCompat.Builder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.Action
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import org.amnezia.vpn.protocol.ProtocolState
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
 import org.amnezia.vpn.protocol.ProtocolState.DISCONNECTED
@@ -85,29 +81,17 @@ class ServiceNotification(private val context: Context) {
             .setSubText(getSpeedString(speed))
             .build()
 
-    fun isNotificationEnabled(): Boolean {
-        if (!context.isNotificationPermissionGranted()) return false
-        if (!notificationManager.areNotificationsEnabled()) return false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID)
-                ?.let { it.importance != NotificationManager.IMPORTANCE_NONE } ?: true
-        }
-        return true
-    }
+    fun isNotificationEnabled(): Boolean = notificationManager.areNotificationsEnabled()
 
     @SuppressLint("MissingPermission")
     fun updateNotification(serverName: String?, protocol: String?, state: ProtocolState) {
-        if (context.isNotificationPermissionGranted()) {
-            Log.d(TAG, "Update notification: $serverName, $state")
-            notificationManager.notify(NOTIFICATION_ID, buildNotification(serverName, protocol, state))
-        }
+        Log.d(TAG, "Update notification: $serverName, $state")
+        notificationManager.notify(NOTIFICATION_ID, buildNotification(serverName, protocol, state))
     }
 
     @SuppressLint("MissingPermission")
     fun updateSpeed(speed: TrafficData) {
-        if (context.isNotificationPermissionGranted()) {
-            notificationManager.notify(NOTIFICATION_ID, buildNotification(speed))
-        }
+        notificationManager.notify(NOTIFICATION_ID, buildNotification(speed))
     }
 
     private fun getSpeedString(traffic: TrafficData) =
@@ -168,8 +152,3 @@ class ServiceNotification(private val context: Context) {
         }
     }
 }
-
-fun Context.isNotificationPermissionGranted(): Boolean =
-    Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-        ContextCompat.checkSelfPermission(this, permission.POST_NOTIFICATIONS) ==
-        PackageManager.PERMISSION_GRANTED

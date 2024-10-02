@@ -183,14 +183,6 @@ class OpenVpnClient(
     // Never called more than once per tun_builder session.
     override fun tun_builder_set_proxy_http(host: String, port: Int): Boolean {
         Log.d(TAG, "tun_builder_set_proxy_http: $host, $port")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            try {
-                configBuilder.setHttpProxy(ProxyInfo.buildDirectProxy(host, port))
-            } catch (e: Exception) {
-                Log.e(TAG, "Could not set proxy: ${e.message}")
-                return false
-            }
-        }
         return true
     }
 

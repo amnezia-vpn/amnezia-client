@@ -3,14 +3,10 @@ package org.amnezia.vpn
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
-import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED
 import android.net.VpnService
-import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -104,7 +100,6 @@ open class AmneziaVpnService : VpnService() {
     private lateinit var networkState: NetworkState
     private lateinit var trafficStats: TrafficStats
     private var controlReceiver: BroadcastReceiver? = null
-    private var notificationStateReceiver: BroadcastReceiver? = null
     private var screenOnReceiver: BroadcastReceiver? = null
     private var screenOffReceiver: BroadcastReceiver? = null
     private val clientMessengers = ConcurrentHashMap<Messenger, IpcMessenger>()
@@ -189,16 +184,6 @@ open class AmneziaVpnService : VpnService() {
         Messenger(actionMessageHandler)
     }
 
-    /**
-     * Notification setup
-     */
-    private val foregroundServiceTypeCompat
-        get() = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE -> FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> FOREGROUND_SERVICE_TYPE_MANIFEST
-            else -> 0
-        }
-
     private val serviceNotification: ServiceNotification by lazy(NONE) { ServiceNotification(this) }
 
     /**
@@ -232,7 +217,7 @@ open class AmneziaVpnService : VpnService() {
         ServiceCompat.startForeground(
             this, NOTIFICATION_ID,
             serviceNotification.buildNotification(serverName, vpnProto?.label, protocolState.value),
-            foregroundServiceTypeCompat
+            0
         )
         return START_REDELIVER_INTENT
     }
@@ -309,23 +294,6 @@ open class AmneziaVpnService : VpnService() {
             }
         }
 
-        notificationStateReceiver = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            registerBroadcastReceiver(
-                arrayOf(
-                    NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED,
-                    NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED
-                )
-            ) {
-                val state = it?.getBooleanExtra(NotificationManager.EXTRA_BLOCKED_STATE, false)
-                Log.d(TAG, "Notification state changed: ${it?.action}, blocked = $state")
-                if (state == false) {
-                    enableNotification()
-                } else {
-                    disableNotification()
-                }
-            }
-        } else null
-
         registerScreenStateBroadcastReceivers()
     }
 
@@ -353,10 +321,8 @@ open class AmneziaVpnService : VpnService() {
     private fun unregisterBroadcastReceivers() {
         Log.d(TAG, "Unregister broadcast receivers")
         unregisterBroadcastReceiver(controlReceiver)
-        unregisterBroadcastReceiver(notificationStateReceiver)
         unregisterScreenStateBroadcastReceivers()
         controlReceiver = null
-        notificationStateReceiver = null
     }
 
     /**

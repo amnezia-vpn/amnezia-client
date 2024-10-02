@@ -1,7 +1,6 @@
 package org.amnezia.vpn.util.net
 
 import android.net.TrafficStats
-import android.os.Build
 import android.os.Process
 import android.os.SystemClock
 import kotlin.math.roundToLong
@@ -17,18 +16,12 @@ class TrafficStats {
     private var lastTrafficData = TrafficData.ZERO
     private var lastTimestamp = 0L
 
-    private val getTrafficDataCompat: () -> TrafficData =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val iface = "tun0"
-            fun(): TrafficData {
-                return TrafficData(TrafficStats.getRxBytes(iface), TrafficStats.getTxBytes(iface))
-            }
-        } else {
-            val uid = Process.myUid()
-            fun(): TrafficData {
-                return TrafficData(TrafficStats.getUidRxBytes(uid), TrafficStats.getUidTxBytes(uid))
-            }
+    private val getTrafficDataCompat: () -> TrafficData = run {
+        val uid = Process.myUid()
+        fun(): TrafficData {
+            return TrafficData(TrafficStats.getUidRxBytes(uid), TrafficStats.getUidTxBytes(uid))
         }
+    }
 
     fun reset() {
         lastTrafficData = getTrafficDataCompat()

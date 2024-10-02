@@ -117,12 +117,7 @@ abstract class Protocol {
                 Log.d(TAG, "addRoute: $inetNetwork")
                 vpnBuilder.addRoute(inetNetwork)
             } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    Log.d(TAG, "excludeRoute: $inetNetwork")
-                    vpnBuilder.excludeRoute(inetNetwork)
-                } else {
-                    Log.e(TAG, "Trying to exclude route $inetNetwork on old Android")
-                }
+                Log.e(TAG, "Trying to exclude route $inetNetwork on old Android")
             }
         }
 
@@ -139,13 +134,6 @@ abstract class Protocol {
         Log.d(TAG, "setMtu: ${config.mtu}")
         vpnBuilder.setMtu(config.mtu)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            config.httpProxy?.let {
-                Log.d(TAG, "setHttpProxy: $it")
-                vpnBuilder.setHttpProxy(it)
-            }
-        }
-
         if (config.allowAllAF) {
             Log.d(TAG, "allowFamily")
             vpnBuilder.allowFamily(OsConstants.AF_INET)
@@ -155,8 +143,6 @@ abstract class Protocol {
         Log.d(TAG, "setBlocking: ${config.blockingMode}")
         vpnBuilder.setBlocking(config.blockingMode)
         vpnBuilder.setUnderlyingNetworks(null)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            vpnBuilder.setMetered(false)
     }
 }
 
