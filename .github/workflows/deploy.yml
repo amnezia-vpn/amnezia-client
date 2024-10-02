@@ -313,7 +313,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
         target: 'desktop'
-        arch: 'linux_gcc_64'
+        arch: 'gcc_64'
         modules: ${{ env.QT_MODULES }}
         dir: ${{ runner.temp }}
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
