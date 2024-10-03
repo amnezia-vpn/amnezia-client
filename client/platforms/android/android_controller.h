@@ -56,6 +56,7 @@ public:
     bool requestAuthentication();
     void sendTouch(float x, float y);
     bool isPlay();
+    QJsonObject getSubscriptionPlans();
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
