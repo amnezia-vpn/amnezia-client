@@ -357,9 +357,9 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
 
         EVP_PKEY *publicKey = nullptr;
         try {
-            QByteArray key = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
+            QByteArray rsaKey = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
             QSimpleCrypto::QRsa rsa;
-            publicKey = rsa.getPublicKeyFromByteArray(key);
+            publicKey = rsa.getPublicKeyFromByteArray(rsaKey);
         } catch (...) {
             qCritical() << "error loading public key from environment variables";
             return ErrorCode::ApiMissingAgwPublicKey;

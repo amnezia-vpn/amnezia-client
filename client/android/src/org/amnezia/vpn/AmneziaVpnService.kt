@@ -22,6 +22,7 @@ import androidx.annotation.MainThread
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import java.net.UnknownHostException
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -126,6 +127,8 @@ open class AmneziaVpnService : VpnService() {
             is BadConfigException -> onError("VPN config format error: ${e.message}")
 
             is LoadLibraryException -> onError("${e.message}. Caused: ${e.cause?.message}")
+
+            is UnknownHostException -> onError("Unknown host")
 
             else -> throw e
         }
