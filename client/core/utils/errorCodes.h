@@ -114,7 +114,15 @@ namespace amnezia
         PermissionsError = 1202,
         UnspecifiedError = 1203,
         FatalError = 1204,
-        AbortError = 1205
+        AbortError = 1205,
+
+        // Billing errors
+        BillingError = 1300,
+        BillingGooglePlayError = 1301,
+        BillingUnavailable = 1302,
+        SubscriptionAlreadyOwned = 1303,
+        SubscriptionUnavailable = 1304,
+        BillingNetworkError = 1305,
       };
       Q_ENUM_NS(ErrorCode)
     }

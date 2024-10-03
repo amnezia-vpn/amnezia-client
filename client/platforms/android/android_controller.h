@@ -56,6 +56,7 @@ public:
     bool requestAuthentication();
     void sendTouch(float x, float y);
     bool isPlay();
+    QJsonObject getSubscriptionPlans();
 
     void showUpdateCover();
     void hideUpdateCover();
