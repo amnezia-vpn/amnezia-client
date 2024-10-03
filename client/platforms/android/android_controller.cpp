@@ -292,6 +292,13 @@ bool AndroidController::isPlay()
     return callActivityMethod<jboolean>("isPlay", "()Z");
 }
 
+QJsonObject AndroidController::getSubscriptionPlans()
+{
+    QJniObject subscriptionPlans = callActivityMethod<jstring>("getSubscriptionPlans", "()Ljava/lang/String;");
+    QJsonObject json = QJsonDocument::fromJson(subscriptionPlans.toString().toUtf8()).object();
+    return json;
+}
+
 // Moving log processing to the Android side
 jclass AndroidController::log;
 jmethodID AndroidController::logDebug;

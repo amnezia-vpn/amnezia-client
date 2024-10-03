@@ -70,6 +70,14 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::FatalError): errorMessage =  QObject::tr("QFile error: A fatal error occurred"); break;
     case(ErrorCode::AbortError): errorMessage =  QObject::tr("QFile error: The operation was aborted"); break;
 
+    // Billing errors
+    case(ErrorCode::BillingError): errorMessage = QObject::tr("Billing error"); break;
+    case(ErrorCode::BillingGooglePlayError): errorMessage = QObject::tr("Internal Google Play error, please try again later"); break;
+    case(ErrorCode::BillingUnavailable): errorMessage = QObject::tr("Billing is unavailable, please try again later"); break;
+    case(ErrorCode::SubscriptionAlreadyOwned): errorMessage = QObject::tr("You already own this subscription"); break;
+    case(ErrorCode::SubscriptionUnavailable): errorMessage = QObject::tr("The requested subscription is not available for purchase"); break;
+    case(ErrorCode::BillingNetworkError): errorMessage = QObject::tr("A network error occurred during the operation, please check the Internet connection"); break;
+
     case(ErrorCode::InternalError):
     default:
         errorMessage = QObject::tr("Internal error"); break;

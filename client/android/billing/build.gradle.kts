@@ -12,6 +12,7 @@ android {
 }
 
 dependencies {
+    compileOnly(project(":utils"))
     implementation(libs.androidx.core)
     implementation(libs.kotlinx.coroutines)
     implementation(libs.android.billing)

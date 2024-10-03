@@ -70,6 +70,7 @@ class AmneziaActivity : QtActivity() {
     private var isInBoundState = false
     private var notificationStateReceiver: BroadcastReceiver? = null
     private lateinit var vpnServiceMessenger: IpcMessenger
+    private lateinit var billingRepository: BillingRepository
 
     private val actionResultHandlers = mutableMapOf<Int, ActivityResultHandler>()
     private val permissionRequestHandlers = mutableMapOf<Int, PermissionRequestHandler>()
@@ -157,7 +158,6 @@ class AmneziaActivity : QtActivity() {
      * Activity overloaded methods
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d(TAG, "Billing provider: ${BillingProvider().type()}")
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Create Amnezia activity: $intent")
         loadLibs()
@@ -180,6 +180,7 @@ class AmneziaActivity : QtActivity() {
         registerBroadcastReceivers()
         intent?.let(::processIntent)
         runBlocking { vpnProto = proto.await() }
+        billingRepository = BillingPaymentRepository(applicationContext)
     }
 
     private fun loadLibs() {
@@ -723,6 +724,26 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun isPlay(): Boolean = BuildConfig.FLAVOR == "play"
+
+    @Suppress("unused")
+    fun getCountryCode(): String {
+        Log.v(TAG, "Get country code")
+        return runBlocking {
+            mainScope.async {
+                billingRepository.getCountryCode()
+            }.await()
+        }
+    }
+
+    @Suppress("unused")
+    fun getSubscriptionPlans(): String {
+        Log.v(TAG, "Get subscription plans")
+        return runBlocking {
+            mainScope.async {
+                billingRepository.getSubscriptionPlans()
+            }.await()
+        }
+    }
 
     /**
      * Utils methods
