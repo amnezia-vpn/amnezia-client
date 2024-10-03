@@ -1,4 +1,4 @@
-message("Client ==> MacOX build")
+message("Client ==> iOS build")
 
 set_target_properties(${PROJECT} PROPERTIES MACOSX_BUNDLE TRUE)
 set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
@@ -149,14 +149,14 @@ set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
 add_subdirectory(ios/networkextension)
 add_dependencies(${PROJECT} networkextension)
 
-set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
-    "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-macos/OpenVPNAdapter.framework"
-)
+# set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
+#     "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
+# )
 
 
 
-set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-macos)
-target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-macos/OpenVPNAdapter.framework")
+# set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
+# target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework")
 
 get_target_property(QtCore_location Qt6::Core LOCATION)
 message("QtCore_location")
@@ -165,3 +165,17 @@ message(${QtCore_location})
 get_filename_component(QT_BIN_DIR_DETECTED "${QtCore_location}/../../../../../bin" ABSOLUTE)
 
 
+# add_custom_command(TARGET ${PROJECT} POST_BUILD
+#     COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:AmneziaVPN> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR}
+# )
+
+# if(CMAKE_BUILD_TYPE STREQUAL "Release")
+#     SET(SIGN_CMD codesign --deep --force --sign 'Apple Distribution: Privacy Technologies OU \(X7UJ388FXK\)' --timestamp --options runtime $<TARGET_BUNDLE_DIR:AmneziaVPN>)
+#     message("Manual signing bundle...")
+#     message(${SIGN_CMD})
+
+
+#     add_custom_command(TARGET ${PROJECT} POST_BUILD
+#         COMMAND ${SIGN_CMD}
+#     )
+# endif()
