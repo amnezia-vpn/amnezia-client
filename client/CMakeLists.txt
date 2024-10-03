@@ -3,8 +3,7 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(PROJECT AmneziaVPN)
 project(${PROJECT})
 
-set(IOS 1)
-#set(APPLE 1)
+set(MACOX 1)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
@@ -26,11 +25,11 @@ execute_process(
 
 add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
-if(IOS OR APPLE)
+if(IOS OR MACOX)
     set(PACKAGES ${PACKAGES} Multimedia)
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (MACOX AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
@@ -43,18 +42,18 @@ set(LIBS ${LIBS}
     Qt6::Core5Compat Qt6::Concurrent
 )
 
-if(IOS OR APPLE)
+if(IOS OR MACOX)
     set(LIBS ${LIBS} Qt6::Multimedia)
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (MACOX AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(LIBS ${LIBS} Qt6::Widgets)
 endif()
 
 qt_standard_project_setup()
 qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (MACOX AND NOT IOS) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
 endif()
@@ -90,15 +89,16 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/translations/translations.qrc.in ${CMAK
 qt6_add_resources(QRC ${I18NQRC} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 # -- i18n end
 
-if(IOS OR APPLE)
-    message("Client >> Cmake build OpenVPN: iOS or OSX build")
+if(IOS)
+    message("Client >> Cmake build OpenVPN: iOS")
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/ios/scripts/openvpn.sh args
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
-# if(APPLE)
-#     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/macos/scripts/openvpn.sh args
-#         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+if(MACOX)
+    message("Client >> Cmake build OpenVPN: OSX build")
+    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/macos/scripts/openvpn.sh args
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 
 set(IS_CI ${CI})
 if(IS_CI)
@@ -158,7 +158,7 @@ include_directories(mozilla)
 include_directories(mozilla/shared)
 include_directories(mozilla/models)
 
-if(NOT IOS OR NOT APPLE)
+if(NOT IOS OR NOT MACOX)
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
     )
@@ -207,7 +207,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
 endif()
 
-if(NOT IOS OR NOT APPLE)
+if(NOT IOS OR NOT MACOX)
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
     )
@@ -287,7 +287,7 @@ if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 endif()
 
-if(APPLE)
+if(MACOX)
     cmake_policy(SET CMP0099 OLD)
     cmake_policy(SET CMP0114 NEW)
 
@@ -315,7 +315,7 @@ if(LINUX AND NOT ANDROID)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
-# if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+# if(WIN32 OR (MACOX AND NOT IOS) OR (LINUX AND NOT ANDROID))
 if(WIN32 OR (LINUX AND NOT ANDROID))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
@@ -353,9 +353,9 @@ if(IOS) # only for iOS or OSX
     message("Client >> Cmake: iOS build")
     include(cmake/ios.cmake)
     #include(cmake/ios-arch-fixup.cmake)
-elseif(APPLE AND NOT IOS) # all version
+elseif(MACOX AND NOT IOS) # all version
     message("Client >> Cmake: OSX build")
-    include(cmake/apple.cmake)
+    include(cmake/MACOX.cmake)
     # include(cmake/osxtools.cmake)
     # include(cmake/macos.cmake)
 endif()
@@ -372,11 +372,11 @@ if(WIN32)
     endif()
 elseif(LINUX)
     set(DEPLOY_PLATFORM_PATH "linux/client")
-# elseif(APPLE AND NOT IOS)
+# elseif(MACOX AND NOT IOS)
 #     set(DEPLOY_PLATFORM_PATH "macos")
 endif()
 
-if(NOT IOS AND NOT ANDROID AND NOT APPLE)
+if(NOT IOS AND NOT ANDROID AND NOT MACOX)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
@@ -412,7 +412,7 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
 
 # Nếu ở chế độ Release, ký mã gói ứng dụng
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    SET(SIGN_CMD codesign --deep --force --sign 'Apple Distribution: Privacy Technologies OU \(X7UJ388FXK\)' --timestamp --options runtime $<TARGET_BUNDLE_DIR:AmneziaVPN>)
+    SET(SIGN_CMD codesign --deep --force --sign 'MACOX Distribution: Privacy Technologies OU \(X7UJ388FXK\)' --timestamp --options runtime $<TARGET_BUNDLE_DIR:AmneziaVPN>)
     message("Manual signing bundle...")
     message(${SIGN_CMD})
 
