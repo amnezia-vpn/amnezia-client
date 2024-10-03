@@ -355,7 +355,7 @@ if(IOS) # only for iOS or OSX
     #include(cmake/ios-arch-fixup.cmake)
 elseif(MACOX AND NOT IOS) # all version
     message("Client >> Cmake: OSX build")
-    include(cmake/MACOX.cmake)
+    include(cmake/macos.cmake)
     # include(cmake/osxtools.cmake)
     # include(cmake/macos.cmake)
 endif()
@@ -395,7 +395,7 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOX)
 endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
-set(IOS 0)
+# set(IOS 0)
 # Sao chép QtConcurrent.framework vào thư mục Frameworks
 add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory

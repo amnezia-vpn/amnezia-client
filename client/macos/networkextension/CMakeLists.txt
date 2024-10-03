@@ -1,5 +1,5 @@
 enable_language(Swift)
-message("Client message >> iOS build >> networkextension")
+message("Client message >> macos build >> networkextension")
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
 add_executable(networkextension)
@@ -17,8 +17,8 @@ set_target_properties(networkextension PROPERTIES
 
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${APPLE_PROJECT_VERSION}"
 
-    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}.network-extension"
-    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_NAME "${BUILD_IOS_APP_IDENTIFIER}.network-extension"
+    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_OSX_APP_IDENTIFIER}.network-extension"
+    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_NAME "${BUILD_OSX_APP_IDENTIFIER}.network-extension"
     XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS ${CMAKE_CURRENT_SOURCE_DIR}/AmneziaVPNNetworkExtension.entitlements
     XCODE_ATTRIBUTE_MARKETING_VERSION "${APP_MAJOR_VERSION}"
     XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${BUILD_ID}"
@@ -103,12 +103,19 @@ find_library(FW_LIBRESOLV libresolv.9.tbd)
 
 
 
-# set_property(TARGET networkextension PROPERTY XCODE_EMBED_FRAMEWORKS
-#     "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
-# )
+# Set the root directory
+set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
-# set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
-# target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework")
+# Embedding the framework using CLIENT_ROOT_DIR
+set_property(TARGET networkextension PROPERTY XCODE_EMBED_FRAMEWORKS
+    "${CLIENT_ROOT_DIR}/3rd/OpenVPNAdapter/build/Release-macos/OpenVPNAdapter.framework"
+)
+
+# Setting the framework search paths using CLIENT_ROOT_DIR
+set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS "${CLIENT_ROOT_DIR}/3rd/OpenVPNAdapter/build/Release-macos")
+
+# Linking the framework using CLIENT_ROOT_DIR
+target_link_libraries("networkextension" PRIVATE "${CLIENT_ROOT_DIR}/3rd/OpenVPNAdapter/build/Release-macos/OpenVPNAdapter.framework")
 
 
 
@@ -145,16 +152,16 @@ target_sources(networkextension PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/Array+ConcurrentMap.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddress+AddrInfo.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PrivateKey.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/HevSocksTunnel.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/NELogController.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+WireGuard.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPN.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+Xray.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/WGConfig.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
+    ${CLIENT_ROOT_DIR}/platforms/macos/HevSocksTunnel.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/NELogController.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/Log.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/LogRecord.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/PacketTunnelProvider.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/PacketTunnelProvider+WireGuard.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/PacketTunnelProvider+OpenVPN.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/PacketTunnelProvider+Xray.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/WGConfig.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/iosglue.mm
 )
 
 target_sources(networkextension PRIVATE
@@ -182,4 +189,10 @@ target_include_directories(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64/libwg-go.a)
 
-target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework)
+# Print the root directory for debugging purposes
+# message("---------")
+# message(${CLIENT_ROOT_DIR})
+# message(${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework/macos-arm64_x86_64/libhev-socks5-tunnel.a)
+target_link_libraries("networkextension" PRIVATE "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework/macos-arm64_x86_64/libhev-socks5-tunnel.a")
+
+target_include_directories(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework/macos-arm64_x86_64/Headers)
