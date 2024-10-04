@@ -1,5 +1,7 @@
-#include "wireguard-go-version.h"
-#include "3rd/amneziawg-apple/Sources/WireGuardKitGo/wireguard.h"
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include "3rd/amneziawg-apple/Sources/WireGuardKitC/WireGuardKitC.h"
 
 #include <stdbool.h>
@@ -20,7 +22,7 @@ bool key_eq(const uint8_t key1[WG_KEY_LEN], const uint8_t key2[WG_KEY_LEN]);
 
 void write_msg_to_log(const char* tag, const char* msg);
 
-// Khai báo hàm C để Swift có thể sử dụng
-void hev_socks5_tunnel_quit(void);
-// Updated function definition in C
-int hev_socks5_tunnel_main(const char* configFile, int fd);
+#import "TargetConditionals.h"
+#if TARGET_OS_OSX
+#  include <libproc.h>
+#endif

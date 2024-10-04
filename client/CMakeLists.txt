@@ -30,11 +30,12 @@ add_definitions(-DPROD_PROXY_STORAGE_KEY="$ENV{PROD_PROXY_STORAGE_KEY}")
 add_definitions(-DDEV_AGW_PUBLIC_KEY="$ENV{DEV_AGW_PUBLIC_KEY}")
 add_definitions(-DDEV_AGW_ENDPOINT="$ENV{DEV_AGW_ENDPOINT}")
 
-if(IOS)
+if(IOS OR MACOS_NE)
     set(PACKAGES ${PACKAGES} Multimedia)
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+#Macos Network Extension doesn't need Widgets
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (NOT MACOS_NE))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
@@ -47,18 +48,19 @@ set(LIBS ${LIBS}
     Qt6::Core5Compat Qt6::Concurrent
 )
 
-if(IOS)
+if(IOS OR MACOS_NE)
     set(LIBS ${LIBS} Qt6::Multimedia)
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+#Macos Network Extension doesn't need Widgets
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE NOT MACOS_NE))
     set(LIBS ${LIBS} Qt6::Widgets)
 endif()
 
 qt_standard_project_setup()
 qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE NOT MACOS_NE))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_tun2socks.rep)
@@ -97,6 +99,12 @@ qt6_add_resources(QRC ${I18NQRC} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 
 if(IOS)
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/ios/scripts/openvpn.sh args
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+endif()
+
+# Build openvpn adapter for MacOS Network Extension
+if(MACOS_NE)
+    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/macos/scripts/openvpn.sh args
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
@@ -160,7 +168,7 @@ include_directories(mozilla)
 include_directories(mozilla/shared)
 include_directories(mozilla/models)
 
-if(NOT IOS)
+if((NOT IOS) OR (NOT MACOS_NE))
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
     )
@@ -210,7 +218,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
 endif()
 
-if(NOT IOS)
+if((NOT IOS) OR (NOT MACOS_NE))
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
     )
@@ -318,7 +326,8 @@ if(LINUX AND NOT ANDROID)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
+# Macos Network Extension doesn't need
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE NOT MACOS_NE))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
 
@@ -354,9 +363,11 @@ endif()
 if(IOS)
     include(cmake/ios.cmake)
     include(cmake/ios-arch-fixup.cmake)
-elseif(APPLE AND NOT IOS)
+elseif(APPLE AND NOT IOS AND NOT MACOS_NE)
     include(cmake/osxtools.cmake)
     include(cmake/macos.cmake)
+    elseif(APPLE AND NOT IOS AND MACOS_NE)
+        include(cmake/macos_ne.cmake)
 endif()
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
