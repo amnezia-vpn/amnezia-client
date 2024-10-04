@@ -1,4 +1,4 @@
-message("Client ==> iOS build")
+message("Client ==> macOS build")
 
 set_target_properties(${PROJECT} PROPERTIES MACOSX_BUNDLE TRUE)
 set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)
@@ -34,22 +34,22 @@ set(LIBS ${LIBS}
 
 
 set(HEADERS ${HEADERS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/ios_controller.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/ios_controller_wrapper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/iosnotificationhandler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/QtAppDelegate.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/QtAppDelegate-C-Interface.h
 )
-set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h PROPERTIES OBJECTIVE_CPP_HEADER TRUE)
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/ios_controller.h PROPERTIES OBJECTIVE_CPP_HEADER TRUE)
 
 
 set(SOURCES ${SOURCES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/ios_controller.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/ios_controller_wrapper.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/iosnotificationhandler.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/iosglue.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/QRCodeReaderBase.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/QtAppDelegate.mm
 )
 
 set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/images/app.icns)
@@ -125,25 +125,25 @@ target_compile_options(${PROJECT} PRIVATE
 set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/amneziawg-apple/Sources)
 
 target_sources(${PROJECT} PRIVATE
-#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosvpnprotocol.swift
+#    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/iosvpnprotocol.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKitC/x25519.c
-    ${CLIENT_ROOT_DIR}/platforms/ios/LogController.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/ScreenProtection.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/VPNCController.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/LogController.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/Log.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/LogRecord.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/ScreenProtection.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos/VPNCController.swift
 )
 
 target_sources(${PROJECT} PRIVATE
-    #${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
+    #${CMAKE_CURRENT_SOURCE_DIR}/macos/app/AmneziaVPNLaunchScreen.storyboard
+    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Media.xcassets
+    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/PrivacyInfo.xcprivacy
 )
 
 set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
-    #${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
+    #${CMAKE_CURRENT_SOURCE_DIR}/macos/app/AmneziaVPNLaunchScreen.storyboard
+    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Media.xcassets
+    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/PrivacyInfo.xcprivacy
 )
 
 add_subdirectory(ios/networkextension)
