@@ -51,16 +51,16 @@ set(LIBS ${LIBS}
 if(IOS OR MACOS_NE)
     set(LIBS ${LIBS} Qt6::Multimedia)
 endif()
-
+message("Client desktop build ", ${MACOS_NE})
 #Macos Network Extension doesn't need Widgets
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE NOT MACOS_NE))
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE AND NOT MACOS_NE))
     set(LIBS ${LIBS} Qt6::Widgets)
 endif()
 
 qt_standard_project_setup()
 qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE NOT MACOS_NE))
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE AND NOT MACOS_NE))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_tun2socks.rep)
@@ -98,12 +98,14 @@ qt6_add_resources(QRC ${I18NQRC} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 # -- i18n end
 
 if(IOS)
+    message("Building for iOS")
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/ios/scripts/openvpn.sh args
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
 # Build openvpn adapter for MacOS Network Extension
 if(MACOS_NE)
+    message("Building for MacOS Network Extension")
     execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/macos/scripts/openvpn.sh args
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
@@ -327,7 +329,7 @@ if(LINUX AND NOT ANDROID)
 endif()
 
 # Macos Network Extension doesn't need
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE NOT MACOS_NE))
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE AND NOT MACOS_NE))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
 

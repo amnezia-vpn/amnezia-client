@@ -1,4 +1,4 @@
-message("Client ==> iOS build")
+message("Client ==> MacOS NE build")
 
 set_target_properties(${PROJECT} PROPERTIES MACOSX_BUNDLE TRUE)
 set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE INTERNAL "" FORCE)

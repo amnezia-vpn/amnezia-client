@@ -1,9 +1,11 @@
 XCODEBUILD="/usr/bin/xcodebuild"
 WORKINGDIR=`pwd`
 PATCH="/usr/bin/patch"
-
+echo "Building OpenVPNAdapter for macOS ..."
 # Copy the Project.xcconfig settings to amnezia.xcconfig
 cat $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/Project.xcconfig > $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/amnezia.xcconfig
+OTHER_LDFLAGS[sdk=iphoneos*] = -framework UIKit
+OTHER_LDFLAGS[sdk=macosx*] = -framework Cocoa
 
 # Append macOS-specific build directory configurations to amnezia.xcconfig
 cat << EOF >> $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/amnezia.xcconfig
