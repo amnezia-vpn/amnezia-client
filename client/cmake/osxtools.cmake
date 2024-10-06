@@ -141,6 +141,7 @@ function(osx_codesign_target TARGET)
         endif()
 
         foreach(FILE ${CODESIGN_FILES})
+            message(STATUS "Signing ${TARGET}: ${FILE}")
             add_custom_command(TARGET ${TARGET} POST_BUILD VERBATIM
                 COMMAND ${COMMENT_ECHO_COMMAND} "Signing ${TARGET}: ${FILE}"
                 COMMAND ${CODESIGN_BIN} ${CODESIGN_ARGS} ${FILE}

@@ -35,7 +35,7 @@ if(IOS OR MACOS_NE)
 endif()
 
 #Macos Network Extension doesn't need Widgets
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (NOT MACOS_NE))
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (NOT DEFINED MACOS_NE))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
@@ -51,16 +51,16 @@ set(LIBS ${LIBS}
 if(IOS OR MACOS_NE)
     set(LIBS ${LIBS} Qt6::Multimedia)
 endif()
-message("Client desktop build ", ${MACOS_NE})
+# message("Client desktop build ", ${MACOS_NE})
 #Macos Network Extension doesn't need Widgets
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE AND NOT MACOS_NE))
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE AND NOT DEFINED MACOS_NE))
     set(LIBS ${LIBS} Qt6::Widgets)
 endif()
 
 qt_standard_project_setup()
 qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE AND NOT MACOS_NE))
+if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE AND NOT DEFINED MACOS_NE))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_tun2socks.rep)
@@ -170,11 +170,23 @@ include_directories(mozilla)
 include_directories(mozilla/shared)
 include_directories(mozilla/models)
 
-if((NOT IOS) OR (NOT MACOS_NE))
+if(MACOS_NE)
+    message("MACOS_NE is ON")
+    add_definitions(-DQ_OS_IOS)
+    add_definitions(-DMACOS_NE)
+    message("Add macros for MacOS Network Extension")
+else()
+    message("MACOS_NE is OFF")
+endif()
+
+
+if(NOT IOS AND NOT MACOS_NE)
+    message(" Add header for non-IOS and non-MACOS_NE")
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
     )
 endif()
+
 
 if(NOT ANDROID)
     set(HEADERS ${HEADERS}
@@ -220,7 +232,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
 endif()
 
-if((NOT IOS) OR (NOT MACOS_NE))
+if(NOT IOS AND NOT MACOS_NE)
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
     )
@@ -328,8 +340,12 @@ if(LINUX AND NOT ANDROID)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
+    message("Run this block when MACOS_NE is not defined or set to FALSE")
+endif()
+
 # Macos Network Extension doesn't need
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE AND NOT MACOS_NE))
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     message("Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
 
@@ -365,11 +381,12 @@ endif()
 if(IOS)
     include(cmake/ios.cmake)
     include(cmake/ios-arch-fixup.cmake)
-elseif(APPLE AND NOT IOS AND NOT MACOS_NE)
+elseif(APPLE AND NOT IOS AND NOT DEFINED MACOS_NE)
     include(cmake/osxtools.cmake)
     include(cmake/macos.cmake)
-    elseif(APPLE AND NOT IOS AND MACOS_NE)
-        include(cmake/macos_ne.cmake)
+elseif(APPLE AND NOT IOS AND MACOS_NE)
+    include(cmake/osxtools.cmake)
+    include(cmake/macos_ne.cmake)
 endif()
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})

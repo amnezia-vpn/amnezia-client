@@ -30,7 +30,7 @@ set_target_properties(networkextension PROPERTIES
 
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../Frameworks"
 
-    # XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
+    XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
     # #XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
 
     # #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution: Privacy Technologies OU (X7UJ388FXK)"
@@ -187,7 +187,7 @@ target_sources(networkextension PRIVATE
 target_include_directories(networkextension PRIVATE ${CLIENT_ROOT_DIR})
 target_include_directories(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64/libwg-go.a)
+target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/macos/x86_64/libwg-go.a)
 
 # Print the root directory for debugging purposes
 message("---------")

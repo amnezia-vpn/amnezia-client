@@ -5,11 +5,14 @@
 #include <QDebug>
 #include "notificationhandler.h"
 
-#if defined(Q_OS_IOS)
+#if defined(Q_OS_IOS) && !defined(MACOS_NE)
 #  include "platforms/ios/iosnotificationhandler.h"
+#elif defined(MACOS_NE)
+#  include "platforms/macos_ne/iosnotificationhandler.h"
 #else
 #  include "systemtray_notificationhandler.h"
 #endif
+
 
 // static
 NotificationHandler* NotificationHandler::create(QObject* parent) {

@@ -34,22 +34,22 @@ set(LIBS ${LIBS}
 
 
 set(HEADERS ${HEADERS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/ios_controller.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/ios_controller_wrapper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/iosnotificationhandler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/QtAppDelegate.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/QtAppDelegate-C-Interface.h
 )
-set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h PROPERTIES OBJECTIVE_CPP_HEADER TRUE)
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/ios_controller.h PROPERTIES OBJECTIVE_CPP_HEADER TRUE)
 
 
 set(SOURCES ${SOURCES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/ios_controller.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/ios_controller_wrapper.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/iosnotificationhandler.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/iosglue.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/QRCodeReaderBase.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/QtAppDelegate.mm
 )
 
 set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/images/app.icns)
@@ -71,7 +71,7 @@ target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
 set_target_properties(${PROJECT} PROPERTIES
     XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
-    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Info.plist.in
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Info.plist.in
     #MACOSX_BUNDLE_ICON_FILE "AppIcon"
     MACOSX_BUNDLE_INFO_STRING "AmneziaVPN"
     MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPN"
@@ -79,7 +79,7 @@ set_target_properties(${PROJECT} PROPERTIES
     MACOSX_BUNDLE_LONG_VERSION_STRING "${APPLE_PROJECT_VERSION}-${CMAKE_PROJECT_VERSION_TWEAK}"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${APPLE_PROJECT_VERSION}"
     XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}"
-    XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/ios/app/main.entitlements"
+    XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/macos/app/main.entitlements"
     XCODE_ATTRIBUTE_MARKETING_VERSION "${APPLE_PROJECT_VERSION}"
     XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
     XCODE_ATTRIBUTE_PRODUCT_NAME "AmneziaVPN"
@@ -96,14 +96,14 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_EMBED_APP_EXTENSIONS networkextension
 
     XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
-    #XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
+    # XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
 
-    #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution: Privacy Technologies OU (X7UJ388FXK)"
-    #XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
+    # XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution: Privacy Technologies OU (X7UJ388FXK)"
+    # XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
 
 
-    #XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "Mac AppStore AmneziaVPN"
-    #XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "Mac AppStore AmneziaVPN"
+    # XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "Mac AppStore AmneziaVPN"
+    # XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "Mac AppStore AmneziaVPN"
 
 )
 set_target_properties(${PROJECT} PROPERTIES
@@ -127,23 +127,23 @@ set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/amneziawg-apple/Sources)
 target_sources(${PROJECT} PRIVATE
 #    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosvpnprotocol.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKitC/x25519.c
-    ${CLIENT_ROOT_DIR}/platforms/ios/LogController.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/ScreenProtection.swift
-    ${CLIENT_ROOT_DIR}/platforms/ios/VPNCController.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos_ne/LogController.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos_ne/Log.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos_ne/LogRecord.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos_ne/ScreenProtection.swift
+    ${CLIENT_ROOT_DIR}/platforms/macos_ne/VPNCController.swift
 )
 
 target_sources(${PROJECT} PRIVATE
-    #${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
+    #${CMAKE_CURRENT_SOURCE_DIR}/macos_ne/app/AmneziaVPNLaunchScreen.storyboard
+    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Media.xcassets
+    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/PrivacyInfo.xcprivacy
 )
 
 set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
-    #${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
+    #${CMAKE_CURRENT_SOURCE_DIR}/macos/app/AmneziaVPNLaunchScreen.storyboard
+    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Media.xcassets
+    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/PrivacyInfo.xcprivacy
 )
 
 add_subdirectory(macos/networkextension)

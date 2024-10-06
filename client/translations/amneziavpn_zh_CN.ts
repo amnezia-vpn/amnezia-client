@@ -262,18 +262,18 @@ Can&apos;t be disabled for current server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="187"/>
-        <location filename="../ui/controllers/importController.cpp" line="192"/>
+        <location filename="../ui/controllers/importController.cpp" line="191"/>
+        <location filename="../ui/controllers/importController.cpp" line="196"/>
         <source>Invalid configuration file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="617"/>
+        <location filename="../ui/controllers/importController.cpp" line="622"/>
         <source>Scanned %1 of %2.</source>
         <translation>扫描 %1 of %2.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="652"/>
+        <location filename="../ui/controllers/importController.cpp" line="657"/>
         <source>In the imported configuration, potentially dangerous lines were found:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -427,28 +427,28 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>NotificationHandler</name>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="63"/>
-        <location filename="../ui/notificationhandler.cpp" line="70"/>
+        <location filename="../ui/notificationhandler.cpp" line="66"/>
+        <location filename="../ui/notificationhandler.cpp" line="73"/>
         <source>AmneziaVPN</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="64"/>
+        <location filename="../ui/notificationhandler.cpp" line="67"/>
         <source>VPN Connected</source>
         <translation>已连接到VPN</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="71"/>
+        <location filename="../ui/notificationhandler.cpp" line="74"/>
         <source>VPN Disconnected</source>
         <translation>已从VPN断开</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="94"/>
+        <location filename="../ui/notificationhandler.cpp" line="97"/>
         <source>AmneziaVPN notification</source>
         <translation>AmneziaVPN 提示</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="95"/>
+        <location filename="../ui/notificationhandler.cpp" line="98"/>
         <source>Unsecured network detected: </source>
         <translation>发现不安全网络</translation>
     </message>
@@ -2673,12 +2673,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="vanished">密码 或 私钥</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="113"/>
         <source>Continue</source>
         <translation>继续</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="141"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>您输入的所有数据将严格保密，不会与 Amnezia 或任何第三方共享或披露</translation>
     </message>
@@ -2694,42 +2694,42 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="78"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="75"/>
         <source>SSH Username</source>
         <translation>SSH 用户名</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="91"/>
         <source>Password or SSH private key</source>
         <translation>密码或 SSH 私钥</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="150"/>
         <source>How to run your VPN server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="151"/>
         <source>Where to get connection data, step-by-step instructions for buying a VPS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="167"/>
         <source>Ip address cannot be empty</source>
         <translation>IP不能为空</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="173"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="170"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
         <translation>按照这种格式输入 255.255.255.255:88</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="177"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="174"/>
         <source>Login cannot be empty</source>
         <translation>账号不能为空</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="181"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="178"/>
         <source>Password/private key cannot be empty</source>
         <translation>密码或私钥不能为空</translation>
     </message>
@@ -3087,46 +3087,51 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="849"/>
+        <source>Allowed IPs: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Creation date: </source>
         <translation type="vanished">创建日期: </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="862"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="870"/>
         <source>Rename</source>
         <translation>重新命名</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="908"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="916"/>
         <source>Client name</source>
         <translation>客户名称</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="921"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="929"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="955"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="963"/>
         <source>Revoke</source>
         <translation>撤销</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="959"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="967"/>
         <source>Revoke the config for a user - %1?</source>
         <translation>撤销用户的配置- %1?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="960"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="968"/>
         <source>The user will no longer be able to connect to your server.</source>
         <translation>该用户将无法再连接到您的服务器.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="961"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="969"/>
         <source>Continue</source>
         <translation>继续</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="962"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="970"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -4610,12 +4615,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="162"/>
+        <location filename="../ui/qml/main2.qml" line="163"/>
         <source>Private key passphrase</source>
         <translation>私钥密码</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="185"/>
+        <location filename="../ui/qml/main2.qml" line="186"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>

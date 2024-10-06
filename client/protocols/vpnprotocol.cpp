@@ -109,7 +109,7 @@ VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &
 #if defined(Q_OS_WINDOWS)
     case DockerContainer::Ipsec: return new Ikev2Protocol(configuration);
 #endif
-#if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
+#if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) and !defined MACOS_NE || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
     case DockerContainer::OpenVpn: return new OpenVpnProtocol(configuration);
     case DockerContainer::Cloak: return new OpenVpnOverCloakProtocol(configuration);
     case DockerContainer::ShadowSocks: return new ShadowSocksVpnProtocol(configuration);

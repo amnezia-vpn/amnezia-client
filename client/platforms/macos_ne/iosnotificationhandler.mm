@@ -2,15 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "platforms/ios/iosnotificationhandler.h"
+#include "platforms/macos_ne/iosnotificationhandler.h"
 
 #import <UserNotifications/UserNotifications.h>
 #import <Foundation/Foundation.h>
-//#import <UIKit/UIKit.h>
 
-/*
+// Removed the UIResponder and UIApplicationDelegate references as these are not available in macOS
 @interface IOSNotificationDelegate
-    : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate> {
+    : NSObject <UNUserNotificationCenterDelegate> {
   IOSNotificationHandler* m_iosNotificationHandler;
 }
 @end
@@ -18,7 +17,7 @@
 @implementation IOSNotificationDelegate
 
 - (id)initWithObject:(IOSNotificationHandler*)notification {
-  self = [super init];
+  self = [super init];  // Removed `super init` as it refers to UIResponder, which is iOS specific
   if (self) {
     m_iosNotificationHandler = notification;
   }
@@ -30,7 +29,7 @@
          withCompletionHandler:
              (void (^)(UNNotificationPresentationOptions options))completionHandler {
   Q_UNUSED(center)
-  completionHandler(UNNotificationPresentationOptionAlert);
+  completionHandler(UNNotificationPresentationOptionList | UNNotificationPresentationOptionBanner);
 }
 
 - (void)userNotificationCenter:(UNUserNotificationCenter*)center
@@ -79,7 +78,7 @@ void IOSNotificationHandler::notify(NotificationHandler::Message type, const QSt
                                                                         trigger:trigger];
 
   UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-  center.delegate = id(m_delegate);
+  center.delegate = (id<UNUserNotificationCenterDelegate>)m_delegate;
 
   [center addNotificationRequest:request
            withCompletionHandler:^(NSError* _Nullable error) {
@@ -87,4 +86,4 @@ void IOSNotificationHandler::notify(NotificationHandler::Message type, const QSt
                NSLog(@"Local Notification failed");
              }
            }];
-}*/
+}
