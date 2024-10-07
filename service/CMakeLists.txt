@@ -6,6 +6,6 @@ project(${PROJECT})
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(NOT IOS AND NOT ANDROID)
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_subdirectory(server)
 endif()

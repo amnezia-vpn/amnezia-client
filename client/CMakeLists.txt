@@ -35,7 +35,7 @@ if(IOS OR MACOS_NE)
 endif()
 
 #Macos Network Extension doesn't need Widgets
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (NOT DEFINED MACOS_NE))
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
@@ -53,14 +53,18 @@ if(IOS OR MACOS_NE)
 endif()
 # message("Client desktop build ", ${MACOS_NE})
 #Macos Network Extension doesn't need Widgets
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE AND NOT DEFINED MACOS_NE))
+
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
+    message("Run this block when MACOS_NE is not defined or set to FALSE")
     set(LIBS ${LIBS} Qt6::Widgets)
 endif()
 
 qt_standard_project_setup()
 qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID) OR (APPLE AND NOT DEFINED MACOS_NE))
+# TODO error in there
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
+    message("Run this block when MACOS_NE is not defined or set to FALSE")
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_interface.rep)
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_process_tun2socks.rep)
@@ -339,16 +343,12 @@ if(LINUX AND NOT ANDROID)
     set(LIBS ${LIBS} -static-libstdc++ -static-libgcc -ldl)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
-
-if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
-    message("Run this block when MACOS_NE is not defined or set to FALSE")
-endif()
-
+message("In here")
 # Macos Network Extension doesn't need
 if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
-    message("Client desktop build")
+    message("-----> Client desktop build")
     add_compile_definitions(AMNEZIA_DESKTOP)
-
+    message("-----> Add AMNEZIA_DESKTOP")
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/core/ipcclient.h
         ${CMAKE_CURRENT_LIST_DIR}/core/privileged_process.h
@@ -382,7 +382,7 @@ if(IOS)
     include(cmake/ios.cmake)
     include(cmake/ios-arch-fixup.cmake)
 elseif(APPLE AND NOT IOS AND NOT DEFINED MACOS_NE)
-    include(cmake/osxtools.cmake)
+    # include(cmake/osxtools.cmake)
     include(cmake/macos.cmake)
 elseif(APPLE AND NOT IOS AND MACOS_NE)
     include(cmake/osxtools.cmake)
@@ -405,7 +405,7 @@ elseif(APPLE AND NOT IOS)
     set(DEPLOY_PLATFORM_PATH "macos")
 endif()
 
-if(NOT IOS AND NOT ANDROID)
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
@@ -424,4 +424,33 @@ if(NOT IOS AND NOT ANDROID)
 endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
+# Sao chép QtConcurrent.framework vào thư mục Frameworks
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+    "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks"
+    
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "/Users/macbook/Qt/6.8.0/macos/lib/QtConcurrent.framework"
+    "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks/QtConcurrent.framework"
+    
+    COMMENT "Copying QtConcurrent.framework to the bundle's Frameworks directory"
+)
+
+
+# Triển khai ứng dụng với macdeployqt và ký mã (nếu cần)
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:AmneziaVPN> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+# Nếu ở chế độ Release, ký mã gói ứng dụng
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    SET(SIGN_CMD codesign --deep --force --sign 'Apple Distribution: Privacy Technologies OU \(X7UJ388FXK\)' --timestamp --options runtime $<TARGET_BUNDLE_DIR:AmneziaVPN>)
+    message("Manual signing bundle...")
+    message(${SIGN_CMD})
+
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${SIGN_CMD}
+    )
+endif()
+
 qt_finalize_target(${PROJECT})

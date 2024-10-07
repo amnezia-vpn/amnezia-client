@@ -4,7 +4,7 @@
 #include "core/errorstrings.h"
 #include "vpnprotocol.h"
 
-#if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
+#if defined(Q_OS_WINDOWS) || defined(Q_OS_MACX) and !defined MACOS_NE || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
     #include "openvpnovercloakprotocol.h"
     #include "openvpnprotocol.h"
     #include "shadowsocksvpnprotocol.h"
