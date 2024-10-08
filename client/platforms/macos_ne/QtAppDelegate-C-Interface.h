@@ -1,6 +1,0 @@
-#ifndef QTAPPDELEGATECINTERFACE_H
-#define QTAPPDELEGATECINTERFACE_H
-
-void QtAppDelegateInitialize();
-
-#endif // QTAPPDELEGATECINTERFACE_H

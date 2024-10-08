@@ -34,22 +34,22 @@ set(LIBS ${LIBS}
 
 
 set(HEADERS ${HEADERS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/ios_controller.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/ios_controller_wrapper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/iosnotificationhandler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/QtAppDelegate.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/QtAppDelegate-C-Interface.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
 )
-set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/ios_controller.h PROPERTIES OBJECTIVE_CPP_HEADER TRUE)
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h PROPERTIES OBJECTIVE_CPP_HEADER TRUE)
 
 
 set(SOURCES ${SOURCES}
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/ios_controller.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/ios_controller_wrapper.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/iosnotificationhandler.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/iosglue.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/QRCodeReaderBase.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos_ne/QtAppDelegate.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
 )
 
 set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/images/app.icns)
@@ -127,11 +127,11 @@ set(WG_APPLE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rd/amneziawg-apple/Sources)
 target_sources(${PROJECT} PRIVATE
 #    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosvpnprotocol.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKitC/x25519.c
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/LogController.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/Log.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/LogRecord.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/ScreenProtection.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/VPNCController.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/LogController.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/ScreenProtection.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/VPNCController.swift
 )
 
 target_sources(${PROJECT} PRIVATE

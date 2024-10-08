@@ -8,7 +8,7 @@
 #include "notificationhandler.h"
 
 #include <QMenu>
-#include <QSystemTrayIcon>
+#include <QSystemTrayIcon>'QMenu' file not found
 
 class SystemTrayNotificationHandler : public NotificationHandler {
     Q_OBJECT

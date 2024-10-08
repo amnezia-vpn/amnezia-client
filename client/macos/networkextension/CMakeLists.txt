@@ -9,6 +9,15 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
 )
 
+if(MACOS_NE)
+    message("MACOS_NE is ON")
+    add_definitions(-DQ_OS_IOS)
+    add_definitions(-DMACOS_NE)
+    message("Add macros for MacOS Network Extension")
+else()
+    message("MACOS_NE is OFF")
+endif()
+
 set_target_properties(networkextension PROPERTIES
     XCODE_PRODUCT_TYPE com.apple.product-type.app-extension
     BUNDLE_EXTENSION appex
@@ -152,16 +161,16 @@ target_sources(networkextension PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/Array+ConcurrentMap.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/IPAddress+AddrInfo.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PrivateKey.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/HevSocksTunnel.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/NELogController.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/Log.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/LogRecord.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/PacketTunnelProvider.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/PacketTunnelProvider+WireGuard.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/PacketTunnelProvider+OpenVPN.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/PacketTunnelProvider+Xray.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/WGConfig.swift
-    ${CLIENT_ROOT_DIR}/platforms/macos_ne/iosglue.mm
+    ${CLIENT_ROOT_DIR}/platforms/ios/HevSocksTunnel.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/NELogController.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+WireGuard.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+OpenVPN.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+Xray.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/WGConfig.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
 )
 
 target_sources(networkextension PRIVATE
