@@ -34,6 +34,7 @@ private:
 
         QString wireGuardClientPrivKey;
         QString wireGuardClientPubKey;
+        QString wireGuardPskKey;
     };
 
     ApiPayloadData generateApiPayloadData(const QString &protocol);
