@@ -34,16 +34,15 @@ DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/macos
 INSTALLER_DATA_DIR=$BUILD_DIR/installer/packages/$APP_DOMAIN/data
 INSTALLER_BUNDLE_DIR=$BUILD_DIR/installer/$APP_FILENAME
 DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
-
 # Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
   echo "QT_VERSION is not set, using default 6.8.0"
-  QT_VERSION=6.8.0
+  QT_VERSION=6.4.3
 fi
 
 if [ -z "${QIF_VERSION+x}" ]; then
   echo "QIF_VERSION is not set, using default 4.7"
-  QIF_VERSION=4.7
+  QIF_VERSION=4.6
 fi
 
 QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
