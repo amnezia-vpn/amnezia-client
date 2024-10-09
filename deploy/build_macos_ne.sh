@@ -41,8 +41,8 @@ if [ -z "${QT_VERSION+x}" ]; then
 fi
 
 if [ -z "${QIF_VERSION+x}" ]; then
-  echo "QIF_VERSION is not set, using default 4.7"
-  QIF_VERSION=4.7
+  echo "QIF_VERSION is not set, using default 4.6"
+  QIF_VERSION=4.6
 fi
 
 QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
