@@ -316,7 +316,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
         dir: ${{ runner.temp }}
         set-env: 'true'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'

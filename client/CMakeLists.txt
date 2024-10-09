@@ -424,34 +424,34 @@ if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
 endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
-# if(APPLE AND NOT ANDROID)
-#     # MacOS specific bundle operations
-#     add_custom_command(TARGET ${PROJECT} POST_BUILD
-#         COMMAND ${CMAKE_COMMAND} -E make_directory
-#         "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks"
+if(MACOS_NE)
+    # MacOS specific bundle operations
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+        "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks"
 
-#         COMMAND ${CMAKE_COMMAND} -E copy_directory
-#         "/Users/macbook/Qt/6.8.0/macos/lib/QtConcurrent.framework"
-#         "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks/QtConcurrent.framework"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "/Users/macbook/Qt/6.8.0/macos/lib/QtConcurrent.framework"
+        "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks/QtConcurrent.framework"
 
-#         COMMENT "Copying QtConcurrent.framework to the bundle's Frameworks directory"
-#     )
+        COMMENT "Copying QtConcurrent.framework to the bundle's Frameworks directory"
+    )
 
-#     # MacOS specific application deployment
-#     add_custom_command(TARGET ${PROJECT} POST_BUILD
-#         COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:AmneziaVPN> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR}
-#     )
+    # MacOS specific application deployment
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:AmneziaVPN> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR}
+    )
 
-#     # MacOS specific code signing for Release
-#     if(CMAKE_BUILD_TYPE STREQUAL "Release")
-#         SET(SIGN_CMD codesign --deep --force --sign 'Apple Distribution: Privacy Technologies OU \(X7UJ388FXK\)' --timestamp --options runtime $<TARGET_BUNDLE_DIR:AmneziaVPN>)
-#         message("Manual signing bundle...")
-#         message(${SIGN_CMD})
+    # MacOS specific code signing for Release
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        SET(SIGN_CMD codesign --deep --force --sign 'Apple Distribution: Privacy Technologies OU \(X7UJ388FXK\)' --timestamp --options runtime $<TARGET_BUNDLE_DIR:AmneziaVPN>)
+        message("Manual signing bundle...")
+        message(${SIGN_CMD})
 
-#         add_custom_command(TARGET ${PROJECT} POST_BUILD
-#             COMMAND ${SIGN_CMD}
-#         )
-#     endif()
-# endif()
+        add_custom_command(TARGET ${PROJECT} POST_BUILD
+            COMMAND ${SIGN_CMD}
+        )
+    endif()
+endif()
 
 qt_finalize_target(${PROJECT})
