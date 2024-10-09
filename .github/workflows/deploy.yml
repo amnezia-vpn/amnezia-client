@@ -320,7 +320,11 @@ jobs:
         dir: ${{ runner.temp }}
         set-env: 'true'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
-
+    - name: 'Install Qt Installer Framework ${{ env.QIF_VERSION }}'
+      run: |
+        mkdir -pv ${{ runner.temp }}/Qt/Tools/QtInstallerFramework
+        wget https://qt.amzsvc.com/tools/ifw/${{ env.QIF_VERSION }}.zip
+        unzip ${{ env.QIF_VERSION }}.zip -d ${{ runner.temp }}/Qt/Tools/QtInstallerFramework/
     - name: 'Install Go'
       uses: actions/setup-go@v5
       with:
