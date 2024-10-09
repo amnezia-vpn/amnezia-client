@@ -327,40 +327,26 @@ jobs:
         go-version: '1.22.1'
         cache: false
 
-    - name: 'Setup gomobile'
-      run: |
-        export PATH=$PATH:~/go/bin
-        go install golang.org/x/mobile/cmd/gomobile@latest
-        gomobile init
-
     - name: 'Get sources'
       uses: actions/checkout@v4
       with:
         submodules: 'true'
         fetch-depth: 10
 
-    - name: 'Setup ccache'
-      uses: hendrikmuhs/ccache-action@v1.2
-
     - name: 'Install dependencies'
       run: pip install jsonschema jinja2
 
-    - name: 'Build macOS NE'
-      run: |
-        git submodule update --init --recursive
-        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
-        export PATH=$PATH:~/go/bin
-        mkdir build-macos
-        $QT_BIN_DIR/qt-cmake . -B build-macos -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR -DMACOS_NE=TRUE
-        xcodebuild -project build-macos/MyApp.xcodeproj -configuration Release
+    - name: 'Set execute permissions for deploy script'
+      run: chmod +x deploy/deploy_macos_ne.sh
 
-    - name: 'Upload installer artifact'
-      uses: actions/upload-artifact@v4
-      with:
-        name: AmneziaVPN_MacOS_NE_installer
-        path: build-macos/Release/AmneziaVPN.dmg
-        retention-days: 7
+    - name: 'Build and deploy macOS NE'
+      run: bash deploy/deploy_macos_ne.sh
+      env:
+        MAC_CERT_PW: ${{ secrets.MAC_CERT_PW }}
+        MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
+        APPLE_DEV_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
+        MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
+        APPLE_DEV_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
 
 # ------------------------------------------------------
 
