@@ -37,12 +37,12 @@ DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 # Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
   echo "QT_VERSION is not set, using default 6.8.0"
-  QT_VERSION=6.4.3
+  QT_VERSION=6.8.0
 fi
 
 if [ -z "${QIF_VERSION+x}" ]; then
   echo "QIF_VERSION is not set, using default 4.7"
-  QIF_VERSION=4.6
+  QIF_VERSION=4.7
 fi
 
 QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
