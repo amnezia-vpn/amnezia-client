@@ -293,6 +293,74 @@ jobs:
         name: AmneziaVPN_MacOS_unpacked
         path: deploy/build/client/AmneziaVPN.app
         retention-days: 7
+# ------------------------------------------------------
+  Build-MacOS-NE:
+    runs-on: macos-latest
+
+    env:
+      QT_VERSION: 6.8.0
+      QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+
+    steps:
+    - name: 'Setup Xcode'
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '14.3.1'
+
+    - name: 'Install Desktop Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
+        dir: ${{ runner.temp }}
+        set-env: 'true'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install Go'
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22.1'
+        cache: false
+
+    - name: 'Setup gomobile'
+      run: |
+        export PATH=$PATH:~/go/bin
+        go install golang.org/x/mobile/cmd/gomobile@latest
+        gomobile init
+
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: 'Install dependencies'
+      run: pip install jsonschema jinja2
+
+    - name: 'Build macOS NE'
+      run: |
+        git submodule update --init --recursive
+        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
+        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
+        export PATH=$PATH:~/go/bin
+        mkdir build-macos
+        $QT_BIN_DIR/qt-cmake . -B build-macos -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR -DMACOS_NE=TRUE
+        xcodebuild -project build-macos/MyApp.xcodeproj -configuration Release
+
+    - name: 'Upload installer artifact'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_MacOS_NE_installer
+        path: build-macos/Release/AmneziaVPN.dmg
+        retention-days: 7
 
 # ------------------------------------------------------
 
