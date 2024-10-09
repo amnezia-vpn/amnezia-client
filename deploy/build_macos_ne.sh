@@ -34,50 +34,45 @@ DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/macos
 INSTALLER_DATA_DIR=$BUILD_DIR/installer/packages/$APP_DOMAIN/data
 INSTALLER_BUNDLE_DIR=$BUILD_DIR/installer/$APP_FILENAME
 DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
-# Search Qt
-if [ -z "${QT_VERSION+x}" ]; then
-  echo "QT_VERSION is not set, using default 6.8.0"
-  QT_VERSION=6.8.0
-fi
 
-if [ -z "${QIF_VERSION+x}" ]; then
-  echo "QIF_VERSION is not set, using default 4.6"
-  QIF_VERSION=4.6
-fi
-
-QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
-QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
-
-# Check if QT_BIN_DIR is properly set
-if [ -z "${QT_BIN_DIR+x}" ]; then
-  echo "Error: QT_BIN_DIR is not set."
+# Check if QT_PATH is properly set
+if [ -z "${QT_PATH+x}" ]; then
+  echo "Error: QT_PATH is not set."
   exit 1
 fi
 
-echo "Using Qt in $QT_BIN_DIR"
-echo "Using QIF in $QIF_BIN_DIR"
+# Set QT_BIN_DIR to the bin folder of the Qt installation
+QT_BIN_DIR="$QT_PATH/bin"
 
-# Setup environment paths
-export QT_BIN_DIR
-export QT_MACOS_ROOT_DIR=$HOME/Qt/$QT_VERSION/macos
-export QT_MACOS_BIN=$QT_BIN_DIR
-export PATH=$PATH:~/go/bin
+# Check if QT_BIN_DIR exists
+if [ ! -d "$QT_BIN_DIR" ]; then
+  echo "Error: QT_BIN_DIR does not exist at $QT_BIN_DIR"
+  exit 1
+fi
 
 # Show the content of QT_BIN_DIR
 echo "Listing contents of QT_BIN_DIR:"
 ls -la $QT_BIN_DIR || { echo "Error: Cannot access $QT_BIN_DIR"; exit 1; }
 
-# Checking env
+# Check if QIF_VERSION is properly set, otherwise set a default
+if [ -z "${QIF_VERSION+x}" ]; then
+  echo "QIF_VERSION is not set, using default 4.7"
+  QIF_VERSION=4.7
+fi
+
+QIF_BIN_DIR="$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin"
+
+# Checking environment
 $QT_BIN_DIR/qt-cmake --version || { echo "Error: qt-cmake not found in $QT_BIN_DIR"; exit 1; }
 cmake --version || { echo "Error: cmake not found"; exit 1; }
 clang -v || { echo "Error: clang not found"; exit 1; }
 
-# Build App
+# Build the app
 echo "Building App..."
 mkdir -p build-macos
 cd build-macos
 
-$QT_MACOS_BIN/qt-cmake .. -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR -DMACOS_NE=TRUE
+$QT_BIN_DIR/qt-cmake .. -GXcode -DQT_HOST_PATH=$QT_PATH -DMACOS_NE=TRUE
 cmake --build . --config release --target all
 
 # Build and run tests here
@@ -95,6 +90,7 @@ cp -av $BUILD_DIR/service/server/$APP_NAME-service $BUNDLE_DIR/Contents/macOS
 cp -Rv $PROJECT_DIR/deploy/data/macos/* $BUNDLE_DIR/Contents/macOS
 rm -f $BUNDLE_DIR/Contents/macOS/post_install.sh $BUNDLE_DIR/Contents/macOS/post_uninstall.sh
 
+# Signing and notarizing the app
 if [ "${MAC_CERT_PW+x}" ]; then
 
   CERTIFICATE_P12=$DEPLOY_DIR/PrivacyTechAppleCertDeveloperId.p12
@@ -151,39 +147,3 @@ if [ "${MAC_CERT_PW+x}" ]; then
   echo "Signing installer bundle..."
   security unlock-keychain -p $TEMP_PASS $KEYCHAIN
   /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "$MAC_SIGNER_ID" $INSTALLER_BUNDLE_DIR
-  /usr/bin/codesign --verify -vvvv $INSTALLER_BUNDLE_DIR || true
-
-  if [ "${NOTARIZE_APP+x}" ]; then
-    echo "Notarizing installer bundle..."
-    /usr/bin/ditto -c -k --keepParent $INSTALLER_BUNDLE_DIR $PROJECT_DIR/Installer_bundle_to_notarize.zip
-    xcrun notarytool submit $PROJECT_DIR/Installer_bundle_to_notarize.zip --apple-id $APPLE_DEV_EMAIL --team-id $MAC_TEAM_ID --password $APPLE_DEV_PASSWORD
-    rm $PROJECT_DIR/Installer_bundle_to_notarize.zip
-    sleep 300
-    xcrun stapler staple $INSTALLER_BUNDLE_DIR
-    xcrun stapler validate $INSTALLER_BUNDLE_DIR
-    spctl -a -vvvv $INSTALLER_BUNDLE_DIR || true
-  fi
-fi
-
-echo "Building DMG installer..."
-hdiutil create -size 256mb -volname AmneziaVPN -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
-
-if [ "${MAC_CERT_PW+x}" ]; then
-  echo "Signing DMG installer..."
-  security unlock-keychain -p $TEMP_PASS $KEYCHAIN
-  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "$MAC_SIGNER_ID" $DMG_FILENAME
-  /usr/bin/codesign --verify -vvvv $DMG_FILENAME || true
-
-  if [ "${NOTARIZE_APP+x}" ]; then
-    echo "Notarizing DMG installer..."
-    xcrun notarytool submit $DMG_FILENAME --apple-id $APPLE_DEV_EMAIL --team-id $MAC_TEAM_ID --password $APPLE_DEV_PASSWORD
-    sleep 300
-    xcrun stapler staple $DMG_FILENAME
-    xcrun stapler validate $DMG_FILENAME
-  fi
-fi
-
-echo "Finished, artifact is $DMG_FILENAME"
-
-# restore keychain
-security default-keychain -s login.keychain

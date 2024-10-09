@@ -299,7 +299,7 @@ jobs:
 
     env:
       QT_VERSION: 6.8.0
-      QIF_VERSION: 4.6
+      QIF_VERSION: 4.7
       QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
@@ -310,17 +310,17 @@ jobs:
       with:
         xcode-version: '14.3.1'
 
-    - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'mac'
-        target: 'desktop'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
-        arch: 'clang_64'
-        dir: ${{ runner.temp }}
-        set-env: 'true'
-        extra: '--base ${{ env.QT_MIRROR }}'
+    - name: 'Install Qt'
+    uses: jurplel/install-qt-action@v3
+    with:
+      version: ${{ env.QT_VERSION }}
+      host: 'mac'
+      target: 'desktop'
+      arch: 'clang_64'
+      dir: ${{ runner.temp }}
+      setup-python: 'true'
+      set-env: 'true'  # This will set QT_PATH
+      extra: '--external 7z --base https://mirrors.ocf.berkeley.edu/qt/'
     - name: 'Install Qt Installer Framework ${{ env.QIF_VERSION }}'
       run: |
         mkdir -pv ${{ runner.temp }}/Qt/Tools/QtInstallerFramework
