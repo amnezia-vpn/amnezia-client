@@ -37,25 +37,33 @@ DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
 # Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
-QT_VERSION=6.8.0;
-QIF_VERSION=4.7
+  echo "QT_VERSION is not set, using default 6.8.0"
+  QT_VERSION=6.8.0
+  QIF_VERSION=4.7
+fi
+
 QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
 QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
+
+# Check if QT_BIN_DIR is properly set
+if [ -z "${QT_BIN_DIR+x}" ]; then
+  echo "Error: QT_BIN_DIR is not set."
+  exit 1
 fi
 
 echo "Using Qt in $QT_BIN_DIR"
 echo "Using QIF in $QIF_BIN_DIR"
 
 # Setup environment paths
-export QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
+export QT_BIN_DIR
 export QT_MACOS_ROOT_DIR=$HOME/Qt/$QT_VERSION/macos
 export QT_MACOS_BIN=$QT_BIN_DIR
 export PATH=$PATH:~/go/bin
 
 # Checking env
-$QT_BIN_DIR/qt-cmake --version
-cmake --version
-clang -v
+$QT_BIN_DIR/qt-cmake --version || { echo "Error: qt-cmake not found in $QT_BIN_DIR"; exit 1; }
+cmake --version || { echo "Error: cmake not found"; exit 1; }
+clang -v || { echo "Error: clang not found"; exit 1; }
 
 # Build App
 echo "Building App..."
@@ -151,7 +159,6 @@ if [ "${MAC_CERT_PW+x}" ]; then
 fi
 
 echo "Building DMG installer..."
-# Allow Terminal to make changes in Privacy & Security > App Management
 hdiutil create -size 256mb -volname AmneziaVPN -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
 
 if [ "${MAC_CERT_PW+x}" ]; then
