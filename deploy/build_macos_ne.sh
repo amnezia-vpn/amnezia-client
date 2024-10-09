@@ -63,6 +63,10 @@ export QT_MACOS_ROOT_DIR=$HOME/Qt/$QT_VERSION/macos
 export QT_MACOS_BIN=$QT_BIN_DIR
 export PATH=$PATH:~/go/bin
 
+# Show the content of QT_BIN_DIR
+echo "Listing contents of QT_BIN_DIR:"
+ls -la $QT_BIN_DIR || { echo "Error: Cannot access $QT_BIN_DIR"; exit 1; }
+
 # Checking env
 $QT_BIN_DIR/qt-cmake --version || { echo "Error: qt-cmake not found in $QT_BIN_DIR"; exit 1; }
 cmake --version || { echo "Error: cmake not found"; exit 1; }
