@@ -298,8 +298,8 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.8.0
-      QIF_VERSION: 4.7
+      QT_VERSION: 6.4.3
+      QIF_VERSION: 4.6
       QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}

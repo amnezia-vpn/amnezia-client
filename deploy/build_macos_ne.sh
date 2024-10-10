@@ -56,8 +56,8 @@ ls -la $QT_BIN_DIR || { echo "Error: Cannot access $QT_BIN_DIR"; exit 1; }
 
 # Check if QIF_VERSION is properly set, otherwise set a default
 if [ -z "${QIF_VERSION+x}" ]; then
-  echo "QIF_VERSION is not set, using default 4.7"
-  QIF_VERSION=4.7
+  echo "QIF_VERSION is not set, using default 4.6"
+  QIF_VERSION=4.6
 fi
 
 QIF_BIN_DIR="$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin"
