@@ -345,7 +345,10 @@ jobs:
       run: chmod +x deploy/build_macos_ne.sh
 
     - name: 'Build and deploy macOS NE'
-      run: bash deploy/build_macos_ne.sh
+      run: |
+        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
+        export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
+        bash deploy/build_macos_ne.sh
       env:
         MAC_CERT_PW: ${{ secrets.MAC_CERT_PW }}
         MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
