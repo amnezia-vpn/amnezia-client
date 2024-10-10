@@ -54,7 +54,9 @@ mkdir -p build-macos
 cd build-macos
 
 $QT_BIN_DIR/qt-cmake .. -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR -DMACOS_NE=TRUE
-cmake --build . --config release --target all
+# Xác định target hợp lệ và build
+cmake --build . --config release --target AmneziaVPN  # Hoặc target chính xác của bạn
+
 
 # Build and run tests here
 
