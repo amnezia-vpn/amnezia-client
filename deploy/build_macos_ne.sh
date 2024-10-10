@@ -35,25 +35,6 @@ INSTALLER_DATA_DIR=$BUILD_DIR/installer/packages/$APP_DOMAIN/data
 INSTALLER_BUNDLE_DIR=$BUILD_DIR/installer/$APP_FILENAME
 DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
-# # Check if QT_PATH is properly set
-# if [ -z "${QT_PATH+x}" ]; then
-#   echo "Error: QT_PATH is not set."
-#   exit 1
-# fi
-
-# # Set QT_BIN_DIR to the bin folder of the Qt installation
-# QT_BIN_DIR="$QT_PATH/bin"
-
-# # Check if QT_BIN_DIR exists
-# if [ ! -d "$QT_BIN_DIR" ]; then
-#   echo "Error: QT_BIN_DIR does not exist at $QT_BIN_DIR"
-#   exit 1
-# fi
-
-# # Show the content of QT_BIN_DIR
-# echo "Listing contents of QT_BIN_DIR:"
-# ls -la $QT_BIN_DIR || { echo "Error: Cannot access $QT_BIN_DIR"; exit 1; }
-
 # Check if QIF_VERSION is properly set, otherwise set a default
 if [ -z "${QIF_VERSION+x}" ]; then
   echo "QIF_VERSION is not set, using default 4.6"
