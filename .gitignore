@@ -68,6 +68,11 @@ client/3rd/ShadowSocks/build/
 # QtCtreator CMake
 CMakeLists.txt.user*
 
+# Visual Studio files
+/.vs
+/CMakePresets.json
+/CMakeUserPresets.json
+
 # Linux files
 *.7z
 deploy/AppDir
