@@ -348,6 +348,7 @@ jobs:
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
         export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
+        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
         bash deploy/build_macos_ne.sh
       env:
         MAC_CERT_PW: ${{ secrets.MAC_CERT_PW }}
