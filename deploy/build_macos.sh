@@ -1,4 +1,11 @@
 #!/bin/bash
+
+# If you want to just build the binary, you can pass `BUILD_ONLY=True` environment variable,
+# in this case you'll get only the binary, without any deployment steps like packaging installer
+
+# BUILD_ONLY requires:
+# qt – you can install minimal QT toolchain via brew: `brew install qt`
+
 echo "Build script started ..."
 
 set -o errexit -o nounset
@@ -48,7 +55,21 @@ echo "Using QIF in $QIF_BIN_DIR"
 
 
 # Checking env
-$QT_BIN_DIR/qt-cmake --version
+BREW_BIN_DIR=/opt/homebrew/bin
+if "$QT_BIN_DIR"/qt-cmake --version >/dev/null 2>&1; then
+  QT_CMAKE=$QT_BIN_DIR/qt-cmake
+  echo "qt-cmake found at $QT_BIN_DIR/qt-cmake"
+else
+  if $BREW_BIN_DIR/qt-cmake --version >/dev/null 2>&1; then
+    QT_CMAKE=$BREW_BIN_DIR/qt-cmake
+    echo "qt-cmake found at $BREW_BIN_DIR/qt-cmake"
+  else
+    echo "qt-cmake not found in $QT_BIN_DIR or $BREW_BIN_DIR directories."
+    exit 1
+  fi
+fi
+
+$QT_CMAKE --version
 cmake --version
 clang -v
 
@@ -56,8 +77,13 @@ clang -v
 echo "Building App..."
 cd $BUILD_DIR
 
-$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -B $BUILD_DIR
+$QT_CMAKE -S $PROJECT_DIR -B $BUILD_DIR
 cmake --build . --config release --target all
+
+if [ "${BUILD_ONLY:-}" = "True" ] || [ "${BUILD_ONLY:-}" = "true" ]; then
+  echo Succesfull build $APP_NAME, path to binary: $BUNDLE_DIR
+  exit 0
+fi
 
 # Build and run tests here
 
