@@ -36,19 +36,19 @@ INSTALLER_BUNDLE_DIR=$BUILD_DIR/installer/$APP_FILENAME
 DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
 # Copy provisioning profiles
-mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles/"
+# mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles/"
 
-echo $MACOS_APP_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/macos_app.mobileprovision
-echo $MACOS_NE_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision
+# echo $MACOS_APP_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/macos_app.mobileprovision
+# echo $MACOS_NE_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision
 
-shasum -a 256 ~/Library/MobileDevice/Provisioning\ Profiles/macos_app.mobileprovision
-shasum -a 256 ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision
+# shasum -a 256 ~/Library/MobileDevice/Provisioning\ Profiles/macos_app.mobileprovision
+# shasum -a 256 ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision
 
-macos_app_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/macos_app.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
-macos_ne_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
+# macos_app_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/macos_app.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
+# macos_ne_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
 
-mv ~/Library/MobileDevice/Provisioning\ Profiles/macos_app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$macos_app_uuid.mobileprovision
-mv ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$macos_ne_uuid.mobileprovision
+# mv ~/Library/MobileDevice/Provisioning\ Profiles/macos_app.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$macos_app_uuid.mobileprovision
+# mv ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$macos_ne_uuid.mobileprovision
 
 # Check if QIF_VERSION is properly set, otherwise set a default
 if [ -z "${QIF_VERSION+x}" ]; then

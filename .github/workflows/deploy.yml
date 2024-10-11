@@ -138,86 +138,86 @@ jobs:
 
 # ------------------------------------------------------
 
-  # Build-iOS:
-  #   runs-on: macos-13
+  Build-iOS:
+    runs-on: macos-13
 
-  #   env:
-  #     QT_VERSION: 6.6.2
-  #     CC: cc
-  #     CXX: c++
-  #     PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
-  #     DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+    env:
+      QT_VERSION: 6.6.2
+      CC: cc
+      CXX: c++
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
 
-  #   steps:
-  #   - name: 'Setup xcode'
-  #     uses: maxim-lobanov/setup-xcode@v1
-  #     with:
-  #       xcode-version: '15.2'
+    steps:
+    - name: 'Setup xcode'
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '15.2'
 
-  #   - name: 'Install desktop Qt'
-  #     uses: jurplel/install-qt-action@v3
-  #     with:
-  #       version: ${{ env.QT_VERSION }}
-  #       host: 'mac'
-  #       target: 'desktop'
-  #       modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
-  #       arch: 'clang_64'
-  #       dir: ${{ runner.temp }}
-  #       set-env: 'true'
-  #       extra: '--base ${{ env.QT_MIRROR }}'
+    - name: 'Install desktop Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'mac'
+        target: 'desktop'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+        arch: 'clang_64'
+        dir: ${{ runner.temp }}
+        set-env: 'true'
+        extra: '--base ${{ env.QT_MIRROR }}'
 
-  #   - name: 'Install iOS Qt'
-  #     uses: jurplel/install-qt-action@v3
-  #     with:
-  #       version: ${{ env.QT_VERSION }}
-  #       host: 'mac'
-  #       target: 'ios'
-  #       modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
-  #       dir: ${{ runner.temp }}
-  #       setup-python: 'true'
-  #       set-env: 'true'
-  #       extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+    - name: 'Install iOS Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'mac'
+        target: 'ios'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        set-env: 'true'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
-  #   - name: 'Install go'
-  #     uses: actions/setup-go@v5
-  #     with:
-  #       go-version: '1.22.1'
-  #       cache: false
+    - name: 'Install go'
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22.1'
+        cache: false
 
-  #   - name: 'Setup gomobile'
-  #     run: |
-  #         export PATH=$PATH:~/go/bin
-  #         go install golang.org/x/mobile/cmd/gomobile@latest
-  #         gomobile init
+    - name: 'Setup gomobile'
+      run: |
+          export PATH=$PATH:~/go/bin
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          gomobile init
 
-  #   - name: 'Get sources'
-  #     uses: actions/checkout@v4
-  #     with:
-  #       submodules: 'true'
-  #       fetch-depth: 10
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
 
-  #   - name: 'Setup ccache'
-  #     uses: hendrikmuhs/ccache-action@v1.2
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
 
-  #   - name: 'Install dependencies'
-  #     run: pip install jsonschema jinja2
+    - name: 'Install dependencies'
+      run: pip install jsonschema jinja2
 
-  #   - name: 'Build project'
-  #     run: |
-  #       git submodule update --init --recursive
-  #       export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
-  #       export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
-  #       export PATH=$PATH:~/go/bin
-  #       sh deploy/build_ios.sh
-  #     env:
-  #       IOS_TRUST_CERT_BASE64: ${{ secrets.IOS_TRUST_CERT_BASE64 }}
-  #       IOS_SIGNING_CERT_BASE64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
-  #       IOS_SIGNING_CERT_PASSWORD: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
-  #       APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
-  #       APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
-  #       APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
-  #       IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
-  #       IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
+    - name: 'Build project'
+      run: |
+        git submodule update --init --recursive
+        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ios/bin"
+        export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
+        export PATH=$PATH:~/go/bin
+        sh deploy/build_ios.sh
+      env:
+        IOS_TRUST_CERT_BASE64: ${{ secrets.IOS_TRUST_CERT_BASE64 }}
+        IOS_SIGNING_CERT_BASE64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
+        IOS_SIGNING_CERT_PASSWORD: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
+        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
+        IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
+        IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
 
 #    - name: 'Upload appstore .ipa and dSYMs to artifacts'
 #      uses: actions/upload-artifact@v4
