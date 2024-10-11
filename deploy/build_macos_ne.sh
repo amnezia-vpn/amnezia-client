@@ -35,9 +35,9 @@ INSTALLER_DATA_DIR=$BUILD_DIR/installer/packages/$APP_DOMAIN/data
 INSTALLER_BUNDLE_DIR=$BUILD_DIR/installer/$APP_FILENAME
 DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
-# Check provisioning profile for NE
+# Sử dụng provisioning profile đã được cấu hình sẵn
 echo "Setting up provisioning profile for Network Extension"
-echo $MACOS_NE_PROVISIONING_PROFILE | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision
+cp $PROJECT_DIR/deploy/match_AppStore_orgamneziaAmneziaVPNnetworkextension.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision
 
 # Verify that profile is properly installed
 macos_ne_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
