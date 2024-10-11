@@ -35,24 +35,38 @@ INSTALLER_DATA_DIR=$BUILD_DIR/installer/packages/$APP_DOMAIN/data
 INSTALLER_BUNDLE_DIR=$BUILD_DIR/installer/$APP_FILENAME
 DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
-# Sử dụng provisioning profile đã được cấu hình sẵn
-echo "Setting up provisioning profile for Network Extension"
+# Setup provisioning profiles for main app and NE
+echo "Setting up provisioning profiles..."
+
 # Tạo thư mục Provisioning Profiles nếu chưa tồn tại
 mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
 
-# Setup provisioning profiles
-echo "Setting up provisioning profile for main project (AmneziaVPN)"
+# Setup provisioning profile cho main app
+echo "Setting up provisioning profile for main app (AmneziaVPN)"
 cp $PROJECT_DIR/deploy/orgamneziaAmneziaVPN_manual_profile.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/
 macos_main_uuid=$(grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/orgamneziaAmneziaVPN_manual_profile.provisionprofile | grep -io "[-A-F0-9]\{36\}")
 mv ~/Library/MobileDevice/Provisioning\ Profiles/orgamneziaAmneziaVPN_manual_profile.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/$macos_main_uuid.mobileprovision
 
-
-# Copy file provisioning profile
+# Setup provisioning profile cho Network Extension (NE)
+echo "Setting up provisioning profile for Network Extension"
 cp $PROJECT_DIR/deploy/match_AppStore_orgamneziaAmneziaVPNnetworkextension.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision
-
-# Verify that profile is properly installed
-macos_ne_uuid=`grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision | grep -io "[-A-F0-9]\{36\}"`
+macos_ne_uuid=$(grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision | grep -io "[-A-F0-9]\{36\}")
 mv ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$macos_ne_uuid.mobileprovision
+
+# Giải mã và cài đặt chứng chỉ ký code
+echo "Installing signing certificates..."
+echo $MAC_TRUST_CERT_BASE64 | base64 --decode > mac_trust_cert.pem
+echo $MAC_SIGNING_CERT_BASE64 | base64 --decode > mac_signing_cert.p12
+
+# Cài đặt chứng chỉ vào keychain
+security create-keychain -p password build.keychain
+security default-keychain -s build.keychain
+security unlock-keychain -p password build.keychain
+security import mac_trust_cert.pem -k build.keychain -A
+security import mac_signing_cert.p12 -k build.keychain -P $MAC_SIGNING_CERT_PASSWORD -A
+
+# Thiết lập keychain cho quá trình ký
+security set-key-partition-list -S apple-tool:,apple: -s -k password build.keychain
 
 # Check if QIF_VERSION is properly set, otherwise set a default
 if [ -z "${QIF_VERSION+x}" ]; then
