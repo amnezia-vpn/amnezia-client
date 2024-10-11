@@ -37,6 +37,9 @@ DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
 # Sử dụng provisioning profile đã được cấu hình sẵn
 echo "Setting up provisioning profile for Network Extension"
+# Tạo thư mục Provisioning Profiles nếu chưa tồn tại
+mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+# Copy file provisioning profile
 cp $PROJECT_DIR/deploy/match_AppStore_orgamneziaAmneziaVPNnetworkextension.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision
 
 # Verify that profile is properly installed
