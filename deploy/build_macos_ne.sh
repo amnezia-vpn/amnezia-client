@@ -39,6 +39,14 @@ DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 echo "Setting up provisioning profile for Network Extension"
 # Tạo thư mục Provisioning Profiles nếu chưa tồn tại
 mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+
+# Setup provisioning profiles
+echo "Setting up provisioning profile for main project (AmneziaVPN)"
+cp $PROJECT_DIR/deploy/orgamneziaAmneziaVPN_manual_profile.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/
+macos_main_uuid=$(grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/orgamneziaAmneziaVPN_manual_profile.provisionprofile | grep -io "[-A-F0-9]\{36\}")
+mv ~/Library/MobileDevice/Provisioning\ Profiles/orgamneziaAmneziaVPN_manual_profile.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/$macos_main_uuid.mobileprovision
+
+
 # Copy file provisioning profile
 cp $PROJECT_DIR/deploy/match_AppStore_orgamneziaAmneziaVPNnetworkextension.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision
 
