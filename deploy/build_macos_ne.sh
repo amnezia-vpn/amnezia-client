@@ -43,13 +43,13 @@ mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
 
 # Setup provisioning profile cho main app
 echo "Setting up provisioning profile for main app (AmneziaVPN)"
-cp $PROJECT_DIR/deploy/orgamneziaAmneziaVPN_manual_profile.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/
-macos_main_uuid=$(grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/orgamneziaAmneziaVPN_manual_profile.provisionprofile | grep -io "[-A-F0-9]\{36\}")
-mv ~/Library/MobileDevice/Provisioning\ Profiles/orgamneziaAmneziaVPN_manual_profile.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/$macos_main_uuid.mobileprovision
+cp $PROJECT_DIR/deploy/AnhTVMacOSMain.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/
+macos_main_uuid=$(grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/AnhTVMacOSMain.provisionprofile | grep -io "[-A-F0-9]\{36\}")
+mv ~/Library/MobileDevice/Provisioning\ Profiles/AnhTVMacOSMain.provisionprofile ~/Library/MobileDevice/Provisioning\ Profiles/$macos_main_uuid.mobileprovision
 
 # Setup provisioning profile cho Network Extension (NE)
 echo "Setting up provisioning profile for Network Extension"
-cp $PROJECT_DIR/deploy/match_AppStore_orgamneziaAmneziaVPNnetworkextension.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision
+cp $PROJECT_DIR/deploy/AnhTVMacOSNE.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision
 macos_ne_uuid=$(grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision | grep -io "[-A-F0-9]\{36\}")
 mv ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$macos_ne_uuid.mobileprovision
 
