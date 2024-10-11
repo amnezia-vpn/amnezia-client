@@ -357,6 +357,9 @@ jobs:
         APPLE_DEV_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
         MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
         APPLE_DEV_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
+        APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+        APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+        APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
 
 # ------------------------------------------------------
 
