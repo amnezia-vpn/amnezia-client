@@ -50,6 +50,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::AddressPoolError): errorMessage = QObject::tr("VPN pool error: no available addresses"); break;
 
     case (ErrorCode::ImportInvalidConfigError): errorMessage = QObject::tr("The config does not contain any containers and credentials for connecting to the server"); break;
+    case (ErrorCode::ImportQrDecodingError): errorMessage = QObject::tr("Failed to decode qr-code"); break;
 
     // Android errors
     case (ErrorCode::AndroidError): errorMessage = QObject::tr("VPN connection error"); break;

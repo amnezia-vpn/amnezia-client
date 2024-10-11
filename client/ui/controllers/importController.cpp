@@ -202,19 +202,7 @@ bool ImportController::extractConfigFromData(QString data)
 
 bool ImportController::extractConfigFromQr(const QByteArray &data)
 {
-    QJsonObject dataObj = QJsonDocument::fromJson(data).object();
-    if (!dataObj.isEmpty()) {
-        m_config = dataObj;
-        return true;
-    }
-
-    QByteArray ba_uncompressed = qUncompress(data);
-    if (!ba_uncompressed.isEmpty()) {
-        m_config = QJsonDocument::fromJson(ba_uncompressed).object();
-        return true;
-    }
-
-    return false;
+    return extractConfigFromData(data.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals));
 }
 
 QString ImportController::getConfig()
@@ -549,8 +537,12 @@ void ImportController::startDecodingQr()
     #endif
 }
 
-void ImportController::stopDecodingQr()
+void ImportController::stopDecodingQr(const QByteArray &data)
 {
+    if (!extractConfigFromQr(data)) {
+        emit qrDecodingError(ErrorCode::ImportQrDecodingError);
+        return;
+    }
     emit qrDecodingFinished();
 }
 
@@ -587,25 +579,27 @@ bool ImportController::parseQrCodeChunk(const QString &code)
                 data.append(m_qrCodeChunks.value(i));
             }
 
-            bool ok = extractConfigFromQr(data);
-            if (ok) {
-                m_isQrCodeProcessed = false;
-                qDebug() << "stopDecodingQr";
-                stopDecodingQr();
-                return true;
-            } else {
+            data = qUncompress(data);
+            auto format = checkConfigFormat(data);
+            if (format == ConfigTypes::Invalid) {
                 qDebug() << "error while extracting data from qr";
                 m_qrCodeChunks.clear();
                 m_totalQrCodeChunksCount = 0;
                 m_receivedQrCodeChunksCount = 0;
+            } else {
+                qDebug() << "stopDecodingQr";
+                m_isQrCodeProcessed = false;
+                stopDecodingQr(data);
+                return true;
             }
         }
     } else {
-        bool ok = extractConfigFromQr(ba);
-        if (ok) {
-            m_isQrCodeProcessed = false;
+        auto data = code.toUtf8();
+        auto format = checkConfigFormat(data);
+        if (format != ConfigTypes::Invalid) {
             qDebug() << "stopDecodingQr";
-            stopDecodingQr();
+            m_isQrCodeProcessed = false;
+            stopDecodingQr(data);
             return true;
         }
     }
