@@ -343,7 +343,7 @@ if(LINUX AND NOT ANDROID)
     set(LIBS ${LIBS} -static-libstdc++ -static-libgcc -ldl)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
-message("In here")
+
 # Macos Network Extension doesn't need
 if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     message("-----> Client desktop build")
@@ -431,11 +431,12 @@ if(MACOS_NE)
         "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks"
 
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "/Users/macbook/Qt/6.8.0/macos/lib/QtConcurrent.framework"
+        "$ENV{QT_HOST_PATH}/lib/QtConcurrent.framework"
         "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks/QtConcurrent.framework"
 
-        COMMENT "Copying QtConcurrent.framework to the bundle's Frameworks directory"
+        COMMENT "Copying QtConcurrent.framework from QT_HOST_PATH to the bundle's Frameworks directory"
     )
+
 
     # MacOS specific application deployment
     add_custom_command(TARGET ${PROJECT} POST_BUILD
