@@ -295,7 +295,7 @@ jobs:
         retention-days: 7
 
 # ------------------------------------------------------
-  # Build-MacOS-NE:
+  Build-MacOS-NE:
     runs-on: macos-latest
 
     env:
