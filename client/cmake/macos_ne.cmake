@@ -8,14 +8,12 @@ set(APPLE_PROJECT_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION
 
 
 enable_language(OBJC)
-# enable_language(OBJCXX)
 enable_language(Swift)
 
 find_package(Qt6 REQUIRED COMPONENTS ShaderTools)
 set(LIBS ${LIBS} Qt6::ShaderTools)
 
 find_library(FW_AUTHENTICATIONSERVICES AuthenticationServices)
-#find_library(FW_UIKIT UIKit)
 find_library(FW_AVFOUNDATION AVFoundation)
 find_library(FW_FOUNDATION Foundation)
 find_library(FW_STOREKIT StoreKit)
@@ -24,7 +22,6 @@ find_library(FW_NETWORKEXTENSION NetworkExtension)
 
 set(LIBS ${LIBS}
     ${FW_AUTHENTICATIONSERVICES}
-#    ${FW_UIKIT}
     ${FW_AVFOUNDATION}
     ${FW_FOUNDATION}
     ${FW_STOREKIT}
@@ -57,14 +54,6 @@ set(MACOSX_BUNDLE_ICON_FILE app.icns)
 set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 set(SOURCES ${SOURCES} ${ICON_FILE})
 
-# set(HEADERS ${HEADERS}
-#     ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.h
-# )
-
-# set(SOURCES ${SOURCES}
-#     ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.mm
-# )
-
 
 target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
@@ -72,7 +61,7 @@ target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 set_target_properties(${PROJECT} PROPERTIES
     XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Info.plist.in
-    #MACOSX_BUNDLE_ICON_FILE "AppIcon"
+    MACOSX_BUNDLE_ICON_FILE "AppIcon"
     MACOSX_BUNDLE_INFO_STRING "AmneziaVPN"
     MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPN"
     MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
@@ -86,7 +75,7 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_ATTRIBUTE_BUNDLE_INFO_STRING "AmneziaVPN"
     XCODE_GENERATE_SCHEME TRUE
     XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
-    #XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
+    XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
     XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY "NO"
     XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY "YES"
@@ -96,14 +85,6 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_EMBED_APP_EXTENSIONS networkextension
 
     XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
-    # XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
-
-    # XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution: Privacy Technologies OU (X7UJ388FXK)"
-    # XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
-
-
-    # XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "Mac AppStore AmneziaVPN"
-    # XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "Mac AppStore AmneziaVPN"
 
 )
 set_target_properties(${PROJECT} PROPERTIES
@@ -135,13 +116,11 @@ target_sources(${PROJECT} PRIVATE
 )
 
 target_sources(${PROJECT} PRIVATE
-    #${CMAKE_CURRENT_SOURCE_DIR}/macos_ne/app/AmneziaVPNLaunchScreen.storyboard
     ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Media.xcassets
     ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/PrivacyInfo.xcprivacy
 )
 
 set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
-    #${CMAKE_CURRENT_SOURCE_DIR}/macos/app/AmneziaVPNLaunchScreen.storyboard
     ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Media.xcassets
     ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/PrivacyInfo.xcprivacy
 )
@@ -149,33 +128,8 @@ set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
 add_subdirectory(macos/networkextension)
 add_dependencies(${PROJECT} networkextension)
 
-# set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
-#     "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework"
-# )
-
-
-
-# set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos)
-# target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd/OpenVPNAdapter/build/Release-iphoneos/OpenVPNAdapter.framework")
-
 get_target_property(QtCore_location Qt6::Core LOCATION)
 message("QtCore_location")
 message(${QtCore_location})
 
 get_filename_component(QT_BIN_DIR_DETECTED "${QtCore_location}/../../../../../bin" ABSOLUTE)
-
-
-# add_custom_command(TARGET ${PROJECT} POST_BUILD
-#     COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:AmneziaVPN> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR}
-# )
-
-# if(CMAKE_BUILD_TYPE STREQUAL "Release")
-#     SET(SIGN_CMD codesign --deep --force --sign 'Apple Distribution: Privacy Technologies OU \(X7UJ388FXK\)' --timestamp --options runtime $<TARGET_BUNDLE_DIR:AmneziaVPN>)
-#     message("Manual signing bundle...")
-#     message(${SIGN_CMD})
-
-
-#     add_custom_command(TARGET ${PROJECT} POST_BUILD
-#         COMMAND ${SIGN_CMD}
-#     )
-# endif()

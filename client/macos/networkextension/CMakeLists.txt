@@ -171,6 +171,7 @@ target_sources(networkextension PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+Xray.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/WGConfig.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/iosglue.mm
+    ${CLIENT_ROOT_DIR}/platforms/ios/XrayConfig.swift
 )
 
 target_sources(networkextension PRIVATE
