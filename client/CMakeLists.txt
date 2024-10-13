@@ -431,7 +431,7 @@ if(MACOS_NE)
         "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks"
 
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "$ENV{QT_HOST_PATH}/lib/QtConcurrent.framework"
+        "${QT_HOST_PATH}/lib/QtConcurrent.framework"
         "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks/QtConcurrent.framework"
 
         COMMENT "Copying QtConcurrent.framework from QT_HOST_PATH to the bundle's Frameworks directory"
