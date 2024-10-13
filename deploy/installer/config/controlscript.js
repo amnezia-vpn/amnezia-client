@@ -142,6 +142,15 @@ Controller.prototype.FinishedPageCallback = function ()
         installer.autoAcceptMessageBoxes();
         gui.clickButton(buttons.FinishButton);
     }
+
+    if (installer.isUninstaller()) {
+        var widget = gui.pageById(QInstaller.InstallationFinished);
+        if (widget) {
+            widget["RunItCheckBox"].visible = true;
+            widget["RunItCheckBox"].text = "Remove all settings and data";
+            gui.finishButtonClicked.connect(onFinishButtonClicked);
+        }
+    }
 }
 
 Controller.prototype.RestartPageCallback = function ()
@@ -216,11 +225,25 @@ onBrowseButtonClicked = function()
     }
 }
 
-onNextButtonClicked = function()
-{
-    var widget = gui.pageById(QInstaller.TargetDirectory);
-    if (widget !== null) {
-        installer.setValue("APP_BUNDLE_TARGET_DIR", widget.TargetDirectoryLineEdit.text);
+onFinishButtonClicked = function() {
+    let widget = gui.pageById(QInstaller.InstallationFinished);
+    if (widget) {
+        let isChecked = widget["RunItCheckBox"].checked;
+        
+        if (isChecked) {
+            if (runningOnWindows()) {
+                let cmdArgs = ["/C", "reg", "delete", "HKEY_CURRENT_USER\\Software\\AmneziaVPN.ORG", "/f"];
+                installer.execute("cmd", cmdArgs);
+            }
+            else if (runningOnMacOS()) {
+                let plistPath = QDesktopServices.storageLocation(QDesktopServices.HomeLocation) + "/Library/Preferences/org.amneziavpn.AmneziaVPN.plist";
+                installer.performOperation("Delete", [plistPath]);
+            }
+            else if (runningOnLinux()) {
+                let cmdArgs = ["-c", "rm -rf ~/.config/AmneziaVPN.ORG"];
+                installer.execute("/bin/bash", cmdArgs);
+            }
+        }
     }
 }
 
