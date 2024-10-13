@@ -10,6 +10,12 @@ class QQuickItem;
 class QQmlApplicationEngine;
 class ListViewFocusController;
 
+/*!
+ * \brief The FocusController class makes focus control more straightforward
+ * \details Focus is handled only for visible and enabled items which have
+ *          `isFocused` property from top left to bottom right.
+ * \note There are items handled differently (e.g. ListView)
+ */
 class FocusController : public QObject
 {
     Q_OBJECT
