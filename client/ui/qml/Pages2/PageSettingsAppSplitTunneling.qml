@@ -128,7 +128,7 @@ PageType {
 
             headerText: qsTr("Mode")
 
-            enabled: Qt.platform.os === "android" && root.pageEnabled
+            enabled: (Qt.platform.os === "android" || Qt.platform.os === "windows") && root.pageEnabled
 
             KeyNavigation.tab: searchField.textField
 
