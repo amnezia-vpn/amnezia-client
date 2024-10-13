@@ -768,7 +768,7 @@ bool InstallController::checkSshConnection(QSharedPointer<ServerController> serv
     } else {
         if (output.contains(tr("Please login as the user"))) {
             output.replace("\n", "");
-            emit installationErrorOccurred(output);
+            emit wrongInstallationUser(output);
             return false;
         }
     }
