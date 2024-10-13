@@ -295,70 +295,6 @@ jobs:
         retention-days: 7
 
 # ------------------------------------------------------
-  # Build-MacOS-NE:
-  #   runs-on: macos-latest
-
-  #   env:
-  #     QT_VERSION: 6.4.3
-  #     QIF_VERSION: 4.6
-  #     QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/
-  #     PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
-  #     DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-
-  #   steps:
-  #   - name: 'Setup Xcode'
-  #     uses: maxim-lobanov/setup-xcode@v1
-  #     with:
-  #       xcode-version: '14.3.1'
-
-  #   - name: 'Install desktop Qt'
-  #     uses: jurplel/install-qt-action@v3
-  #     with:
-  #       version: ${{ env.QT_VERSION }}
-  #       host: 'mac'
-  #       target: 'desktop'
-  #       modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
-  #       arch: 'clang_64'
-  #       dir: ${{ runner.temp }}
-  #       set-env: 'true'
-  #       extra: '--base ${{ env.QT_MIRROR }}'
-  #   - name: 'Install Qt Installer Framework ${{ env.QIF_VERSION }}'
-  #     run: |
-  #       mkdir -pv ${{ runner.temp }}/Qt/Tools/QtInstallerFramework
-  #       wget https://qt.amzsvc.com/tools/ifw/${{ env.QIF_VERSION }}.zip
-  #       unzip ${{ env.QIF_VERSION }}.zip -d ${{ runner.temp }}/Qt/Tools/QtInstallerFramework/
-  #   - name: 'Install Go'
-  #     uses: actions/setup-go@v5
-  #     with:
-  #       go-version: '1.22.1'
-  #       cache: false
-
-  #   - name: 'Get sources'
-  #     uses: actions/checkout@v4
-  #     with:
-  #       submodules: 'true'
-  #       fetch-depth: 10
-
-  #   - name: 'Install dependencies'
-  #     run: pip install jsonschema jinja2
-
-  #   - name: 'Set execute permissions for deploy script'
-  #     run: chmod +x deploy/build_macos_ne.sh
-
-  #   - name: 'Build and deploy macOS NE'
-  #     run: |
-  #       export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-  #       export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
-  #       export QT_MACOS_ROOT_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
-  #       bash deploy/build_macos_ne.sh
-  #     env:
-  #       APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
-  #       APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
-  #       APPSTORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
-  #       MAC_TRUST_CERT_BASE64: ${{ secrets.IOS_TRUST_CERT_BASE64 }}
-  #       MAC_SIGNING_CERT_BASE64: ${{ secrets.IOS_SIGNING_CERT_BASE64 }}
-  #       MAC_SIGNING_CERT_PASSWORD: ${{ secrets.IOS_SIGNING_CERT_PASSWORD }}
-# ------------------------------------------------------
 
   Build-Android:
     runs-on: ubuntu-latest
@@ -508,7 +444,7 @@ jobs:
         path: deploy/build/AmneziaVPN-release.aab
         compression-level: 0
         retention-days: 7
-        
+
   Extra:
     runs-on: ubuntu-latest
     steps:
