@@ -26,7 +26,8 @@
 
 @end
 
-@implementation DocumentPickerDelegate 
+#if !MACOS_NE
+@implementation DocumentPickerDelegate
 
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
     for (NSURL *url in urls) {
@@ -43,3 +44,4 @@
 }
 
 @end
+#endif

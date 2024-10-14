@@ -1,6 +1,7 @@
 [submodule "client/3rd/OpenVPNAdapter"]
 	path = client/3rd/OpenVPNAdapter
 	url = https://github.com/amnezia-vpn/OpenVPNAdapter.git
+        branch = macos-dirty-build
 [submodule "client/3rd/qtkeychain"]
 	path = client/3rd/qtkeychain
 	url = https://github.com/frankosterfeld/qtkeychain.git
@@ -10,6 +11,7 @@
 [submodule "client/3rd-prebuilt"]
 	path = client/3rd-prebuilt
 	url = https://github.com/amnezia-vpn/3rd-prebuilt
+        branch = fixbug/mac-network-extension
 [submodule "client/3rd/amneziawg-apple"]
 	path = client/3rd/amneziawg-apple
 	url = https://github.com/amnezia-vpn/amneziawg-apple
