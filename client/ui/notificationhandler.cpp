@@ -7,8 +7,6 @@
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
 #  include "platforms/ios/iosnotificationhandler.h"
-// #elif defined(MACOS_NE)
-// #  include "platforms/ios/iosnotificationhandler.h"
 #else
 #  include "systemtray_notificationhandler.h"
 #endif

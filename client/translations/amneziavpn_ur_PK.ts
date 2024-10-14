@@ -399,30 +399,30 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>NotificationHandler</name>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="66"/>
-        <location filename="../ui/notificationhandler.cpp" line="73"/>
+        <location filename="../ui/notificationhandler.cpp" line="64"/>
+        <location filename="../ui/notificationhandler.cpp" line="71"/>
         <source>AmneziaVPN</source>
         <translation>The translation of &quot;AmneziaVPN&quot; in Urdu would be:
 
 امنیزیا وی پی ای</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="67"/>
+        <location filename="../ui/notificationhandler.cpp" line="65"/>
         <source>VPN Connected</source>
         <translation>وی پی این متصل ہوگیا</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="74"/>
+        <location filename="../ui/notificationhandler.cpp" line="72"/>
         <source>VPN Disconnected</source>
         <translation>وی پی این منقطع ہوگیا</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="97"/>
+        <location filename="../ui/notificationhandler.cpp" line="95"/>
         <source>AmneziaVPN notification</source>
         <translation>امنیزیا وی پی این کی اطلاعات</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="98"/>
+        <location filename="../ui/notificationhandler.cpp" line="96"/>
         <source>Unsecured network detected: </source>
         <translation>غیر محفوظ نیٹ ورک کا پتہ لگایا گیا ہے: </translation>
     </message>

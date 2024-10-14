@@ -405,28 +405,28 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>NotificationHandler</name>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="66"/>
-        <location filename="../ui/notificationhandler.cpp" line="73"/>
+        <location filename="../ui/notificationhandler.cpp" line="64"/>
+        <location filename="../ui/notificationhandler.cpp" line="71"/>
         <source>AmneziaVPN</source>
         <translation>AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="67"/>
+        <location filename="../ui/notificationhandler.cpp" line="65"/>
         <source>VPN Connected</source>
         <translation>VPN подключен</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="74"/>
+        <location filename="../ui/notificationhandler.cpp" line="72"/>
         <source>VPN Disconnected</source>
         <translation>VPN выключен</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="97"/>
+        <location filename="../ui/notificationhandler.cpp" line="95"/>
         <source>AmneziaVPN notification</source>
         <translation>Уведомление AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="98"/>
+        <location filename="../ui/notificationhandler.cpp" line="96"/>
         <source>Unsecured network detected: </source>
         <translation>Обнаружена незащищенная сеть: </translation>
     </message>

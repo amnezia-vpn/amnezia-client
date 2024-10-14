@@ -16,9 +16,6 @@ CONFIGURATION_BUILD_DIR = $WORKINGDIR/3rd/OpenVPNAdapter/build/Release-macos
 BUILT_PRODUCTS_DIR = $WORKINGDIR/3rd/OpenVPNAdapter/build/Release-macos
 EOF
 
-# Exclude UIKit, include Cocoa for macOS
-# echo "OTHER_LDFLAGS = -framework Cocoa" >> $WORKINGDIR/3rd/OpenVPNAdapter/Configuration/amnezia.xcconfig
-
 # Fetch the current macOS SDK version dynamically
 MACOSX_SDK=$(xcrun --sdk macosx --show-sdk-path | sed -E 's/.*MacOSX([0-9]+\.[0-9]+)\.sdk/\1/')
 
