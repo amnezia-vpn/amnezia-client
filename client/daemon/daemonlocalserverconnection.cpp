@@ -92,6 +92,17 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
 
   logger.debug() << "Command received:" << type;
 
+  // It is expected that sometimes the client will request backend logs
+  // before the first authentication. In these cases we just return empty
+  // logs.
+  if (type == "logs") {
+    QJsonObject obj;
+    obj.insert("type", "logs");
+    obj.insert("logs", "");
+    write(obj);
+    return;
+  }
+
   if (type == "activate") {
     InterfaceConfig config;
     if (!Daemon::parseConfig(obj, config)) {
@@ -115,8 +126,7 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
   if (type == "status") {
     QJsonObject obj = Daemon::instance()->getStatus();
     obj.insert("type", "status");
-    m_socket->write(QJsonDocument(obj).toJson(QJsonDocument::Compact));
-    m_socket->write("\n");
+    write(obj);
     return;
   }
 
@@ -124,8 +134,7 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
     QJsonObject obj;
     obj.insert("type", "logs");
     obj.insert("logs", Daemon::instance()->logs().replace("\n", "|"));
-    m_socket->write(QJsonDocument(obj).toJson(QJsonDocument::Compact));
-    m_socket->write("\n");
+    write(obj);
     return;
   }
 

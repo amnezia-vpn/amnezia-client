@@ -21,7 +21,6 @@ class MacOSDaemon final : public Daemon {
 
  protected:
   WireguardUtils* wgutils() const override { return m_wgutils; }
-  bool supportDnsUtils() const override { return true; }
   DnsUtils* dnsutils() override { return m_dnsutils; }
   bool supportIPUtils() const override { return true; }
   IPUtils* iputils() override { return m_iputils; }

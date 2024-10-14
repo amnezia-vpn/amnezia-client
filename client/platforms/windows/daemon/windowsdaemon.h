@@ -26,7 +26,6 @@ class WindowsDaemon final : public Daemon {
  protected:
   bool run(Op op, const InterfaceConfig& config) override;
   WireguardUtils* wgutils() const override { return m_wgutils; }
-  bool supportDnsUtils() const override { return true; }
   DnsUtils* dnsutils() override { return m_dnsutils; }
 
  private:
