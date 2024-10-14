@@ -21,7 +21,7 @@ public slots:
 
     ErrorCode getServicesList(QByteArray &responseBody);
     ErrorCode getConfigForService(const QString &installationUuid, const QString &userCountryCode, const QString &serviceType,
-                                  const QString &protocol, const QString &serverCountryCode, QJsonObject &serverConfig);
+                                  const QString &protocol, const QString &serverCountryCode, const QJsonObject &authData, QJsonObject &serverConfig);
 
 signals:
     void errorOccurred(ErrorCode errorCode);
