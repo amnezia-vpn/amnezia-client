@@ -768,7 +768,7 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
     const QString scriptData = amnezia::scriptData(SharedScriptType::check_user_in_sudo);
     ErrorCode error = runScript(credentials, replaceVars(scriptData, genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
-    if (!stdOut.contains("sudo"))
+    if (!stdOut.contains("sudo") && !stdOut.contains("wheel"))
         return ErrorCode::ServerUserNotInSudo;
 
     return error;
