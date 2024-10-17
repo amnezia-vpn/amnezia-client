@@ -6,6 +6,67 @@
 #include <QQmlApplicationEngine>
 
 
+bool isListView(QObject* item)
+{
+    return item->inherits("QQuickListView");
+}
+
+bool isOnTheScene(QObject* object)
+{
+    QQuickItem* item = qobject_cast<QQuickItem*>(object);
+    if (!item) {
+        qWarning() << "Couldn't recognize object as item";
+        return false;
+    }
+
+    if (!item->isVisible()) {
+        // qDebug() << "===>> The item is not visible: " << item;
+        return false;
+    }
+
+    QRectF itemRect = item->mapRectToScene(item->childrenRect());
+
+    QQuickWindow* window = item->window();
+    if (!window) {
+        qWarning() << "Couldn't get the window on the Scene check";
+        return false;
+    }
+
+    const auto contentItem = window->contentItem();
+    if (!contentItem) {
+        qWarning() << "Couldn't get the content item on the Scene check";
+        return false;
+    }
+    QRectF windowRect = contentItem->childrenRect();
+    const auto res = (windowRect.contains(itemRect) || isListView(item));
+    // qDebug() << (res ? "===>> item is inside the Scene" : "===>> ITEM IS OUTSIDE THE SCENE") << " itemRect: " << itemRect << "; windowRect: " << windowRect;
+    return res;
+}
+
+QList<QObject*> getSubChain(QObject* object)
+{
+    QList<QObject*> res;
+    if (!object) {
+        qDebug() << "The object is NULL";
+        return res;
+    }
+
+    const auto children = object->children();
+
+    for(const auto child : children) {
+        if (child
+            && isFocusable(child)
+            && isOnTheScene(child)
+            && isEnabled(child)
+            ) {
+            res.append(child);
+        } else {
+            res.append(getSubChain(child));
+        }
+    }
+    return res;
+}
+
 FocusController::FocusController(QQmlApplicationEngine* engine, QObject *parent)
     : QObject{parent}
     , m_engine{engine}
@@ -25,16 +86,16 @@ FocusController::FocusController(QQmlApplicationEngine* engine, QObject *parent)
     });
 }
 
-void FocusController::nextItem(bool isForwardOrder)
+void FocusController::nextItem(Direction direction)
 {
     if (m_lvfc) {
-        isForwardOrder ? focusNextListViewItem() : focusPreviousListViewItem();
+        direction == Direction::Forward ? focusNextListViewItem() : focusPreviousListViewItem();
         qDebug() << "===>> [handling the ListView]";
 
         return;
     }
 
-    reload(isForwardOrder);
+    reload(direction);
 
     if(m_focusChain.empty()) {
         qWarning() << "There are no items to navigate";
@@ -60,13 +121,13 @@ void FocusController::nextItem(bool isForwardOrder)
     if(isListView(m_focusedItem)) {
         qDebug() << "===>> [Found ListView]";
         m_lvfc = new ListViewFocusController(m_focusedItem, this);
-        if(isForwardOrder) {
+        if(direction == Direction::Forward) {
             m_lvfc->viewToBegin();
-            m_lvfc->nextElement();
+            m_lvfc->nextDelegate();
             focusNextListViewItem();
         } else {
             m_lvfc->viewToEnd();
-            m_lvfc->previousElement();
+            m_lvfc->previousDelegate();
             focusPreviousListViewItem();
         }
         return;
@@ -90,62 +151,67 @@ void FocusController::nextItem(bool isForwardOrder)
 
 void FocusController::focusNextListViewItem()
 {
-    m_lvfc->focusNextItem();
-
     if (m_lvfc->isLastFocusItemInListView() || m_lvfc->isReturnNeeded()) {
-        qDebug() << "===>> [Last item in ListView was reached]";
+        qDebug() << "===>> [Last item in ListView was reached. Going to the NEXT element after ListView]";
         delete m_lvfc;
         m_lvfc = nullptr;
+        nextItem(Direction::Forward);
+        return;
     } else if (m_lvfc->isLastFocusItemInDelegate()) {
         qDebug() << "===>> [End of delegate elements was reached. Going to the next delegate]";
         m_lvfc->resetFocusChain();
-        m_lvfc->nextElement();
+        m_lvfc->nextDelegate();
         m_lvfc->viewAtCurrentIndex();
     }
+
+    m_lvfc->focusNextItem();
 }
 
 void FocusController::focusPreviousListViewItem()
 {
-    m_lvfc->focusPreviousItem();
-
     if (m_lvfc->isFirstFocusItemInListView() || m_lvfc->isReturnNeeded()) {
+        qDebug() << "===>> [First item in ListView was reached. Going to the PREVIOUS element after ListView]";
         delete m_lvfc;
         m_lvfc = nullptr;
+        nextItem(Direction::Backward);
+        return;
     } else if (m_lvfc->isFirstFocusItemInDelegate()) {
         m_lvfc->resetFocusChain();
-        m_lvfc->decrementIndex();
+        m_lvfc->previousDelegate();
         m_lvfc->viewAtCurrentIndex();
     }
+
+    m_lvfc->focusPreviousItem();
 }
 
 void FocusController::nextKeyTabItem()
 {
-    nextItem(true);
+    nextItem(Direction::Forward);
 }
 
 void FocusController::previousKeyTabItem()
 {
-    nextItem(false);
+    nextItem(Direction::Backward);
 }
 
 void FocusController::nextKeyUpItem()
 {
-    nextItem(false);
+    nextItem(Direction::Backward);
 }
 
 void FocusController::nextKeyDownItem()
 {
-    nextItem(true);
+    nextItem(Direction::Forward);
 }
 
 void FocusController::nextKeyLeftItem()
 {
-    nextItem(false);
+    nextItem(Direction::Backward);
 }
 
 void FocusController::nextKeyRightItem()
 {
-    nextItem(true);
+    nextItem(Direction::Forward);
 }
 
 void FocusController::setFocusOnDefaultItem()
@@ -154,7 +220,7 @@ void FocusController::setFocusOnDefaultItem()
     m_defaultFocusItem->forceActiveFocus();
 }
 
-void FocusController::reload(bool isForwardOrder)
+void FocusController::reload(Direction direction)
 {
         m_focusChain.clear();
 
@@ -174,7 +240,7 @@ void FocusController::reload(bool isForwardOrder)
 
     m_focusChain.append(getSubChain(rootObject));
 
-    std::sort(m_focusChain.begin(), m_focusChain.end(), isForwardOrder? isLess : isMore);
+    std::sort(m_focusChain.begin(), m_focusChain.end(), direction == Direction::Forward ? isLess : isMore);
 
     if (m_focusChain.empty()) {
         qWarning() << "Focus chain is empty!";
