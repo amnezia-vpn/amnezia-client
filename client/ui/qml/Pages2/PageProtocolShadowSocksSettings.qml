@@ -158,7 +158,6 @@ PageType {
                             enabled: isPortEditable | isCipherEditable
 
                             text: qsTr("Save")
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()

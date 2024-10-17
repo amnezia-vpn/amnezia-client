@@ -205,7 +205,6 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 textColor: AmneziaStyle.color.vibrantRed
 
-                Keys.onTabPressed: lastItemTabClicked()
                 parentFlickable: fl
 
                 clickedFunction: function() {
@@ -246,11 +245,5 @@ PageType {
 
         width: root.width
         height: root.height
-
-        // onClosed: {
-        //     if (!GC.isMobile()) {
-        //         focusItem.forceActiveFocus()
-        //     }
-        // }
     }
 }

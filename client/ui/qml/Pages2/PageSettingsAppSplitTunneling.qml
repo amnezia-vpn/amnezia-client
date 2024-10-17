@@ -253,7 +253,6 @@ PageType {
             textFieldPlaceholderText: qsTr("application name")
             buttonImageSource: "qrc:/images/controls/plus.svg"
 
-            Keys.onTabPressed: lastItemTabClicked(focusItem)
             rightButtonClickedOnEnter: true
 
             clickedFunc: function() {

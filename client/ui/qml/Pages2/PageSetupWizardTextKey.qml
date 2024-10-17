@@ -73,7 +73,6 @@ PageType {
         anchors.bottomMargin: 32
 
         text: qsTr("Continue")
-        Keys.onTabPressed: lastItemTabClicked(focusItem)
 
         clickedFunc: function() {
             if (ImportController.extractConfigFromData(textKey.textFieldText)) {

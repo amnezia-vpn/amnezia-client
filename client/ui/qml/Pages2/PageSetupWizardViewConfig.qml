@@ -178,8 +178,6 @@ PageType {
         anchors.rightMargin: 16
         anchors.leftMargin: 16
 
-        Keys.onTabPressed: lastItemTabClicked(focusItem)
-
         BasicButtonType {
             id: connectButton
             Layout.fillWidth: true
