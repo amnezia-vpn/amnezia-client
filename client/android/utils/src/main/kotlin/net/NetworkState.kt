@@ -42,11 +42,11 @@ class NetworkState(
     private val networkCallback: NetworkCallback by lazy(NONE) {
         object : NetworkCallback() {
             override fun onAvailable(network: Network) {
-                Log.d(TAG, "onAvailable: $network")
+                Log.v(TAG, "onAvailable: $network")
             }
 
             override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
-                Log.d(TAG, "onCapabilitiesChanged: $network, $networkCapabilities")
+                Log.v(TAG, "onCapabilitiesChanged: $network, $networkCapabilities")
                 checkNetworkState(network, networkCapabilities)
             }
 
@@ -67,11 +67,11 @@ class NetworkState(
             }
 
             override fun onBlockedStatusChanged(network: Network, blocked: Boolean) {
-                Log.d(TAG, "onBlockedStatusChanged: $network, $blocked")
+                Log.v(TAG, "onBlockedStatusChanged: $network, $blocked")
             }
 
             override fun onLost(network: Network) {
-                Log.d(TAG, "onLost: $network")
+                Log.v(TAG, "onLost: $network")
             }
         }
     }

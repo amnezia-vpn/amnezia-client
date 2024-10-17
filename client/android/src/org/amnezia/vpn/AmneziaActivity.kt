@@ -159,7 +159,7 @@ class AmneziaActivity : QtActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "Create Amnezia activity: $intent")
+        Log.d(TAG, "Create Amnezia activity")
         loadLibs()
         window.apply {
             addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
@@ -201,7 +201,7 @@ class AmneziaActivity : QtActivity() {
                     NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED
                 )
             ) {
-                Log.d(
+                Log.v(
                     TAG, "Notification state changed: ${it?.action}, blocked = " +
                         "${it?.getBooleanExtra(NotificationManager.EXTRA_BLOCKED_STATE, false)}"
                 )
@@ -215,7 +215,7 @@ class AmneziaActivity : QtActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        Log.d(TAG, "onNewIntent: $intent")
+        Log.v(TAG, "onNewIntent: $intent")
         intent?.let(::processIntent)
     }
 
@@ -404,7 +404,7 @@ class AmneziaActivity : QtActivity() {
     @MainThread
     private fun startVpn(vpnConfig: String) {
         getVpnProto(vpnConfig)?.let { proto ->
-            Log.d(TAG, "Proto from config: $proto, current proto: $vpnProto")
+            Log.v(TAG, "Proto from config: $proto, current proto: $vpnProto")
             if (isServiceConnected) {
                 if (proto.serviceClass == vpnProto?.serviceClass) {
                     vpnProto = proto
@@ -517,7 +517,7 @@ class AmneziaActivity : QtActivity() {
                 startActivityForResult(it, CREATE_FILE_ACTION_CODE, ActivityResultHandler(
                     onSuccess = {
                         it?.data?.let { uri ->
-                            Log.d(TAG, "Save file to $uri")
+                            Log.v(TAG, "Save file to $uri")
                             try {
                                 contentResolver.openOutputStream(uri)?.use { os ->
                                     os.bufferedWriter().use { it.write(data) }
@@ -566,7 +566,7 @@ class AmneziaActivity : QtActivity() {
                 startActivityForResult(it, OPEN_FILE_ACTION_CODE, ActivityResultHandler(
                     onAny = {
                         val uri = it?.data?.toString() ?: ""
-                        Log.d(TAG, "Open file: $uri")
+                        Log.v(TAG, "Open file: $uri")
                         mainScope.launch {
                             qtInitialized.await()
                             QtAndroidController.onFileOpened(uri)

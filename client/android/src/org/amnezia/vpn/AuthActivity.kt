@@ -66,7 +66,7 @@ class AuthActivity : FragmentActivity() {
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
-                    Log.d(TAG, "Authentication succeeded")
+                    Log.v(TAG, "Authentication succeeded")
                     QtAndroidController.onAuthResult(true)
                     finish()
                 }
