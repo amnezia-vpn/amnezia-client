@@ -10,7 +10,6 @@
 bool isVisible(QObject* item)
 {
     const auto res = item->property("visible").toBool();
-    // qDebug() << "==>> " << (res ? "VISIBLE" : "NOT visible") << item;
     return res;
 }
 
@@ -39,50 +38,13 @@ bool isMore(QObject* item1, QObject* item2)
     return !isLess(item1, item2);
 }
 
-bool isListView(QObject* item)
-{
-    return item->inherits("QQuickListView");
-}
-
-bool isOnTheScene(QObject* object)
-{
-    QQuickItem* item = qobject_cast<QQuickItem*>(object);
-    if (!item) {
-        qWarning() << "Couldn't recognize object as item";
-        return false;
-    }
-
-    if (!item->isVisible()) {
-        // qDebug() << "===>> The item is not visible: " << item;
-        return false;
-    }
-
-    QRectF itemRect = item->mapRectToScene(item->childrenRect());
-
-    QQuickWindow* window = item->window();
-    if (!window) {
-        qWarning() << "Couldn't get the window on the Scene check";
-        return false;
-    }
-
-    const auto contentItem = window->contentItem();
-    if (!contentItem) {
-        qWarning() << "Couldn't get the content item on the Scene check";
-        return false;
-    }
-    QRectF windowRect = contentItem->childrenRect();
-    const auto res = (windowRect.contains(itemRect) || isListView(item));
-    // qDebug() << (res ? "===>> item is inside the Scene" : "===>> ITEM IS OUTSIDE THE SCENE") << " itemRect: " << itemRect << "; windowRect: " << windowRect;
-    return res;
-}
-
 bool isEnabled(QObject* obj)
 {
     const auto item = qobject_cast<QQuickItem*>(obj);
     return item && item->isEnabled();
 }
 
-QList<QObject*> getSubChain(QObject* object)
+QList<QObject*> getItemsChain(QObject* object)
 {
     QList<QObject*> res;
     if (!object) {
@@ -95,12 +57,12 @@ QList<QObject*> getSubChain(QObject* object)
     for(const auto child : children) {
         if (child
             && isFocusable(child)
-            && isOnTheScene(child)
             && isEnabled(child)
+            && isVisible(child)
             ) {
             res.append(child);
         } else {
-            res.append(getSubChain(child));
+            res.append(getItemsChain(child));
         }
     }
     return res;
@@ -175,13 +137,13 @@ int ListViewFocusController::currentIndex() const
     return m_delegateIndex;
 }
 
-void ListViewFocusController::nextElement()
+void ListViewFocusController::nextDelegate()
 {
-    qDebug() << "===>> Current section: " << m_currentSectionString.at(static_cast<qsizetype>(m_currentSection));
     switch(m_currentSection) {
     case Section::Default: {
         if(m_header) {
             m_currentSection = Section::Header;
+            viewToBegin();
             break;
         }
     }
@@ -197,6 +159,7 @@ void ListViewFocusController::nextElement()
             break;
         } else if (m_footer) {
             m_currentSection = Section::Footer;
+            viewToEnd();
             break;
         }
     case Section::Footer: {
@@ -209,10 +172,9 @@ void ListViewFocusController::nextElement()
         break;
     }
     }
-
 }
 
-void ListViewFocusController::previousElement()
+void ListViewFocusController::previousDelegate()
 {
     switch(m_currentSection) {
     case Section::Default: {
@@ -224,7 +186,6 @@ void ListViewFocusController::previousElement()
     case Section::Footer: {
         if (size() > 0) {
             m_currentSection = Section::Delegate;
-            m_focusedItemIndex = size() - 1; // workarount to default value == -1
             break;
         }
     }
@@ -298,16 +259,17 @@ QQuickItem* ListViewFocusController::focusedItem()
 void ListViewFocusController::focusNextItem()
 {
     if (m_isReturnNeeded) {
+        qDebug() << "===>> RETURN IS NEEDED...";
         return;
     }
 
     if (m_focusChain.empty()) {
         qDebug() << "Empty focusChain with current delegate: " << currentDelegate() << "Scanning for elements...";
-        m_focusChain = getSubChain(currentDelegate());
+        m_focusChain = getItemsChain(currentDelegate());
     }
     if (m_focusChain.empty()) {
-        qWarning() << "No elements found. Returning from ListView...";
-        nextElement();
+        qWarning() << "No elements found in the delegate. Going to next delegate...";
+        nextDelegate();
         focusNextItem();
         return;
     }
@@ -325,13 +287,16 @@ void ListViewFocusController::focusPreviousItem()
 
     if (m_focusChain.empty()) {
         qDebug() << "Empty focusChain with current delegate: " << currentDelegate() << "Scanning for elements...";
-        m_focusChain = getSubChain(currentDelegate());
+        m_focusChain = getItemsChain(currentDelegate());
     }
     if (m_focusChain.empty()) {
-        qWarning() << "No elements found. Returning from ListView...";
-        previousElement();
+        qWarning() << "No elements found in the delegate. Going to next delegate...";
+        previousDelegate();
         focusPreviousItem();
         return;
+    }
+    if (m_focusedItemIndex == -1) {
+        m_focusedItemIndex = m_focusChain.size();
     }
     m_focusedItemIndex--;
     m_focusedItem = qobject_cast<QQuickItem*>(m_focusChain.at(m_focusedItemIndex));

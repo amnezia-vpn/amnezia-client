@@ -35,10 +35,15 @@ public:
     Q_INVOKABLE void dropRootObject(QObject* object);
 
 private:
-    void nextItem(bool isForwardOrder);
+    enum class Direction {
+        Forward,
+        Backward,
+    };
+
+    void nextItem(Direction direction);
     void focusNextListViewItem();
     void focusPreviousListViewItem();
-    void reload(bool isForwardOrder);
+    void reload(Direction direction);
 
     QSharedPointer<QQmlApplicationEngine> m_engine; // Pointer to engine to get root object
     QList<QObject*> m_focusChain; // List of current objects to be focused

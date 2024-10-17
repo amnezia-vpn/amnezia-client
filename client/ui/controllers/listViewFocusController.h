@@ -7,7 +7,8 @@
 #include <QQuickItem>
 
 
-bool isListView(QObject* item);
+bool isEnabled(QObject* item);
+bool isFocusable(QObject* item);
 bool isMore(QObject* item1, QObject* item2);
 bool isLess(QObject* item1, QObject* item2);
 QList<QObject*> getSubChain(QObject* object);
@@ -29,8 +30,8 @@ public:
     explicit ListViewFocusController(QQuickItem* listView, QObject* parent = nullptr);
     ~ListViewFocusController();
 
-    void nextElement();
-    void previousElement();
+    void nextDelegate();
+    void previousDelegate();
     void decrementIndex();
     void focusNextItem();
     void focusPreviousItem();

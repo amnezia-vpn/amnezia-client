@@ -15,6 +15,7 @@ import "Pages2"
 Window  {
     id: root
     objectName: "mainWindow"
+
     visible: true
     width: GC.screenWidth
     height: GC.screenHeight
@@ -32,7 +33,7 @@ Window  {
 
     title: "AmneziaVPN"
 
-    Item {
+    Item { // This item is needed for focus handling
         id: defaultFocusItem
         objectName: "defaultFocusItem"
 
@@ -210,8 +211,6 @@ Window  {
                     clickedFunc: function() {
                         hidePassword = !hidePassword
                     }
-
-                    // KeyNavigation.tab: saveButton
                 }
 
                 BasicButtonType {
