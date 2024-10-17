@@ -123,6 +123,10 @@ PageType {
             }
         }
 
+        function onWrongInstallationUser(message) {
+            onInstallationErrorOccurred(message)
+        }
+
         function onUpdateContainerFinished(message) {
             PageController.showNotificationMessage(message)
             PageController.closePage()

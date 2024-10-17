@@ -75,8 +75,8 @@ signals:
     void removeAllContainersFinished(const QString &finishedMessage);
     void removeProcessedContainerFinished(const QString &finishedMessage);
 
-    void installationErrorOccurred(const QString &errorMessage);
     void installationErrorOccurred(ErrorCode errorCode);
+    void wrongInstallationUser(const QString &message);
 
     void serverAlreadyExists(int serverIndex);
 
