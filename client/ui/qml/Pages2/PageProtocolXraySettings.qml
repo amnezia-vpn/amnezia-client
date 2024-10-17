@@ -17,13 +17,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: backButtonLayout
 
@@ -35,7 +28,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listview
         }
     }
 
@@ -65,12 +57,12 @@ PageType {
 
                 model: XrayConfigModel
 
-                activeFocusOnTab: true
-                onActiveFocusChanged: {
-                    if (activeFocus) {
-                        listview.itemAtIndex(0)?.focusItemId.forceActiveFocus()
-                    }
-                }
+                // activeFocusOnTab: true
+                // onActiveFocusChanged: {
+                //     if (activeFocus) {
+                //         listview.itemAtIndex(0)?.focusItemId.forceActiveFocus()
+                //     }
+                // }
 
                 delegate: Item {
                     property alias focusItemId: textFieldWithHeaderType.textField
@@ -103,8 +95,6 @@ PageType {
                             headerText: qsTr("Disguised as traffic from")
                             textFieldText: site
 
-                            KeyNavigation.tab: basicButton
-
                             textField.onEditingFinished: {
                                 if (textFieldText !== site) {
                                     var tmpText = textFieldText
@@ -127,8 +117,6 @@ PageType {
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save")
-
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             onClicked: {
                                 forceActiveFocus()

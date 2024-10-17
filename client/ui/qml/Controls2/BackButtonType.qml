@@ -4,7 +4,7 @@ import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
-Item {
+FocusScope {
     id: root
 
     property string backButtonImage: "qrc:/images/controls/arrow-left.svg"
@@ -14,12 +14,6 @@ Item {
     implicitHeight: content.implicitHeight
 
     visible: backButtonImage !== ""
-
-    onActiveFocusChanged: {
-        if (activeFocus) {
-            backButton.forceActiveFocus()
-        }
-    }
 
     RowLayout {
         id: content

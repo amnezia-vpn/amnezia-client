@@ -14,19 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-
-        onFocusChanged: {
-            if (focusItem.activeFocus) {
-                fl.contentY = 0
-            }
-        }
-    }
-
     BackButtonType {
         id: backButton
 
@@ -34,8 +21,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: telegramButton
     }
 
     FlickableType {
@@ -106,7 +91,6 @@ PageType {
                 descriptionText: qsTr("To discuss features")
                 leftImageSource: "qrc:/images/controls/telegram.svg"
 
-                KeyNavigation.tab: mailButton
                 parentFlickable: fl
 
                 clickedFunction: function() {
@@ -124,7 +108,6 @@ PageType {
                 descriptionText: qsTr("For reviews and bug reports")
                 leftImageSource: "qrc:/images/controls/mail.svg"
 
-                KeyNavigation.tab: githubButton
                 parentFlickable: fl
 
                 clickedFunction: function() {
@@ -143,7 +126,6 @@ PageType {
                 text: qsTr("GitHub")
                 leftImageSource: "qrc:/images/controls/github.svg"
 
-                KeyNavigation.tab: websiteButton
                 parentFlickable: fl
 
                 clickedFunction: function() {
@@ -161,7 +143,6 @@ PageType {
                 text: qsTr("Website")
                 leftImageSource: "qrc:/images/controls/amnezia.svg"
 
-                KeyNavigation.tab: checkUpdatesButton
                 parentFlickable: fl
 
                 clickedFunction: function() {
@@ -209,7 +190,6 @@ PageType {
 
                 text: qsTr("Check for updates")
 
-                KeyNavigation.tab: privacyPolicyButton
                 parentFlickable: fl
 
                 clickedFunc: function() {
@@ -232,7 +212,6 @@ PageType {
 
               text: qsTr("Privacy Policy")
 
-              Keys.onTabPressed: lastItemTabClicked()
               parentFlickable: fl
 
               clickedFunc: function() {

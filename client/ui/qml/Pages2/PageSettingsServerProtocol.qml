@@ -21,13 +21,6 @@ PageType {
 
     property bool isClearCacheVisible: ServersModel.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ContainersModel.getProcessedContainerIndex())
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: header
 
@@ -39,7 +32,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: protocols
         }
 
         HeaderType {
@@ -168,7 +160,6 @@ PageType {
             Layout.fillWidth: true
 
             visible: root.isClearCacheVisible
-            KeyNavigation.tab: removeButton
 
             text: qsTr("Clear profile")
 
