@@ -104,23 +104,10 @@ PageType {
                         DrawerType2 {
                             id: showDetailsDrawer
                             parent: root
-                            onClosed: {
-                                if (!GC.isMobile()) {
-                                    // defaultActiveFocusItem.forceActiveFocus()
-                                }
-                            }
 
                             anchors.fill: parent
                             expandedHeight: parent.height * 0.9
                             expandedStateContent: Item {
-                                Connections {
-                                    target: showDetailsDrawer
-                                    enabled: !GC.isMobile()
-                                    function onOpened() {
-                                        focusItem2.forceActiveFocus()
-                                    }
-                                }
-
                                 implicitHeight: showDetailsDrawer.expandedHeight
 
                                 // Item {
@@ -196,7 +183,7 @@ PageType {
                                             parentFlickable: fl
 
                                             text: qsTr("Close")
-                                            Keys.onTabPressed: lastItemTabClicked(focusItem2)
+                                            // Keys.onTabPressed: lastItemTabClicked(focusItem2)
 
 											clickedFunc: function()  {
                                                 showDetailsDrawer.close()
@@ -248,7 +235,7 @@ PageType {
 
                             text: qsTr("Install")
 
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
+                            // Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 if (!port.textField.acceptableInput &&
