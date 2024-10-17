@@ -84,6 +84,12 @@ Component.prototype.createOperations = function()
             console.log("Microsoft Visual C++ 2017 Redistributable already installed");
         }
 
+        component.addElevatedOperation("GlobalConfig", "Classes\Applications\@Publisher@", "@Title@", "shell/open/command", "@TargetDir@/@Name@.exe")
+        component.addElevatedOperation("GlobalConfig", "Classes\Applications\@Publisher@", "@Title@", "SupportedTypes", ".vpn")
+        component.addElevatedOperation("GlobalConfig", "Classes\Applications\@Publisher@", "@Title@", "SupportedTypes", ".conf")
+        component.addElevatedOperation("GlobalConfig", "Classes\Applications\@Publisher@", "@Title@", "SupportedTypes", ".ovpn")
+        component.addElevatedOperation("GlobalConfig", "Classes\Applications\@Publisher@", "@Title@", "SupportedTypes", ".backup")
+
         let pu_path = installer.value("TargetDir").replace(/\//g, '\\') + "\\"
         component.addElevatedOperation("Execute",
                                        ["sc", "create", serviceName(), "binpath=", pu_path + serviceName() + ".exe",
