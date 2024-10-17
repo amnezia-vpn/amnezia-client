@@ -66,7 +66,7 @@ open class Wireguard : Protocol() {
             try {
                 delay(1000)
                 var log = getLogcat(time)
-                Log.d(TAG, "First waiting log: $log")
+                Log.v(TAG, "First waiting log: $log")
                 // check that there is a connection log,
                 // to avoid infinite connection
                 if (!log.contains("Attaching to interface")) {

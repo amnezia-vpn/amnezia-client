@@ -130,8 +130,8 @@ class Xray : Protocol() {
             LibXray.initXray(assetsPath)
             val geoDir = File(assetsPath, "geo").absolutePath
             val configPath = File(context.cacheDir, "config.json")
-            Log.d(TAG, "xray.location.asset: $geoDir")
-            Log.d(TAG, "config: $configPath")
+            Log.v(TAG, "xray.location.asset: $geoDir")
+            Log.v(TAG, "config: $configPath")
             try {
                 configPath.writeText(configJson)
             } catch (e: IOException) {

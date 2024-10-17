@@ -301,7 +301,7 @@ jobs:
 
     env:
       ANDROID_BUILD_PLATFORM: android-34
-      QT_VERSION: 6.7.2
+      QT_VERSION: 6.7.3
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}

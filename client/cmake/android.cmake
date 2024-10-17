@@ -1,6 +1,6 @@
 message("Client android ${CMAKE_ANDROID_ARCH_ABI} build")
 
-set(APP_ANDROID_MIN_SDK 24)
+set(APP_ANDROID_MIN_SDK 26)
 set(ANDROID_PLATFORM "android-${APP_ANDROID_MIN_SDK}" CACHE STRING
     "The minimum API level supported by the application or library" FORCE)
 

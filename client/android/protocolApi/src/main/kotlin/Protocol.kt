@@ -1,6 +1,5 @@
 package org.amnezia.vpn.protocol
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.net.IpPrefix
 import android.net.VpnService
@@ -8,9 +7,6 @@ import android.net.VpnService.Builder
 import android.os.Build
 import android.system.OsConstants
 import androidx.annotation.RequiresApi
-import java.io.File
-import java.io.FileOutputStream
-import java.util.zip.ZipFile
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.net.InetNetwork

@@ -29,20 +29,20 @@ class ImportConfigActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "Create Import Config Activity: $intent")
+        Log.v(TAG, "Create Import Config Activity: $intent")
         intent?.let(::readConfig)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        Log.d(TAG, "onNewIntent: $intent")
+        Log.v(TAG, "onNewIntent: $intent")
         intent.let(::readConfig)
     }
 
     private fun readConfig(intent: Intent) {
         when (intent.action) {
             ACTION_SEND -> {
-                Log.d(TAG, "Process SEND action, type: ${intent.type}")
+                Log.v(TAG, "Process SEND action, type: ${intent.type}")
                 when (intent.type) {
                     "application/octet-stream" -> {
                         intent.getUriCompat()?.let { uri ->
@@ -60,7 +60,7 @@ class ImportConfigActivity : ComponentActivity() {
             }
 
             ACTION_VIEW -> {
-                Log.d(TAG, "Process VIEW action, scheme: ${intent.scheme}")
+                Log.v(TAG, "Process VIEW action, scheme: ${intent.scheme}")
                 when (intent.scheme) {
                     "file", "content" -> {
                         intent.data?.let { uri ->
