@@ -14,14 +14,13 @@
 
 QString Utils::getRandomString(int len)
 {
-    const QString possibleCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
-
+    const QString possibleCharacters = QStringLiteral("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
     QString randomString;
+
     for (int i = 0; i < len; ++i) {
-        quint32 index = QRandomGenerator::global()->generate() % possibleCharacters.length();
-        QChar nextChar = possibleCharacters.at(index);
-        randomString.append(nextChar);
+        randomString.append(possibleCharacters.at(QRandomGenerator::system()->bounded(possibleCharacters.length())));
     }
+
     return randomString;
 }
 
