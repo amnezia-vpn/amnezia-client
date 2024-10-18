@@ -69,7 +69,6 @@ class Daemon : public QObject {
   virtual WireguardUtils* wgutils() const = 0;
   virtual bool supportIPUtils() const { return false; }
   virtual IPUtils* iputils() { return nullptr; }
-  virtual bool supportDnsUtils() const { return false; }
   virtual DnsUtils* dnsutils() { return nullptr; }
 
   static bool parseStringList(const QJsonObject& obj, const QString& name,
