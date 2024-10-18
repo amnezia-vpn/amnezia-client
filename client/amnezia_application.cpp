@@ -111,10 +111,11 @@ void AmneziaApplication::init()
         qFatal("Android controller initialization failed");
     }
 
-    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, [this](QString data) {
-        m_pageController->goToPageHome();
+    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, this, [this](QString data) {
+        emit m_pageController->goToPageHome();
         m_importController->extractConfigFromData(data);
-        m_pageController->goToPageViewConfig();
+        data.clear();
+        emit m_pageController->goToPageViewConfig();
     });
 
     m_engine->addImageProvider(QLatin1String("installedAppImage"), new InstalledAppsImageProvider);
@@ -122,16 +123,16 @@ void AmneziaApplication::init()
 
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
-    connect(IosController::Instance(), &IosController::importConfigFromOutside, [this](QString data) {
-        m_pageController->goToPageHome();
+    connect(IosController::Instance(), &IosController::importConfigFromOutside, this, [this](QString data) {
+        emit m_pageController->goToPageHome();
         m_importController->extractConfigFromData(data);
-        m_pageController->goToPageViewConfig();
+        emit m_pageController->goToPageViewConfig();
     });
 
-    connect(IosController::Instance(), &IosController::importBackupFromOutside, [this](QString filePath) {
-        m_pageController->goToPageHome();
+    connect(IosController::Instance(), &IosController::importBackupFromOutside, this, [this](QString filePath) {
+        emit m_pageController->goToPageHome();
         m_pageController->goToPageSettingsBackup();
-        m_settingsController->importBackupFromOutside(filePath);
+        emit m_settingsController->importBackupFromOutside(filePath);
     });
 
     QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled()); });
