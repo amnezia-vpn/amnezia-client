@@ -15,6 +15,7 @@ import "Pages2"
 Window  {
     id: root
     objectName: "mainWindow"
+
     visible: true
     width: GC.screenWidth
     height: GC.screenHeight
@@ -32,7 +33,40 @@ Window  {
 
     title: "AmneziaVPN"
 
+    Item { // This item is needed for focus handling
+        id: defaultFocusItem
+        objectName: "defaultFocusItem"
+
+        focus: true
+
+        Keys.onTabPressed: {
+            FocusController.nextKeyTabItem()
+        }
+
+        Keys.onBacktabPressed: {
+            FocusController.previousKeyTabItem()
+        }
+
+        Keys.onUpPressed: {
+            FocusController.nextKeyUpItem()
+        }
+
+        Keys.onDownPressed: {
+            FocusController.nextKeyDownItem()
+        }
+
+        Keys.onLeftPressed: {
+            FocusController.nextKeyLeftItem()
+        }
+
+        Keys.onRightPressed: {
+            FocusController.nextKeyRightItem()
+        }
+    }
+
     Connections {
+        objectName: "pageControllerConnections"
+
         target: PageController
 
         function onRaiseMainWindow() {
@@ -72,6 +106,8 @@ Window  {
     }
 
     Connections {
+        objectName: "settingsControllerConnections"
+
         target: SettingsController
 
         function onChangeSettingsFinished(finishedMessage) {
@@ -80,11 +116,15 @@ Window  {
     }
 
     PageStart {
+        objectName: "pageStart"
+
         width: root.width
         height: root.height
     }
 
     Item {
+        objectName: "popupNotificationItem"
+
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
@@ -108,6 +148,8 @@ Window  {
     }
 
     Item {
+        objectName: "popupErrorMessageItem"
+
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
@@ -120,6 +162,8 @@ Window  {
     }
 
     Item {
+        objectName: "privateKeyPassphraseDrawerItem"
+
         anchors.fill: parent
 
         DrawerType2 {
@@ -128,7 +172,7 @@ Window  {
             anchors.fill: parent
             expandedHeight: root.height * 0.35
 
-            expandedContent: ColumnLayout {
+            expandedStateContent: ColumnLayout {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -167,8 +211,6 @@ Window  {
                     clickedFunc: function() {
                         hidePassword = !hidePassword
                     }
-
-                    KeyNavigation.tab: saveButton
                 }
 
                 BasicButtonType {
@@ -195,6 +237,8 @@ Window  {
     }
 
     Item {
+        objectName: "questionDrawerItem"
+
         anchors.fill: parent
 
         QuestionDrawer {
@@ -205,6 +249,8 @@ Window  {
     }
 
     Item {
+        objectName: "busyIndicatorItem"
+
         anchors.fill: parent
 
         BusyIndicatorType {
@@ -221,26 +267,26 @@ Window  {
         questionDrawer.noButtonText = noButtonText
 
         questionDrawer.yesButtonFunction = function() {
-            questionDrawer.close()
+            questionDrawer.closeTriggered()
             if (yesButtonFunction && typeof yesButtonFunction === "function") {
                 yesButtonFunction()
             }
         }
         questionDrawer.noButtonFunction = function() {
-            questionDrawer.close()
+            questionDrawer.closeTriggered()
             if (noButtonFunction && typeof noButtonFunction === "function") {
                 noButtonFunction()
             }
         }
-        questionDrawer.open()
+        questionDrawer.openTriggered()
     }
 
     FileDialog {
         id: mainFileDialog
+        objectName: "mainFileDialog"
 
         property bool isSaveMode: false
 
-        objectName: "mainFileDialog"
         fileMode: isSaveMode ? FileDialog.SaveFile : FileDialog.OpenFile
 
         onAccepted: SystemController.fileDialogClosed(true)

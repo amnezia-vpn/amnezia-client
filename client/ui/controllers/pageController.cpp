@@ -81,7 +81,7 @@ void PageController::keyPressEvent(Qt::Key key)
     case Qt::Key_Escape: {
         if (m_drawerDepth) {
             emit closeTopDrawer();
-            setDrawerDepth(getDrawerDepth() - 1);
+            decrementDrawerDepth();
         } else {
             emit escapePressed();
         }
@@ -142,9 +142,23 @@ void PageController::setDrawerDepth(const int depth)
     }
 }
 
-int PageController::getDrawerDepth()
+int PageController::getDrawerDepth() const
 {
     return m_drawerDepth;
+}
+
+int PageController::incrementDrawerDepth()
+{
+    return ++m_drawerDepth;
+}
+
+int PageController::decrementDrawerDepth()
+{
+    if (m_drawerDepth == 0) {
+        return m_drawerDepth;
+    } else {
+        return --m_drawerDepth;
+    }
 }
 
 void PageController::onShowErrorMessage(ErrorCode errorCode)

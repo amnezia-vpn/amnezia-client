@@ -17,18 +17,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.vpnAddressSubnetTextField.textField
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-        onActiveFocusChanged: {
-            if (activeFocus) {
-                fl.ensureVisible(focusItem)
-            }
-        }
-    }
-
     ColumnLayout {
         id: backButtonLayout
 
@@ -40,7 +28,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listview.currentItem.vpnAddressSubnetTextField.textField
         }
     }
 
@@ -104,7 +91,6 @@ PageType {
                             textFieldText: subnetAddress
 
                             parentFlickable: fl
-                            KeyNavigation.tab: transportProtoSelector
 
                             textField.onEditingFinished: {
                                 if (textFieldText !== subnetAddress) {
@@ -131,8 +117,6 @@ PageType {
                             currentIndex: {
                                 return transportProto === "tcp" ? 1 : 0
                             }
-
-                            KeyNavigation.tab: portTextField.enabled ? portTextField.textField : autoNegotiateEncryprionSwitcher
 
                             onCurrentIndexChanged: {
                                 if (transportProto === "tcp" && currentIndex === 0) {
@@ -162,8 +146,6 @@ PageType {
                                     port = textFieldText
                                 }
                             }
-
-                            KeyNavigation.tab: autoNegotiateEncryprionSwitcher
                         }
 
                         SwitcherType {
@@ -181,10 +163,6 @@ PageType {
                                     autoNegotiateEncryprion = checked
                                 }
                             }
-
-                            KeyNavigation.tab: hashDropDown.enabled ?
-                                                   hashDropDown :
-                                                   tlsAuthCheckBox
                         }
 
                         DropDownType {
@@ -199,9 +177,6 @@ PageType {
 
                             drawerParent: root
                             parentFlickable: fl
-                            KeyNavigation.tab: cipherDropDown.enabled ?
-                                               cipherDropDown :
-                                               tlsAuthCheckBox
 
                             listView: ListViewWithRadioButtonType {
                                 id: hashListView
@@ -251,8 +226,6 @@ PageType {
 
                             drawerParent: root
                             parentFlickable: fl
-
-                            KeyNavigation.tab: tlsAuthCheckBox
 
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView
@@ -320,8 +293,6 @@ PageType {
                                     text: qsTr("TLS auth")
                                     checked: tlsAuth
 
-                                    KeyNavigation.tab: blockDnsCheckBox
-
                                     onCheckedChanged: {
                                         if (checked !== tlsAuth) {
                                             console.log("tlsAuth changed to: " + checked)
@@ -339,8 +310,6 @@ PageType {
                                     text: qsTr("Block DNS requests outside of VPN")
                                     checked: blockDns
 
-                                    KeyNavigation.tab: additionalClientCommandsSwitcher
-
                                     onCheckedChanged: {
                                         if (checked !== blockDns) {
                                             blockDns = checked
@@ -355,9 +324,6 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 32
                             parentFlickable: fl
-                            KeyNavigation.tab: additionalClientCommandsTextArea.visible ?
-                                               additionalClientCommandsTextArea.textArea :
-                                               additionalServerCommandsSwitcher
 
                             checked: additionalClientCommands !== ""
 
@@ -376,7 +342,7 @@ PageType {
                             Layout.topMargin: 16
 
                             visible: additionalClientCommandsSwitcher.checked
-                            KeyNavigation.tab: additionalServerCommandsSwitcher
+
                             parentFlickable: fl
 
                             textAreaText: additionalClientCommands
@@ -394,9 +360,6 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
                             parentFlickable: fl
-                            KeyNavigation.tab: additionalServerCommandsTextArea.visible ?
-                                               additionalServerCommandsTextArea.textArea :
-                                               saveRestartButton
 
                             checked: additionalServerCommands !== ""
 
@@ -419,7 +382,6 @@ PageType {
                             textAreaText: additionalServerCommands
                             placeholderText: qsTr("Commands:")
                             parentFlickable: fl
-                            KeyNavigation.tab: saveRestartButton
                             textArea.onEditingFinished: {
                                 if (additionalServerCommands !== textAreaText) {
                                     additionalServerCommands = textAreaText

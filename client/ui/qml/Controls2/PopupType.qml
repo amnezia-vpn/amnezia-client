@@ -28,11 +28,11 @@ Popup {
     }
 
     onOpened: {
-        focusItem.forceActiveFocus()
+        FocusController.pushRootObject(root)
     }
 
     onClosed: {
-        PageController.forceStackActiveFocus()
+        FocusController.dropRootObject(root)
     }
 
     background: Rectangle {
@@ -72,11 +72,6 @@ Popup {
                 }
             }
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: closeButton
-            }
-
             BasicButtonType {
                 id: closeButton
                 visible: closeButtonVisible
@@ -92,7 +87,6 @@ Popup {
                 borderWidth: 0
 
                 text: qsTr("Close")
-                KeyNavigation.tab: focusItem
 
                 clickedFunc: function() {
                     root.close()

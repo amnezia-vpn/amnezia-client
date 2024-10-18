@@ -17,18 +17,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.portTextField.textField
-
-    Item {
-        id: focusItem
-        onFocusChanged: {
-            if (activeFocus) {
-                fl.ensureVisible(focusItem)
-            }
-        }
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: backButtonLayout
 
@@ -40,7 +28,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listview.currentItem.portTextField.textField
         }
     }
 
@@ -114,8 +101,26 @@ PageType {
                             }
 
                             checkEmptyText: true
+                        }
 
-                            KeyNavigation.tab: junkPacketCountTextField.textField
+                        TextFieldWithHeaderType {
+                            id: mtuTextField
+                            Layout.fillWidth: true
+                            Layout.topMargin: 16
+
+                            headerText: qsTr("MTU")
+                            textFieldText: mtu
+                            textField.validator: IntValidator { bottom: 576; top: 65535 }
+
+                            textField.onEditingFinished: {
+                                if (textFieldText === "") {
+                                    textFieldText = "0"
+                                }
+                                if (textFieldText !== mtu) {
+                                    mtu = textFieldText
+                                }
+                            }
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
@@ -139,8 +144,6 @@ PageType {
                             }
 
                             checkEmptyText: true
-
-                            KeyNavigation.tab: junkPacketMinSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -160,8 +163,6 @@ PageType {
                             }
 
                             checkEmptyText: true
-
-                            KeyNavigation.tab: junkPacketMaxSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -181,8 +182,6 @@ PageType {
                             }
 
                             checkEmptyText: true
-
-                            KeyNavigation.tab: initPacketJunkSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -202,8 +201,6 @@ PageType {
                             }
 
                             checkEmptyText: true
-
-                            KeyNavigation.tab: responsePacketJunkSizeTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -223,8 +220,6 @@ PageType {
                             }
 
                             checkEmptyText: true
-
-                            KeyNavigation.tab: initPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -244,8 +239,6 @@ PageType {
                             }
 
                             checkEmptyText: true
-
-                            KeyNavigation.tab: responsePacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -265,8 +258,6 @@ PageType {
                             }
 
                             checkEmptyText: true
-
-                            KeyNavigation.tab: transportPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -286,8 +277,6 @@ PageType {
                             }
 
                             checkEmptyText: true
-
-                            KeyNavigation.tab: underloadPacketMagicHeaderTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -307,8 +296,6 @@ PageType {
                             }
 
                             checkEmptyText: true
-
-                            KeyNavigation.tab: saveRestartButton
                         }
 
                         BasicButtonType {
@@ -331,8 +318,6 @@ PageType {
                                      portTextField.errorText === ""
 
                             text: qsTr("Save")
-
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()

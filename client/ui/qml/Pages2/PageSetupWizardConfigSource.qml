@@ -25,8 +25,6 @@ PageType {
         }
     }
 
-    defaultActiveFocusItem: focusItem
-
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -42,13 +40,9 @@ PageType {
 
             spacing: 0
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: textKey.textField
-            }
-
-
             HeaderType {
+                id: moreButton
+
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.rightMargin: 16
@@ -58,7 +52,16 @@ PageType {
 
                 actionButtonImage: PageController.isStartPageVisible() ? "qrc:/images/controls/more-vertical.svg" : ""
                 actionButtonFunction: function() {
-                    moreActionsDrawer.open()
+                    moreActionsDrawer.openTriggered()
+                }
+
+                actionButton.onFocusChanged: {
+                    console.debug("MOVE THIS LOGIC TO CPP!")
+                    if (actionButton.activeFocus) {
+                        if (fl) {
+                            fl.ensureVisible(moreButton)
+                        }
+                    }
                 }
 
                 DrawerType2 {
@@ -69,7 +72,7 @@ PageType {
                     anchors.fill: parent
                     expandedHeight: root.height * 0.35
 
-                    expandedContent: ColumnLayout {
+                    expandedStateContent: ColumnLayout {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -103,6 +106,8 @@ PageType {
             }
 
             ParagraphTextType {
+                objectName: "insertKeyLabel"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 32
                 Layout.rightMargin: 16
@@ -122,12 +127,12 @@ PageType {
                 headerText: qsTr("Insert key")
                 buttonText: qsTr("Insert")
 
+                parentFlickable: fl
+
                 clickedFunc: function() {
                     textField.text = ""
                     textField.paste()
                 }
-
-                KeyNavigation.tab: continueButton
             }
 
             BasicButtonType {
@@ -138,10 +143,11 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
+                parentFlickable: fl
+
                 visible: textKey.textFieldText !== ""
 
                 text: qsTr("Continue")
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunc: function() {
                     if (ImportController.extractConfigFromData(textKey.textFieldText)) {
@@ -175,6 +181,8 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/amnezia.svg"
 
+                parentFlickable: fl
+
                 onClicked: function() {
                     PageController.showBusyIndicator(true)
                     var result = InstallController.fillAvailableServices()
@@ -199,6 +207,8 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/server.svg"
 
+                parentFlickable: fl
+
                 onClicked: {
                     PageController.goToPage(PageEnum.PageSetupWizardCredentials)
                 }
@@ -218,6 +228,8 @@ PageType {
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/archive-restore.svg"
+
+                parentFlickable: fl
 
                 onClicked: {
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),
@@ -242,6 +254,8 @@ PageType {
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/folder-search-2.svg"
+
+                parentFlickable: fl
 
                 onClicked: {
                     var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
@@ -270,6 +284,8 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/scan-line.svg"
 
+                parentFlickable: fl
+
                 onClicked: {
                     ImportController.startDecodingQr()
                     if (Qt.platform.os === "ios") {
@@ -292,6 +308,8 @@ PageType {
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/help-circle.svg"
+
+                parentFlickable: fl
 
                 onClicked: {
                     Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())

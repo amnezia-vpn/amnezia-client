@@ -100,8 +100,6 @@ PageType {
                 text: qsTr("Check the server for previously installed Amnezia services")
                 descriptionText: qsTr("Add them to the application if they were not displayed")
 
-                KeyNavigation.tab: labelWithButton2
-
                 clickedFunction: function() {
                     PageController.showBusyIndicator(true)
                     InstallController.scanServerForInstalledContainers()
@@ -120,8 +118,6 @@ PageType {
 
                 text: qsTr("Reboot server")
                 textColor: AmneziaStyle.color.vibrantRed
-
-                KeyNavigation.tab: labelWithButton3
 
                 clickedFunction: function() {
                     var headerText = qsTr("Do you want to reboot the server?")

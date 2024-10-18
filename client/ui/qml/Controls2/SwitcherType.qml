@@ -35,10 +35,37 @@ Switch {
     property string hoveredIndicatorBackgroundColor: AmneziaStyle.color.translucentWhite
     property string defaultIndicatorBackgroundColor: AmneziaStyle.color.transparent
 
+    property bool isFocusable: true
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+
+    Keys.onUpPressed: {
+        FocusController.nextKeyUpItem()
+    }
+    
+    Keys.onDownPressed: {
+        FocusController.nextKeyDownItem()
+    }
+    
+    Keys.onLeftPressed: {
+        FocusController.nextKeyLeftItem()
+    }
+
+    Keys.onRightPressed: {
+        FocusController.nextKeyRightItem()
+    }
+
     hoverEnabled: enabled ? true : false
     focusPolicy: Qt.TabFocus
 
     property FlickableType parentFlickable: null
+
     onFocusChanged: {
         if (root.activeFocus) {
             if (root.parentFlickable) {
