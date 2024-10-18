@@ -41,6 +41,9 @@ namespace
 
         constexpr char apiPayload[] = "api_payload";
         constexpr char keyPayload[] = "key_payload";
+
+        constexpr char apiConfig[] = "api_config";
+        constexpr char authData[] = "auth_data";
     }
 
     ErrorCode checkErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply)
@@ -93,8 +96,8 @@ void ApiController::fillServerConfig(const QString &protocol, const ApiControlle
         configStr.replace("$OPENVPN_PRIV_KEY", apiPayloadData.certRequest.privKey);
     } else if (protocol == configKey::awg) {
         configStr.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", apiPayloadData.wireGuardClientPrivKey);
-        auto serverConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
-        auto containers = serverConfig.value(config_key::containers).toArray();
+        auto newServerConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
+        auto containers = newServerConfig.value(config_key::containers).toArray();
         if (containers.isEmpty()) {
             return; // todo process error
         }
@@ -113,24 +116,29 @@ void ApiController::fillServerConfig(const QString &protocol, const ApiControlle
         containerConfig[config_key::transportPacketMagicHeader] = protocolConfig.value(config_key::transportPacketMagicHeader);
         container[containerName] = containerConfig;
         containers.replace(0, container);
-        serverConfig[config_key::containers] = containers;
-        configStr = QString(QJsonDocument(serverConfig).toJson());
+        newServerConfig[config_key::containers] = containers;
+        configStr = QString(QJsonDocument(newServerConfig).toJson());
     }
 
-    QJsonObject apiConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
-    serverConfig[config_key::dns1] = apiConfig.value(config_key::dns1);
-    serverConfig[config_key::dns2] = apiConfig.value(config_key::dns2);
-    serverConfig[config_key::containers] = apiConfig.value(config_key::containers);
-    serverConfig[config_key::hostName] = apiConfig.value(config_key::hostName);
+    QJsonObject newServerConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
+    serverConfig[config_key::dns1] = newServerConfig.value(config_key::dns1);
+    serverConfig[config_key::dns2] = newServerConfig.value(config_key::dns2);
+    serverConfig[config_key::containers] = newServerConfig.value(config_key::containers);
+    serverConfig[config_key::hostName] = newServerConfig.value(config_key::hostName);
 
-    if (apiConfig.value(config_key::configVersion).toInt() == ApiConfigSources::AmneziaGateway) {
-        serverConfig[config_key::configVersion] = apiConfig.value(config_key::configVersion);
-        serverConfig[config_key::description] = apiConfig.value(config_key::description);
-        serverConfig[config_key::name] = apiConfig.value(config_key::name);
+    if (newServerConfig.value(config_key::configVersion).toInt() == ApiConfigSources::AmneziaGateway) {
+        serverConfig[config_key::configVersion] = newServerConfig.value(config_key::configVersion);
+        serverConfig[config_key::description] = newServerConfig.value(config_key::description);
+        serverConfig[config_key::name] = newServerConfig.value(config_key::name);
     }
 
-    auto defaultContainer = apiConfig.value(config_key::defaultContainer).toString();
+    auto defaultContainer = newServerConfig.value(config_key::defaultContainer).toString();
     serverConfig[config_key::defaultContainer] = defaultContainer;
+
+    QVariantMap map = serverConfig.value(configKey::apiConfig).toObject().toVariantMap();
+    map.insert(newServerConfig.value(configKey::apiConfig).toObject().toVariantMap());
+    auto apiConfig = QJsonObject::fromVariantMap(map);
+    serverConfig[configKey::apiConfig] = apiConfig;
 
     return;
 }
@@ -336,7 +344,8 @@ ErrorCode ApiController::getServicesList(QByteArray &responseBody)
 }
 
 ErrorCode ApiController::getConfigForService(const QString &installationUuid, const QString &userCountryCode, const QString &serviceType,
-                                             const QString &protocol, const QString &serverCountryCode, QJsonObject &serverConfig)
+                                             const QString &protocol, const QString &serverCountryCode, const QJsonObject &authData,
+                                             QJsonObject &serverConfig)
 {
 #ifdef Q_OS_IOS
     IosController::Instance()->requestInetAccess();
@@ -359,6 +368,7 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
     }
     apiPayload[configKey::serviceType] = serviceType;
     apiPayload[configKey::uuid] = installationUuid;
+    apiPayload[configKey::authData] = authData;
 
     QSimpleCrypto::QBlockCipher blockCipher;
     QByteArray key = blockCipher.generatePrivateSalt(32);
