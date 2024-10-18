@@ -12,6 +12,7 @@
 #include "configurators/wireguard_configurator.h"
 #include "core/enums/apiEnums.h"
 #include "version.h"
+#include "utilities.h"
 
 namespace
 {
@@ -41,8 +42,6 @@ namespace
         constexpr char apiPayload[] = "api_payload";
         constexpr char keyPayload[] = "key_payload";
     }
-
-    const QStringList proxyStorageUrl = { "" };
 
     ErrorCode checkErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply)
     {
@@ -146,6 +145,15 @@ QStringList ApiController::getProxyUrls()
     QList<QSslError> sslErrors;
     QNetworkReply *reply;
 
+    QStringList proxyStorageUrl;
+    if (m_isDevEnvironment) {
+        proxyStorageUrl = QStringList { DEV_S3_ENDPOINT };
+    } else {
+        proxyStorageUrl = QStringList { PROD_S3_ENDPOINT };
+    }
+
+    QByteArray key = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
+
     for (const auto &proxyStorageUrl : proxyStorageUrl) {
         request.setUrl(proxyStorageUrl);
         reply = amnApp->manager()->get(request);
@@ -166,11 +174,23 @@ QStringList ApiController::getProxyUrls()
     EVP_PKEY *privateKey = nullptr;
     QByteArray responseBody;
     try {
-        QByteArray key = PROD_PROXY_STORAGE_KEY;
-        QSimpleCrypto::QRsa rsa;
-        privateKey = rsa.getPrivateKeyFromByteArray(key, "");
-        responseBody = rsa.decrypt(encryptedResponseBody, privateKey, RSA_PKCS1_PADDING);
+        if (!m_isDevEnvironment) {
+            QCryptographicHash hash(QCryptographicHash::Sha512);
+            hash.addData(key);
+            QByteArray hashResult = hash.result().toHex();
+
+            QByteArray key = QByteArray::fromHex(hashResult.left(64));
+            QByteArray iv = QByteArray::fromHex(hashResult.mid(64, 32));
+
+            QByteArray ba = QByteArray::fromBase64(encryptedResponseBody);
+
+            QSimpleCrypto::QBlockCipher blockCipher;
+            responseBody = blockCipher.decryptAesBlockCipher(ba, key, iv);
+        } else {
+            responseBody = encryptedResponseBody;
+        }
     } catch (...) {
+        Utils::logException();
         qCritical() << "error loading private key from environment variables or decrypting payload";
         return {};
     }
@@ -361,6 +381,7 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
             QSimpleCrypto::QRsa rsa;
             publicKey = rsa.getPublicKeyFromByteArray(rsaKey);
         } catch (...) {
+            Utils::logException();
             qCritical() << "error loading public key from environment variables";
             return ErrorCode::ApiMissingAgwPublicKey;
         }
@@ -370,7 +391,9 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
 
         encryptedApiPayload = blockCipher.encryptAesBlockCipher(QJsonDocument(apiPayload).toJson(), key, iv, "", salt);
     } catch (...) { // todo change error handling in QSimpleCrypto?
+        Utils::logException();
         qCritical() << "error when encrypting the request body";
+        return ErrorCode::ApiConfigDecryptionError;
     }
 
     QJsonObject requestBody;
@@ -416,7 +439,9 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
         auto responseBody = blockCipher.decryptAesBlockCipher(encryptedResponseBody, key, iv, "", salt);
         fillServerConfig(protocol, apiPayloadData, responseBody, serverConfig);
     } catch (...) { // todo change error handling in QSimpleCrypto?
+        Utils::logException();
         qCritical() << "error when decrypting the request body";
+        return ErrorCode::ApiConfigDecryptionError;
     }
 
     return errorCode;

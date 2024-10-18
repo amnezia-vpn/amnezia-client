@@ -108,6 +108,7 @@ namespace amnezia
         ApiConfigTimeoutError = 1103,
         ApiConfigSslError = 1104,
         ApiMissingAgwPublicKey = 1105,
+        ApiConfigDecryptionError = 1106,
 
         // QFile errors
         OpenError = 1200,
