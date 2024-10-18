@@ -1,8 +1,6 @@
 package org.amnezia.vpn.util
 
 import android.content.Context
-import android.icu.text.DateFormat
-import android.icu.text.SimpleDateFormat
 import android.os.Build
 import android.os.Process
 import java.io.File
@@ -12,8 +10,6 @@ import java.nio.channels.FileChannel
 import java.nio.channels.FileLock
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Date
-import java.util.Locale
 import java.util.concurrent.locks.ReentrantLock
 import org.amnezia.vpn.util.Log.Priority.D
 import org.amnezia.vpn.util.Log.Priority.E
@@ -41,11 +37,7 @@ private const val LOG_MAX_FILE_SIZE = 1024 * 1024
  * |                   |              | create a report and/or terminate the process |
  */
 object Log {
-    private val dateTimeFormat: Any =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)
-        else object : ThreadLocal<DateFormat>() {
-            override fun initialValue(): DateFormat = SimpleDateFormat(DATE_TIME_PATTERN, Locale.US)
-        }
+    private val dateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)
 
     private lateinit var logDir: File
     private val logFile: File by lazy { File(logDir, LOG_FILE_NAME) }
@@ -143,12 +135,7 @@ object Log {
     }
 
     private fun formatLogMsg(tag: String, msg: String, priority: Priority): String {
-        val date = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LocalDateTime.now().format(dateTimeFormat as DateTimeFormatter)
-        } else {
-            @Suppress("UNCHECKED_CAST")
-            (dateTimeFormat as ThreadLocal<DateFormat>).get()?.format(Date())
-        }
+        val date = LocalDateTime.now().format(dateTimeFormat)
         return "$date ${Process.myPid()} ${Process.myTid()} $priority [${Thread.currentThread().name}] " +
             "$tag: $msg\n"
     }

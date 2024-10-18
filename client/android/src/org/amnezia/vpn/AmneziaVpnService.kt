@@ -22,6 +22,7 @@ import androidx.annotation.MainThread
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import java.net.UnknownHostException
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -126,6 +127,8 @@ open class AmneziaVpnService : VpnService() {
             is BadConfigException -> onError("VPN config format error: ${e.message}")
 
             is LoadLibraryException -> onError("${e.message}. Caused: ${e.cause?.message}")
+
+            is UnknownHostException -> onError("Unknown host")
 
             else -> throw e
         }
@@ -297,7 +300,7 @@ open class AmneziaVpnService : VpnService() {
             arrayOf(ACTION_CONNECT, ACTION_DISCONNECT), ContextCompat.RECEIVER_NOT_EXPORTED
         ) {
             it?.action?.let { action ->
-                Log.d(TAG, "Broadcast request received: $action")
+                Log.v(TAG, "Broadcast request received: $action")
                 when (action) {
                     ACTION_CONNECT -> connect()
                     ACTION_DISCONNECT -> disconnect()
@@ -314,7 +317,7 @@ open class AmneziaVpnService : VpnService() {
                 )
             ) {
                 val state = it?.getBooleanExtra(NotificationManager.EXTRA_BLOCKED_STATE, false)
-                Log.d(TAG, "Notification state changed: ${it?.action}, blocked = $state")
+                Log.v(TAG, "Notification state changed: ${it?.action}, blocked = $state")
                 if (state == false) {
                     enableNotification()
                 } else {
@@ -447,7 +450,7 @@ open class AmneziaVpnService : VpnService() {
             serviceNotification.isNotificationEnabled() &&
             getSystemService<PowerManager>()?.isInteractive != false
         ) {
-            Log.d(TAG, "Launch traffic stats update")
+            Log.v(TAG, "Launch traffic stats update")
             trafficStats.reset()
             startTrafficStatsUpdateJob()
         }

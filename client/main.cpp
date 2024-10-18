@@ -15,12 +15,23 @@
     #include "platforms/ios/QtAppDelegate-C-Interface.h"
 #endif
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+bool isAnotherInstanceRunning()
+{
+    QLocalSocket socket;
+    socket.connectToServer("AmneziaVPNInstance");
+    if (socket.waitForConnected(500)) {
+        qWarning() << "AmneziaVPN is already running";
+        return true;
+    }
+    return false;
+}
+#endif
+
 int main(int argc, char *argv[])
 {
     Migrations migrationsManager;
     migrationsManager.doMigrations();
-
-    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
 
 #ifdef Q_OS_WIN
     AllowSetForegroundWindow(ASFW_ANY);
@@ -32,16 +43,14 @@ int main(int argc, char *argv[])
     qputenv("ANDROID_OPENSSL_SUFFIX", "_3");
 #endif
 
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     AmneziaApplication app(argc, argv);
-#else
-    AmneziaApplication app(argc, argv, true,
-                           SingleApplication::Mode::User | SingleApplication::Mode::SecondaryNotification);
 
-    if (!app.isPrimary()) {
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (isAnotherInstanceRunning()) {
         QTimer::singleShot(1000, &app, [&]() { app.quit(); });
         return app.exec();
     }
+    app.startLocalServer();
 #endif
 
 // Allow to raise app window if secondary instance launched

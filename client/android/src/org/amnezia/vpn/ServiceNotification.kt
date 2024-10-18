@@ -62,7 +62,7 @@ class ServiceNotification(private val context: Context) {
     fun buildNotification(serverName: String?, protocol: String?, state: ProtocolState): Notification {
         val speedString = if (state == CONNECTED) zeroSpeed else null
 
-        Log.d(TAG, "Build notification: $serverName, $state")
+        Log.v(TAG, "Build notification: $serverName, $state")
 
         return notificationBuilder
             .setSmallIcon(R.drawable.ic_amnezia_round)
@@ -88,17 +88,15 @@ class ServiceNotification(private val context: Context) {
     fun isNotificationEnabled(): Boolean {
         if (!context.isNotificationPermissionGranted()) return false
         if (!notificationManager.areNotificationsEnabled()) return false
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID)
-                ?.let { it.importance != NotificationManager.IMPORTANCE_NONE } ?: true
-        }
-        return true
+        return notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID)?.let {
+            it.importance != NotificationManager.IMPORTANCE_NONE
+        } ?: true
     }
 
     @SuppressLint("MissingPermission")
     fun updateNotification(serverName: String?, protocol: String?, state: ProtocolState) {
         if (context.isNotificationPermissionGranted()) {
-            Log.d(TAG, "Update notification: $serverName, $state")
+            Log.v(TAG, "Update notification: $serverName, $state")
             notificationManager.notify(NOTIFICATION_ID, buildNotification(serverName, protocol, state))
         }
     }

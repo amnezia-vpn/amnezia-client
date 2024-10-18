@@ -51,6 +51,9 @@ void ConnectionController::openConnection()
     if (configVersion == ApiConfigSources::Telegram
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         emit updateApiConfigFromTelegram();
+        } else if (configVersion == ApiConfigSources::AmneziaGateway
+        && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
+        emit updateApiConfigFromGateway();
     } else if (configVersion && m_serversModel->isApiKeyExpired(serverIndex)) {
         qDebug() << "attempt to update api config by end_date event";
         if (configVersion == ApiConfigSources::Telegram) {

@@ -499,6 +499,20 @@ bool IosController::setupWireGuard()
         wgConfig.insert(config_key::persistent_keep_alive, "25");
     }
 
+    if (config.contains(config_key::isObfuscationEnabled) && config.value(config_key::isObfuscationEnabled).toBool()) {
+        wgConfig.insert(config_key::initPacketMagicHeader, config[config_key::initPacketMagicHeader]);
+        wgConfig.insert(config_key::responsePacketMagicHeader, config[config_key::responsePacketMagicHeader]);
+        wgConfig.insert(config_key::underloadPacketMagicHeader, config[config_key::underloadPacketMagicHeader]);
+        wgConfig.insert(config_key::transportPacketMagicHeader, config[config_key::transportPacketMagicHeader]);
+
+        wgConfig.insert(config_key::initPacketJunkSize, config[config_key::initPacketJunkSize]);
+        wgConfig.insert(config_key::responsePacketJunkSize, config[config_key::responsePacketJunkSize]);
+
+        wgConfig.insert(config_key::junkPacketCount, config[config_key::junkPacketCount]);
+        wgConfig.insert(config_key::junkPacketMinSize, config[config_key::junkPacketMinSize]);
+        wgConfig.insert(config_key::junkPacketMaxSize, config[config_key::junkPacketMaxSize]);
+    }
+
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
 

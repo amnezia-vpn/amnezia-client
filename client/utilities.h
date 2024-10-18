@@ -35,6 +35,9 @@ public:
     static QString certUtilPath();
     static QString tun2socksPath();
 
+    static void logException(const std::exception &e);
+    static void logException(const std::exception_ptr &eptr = std::current_exception());
+
 #ifdef Q_OS_WIN
     static bool signalCtrl(DWORD dwProcessId, DWORD dwCtrlEvent);
     static QString getNextDriverLetter();

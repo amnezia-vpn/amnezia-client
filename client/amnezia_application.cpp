@@ -10,6 +10,8 @@
 #include <QTextDocument>
 #include <QTimer>
 #include <QTranslator>
+#include <QLocalSocket>
+#include <QLocalServer>
 
 #include "logger.h"
 #include "ui/models/installedAppsModel.h"
@@ -28,13 +30,7 @@
     #include <AmneziaVPN-Swift.h>
 #endif
 
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
 AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv)
-#else
-AmneziaApplication::AmneziaApplication(int &argc, char *argv[], bool allowSecondary, SingleApplication::Options options, int timeout,
-                                       const QString &userData)
-    : SingleApplication(argc, argv, allowSecondary, options, timeout, userData)
-#endif
 {
     setQuitOnLastWindowClosed(false);
 
@@ -115,10 +111,11 @@ void AmneziaApplication::init()
         qFatal("Android controller initialization failed");
     }
 
-    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, [this](QString data) {
-        m_pageController->goToPageHome();
+    connect(AndroidController::instance(), &AndroidController::importConfigFromOutside, this, [this](QString data) {
+        emit m_pageController->goToPageHome();
         m_importController->extractConfigFromData(data);
-        m_pageController->goToPageViewConfig();
+        data.clear();
+        emit m_pageController->goToPageViewConfig();
     });
 
     m_engine->addImageProvider(QLatin1String("installedAppImage"), new InstalledAppsImageProvider);
@@ -126,16 +123,16 @@ void AmneziaApplication::init()
 
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
-    connect(IosController::Instance(), &IosController::importConfigFromOutside, [this](QString data) {
-        m_pageController->goToPageHome();
+    connect(IosController::Instance(), &IosController::importConfigFromOutside, this, [this](QString data) {
+        emit m_pageController->goToPageHome();
         m_importController->extractConfigFromData(data);
-        m_pageController->goToPageViewConfig();
+        emit m_pageController->goToPageViewConfig();
     });
 
-    connect(IosController::Instance(), &IosController::importBackupFromOutside, [this](QString filePath) {
-        m_pageController->goToPageHome();
+    connect(IosController::Instance(), &IosController::importBackupFromOutside, this, [this](QString filePath) {
+        emit m_pageController->goToPageHome();
         m_pageController->goToPageSettingsBackup();
-        m_settingsController->importBackupFromOutside(filePath);
+        emit m_settingsController->importBackupFromOutside(filePath);
     });
 
     QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled()); });
@@ -178,16 +175,6 @@ void AmneziaApplication::init()
         emit m_pageController->raiseMainWindow();
 #else
     m_pageController->showOnStartup();
-#endif
-
-        // TODO - fix
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    if (isPrimary()) {
-        QObject::connect(this, &SingleApplication::instanceStarted, m_pageController.get(), [this]() {
-            qDebug() << "Secondary instance started, showing this window instead";
-            emit m_pageController->raiseMainWindow();
-        });
-    }
 #endif
 
 // Android TextArea clipboard workaround
@@ -293,6 +280,24 @@ bool AmneziaApplication::parseCommands()
     }
     return true;
 }
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+void AmneziaApplication::startLocalServer() {
+    const QString serverName("AmneziaVPNInstance");
+    QLocalServer::removeServer(serverName);
+
+    QLocalServer* server = new QLocalServer(this);
+    server->listen(serverName);
+
+    QObject::connect(server, &QLocalServer::newConnection, this, [server, this]() {
+        if (server) {
+            QLocalSocket* clientConnection = server->nextPendingConnection();
+            clientConnection->deleteLater();
+        }
+        emit m_pageController->raiseMainWindow();
+    });
+}
+#endif
 
 QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
 {

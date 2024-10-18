@@ -46,7 +46,7 @@ object LibraryLoader {
             System.loadLibrary(libraryName)
             return
         } catch (_: UnsatisfiedLinkError) {
-            Log.d(TAG, "Failed to load library, try to extract it from apk")
+            Log.w(TAG, "Failed to load library, try to extract it from apk")
         }
         var tempFile: File? = null
         try {

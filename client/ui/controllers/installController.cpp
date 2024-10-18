@@ -32,6 +32,7 @@ namespace
         constexpr char availableCountries[] = "available_countries";
 
         constexpr char apiConfig[] = "api_config";
+        constexpr char authData[] = "auth_data";
     }
 }
 
@@ -110,10 +111,10 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 containerConfig[config_key::transportPacketMagicHeader] = transportPacketMagicHeader;
             } else if (container == DockerContainer::Sftp) {
                 containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
-                containerConfig.insert(config_key::password, Utils::getRandomString(10));
+                containerConfig.insert(config_key::password, Utils::getRandomString(16));
             } else if (container == DockerContainer::Socks5Proxy) {
                 containerConfig.insert(config_key::userName, protocols::socks5Proxy::defaultUserName);
-                containerConfig.insert(config_key::password, Utils::getRandomString(10));
+                containerConfig.insert(config_key::password, Utils::getRandomString(16));
             }
 
             config.insert(config_key::container, ContainerProps::containerToString(container));
@@ -743,7 +744,7 @@ bool InstallController::checkSshConnection(QSharedPointer<ServerController> serv
     } else {
         if (output.contains(tr("Please login as the user"))) {
             output.replace("\n", "");
-            emit installationErrorOccurred(output);
+            emit wrongInstallationUser(output);
             return false;
         }
     }
@@ -801,7 +802,7 @@ bool InstallController::installServiceFromApi()
 
     ErrorCode errorCode = apiController.getConfigForService(m_settings->getInstallationUuid(true), m_apiServicesModel->getCountryCode(),
                                                             m_apiServicesModel->getSelectedServiceType(),
-                                                            m_apiServicesModel->getSelectedServiceProtocol(), "", serverConfig);
+                                                            m_apiServicesModel->getSelectedServiceProtocol(), "", QJsonObject(), serverConfig);
     if (errorCode != ErrorCode::NoError) {
         emit installationErrorOccurred(errorCode);
         return false;
@@ -828,19 +829,19 @@ bool InstallController::updateServiceFromApi(const int serverIndex, const QStrin
 
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+    auto authData = serverConfig.value(configKey::authData).toObject();
 
     QJsonObject newServerConfig;
-    ErrorCode errorCode =
-            apiController.getConfigForService(m_settings->getInstallationUuid(true), apiConfig.value(configKey::userCountryCode).toString(),
-                                              apiConfig.value(configKey::serviceType).toString(),
-                                              apiConfig.value(configKey::serviceProtocol).toString(), newCountryCode, newServerConfig);
+    ErrorCode errorCode = apiController.getConfigForService(
+            m_settings->getInstallationUuid(true), apiConfig.value(configKey::userCountryCode).toString(),
+            apiConfig.value(configKey::serviceType).toString(), apiConfig.value(configKey::serviceProtocol).toString(), newCountryCode,
+            authData, newServerConfig);
     if (errorCode != ErrorCode::NoError) {
         emit installationErrorOccurred(errorCode);
         return false;
     }
 
     QJsonObject newApiConfig = newServerConfig.value(configKey::apiConfig).toObject();
-    newApiConfig.insert(configKey::serviceInfo, apiConfig.value(configKey::serviceInfo));
     newApiConfig.insert(configKey::userCountryCode, apiConfig.value(configKey::userCountryCode));
     newApiConfig.insert(configKey::serviceType, apiConfig.value(configKey::serviceType));
     newApiConfig.insert(configKey::serviceProtocol, apiConfig.value(configKey::serviceProtocol));

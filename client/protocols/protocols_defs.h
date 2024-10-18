@@ -65,6 +65,7 @@ namespace amnezia
         constexpr char last_config[] = "last_config";
 
         constexpr char isThirdPartyConfig[] = "isThirdPartyConfig";
+        constexpr char isObfuscationEnabled[] = "isObfuscationEnabled";
 
         constexpr char junkPacketCount[] = "Jc";
         constexpr char junkPacketMinSize[] = "Jmin";

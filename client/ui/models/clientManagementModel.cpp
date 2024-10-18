@@ -77,6 +77,7 @@ ErrorCode ClientManagementModel::updateModel(const DockerContainer container, co
 {
     beginResetModel();
     m_clientsTable = QJsonArray();
+    endResetModel();
 
     ErrorCode error = ErrorCode::NoError;
 
@@ -90,10 +91,10 @@ ErrorCode ClientManagementModel::updateModel(const DockerContainer container, co
     const QByteArray clientsTableString = serverController->getTextFileFromContainer(container, credentials, clientsTableFile, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the clientsTable file from the server";
-        endResetModel();
         return error;
     }
 
+    beginResetModel();
     m_clientsTable = QJsonDocument::fromJson(clientsTableString).array();
 
     if (m_clientsTable.isEmpty()) {
@@ -601,5 +602,6 @@ QHash<int, QByteArray> ClientManagementModel::roleNames() const
     roles[LatestHandshakeRole] = "latestHandshake";
     roles[DataReceivedRole] = "dataReceived";
     roles[DataSentRole] = "dataSent";
+    roles[AllowedIpsRole] = "allowedIps";
     return roles;
 }
