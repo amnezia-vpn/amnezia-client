@@ -12,6 +12,7 @@
 #include "configurators/wireguard_configurator.h"
 #include "core/enums/apiEnums.h"
 #include "version.h"
+#include "utilities.h"
 
 namespace
 {
