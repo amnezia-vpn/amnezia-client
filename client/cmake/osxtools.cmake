@@ -76,7 +76,7 @@ function(osx_bundle_assetcatalog TARGET)
     )
 
     ## Patch the asset catalog into the target bundle.
-    if(NOT IOS)
+    if(NOT IOS AND NOT MACOS_NE)
         set(XCASSETS_RESOURCE_DIR "Resources")
     endif()
     add_custom_command(TARGET ${TARGET} POST_BUILD
@@ -141,6 +141,7 @@ function(osx_codesign_target TARGET)
         endif()
 
         foreach(FILE ${CODESIGN_FILES})
+            message(STATUS "Signing ${TARGET}: ${FILE}")
             add_custom_command(TARGET ${TARGET} POST_BUILD VERBATIM
                 COMMAND ${COMMENT_ECHO_COMMAND} "Signing ${TARGET}: ${FILE}"
                 COMMAND ${CODESIGN_BIN} ${CODESIGN_ARGS} ${FILE}
