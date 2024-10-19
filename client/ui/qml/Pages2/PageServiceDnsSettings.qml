@@ -64,8 +64,6 @@ PageType {
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: AmneziaStyle.color.vibrantRed
 
-                Keys.onTabPressed: root.lastItemTabClicked()
-
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                     var yesButtonText = qsTr("Continue")

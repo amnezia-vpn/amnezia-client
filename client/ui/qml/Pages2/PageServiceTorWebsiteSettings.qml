@@ -80,8 +80,6 @@ PageType {
                 rightImageSource: "qrc:/images/controls/copy.svg"
                 rightImageColor: AmneziaStyle.color.paleGray
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
-
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
                     PageController.showNotificationMessage(qsTr("Copied"))

@@ -33,18 +33,6 @@ DrawerType2 {
             root.expandedHeight = content.implicitHeight + 32
         }
 
-        Connections {
-            target: root
-            enabled: !GC.isMobile()
-            function onOpened() {
-                FocusController.pushRootObject(root)
-            }
-            
-            function onClosed() {
-                FocusController.dropRootObject(root)
-            }
-        }
-
         Header2TextType {
             Layout.fillWidth: true
             Layout.topMargin: 16

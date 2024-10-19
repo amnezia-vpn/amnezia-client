@@ -174,14 +174,6 @@ PageType {
 
                             parentFlickable: fl
 
-                            rightButton.Keys.onTabPressed: {
-                                if (mountButton.visible) {
-                                    mountButton.forceActiveFocus()
-                                } else {
-                                    detailedInstructionsButton.forceActiveFocus()
-                                }
-                            }
-
                             rightImageSource: "qrc:/images/controls/copy.svg"
                             rightImageColor: AmneziaStyle.color.paleGray
 
@@ -278,7 +270,6 @@ PageType {
                             text: qsTr("Detailed instructions")
 
                             parentFlickable: fl
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
 //                                Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")

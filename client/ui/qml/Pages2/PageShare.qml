@@ -199,11 +199,6 @@ PageType {
 
                     anchors.fill: parent
                     expandedHeight: root.height
-                    onClosed: {
-                        if (!GC.isMobile()) {
-                            // clientNameTextField.textField.forceActiveFocus()
-                        }
-                    }
 
                     expandedStateContent: ColumnLayout {
                         id: shareFullAccessDrawerContent
@@ -216,14 +211,6 @@ PageType {
 
                         onImplicitHeightChanged: {
                             shareFullAccessDrawer.expandedHeight = shareFullAccessDrawerContent.implicitHeight + 32
-                        }
-
-                        Connections {
-                            target: shareFullAccessDrawer
-                            enabled: !GC.isMobile()
-                            function onOpened() {
-                                // focusItem.forceActiveFocus()
-                            }
                         }
 
                         Header2Type {
@@ -294,8 +281,6 @@ PageType {
 
                         implicitWidth: (root.width - 32) / 2
                         text: qsTr("Users")
-
-                        // KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ? clientNameTextField.textField : serverSelector
 
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
@@ -565,7 +550,6 @@ PageType {
                 text: qsTr("Share")
                 imageSource: "qrc:/images/controls/share-2.svg"                
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 parentFlickable: a
 

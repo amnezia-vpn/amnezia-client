@@ -20,18 +20,6 @@ DrawerType2 {
             root.expandedHeight = container.implicitHeight
         }
 
-        Connections {
-            target: root
-            enabled: !GC.isMobile()
-            function onOpened() {
-                FocusController.pushRootObject(root)
-            }
-
-            function onClosed() {
-                FocusController.dropRootObject(root)
-            }
-        }
-
         ColumnLayout {
             id: backButtonLayout
 

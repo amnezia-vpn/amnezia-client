@@ -110,25 +110,11 @@ PageType {
 
                             expandedHeight: root.height * 0.9
 
-                            onClosed: {
-                                if (!GC.isMobile()) {
-                                    defaultActiveFocusItem.forceActiveFocus()
-                                }
-                            }
-
                             parent: root
                             anchors.fill: parent
 
                             expandedStateContent: Item {
                                 implicitHeight: configContentDrawer.expandedHeight
-
-                                Connections {
-                                    target: configContentDrawer
-                                    enabled: !GC.isMobile()
-                                    function onOpened() {
-                                        focusItem1.forceActiveFocus()
-                                    }
-                                }
 
                                 BackButtonType {
                                     id: backButton1
@@ -209,7 +195,6 @@ PageType {
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: AmneziaStyle.color.vibrantRed
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                     var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")

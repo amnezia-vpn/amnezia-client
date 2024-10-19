@@ -140,8 +140,6 @@ PageType {
                     }
                     PageController.showNotificationMessage(qsTr("Settings saved"))
                 }
-
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
             }
         }
     }

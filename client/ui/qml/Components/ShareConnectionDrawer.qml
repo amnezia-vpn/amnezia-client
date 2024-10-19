@@ -39,14 +39,6 @@ DrawerType2 {
     expandedStateContent: Item {
         implicitHeight: root.expandedHeight
 
-        Connections {
-            target: root
-            enabled: !GC.isMobile()
-            function onOpened() {
-                header.forceActiveFocus()
-            }
-        }
-
         Header2Type {
             id: header
             anchors.top: parent.top
@@ -167,12 +159,6 @@ DrawerType2 {
 
                     anchors.fill: parent
                     expandedHeight: parent.height * 0.9
-
-                    onClosed: {
-                        if (!GC.isMobile()) {
-                            header.forceActiveFocus()
-                        }
-                    }
 
                     expandedStateContent: Item {
                         id: configContentContainer

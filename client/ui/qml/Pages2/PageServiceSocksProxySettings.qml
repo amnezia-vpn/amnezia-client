@@ -187,12 +187,6 @@ PageType {
                         anchors.fill: parent
                         expandedHeight: root.height * 0.9
 
-                        onClosed: {
-                            if (!GC.isMobile()) {
-                                focusItem.forceActiveFocus()
-                            }
-                        }
-
                         expandedStateContent: ColumnLayout {
                             property string tempPort: port
                             property string tempUsername: username
@@ -209,9 +203,6 @@ PageType {
                             Connections {
                                 target: changeSettingsDrawer
                                 function onOpened() {
-                                    if (!GC.isMobile()) {
-                                        drawerFocusItem.forceActiveFocus()
-                                    }
                                     tempPort = port
                                     tempUsername = username
                                     tempPassword = password
@@ -310,7 +301,6 @@ PageType {
                                 Layout.bottomMargin: 24
 
                                 text: qsTr("Change connection settings")
-                                Keys.onTabPressed: lastItemTabClicked(drawerFocusItem)
 
                                 clickedFunc: function() {
                                     forceActiveFocus()
@@ -348,7 +338,6 @@ PageType {
                         Layout.rightMargin: 16
 
                         text: qsTr("Change connection settings")
-                        Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                         clickedFunc: function() {
                             forceActiveFocus()

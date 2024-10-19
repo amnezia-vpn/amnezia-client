@@ -124,10 +124,6 @@ PageType {
                     objectName: "homeSplitTunnelingDrawer"
 
                     parent: root
-
-                    onClosed: {
-                        console.log(objectName, " was closed...")
-                    }
                 }
             }
         }
@@ -146,12 +142,14 @@ PageType {
             Component.onCompleted: {
                 drawer.expandedHeight = implicitHeight
             }
+
             Connections {
                 objectName: "drawerConnections"
 
                 target: drawer
                 enabled: !GC.isMobile()
             }
+
             ColumnLayout {
                 id: collapsed
                 objectName: "collapsedColumnLayout"
@@ -253,7 +251,6 @@ PageType {
                         Keys.onReturnPressed: collapsedButtonChevron.clicked()
 
                         onClicked: {
-                            console.debug("onClicked collapsedButtonChevron")
                             if (drawer.isCollapsedStateActive()) {
                                 drawer.openTriggered()
                             }
@@ -383,6 +380,7 @@ PageType {
                 Connections {
                     target: drawer
 
+                    // this item shouldn't be focused when drawer is closed
                     function onIsOpenedChanged() {
                         serversMenuContent.isFocusable = drawer.isOpened
                     }

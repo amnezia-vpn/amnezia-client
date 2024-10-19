@@ -398,7 +398,6 @@ PageType {
 
                             text: qsTr("Save")
                             parentFlickable: fl
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()

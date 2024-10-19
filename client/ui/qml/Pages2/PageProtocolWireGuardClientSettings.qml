@@ -150,8 +150,6 @@ PageType {
 
         text: qsTr("Save")
 
-        Keys.onTabPressed: lastItemTabClicked(focusItem)
-
         clickedFunc: function() {
             forceActiveFocus()
             var headerText = qsTr("Save settings?")

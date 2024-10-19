@@ -61,15 +61,6 @@ PageType {
                 }
             }
 
-            Keys.onTabPressed: {
-                if (currentFocusIndex < this.count - 1) {
-                    currentFocusIndex += 1
-                    protocols.itemAtIndex(currentFocusIndex).focusItem.forceActiveFocus()
-                } else {
-                    clearCacheButton.forceActiveFocus()
-                }
-            }
-
             delegate: Item {
                 property var focusItem: clientSettings.rightButton
 
@@ -210,7 +201,6 @@ PageType {
             Layout.fillWidth: true
 
             visible: ServersModel.isProcessedServerHasWriteAccess()
-            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
             text: qsTr("Remove ")
             textColor: AmneziaStyle.color.vibrantRed

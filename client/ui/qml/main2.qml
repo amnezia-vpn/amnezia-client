@@ -27,7 +27,6 @@ Window  {
     color: AmneziaStyle.color.midnightBlack
 
     onClosing: function() {
-        console.debug("QML onClosing signal")
         PageController.closeWindow()
     }
 

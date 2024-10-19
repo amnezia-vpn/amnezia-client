@@ -140,8 +140,6 @@ PageType {
 
                             text: qsTr("Save")
 
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
-
                             onClicked: function() {
                                 forceActiveFocus()
 
