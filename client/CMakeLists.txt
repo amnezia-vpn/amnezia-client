@@ -51,8 +51,6 @@ set(LIBS ${LIBS}
 if(IOS OR MACOS_NE)
     set(LIBS ${LIBS} Qt6::Multimedia)
 endif()
-# message("Client desktop build ", ${MACOS_NE})
-#Macos Network Extension doesn't need Widgets
 
 if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     message("Run this block when MACOS_NE is not defined or set to FALSE")
