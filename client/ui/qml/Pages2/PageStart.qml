@@ -246,6 +246,10 @@ PageType {
         }
 
         Keys.onPressed: function(event) {
+            if(event.key === Qt.Key_Tab) {
+                FocusController.nextKeyTabItem()
+            }
+
             PageController.keyPressEvent(event.key)
             event.accepted = true
         }

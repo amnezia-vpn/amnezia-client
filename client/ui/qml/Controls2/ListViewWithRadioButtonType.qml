@@ -77,6 +77,8 @@ ListView {
 
             hoverEnabled: true
 
+            property bool isFocusable: true
+
             indicator: Rectangle {
                 width: parent.width - 1
                 height: parent.height

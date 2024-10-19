@@ -65,6 +65,30 @@ DrawerType2 {
 
             property bool isFocusable: true
 
+            Keys.onTabPressed: {
+                FocusController.nextKeyTabItem()
+            }
+
+            Keys.onBacktabPressed: {
+                FocusController.previousKeyTabItem()
+            }
+
+            Keys.onUpPressed: {
+                FocusController.nextKeyUpItem()
+            }
+
+            Keys.onDownPressed: {
+                FocusController.nextKeyDownItem()
+            }
+
+            Keys.onLeftPressed: {
+                FocusController.nextKeyLeftItem()
+            }
+
+            Keys.onRightPressed: {
+                FocusController.nextKeyRightItem()
+            }
+
             model: LanguageModel
             currentIndex: LanguageModel.currentLanguageIndex
 
@@ -72,47 +96,9 @@ DrawerType2 {
                 id: buttonGroup
             }
 
-            // activeFocusOnTab: true
-            // onActiveFocusChanged: {
-            //     if (activeFocus) {
-            //         this.currentFocusIndex = 0
-            //         this.itemAtIndex(currentFocusIndex).forceActiveFocus()
-            //     }
-            // }
-
-            // Keys.onTabPressed: {
-            //     if (currentFocusIndex < this.count - 1) {
-            //         currentFocusIndex += 1
-            //         this.itemAtIndex(currentFocusIndex).forceActiveFocus()
-            //     } else {
-            //         listViewFocusItem.forceActiveFocus()
-            //         focusItem.forceActiveFocus()
-            //     }
-            // }
-
-            // Item {
-            //     id: listViewFocusItem // TODO: delete?
-            //     Keys.onTabPressed: {
-            //         root.forceActiveFocus()
-            //     }
-            // }
-
-            // onVisibleChanged: {
-            //     if (visible) {
-            //         listViewFocusItem.forceActiveFocus()
-            //         focusItem.forceActiveFocus()
-            //     }
-            // }
-
             delegate: Item {
                 implicitWidth: root.width
                 implicitHeight: delegateContent.implicitHeight
-
-                // onActiveFocusChanged: {
-                //     if (activeFocus) {
-                //         radioButton.forceActiveFocus()
-                //     }
-                // }
 
                 ColumnLayout {
                     id: delegateContent
