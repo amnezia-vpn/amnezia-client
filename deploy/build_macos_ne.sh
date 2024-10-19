@@ -53,19 +53,19 @@ cp $PROJECT_DIR/deploy/AnhTVMacOSNE.mobileprovision ~/Library/MobileDevice/Provi
 macos_ne_uuid=$(grep UUID -A1 -a ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision | grep -io "[-A-F0-9]\{36\}")
 mv ~/Library/MobileDevice/Provisioning\ Profiles/macos_ne.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$macos_ne_uuid.mobileprovision
 
-# Giải mã và cài đặt chứng chỉ ký code
+# Decode and install signing certificates
 echo "Installing signing certificates..."
 echo $MAC_TRUST_CERT_BASE64 | base64 --decode > mac_trust_cert.pem
 echo $MAC_SIGNING_CERT_BASE64 | base64 --decode > mac_signing_cert.p12
 
-# Cài đặt chứng chỉ vào keychain
+# Install certificates into keychain
 security create-keychain -p password build.keychain
 security default-keychain -s build.keychain
 security unlock-keychain -p password build.keychain
 security import mac_trust_cert.pem -k build.keychain -A
 security import mac_signing_cert.p12 -k build.keychain -P $MAC_SIGNING_CERT_PASSWORD -A
 
-# Thiết lập keychain cho quá trình ký
+# Establish the keychain settings for the signing process
 security set-key-partition-list -S apple-tool:,apple: -s -k password build.keychain
 
 # Check if QIF_VERSION is properly set, otherwise set a default
@@ -132,7 +132,3 @@ if [ "${MAC_CERT_PW+x}" ]; then
     spctl -a -vvvv $BUNDLE_DIR || true
   fi
 fi
-
-# Package installer, sign, and notarize (if needed)
-
-# The rest of your installer packaging process similar to build_macos.sh
