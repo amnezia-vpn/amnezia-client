@@ -109,6 +109,7 @@ void ListViewFocusController::viewAtCurrentIndex()
 {
     switch(m_currentSection) {
     case Section::Default:
+        [[fallthrough]];
     case Section::Header: {
         QMetaObject::invokeMethod(m_listView, "positionViewAtBeginning");
         break;
@@ -146,12 +147,14 @@ void ListViewFocusController::nextDelegate()
             viewToBegin();
             break;
         }
+        [[fallthrough]];
     }
     case Section::Header: {
         if (size() > 0) {
             m_currentSection = Section::Delegate;
             break;
         }
+        [[fallthrough]];
     }
     case Section::Delegate:
         if (m_delegateIndex < (size() - 1)) {
@@ -162,6 +165,7 @@ void ListViewFocusController::nextDelegate()
             viewToEnd();
             break;
         }
+        [[fallthrough]];
     case Section::Footer: {
         m_isReturnNeeded = true;
         m_currentSection = Section::Default;
@@ -182,12 +186,15 @@ void ListViewFocusController::previousDelegate()
             m_currentSection = Section::Footer;
             break;
         }
+        [[fallthrough]];
     }
     case Section::Footer: {
         if (size() > 0) {
             m_currentSection = Section::Delegate;
+            m_delegateIndex = size() - 1;
             break;
         }
+        [[fallthrough]];
     }
     case Section::Delegate: {
         if (m_delegateIndex > 0) {
@@ -197,6 +204,7 @@ void ListViewFocusController::previousDelegate()
             m_currentSection = Section::Header;
             break;
         }
+        [[fallthrough]];
     }
     case Section::Header: {
         m_isReturnNeeded = true;
