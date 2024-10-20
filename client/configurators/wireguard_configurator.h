@@ -45,6 +45,9 @@ private:
     amnezia::ProtocolScriptType m_configTemplate;
     QString m_protocolName;
     QString m_defaultPort;
+    QString m_interfaceName;
+    QString m_wgBinaryName;
+    QString m_wgQuickBinaryName;
 };
 
 #endif // WIREGUARD_CONFIGURATOR_H

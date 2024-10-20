@@ -833,3 +833,24 @@ ErrorCode ServerController::getDecryptedPrivateKey(const ServerCredentials &cred
     auto error = m_sshClient.getDecryptedPrivateKey(credentials, decryptedPrivateKey, callback);
     return error;
 }
+
+bool ServerController::isNewAwgContainer(const ServerCredentials &credentials)
+{
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+
+    QString script = QString("sudo docker exec -i $CONTAINER_NAME bash -c 'type awg'");
+
+    runScript(credentials, replaceVars(script, genVarsForScript(credentials, DockerContainer::Awg)), cbReadStdOut, cbReadStdErr);
+
+    return stdOut.contains("/usr/bin/awg");
+
+}

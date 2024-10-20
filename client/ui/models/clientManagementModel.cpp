@@ -207,7 +207,8 @@ ErrorCode ClientManagementModel::getWireGuardClients(const DockerContainer conta
 {
     ErrorCode error = ErrorCode::NoError;
 
-    const QString wireGuardConfigFile = QString("opt/amnezia/%1/wg0.conf").arg(container == DockerContainer::WireGuard ? "wireguard" : "awg");
+    const QString wireGuardConfigFile =
+            DockerContainer::WireGuard ? amnezia::protocols::wireguard::serverConfigPath : amnezia::protocols::awg::serverConfigPath;
     const QString wireguardConfigString = serverController->getTextFileFromContainer(container, credentials, wireGuardConfigFile, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the wg conf file from the server";
@@ -538,8 +539,17 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
 {
     ErrorCode error = ErrorCode::NoError;
 
-    const QString wireGuardConfigFile =
-            QString("/opt/amnezia/%1/wg0.conf").arg(container == DockerContainer::WireGuard ? "wireguard" : "awg");
+    QString wireGuardConfigFile;
+    if (container == DockerContainer::Awg) {
+        if (serverController->isNewAwgContainer(credentials)) {
+            wireGuardConfigFile = amnezia::protocols::awg::serverConfigPath;
+        } else {
+            wireGuardConfigFile = "/opt/amnezia/awg/wg0.conf";
+        }
+    } else {
+        wireGuardConfigFile = amnezia::protocols::wireguard::serverConfigPath;
+    }
+
     const QString wireguardConfigString = serverController->getTextFileFromContainer(container, credentials, wireGuardConfigFile, error);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to get the wg conf file from the server";
@@ -582,7 +592,11 @@ ErrorCode ClientManagementModel::revokeWireGuard(const int row, const DockerCont
         return error;
     }
 
-    const QString script = "sudo docker exec -i $CONTAINER_NAME bash -c 'wg syncconf wg0 <(wg-quick strip %1)'";
+    QString interfaceName = DockerContainer::WireGuard ? protocols::wireguard::interfaceName : protocols::awg::interfaceName;
+    QString wgBinaryName = DockerContainer::WireGuard ? protocols::wireguard::wgBinaryName : protocols::awg::wgBinaryName;
+    QString wgQuickBinaryName = DockerContainer::WireGuard ? protocols::wireguard::wgQuickBinaryName : protocols::awg::wgQuickBinaryName;
+    QString script = QString("sudo docker exec -i $CONTAINER_NAME bash -c '%4 syncconf %2 <(%3 strip %1)'")
+                             .arg(wireGuardConfigFile, interfaceName, wgQuickBinaryName, wgBinaryName);
     error = serverController->runScript(
             credentials,
             serverController->replaceVars(script.arg(wireGuardConfigFile), serverController->genVarsForScript(credentials, container)));

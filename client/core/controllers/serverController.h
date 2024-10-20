@@ -57,6 +57,8 @@ public:
     ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey,
                                      const std::function<QString()> &callback);
 
+    bool isNewAwgContainer(const ServerCredentials &credentials);
+
 private:
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container);
     ErrorCode prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config = QJsonObject());
