@@ -148,7 +148,7 @@ PageType {
 
                 clickedFunction: function() {
                     selector.text = selectedText
-                    selector.close()
+                    selector.closeTriggered()
                     if (SitesModel.routeMode !== root.routeModesModel[currentIndex].type) {
                         SitesModel.routeMode = root.routeModesModel[currentIndex].type
                     }

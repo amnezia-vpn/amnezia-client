@@ -226,7 +226,7 @@ Item {
                     backButtonImage: root.headerBackButtonImage
                     backButtonFunction: function() { menu.closeTriggered() }
                     onActiveFocusChanged: {
-                        if(activeFocus) {
+                        if(backButton.enabled && backButton.activeFocus) {
                             root.listView.positionViewAtBeginning()
                         }
                     }
@@ -235,9 +235,10 @@ Item {
 
             Column {
                 id: col
-                anchors.top: parent.top
+                anchors.top: header.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
+                anchors.topMargin: 16
 
                 spacing: 16
 
