@@ -17,19 +17,12 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview
-
     Connections {
         target: InstallController
 
         function onUpdateContainerFinished() {
             PageController.showNotificationMessage(qsTr("Settings updated successfully"))
         }
-    }
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
     }
 
     ColumnLayout {
@@ -43,7 +36,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listview
         }
     }
 
@@ -99,7 +91,6 @@ PageType {
                         Layout.topMargin: 32
 
                         parentFlickable: fl
-                        KeyNavigation.tab: portLabel.rightButton
 
                         text: qsTr("Host")
                         descriptionText: ServersModel.getProcessedServerData("hostName")
@@ -128,7 +119,6 @@ PageType {
                         descriptionOnTop: true
 
                         parentFlickable: fl
-                        KeyNavigation.tab: usernameLabel.rightButton
 
                         rightImageSource: "qrc:/images/controls/copy.svg"
                         rightImageColor: AmneziaStyle.color.paleGray
@@ -152,7 +142,6 @@ PageType {
                         descriptionOnTop: true
 
                         parentFlickable: fl
-                        KeyNavigation.tab: passwordLabel.eyeButton
 
                         rightImageSource: "qrc:/images/controls/copy.svg"
                         rightImageColor: AmneziaStyle.color.paleGray
@@ -176,8 +165,6 @@ PageType {
                         descriptionOnTop: true
 
                         parentFlickable: fl
-                        eyeButton.KeyNavigation.tab: passwordLabel.rightButton
-                        rightButton.KeyNavigation.tab: changeSettingsButton
 
                         rightImageSource: "qrc:/images/controls/copy.svg"
                         rightImageColor: AmneziaStyle.color.paleGray
@@ -200,13 +187,7 @@ PageType {
                         anchors.fill: parent
                         expandedHeight: root.height * 0.9
 
-                        onClosed: {
-                            if (!GC.isMobile()) {
-                                focusItem.forceActiveFocus()
-                            }
-                        }
-
-                        expandedContent: ColumnLayout {
+                        expandedStateContent: ColumnLayout {
                             property string tempPort: port
                             property string tempUsername: username
                             property string tempPassword: password
@@ -222,9 +203,6 @@ PageType {
                             Connections {
                                 target: changeSettingsDrawer
                                 function onOpened() {
-                                    if (!GC.isMobile()) {
-                                        drawerFocusItem.forceActiveFocus()
-                                    }
                                     tempPort = port
                                     tempUsername = username
                                     tempPassword = password
@@ -237,11 +215,6 @@ PageType {
                                     usernameTextField.textFieldText = username
                                     passwordTextField.textFieldText = password
                                 }
-                            }
-
-                            Item {
-                                id: drawerFocusItem
-                                KeyNavigation.tab: portTextField.textField
                             }
 
                             HeaderType {
@@ -268,8 +241,6 @@ PageType {
                                         port = textFieldText
                                     }
                                 }
-
-                                KeyNavigation.tab: usernameTextField.textField
                             }
 
                             TextFieldWithHeaderType {
@@ -290,8 +261,6 @@ PageType {
                                         username = textFieldText
                                     }
                                 }
-
-                                KeyNavigation.tab: passwordTextField.textField
                             }
 
                             TextFieldWithHeaderType {
@@ -322,8 +291,6 @@ PageType {
                                         password = textFieldText
                                     }
                                 }
-
-                                KeyNavigation.tab: saveButton
                             }
 
                             BasicButtonType {
@@ -334,7 +301,6 @@ PageType {
                                 Layout.bottomMargin: 24
 
                                 text: qsTr("Change connection settings")
-                                Keys.onTabPressed: lastItemTabClicked(drawerFocusItem)
 
                                 clickedFunc: function() {
                                     forceActiveFocus()
@@ -372,7 +338,6 @@ PageType {
                         Layout.rightMargin: 16
 
                         text: qsTr("Change connection settings")
-                        Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                         clickedFunc: function() {
                             forceActiveFocus()

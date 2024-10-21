@@ -21,13 +21,6 @@ PageType {
 
     property bool isClearCacheVisible: ServersModel.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ContainersModel.getProcessedContainerIndex())
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: header
 
@@ -39,7 +32,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: protocols
         }
 
         HeaderType {
@@ -66,15 +58,6 @@ PageType {
                 if (activeFocus) {
                     this.currentFocusIndex = 0
                     protocols.itemAtIndex(currentFocusIndex).focusItem.forceActiveFocus()
-                }
-            }
-
-            Keys.onTabPressed: {
-                if (currentFocusIndex < this.count - 1) {
-                    currentFocusIndex += 1
-                    protocols.itemAtIndex(currentFocusIndex).focusItem.forceActiveFocus()
-                } else {
-                    clearCacheButton.forceActiveFocus()
                 }
             }
 
@@ -168,7 +151,6 @@ PageType {
             Layout.fillWidth: true
 
             visible: root.isClearCacheVisible
-            KeyNavigation.tab: removeButton
 
             text: qsTr("Clear profile")
 
@@ -219,7 +201,6 @@ PageType {
             Layout.fillWidth: true
 
             visible: ServersModel.isProcessedServerHasWriteAccess()
-            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
             text: qsTr("Remove ")
             textColor: AmneziaStyle.color.vibrantRed

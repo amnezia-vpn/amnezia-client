@@ -16,19 +16,12 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     Connections {
         target: InstallController
 
         function onUpdateContainerFinished() {
             PageController.showNotificationMessage(qsTr("Settings updated successfully"))
         }
-    }
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
     }
 
     ColumnLayout {
@@ -42,7 +35,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listview
         }
     }
 
@@ -107,7 +99,6 @@ PageType {
                             Layout.topMargin: 32
 
                             parentFlickable: fl
-                            KeyNavigation.tab: portLabel.rightButton
 
                             text: qsTr("Host")
                             descriptionText: ServersModel.getProcessedServerData("hostName")
@@ -136,7 +127,6 @@ PageType {
                             descriptionOnTop: true
 
                             parentFlickable: fl
-                            KeyNavigation.tab: usernameLabel.rightButton
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
                             rightImageColor: AmneziaStyle.color.paleGray
@@ -160,7 +150,6 @@ PageType {
                             descriptionOnTop: true
 
                             parentFlickable: fl
-                            KeyNavigation.tab: passwordLabel.eyeButton
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
                             rightImageColor: AmneziaStyle.color.paleGray
@@ -184,14 +173,6 @@ PageType {
                             descriptionOnTop: true
 
                             parentFlickable: fl
-                            eyeButton.KeyNavigation.tab: passwordLabel.rightButton
-                            rightButton.Keys.onTabPressed: {
-                                if (mountButton.visible) {
-                                    mountButton.forceActiveFocus()
-                                } else {
-                                    detailedInstructionsButton.forceActiveFocus()
-                                }
-                            }
 
                             rightImageSource: "qrc:/images/controls/copy.svg"
                             rightImageColor: AmneziaStyle.color.paleGray
@@ -225,7 +206,6 @@ PageType {
                             borderWidth: 1
 
                             parentFlickable: fl
-                            KeyNavigation.tab: detailedInstructionsButton
 
                             text: qsTr("Mount folder on device")
 
@@ -290,7 +270,6 @@ PageType {
                             text: qsTr("Detailed instructions")
 
                             parentFlickable: fl
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
 //                                Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
