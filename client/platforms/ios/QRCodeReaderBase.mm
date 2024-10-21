@@ -1,3 +1,4 @@
+#if !MACOS_NE
 #include "QRCodeReaderBase.h"
 
 #import <UIKit/UIKit.h>
@@ -108,3 +109,19 @@ void QRCodeReader::startReading() {
 void QRCodeReader::stopReading() {
     [m_qrCodeReader stopReading];
 }
+#else
+#include "QRCodeReaderBase.h"
+
+QRCodeReader::QRCodeReader()
+{
+
+}
+
+QRect QRCodeReader::cameraSize() {
+    return QRect();
+}
+
+void QRCodeReader::startReading() {}
+void QRCodeReader::stopReading() {}
+void QRCodeReader::setCameraSize(QRect) {}
+#endif

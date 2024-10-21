@@ -3,27 +3,32 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>CFBundleDisplayName</key>
-	<string>AmneziaVPNNetworkExtension</string>
+	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
+	<string>AmneziaVPNNetworkExtension</string>
+
 	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>${BUILD_IOS_APP_IDENTIFIER}.network-extension</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>$(PRODUCT_NAME)</string>
+	<string>AmneziaVPNNetworkExtension</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
+	<string>${APPLE_PROJECT_VERSION}</string>
 	<key>CFBundleVersion</key>
-	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<string>${CMAKE_PROJECT_VERSION_TWEAK}</string>
+
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+
 	<key>LSMinimumSystemVersion</key>
-	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<string>${CMAKE_OSX_DEPLOYMENT_TARGET}</string>
+
+	<key>CFBundleDisplayName</key>
+	<string>AmneziaVPNNetworkExtension</string>
+
 	<key>NSExtension</key>
 	<dict>
 		<key>NSExtensionPointIdentifier</key>
@@ -31,5 +36,11 @@
 		<key>NSExtensionPrincipalClass</key>
 		<string>$(PRODUCT_MODULE_NAME).PacketTunnelProvider</string>
 	</dict>
+
+	<key>com.wireguard.ios.app_group_id</key>
+	<string>group.org.amnezia.AmneziaVPN</string>
+
+	<key>com.wireguard.macos.app_group_id</key>
+	<string>${BUILD_VPN_DEVELOPMENT_TEAM}.group.org.amnezia.AmneziaVPN</string>
 </dict>
 </plist>

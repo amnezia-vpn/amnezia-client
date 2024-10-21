@@ -102,7 +102,9 @@ QProcessEnvironment SshConfigurator::prepareEnv()
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\cygwin;");
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn;");
 #elif defined(Q_OS_MACX)
+#if !defined(MACOS_NE)
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS");
+#endif
 #endif
 
     env.insert("PATH", pathEnvVar);

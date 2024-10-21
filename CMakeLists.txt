@@ -31,13 +31,14 @@ set(QT_BUILD_TOOLS_WHEN_CROSS_COMPILING ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(APPLE AND NOT IOS)
+if((APPLE AND NOT IOS) OR (DEFINED MACOS_NE AND MACOS_NE AND NOT IOS))
     set(CMAKE_OSX_ARCHITECTURES "x86_64")
 endif()
 
 add_subdirectory(client)
 
-if(NOT IOS AND NOT ANDROID)
+# Mac OSX with Network Extension don't need service
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_subdirectory(service)
 
     include(${CMAKE_SOURCE_DIR}/deploy/installer/config.cmake)
