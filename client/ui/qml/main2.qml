@@ -38,28 +38,22 @@ Window  {
 
         focus: true
 
-        Keys.onTabPressed: {
-            FocusController.nextKeyTabItem()
-        }
-
-        Keys.onBacktabPressed: {
-            FocusController.previousKeyTabItem()
-        }
-
-        Keys.onUpPressed: {
-            FocusController.nextKeyUpItem()
-        }
-
-        Keys.onDownPressed: {
-            FocusController.nextKeyDownItem()
-        }
-
-        Keys.onLeftPressed: {
-            FocusController.nextKeyLeftItem()
-        }
-
-        Keys.onRightPressed: {
-            FocusController.nextKeyRightItem()
+        Keys.onPressed: function(event) {
+            switch (event.key) {
+            case Qt.Key_Tab:
+            case Qt.Key_Down:
+            case Qt.Key_Right:
+                FocusController.nextKeyTabItem()
+                break
+            case Qt.Key_Backtab:
+            case Qt.Key_Up:
+            case Qt.Key_Left:
+                FocusController.previousKeyTabItem()
+                break
+            default:
+                PageController.keyPressEvent(event.key)
+                event.accepted = true
+            }
         }
     }
 
