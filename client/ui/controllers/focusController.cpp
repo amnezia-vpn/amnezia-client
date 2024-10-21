@@ -88,6 +88,8 @@ FocusController::FocusController(QQmlApplicationEngine* engine, QObject *parent)
 
 void FocusController::nextItem(Direction direction)
 {
+    reload(direction);
+
     if (m_lvfc) {
         direction == Direction::Forward ? focusNextListViewItem() : focusPreviousListViewItem();
         qDebug() << "===>> [handling the ListView]";
@@ -95,15 +97,13 @@ void FocusController::nextItem(Direction direction)
         return;
     }
 
-    reload(direction);
-
     if(m_focusChain.empty()) {
         qWarning() << "There are no items to navigate";
         return;
     }
 
     if (m_focusedItemIndex == (m_focusChain.size() - 1)) {
-        qDebug() << "Last focus index. Making it zero";
+        qDebug() << "Last focus index. Making it zero...";
         m_focusedItemIndex = 0;
     } else {
         qDebug() << "Incrementing focus index";
@@ -222,7 +222,7 @@ void FocusController::setFocusOnDefaultItem()
 
 void FocusController::reload(Direction direction)
 {
-        m_focusChain.clear();
+    m_focusChain.clear();
 
     QObject* rootObject = (m_rootObjects.empty()
                                ? m_engine->rootObjects().value(0)
@@ -232,6 +232,7 @@ void FocusController::reload(Direction direction)
         qCritical() << "No ROOT OBJECT found!";
         m_focusedItemIndex = -1;
         resetRootObject();
+        resetListView();
         setFocusOnDefaultItem();
         return;
     }
@@ -246,6 +247,7 @@ void FocusController::reload(Direction direction)
         qWarning() << "Focus chain is empty!";
         m_focusedItemIndex = -1;
         resetRootObject();
+        resetListView();
         setFocusOnDefaultItem();
         return;
     }
@@ -254,8 +256,17 @@ void FocusController::reload(Direction direction)
 
     if(m_focusedItemIndex == -1) {
         qInfo() << "No focus item in chain.";
+        resetListView();
         setFocusOnDefaultItem();
         return;
+    }
+}
+
+void FocusController::resetListView()
+{
+    if(m_lvfc) {
+        delete m_lvfc;
+        m_lvfc = nullptr;
     }
 }
 

@@ -44,6 +44,7 @@ private:
     void focusNextListViewItem();
     void focusPreviousListViewItem();
     void reload(Direction direction);
+    void resetListView();
 
     QSharedPointer<QQmlApplicationEngine> m_engine; // Pointer to engine to get root object
     QList<QObject*> m_focusChain; // List of current objects to be focused
