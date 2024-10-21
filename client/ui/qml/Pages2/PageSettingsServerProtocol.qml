@@ -49,21 +49,36 @@ PageType {
             height: protocols.contentItem.height
             clip: true
             interactive: true
-            model: ProtocolsModel
 
-            property int currentFocusIndex: 0
+            property bool isFocusable: true
 
-            activeFocusOnTab: true
-            onActiveFocusChanged: {
-                if (activeFocus) {
-                    this.currentFocusIndex = 0
-                    protocols.itemAtIndex(currentFocusIndex).focusItem.forceActiveFocus()
-                }
+            Keys.onTabPressed: {
+                FocusController.nextKeyTabItem()
             }
 
-            delegate: Item {
-                property var focusItem: clientSettings.rightButton
+            Keys.onBacktabPressed: {
+                FocusController.previousKeyTabItem()
+            }
 
+            Keys.onUpPressed: {
+                FocusController.nextKeyUpItem()
+            }
+
+            Keys.onDownPressed: {
+                FocusController.nextKeyDownItem()
+            }
+
+            Keys.onLeftPressed: {
+                FocusController.nextKeyLeftItem()
+            }
+
+            Keys.onRightPressed: {
+                FocusController.nextKeyRightItem()
+            }
+
+            model: ProtocolsModel
+
+            delegate: Item {
                 implicitWidth: protocols.width
                 implicitHeight: delegateContent.implicitHeight
 
@@ -143,107 +158,112 @@ PageType {
                     }
                 }
             }
-        }
 
-        LabelWithButtonType {
-            id: clearCacheButton
+            footer: ColumnLayout {
+                width: header.width
 
-            Layout.fillWidth: true
+                LabelWithButtonType {
+                    id: clearCacheButton
 
-            visible: root.isClearCacheVisible
+                    Layout.fillWidth: true
 
-            text: qsTr("Clear profile")
+                    visible: root.isClearCacheVisible
 
-            clickedFunction: function() {
-                var headerText = qsTr("Clear %1 profile?").arg(ContainersModel.getProcessedContainerName())
-                var descriptionText = qsTr("The connection configuration will be deleted for this device only")
-                var yesButtonText = qsTr("Continue")
-                var noButtonText = qsTr("Cancel")
+                    text: qsTr("Clear profile")
 
-                var yesButtonFunction = function() {
-                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                        var message = qsTr("Unable to clear %1 profile while there is an active connection").arg(ContainersModel.getProcessedContainerName())
-                        PageController.showNotificationMessage(message)
-                        return
+                    clickedFunction: function() {
+                        var headerText = qsTr("Clear %1 profile?").arg(ContainersModel.getProcessedContainerName())
+                        var descriptionText = qsTr("The connection configuration will be deleted for this device only")
+                        var yesButtonText = qsTr("Continue")
+                        var noButtonText = qsTr("Cancel")
+
+                        var yesButtonFunction = function() {
+                            if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                var message = qsTr("Unable to clear %1 profile while there is an active connection").arg(ContainersModel.getProcessedContainerName())
+                                PageController.showNotificationMessage(message)
+                                return
+                            }
+
+                            PageController.showBusyIndicator(true)
+                            InstallController.clearCachedProfile()
+                            PageController.showBusyIndicator(false)
+                        }
+                        var noButtonFunction = function() {
+                            // if (!GC.isMobile()) {
+                            //     focusItem.forceActiveFocus()
+                            // }
+                        }
+
+                        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                     }
 
-                    PageController.showBusyIndicator(true)
-                    InstallController.clearCachedProfile()
-                    PageController.showBusyIndicator(false)
-                }
-                var noButtonFunction = function() {
-                    if (!GC.isMobile()) {
-                        focusItem.forceActiveFocus()
-                    }
-                }
-
-                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-            }
-
-            MouseArea {
-                anchors.fill: clearCacheButton
-                cursorShape: Qt.PointingHandCursor
-                enabled: false
-            }
-        }
-
-        DividerType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            visible: root.isClearCacheVisible
-        }
-
-        LabelWithButtonType {
-            id: removeButton
-
-            Layout.fillWidth: true
-
-            visible: ServersModel.isProcessedServerHasWriteAccess()
-
-            text: qsTr("Remove ")
-            textColor: AmneziaStyle.color.vibrantRed
-
-            clickedFunction: function() {
-                var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
-                var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
-                var yesButtonText = qsTr("Continue")
-                var noButtonText = qsTr("Cancel")
-
-                var yesButtonFunction = function() {
-                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
-                    && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                        PageController.showNotificationMessage(qsTr("Cannot remove active container"))
-                    } else
-                    {
-                        PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeProcessedContainer()
-                    }
-                }
-                var noButtonFunction = function() {
-                    if (!GC.isMobile()) {
-                        focusItem.forceActiveFocus()
+                    MouseArea {
+                        anchors.fill: clearCacheButton
+                        cursorShape: Qt.PointingHandCursor
+                        enabled: false
                     }
                 }
 
-                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-            }
+                DividerType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
-            MouseArea {
-                anchors.fill: removeButton
-                cursorShape: Qt.PointingHandCursor
-                enabled: false
+                    visible: root.isClearCacheVisible
+                }
+
+                LabelWithButtonType {
+                    id: removeButton
+
+                    Layout.fillWidth: true
+
+                    visible: ServersModel.isProcessedServerHasWriteAccess()
+
+                    text: qsTr("Remove ")
+                    textColor: AmneziaStyle.color.vibrantRed
+
+                    clickedFunction: function() {
+                        var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
+                        var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
+                        var yesButtonText = qsTr("Continue")
+                        var noButtonText = qsTr("Cancel")
+
+                        var yesButtonFunction = function() {
+                            if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
+                                    && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                PageController.showNotificationMessage(qsTr("Cannot remove active container"))
+                            } else
+                            {
+                                PageController.goToPage(PageEnum.PageDeinstalling)
+                                InstallController.removeProcessedContainer()
+                            }
+                        }
+                        var noButtonFunction = function() {
+                            if (!GC.isMobile()) {
+                                focusItem.forceActiveFocus()
+                            }
+                        }
+
+                        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    }
+
+                    MouseArea {
+                        anchors.fill: removeButton
+                        cursorShape: Qt.PointingHandCursor
+                        enabled: false
+                    }
+                }
+
+                DividerType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+
+                    visible: ServersModel.isProcessedServerHasWriteAccess()
+                }
             }
         }
 
-        DividerType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            visible: ServersModel.isProcessedServerHasWriteAccess()
-        }
     }
 }
 
