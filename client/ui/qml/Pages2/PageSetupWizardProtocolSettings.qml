@@ -49,6 +49,32 @@ PageType {
                 interactive: false
                 model: proxyContainersModel
 
+                property bool isFocusable: true
+
+                Keys.onTabPressed: {
+                    FocusController.nextKeyTabItem()
+                }
+
+                Keys.onBacktabPressed: {
+                    FocusController.previousKeyTabItem()
+                }
+
+                Keys.onUpPressed: {
+                    FocusController.nextKeyUpItem()
+                }
+
+                Keys.onDownPressed: {
+                    FocusController.nextKeyDownItem()
+                }
+
+                Keys.onLeftPressed: {
+                    FocusController.nextKeyLeftItem()
+                }
+
+                Keys.onRightPressed: {
+                    FocusController.nextKeyRightItem()
+                }
+
                 delegate: Item {
                     implicitWidth: processedContainerListView.width
                     implicitHeight: (delegateContent.implicitHeight > root.height) ? delegateContent.implicitHeight : root.height
@@ -97,7 +123,7 @@ PageType {
                             KeyNavigation.tab: transportProtoSelector
 
                             clickedFunc: function() {
-                                showDetailsDrawer.open()
+                                showDetailsDrawer.openTriggered()
                             }
                         }
 
@@ -110,16 +136,6 @@ PageType {
                             expandedStateContent: Item {
                                 implicitHeight: showDetailsDrawer.expandedHeight
 
-                                // Item {
-                                //     id: focusItem2
-                                //     KeyNavigation.tab: showDetailsBackButton
-                                //     onFocusChanged: {
-                                //         if (focusItem2.activeFocus) {
-                                //             fl.contentY = 0
-                                //         }
-                                //     }
-                                // }
-
                                 BackButtonType {
                                     id: showDetailsBackButton
 
@@ -129,7 +145,7 @@ PageType {
                                     anchors.topMargin: 16
 
                                     backButtonFunction: function() {
-                                        showDetailsDrawer.close()
+                                        showDetailsDrawer.closeTriggered()
                                     }
                                 }
 
@@ -183,10 +199,9 @@ PageType {
                                             parentFlickable: fl
 
                                             text: qsTr("Close")
-                                            // Keys.onTabPressed: lastItemTabClicked(focusItem2)
 
 											clickedFunc: function()  {
-                                                showDetailsDrawer.close()
+                                                showDetailsDrawer.closeTriggered()
                                             }
                                         }
                                     }
@@ -207,8 +222,6 @@ PageType {
 
                             Layout.fillWidth: true
                             rootWidth: root.width
-
-                            // KeyNavigation.tab: (port.visible && port.enabled) ? port.textField : installButton
                         }
 
                         TextFieldWithHeaderType {
@@ -234,8 +247,6 @@ PageType {
                             Layout.bottomMargin: 32
 
                             text: qsTr("Install")
-
-                            // Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 if (!port.textField.acceptableInput &&
@@ -264,11 +275,6 @@ PageType {
                             var protocolSelectorVisible = ProtocolProps.defaultTransportProtoChangeable(defaultContainerProto)
                             transportProtoSelector.visible = protocolSelectorVisible
                             transportProtoHeader.visible = protocolSelectorVisible
-
-                            // if (port.visible && port.enabled)
-                            //     defaultActiveFocusItem = port.textField
-                            // else
-                            //     defaultActiveFocusItem = focusItem
                         }
                     }
                 }
