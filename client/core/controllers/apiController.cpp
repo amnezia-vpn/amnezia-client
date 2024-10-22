@@ -25,6 +25,7 @@ namespace
         constexpr char accessToken[] = "api_key";
         constexpr char certificate[] = "certificate";
         constexpr char publicKey[] = "public_key";
+        constexpr char pskKey[] = "preshared_key";
         constexpr char protocol[] = "protocol";
 
         constexpr char uuid[] = "installation_uuid";
@@ -221,6 +222,12 @@ ApiController::ApiPayloadData ApiController::generateApiPayloadData(const QStrin
         auto connData = WireguardConfigurator::genClientKeys();
         apiPayload.wireGuardClientPubKey = connData.clientPubKey;
         apiPayload.wireGuardClientPrivKey = connData.clientPrivKey;
+        QSimpleCrypto::QBlockCipher blockCipher;
+        apiPayload.wireGuardPskKey = blockCipher.generatePrivateSalt(32);
+
+        qDebug() << apiPayload.wireGuardClientPubKey;
+        qDebug() << apiPayload.wireGuardPskKey;
+
     }
     return apiPayload;
 }
@@ -232,6 +239,7 @@ QJsonObject ApiController::fillApiPayload(const QString &protocol, const ApiCont
         obj[configKey::certificate] = apiPayloadData.certRequest.request;
     } else if (protocol == configKey::awg) {
         obj[configKey::publicKey] = apiPayloadData.wireGuardClientPubKey;
+        obj[configKey::pskKey] = apiPayloadData.wireGuardPskKey;
     }
 
     obj[configKey::osVersion] = QSysInfo::productType();
