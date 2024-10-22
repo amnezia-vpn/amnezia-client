@@ -37,7 +37,7 @@ PageType {
     Connections {
         target: ImportController
 
-        function onImportErrorOccurred(errorMessage, goToPageHome) {
+        function onImportErrorOccurred(error, goToPageHome) {
             if (goToPageHome) {
                 PageController.goToStartPage()
             } else {

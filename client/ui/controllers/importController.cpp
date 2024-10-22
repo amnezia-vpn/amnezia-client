@@ -39,11 +39,12 @@ namespace
         const QString amneziaConfigPatternUserName = "userName";
         const QString amneziaConfigPatternPassword = "password";
         const QString amneziaFreeConfigPattern = "api_key";
+        const QString amneziaPremiumConfigPattern = "auth_data";
         const QString backupPattern = "Servers/serversList";
 
         if (config.contains(backupPattern)) {
             return ConfigTypes::Backup;
-        } else if (config.contains(amneziaConfigPattern) || config.contains(amneziaFreeConfigPattern)
+        } else if (config.contains(amneziaConfigPattern) || config.contains(amneziaFreeConfigPattern) || config.contains(amneziaPremiumConfigPattern)
                    || (config.contains(amneziaConfigPatternHostName) && config.contains(amneziaConfigPatternUserName)
                        && config.contains(amneziaConfigPatternPassword))) {
             return ConfigTypes::Amnezia;
@@ -84,7 +85,7 @@ bool ImportController::extractConfigFromFile(const QString &fileName)
         return extractConfigFromData(data);
     }
 
-    emit importErrorOccurred(tr("Unable to open file"), false);
+    emit importErrorOccurred(ErrorCode::ImportOpenConfigError, false);
     return false;
 }
 
@@ -188,12 +189,12 @@ bool ImportController::extractConfigFromData(QString data)
         if (!m_serversModel->getServersCount()) {
             emit restoreAppConfig(config.toUtf8());
         } else {
-            emit importErrorOccurred(tr("Invalid configuration file"), false);
+            emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
         }
         break;
     }
     case ConfigTypes::Invalid: {
-        emit importErrorOccurred(tr("Invalid configuration file"), false);
+        emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
         break;
     }
     }

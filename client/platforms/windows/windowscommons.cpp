@@ -21,7 +21,7 @@
 #include "platforms/windows/windowsutils.h"
 
 constexpr const char* VPN_NAME = "AmneziaVPN";
-constexpr const char* WIREGUARD_DIR = "WireGuard";
+constexpr const char* WIREGUARD_DIR = "AmneziaWG";
 constexpr const char* DATA_DIR = "Data";
 
 namespace {

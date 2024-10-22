@@ -285,7 +285,7 @@ open class AmneziaVpnService : VpnService() {
             arrayOf(ACTION_CONNECT, ACTION_DISCONNECT), ContextCompat.RECEIVER_NOT_EXPORTED
         ) {
             it?.action?.let { action ->
-                Log.d(TAG, "Broadcast request received: $action")
+                Log.v(TAG, "Broadcast request received: $action")
                 when (action) {
                     ACTION_CONNECT -> connect()
                     ACTION_DISCONNECT -> disconnect()
@@ -416,7 +416,7 @@ open class AmneziaVpnService : VpnService() {
             serviceNotification.isNotificationEnabled() &&
             getSystemService<PowerManager>()?.isInteractive != false
         ) {
-            Log.d(TAG, "Launch traffic stats update")
+            Log.v(TAG, "Launch traffic stats update")
             trafficStats.reset()
             startTrafficStatsUpdateJob()
         }

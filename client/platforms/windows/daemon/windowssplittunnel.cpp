@@ -502,7 +502,7 @@ QString WindowsSplitTunnel::convertPath(const QString& path) {
     // device should contain : for e.g C:
     return "";
   }
-  QByteArray buffer(2048, 0xFF);
+  QByteArray buffer(2048, 0xFFu);
   auto ok = QueryDosDeviceW(qUtf16Printable(driveLetter),
                             (wchar_t*)buffer.data(), buffer.size() / 2);
 
