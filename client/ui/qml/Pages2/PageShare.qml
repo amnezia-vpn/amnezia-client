@@ -45,7 +45,7 @@ PageType {
             shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
             shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
 
-            shareConnectionDrawer.
+            shareConnectionDrawer.openTriggered()
             shareConnectionDrawer.contentVisible = false
             PageController.showBusyIndicator(true)
 
@@ -182,7 +182,6 @@ PageType {
                     shareFullAccessDrawer.openTriggered()
                 }
 
-                // KeyNavigation.tab: connectionRadioButton
                 actionButton.onFocusChanged: {
                     console.debug("MOVE THIS LOGIC TO CPP!")
                     if (actionButton.activeFocus) {
@@ -229,7 +228,6 @@ PageType {
 
                             text: qsTr("Share")
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                            // KeyNavigation.tab: focusItem
 
                             clickedFunction: function() {
                                 PageController.goToPage(PageEnum.PageShareFullAccess)
@@ -265,12 +263,10 @@ PageType {
                         implicitWidth: (root.width - 32) / 2
                         text: qsTr("Connection")
 
-                        // KeyNavigation.tab: usersRadioButton
-
                         onClicked: {
                             accessTypeSelector.currentIndex = 0
                             if (!GC.isMobile()) {
-                                // clientNameTextField.textField.forceActiveFocus()
+                                clientNameTextField.textField.forceActiveFocus()
                             }
                         }
                     }
@@ -288,7 +284,6 @@ PageType {
                             ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
-                            // focusItem.forceActiveFocus()
                         }
                     }
                 }
@@ -317,9 +312,6 @@ PageType {
                 textField.maximumLength: 20
 
                 checkEmptyText: true
-
-                // KeyNavigation.tab: serverSelector
-
             }
 
             DropDownType {
@@ -383,8 +375,6 @@ PageType {
                         ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
                     }
                 }
-
-                // KeyNavigation.tab: protocolSelector
             }
 
             DropDownType {
@@ -483,12 +473,6 @@ PageType {
                         }
                     }
                 }
-
-                // KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ?
-                                    //    exportTypeSelector : searchTextField.textField
-                                    //    isSearchBarVisible ?
-                                    //        searchTextField.textField :
-                                    //        usersHeader.actionButton
             }
 
             DropDownType {
@@ -532,9 +516,6 @@ PageType {
                         exportTypeSelector.currentIndex = currentIndex
                     }
                 }
-
-                // KeyNavigation.tab: shareButton
-
             }
 
             BasicButtonType {
@@ -558,7 +539,6 @@ PageType {
                         ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
                     }
                 }
-
             }
 
             Header2Type {
@@ -578,7 +558,6 @@ PageType {
                 Keys.onTabPressed: clientsListView.model.count > 0 ?
                                        clientsListView.forceActiveFocus() :
                                        lastItemTabClicked(focusItem)
-
             }
 
             RowLayout {
@@ -864,8 +843,6 @@ PageType {
 
                                     text: qsTr("Rename")
 
-                                    // KeyNavigation.tab: revokeButton
-
                                     clickedFunc: function() {
                                         clientNameEditDrawer.openTriggered()
                                     }
@@ -907,8 +884,6 @@ PageType {
                                                 textFieldText: clientName
                                                 textField.maximumLength: 20
                                                 checkEmptyText: true
-
-                                                // KeyNavigation.tab: saveButton
                                             }
 
                                             BasicButtonType {
@@ -917,7 +892,6 @@ PageType {
                                                 Layout.fillWidth: true
 
                                                 text: qsTr("Save")
-                                                // KeyNavigation.tab: focusItem2
 
                                                 clickedFunc: function() {
                                                     if (clientNameEditor.textFieldText === "") {
@@ -951,7 +925,6 @@ PageType {
                                     borderWidth: 1
 
                                     text: qsTr("Revoke")
-                                    // KeyNavigation.tab: focusItem1
 
                                     clickedFunc: function() {
                                         var headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
