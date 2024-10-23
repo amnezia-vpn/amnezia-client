@@ -1,5 +1,8 @@
 #include "apiController.h"
 
+#include <algorithm>
+#include <random>
+
 #include <QEventLoop>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -346,6 +349,9 @@ ErrorCode ApiController::getServicesList(QByteArray &responseBody)
 
     if (sslErrors.isEmpty() && shouldBypassProxy(reply, responseBody, false)) {
         m_proxyUrls = getProxyUrls();
+        std::random_device randomDevice;
+        std::mt19937 generator(randomDevice());
+        std::shuffle(m_proxyUrls.begin(), m_proxyUrls.end(), generator);
         for (const QString &proxyUrl : m_proxyUrls) {
             qDebug() << "Go to the next endpoint";
             request.setUrl(QString("%1v1/services").arg(proxyUrl));
@@ -448,6 +454,9 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
 
     if (sslErrors.isEmpty() && shouldBypassProxy(reply, encryptedResponseBody, true)) {
         m_proxyUrls = getProxyUrls();
+        std::random_device randomDevice;
+        std::mt19937 generator(randomDevice());
+        std::shuffle(m_proxyUrls.begin(), m_proxyUrls.end(), generator);
         for (const QString &proxyUrl : m_proxyUrls) {
             qDebug() << "Go to the next endpoint";
             request.setUrl(QString("%1v1/config").arg(proxyUrl));
