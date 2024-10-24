@@ -37,6 +37,7 @@ namespace
         constexpr char userCountryCode[] = "user_country_code";
         constexpr char serverCountryCode[] = "server_country_code";
         constexpr char serviceType[] = "service_type";
+        constexpr char serviceInfo[] = "service_info";
 
         constexpr char aesKey[] = "aes_key";
         constexpr char aesIv[] = "aes_iv";
@@ -163,6 +164,11 @@ void ApiController::fillServerConfig(const QString &protocol, const ApiControlle
     QVariantMap map = serverConfig.value(configKey::apiConfig).toObject().toVariantMap();
     map.insert(newServerConfig.value(configKey::apiConfig).toObject().toVariantMap());
     auto apiConfig = QJsonObject::fromVariantMap(map);
+
+    if (newServerConfig.value(config_key::configVersion).toInt() == ApiConfigSources::AmneziaGateway) {
+        apiConfig.insert(configKey::serviceInfo, QJsonDocument::fromJson(apiResponseBody).object().value(configKey::serviceInfo).toObject());
+    }
+
     serverConfig[configKey::apiConfig] = apiConfig;
 
     return;
