@@ -56,14 +56,15 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 {
 
 #ifdef AMNEZIA_DESKTOP
-    QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
+    auto container = m_settings->defaultContainer(m_settings->defaultServerIndex());
 
     if (IpcClient::Interface()) {
         if (state == Vpn::ConnectionState::Connected) {
             IpcClient::Interface()->resetIpStack();
             IpcClient::Interface()->flushDns();
 
-            if (!m_vpnConfiguration.value(config_key::configVersion).toInt()) {
+            if (!m_vpnConfiguration.value(config_key::configVersion).toInt() && container != DockerContainer::Awg
+                && container != DockerContainer::WireGuard) {
                 QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
                 QString dns2 = m_vpnConfiguration.value(config_key::dns2).toString();
 
