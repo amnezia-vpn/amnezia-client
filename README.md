@@ -10,21 +10,17 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 <br>
 
-<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.7.0.0/AmneziaVPN_4.7.0.0_x64.exe"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/win.png" width="150" style="max-width: 100%;"></a> 
-<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.7.0.0/AmneziaVPN_4.7.0.0.dmg"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/mac.png" width="150" style="max-width: 100%;"></a> 
-<a href="https://github.com/amnezia-vpn/amnezia-client/releases/download/4.7.0.0/AmneziaVPN_Linux_4.7.0.0.tar.zip"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/lin.png" width="150" style="max-width: 100%;"></a>
-<a href="https://github.com/amnezia-vpn/amnezia-client/releases/tag/4.7.0.0"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/andr.png" width="150" style="max-width: 100%;"></a>
-
-<br>
-
+<a href="https://amnezia.org/downloads"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/download.png" width="150" style="max-width: 100%;"></a>
 <a href="https://play.google.com/store/search?q=amnezia+vpn&c=apps"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/play.png" width="150" style="max-width: 100%;"></a>
 <a href="https://apps.apple.com/us/app/amneziavpn/id1600529900"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/apl.png" width="150" style="max-width: 100%;"></a>
 
+[Alternative download link (mirror)](https://storage.googleapis.com/kldscp/amnezia.org/downloads)
 
 [All releases](https://github.com/amnezia-vpn/amnezia-client/releases)
 
 <br>
 
+<a href="https://www.testiny.io"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/testiny.png" height="28px"></a>
 
 ## Features
 
@@ -37,7 +33,7 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 ## Links
 
-- [https://amnezia.org](https://amnezia.org) - project website  
+- [https://amnezia.org](https://amnezia.org) - project website | [Alternative link (mirror)](https://storage.googleapis.com/kldscp/amnezia.org)
 - [https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
 - [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English) 
 - [https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Telegram support channel (Farsi) 
