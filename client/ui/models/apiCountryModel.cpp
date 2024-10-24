@@ -39,6 +39,9 @@ QVariant ApiCountryModel::data(const QModelIndex &index, int role) const
     case CountryNameRole: {
         return countryInfo.value(configKey::serverCountryName).toString();
     }
+    case CountryImageCodeRole: {
+        return countryInfo.value(configKey::serverCountryCode).toString().toUpper();
+    }
     }
 
     return QVariant();
@@ -76,5 +79,6 @@ QHash<int, QByteArray> ApiCountryModel::roleNames() const
     QHash<int, QByteArray> roles;
     roles[CountryNameRole] = "countryName";
     roles[CountryCodeRole] = "countryCode";
+    roles[CountryImageCodeRole] = "countryImageCode";
     return roles;
 }

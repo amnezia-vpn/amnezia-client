@@ -10,7 +10,62 @@
 #include <QJsonObject>
 
 #include "utilities.h"
-#include "version.h"
+
+#ifdef Q_OS_WINDOWS
+QString printErrorMessage(DWORD errorCode) {
+    LPVOID lpMsgBuf;
+
+    DWORD dwFlags = FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                    FORMAT_MESSAGE_FROM_SYSTEM |
+                    FORMAT_MESSAGE_IGNORE_INSERTS;
+
+    DWORD dwLanguageId = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+
+    FormatMessageW(
+        dwFlags,
+        NULL,
+        errorCode,
+        dwLanguageId,
+        (LPWSTR)&lpMsgBuf,
+        0,
+        NULL
+        );
+
+    QString errorMsg = QString::fromWCharArray((LPCWSTR)lpMsgBuf);
+    LocalFree(lpMsgBuf);
+    return errorMsg.trimmed();
+}
+
+QString Utils::getNextDriverLetter()
+{
+    DWORD drivesBitmask = GetLogicalDrives();
+    if (drivesBitmask == 0) {
+        DWORD error = GetLastError();
+        qDebug() << "GetLogicalDrives failed. Error code:" << error;
+        return "";
+    }
+
+    QString letters = "FGHIJKLMNOPQRSTUVWXYZ";
+    QString availableLetter;
+
+    for (int i = letters.size() - 1; i >= 0; --i) {
+        QChar letterChar = letters.at(i);
+        int driveIndex = letterChar.toLatin1() - 'A';
+
+        if ((drivesBitmask & (1 << driveIndex)) == 0) {
+            availableLetter = letterChar;
+            break;
+        }
+    }
+
+    if (availableLetter.isEmpty()) {
+        qDebug() << "Can't find free drive letter";
+        return "";
+    }
+
+    return availableLetter;
+}
+#endif
 
 QString Utils::getRandomString(int len)
 {
@@ -108,30 +163,34 @@ QString Utils::usrExecutable(const QString &baseName)
 bool Utils::processIsRunning(const QString &fileName, const bool fullFlag)
 {
 #ifdef Q_OS_WIN
-    QProcess process;
-    process.setReadChannel(QProcess::StandardOutput);
-    process.setProcessChannelMode(QProcess::MergedChannels);
-    process.start("wmic.exe",
-                  QStringList() << "/OUTPUT:STDOUT"
-                                << "PROCESS"
-                                << "get"
-                                << "Caption");
-    process.waitForStarted();
-    process.waitForFinished();
-    QString processData(process.readAll());
-    QStringList processList = processData.split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts);
-    foreach (const QString &rawLine, processList) {
-        const QString line = rawLine.simplified();
-        if (line.isEmpty()) {
-            continue;
-        }
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        qWarning() << "Utils::processIsRunning error CreateToolhelp32Snapshot";
+        return false;
+    }
 
-        if (line == fileName) {
+    PROCESSENTRY32W pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32W);
+
+    if (!Process32FirstW(hSnapshot, &pe32)) {
+        CloseHandle(hSnapshot);
+        qWarning() << "Utils::processIsRunning error Process32FirstW";
+        return false;
+    }
+
+    do {
+        QString exeFile = QString::fromWCharArray(pe32.szExeFile);
+
+        if (exeFile.compare(fileName, Qt::CaseInsensitive) == 0) {
+            CloseHandle(hSnapshot);
             return true;
         }
-    }
+    } while (Process32NextW(hSnapshot, &pe32));
+
+    CloseHandle(hSnapshot);
     return false;
-#elif defined(Q_OS_IOS)
+
+#elif defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
     return false;
 #else
     QProcess process;
@@ -149,13 +208,45 @@ bool Utils::processIsRunning(const QString &fileName, const bool fullFlag)
 #endif
 }
 
-void Utils::killProcessByName(const QString &name)
+bool Utils::killProcessByName(const QString &name)
 {
     qDebug().noquote() << "Kill process" << name;
 #ifdef Q_OS_WIN
-    QProcess::execute("taskkill", QStringList() << "/IM" << name << "/F");
-#elif defined Q_OS_IOS
-    return;
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE)
+        return false;
+
+    PROCESSENTRY32W pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32W);
+
+    bool success = false;
+
+    if (Process32FirstW(hSnapshot, &pe32)) {
+        do {
+            QString exeFile = QString::fromWCharArray(pe32.szExeFile);
+
+            if (exeFile.compare(name, Qt::CaseInsensitive) == 0) {
+                HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pe32.th32ProcessID);
+                if (hProcess != NULL) {
+                    if (TerminateProcess(hProcess, 0)) {
+                        success = true;
+                    } else {
+                        DWORD error = GetLastError();
+                        qCritical() << "Can't terminate process" << exeFile << "(PID:" << pe32.th32ProcessID << "). Error:" << printErrorMessage(error);
+                    }
+                    CloseHandle(hProcess);
+                } else {
+                    DWORD error = GetLastError();
+                    qCritical() << "Can't open process for termination" << exeFile << "(PID:" << pe32.th32ProcessID << "). Error:" << printErrorMessage(error);
+                }
+            }
+        } while (Process32NextW(hSnapshot, &pe32));
+    }
+
+    CloseHandle(hSnapshot);
+    return success;
+#elif defined Q_OS_IOS || defined(Q_OS_ANDROID)
+    return false;
 #else
     QProcess::execute(QString("pkill %1").arg(name));
 #endif

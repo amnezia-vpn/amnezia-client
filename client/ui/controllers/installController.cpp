@@ -34,31 +34,6 @@ namespace
         constexpr char apiConfig[] = "api_config";
         constexpr char authData[] = "auth_data";
     }
-
-#ifdef Q_OS_WINDOWS
-    QString getNextDriverLetter()
-    {
-        QProcess drivesProc;
-        drivesProc.start("wmic logicaldisk get caption");
-        drivesProc.waitForFinished();
-        QString drives = drivesProc.readAll();
-        qDebug() << drives;
-
-        QString letters = "CFGHIJKLMNOPQRSTUVWXYZ";
-        QString letter;
-        for (int i = letters.size() - 1; i > 0; i--) {
-            letter = letters.at(i);
-            if (!drives.contains(letter + ":"))
-                break;
-        }
-        if (letter == "C:") {
-            // set err info
-            qDebug() << "Can't find free drive letter";
-            return "";
-        }
-        return letter;
-    }
-#endif
 }
 
 InstallController::InstallController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
@@ -668,7 +643,7 @@ void InstallController::mountSftpDrive(const QString &port, const QString &passw
     QString hostname = serverCredentials.hostName;
 
 #ifdef Q_OS_WINDOWS
-    mountPath = getNextDriverLetter() + ":";
+    mountPath = Utils::getNextDriverLetter() + ":";
     //    QString cmd = QString("net use \\\\sshfs\\%1@x.x.x.x!%2 /USER:%1 %3")
     //            .arg(labelTftpUserNameText())
     //            .arg(labelTftpPortText())
@@ -872,6 +847,8 @@ bool InstallController::updateServiceFromApi(const int serverIndex, const QStrin
     newApiConfig.insert(configKey::serviceProtocol, apiConfig.value(configKey::serviceProtocol));
 
     newServerConfig.insert(configKey::apiConfig, newApiConfig);
+    newServerConfig.insert(configKey::authData, authData);
+    newServerConfig.insert(config_key::crc, serverConfig.value(config_key::crc));
     m_serversModel->editServer(newServerConfig, serverIndex);
 
     if (reloadServiceConfig) {
