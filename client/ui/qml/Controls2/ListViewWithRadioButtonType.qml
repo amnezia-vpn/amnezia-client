@@ -59,7 +59,7 @@ ListView {
 
     function triggerCurrentItem() {
         var item = root.itemAtIndex(currentIndex)
-        var radioButton = item.children[0].children[0]
+        var radioButton = item.children[0]
         radioButton.clicked()
     }
 
