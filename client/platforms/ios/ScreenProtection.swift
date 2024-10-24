@@ -1,3 +1,13 @@
+#if MACOS_NE
+public func toggleScreenshots(_ isEnabled: Bool) {
+  
+}
+
+class ScreenProtection {
+
+
+}
+#else
 import UIKit
 
 public func toggleScreenshots(_ isEnabled: Bool) {
@@ -85,3 +95,4 @@ struct ProtectionPair {
     textField.removeFromSuperview()
   }
 }
+#endif

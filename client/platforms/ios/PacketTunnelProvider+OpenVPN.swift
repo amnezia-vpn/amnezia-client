@@ -47,7 +47,7 @@ extension PacketTunnelProvider {
         let configuration = OpenVPNConfiguration()
         configuration.fileContent = ovpnConfiguration
         if str.contains("cloak") {
-            configuration.setPTCloak()
+           configuration.setPTCloak()
         }
 
         let evaluation: OpenVPNConfigurationEvaluation?

@@ -263,18 +263,18 @@ Can&apos;t be disabled for current server</source>
         <translation>نمی‌توان فایل را باز کرد.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="187"/>
-        <location filename="../ui/controllers/importController.cpp" line="192"/>
+        <location filename="../ui/controllers/importController.cpp" line="191"/>
+        <location filename="../ui/controllers/importController.cpp" line="196"/>
         <source>Invalid configuration file</source>
         <translation>فایل پیکربندی نامعتبر است.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="617"/>
+        <location filename="../ui/controllers/importController.cpp" line="622"/>
         <source>Scanned %1 of %2.</source>
         <translation>ارزیابی %1 از %2.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="652"/>
+        <location filename="../ui/controllers/importController.cpp" line="657"/>
         <source>In the imported configuration, potentially dangerous lines were found:</source>
         <translation>در پیکربندی وارد شده، خطوطی که ممکن است خطرناک باشند، یافت شدند:</translation>
     </message>
@@ -405,28 +405,28 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>NotificationHandler</name>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="63"/>
-        <location filename="../ui/notificationhandler.cpp" line="70"/>
+        <location filename="../ui/notificationhandler.cpp" line="64"/>
+        <location filename="../ui/notificationhandler.cpp" line="71"/>
         <source>AmneziaVPN</source>
         <translation>AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="64"/>
+        <location filename="../ui/notificationhandler.cpp" line="65"/>
         <source>VPN Connected</source>
         <translation>وی‎پی‎ان وصل شد</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="71"/>
+        <location filename="../ui/notificationhandler.cpp" line="72"/>
         <source>VPN Disconnected</source>
         <translation>وی‎پی‎ان قطع شد</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="94"/>
+        <location filename="../ui/notificationhandler.cpp" line="95"/>
         <source>AmneziaVPN notification</source>
         <translation>اخطار AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="95"/>
+        <location filename="../ui/notificationhandler.cpp" line="96"/>
         <source>Unsecured network detected: </source>
         <translation>شبکه ناامن شناسایی شد: </translation>
     </message>
@@ -2544,12 +2544,12 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>آدرس آی‎پی سرور (:پورت)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="116"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="113"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="173"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="170"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
         <translation>آدرس را با فرمت 255.255.255.255:88 وارد کنید</translation>
     </message>
@@ -2564,42 +2564,42 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="78"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="75"/>
         <source>SSH Username</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="91"/>
         <source>Password or SSH private key</source>
         <translation>رمز عبور یا کلید خصوصی SSH</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="144"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="141"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>تمام داده‎هایی که شما وارد می‎کنید به شدت محرمانه‎ است و با Amnezia یا هر شخص ثالث دیگری به اشتراک گذاشته نمی‎شود</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="153"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="150"/>
         <source>How to run your VPN server</source>
         <translation>چگونه سرور VPN خود را اجرا کنید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="154"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="151"/>
         <source>Where to get connection data, step-by-step instructions for buying a VPS</source>
         <translation>داده‌های اتصال را از کجا دریافت کنید و دستورالعمل‌های مرحله به مرحله برای خرید یک VPS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="167"/>
         <source>Ip address cannot be empty</source>
         <translation>آدرس آی‎پی نمی‎تواند خالی باشد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="177"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="174"/>
         <source>Login cannot be empty</source>
         <translation>نام‎کاربری نمی‎تواند خالی باشد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="181"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="178"/>
         <source>Password/private key cannot be empty</source>
         <translation>پسورد یا کلید خصوصی نمی‎تواند خالی باشد</translation>
     </message>
@@ -2959,46 +2959,51 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation>داده‌های ارسال شده: %1</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="849"/>
+        <source>Allowed IPs: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Creation date: </source>
         <translation type="vanished">تاریخ ایجاد: </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="862"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="870"/>
         <source>Rename</source>
         <translation>تغییر نام</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="908"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="916"/>
         <source>Client name</source>
         <translation>نام کلاینت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="921"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="929"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="955"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="963"/>
         <source>Revoke</source>
         <translation>ابطال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="959"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="967"/>
         <source>Revoke the config for a user - %1?</source>
         <translation>لغو پیکربندی برای یک کاربر - %1?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="960"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="968"/>
         <source>The user will no longer be able to connect to your server.</source>
         <translation>کاربر دیگر نمی‎تواند به سرور وصل شود.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="961"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="969"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="962"/>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="970"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
@@ -4316,12 +4321,12 @@ For more detailed information, you can
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="162"/>
+        <location filename="../ui/qml/main2.qml" line="163"/>
         <source>Private key passphrase</source>
         <translation>عبارت کلید خصوصی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="185"/>
+        <location filename="../ui/qml/main2.qml" line="186"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>
