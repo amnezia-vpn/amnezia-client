@@ -248,7 +248,7 @@ bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
   }
   if (result != NO_ERROR) {
     logger.error() << "Failed to create route to"
-                   << logger.sensitive(prefix.toString())
+                   << prefix.toString()
                    << "result:" << result;
   }
   return result == NO_ERROR;
@@ -265,7 +265,7 @@ bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress& prefix) {
   }
   if (result != NO_ERROR) {
     logger.error() << "Failed to delete route to"
-                   << logger.sensitive(prefix.toString())
+                   << prefix.toString()
                    << "result:" << result;
   }
   return result == NO_ERROR;
