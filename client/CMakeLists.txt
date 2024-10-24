@@ -25,7 +25,6 @@ execute_process(
 add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
 add_definitions(-DPROD_AGW_PUBLIC_KEY="$ENV{PROD_AGW_PUBLIC_KEY}")
-add_definitions(-DPROD_PROXY_STORAGE_KEY="$ENV{PROD_PROXY_STORAGE_KEY}")
 add_definitions(-DPROD_S3_ENDPOINT="$ENV{PROD_S3_ENDPOINT}")
 
 add_definitions(-DDEV_AGW_PUBLIC_KEY="$ENV{DEV_AGW_PUBLIC_KEY}")

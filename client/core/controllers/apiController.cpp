@@ -383,7 +383,6 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
     QThread::msleep(10);
 #endif
 
-    QNetworkAccessManager manager;
     QNetworkRequest request;
     request.setTransferTimeout(7000);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
@@ -441,7 +440,7 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
     requestBody[configKey::keyPayload] = QString(encryptedKeyPayload.toBase64());
     requestBody[configKey::apiPayload] = QString(encryptedApiPayload.toBase64());
 
-    QNetworkReply *reply = manager.post(request, QJsonDocument(requestBody).toJson());
+    QNetworkReply *reply = amnApp->manager()->post(request, QJsonDocument(requestBody).toJson());
 
     QEventLoop wait;
     connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
@@ -461,7 +460,7 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
             qDebug() << "Go to the next endpoint";
             request.setUrl(QString("%1v1/config").arg(proxyUrl));
             reply->deleteLater(); // delete the previous reply
-            reply = manager.post(request, QJsonDocument(requestBody).toJson());
+            reply = amnApp->manager()->post(request, QJsonDocument(requestBody).toJson());
 
             QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
             connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
