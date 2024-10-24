@@ -14,8 +14,6 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -31,15 +29,9 @@ PageType {
 
             spacing: 0
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: backButton
-            }
-
             BackButtonType {
                 id: backButton
                 Layout.topMargin: 20
-//                KeyNavigation.tab: fileButton.rightButton
             }
 
             HeaderType {
@@ -58,6 +50,8 @@ PageType {
                 width: parent.width
                 height: containers.contentItem.height
                 spacing: 16
+
+                property bool isFocusable: true
 
                 currentIndex: 1
                 interactive: false
@@ -93,6 +87,9 @@ PageType {
                                     PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
                                 }
                             }
+
+                            Keys.onEnterPressed: clicked()
+                            Keys.onReturnPressed: clicked()
                         }
                     }
                 }

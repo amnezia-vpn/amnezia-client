@@ -18,8 +18,6 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: clientNameTextField.textField
-
     enum ConfigType {
         AmneziaConnection,
         OpenVpn,
@@ -47,7 +45,7 @@ PageType {
             shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
             shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
 
-            shareConnectionDrawer.open()
+            shareConnectionDrawer.openTriggered()
             shareConnectionDrawer.contentVisible = false
             PageController.showBusyIndicator(true)
 
@@ -104,7 +102,7 @@ PageType {
         }
 
         function onExportErrorOccurred(error) {
-            shareConnectionDrawer.close()
+            shareConnectionDrawer.closeTriggered()
 
             PageController.showErrorMessage(error)
         }
@@ -172,16 +170,6 @@ PageType {
 
             spacing: 0
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: header.actionButton
-                onFocusChanged: {
-                    if (focusItem.activeFocus) {
-                        a.contentY = 0
-                    }
-                }
-            }
-
             HeaderType {
                 id: header
                 Layout.fillWidth: true
@@ -191,10 +179,17 @@ PageType {
 
                 actionButtonImage: "qrc:/images/controls/more-vertical.svg"
                 actionButtonFunction: function() {
-                    shareFullAccessDrawer.open()
+                    shareFullAccessDrawer.openTriggered()
                 }
 
-                KeyNavigation.tab: connectionRadioButton
+                actionButton.onFocusChanged: {
+                    console.debug("MOVE THIS LOGIC TO CPP!")
+                    if (actionButton.activeFocus) {
+                        if (fl) {
+                            fl.ensureVisible(moreButton)
+                        }
+                    }
+                }
 
                 DrawerType2 {
                     id: shareFullAccessDrawer
@@ -203,13 +198,8 @@ PageType {
 
                     anchors.fill: parent
                     expandedHeight: root.height
-                    onClosed: {
-                        if (!GC.isMobile()) {
-                            clientNameTextField.textField.forceActiveFocus()
-                        }
-                    }
 
-                    expandedContent: ColumnLayout {
+                    expandedStateContent: ColumnLayout {
                         id: shareFullAccessDrawerContent
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -222,14 +212,6 @@ PageType {
                             shareFullAccessDrawer.expandedHeight = shareFullAccessDrawerContent.implicitHeight + 32
                         }
 
-                        Connections {
-                            target: shareFullAccessDrawer
-                            enabled: !GC.isMobile()
-                            function onOpened() {
-                                focusItem.forceActiveFocus()
-                            }
-                        }
-
                         Header2Type {
                             Layout.fillWidth: true
                             Layout.bottomMargin: 16
@@ -240,24 +222,17 @@ PageType {
                             descriptionText: qsTr("Use for your own devices, or share with those you trust to manage the server.")
                         }
 
-                        Item {
-                            id: focusItem
-                            KeyNavigation.tab: shareFullAccessButton.rightButton
-                        }
-
                         LabelWithButtonType {
                             id: shareFullAccessButton
                             Layout.fillWidth: true
 
                             text: qsTr("Share")
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                            KeyNavigation.tab: focusItem
 
                             clickedFunction: function() {
                                 PageController.goToPage(PageEnum.PageShareFullAccess)
-                                shareFullAccessDrawer.close()
+                                shareFullAccessDrawer.closeTriggered()
                             }
-
                         }
                     }
                 }
@@ -288,8 +263,6 @@ PageType {
                         implicitWidth: (root.width - 32) / 2
                         text: qsTr("Connection")
 
-                        KeyNavigation.tab: usersRadioButton
-
                         onClicked: {
                             accessTypeSelector.currentIndex = 0
                             if (!GC.isMobile()) {
@@ -305,15 +278,12 @@ PageType {
                         implicitWidth: (root.width - 32) / 2
                         text: qsTr("Users")
 
-                        KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ? clientNameTextField.textField : serverSelector
-
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
-                            focusItem.forceActiveFocus()
                         }
                     }
                 }
@@ -342,9 +312,6 @@ PageType {
                 textField.maximumLength: 20
 
                 checkEmptyText: true
-
-                KeyNavigation.tab: serverSelector
-
             }
 
             DropDownType {
@@ -390,7 +357,7 @@ PageType {
                             serverSelector.severSelectorIndexChanged()
                         }
 
-                        serverSelector.close()
+                        serverSelector.closeTriggered()
                     }
 
                     Component.onCompleted: {
@@ -408,8 +375,6 @@ PageType {
                         ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
                     }
                 }
-
-                KeyNavigation.tab: protocolSelector
             }
 
             DropDownType {
@@ -450,7 +415,7 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        protocolSelector.close()
+                        protocolSelector.closeTriggered()
                     }
 
                     Connections {
@@ -508,12 +473,6 @@ PageType {
                         }
                     }
                 }
-
-                KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ?
-                                       exportTypeSelector :
-                                       isSearchBarVisible ?
-                                           searchTextField.textField :
-                                           usersHeader.actionButton
             }
 
             DropDownType {
@@ -549,7 +508,7 @@ PageType {
                     clickedFunction: function() {
                         exportTypeSelector.text = selectedText
                         exportTypeSelector.currentIndex = currentIndex
-                        exportTypeSelector.close()
+                        exportTypeSelector.closeTriggered()
                     }
 
                     Component.onCompleted: {
@@ -557,9 +516,6 @@ PageType {
                         exportTypeSelector.currentIndex = currentIndex
                     }
                 }
-
-                KeyNavigation.tab: shareButton
-
             }
 
             BasicButtonType {
@@ -575,7 +531,6 @@ PageType {
                 text: qsTr("Share")
                 imageSource: "qrc:/images/controls/share-2.svg"                
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 parentFlickable: a
 
@@ -584,7 +539,6 @@ PageType {
                         ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
                     }
                 }
-
             }
 
             Header2Type {
@@ -604,7 +558,6 @@ PageType {
                 Keys.onTabPressed: clientsListView.model.count > 0 ?
                                        clientsListView.forceActiveFocus() :
                                        lastItemTabClicked(focusItem)
-
             }
 
             RowLayout {
@@ -622,11 +575,11 @@ PageType {
                         target: root
                         function onIsSearchBarVisibleChanged() {
                             if (root.isSearchBarVisible) {
-                                searchTextField.textField.forceActiveFocus()
+                                // searchTextField.textField.forceActiveFocus()
                             } else {
                                 searchTextField.textFieldText = ""
                                 if (!GC.isMobile()) {
-                                    usersHeader.actionButton.forceActiveFocus()
+                                    // usersHeader.actionButton.forceActiveFocus()
                                 }
                             }
                         }
@@ -638,15 +591,15 @@ PageType {
 
                     function navigateTo() {
                         if (GC.isMobile()) {
-                            focusItem.forceActiveFocus()
+                            // focusItem.forceActiveFocus()
                             return;
                         }
 
                         if (searchTextField.textFieldText === "") {
                             root.isSearchBarVisible = false
-                            usersHeader.actionButton.forceActiveFocus()
+                            // usersHeader.actionButton.forceActiveFocus()
                         } else {
-                            closeSearchButton.forceActiveFocus()
+                            // closeSearchButton.forceActiveFocus()
                         }
                     }
 
@@ -663,9 +616,9 @@ PageType {
                     Keys.onTabPressed: {
                         if (!GC.isMobile()) {
                             if (clientsListView.model.count > 0) {
-                                clientsListView.forceActiveFocus()
+                                // clientsListView.forceActiveFocus()
                             } else {
-                                lastItemTabClicked(focusItem)
+                                // lastItemTabClicked(focusItem)
                             }
                         }
                     }
@@ -687,6 +640,32 @@ PageType {
 
                 visible: accessTypeSelector.currentIndex === 1
 
+                property bool isFocusable: true
+
+                Keys.onTabPressed: {
+                    FocusController.nextKeyTabItem()
+                }
+
+                Keys.onBacktabPressed: {
+                    FocusController.previousKeyTabItem()
+                }
+
+                Keys.onUpPressed: {
+                    FocusController.nextKeyUpItem()
+                }
+
+                Keys.onDownPressed: {
+                    FocusController.nextKeyDownItem()
+                }
+
+                Keys.onLeftPressed: {
+                    FocusController.nextKeyLeftItem()
+                }
+
+                Keys.onRightPressed: {
+                    FocusController.nextKeyRightItem()
+                }
+
                 model: SortFilterProxyModel {
                     id: proxyClientManagementModel
                     sourceModel: ClientManagementModel
@@ -698,44 +677,44 @@ PageType {
                 }
 
                 clip: true
-                interactive: false
+                // interactive: false
 
-                activeFocusOnTab: true
-                focus: true
-                Keys.onTabPressed: {
-                    if (!GC.isMobile()) {
-                        if (currentIndex < this.count - 1) {
-                            this.incrementCurrentIndex()
-                            currentItem.focusItem.forceActiveFocus()
-                        } else {
-                            this.currentIndex = 0
-                            lastItemTabClicked(focusItem)
-                        }
-                    }
-                }
+                // activeFocusOnTab: true
+                // focus: true
+                // Keys.onTabPressed: {
+                //     if (!GC.isMobile()) {
+                //         if (currentIndex < this.count - 1) {
+                //             this.incrementCurrentIndex()
+                //             // currentItem.focusItem.forceActiveFocus()
+                //         } else {
+                //             this.currentIndex = 0
+                //             // lastItemTabClicked(focusItem)
+                //         }
+                //     }
+                // }
 
-                onActiveFocusChanged: {
-                    if (focus && !GC.isMobile()) {
-                        currentIndex = 0
-                        currentItem.focusItem.forceActiveFocus()
-                    }
-                }
+                // onActiveFocusChanged: {
+                //     if (focus && !GC.isMobile()) {
+                //         currentIndex = 0
+                //         // currentItem.focusItem.forceActiveFocus()
+                //     }
+                // }
 
-                onCurrentIndexChanged: {
-                    if (currentItem) {
-                        if (currentItem.y < a.contentY) {
-                            a.contentY = currentItem.y
-                        } else if (currentItem.y + currentItem.height + clientsListView.y > a.contentY + a.height) {
-                            a.contentY = currentItem.y + clientsListView.y + currentItem.height - a.height
-                        }
-                    }
-                }
+                // onCurrentIndexChanged: {
+                //     if (currentItem) {
+                //         if (currentItem.y < a.contentY) {
+                //             a.contentY = currentItem.y
+                //         } else if (currentItem.y + currentItem.height + clientsListView.y > a.contentY + a.height) {
+                //             a.contentY = currentItem.y + clientsListView.y + currentItem.height - a.height
+                //         }
+                //     }
+                // }
 
                 delegate: Item {
                     implicitWidth: clientsListView.width
                     implicitHeight: delegateContent.implicitHeight
 
-                    property alias focusItem: clientFocusItem.rightButton
+                    // property alias focusItem: clientFocusItem.rightButton
 
                     ColumnLayout {
                         id: delegateContent
@@ -755,7 +734,7 @@ PageType {
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {
-                                clientInfoDrawer.open()
+                                clientInfoDrawer.openTriggered()
                             }
                         }
 
@@ -768,14 +747,14 @@ PageType {
 
                             onClosed: {
                                 if (!GC.isMobile()) {
-                                    focusItem.forceActiveFocus()
+                                    // focusItem.forceActiveFocus()
                                 }
                             }
 
                             anchors.fill: parent
 
-                            expandedContent: ColumnLayout {
-                                id: expandedContent
+                            expandedStateContent: ColumnLayout {
+                                id: expandedStateContent
                                 anchors.top: parent.top
                                 anchors.left: parent.left
                                 anchors.right: parent.right
@@ -786,14 +765,14 @@ PageType {
                                 spacing: 8
 
                                 onImplicitHeightChanged: {
-                                    clientInfoDrawer.expandedHeight = expandedContent.implicitHeight + 32
+                                    clientInfoDrawer.expandedHeight = expandedStateContent.implicitHeight + 32
                                 }
 
                                 Connections {
                                     target: clientInfoDrawer
                                     enabled: !GC.isMobile()
                                     function onOpened() {
-                                        focusItem1.forceActiveFocus()
+                                        // focusItem1.forceActiveFocus()
                                     }
                                 }
 
@@ -850,11 +829,6 @@ PageType {
                                     }
                                 }
 
-                                Item {
-                                    id: focusItem1
-                                    KeyNavigation.tab: renameButton
-                                }
-
                                 BasicButtonType {
                                     id: renameButton
                                     Layout.fillWidth: true
@@ -869,10 +843,8 @@ PageType {
 
                                     text: qsTr("Rename")
 
-                                    KeyNavigation.tab: revokeButton
-
                                     clickedFunc: function() {
-                                        clientNameEditDrawer.open()
+                                        clientNameEditDrawer.openTriggered()
                                     }
 
                                     DrawerType2 {
@@ -885,11 +857,11 @@ PageType {
 
                                         onClosed: {
                                             if (!GC.isMobile()) {
-                                                focusItem1.forceActiveFocus()
+                                                // focusItem1.forceActiveFocus()
                                             }
                                         }
 
-                                        expandedContent: ColumnLayout {
+                                        expandedStateContent: ColumnLayout {
                                             anchors.top: parent.top
                                             anchors.left: parent.left
                                             anchors.right: parent.right
@@ -901,13 +873,8 @@ PageType {
                                                 target: clientNameEditDrawer
                                                 enabled: !GC.isMobile()
                                                 function onOpened() {
-                                                    clientNameEditor.textField.forceActiveFocus()
+                                                    // clientNameEditor.textField.forceActiveFocus()
                                                 }
-                                            }
-
-                                            Item {
-                                                id: focusItem2
-                                                KeyNavigation.tab: clientNameEditor.textField
                                             }
 
                                             TextFieldWithHeaderType {
@@ -917,8 +884,6 @@ PageType {
                                                 textFieldText: clientName
                                                 textField.maximumLength: 20
                                                 checkEmptyText: true
-
-                                                KeyNavigation.tab: saveButton
                                             }
 
                                             BasicButtonType {
@@ -927,7 +892,6 @@ PageType {
                                                 Layout.fillWidth: true
 
                                                 text: qsTr("Save")
-                                                KeyNavigation.tab: focusItem2
 
                                                 clickedFunc: function() {
                                                     if (clientNameEditor.textFieldText === "") {
@@ -941,7 +905,7 @@ PageType {
                                                                                       ContainersModel.getProcessedContainerIndex(),
                                                                                       ServersModel.getProcessedServerCredentials())
                                                         PageController.showBusyIndicator(false)
-                                                        clientNameEditDrawer.close()
+                                                        clientNameEditDrawer.closeTriggered()
                                                     }
                                                 }
                                             }
@@ -961,7 +925,6 @@ PageType {
                                     borderWidth: 1
 
                                     text: qsTr("Revoke")
-                                    KeyNavigation.tab: focusItem1
 
                                     clickedFunc: function() {
                                         var headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
@@ -970,12 +933,12 @@ PageType {
                                         var noButtonText = qsTr("Cancel")
 
                                         var yesButtonFunction = function() {
-                                            clientInfoDrawer.close()
+                                            clientInfoDrawer.closeTriggered()
                                             root.revokeConfig(index)
                                         }
                                         var noButtonFunction = function() {
                                             if (!GC.isMobile()) {
-                                                focusItem1.forceActiveFocus()
+                                                // focusItem1.forceActiveFocus()
                                             }
                                         }
 
@@ -996,7 +959,7 @@ PageType {
         anchors.fill: parent
         onClosed: {
             if (!GC.isMobile()) {
-                clientNameTextField.textField.forceActiveFocus()
+                // clientNameTextField.textField.forceActiveFocus()
             }
         }
     }
@@ -1004,7 +967,7 @@ PageType {
     MouseArea {
         anchors.fill: parent
         onPressed: function(mouse) {
-            forceActiveFocus()
+            // forceActiveFocus()
             mouse.accepted = false
         }
     }

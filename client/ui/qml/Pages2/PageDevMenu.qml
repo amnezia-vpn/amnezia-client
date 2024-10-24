@@ -16,13 +16,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: backButtonLayout
 
@@ -34,7 +27,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            // KeyNavigation.tab: removeButton
         }
     }
 
@@ -61,7 +53,6 @@ PageType {
                 headerText: "Dev menu"
             }
 
-
             TextFieldWithHeaderType {
                 id: passwordTextField
 
@@ -86,8 +77,6 @@ PageType {
                         SettingsController.gatewayEndpoint = textFieldText
                     }
                 }
-
-                // KeyNavigation.tab: saveButton
             }
 
             SwitcherType {

@@ -26,7 +26,7 @@ DrawerType2 {
         id: installedAppsModel
     }
 
-    expandedContent: Item {
+    expandedStateContent: Item {
         id: container
 
         implicitHeight: expandedHeight
@@ -68,6 +68,8 @@ DrawerType2 {
 
                 clip: true
                 interactive: true
+
+                property bool isFocusable: true
 
                 model: SortFilterProxyModel {
                     id: proxyInstalledAppsModel

@@ -100,8 +100,6 @@ PageType {
                 text: qsTr("Check the server for previously installed Amnezia services")
                 descriptionText: qsTr("Add them to the application if they were not displayed")
 
-                KeyNavigation.tab: labelWithButton2
-
                 clickedFunction: function() {
                     PageController.showBusyIndicator(true)
                     InstallController.scanServerForInstalledContainers()
@@ -120,8 +118,6 @@ PageType {
 
                 text: qsTr("Reboot server")
                 textColor: AmneziaStyle.color.vibrantRed
-
-                KeyNavigation.tab: labelWithButton3
 
                 clickedFunction: function() {
                     var headerText = qsTr("Do you want to reboot the server?")
@@ -162,16 +158,6 @@ PageType {
                 text: qsTr("Remove server from application")
                 textColor: AmneziaStyle.color.vibrantRed
 
-                Keys.onTabPressed: {
-                    if (content.isServerWithWriteAccess) {
-                        labelWithButton4.forceActiveFocus()
-                    } else {
-                        labelWithButton5.visible ?
-                            labelWithButton5.forceActiveFocus() :
-                            lastItemTabClickedSignal()
-                    }
-                }
-
                 clickedFunction: function() {
                     var headerText = qsTr("Do you want to remove the server from application?")
                     var descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
@@ -209,10 +195,6 @@ PageType {
 
                 text: qsTr("Clear server from Amnezia software")
                 textColor: AmneziaStyle.color.vibrantRed
-
-                Keys.onTabPressed: labelWithButton5.visible ?
-                                    labelWithButton5.forceActiveFocus() :
-                                    root.lastItemTabClickedSignal()
 
                 clickedFunction: function() {
                     var headerText = qsTr("Do you want to clear server from Amnezia software?")
@@ -252,8 +234,6 @@ PageType {
 
                 text: qsTr("Reset API config")
                 textColor: AmneziaStyle.color.vibrantRed
-
-                Keys.onTabPressed: root.lastItemTabClickedSignal()
 
                 clickedFunction: function() {
                     var headerText = qsTr("Do you want to reset API config?")

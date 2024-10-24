@@ -79,6 +79,12 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
     return true;
 }
 
+bool ServersModel::setData(const int index, const QVariant &value, int role)
+{
+    QModelIndex modelIndex = this->index(index);
+    return setData(modelIndex, value, role);
+}
+
 QVariant ServersModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= static_cast<int>(m_servers.size())) {
@@ -677,6 +683,18 @@ QVariant ServersModel::getProcessedServerData(const QString roleString)
     }
 
     return {};
+}
+
+bool ServersModel::setProcessedServerData(const QString& roleString, const QVariant& value)
+{
+    const auto roles = roleNames();
+    for (auto it = roles.begin(); it != roles.end(); it++) {
+        if (QString(it.value()) == roleString) {
+            return setData(m_processedServerIndex, value, it.key());
+        }
+    }
+    
+    return false;
 }
 
 bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()

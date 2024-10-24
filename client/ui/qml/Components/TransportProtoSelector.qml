@@ -39,8 +39,6 @@ Rectangle {
             implicitWidth: (rootWidth - 32) / 2
             text: "UDP"
 
-            KeyNavigation.tab: tcpButton
-
             onClicked: {
                 root.currentIndex = 0
             }

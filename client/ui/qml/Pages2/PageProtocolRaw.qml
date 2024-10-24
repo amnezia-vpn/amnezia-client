@@ -19,13 +19,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: header
 
@@ -37,7 +30,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listView
         }
 
         HeaderType {
@@ -104,8 +96,6 @@ PageType {
                                 configContentDrawer.open()
                             }
 
-                            KeyNavigation.tab: removeButton
-
                             MouseArea {
                                 anchors.fill: button
                                 cursorShape: Qt.PointingHandCursor
@@ -120,30 +110,11 @@ PageType {
 
                             expandedHeight: root.height * 0.9
 
-                            onClosed: {
-                                if (!GC.isMobile()) {
-                                    defaultActiveFocusItem.forceActiveFocus()
-                                }
-                            }
-
                             parent: root
                             anchors.fill: parent
 
-                            expandedContent: Item {
+                            expandedStateContent: Item {
                                 implicitHeight: configContentDrawer.expandedHeight
-
-                                Connections {
-                                    target: configContentDrawer
-                                    enabled: !GC.isMobile()
-                                    function onOpened() {
-                                        focusItem1.forceActiveFocus()
-                                    }
-                                }
-
-                                Item {
-                                    id: focusItem1
-                                    KeyNavigation.tab: backButton1
-                                }
 
                                 BackButtonType {
                                     id: backButton1
@@ -156,8 +127,6 @@ PageType {
                                     backButtonFunction: function() {
                                         configContentDrawer.close()
                                     }
-
-                                    KeyNavigation.tab: focusItem1
                                 }
 
                                 FlickableType {
@@ -226,7 +195,6 @@ PageType {
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: AmneziaStyle.color.vibrantRed
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                     var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")

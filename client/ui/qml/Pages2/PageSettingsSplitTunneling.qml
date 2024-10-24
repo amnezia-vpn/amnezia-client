@@ -23,13 +23,6 @@ PageType {
 
     property var isServerFromTelegramApi: ServersModel.getDefaultServerData("isServerFromTelegramApi")
     
-    defaultActiveFocusItem: searchField.textField
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     property bool pageEnabled
 
     Component.onCompleted: {
@@ -99,7 +92,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: switcher
         }
 
         RowLayout {
@@ -129,8 +121,6 @@ PageType {
                 onToggled: { onToggledFunc() }
                 Keys.onEnterPressed: { onToggledFunc() }
                 Keys.onReturnPressed: { onToggledFunc() }
-
-                KeyNavigation.tab: selector
             }
         }
 
@@ -158,7 +148,7 @@ PageType {
 
                 clickedFunction: function() {
                     selector.text = selectedText
-                    selector.close()
+                    selector.closeTriggered()
                     if (SitesModel.routeMode !== root.routeModesModel[currentIndex].type) {
                         SitesModel.routeMode = root.routeModesModel[currentIndex].type
                     }
@@ -179,123 +169,119 @@ PageType {
                     }
                 }
             }
-
-            KeyNavigation.tab: {
-                return sites.count > 0 ?
-                            sites :
-                            searchField.textField
-            }
         }
     }
 
-    FlickableType {
-        id: fl
+    ListView {
+        id: sites
+
         anchors.top: header.bottom
         anchors.topMargin: 16
-        contentHeight: col.implicitHeight + addSiteButton.implicitHeight + addSiteButton.anchors.bottomMargin + addSiteButton.anchors.topMargin
+        width: parent.width
+
+        height: 200 // TODO: Change to correct height
 
         enabled: root.pageEnabled
 
-        Column {
-            id: col
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        property bool isFocusable: true
 
-            ListView {
-                id: sites
-                width: parent.width
-                height: sites.contentItem.height
+        Keys.onTabPressed: {
+            FocusController.nextKeyTabItem()
+        }
 
-                model: SortFilterProxyModel {
-                    id: proxySitesModel
-                    sourceModel: SitesModel
-                    filters: [
-                        AnyOf {
-                            RegExpFilter {
-                                roleName: "url"
-                                pattern: ".*" + searchField.textField.text + ".*"
-                                caseSensitivity: Qt.CaseInsensitive
-                            }
-                            RegExpFilter {
-                                roleName: "ip"
-                                pattern: ".*" + searchField.textField.text + ".*"
-                                caseSensitivity: Qt.CaseInsensitive
+        Keys.onBacktabPressed: {
+            FocusController.previousKeyTabItem()
+        }
+
+        Keys.onUpPressed: {
+            FocusController.nextKeyUpItem()
+        }
+
+        Keys.onDownPressed: {
+            FocusController.nextKeyDownItem()
+        }
+
+        Keys.onLeftPressed: {
+            FocusController.nextKeyLeftItem()
+        }
+
+        Keys.onRightPressed: {
+            FocusController.nextKeyRightItem()
+        }
+
+        model: SortFilterProxyModel {
+            id: proxySitesModel
+            sourceModel: SitesModel
+            filters: [
+                AnyOf {
+                    RegExpFilter {
+                        roleName: "url"
+                        pattern: ".*" + searchField.textField.text + ".*"
+                        caseSensitivity: Qt.CaseInsensitive
+                    }
+                    RegExpFilter {
+                        roleName: "ip"
+                        pattern: ".*" + searchField.textField.text + ".*"
+                        caseSensitivity: Qt.CaseInsensitive
+                    }
+                }
+            ]
+        }
+
+        clip: true
+
+        delegate: Item {
+            implicitWidth: sites.width
+            implicitHeight: delegateContent.implicitHeight
+
+            // onActiveFocusChanged: {
+            //     if (activeFocus) {
+            //         site.rightButton.forceActiveFocus()
+            //     }
+            // }
+
+            ColumnLayout {
+                id: delegateContent
+
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+
+                LabelWithButtonType {
+                    id: site
+                    Layout.fillWidth: true
+
+                    text: url
+                    descriptionText: ip
+                    rightImageSource: "qrc:/images/controls/trash.svg"
+                    rightImageColor: AmneziaStyle.color.paleGray
+
+                    clickedFunction: function() {
+                        var headerText = qsTr("Remove ") + url + "?"
+                        var yesButtonText = qsTr("Continue")
+                        var noButtonText = qsTr("Cancel")
+
+                        var yesButtonFunction = function() {
+                            SitesController.removeSite(proxySitesModel.mapToSource(index))
+                            if (!GC.isMobile()) {
+                                site.rightButton.forceActiveFocus()
                             }
                         }
-                    ]
-                }
-
-                clip: true
-                interactive: false
-
-                activeFocusOnTab: true
-                focus: true
-                Keys.onTabPressed: {
-                    if (currentIndex < this.count - 1) {
-                        this.incrementCurrentIndex()
-                    } else {
-                        currentIndex = 0
-                        searchField.textField.forceActiveFocus()
-                    }
-
-                    fl.ensureVisible(currentItem)
-                }
-
-                delegate: Item {
-                    implicitWidth: sites.width
-                    implicitHeight: delegateContent.implicitHeight
-
-                    onActiveFocusChanged: {
-                        if (activeFocus) {
-                            site.rightButton.forceActiveFocus()
-                        }
-                    }
-
-                    ColumnLayout {
-                        id: delegateContent
-
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-
-                        LabelWithButtonType {
-                            id: site
-                            Layout.fillWidth: true
-
-                            text: url
-                            descriptionText: ip
-                            rightImageSource: "qrc:/images/controls/trash.svg"
-                            rightImageColor: AmneziaStyle.color.paleGray
-
-                            clickedFunction: function() {
-                                var headerText = qsTr("Remove ") + url + "?"
-                                var yesButtonText = qsTr("Continue")
-                                var noButtonText = qsTr("Cancel")
-
-                                var yesButtonFunction = function() {
-                                    SitesController.removeSite(proxySitesModel.mapToSource(index))
-                                    if (!GC.isMobile()) {
-                                        site.rightButton.forceActiveFocus()
-                                    }
-                                }
-                                var noButtonFunction = function() {
-                                    if (!GC.isMobile()) {
-                                        site.rightButton.forceActiveFocus()
-                                    }
-                                }
-
-                                showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                        var noButtonFunction = function() {
+                            if (!GC.isMobile()) {
+                                site.rightButton.forceActiveFocus()
                             }
                         }
 
-                        DividerType {}
+                        showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                     }
                 }
+
+                DividerType {}
             }
-
         }
     }
+
 
     Rectangle {
         anchors.fill: addSiteButton
@@ -325,7 +311,6 @@ PageType {
 
             textFieldPlaceholderText: qsTr("website or IP")
             buttonImageSource: "qrc:/images/controls/plus.svg"
-            KeyNavigation.tab: GC.isMobile() ? focusItem : addSiteButtonImage
 
             clickedFunc: function() {
                 PageController.showBusyIndicator(true)
@@ -344,13 +329,11 @@ PageType {
             imageColor: AmneziaStyle.color.paleGray
 
             onClicked: function () {
-                moreActionsDrawer.open()
+                moreActionsDrawer.openTriggered()
             }
 
             Keys.onReturnPressed: addSiteButtonImage.clicked()
             Keys.onEnterPressed: addSiteButtonImage.clicked()
-
-            Keys.onTabPressed: lastItemTabClicked(focusItem)
         }
     }
 
@@ -360,37 +343,12 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.4375
 
-        onClosed: {
-            if (root.defaultActiveFocusItem && !GC.isMobile()) {
-                root.defaultActiveFocusItem.forceActiveFocus()
-            }
-        }
-
-        expandedContent: ColumnLayout {
+        expandedStateContent: ColumnLayout {
             id: moreActionsDrawerContent
 
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-
-            Connections {
-                target: moreActionsDrawer
-
-                function onOpened() {
-                    focusItem1.forceActiveFocus()
-                }
-
-                function onActiveFocusChanged() {
-                    if (!GC.isMobile()) {
-                        focusItem1.forceActiveFocus()
-                    }
-                }
-            }
-
-            Item {
-                id: focusItem1
-                KeyNavigation.tab: importSitesButton.rightButton
-            }
 
             Header2Type {
                 Layout.fillWidth: true
@@ -407,10 +365,8 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    importSitesDrawer.open()
+                    importSitesDrawer.openTriggered()
                 }
-
-                KeyNavigation.tab: exportSitesButton
             }
 
             DividerType {}
@@ -419,8 +375,6 @@ PageType {
                 id: exportSitesButton
                 Layout.fillWidth: true
                 text: qsTr("Save site list")
-
-                KeyNavigation.tab: focusItem1
 
                 clickedFunction: function() {
                     var fileName = ""
@@ -436,7 +390,7 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         SitesController.exportSites(fileName)
-                        moreActionsDrawer.close()
+                        moreActionsDrawer.closeTriggered()
                         PageController.showBusyIndicator(false)
                     }
                 }
@@ -452,27 +406,8 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.4375
 
-        onClosed: {
-            if (!GC.isMobile()) {
-                moreActionsDrawer.forceActiveFocus()
-            }
-        }
-
-        expandedContent: Item {
+        expandedStateContent: Item {
             implicitHeight: importSitesDrawer.expandedHeight
-
-            Connections {
-                target: importSitesDrawer
-                enabled: !GC.isMobile()
-                function onOpened() {
-                    focusItem2.forceActiveFocus()
-                }
-            }
-
-            Item {
-                id: focusItem2
-                KeyNavigation.tab: importSitesDrawerBackButton
-            }
 
             BackButtonType {
                 id: importSitesDrawerBackButton
@@ -482,10 +417,8 @@ PageType {
                 anchors.right: parent.right
                 anchors.topMargin: 16
 
-                KeyNavigation.tab: importSitesButton2
-
                 backButtonFunction: function() {
-                    importSitesDrawer.close()
+                    importSitesDrawer.closeTriggered()
                 }
             }
 
@@ -516,7 +449,6 @@ PageType {
                         Layout.fillWidth: true
 
                         text: qsTr("Replace site list")
-                        KeyNavigation.tab: importSitesButton3
 
                         clickedFunction: function() {
                             var fileName = SystemController.getFileName(qsTr("Open sites file"),
@@ -533,7 +465,6 @@ PageType {
                         id: importSitesButton3
                         Layout.fillWidth: true
                         text: qsTr("Add imported sites to existing ones")
-                        KeyNavigation.tab: focusItem2
 
                         clickedFunction: function() {
                             var fileName = SystemController.getFileName(qsTr("Open sites file"),
@@ -548,8 +479,8 @@ PageType {
                         PageController.showBusyIndicator(true)
                         SitesController.importSites(fileName, replaceExistingSites)
                         PageController.showBusyIndicator(false)
-                        importSitesDrawer.close()
-                        moreActionsDrawer.close()
+                        importSitesDrawer.closeTriggered()
+                        moreActionsDrawer.closeTriggered()
                     }
 
                     DividerType {}

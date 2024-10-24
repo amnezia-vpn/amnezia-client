@@ -13,13 +13,6 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    defaultActiveFocusItem: hostname.textField
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -27,8 +20,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: hostname.textField
     }
 
     FlickableType {
@@ -61,11 +52,11 @@ PageType {
                 headerText: qsTr("Server IP address [:port]")
                 textFieldPlaceholderText: qsTr("255.255.255.255:22")
 
+                parentFlickable: fl
+
                 textField.onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                 }
-
-                KeyNavigation.tab: username.textField
             }
 
             TextFieldWithHeaderType {
@@ -75,11 +66,11 @@ PageType {
                 headerText: qsTr("SSH Username")
                 textFieldPlaceholderText: "root"
 
+                parentFlickable: fl
+
                 textField.onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                 }
-
-                KeyNavigation.tab: secretData.textField
             }
 
             TextFieldWithHeaderType {
@@ -93,6 +84,8 @@ PageType {
                 buttonImageSource: textFieldText !== "" ? (hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg")
                                                         : ""
 
+                parentFlickable: fl
+
                 clickedFunc: function() {
                     hidePassword = !hidePassword
                 }
@@ -100,8 +93,6 @@ PageType {
                 textField.onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                 }
-
-                KeyNavigation.tab: continueButton
             }
 
             BasicButtonType {
@@ -112,7 +103,7 @@ PageType {
 
                 text: qsTr("Continue")
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
+                parentFlickable: fl
 
                 clickedFunc: function() {
                     forceActiveFocus()
@@ -152,6 +143,8 @@ PageType {
 
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/help-circle.svg"
+
+                parentFlickable: fl
 
                 onClicked: {
                     Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl() + "/starter-guide")

@@ -36,16 +36,8 @@ DrawerType2 {
         configFileName = "amnezia_config"
     }
 
-    expandedContent: Item {
+    expandedStateContent: Item {
         implicitHeight: root.expandedHeight
-
-        Connections {
-            target: root
-            enabled: !GC.isMobile()
-            function onOpened() {
-                header.forceActiveFocus()
-            }
-        }
 
         Header2Type {
             id: header
@@ -57,8 +49,6 @@ DrawerType2 {
             anchors.rightMargin: 16
 
             headerText: root.headerText
-
-            KeyNavigation.tab: shareButton
         }
 
         FlickableType {
@@ -85,8 +75,6 @@ DrawerType2 {
 
                     text: qsTr("Share")
                     imageSource: "qrc:/images/controls/share-2.svg"
-
-                    KeyNavigation.tab: copyConfigTextButton
 
                     clickedFunc: function() {
                         var fileName = ""
@@ -124,8 +112,6 @@ DrawerType2 {
 
                     Keys.onReturnPressed: { copyConfigTextButton.clicked() }
                     Keys.onEnterPressed: { copyConfigTextButton.clicked() }
-
-                    KeyNavigation.tab: copyNativeConfigStringButton.visible ? copyNativeConfigStringButton : showSettingsButton
                 }
 
                 BasicButtonType {
@@ -144,8 +130,6 @@ DrawerType2 {
 
                     text: qsTr("Copy config string")
                     imageSource: "qrc:/images/controls/copy.svg"
-
-                    KeyNavigation.tab: showSettingsButton
                 }
 
                 BasicButtonType {
@@ -166,8 +150,6 @@ DrawerType2 {
                     clickedFunc: function() {
                         configContentDrawer.open()
                     }
-
-                    KeyNavigation.tab: header
                 }
 
                 DrawerType2 {
@@ -178,29 +160,10 @@ DrawerType2 {
                     anchors.fill: parent
                     expandedHeight: parent.height * 0.9
 
-                    onClosed: {
-                        if (!GC.isMobile()) {
-                            header.forceActiveFocus()
-                        }
-                    }
-
-                    expandedContent: Item {
+                    expandedStateContent: Item {
                         id: configContentContainer
 
                         implicitHeight: configContentDrawer.expandedHeight
-
-                        Connections {
-                            target: configContentDrawer
-                            enabled: !GC.isMobile()
-                            function onOpened() {
-                                focusItem.forceActiveFocus()
-                            }
-                        }
-
-                        Item {
-                            id: focusItem
-                            KeyNavigation.tab: backButton
-                        }
 
                         Connections {
                             target: copyNativeConfigStringButton
@@ -232,8 +195,6 @@ DrawerType2 {
                             anchors.topMargin: 16
 
                             backButtonFunction: function() { configContentDrawer.close() }
-
-                            KeyNavigation.tab: focusItem
                         }
 
                         FlickableType {

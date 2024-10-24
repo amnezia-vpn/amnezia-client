@@ -17,7 +17,6 @@ PageType {
     id: root
 
     property bool isEasySetup: true
-    defaultActiveFocusItem: focusItem
 
     SortFilterProxyModel {
         id: proxyContainersModel
@@ -34,14 +33,6 @@ PageType {
         }
     }
 
-    Item {
-        id: focusItem
-        implicitWidth: 1
-        implicitHeight: 54
-
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -49,8 +40,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: continueButton
     }
 
     FlickableType {
@@ -163,7 +152,7 @@ PageType {
                 implicitWidth: parent.width
 
                 text: qsTr("Continue")
-                KeyNavigation.tab: setupLaterButton
+                
                 parentFlickable: fl
 
                 clickedFunc: function() {
