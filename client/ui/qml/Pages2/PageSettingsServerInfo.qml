@@ -147,7 +147,8 @@ PageType {
                         }
 
                         if (serverName.textFieldText !== root.server.name) {
-                            root.server.name = serverName.textFieldText // TODO(CyAn84): set value to the model
+                            ServersModel.setProcessedServerData("name", serverName.textFieldText);
+                            root.server = proxyServersModel.get(0);
                         }
                         serverNameEditDrawer.closeTriggered()
                     }
