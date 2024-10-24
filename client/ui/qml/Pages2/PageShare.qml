@@ -772,7 +772,8 @@ PageType {
                                 }
                             }
 
-                            anchors.fill: parent
+                            width: root.width
+                            height: root.height
 
                             expandedContent: ColumnLayout {
                                 id: expandedContent
@@ -782,8 +783,6 @@ PageType {
                                 anchors.topMargin: 16
                                 anchors.leftMargin: 16
                                 anchors.rightMargin: 16
-
-                                spacing: 8
 
                                 onImplicitHeightChanged: {
                                     clientInfoDrawer.expandedHeight = expandedContent.implicitHeight + 32
@@ -797,57 +796,54 @@ PageType {
                                     }
                                 }
 
-                                Header2Type {
-                                    Layout.fillWidth: true
-
-                                    headerText: clientName
-                                }
-
-                                ColumnLayout
-                                {
-                                    id: textColumn
-                                    property string textColor: AmneziaStyle.color.mutedGray
+                                Header2TextType {
+                                    Layout.maximumWidth: parent.width
                                     Layout.bottomMargin: 24
 
-                                    ParagraphTextType {
-                                        color: textColumn.textColor
-                                        visible: creationDate
-                                        Layout.fillWidth: true
+                                    text: clientName
+                                    maximumLineCount: 2
+                                    wrapMode: Text.Wrap
+                                    elide: Qt.ElideRight
+                                }
 
-                                        text: qsTr("Creation date: %1").arg(creationDate)
-                                    }
+                                ParagraphTextType {
+                                    color: AmneziaStyle.color.mutedGray
+                                    visible: creationDate
+                                    Layout.fillWidth: true
 
-                                    ParagraphTextType {
-                                        color: textColumn.textColor
-                                        visible: latestHandshake
-                                        Layout.fillWidth: true
+                                    text: qsTr("Creation date: %1").arg(creationDate)
+                                }
 
-                                        text: qsTr("Latest handshake: %1").arg(latestHandshake)
-                                    }
+                                ParagraphTextType {
+                                    color: AmneziaStyle.color.mutedGray
+                                    visible: latestHandshake
+                                    Layout.fillWidth: true
 
-                                    ParagraphTextType {
-                                        color: textColumn.textColor
-                                        visible: dataReceived
-                                        Layout.fillWidth: true
+                                    text: qsTr("Latest handshake: %1").arg(latestHandshake)
+                                }
 
-                                        text: qsTr("Data received: %1").arg(dataReceived)
-                                    }
+                                ParagraphTextType {
+                                    color: AmneziaStyle.color.mutedGray
+                                    visible: dataReceived
+                                    Layout.fillWidth: true
 
-                                    ParagraphTextType {
-                                        color: textColumn.textColor
-                                        visible: dataSent
-                                        Layout.fillWidth: true
+                                    text: qsTr("Data received: %1").arg(dataReceived)
+                                }
 
-                                        text: qsTr("Data sent: %1").arg(dataSent)
-                                    }
+                                ParagraphTextType {
+                                    color: AmneziaStyle.color.mutedGray
+                                    visible: dataSent
+                                    Layout.fillWidth: true
 
-                                    ParagraphTextType {
-                                        color: textColumn.textColor
-                                        visible: allowedIps
-                                        Layout.fillWidth: true
+                                    text: qsTr("Data sent: %1").arg(dataSent)
+                                }
 
-                                        text: qsTr("Allowed IPs: %1").arg(allowedIps)
-                                    }
+                                ParagraphTextType {
+                                    color: AmneziaStyle.color.mutedGray
+                                    visible: allowedIps
+                                    Layout.fillWidth: true
+
+                                    text: qsTr("Allowed IPs: %1").arg(allowedIps)
                                 }
 
                                 Item {
@@ -952,6 +948,7 @@ PageType {
                                 BasicButtonType {
                                     id: revokeButton
                                     Layout.fillWidth: true
+                                    Layout.topMargin: 8
 
                                     defaultColor: AmneziaStyle.color.transparent
                                     hoveredColor: AmneziaStyle.color.translucentWhite
