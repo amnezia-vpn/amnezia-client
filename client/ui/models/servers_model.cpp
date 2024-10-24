@@ -771,5 +771,5 @@ const QString ServersModel::getDefaultServerImagePathCollapsed()
     if (countryCode.isEmpty()) {
         return "";
     }
-    return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(countryCode);
+    return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(countryCode.toUpper());
 }
