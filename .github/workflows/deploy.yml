@@ -388,6 +388,21 @@ jobs:
       QT_MODULES: "qtremoteobjects qt5compat qtimageformats qtshadertools"
 
     steps:
+      - name: Get token from Github App
+        uses: actions/create-github-app-token@v1
+        id: app_token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PEM }}
+          owner: ${{ github.repository_owner }}
+
+      - name: "Get sources"
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+          fetch-depth: 10
+          token: ${{ steps.app_token.outputs.token }}
+          
       - name: "Install desktop Qt"
         uses: jurplel/install-qt-action@v4
         with:
@@ -447,13 +462,7 @@ jobs:
         shell: bash
         run: |
           chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
-
-      - name: "Get sources"
-        uses: actions/checkout@v4
-        with:
-          submodules: "true"
-          fetch-depth: 10
-
+          
       - name: "Setup ccache"
         uses: hendrikmuhs/ccache-action@v1.2
 
