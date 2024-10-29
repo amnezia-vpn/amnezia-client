@@ -4807,7 +4807,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>ServerLocale</name>
     <message>
-        <location filename="../errorParser.cpp" line="15"/>
+        <location filename="../errorParser.cpp" line="17"/>
         <source>Server error</source>
         <translation>Ошибка сервера</translation>
     </message>

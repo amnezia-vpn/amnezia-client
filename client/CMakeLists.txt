@@ -89,13 +89,15 @@ set_source_files_properties(${QML_FILES_DIR}/Modules/Style/AmneziaStyle.qml PROP
 set_source_files_properties(${QML_FILES_DIR}/Config/GlobalConfig.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 if (NOT IOS AND NOT ANDROID)
-    qt_add_qml_module(${PROJECT}
-            URI Application
-            VERSION 4.8
-            QML_FILES
-            ${QML_FILES}
-    )
-endif()
+    if (${COPY_QT_RESOURCES})
+        qt_add_qml_module(${PROJECT}
+                URI Application
+                VERSION 4.8
+                QML_FILES
+                ${QML_FILES}
+        )
+    endif ()
+endif ()
 
 if (WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
@@ -178,6 +180,7 @@ set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/core/serialization/transfer.h
         ${CMAKE_CURRENT_LIST_DIR}/core/enums/apiEnums.h
         ${CMAKE_CURRENT_LIST_DIR}/../common/logger/logger.h
+        ${CMAKE_CURRENT_LIST_DIR}/ui/jsonTranslation.h
 )
 
 # Mozilla headres
@@ -230,6 +233,7 @@ set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess.cpp
         ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess_new.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../common/logger/logger.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/ui/jsonTranslation.cpp
 )
 
 # Mozilla sources

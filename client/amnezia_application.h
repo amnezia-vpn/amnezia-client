@@ -26,6 +26,7 @@
 #include "ui/controllers/settingsController.h"
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
+#include "ui/jsonTranslation.h"
 #include "ui/models/availableProtocolsModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
@@ -80,6 +81,7 @@ public:
 
   QQmlApplicationEngine *qmlEngine() const;
   QNetworkAccessManager *manager() { return m_nam; }
+  JsonTranslation *jsonTranslation() const { return m_jsonTranslation.get(); }
 
 signals:
   void translationsUpdated();
@@ -140,6 +142,7 @@ private:
   QScopedPointer<ScreenMarginController> m_screenMarginController;
   QScopedPointer<FirstSetupController> m_firstSetupController;
   QScopedPointer<AutoUpdateController> m_autoUpdateController;
+  QScopedPointer<JsonTranslation> m_jsonTranslation;
 
   QNetworkAccessManager *m_nam;
 

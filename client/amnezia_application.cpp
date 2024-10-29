@@ -91,6 +91,7 @@ void AmneziaApplication::init() {
   m_vpnConnection->moveToThread(&m_vpnConnectionThread);
   m_vpnConnectionThread.start();
 
+  m_jsonTranslation.reset(new JsonTranslation(this));
   m_authController.reset(new AuthController(m_settings));
   m_engine->rootContext()->setContextProperty("AuthController",
                                               m_authController.get());
@@ -383,6 +384,9 @@ void AmneziaApplication::initModels() {
   m_languageModel.reset(new LanguageModel(m_settings, this));
   m_engine->rootContext()->setContextProperty("LanguageModel",
                                               m_languageModel.get());
+
+  connect(m_languageModel.get(), &LanguageModel::updateTranslations,
+          m_jsonTranslation.get(), &JsonTranslation::loadTranslation);
   connect(m_languageModel.get(), &LanguageModel::updateTranslations, this,
           &AmneziaApplication::updateTranslator);
   connect(this, &AmneziaApplication::translationsUpdated, m_languageModel.get(),

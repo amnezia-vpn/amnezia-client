@@ -13,7 +13,7 @@ struct Response {
 
   static bool isOk(int statusCode) { return (statusCode / 100) == 2; }
   [[nodiscard]] bool isOk() const {
-    return isOk(statusCode) || errors.has_value();
+    return isOk(statusCode) && !errors.has_value();
   }
 };
 

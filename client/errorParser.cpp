@@ -5,6 +5,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include "amnezia_application.h"
+
 Errors ErrorParser::parse(QByteArray body, bool isFormError) {
   Errors err{};
   err.isFormError = isFormError;
@@ -16,8 +18,10 @@ Errors ErrorParser::parse(QByteArray body, bool isFormError) {
     return err;
   }
 
+  auto *jsonTranslation = amnApp->jsonTranslation();
+
   QJsonObject obj = document.object();
-  err.errorMessage = obj["error"].toString();
+  err.errorMessage = jsonTranslation->translate(obj["error"].toString());
   if (obj.contains("errors")) {
     QJsonObject errors = obj["errors"].toObject();
 
@@ -29,7 +33,8 @@ Errors ErrorParser::parse(QByteArray body, bool isFormError) {
         QString keyErrorsJoined{};
 
         for (qsizetype i = 0; i < keyErrors.size(); i++) {
-          keyErrorsJoined += keyErrors[i].toString();
+          keyErrorsJoined +=
+              jsonTranslation->translate(keyErrors[i].toString());
           if (i != 0)
             keyErrorsJoined += "\n";
         }
