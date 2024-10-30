@@ -111,12 +111,12 @@
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="81"/>
         <source>Region not selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Регион не выбран</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="97"/>
         <source>Failed to import config</source>
-        <translation type="unfinished"></translation>
+        <translation>Ошибка импорта конфигурации</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.cpp" line="121"/>
