@@ -1,9 +1,9 @@
 #include "connectionController.h"
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-    #include <QGuiApplication>
+#include <QGuiApplication>
 #else
-    #include <QApplication>
+#include <QApplication>
 #endif
 #include <QtConcurrent>
 
@@ -12,42 +12,42 @@
 #include "version.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ImportController> importController,
-                                           const QSharedPointer<AuthController> authController, 
+                                           const QSharedPointer<AuthController> authController,
                                            const QSharedPointer<RegionsModel> regionsModel,
                                            const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ContainersModel> &containersModel,
                                            const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                           const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
-                                           QObject *parent)
-    : QObject(parent),
-      m_importController(importController),
-      m_authController(authController),
-      m_regionsModel(regionsModel),
-      m_serversModel(serversModel),
-      m_containersModel(containersModel),
-      m_clientManagementModel(clientManagementModel), 
-      m_vpnConnection(vpnConnection),
-      m_settings(settings)
-{
-    connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this, &ConnectionController::onConnectionStateChanged);
-    connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn, Qt::QueuedConnection);
-    connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
+                                           const QSharedPointer<VpnConnection> &vpnConnection,
+                                           const std::shared_ptr<Settings> &settings, QObject *parent) :
+    QObject(parent), m_importController(importController), m_authController(authController),
+    m_regionsModel(regionsModel), m_serversModel(serversModel), m_containersModel(containersModel),
+    m_clientManagementModel(clientManagementModel), m_vpnConnection(vpnConnection), m_settings(settings) {
+    connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this,
+            &ConnectionController::onConnectionStateChanged);
+    connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn,
+            Qt::QueuedConnection);
+    connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn,
+            Qt::QueuedConnection);
 
     connect(this, &ConnectionController::configFromApiUpdated, this, &ConnectionController::continueConnection);
 
-    connect(m_importController.get(), qOverload<const QString&, bool>(&ImportController::importErrorOccurred), this, [this](const QString& errorMessage, bool goToPageHome) {
-        if (m_vpnConnection->connectionState() != Vpn::ConnectionState::Preparing) return;
+    connect(m_importController.get(), qOverload<const QString &, bool>(&ImportController::importErrorOccurred), this,
+            [this](const QString &errorMessage, bool goToPageHome) {
+                if (m_vpnConnection->connectionState() != Vpn::ConnectionState::Preparing)
+                    return;
 
-        emit connectionErrorOccurred(errorMessage);
-        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error, false);
-    });
+                emit connectionErrorOccurred(errorMessage);
+                emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error, false);
+            });
 
-    connect(m_importController.get(), qOverload<ErrorCode, bool>(&ImportController::importErrorOccurred), this, [this](const ErrorCode errorCode, bool goToHome) {
-        if (m_vpnConnection->connectionState() != Vpn::ConnectionState::Preparing) return;
+    connect(m_importController.get(), qOverload<ErrorCode, bool>(&ImportController::importErrorOccurred), this,
+            [this](const ErrorCode errorCode, bool goToHome) {
+                if (m_vpnConnection->connectionState() != Vpn::ConnectionState::Preparing)
+                    return;
 
-        emit connectionErrorOccurred(errorCode);
-        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error, false);
-    });
+                emit connectionErrorOccurred(errorCode);
+                emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error, false);
+            });
 
     connect(m_importController.get(), &ImportController::importFinished, this, [this]() {
         m_serversModel->setDefaultServerIndex(0);
@@ -59,15 +59,14 @@ ConnectionController::ConnectionController(const QSharedPointer<ImportController
     m_state = Vpn::ConnectionState::Disconnected;
 }
 
-void ConnectionController::openConnection()
-{
-// #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-//     if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
-//     {
-//         emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
-//         return;
-//     }
-// #endif
+void ConnectionController::openConnection() {
+    // #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    //     if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
+    //     {
+    //         emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
+    //         return;
+    //     }
+    // #endif
 
     /*int serverIndex = m_serversModel->getDefaultServerIndex();
     QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
@@ -79,12 +78,12 @@ void ConnectionController::openConnection()
 
     QString selectedRegionId = m_regionsModel->getSelectedRegionId();
     if (selectedRegionId.isEmpty()) {
-        emit connectionErrorOccurred("Region not selected");
+        emit connectionErrorOccurred(tr("Region not selected"));
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
         return;
     }
 
-    ServerStringRequest* request = new ServerStringRequest;
+    ServerStringRequest *request = new ServerStringRequest;
     connect(request, &ServerStringRequest::errorOccurred, this, [this, request](const Errors errors) {
         emit connectionErrorOccurred(errors.errorMessage);
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error, false);
@@ -95,7 +94,7 @@ void ConnectionController::openConnection()
 
         bool result = m_importController->extractConfigFromData(connectionString);
         if (!result) {
-            emit connectionErrorOccurred("Failed to import config");
+            emit connectionErrorOccurred(tr("Failed to import config"));
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Error, false);
             return;
         }
@@ -104,74 +103,67 @@ void ConnectionController::openConnection()
     });
 
     m_authController->getServerConnectionString(selectedRegionId, request);
-
 }
 
-void ConnectionController::closeConnection()
-{
-    emit disconnectFromVpn();
-}
+void ConnectionController::closeConnection() { emit disconnectFromVpn(); }
 
-ErrorCode ConnectionController::getLastConnectionError()
-{
-    return m_vpnConnection->lastError();
-}
+ErrorCode ConnectionController::getLastConnectionError() { return m_vpnConnection->lastError(); }
 
-void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state, bool getLastError)
-{
+void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state, bool getLastError) {
     m_state = state;
 
     m_isConnected = false;
     m_connectionStateText = tr("Connecting...");
     switch (state) {
-    case Vpn::ConnectionState::Connected: {
-        m_isConnectionInProgress = false;
-        m_isConnected = true;
-        m_connectionStateText = tr("Connected");
-        break;
-    }
-    case Vpn::ConnectionState::Connecting: {
-        m_isConnectionInProgress = true;
-        break;
-    }
-    case Vpn::ConnectionState::Reconnecting: {
-        m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Reconnecting...");
-        break;
-    }
-    case Vpn::ConnectionState::Disconnected: {
-        m_isConnectionInProgress = false;
-        m_connectionStateText = tr("Connect");
-        break;
-    }
-    case Vpn::ConnectionState::Disconnecting: {
-        m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Disconnecting...");
-        break;
-    }
-    case Vpn::ConnectionState::Preparing: {
-        m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Preparing...");
-        break;
-    }
-    case Vpn::ConnectionState::Error: {
-        m_isConnectionInProgress = false;
-        m_connectionStateText = tr("Connect");
-        if (getLastError) emit connectionErrorOccurred(getLastConnectionError());
-        break;
-    }
-    case Vpn::ConnectionState::Unknown: {
-        m_isConnectionInProgress = false;
-        m_connectionStateText = tr("Connect");
-        if (getLastError) emit connectionErrorOccurred(getLastConnectionError());
-        break;
-    }
+        case Vpn::ConnectionState::Connected: {
+            m_isConnectionInProgress = false;
+            m_isConnected = true;
+            m_connectionStateText = tr("Connected");
+            break;
+        }
+        case Vpn::ConnectionState::Connecting: {
+            m_isConnectionInProgress = true;
+            break;
+        }
+        case Vpn::ConnectionState::Reconnecting: {
+            m_isConnectionInProgress = true;
+            m_connectionStateText = tr("Reconnecting...");
+            break;
+        }
+        case Vpn::ConnectionState::Disconnected: {
+            m_isConnectionInProgress = false;
+            m_connectionStateText = tr("Connect");
+            break;
+        }
+        case Vpn::ConnectionState::Disconnecting: {
+            m_isConnectionInProgress = true;
+            m_connectionStateText = tr("Disconnecting...");
+            break;
+        }
+        case Vpn::ConnectionState::Preparing: {
+            m_isConnectionInProgress = true;
+            m_connectionStateText = tr("Preparing...");
+            break;
+        }
+        case Vpn::ConnectionState::Error: {
+            m_isConnectionInProgress = false;
+            m_connectionStateText = tr("Connect");
+            if (getLastError)
+                emit connectionErrorOccurred(getLastConnectionError());
+            break;
+        }
+        case Vpn::ConnectionState::Unknown: {
+            m_isConnectionInProgress = false;
+            m_connectionStateText = tr("Connect");
+            if (getLastError)
+                emit connectionErrorOccurred(getLastConnectionError());
+            break;
+        }
     }
     emit connectionStateChanged();
 }
 
-void ConnectionController::onCurrentContainerUpdated()
-{
+void ConnectionController::onCurrentContainerUpdated() {
     if (m_isConnected || m_isConnectionInProgress) {
         emit reconnectWithUpdatedContainer(tr("Settings updated successfully, reconnnection..."));
         openConnection();
@@ -180,24 +172,16 @@ void ConnectionController::onCurrentContainerUpdated()
     }
 }
 
-void ConnectionController::onTranslationsUpdated()
-{
+void ConnectionController::onTranslationsUpdated() {
     // get translated text of current state
     onConnectionStateChanged(getCurrentConnectionState());
 }
 
-Vpn::ConnectionState ConnectionController::getCurrentConnectionState()
-{
-    return m_state;
-}
+Vpn::ConnectionState ConnectionController::getCurrentConnectionState() { return m_state; }
 
-QString ConnectionController::connectionStateText() const
-{
-    return m_connectionStateText;
-}
+QString ConnectionController::connectionStateText() const { return m_connectionStateText; }
 
-void ConnectionController::toggleConnection()
-{
+void ConnectionController::toggleConnection() {
     if (m_state == Vpn::ConnectionState::Preparing) {
         emit preparingConfig();
         return;
@@ -212,21 +196,16 @@ void ConnectionController::toggleConnection()
     }
 }
 
-bool ConnectionController::isConnectionInProgress() const
-{
-    return m_isConnectionInProgress;
-}
+bool ConnectionController::isConnectionInProgress() const { return m_isConnectionInProgress; }
 
-bool ConnectionController::isConnected() const
-{
-    return m_isConnected;
-}
+bool ConnectionController::isConnected() const { return m_isConnected; }
 
-bool ConnectionController::isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container)
-{
-    for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
-        QString protocolConfig =
-                containerConfig.value(ProtocolProps::protoToString(protocol)).toObject().value(config_key::last_config).toString();
+bool ConnectionController::isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container) {
+    for (Proto protocol: ContainerProps::protocolsForContainer(container)) {
+        QString protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol))
+                                         .toObject()
+                                         .value(config_key::last_config)
+                                         .toString();
 
         if (protocolConfig.isEmpty()) {
             return false;
@@ -235,8 +214,7 @@ bool ConnectionController::isProtocolConfigExists(const QJsonObject &containerCo
     return true;
 }
 
-void ConnectionController::continueConnection()
-{
+void ConnectionController::continueConnection() {
     int serverIndex = m_serversModel->getDefaultServerIndex();
     QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto configVersion = serverConfig.value(config_key::configVersion).toInt();
@@ -247,7 +225,8 @@ void ConnectionController::continueConnection()
         return;
     }
 
-    DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
+    DockerContainer container = qvariant_cast<DockerContainer>(
+            m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
 
     if (!m_containersModel->isSupportedByCurrentPlatform(container)) {
         emit connectionErrorOccurred(tr("The selected protocol is not supported on the current platform"));
@@ -272,7 +251,8 @@ void ConnectionController::continueConnection()
 
     auto dns = m_serversModel->getDnsPair(serverIndex);
 
-    auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container, errorCode);
+    auto vpnConfiguration =
+            vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container, errorCode);
     if (errorCode != ErrorCode::NoError) {
         emit connectionErrorOccurred(tr("unable to create configuration"));
         return;
@@ -281,33 +261,36 @@ void ConnectionController::continueConnection()
     emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);
 }
 
-ErrorCode ConnectionController::updateProtocolConfig(const DockerContainer container, const ServerCredentials &credentials,
-                                                     QJsonObject &containerConfig, QSharedPointer<ServerController> serverController)
-{
+ErrorCode ConnectionController::updateProtocolConfig(const DockerContainer container,
+                                                     const ServerCredentials &credentials, QJsonObject &containerConfig,
+                                                     QSharedPointer<ServerController> serverController) {
     QFutureWatcher<ErrorCode> watcher;
 
     if (serverController.isNull()) {
         serverController.reset(new ServerController(m_settings));
     }
 
-    QFuture<ErrorCode> future = QtConcurrent::run([this, container, &credentials, &containerConfig, &serverController]() {
-        ErrorCode errorCode = ErrorCode::NoError;
-        if (!isProtocolConfigExists(containerConfig, container)) {
-            VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
-            errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig);
-            if (errorCode != ErrorCode::NoError) {
-                return errorCode;
-            }
-            m_serversModel->updateContainerConfig(container, containerConfig);
+    QFuture<ErrorCode> future =
+            QtConcurrent::run([this, container, &credentials, &containerConfig, &serverController]() {
+                ErrorCode errorCode = ErrorCode::NoError;
+                if (!isProtocolConfigExists(containerConfig, container)) {
+                    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
+                    errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container,
+                                                                                            containerConfig);
+                    if (errorCode != ErrorCode::NoError) {
+                        return errorCode;
+                    }
+                    m_serversModel->updateContainerConfig(container, containerConfig);
 
-            errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig,
-                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
-            if (errorCode != ErrorCode::NoError) {
+                    errorCode = m_clientManagementModel->appendClient(
+                            container, credentials, containerConfig,
+                            QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
+                    if (errorCode != ErrorCode::NoError) {
+                        return errorCode;
+                    }
+                }
                 return errorCode;
-            }
-        }
-        return errorCode;
-    });
+            });
 
     QEventLoop wait;
     connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);

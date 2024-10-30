@@ -147,14 +147,14 @@ void AuthController::refreshToken() {
     QByteArray data = reply->readAll();
     Response response = parseNetworkReply(data, *reply);
     if (!response.isOk()) {
-      m_authenticated = false;
+      setUnauthenticated();
       return;
     }
 
     QJsonDocument document = QJsonDocument::fromJson(data);
     QString token = document.object()["token"].toString();
-    setToken(token);
     m_authenticated = true;
+    setToken(token);
   });
 
   emit loginSuccessfull();
