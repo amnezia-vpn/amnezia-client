@@ -12,10 +12,24 @@ import com.android.billingclient.api.BillingClient.BillingResponseCode.USER_CANC
 import com.android.billingclient.api.BillingResult
 import org.amnezia.vpn.util.ErrorCode
 
-internal class BillingException(billingResult: BillingResult) : Exception(billingResult.debugMessage) {
+internal class BillingException(
+    billingResult: BillingResult,
+    retryable: Boolean = false
+) : Exception(billingResult.toString()) {
+
+    constructor(msg: String) : this(BillingResult.newBuilder()
+        .setResponseCode(9999)
+        .setDebugMessage(msg)
+        .build())
 
     val errorCode: Int
     val isCanceled = billingResult.responseCode == USER_CANCELED
+    val isRetryable = retryable || billingResult.responseCode in setOf(
+        NETWORK_ERROR,
+        SERVICE_DISCONNECTED,
+        SERVICE_UNAVAILABLE,
+        ERROR
+    )
 
     init {
         when (billingResult.responseCode) {
