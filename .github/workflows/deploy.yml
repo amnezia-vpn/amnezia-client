@@ -458,10 +458,10 @@ jobs:
           dir: ${{ runner.temp }}
           extra: "--external 7z --base ${{ env.QT_MIRROR }}"
 
-      - name: "Grant execute permission for qt-cmake"
-        shell: bash
-        run: |
-          chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
+      # - name: "Grant execute permission for qt-cmake"
+      #   shell: bash
+      #   run: |
+      #     chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
           
       - name: "Setup ccache"
         uses: hendrikmuhs/ccache-action@v1.2
