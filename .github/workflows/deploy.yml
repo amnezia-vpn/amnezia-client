@@ -543,7 +543,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.ANDROID_RELEASE_CREDENTIALS_JSON }}
           packageName: com.zloserver.vpn
           releaseFiles: deploy/build/ZloVPN-release.aab
-          track: qa
+          track: internal
 
   Finalize-Release:
     runs-on: ubuntu-latest
