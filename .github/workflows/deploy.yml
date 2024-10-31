@@ -366,7 +366,7 @@ jobs:
         run: |
           mkdir -p r2-release/macos
           aws s3 cp s3://${{ vars.UPDATES_BUCKET }}/macos/appcast.xml r2-release/macos/appcast.xml || true
-          export PROJECT_VERSION=$(cat project-version)
+          export PROJECT_VERSION=$(head -n 1 project-version)
           mkdir -p r2-release/macos
           mv ZloVPN.dmg r2-release/macos/ZloVPN_${PROJECT_VERSION}.dmg
           echo "${{ secrets.SPARKLE_SIGNING_KEY }}" | ./sparkle/bin/generate_appcast --ed-key-file - --download-url-prefix ${{ vars.UPDATES_BUCKET_URL }} r2-release/macos
@@ -544,6 +544,7 @@ jobs:
           packageName: com.zloserver.vpn
           releaseFiles: deploy/build/ZloVPN-release.aab
           track: internal
+          status: draft
 
   Finalize-Release:
     runs-on: ubuntu-latest
