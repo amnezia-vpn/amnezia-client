@@ -81,8 +81,7 @@
     <name>AuthController</name>
     <message>
         <location filename="../ui/controllers/authController.cpp" line="466"/>
-        <source>Payment</source>
-        <comment>Failed to open payment page</comment>
+        <source>Failed to open payment page</source>
         <translation>Произошла ошибка при открытии страницы оплаты.</translation>
     </message>
 </context>

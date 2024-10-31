@@ -461,9 +461,9 @@ void AuthController::openPaymentLink() {
 
     QJsonDocument document = QJsonDocument::fromJson(data);
     QString paymentUrl = document.object()["url"].toString();
-    if (!QDesktopServices::openUrl(paymentUrl)) {
+    if (!QDesktopServices::openUrl(m_spike + paymentUrl)) {
       Errors errors{};
-      errors.errorMessage = tr("Payment", "Failed to open payment page");
+      errors.errorMessage = tr("Failed to open payment page");
       emit errorOccurred(errors);
     } else {
       emit paymentLinkOpened();
