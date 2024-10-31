@@ -24,7 +24,7 @@ ApplicationWindow  {
     maximumWidth: 600
     maximumHeight: 800
 
-    flags: (Qt.platform.os === "ios" ? Qt.MaximizeUsingFullscreenGeometryHint : 0)
+    flags: (Qt.platform.os === "ios" ? Qt.MaximizeUsingFullscreenGeometryHint : Qt.Window)
 
     color: AmneziaStyle.color.midnightBlack
 
