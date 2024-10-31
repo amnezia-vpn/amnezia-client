@@ -48,6 +48,7 @@ PageType {
             Layout.topMargin: 32
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: 280
+            Layout.maximumWidth: parent.width
 
             text: "Go to System Settings -> General -> Login Items & Extensions and allow ZloVPN.app to run in the background. After doing so, restart the app."
             wrapMode: Text.WordWrap

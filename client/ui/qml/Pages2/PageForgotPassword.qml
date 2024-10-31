@@ -61,6 +61,7 @@ PageType {
 
                 ParagraphTextType {
                     Layout.fillWidth: true
+                    Layout.maximumWidth: parent.width
 
                     font.pixelSize: 14
 

@@ -84,18 +84,22 @@ PageType {
 
                     ParagraphTextType {
                         Layout.alignment: Qt.AlignLeft
+                        Layout.maximumWidth: parent.width
                         text: qsTr("• You are having connection issues")
                     }
                     ParagraphTextType {
                         Layout.alignment: Qt.AlignLeft
+                        Layout.maximumWidth: parent.width
                         text: qsTr("• One of our servers has been blocked")
                     }
                     ParagraphTextType {
                         Layout.alignment: Qt.AlignLeft
+                        Layout.maximumWidth: parent.width
                         text: qsTr("• Our servers are down")
                     }
                     ParagraphTextType {
                         Layout.alignment: Qt.AlignLeft
+                        Layout.maximumWidth: parent.width
                         text: qsTr("• Your app is out of date")
                     }
                 }

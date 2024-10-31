@@ -68,6 +68,7 @@ PageType {
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.maximumWidth: parent.width
 
                 horizontalAlignment: Text.AlignHCenter
 

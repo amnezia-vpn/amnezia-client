@@ -41,6 +41,7 @@ PageType {
 
             ParagraphTextType {
                 Layout.alignment: Qt.AlignHCenter
+                Layout.maximumWidth: parent.width
 
                 text: qsTr("Install the latest version from our website.")
                 color: AmneziaStyle.color.mutedGray

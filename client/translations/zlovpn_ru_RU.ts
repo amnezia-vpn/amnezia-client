@@ -507,32 +507,32 @@ Already installed containers were found on the server. All installed containers 
         <translation>Смена почты</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="89"/>
         <source>A confirmation link has been sent to your old email.</source>
         <translation>Ссылка для подтверждения была отправлена на вашу старую почту.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="97"/>
+        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="98"/>
         <source>Go back</source>
         <translation>Назад</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="130"/>
         <source>New email address</source>
         <translation>Новый email адрес</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="151"/>
+        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="152"/>
         <source>Confirm new email address</source>
         <translation>Повторите новый email адрес</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="177"/>
+        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="178"/>
         <source>Emails do not match</source>
         <translation>Адреса почты не совпадают.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="188"/>
+        <location filename="../ui/qml/Pages2/PageChangeEmail.qml" line="189"/>
         <source>Submit</source>
         <translation>Подтвердить</translation>
     </message>
@@ -550,37 +550,37 @@ Already installed containers were found on the server. All installed containers 
         <translation>Пароль изменен</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="89"/>
+        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="90"/>
         <source>Your password has been changed successfully.</source>
         <translation>Ваш пароль был успешно изменен.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="98"/>
+        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="99"/>
         <source>Go back</source>
         <translation>Назад</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="130"/>
+        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="131"/>
         <source>Current password</source>
         <translation>Текущий пароль</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="143"/>
+        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="144"/>
         <source>New password</source>
         <translation>Новый пароль</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="167"/>
         <source>Confirm password</source>
         <translation>Повторите пароль</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="193"/>
+        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="194"/>
         <source>Passwords do not match</source>
         <translation>Пароли не совпадают</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageChangePassword.qml" line="205"/>
         <source>Submit</source>
         <translation>Подтвердить</translation>
     </message>
@@ -629,30 +629,30 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageForgotPassword.qml" line="59"/>
         <source>Recovery link sent</source>
-        <translation>Ссылка для восстановления пароля отправлена.</translation>
+        <translation>Письмо отправлено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageForgotPassword.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageForgotPassword.qml" line="68"/>
         <source>A recovery link has been sent to your email. Follow the instructions in the email message to recover your account.</source>
         <translation>Ссылка для восстановления пароля была отправлена на вашу почту. Следуйте инструкциям в письме чтобы восстановить ваш аккаунт.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageForgotPassword.qml" line="76"/>
+        <location filename="../ui/qml/Pages2/PageForgotPassword.qml" line="77"/>
         <source>Go back</source>
         <translation>Назад</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageForgotPassword.qml" line="117"/>
+        <location filename="../ui/qml/Pages2/PageForgotPassword.qml" line="118"/>
         <source>Account recovery</source>
         <translation>Восстановление аккаунта</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageForgotPassword.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageForgotPassword.qml" line="129"/>
         <source>Email</source>
         <translation>Почта</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageForgotPassword.qml" line="142"/>
+        <location filename="../ui/qml/Pages2/PageForgotPassword.qml" line="143"/>
         <source>Submit</source>
         <translation>Подтвердить</translation>
     </message>
@@ -758,42 +758,42 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished">Возможные причины:</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="87"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="88"/>
         <source>• You are having connection issues</source>
         <translation type="unfinished">• У вас проблемы с подключением к интернету</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="93"/>
         <source>• One of our servers has been blocked</source>
         <translation type="unfinished">• Один из наших серверов заблокирован</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="98"/>
         <source>• Our servers are down</source>
         <translation type="unfinished">• Наши сервера недоступны</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="99"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="103"/>
         <source>• Your app is out of date</source>
         <translation type="unfinished">• Ваше приложение устарело</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="111"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="115"/>
         <source>Website</source>
         <translation type="unfinished">Веб-сайт</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="124"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="128"/>
         <source>Telegram</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="137"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="141"/>
         <source>Email</source>
         <translation type="unfinished">Почта</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="145"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="149"/>
         <source>Copied</source>
         <translation type="unfinished">Скопировано</translation>
     </message>
@@ -1756,17 +1756,17 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Amnezia — это бесплатное приложение с открытым исходным кодом. Поддержите разработчиков, если оно вам нравится.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="77"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="78"/>
         <source>ZloVPN is an easy to use VPN application based on AmneziaVPN.</source>
         <translation>ZloVPN - это простое и удобное VPN приложение основанное на AmneziaVPN.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="87"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="88"/>
         <source>Contacts</source>
         <translation>Контакты</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="95"/>
         <source>Telegram</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1775,12 +1775,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">support@zlovpn.com</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="96"/>
         <source>For issues and suggestions</source>
         <translation>Почта для поддержки и предложений</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="184"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="185"/>
         <source>About AmneziaVPN</source>
         <translation type="unfinished">Об AmneziaVPN</translation>
     </message>
@@ -1817,7 +1817,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="114"/>
         <source>Website</source>
         <translation>Веб-сайт</translation>
     </message>
@@ -1826,7 +1826,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">https://amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="133"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="134"/>
         <source>Software version: %1</source>
         <translation>Версия ПО: %1</translation>
     </message>
@@ -1835,7 +1835,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Проверить обновления</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="162"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="163"/>
         <source>Privacy Policy</source>
         <translation>Политика конфиденциальности</translation>
     </message>
@@ -3671,12 +3671,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdateRequired.qml" line="45"/>
+        <location filename="../ui/qml/Pages2/PageUpdateRequired.qml" line="46"/>
         <source>Install the latest version from our website.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdateRequired.qml" line="66"/>
+        <location filename="../ui/qml/Pages2/PageUpdateRequired.qml" line="67"/>
         <source>Website</source>
         <translation type="unfinished">Веб-сайт</translation>
     </message>
