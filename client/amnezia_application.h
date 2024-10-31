@@ -62,91 +62,92 @@
 #endif
 
 class AmneziaApplication : public AMNEZIA_BASE_CLASS {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  AmneziaApplication(int &argc, char *argv[]);
-  virtual ~AmneziaApplication();
+    AmneziaApplication(int &argc, char *argv[]);
+    virtual ~AmneziaApplication();
 
-  void init();
-  void registerTypes();
-  void loadFonts();
-  void loadTranslator();
-  void updateTranslator(const QLocale &locale);
-  bool parseCommands();
-  QString resourcesDirPath();
+    void init();
+    void registerTypes();
+    void loadFonts();
+    void loadTranslator();
+    void updateTranslator(const QLocale &locale);
+    bool parseCommands();
+    QString resourcesDirPath();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-  void startLocalServer();
+    void startLocalServer();
 #endif
 
-  QQmlApplicationEngine *qmlEngine() const;
-  QNetworkAccessManager *manager() { return m_nam; }
-  JsonTranslation *jsonTranslation() const { return m_jsonTranslation.get(); }
+    QQmlApplicationEngine *qmlEngine() const;
+    QNetworkAccessManager *manager() { return m_nam; }
+    void refreshManager();
+    JsonTranslation *jsonTranslation() const { return m_jsonTranslation.get(); }
 
 signals:
-  void translationsUpdated();
+    void translationsUpdated();
 
 private:
-  void initModels();
-  void initControllers();
+    void initModels();
+    void initControllers();
 
-  QQmlApplicationEngine *m_engine{};
-  std::shared_ptr<Settings> m_settings;
+    QQmlApplicationEngine *m_engine{};
+    std::shared_ptr<Settings> m_settings;
 
-  QSharedPointer<ContainerProps> m_containerProps;
-  QSharedPointer<ProtocolProps> m_protocolProps;
+    QSharedPointer<ContainerProps> m_containerProps;
+    QSharedPointer<ProtocolProps> m_protocolProps;
 
-  QSharedPointer<QTranslator> m_translator;
-  QCommandLineParser m_parser;
+    QSharedPointer<QTranslator> m_translator;
+    QCommandLineParser m_parser;
 
-  QSharedPointer<AvailableProtocolsModel> m_selectedServerProtocolsModel;
-  QSharedPointer<ContainersModel> m_containersModel;
-  QSharedPointer<RegionsModel> m_regionsModel;
-  QSharedPointer<ContainersModel> m_defaultServerContainersModel;
-  QSharedPointer<ServersModel> m_serversModel;
-  QSharedPointer<LanguageModel> m_languageModel;
-  QSharedPointer<ProtocolsModel> m_protocolsModel;
-  QSharedPointer<SitesModel> m_sitesModel;
-  QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
-  QSharedPointer<ClientManagementModel> m_clientManagementModel;
-  QSharedPointer<ApiServicesModel> m_apiServicesModel;
-  QSharedPointer<ApiCountryModel> m_apiCountryModel;
+    QSharedPointer<AvailableProtocolsModel> m_selectedServerProtocolsModel;
+    QSharedPointer<ContainersModel> m_containersModel;
+    QSharedPointer<RegionsModel> m_regionsModel;
+    QSharedPointer<ContainersModel> m_defaultServerContainersModel;
+    QSharedPointer<ServersModel> m_serversModel;
+    QSharedPointer<LanguageModel> m_languageModel;
+    QSharedPointer<ProtocolsModel> m_protocolsModel;
+    QSharedPointer<SitesModel> m_sitesModel;
+    QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
+    QSharedPointer<ClientManagementModel> m_clientManagementModel;
+    QSharedPointer<ApiServicesModel> m_apiServicesModel;
+    QSharedPointer<ApiCountryModel> m_apiCountryModel;
 
-  QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
-  QScopedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;
-  QScopedPointer<CloakConfigModel> m_cloakConfigModel;
-  QScopedPointer<XrayConfigModel> m_xrayConfigModel;
-  QScopedPointer<WireGuardConfigModel> m_wireGuardConfigModel;
-  QScopedPointer<AwgConfigModel> m_awgConfigModel;
+    QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
+    QScopedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;
+    QScopedPointer<CloakConfigModel> m_cloakConfigModel;
+    QScopedPointer<XrayConfigModel> m_xrayConfigModel;
+    QScopedPointer<WireGuardConfigModel> m_wireGuardConfigModel;
+    QScopedPointer<AwgConfigModel> m_awgConfigModel;
 #ifdef Q_OS_WINDOWS
-  QScopedPointer<Ikev2ConfigModel> m_ikev2ConfigModel;
+    QScopedPointer<Ikev2ConfigModel> m_ikev2ConfigModel;
 #endif
 
-  QScopedPointer<SftpConfigModel> m_sftpConfigModel;
-  QScopedPointer<Socks5ProxyConfigModel> m_socks5ConfigModel;
+    QScopedPointer<SftpConfigModel> m_sftpConfigModel;
+    QScopedPointer<Socks5ProxyConfigModel> m_socks5ConfigModel;
 
-  QSharedPointer<VpnConnection> m_vpnConnection;
-  QThread m_vpnConnectionThread;
+    QSharedPointer<VpnConnection> m_vpnConnection;
+    QThread m_vpnConnectionThread;
 #ifndef Q_OS_ANDROID
-  QScopedPointer<NotificationHandler> m_notificationHandler;
+    QScopedPointer<NotificationHandler> m_notificationHandler;
 #endif
 
-  QScopedPointer<ConnectionController> m_connectionController;
-  QScopedPointer<PageController> m_pageController;
-  QSharedPointer<ImportController> m_importController;
-  QScopedPointer<SettingsController> m_settingsController;
-  QScopedPointer<SitesController> m_sitesController;
-  QScopedPointer<SystemController> m_systemController;
-  QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
-  QSharedPointer<AuthController> m_authController;
-  QScopedPointer<ScreenMarginController> m_screenMarginController;
-  QScopedPointer<FirstSetupController> m_firstSetupController;
-  QScopedPointer<AutoUpdateController> m_autoUpdateController;
-  QScopedPointer<JsonTranslation> m_jsonTranslation;
+    QScopedPointer<ConnectionController> m_connectionController;
+    QScopedPointer<PageController> m_pageController;
+    QSharedPointer<ImportController> m_importController;
+    QScopedPointer<SettingsController> m_settingsController;
+    QScopedPointer<SitesController> m_sitesController;
+    QScopedPointer<SystemController> m_systemController;
+    QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
+    QSharedPointer<AuthController> m_authController;
+    QScopedPointer<ScreenMarginController> m_screenMarginController;
+    QScopedPointer<FirstSetupController> m_firstSetupController;
+    QScopedPointer<AutoUpdateController> m_autoUpdateController;
+    QScopedPointer<JsonTranslation> m_jsonTranslation;
 
-  QNetworkAccessManager *m_nam;
+    QNetworkAccessManager *m_nam;
 
-  QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
+    QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 };
 
 #endif // AMNEZIA_APPLICATION_H

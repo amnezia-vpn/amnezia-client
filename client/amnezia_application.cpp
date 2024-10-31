@@ -65,6 +65,11 @@ AmneziaApplication::~AmneziaApplication() {
     }
 }
 
+void AmneziaApplication::refreshManager() {
+    delete m_nam;
+    m_nam = new QNetworkAccessManager(this);
+}
+
 void AmneziaApplication::init() {
     m_engine = new QQmlApplicationEngine;
 

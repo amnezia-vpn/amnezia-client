@@ -11,6 +11,8 @@
 #include "core/enums/apiEnums.h"
 #include "version.h"
 
+#include "amnezia_application.h"
+
 ConnectionController::ConnectionController(const QSharedPointer<ImportController> importController,
                                            const QSharedPointer<AuthController> authController,
                                            const QSharedPointer<RegionsModel> regionsModel,
@@ -53,6 +55,12 @@ ConnectionController::ConnectionController(const QSharedPointer<ImportController
         m_serversModel->setDefaultServerIndex(0);
         m_serversModel->setProcessedServerIndex(0);
         continueConnection();
+    });
+
+    connect(m_authController.get(), &AuthController::tokenUpdated, this, [this]() {
+        if (!m_authController->isAuthenticated()) {
+            closeConnection();
+        }
     });
 
 
@@ -116,6 +124,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state, 
     m_connectionStateText = tr("Connecting...");
     switch (state) {
         case Vpn::ConnectionState::Connected: {
+            amnApp->refreshManager();
             m_isConnectionInProgress = false;
             m_isConnected = true;
             m_connectionStateText = tr("Connected");

@@ -80,7 +80,7 @@
 <context>
     <name>AuthController</name>
     <message>
-        <location filename="../ui/controllers/authController.cpp" line="466"/>
+        <location filename="../ui/controllers/authController.cpp" line="453"/>
         <source>Failed to open payment page</source>
         <translation>Произошла ошибка при открытии страницы оплаты.</translation>
     </message>
@@ -96,72 +96,72 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="237"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="246"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>VPN-протоколы не установлены.
  Пожалуйста, установите протокол</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="116"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="124"/>
         <source>Connecting...</source>
         <translation>Подключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="81"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="89"/>
         <source>Region not selected</source>
         <translation>Регион не выбран</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="97"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="105"/>
         <source>Failed to import config</source>
         <translation>Ошибка импорта конфигурации</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="121"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="130"/>
         <source>Connected</source>
         <translation>Подключено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="145"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="154"/>
         <source>Preparing...</source>
         <translation>Подготовка...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="168"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="177"/>
         <source>Settings updated successfully, reconnnection...</source>
         <translation>Настройки успешно обновлены, переподключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="171"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="180"/>
         <source>Settings updated successfully</source>
         <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="232"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="241"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation>Выбранный протокол не поддерживается на данном устройстве</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="257"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="266"/>
         <source>unable to create configuration</source>
         <translation>не удалось создать конфигурацию</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="130"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="139"/>
         <source>Reconnecting...</source>
         <translation>Переподключение...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="90"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="135"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="150"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="157"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="144"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="159"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="166"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="140"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="149"/>
         <source>Disconnecting...</source>
         <translation>Отключение...</translation>
     </message>
@@ -221,27 +221,27 @@
 <context>
     <name>DaysLocale</name>
     <message>
-        <location filename="../ui/controllers/authController.cpp" line="25"/>
+        <location filename="../ui/controllers/authController.cpp" line="27"/>
         <source>%1 days left</source>
         <translation>осталось %1 дней</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/authController.cpp" line="22"/>
+        <location filename="../ui/controllers/authController.cpp" line="24"/>
         <source>%1 day left</source>
         <translation>остался %1 день</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/authController.cpp" line="35"/>
+        <location filename="../ui/controllers/authController.cpp" line="37"/>
         <source>%1 hours left</source>
         <translation>осталось %1 часов</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/authController.cpp" line="32"/>
+        <location filename="../ui/controllers/authController.cpp" line="34"/>
         <source>%1 hour left</source>
         <translation>остался %1 час</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/authController.cpp" line="51"/>
+        <location filename="../ui/controllers/authController.cpp" line="53"/>
         <source>less than an hour left</source>
         <translation>осталось меньше часа</translation>
     </message>
@@ -249,12 +249,12 @@
 <context>
     <name>DaysLocale234</name>
     <message>
-        <location filename="../ui/controllers/authController.cpp" line="24"/>
+        <location filename="../ui/controllers/authController.cpp" line="26"/>
         <source>%1 days left</source>
         <translation>осталось %1 дня</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/authController.cpp" line="34"/>
+        <location filename="../ui/controllers/authController.cpp" line="36"/>
         <source>%1 hours left</source>
         <translation>осталось %1 часа</translation>
     </message>
