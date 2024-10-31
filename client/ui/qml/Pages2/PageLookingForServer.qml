@@ -21,13 +21,14 @@ PageType {
         ColumnLayout {
             id: content
             anchors.fill: parent
+            height: root.height
 
             Image {
                 id: image
                 source: "qrc:/images/zlovpn.svg"
 
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
-                Layout.topMargin: 36
+                Layout.topMargin: 64
                 Layout.preferredWidth: 300
                 Layout.preferredHeight: 240
             }

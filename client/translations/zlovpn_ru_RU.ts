@@ -738,22 +738,22 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageLookingForServer</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="41"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="42"/>
         <source>Looking for server</source>
         <translation type="unfinished">Поиск сервера</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="48"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="49"/>
         <source>Please wait</source>
         <translation type="unfinished">Пожалуйста подождите</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="70"/>
         <source>Failed to find server</source>
         <translation type="unfinished">Сервер не найден</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="78"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="79"/>
         <source>Possible reasons:</source>
         <translation type="unfinished">Возможные причины:</translation>
     </message>
@@ -1694,7 +1694,7 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="41"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="42"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
@@ -1703,22 +1703,22 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Серверы</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="52"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="53"/>
         <source>Check for updates</source>
         <translation type="unfinished">Проверить обновления</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="69"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="68"/>
         <source>Connection</source>
         <translation>Соединение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="83"/>
         <source>Application</source>
         <translation>Приложение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="98"/>
         <source>About ZloVPN</source>
         <translation type="unfinished">О ZloVPN</translation>
     </message>
@@ -1731,12 +1731,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Об AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="121"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="114"/>
         <source>Dev console</source>
         <translation type="unfinished">Консоль разработчика</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettings.qml" line="142"/>
+        <location filename="../ui/qml/Pages2/PageSettings.qml" line="135"/>
         <source>Close application</source>
         <translation>Закрыть приложение</translation>
     </message>
@@ -3698,38 +3698,38 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Купить %1 месяцев</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="31"/>
+        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="32"/>
         <source>Profile</source>
         <translation>Профиль</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="71"/>
+        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="72"/>
         <source>Username</source>
         <translation type="unfinished">Имя пользователя</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="85"/>
-        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="150"/>
+        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="151"/>
         <source>...</source>
         <translation type="unfinished">...</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="112"/>
+        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="113"/>
         <source>Change password</source>
         <translation type="unfinished">Сменить пароль</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="164"/>
+        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="165"/>
         <source>You can&apos;t add more balance yet.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="84"/>
+        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="85"/>
         <source>Email</source>
         <translation>Почта</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="96"/>
         <source>Edit</source>
         <translation>Сменить</translation>
     </message>
@@ -3742,7 +3742,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Месяцев</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="150"/>
         <source>Balance</source>
         <translation>Баланс</translation>
     </message>
@@ -3751,7 +3751,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished"> дней</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="160"/>
+        <location filename="../ui/qml/Pages2/PageUserAccount.qml" line="161"/>
         <source>Add</source>
         <translation>Пополнить</translation>
     </message>
