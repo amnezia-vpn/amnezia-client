@@ -79,7 +79,6 @@ PageType {
                 }
 
                 ColumnLayout {
-                    Layout.leftMargin: 16
                     Layout.bottomMargin: 32
 
                     ParagraphTextType {
