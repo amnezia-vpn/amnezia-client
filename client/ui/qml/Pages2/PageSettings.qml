@@ -37,6 +37,7 @@ PageType {
                 Layout.topMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.bottomMargin: 10
 
                 headerText: qsTr("Settings")
 
@@ -60,8 +61,6 @@ PageType {
                 KeyNavigation.tab: application.rightButton
             }
 
-            DividerType {}
-
             LabelWithButtonType {
                 id: connection
                 Layout.fillWidth: true
@@ -76,8 +75,6 @@ PageType {
 
                 KeyNavigation.tab: application.rightButton
             }
-
-            DividerType {}
 
             LabelWithButtonType {
                 id: application
@@ -94,8 +91,6 @@ PageType {
                 KeyNavigation.tab: about.rightButton
             }
 
-            DividerType {}
-
             LabelWithButtonType {
                 id: about
                 Layout.fillWidth: true
@@ -110,8 +105,6 @@ PageType {
                 KeyNavigation.tab: close
 
             }
-
-            DividerType {}
 
             LabelWithButtonType {
                 id: devConsole
@@ -150,9 +143,6 @@ PageType {
                 }
             }
 
-            DividerType {
-                visible: GC.isDesktop()
-            }
         }
     }
 }
