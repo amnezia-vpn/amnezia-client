@@ -21,7 +21,7 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
+    defaultActiveFocusItem: searchField.textField
 
     property bool pageEnabled
 
