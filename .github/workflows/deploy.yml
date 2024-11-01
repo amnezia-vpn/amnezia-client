@@ -241,7 +241,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           mkdir -p private_keys
-          echo ${{ secrets.APPSTORE_API_KEY_BASE64 }} | base64 --decode > private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_NAME }}.p8
+          echo "${{ secrets.APPSTORE_API_KEY_BASE64 }}" | base64 --decode > private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_NAME }}.p8
 
       - name: "Verfy app"
         if: startsWith(github.ref, 'refs/tags/')
