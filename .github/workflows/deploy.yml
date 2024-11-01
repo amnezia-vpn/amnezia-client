@@ -327,7 +327,7 @@ jobs:
       - name: "Extract api key"
         run: |
           mkdir -p private_keys
-          echo ${{ secrets.APPSTORE_API_KEY_BASE64 }} | base64 --decode > private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_NAME }}.p8
+          echo "${{ secrets.APPSTORE_API_KEY_BASE64 }}" | base64 --decode > private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_NAME }}.p8
 
       - name: "Build project"
         run: |
@@ -402,7 +402,7 @@ jobs:
           submodules: "true"
           fetch-depth: 10
           token: ${{ steps.app_token.outputs.token }}
-          
+
       - name: "Install desktop Qt"
         uses: jurplel/install-qt-action@v4
         with:
@@ -462,7 +462,7 @@ jobs:
         shell: bash
         run: |
           chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
-          
+
       - name: "Setup ccache"
         uses: hendrikmuhs/ccache-action@v1.2
 
@@ -535,7 +535,7 @@ jobs:
           path: deploy/build/ZloVPN-release.aab
           compression-level: 0
           retention-days: 7
-          
+
       - name: "Upload to Google Play"
         if: startsWith(github.ref, 'refs/tags/')
         uses: r0adkll/upload-google-play@v1
