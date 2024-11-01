@@ -391,17 +391,6 @@ void AuthController::refreshServers() {
     });
 }
 
-QString AuthController::getSelectedRegionId() {
-    QString regionId = m_settings->getSelectedRegionId();
-    if (regionId.isEmpty() && !m_regions.isEmpty()) {
-        return m_regions[0].id;
-    }
-
-    return regionId;
-}
-
-void AuthController::setSelectedRegionId(QString regionId) { m_settings->setSelectedRegionId(regionId); }
-
 void AuthController::getServerConnectionString(const QString &serverId, ServerStringRequest *stringRequest) {
     QJsonObject body{};
     body["port"] = 10833;

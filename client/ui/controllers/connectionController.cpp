@@ -63,7 +63,6 @@ ConnectionController::ConnectionController(const QSharedPointer<ImportController
         }
     });
 
-
     m_state = Vpn::ConnectionState::Disconnected;
 }
 

@@ -1,38 +1,31 @@
 #include "regionsModel.h"
 
-RegionsModel::RegionsModel(QSharedPointer<AuthController> authController,
-                           std::shared_ptr<Settings> settings, QObject *parent)
-    : m_authController(authController), m_settings(settings), QAbstractListModel{parent}
-{
-    m_selectedRegionId = m_settings->getSelectedRegionId();
-    connect(m_authController.get(), &AuthController::regionsUpdated, this, [this]() {
-        resetModel();
-    });
+RegionsModel::RegionsModel(QSharedPointer<AuthController> authController, std::shared_ptr<Settings> settings,
+                           QObject *parent) :
+    m_authController(authController), m_settings(settings), QAbstractListModel{parent} {
+    connect(m_authController.get(), &AuthController::regionsUpdated, this, [this]() { resetModel(); });
 }
 
-int RegionsModel::rowCount(const QModelIndex& parent) const {
-    return m_regions.size();
-}
+int RegionsModel::rowCount(const QModelIndex &parent) const { return m_regions.size(); }
 
-QVariant RegionsModel::data(const QModelIndex& index, int role) const {
+QVariant RegionsModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid() || index.row() < 0 || index.row() >= m_regions.size()) {
         return QVariant();
     }
 
-    auto& region = m_regions.at(index.row());
+    auto &region = m_regions.at(index.row());
 
     switch (role) {
-    case NameRole:
-        return region.countryName;
-    case RegionImagePathRole:
-        return RegionsModel::getRegionImagePath(region.countryCode);
+        case NameRole:
+            return region.countryName;
+        case RegionImagePathRole:
+            return RegionsModel::getRegionImagePath(region.countryCode);
     }
 
     return QVariant();
 }
 
 void RegionsModel::setSelectedRegionId(const QString id) {
-    m_selectedRegionId = id;
     m_settings->setSelectedRegionId(id);
     emit selectedRegionChanged();
 }
@@ -50,41 +43,38 @@ int RegionsModel::getSelectedRegionIndex() {
 }
 
 void RegionsModel::setSelectedRegionIndex(const int index) {
-    if (index >= m_regions.size()) return;
-    m_selectedRegionId = m_regions[index].id;
+    if (index >= m_regions.size())
+        return;
+    setSelectedRegionId(m_regions[index].id);
 }
 
 QString RegionsModel::getSelectedRegionId() {
-    if (m_selectedRegionId.isEmpty() && !m_regions.isEmpty()) {
+    QString regionId = m_settings->getSelectedRegionId();
+    if (regionId.isEmpty() && !m_regions.isEmpty()) {
         return m_regions[0].id;
     }
 
-    return m_selectedRegionId;
+    return regionId;
 }
 
-QString RegionsModel::getSelectedRegionName() {
-    return getRegionInfo(getSelectedRegionId()).countryName;
-}
+QString RegionsModel::getSelectedRegionName() { return getRegionInfo(getSelectedRegionId()).countryName; }
 
 QString RegionsModel::getSelectedRegionImagePath() {
     return RegionsModel::getRegionImagePath(getRegionInfo(getSelectedRegionId()).countryCode);
 }
 
-QString RegionsModel::getSelectedRegionDescriptionExpanded() {
-    return getRegionInfo(getSelectedRegionId()).id;
-}
+QString RegionsModel::getSelectedRegionDescriptionExpanded() { return getRegionInfo(getSelectedRegionId()).id; }
 
-QString RegionsModel::getSelectedRegionDescriptionCollapsed() {
-    return getRegionInfo(getSelectedRegionId()).id;
-}
+QString RegionsModel::getSelectedRegionDescriptionCollapsed() { return getRegionInfo(getSelectedRegionId()).id; }
 
 QString RegionsModel::getSelectedRegionProtocolName() {
     return ContainerProps::containerHumanNames().value(DockerContainer::Xray);
 }
 
 RegionInfo RegionsModel::getRegionInfo(const QString id) {
-    for (auto& region : m_regions) {
-        if (region.id == id) return region;
+    for (auto &region: m_regions) {
+        if (region.id == id)
+            return region;
     }
 
     return {};
@@ -100,8 +90,7 @@ QString RegionsModel::getRegionImagePath(const QString countryCode) {
 void RegionsModel::resetModel() {
     beginResetModel();
     m_regions = m_authController->getRegions();
-    m_selectedRegionId = m_authController->getSelectedRegionId();
-    emit selectedRegionChanged();
+    setSelectedRegionId(getSelectedRegionId());
     endResetModel();
 }
 

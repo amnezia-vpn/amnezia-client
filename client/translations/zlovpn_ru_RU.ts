@@ -80,7 +80,7 @@
 <context>
     <name>AuthController</name>
     <message>
-        <location filename="../ui/controllers/authController.cpp" line="453"/>
+        <location filename="../ui/controllers/authController.cpp" line="442"/>
         <source>Failed to open payment page</source>
         <translation>Произошла ошибка при открытии страницы оплаты.</translation>
     </message>
@@ -96,72 +96,72 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="246"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="245"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>VPN-протоколы не установлены.
  Пожалуйста, установите протокол</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="124"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="123"/>
         <source>Connecting...</source>
         <translation>Подключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="89"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="88"/>
         <source>Region not selected</source>
         <translation>Регион не выбран</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="105"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="104"/>
         <source>Failed to import config</source>
         <translation>Ошибка импорта конфигурации</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="130"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="129"/>
         <source>Connected</source>
         <translation>Подключено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="154"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="153"/>
         <source>Preparing...</source>
         <translation>Подготовка...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="177"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="176"/>
         <source>Settings updated successfully, reconnnection...</source>
         <translation>Настройки успешно обновлены, переподключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="180"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="179"/>
         <source>Settings updated successfully</source>
         <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="241"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="240"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation>Выбранный протокол не поддерживается на данном устройстве</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="266"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="265"/>
         <source>unable to create configuration</source>
         <translation>не удалось создать конфигурацию</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="139"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="138"/>
         <source>Reconnecting...</source>
         <translation>Переподключение...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="90"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="144"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="159"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="166"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="143"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="158"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="165"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="149"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="148"/>
         <source>Disconnecting...</source>
         <translation>Отключение...</translation>
     </message>

@@ -101,9 +101,6 @@ public slots:
     void refreshUserInfo();
     void refreshServers();
 
-    QString getSelectedRegionId();
-    void setSelectedRegionId(QString regionId);
-
     void getServerConnectionString(const QString &serverId, ServerStringRequest *stringRequest);
     void openPaymentLink();
 
