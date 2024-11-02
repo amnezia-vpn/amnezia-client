@@ -87,6 +87,7 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Email")
 
+                textField.inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhEmailCharactersOnly
                 textFieldText: root.email
 
                 KeyNavigation.tab: usernameField.textField
@@ -109,6 +110,7 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Username")
 
+                textField.inputMethodHints: Qt.ImhNoPredictiveText
                 textFieldText: root.username
 
                 KeyNavigation.tab: passwordField.textField
@@ -131,6 +133,7 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Password")
 
+                textField.inputMethodHints: Qt.ImhHiddenText | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
                 textFieldText: root.password
                 echoMode: TextInput.Password
 
@@ -164,6 +167,7 @@ PageType {
                 Layout.fillWidth: true
                 headerText: qsTr("Password confirmation")
 
+                textField.inputMethodHints: Qt.ImhHiddenText | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
                 textFieldText: root.passwordConfirmation
                 echoMode: TextInput.Password
 

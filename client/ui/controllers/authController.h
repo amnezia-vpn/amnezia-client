@@ -95,6 +95,7 @@ public slots:
     void recoverAccount(const QString &email);
     void changePassword(const QString &currentPassword, const QString &newPassword);
     void changeEmail(const QString &newEmail);
+    void activatePromocode(const QString &promocode);
     void checkApiCompatibility();
     void logout();
 
@@ -123,6 +124,8 @@ signals:
     void userInfoUpdated();
     void regionsUpdated();
     void paymentLinkOpened();
+
+    void promocodeActivated();
 
 private:
     QNetworkRequest createNetworkRequest(const QString &endpoint, bool needsAuthorization = false,

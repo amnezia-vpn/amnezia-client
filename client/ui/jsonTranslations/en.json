@@ -25,5 +25,6 @@
   "PAYMENT_FAILED": "Payment is not forgiven",
   "APPCAST_NOT_FOUND": "Appcast not found",
   "ADDRESSES_DONT_MATCH": "The addresses don't match",
-  "PASSWORDS_DONT_MATCH": "The passwords don't match"
+  "PASSWORDS_DONT_MATCH": "The passwords don't match",
+  "INVALID_PROMO_CODE": "Promo code is invalid"
 }

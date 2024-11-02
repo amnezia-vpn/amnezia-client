@@ -242,7 +242,7 @@ void AuthController::changeEmail(const QString &newEmail) {
     QNetworkRequest request = createNetworkRequest(EMAIL_CHANGE_ENDPOINT, true, &bytes);
     QNetworkReply *reply = amnApp->manager()->post(request, bytes);
 
-    connect(reply, &QNetworkReply::finished, [this, reply]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
         QByteArray data = reply->readAll();
         Response response = parseNetworkReply(data, *reply);
         if (!response.isOk()) {
@@ -255,6 +255,33 @@ void AuthController::changeEmail(const QString &newEmail) {
         }
 
         emit emailChanged();
+    });
+}
+
+void AuthController::activatePromocode(const QString &promocode) {
+    QJsonObject body{};
+    body["code"] = promocode;
+
+    QJsonDocument doc{body};
+    QByteArray bytes = doc.toJson();
+
+    QNetworkRequest request = createNetworkRequest(ACTIVATE_PROMOCODE_ENDPOINT, true, &bytes);
+    QNetworkReply *reply = amnApp->manager()->post(request, bytes);
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        QByteArray data = reply->readAll();
+        Response response = parseNetworkReply(data, *reply);
+        if (!response.isOk()) {
+            if (response.statusCode == 401) {
+                setUnauthenticated();
+            }
+
+            emit errorOccurred(*response.errors);
+            return;
+        }
+
+        refreshUserInfo();
+        emit promocodeActivated();
     });
 }
 

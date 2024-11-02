@@ -239,6 +239,7 @@
         <file>ui/qml/Pages2/PageUpdateRequired.qml</file>
         <file>ui/jsonTranslations/en.json</file>
         <file>ui/jsonTranslations/ru.json</file>
+        <file>images/controls/ticket.svg</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>

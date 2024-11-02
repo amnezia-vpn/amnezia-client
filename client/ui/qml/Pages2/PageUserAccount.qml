@@ -16,6 +16,128 @@ import UserInfo 1.0
 PageType {
     id: root
 
+    Popup {
+        property string promoCode: ""
+
+        id: blockingPopup
+        anchors.centerIn: Overlay.overlay
+        background: Rectangle {
+            radius: 16
+            color: Qt.rgba(14/255, 14/255, 17/255, 1.0)
+            border.color: "transparent"
+        }
+
+        enter: Transition {
+            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 100 }
+        }
+        exit: Transition {
+            NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; duration: 100 }
+        }
+
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnPressOutside
+
+        padding: 20
+        property int margin: 32
+        property int maxWidth: 380
+        width: Math.min(parent.width - margin, maxWidth)
+
+        ColumnLayout {
+            id: enterCodeContent
+            width: parent.width
+            spacing: 16
+
+            Header2Type {
+                headerText: qsTr("Enter Promocode")
+            }
+
+            TextFieldWithHeaderType {
+                id: promocodeField
+
+                Layout.fillWidth: true
+                Layout.bottomMargin: 8
+
+                textFieldText: blockingPopup.promoCode
+
+                KeyNavigation.tab: buyButton
+            }
+            Binding { blockingPopup.promoCode: promocodeField.textField.text }
+
+            BasicButtonType {
+                id: buyButton
+
+                Layout.fillWidth: true
+                text: qsTr("Activate")
+                enabled: blockingPopup.promoCode.length !== 0
+
+                onClicked: {
+                    blockingPopup.close()
+                    PageController.showBusyIndicator(true)
+                    AuthController.activatePromocode(blockingPopup.promoCode)
+                }
+            }
+        }
+    }
+
+    Popup {
+        property string promoCode: ""
+
+        id: donePopup
+        anchors.centerIn: Overlay.overlay
+        background: Rectangle {
+            radius: 16
+            color: Qt.rgba(14/255, 14/255, 17/255, 1.0)
+            border.color: "transparent"
+        }
+
+        enter: Transition {
+            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 100 }
+        }
+        exit: Transition {
+            NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; duration: 100 }
+        }
+
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnPressOutside
+
+        padding: 20
+        property int margin: 32
+        property int maxWidth: 380
+        width: Math.min(parent.width - margin, maxWidth)
+
+        ColumnLayout {
+            id: doneContent
+            width: parent.width
+            spacing: 16
+
+            Header2Type {
+                headerText: qsTr("Promocode activated")
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.maximumWidth: parent.width
+
+                font.pixelSize: 14
+
+                text: qsTr("The promocode was successfully activated.")
+                color: AmneziaStyle.color.paleGray
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+
+                text: qsTr("Go back")
+
+                clickedFunc: function() {
+                    donePopup.close()
+                }
+            }
+        }
+    }
+
     RowLayout {
         id: topStrip
         anchors.top: parent.top
@@ -119,11 +241,16 @@ PageType {
                 }
             }
 
-            Item {
-                Layout.fillHeight: true
+            LabelWithButtonType {
                 Layout.fillWidth: true
 
-                Rectangle { anchors.fill: parent; color: "#ffaaaa" }
+                text: qsTr("Activate promocode")
+                leftImageSource: "qrc:/images/controls/ticket.svg"
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    blockingPopup.open()
+                }
             }
         }
     }
@@ -180,6 +307,11 @@ PageType {
         }
 
         function onPaymentLinkOpened() {
+            PageController.showBusyIndicator(false)
+        }
+
+        function onPromocodeActivated() {
+            donePopup.open()
             PageController.showBusyIndicator(false)
         }
     }

@@ -75,6 +75,7 @@ PageType {
                     Layout.fillWidth: true
                     headerText: qsTr("Username")
 
+                    textField.inputMethodHints: Qt.ImhNoPredictiveText
                     textFieldText: root.username
 
                     KeyNavigation.tab: passwordField.textField
@@ -87,6 +88,7 @@ PageType {
                     Layout.fillWidth: true
                     headerText: qsTr("Password")
 
+                    textField.inputMethodHints: Qt.ImhHiddenText | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
                     textFieldText: root.password
                     echoMode: TextInput.Password
 

@@ -25,5 +25,6 @@
   "PAYMENT_FAILED": "Оплата не проша",
   "APPCAST_NOT_FOUND": "Appcast не найден",
   "ADDRESSES_DONT_MATCH": "Адреса не совпадают",
-  "PASSWORDS_DONT_MATCH": "Пароли не совпадают"
+  "PASSWORDS_DONT_MATCH": "Пароли не совпадают",
+  "INVALID_PROMO_CODE": "Промокод недействителен"
 }
