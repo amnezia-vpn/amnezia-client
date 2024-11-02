@@ -80,7 +80,7 @@
 <context>
     <name>AuthController</name>
     <message>
-        <location filename="../ui/controllers/authController.cpp" line="469"/>
+        <location filename="../ui/controllers/authController.cpp" line="486"/>
         <source>Failed to open payment page</source>
         <translation>Произошла ошибка при открытии страницы оплаты.</translation>
     </message>
@@ -714,7 +714,7 @@ Already installed containers were found on the server. All installed containers 
     <name>PageLogin</name>
     <message>
         <location filename="../ui/qml/Pages2/PageLogin.qml" line="65"/>
-        <location filename="../ui/qml/Pages2/PageLogin.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageLogin.qml" line="105"/>
         <source>Login</source>
         <translation>Логин</translation>
     </message>
@@ -724,12 +724,12 @@ Already installed containers were found on the server. All installed containers 
         <translation>Имя пользователя</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLogin.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageLogin.qml" line="89"/>
         <source>Password</source>
         <translation>Пароль</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLogin.qml" line="125"/>
+        <location filename="../ui/qml/Pages2/PageLogin.qml" line="127"/>
         <source>Forgot password?</source>
         <translation>Забыли пароль?</translation>
     </message>
@@ -1405,7 +1405,7 @@ Already installed containers were found on the server. All installed containers 
     <name>PageRegister</name>
     <message>
         <location filename="../ui/qml/Pages2/PageRegister.qml" line="62"/>
-        <location filename="../ui/qml/Pages2/PageRegister.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageRegister.qml" line="208"/>
         <source>Register</source>
         <translation>Регистрация</translation>
     </message>
@@ -1415,22 +1415,22 @@ Already installed containers were found on the server. All installed containers 
         <translation>Почта</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageRegister.qml" line="110"/>
+        <location filename="../ui/qml/Pages2/PageRegister.qml" line="111"/>
         <source>Username</source>
         <translation>Имя пользователя</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageRegister.qml" line="132"/>
+        <location filename="../ui/qml/Pages2/PageRegister.qml" line="134"/>
         <source>Password</source>
         <translation>Пароль</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageRegister.qml" line="165"/>
+        <location filename="../ui/qml/Pages2/PageRegister.qml" line="168"/>
         <source>Password confirmation</source>
         <translation>Повторите пароль</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageRegister.qml" line="193"/>
+        <location filename="../ui/qml/Pages2/PageRegister.qml" line="197"/>
         <source>Passwords do not match</source>
         <translation>Пароли не совпадают</translation>
     </message>
@@ -4854,13 +4854,13 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>Settings</name>
     <message>
-        <location filename="../settings.cpp" line="35"/>
+        <location filename="../settings.cpp" line="33"/>
         <source>Server #1</source>
         <translation>Сервер #1</translation>
     </message>
     <message>
-        <location filename="../settings.cpp" line="222"/>
-        <location filename="../settings.cpp" line="229"/>
+        <location filename="../settings.cpp" line="203"/>
+        <location filename="../settings.cpp" line="210"/>
         <source>Server</source>
         <translation>Сервер</translation>
     </message>

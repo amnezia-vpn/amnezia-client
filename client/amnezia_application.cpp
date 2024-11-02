@@ -89,7 +89,7 @@ void AmneziaApplication::init() {
     m_vpnConnectionThread.start();
 
     m_jsonTranslation.reset(new JsonTranslation(this));
-    m_authController.reset(new AuthController(m_settings));
+    m_authController.reset(new AuthController(m_vpnConnection, m_settings));
 
     m_engine->rootContext()->setContextProperty("AuthController", m_authController.get());
 

@@ -9,16 +9,14 @@
 #include "containers/containers_defs.h"
 #include "logger.h"
 
-namespace
-{
+namespace {
     const char cloudFlareNs1[] = "1.1.1.1";
     const char cloudFlareNs2[] = "1.0.0.1";
 
     constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
-}
+} // namespace
 
-Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_NAME, APPLICATION_NAME, this)
-{
+Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_NAME, APPLICATION_NAME, this) {
     // Import old settings
     if (serversCount() == 0) {
         QString user = value("Server/userName").toString();
@@ -46,13 +44,9 @@ Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_N
     m_gatewayEndpoint = gatewayEndpoint;
 }
 
-int Settings::serversCount() const
-{
-    return serversArray().size();
-}
+int Settings::serversCount() const { return serversArray().size(); }
 
-QJsonObject Settings::server(int index) const
-{
+QJsonObject Settings::server(int index) const {
     const QJsonArray &servers = serversArray();
     if (index >= servers.size())
         return QJsonObject();
@@ -60,15 +54,13 @@ QJsonObject Settings::server(int index) const
     return servers.at(index).toObject();
 }
 
-void Settings::addServer(const QJsonObject &server)
-{
+void Settings::addServer(const QJsonObject &server) {
     QJsonArray servers = serversArray();
     servers.append(server);
     setServersArray(servers);
 }
 
-void Settings::removeServer(int index)
-{
+void Settings::removeServer(int index) {
     QJsonArray servers = serversArray();
     if (index >= servers.size())
         return;
@@ -87,8 +79,7 @@ void Settings::removeAllServers() {
     }
 }
 
-bool Settings::editServer(int index, const QJsonObject &server)
-{
+bool Settings::editServer(int index, const QJsonObject &server) {
     QJsonArray servers = serversArray();
     if (index >= servers.size())
         return false;
@@ -98,20 +89,17 @@ bool Settings::editServer(int index, const QJsonObject &server)
     return true;
 }
 
-void Settings::setDefaultContainer(int serverIndex, DockerContainer container)
-{
+void Settings::setDefaultContainer(int serverIndex, DockerContainer container) {
     QJsonObject s = server(serverIndex);
     s.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
     editServer(serverIndex, s);
 }
 
-DockerContainer Settings::defaultContainer(int serverIndex) const
-{
+DockerContainer Settings::defaultContainer(int serverIndex) const {
     return ContainerProps::containerFromString(defaultContainerName(serverIndex));
 }
 
-QString Settings::defaultContainerName(int serverIndex) const
-{
+QString Settings::defaultContainerName(int serverIndex) const {
     QString name = server(serverIndex).value(config_key::defaultContainer).toString();
     if (name.isEmpty()) {
         return ContainerProps::containerToString(DockerContainer::None);
@@ -119,38 +107,36 @@ QString Settings::defaultContainerName(int serverIndex) const
         return name;
 }
 
-QMap<DockerContainer, QJsonObject> Settings::containers(int serverIndex) const
-{
+QMap<DockerContainer, QJsonObject> Settings::containers(int serverIndex) const {
     const QJsonArray &containers = server(serverIndex).value(config_key::containers).toArray();
 
     QMap<DockerContainer, QJsonObject> containersMap;
-    for (const QJsonValue &val : containers) {
-        containersMap.insert(ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()), val.toObject());
+    for (const QJsonValue &val: containers) {
+        containersMap.insert(
+                ContainerProps::containerFromString(val.toObject().value(config_key::container).toString()),
+                val.toObject());
     }
 
     return containersMap;
 }
 
-void Settings::setContainers(int serverIndex, const QMap<DockerContainer, QJsonObject> &containers)
-{
+void Settings::setContainers(int serverIndex, const QMap<DockerContainer, QJsonObject> &containers) {
     QJsonObject s = server(serverIndex);
     QJsonArray c;
-    for (const QJsonObject &o : containers) {
+    for (const QJsonObject &o: containers) {
         c.append(o);
     }
     s.insert(config_key::containers, c);
     editServer(serverIndex, s);
 }
 
-QJsonObject Settings::containerConfig(int serverIndex, DockerContainer container)
-{
+QJsonObject Settings::containerConfig(int serverIndex, DockerContainer container) {
     if (container == DockerContainer::None)
         return QJsonObject();
     return containers(serverIndex).value(container);
 }
 
-void Settings::setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config)
-{
+void Settings::setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config) {
     if (container == DockerContainer::None) {
         qCritical() << "Settings::setContainerConfig trying to set config for container == DockerContainer::None";
         return;
@@ -161,8 +147,7 @@ void Settings::setContainerConfig(int serverIndex, DockerContainer container, co
     setContainers(serverIndex, c);
 }
 
-void Settings::removeContainerConfig(int serverIndex, DockerContainer container)
-{
+void Settings::removeContainerConfig(int serverIndex, DockerContainer container) {
     if (container == DockerContainer::None) {
         qCritical() << "Settings::removeContainerConfig trying to remove config for container == DockerContainer::None";
         return;
@@ -173,25 +158,22 @@ void Settings::removeContainerConfig(int serverIndex, DockerContainer container)
     setContainers(serverIndex, c);
 }
 
-QJsonObject Settings::protocolConfig(int serverIndex, DockerContainer container, Proto proto)
-{
+QJsonObject Settings::protocolConfig(int serverIndex, DockerContainer container, Proto proto) {
     const QJsonObject &c = containerConfig(serverIndex, container);
     return c.value(ProtocolProps::protoToString(proto)).toObject();
 }
 
-void Settings::setProtocolConfig(int serverIndex, DockerContainer container, Proto proto, const QJsonObject &config)
-{
+void Settings::setProtocolConfig(int serverIndex, DockerContainer container, Proto proto, const QJsonObject &config) {
     QJsonObject c = containerConfig(serverIndex, container);
     c.insert(ProtocolProps::protoToString(proto), config);
 
     setContainerConfig(serverIndex, container, c);
 }
 
-void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer container, Proto proto)
-{
+void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer container, Proto proto) {
     // recursively remove
     if (proto == Proto::Any) {
-        for (Proto p : ContainerProps::protocolsForContainer(container)) {
+        for (Proto p: ContainerProps::protocolsForContainer(container)) {
             clearLastConnectionConfig(serverIndex, container, p);
         }
         return;
@@ -202,24 +184,23 @@ void Settings::clearLastConnectionConfig(int serverIndex, DockerContainer contai
     setProtocolConfig(serverIndex, container, proto, c);
 }
 
-bool Settings::haveAuthData(int serverIndex) const
-{
+bool Settings::haveAuthData(int serverIndex) const {
     if (serverIndex < 0)
         return false;
     ServerCredentials cred = serverCredentials(serverIndex);
     return (!cred.hostName.isEmpty() && !cred.userName.isEmpty() && !cred.secretData.isEmpty());
 }
 
-QString Settings::nextAvailableServerName() const
-{
+QString Settings::nextAvailableServerName() const {
     int i = 0;
     bool nameExist = false;
 
     do {
         i++;
         nameExist = false;
-        for (const QJsonValue &server : serversArray()) {
-            if (server.toObject().value(config_key::description).toString() == tr("Server") + " " + QString::number(i)) {
+        for (const QJsonValue &server: serversArray()) {
+            if (server.toObject().value(config_key::description).toString() ==
+                tr("Server") + " " + QString::number(i)) {
                 nameExist = true;
                 break;
             }
@@ -229,8 +210,7 @@ QString Settings::nextAvailableServerName() const
     return tr("Server") + " " + QString::number(i);
 }
 
-void Settings::setSaveLogs(bool enabled)
-{
+void Settings::setSaveLogs(bool enabled) {
     setValue("Conf/saveLogs", enabled);
 #ifndef Q_OS_ANDROID
     if (!isSaveLogs()) {
@@ -249,42 +229,28 @@ void Settings::setSaveLogs(bool enabled)
     emit saveLogsChanged(enabled);
 }
 
-QDateTime Settings::getLogEnableDate()
-{
-    return value("Conf/logEnableDate").toDateTime();
-}
+QDateTime Settings::getLogEnableDate() { return value("Conf/logEnableDate").toDateTime(); }
 
-void Settings::setLogEnableDate(QDateTime date)
-{
-    setValue("Conf/logEnableDate", date);
-}
+void Settings::setLogEnableDate(QDateTime date) { setValue("Conf/logEnableDate", date); }
 
-QString Settings::routeModeString(RouteMode mode) const
-{
+QString Settings::routeModeString(RouteMode mode) const {
     switch (mode) {
-    case VpnAllSites: return "AllSites";
-    case VpnOnlyForwardSites: return "ForwardSites";
-    case VpnAllExceptSites: return "ExceptSites";
+        case VpnAllSites:
+            return "AllSites";
+        case VpnOnlyForwardSites:
+            return "ForwardSites";
+        case VpnAllExceptSites:
+            return "ExceptSites";
     }
 }
 
-Settings::RouteMode Settings::routeMode() const
-{
-    return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt());
-}
+Settings::RouteMode Settings::routeMode() const { return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt()); }
 
-bool Settings::isSitesSplitTunnelingEnabled() const
-{
-    return value("Conf/sitesSplitTunnelingEnabled", false).toBool();
-}
+bool Settings::isSitesSplitTunnelingEnabled() const { return value("Conf/sitesSplitTunnelingEnabled", false).toBool(); }
 
-void Settings::setSitesSplitTunnelingEnabled(bool enabled)
-{
-    setValue("Conf/sitesSplitTunnelingEnabled", enabled);
-}
+void Settings::setSitesSplitTunnelingEnabled(bool enabled) { setValue("Conf/sitesSplitTunnelingEnabled", enabled); }
 
-bool Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
-{
+bool Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip) {
     QVariantMap sites = vpnSites(mode);
     if (sites.contains(site) && ip.isEmpty())
         return false;
@@ -294,8 +260,7 @@ bool Settings::addVpnSite(RouteMode mode, const QString &site, const QString &ip
     return true;
 }
 
-void Settings::addVpnSites(RouteMode mode, const QMap<QString, QString> &sites)
-{
+void Settings::addVpnSites(RouteMode mode, const QMap<QString, QString> &sites) {
     QVariantMap allSites = vpnSites(mode);
     for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
         const QString &site = i.key();
@@ -310,8 +275,7 @@ void Settings::addVpnSites(RouteMode mode, const QMap<QString, QString> &sites)
     setVpnSites(mode, allSites);
 }
 
-QStringList Settings::getVpnIps(RouteMode mode) const
-{
+QStringList Settings::getVpnIps(RouteMode mode) const {
     QStringList ips;
     const QVariantMap &m = vpnSites(mode);
     for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
@@ -325,8 +289,7 @@ QStringList Settings::getVpnIps(RouteMode mode) const
     return ips;
 }
 
-void Settings::removeVpnSite(RouteMode mode, const QString &site)
-{
+void Settings::removeVpnSite(RouteMode mode, const QString &site) {
     QVariantMap sites = vpnSites(mode);
     if (!sites.contains(site))
         return;
@@ -335,10 +298,9 @@ void Settings::removeVpnSite(RouteMode mode, const QString &site)
     setVpnSites(mode, sites);
 }
 
-void Settings::addVpnIps(RouteMode mode, const QStringList &ips)
-{
+void Settings::addVpnIps(RouteMode mode, const QStringList &ips) {
     QVariantMap sites = vpnSites(mode);
-    for (const QString &ip : ips) {
+    for (const QString &ip: ips) {
         if (ip.isEmpty())
             continue;
 
@@ -348,10 +310,9 @@ void Settings::addVpnIps(RouteMode mode, const QStringList &ips)
     setVpnSites(mode, sites);
 }
 
-void Settings::removeVpnSites(RouteMode mode, const QStringList &sites)
-{
+void Settings::removeVpnSites(RouteMode mode, const QStringList &sites) {
     QVariantMap sitesMap = vpnSites(mode);
-    for (const QString &site : sites) {
+    for (const QString &site: sites) {
         if (site.isEmpty())
             continue;
 
@@ -361,53 +322,40 @@ void Settings::removeVpnSites(RouteMode mode, const QStringList &sites)
     setVpnSites(mode, sitesMap);
 }
 
-void Settings::removeAllVpnSites(RouteMode mode)
-{
-    setVpnSites(mode, QVariantMap());
-}
+void Settings::removeAllVpnSites(RouteMode mode) { setVpnSites(mode, QVariantMap()); }
 
-QString Settings::primaryDns() const
-{
-    return value("Conf/primaryDns", cloudFlareNs1).toString();
-}
+QString Settings::primaryDns() const { return value("Conf/primaryDns", cloudFlareNs1).toString(); }
 
-QString Settings::secondaryDns() const
-{
-    return value("Conf/secondaryDns", cloudFlareNs2).toString();
-}
+QString Settings::secondaryDns() const { return value("Conf/secondaryDns", cloudFlareNs2).toString(); }
 
-void Settings::clearSettings()
-{
+void Settings::clearSettings() {
     auto uuid = getInstallationUuid(false);
     m_settings.clearSettings();
     setInstallationUuid(uuid);
     emit settingsCleared();
 }
 
-QString Settings::appsRouteModeString(AppsRouteMode mode) const
-{
+QString Settings::appsRouteModeString(AppsRouteMode mode) const {
     switch (mode) {
-    case VpnAllApps: return "AllApps";
-    case VpnOnlyForwardApps: return "ForwardApps";
-    case VpnAllExceptApps: return "ExceptApps";
+        case VpnAllApps:
+            return "AllApps";
+        case VpnOnlyForwardApps:
+            return "ForwardApps";
+        case VpnAllExceptApps:
+            return "ExceptApps";
     }
 }
 
-Settings::AppsRouteMode Settings::getAppsRouteMode() const
-{
+Settings::AppsRouteMode Settings::getAppsRouteMode() const {
     return static_cast<AppsRouteMode>(value("Conf/appsRouteMode", 0).toInt());
 }
 
-void Settings::setAppsRouteMode(AppsRouteMode mode)
-{
-    setValue("Conf/appsRouteMode", mode);
-}
+void Settings::setAppsRouteMode(AppsRouteMode mode) { setValue("Conf/appsRouteMode", mode); }
 
-QVector<InstalledAppInfo> Settings::getVpnApps(AppsRouteMode mode) const
-{
+QVector<InstalledAppInfo> Settings::getVpnApps(AppsRouteMode mode) const {
     QVector<InstalledAppInfo> apps;
     auto appsArray = value("Conf/" + appsRouteModeString(mode)).toJsonArray();
-    for (const auto &app : appsArray) {
+    for (const auto &app: appsArray) {
         InstalledAppInfo appInfo;
         appInfo.appName = app.toObject().value("appName").toString();
         appInfo.packageName = app.toObject().value("packageName").toString();
@@ -418,10 +366,9 @@ QVector<InstalledAppInfo> Settings::getVpnApps(AppsRouteMode mode) const
     return apps;
 }
 
-void Settings::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps)
-{
+void Settings::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps) {
     QJsonArray appsArray;
-    for (const auto &app : apps) {
+    for (const auto &app: apps) {
         QJsonObject appInfo;
         appInfo.insert("appName", app.appName);
         appInfo.insert("packageName", app.packageName);
@@ -432,56 +379,41 @@ void Settings::setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &a
     m_settings.sync();
 }
 
-bool Settings::isAppsSplitTunnelingEnabled() const
-{
-    return value("Conf/appsSplitTunnelingEnabled", false).toBool();
-}
+bool Settings::isAppsSplitTunnelingEnabled() const { return value("Conf/appsSplitTunnelingEnabled", false).toBool(); }
 
-void Settings::setAppsSplitTunnelingEnabled(bool enabled)
-{
-    setValue("Conf/appsSplitTunnelingEnabled", enabled);
-}
+void Settings::setAppsSplitTunnelingEnabled(bool enabled) { setValue("Conf/appsSplitTunnelingEnabled", enabled); }
 
-bool Settings::isKillSwitchEnabled() const
-{
-    return value("Conf/killSwitchEnabled", true).toBool();
-}
+bool Settings::isKillSwitchEnabled() const { return value("Conf/killSwitchEnabled", true).toBool(); }
 
-void Settings::setKillSwitchEnabled(bool enabled)
-{
-    setValue("Conf/killSwitchEnabled", enabled);
-}
+void Settings::setKillSwitchEnabled(bool enabled) { setValue("Conf/killSwitchEnabled", enabled); }
 
-QString Settings::getUserToken() {
-    return value("User/token", "").toString();
-}
+QString Settings::getUserToken() { return value("User/token", "").toString(); }
 
 void Settings::setUserToken(QString token) {
     setValue("User/token", token);
     m_settings.sync();
 }
 
-QString Settings::getSelectedRegionId() {
-    return value("User/selectedRegion", "").toString();
-}
+QString Settings::getSelectedRegionId() { return value("User/selectedRegion", "").toString(); }
 
-void Settings::setSelectedRegionId(QString id) {
-    setValue("User/selectedRegion", id);
-}
+void Settings::setSelectedRegionId(QString id) { setValue("User/selectedRegion", id); }
 
-QString Settings::getInstallationUuid(const bool needCreate)
-{
+QString Settings::getSpike() { return value("User/spike", "").toString(); }
+
+void Settings::setSpike(QString spike) { setValue("User/spike", spike); }
+
+QString Settings::getInstallationUuid(const bool needCreate) {
     auto uuid = value("Conf/installationUuid", "").toString();
     if (needCreate && uuid.isEmpty()) {
         uuid = QUuid::createUuid().toString();
 
-        //remove {} from uuid
+        // remove {} from uuid
         uuid.remove(0, 1);
         uuid.chop(1);
 
         setInstallationUuid(uuid);
     } else if (uuid.contains("{") && uuid.contains("}")) {
-        //remove {} from old uuid
+        // remove {} from old uuid
         uuid.remove(0, 1);
         uuid.chop(1);
 
@@ -490,18 +422,11 @@ QString Settings::getInstallationUuid(const bool needCreate)
     return uuid;
 }
 
-void Settings::setInstallationUuid(const QString &uuid)
-{
-    setValue("Conf/installationUuid", uuid);
-}
+void Settings::setInstallationUuid(const QString &uuid) { setValue("Conf/installationUuid", uuid); }
 
-ServerCredentials Settings::defaultServerCredentials() const
-{
-    return serverCredentials(defaultServerIndex());
-}
+ServerCredentials Settings::defaultServerCredentials() const { return serverCredentials(defaultServerIndex()); }
 
-ServerCredentials Settings::serverCredentials(int index) const
-{
+ServerCredentials Settings::serverCredentials(int index) const {
     const QJsonObject &s = server(index);
 
     ServerCredentials credentials;
@@ -513,20 +438,19 @@ ServerCredentials Settings::serverCredentials(int index) const
     return credentials;
 }
 
-QVariant Settings::value(const QString &key, const QVariant &defaultValue) const
-{
+QVariant Settings::value(const QString &key, const QVariant &defaultValue) const {
     QVariant returnValue;
     if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
         returnValue = m_settings.value(key, defaultValue);
     } else {
-        QMetaObject::invokeMethod(&m_settings, "value", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QVariant, returnValue),
-                                  Q_ARG(const QString &, key), Q_ARG(const QVariant &, defaultValue));
+        QMetaObject::invokeMethod(&m_settings, "value", Qt::BlockingQueuedConnection,
+                                  Q_RETURN_ARG(QVariant, returnValue), Q_ARG(const QString &, key),
+                                  Q_ARG(const QVariant &, defaultValue));
     }
     return returnValue;
 }
 
-void Settings::setValue(const QString &key, const QVariant &value)
-{
+void Settings::setValue(const QString &key, const QVariant &value) {
     if (QThread::currentThread() == QCoreApplication::instance()->thread()) {
         m_settings.setValue(key, value);
     } else {
@@ -535,32 +459,14 @@ void Settings::setValue(const QString &key, const QVariant &value)
     }
 }
 
-void Settings::resetGatewayEndpoint()
-{
-    m_gatewayEndpoint = gatewayEndpoint;
-}
+void Settings::resetGatewayEndpoint() { m_gatewayEndpoint = gatewayEndpoint; }
 
-void Settings::setGatewayEndpoint(const QString &endpoint)
-{
-    m_gatewayEndpoint = endpoint;
-}
+void Settings::setGatewayEndpoint(const QString &endpoint) { m_gatewayEndpoint = endpoint; }
 
-void Settings::setDevGatewayEndpoint()
-{
-    m_gatewayEndpoint = DEV_AGW_ENDPOINT;
-}
+void Settings::setDevGatewayEndpoint() { m_gatewayEndpoint = DEV_AGW_ENDPOINT; }
 
-QString Settings::getGatewayEndpoint()
-{
-    return m_gatewayEndpoint;
-}
+QString Settings::getGatewayEndpoint() { return m_gatewayEndpoint; }
 
-bool Settings::isDevGatewayEnv()
-{
-    return m_isDevGatewayEnv;
-}
+bool Settings::isDevGatewayEnv() { return m_isDevGatewayEnv; }
 
-void Settings::toggleDevGatewayEnv(bool enabled)
-{
-    m_isDevGatewayEnv = enabled;
-}
+void Settings::toggleDevGatewayEnv(bool enabled) { m_isDevGatewayEnv = enabled; }

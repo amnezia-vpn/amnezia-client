@@ -72,8 +72,9 @@ qint64 UserInfo::monthsAvailableToAdd() const {
     return qMin(6 - monthsLeft, 6);
 }
 
-AuthController::AuthController(std::shared_ptr<Settings> settings, QObject *parent) :
-    QObject{parent}, m_settings(settings) {
+AuthController::AuthController(QSharedPointer<VpnConnection> vpnConnection, std::shared_ptr<Settings> settings,
+                               QObject *parent) :
+    QObject{parent}, m_vpnConnection(vpnConnection), m_settings(settings) {
     connect(m_settings.get(), &Settings::settingsCleared, this, [this]() {
         m_token = "";
         m_authenticated = false;
@@ -93,22 +94,38 @@ AuthController::AuthController(std::shared_ptr<Settings> settings, QObject *pare
             refreshToken();
     });
 
+    connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this,
+            [this](Vpn::ConnectionState state, bool getLastError) {
+                m_connected = state == Vpn::ConnectionState::Connected;
+            });
+
     m_token = m_settings->getUserToken();
 
     auto &cactus = ICactus::GetInstance();
     cactus.Spike(
             this,
             [this](QString spike) {
+                m_settings->setSpike(spike);
                 m_spike = spike;
                 m_spikeErrored = false;
                 emit spikeUpdated();
                 checkApiCompatibility();
             },
             [this]() {
-                m_spikeErrored = true;
-                emit spikeUpdated();
-                emit spikeErrorOccurred();
+                if (m_vpnConnection->connectionState() == Vpn::ConnectionState::Connected || m_connected) {
+                    loadCachedSpike();
+                } else {
+                    m_spikeErrored = true;
+                    emit spikeUpdated();
+                    emit spikeErrorOccurred();
+                }
             });
+}
+
+void AuthController::loadCachedSpike() {
+    m_spike = m_settings->getSpike();
+    m_spikeErrored = false;
+    emit spikeUpdated();
 }
 
 bool AuthController::isAuthenticated() { return m_authenticated; }

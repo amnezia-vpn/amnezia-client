@@ -3,9 +3,11 @@
 
 #include <QNetworkAccessManager>
 #include <QObject>
+#include <QSharedPointer>
 #include <optional>
 #include "errorParser.h"
 #include "settings.h"
+#include "vpnconnection.h"
 
 struct Response {
     int statusCode;
@@ -78,7 +80,8 @@ class AuthController : public QObject {
     Q_PROPERTY(bool updateRequired MEMBER m_updateRequired NOTIFY apiCompatibilityChanged);
 
 public:
-    explicit AuthController(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit AuthController(QSharedPointer<VpnConnection> vpnConnection, std::shared_ptr<Settings> settings,
+                            QObject *parent = nullptr);
 
     const QList<RegionInfo> &getRegions() const { return m_regions; }
 
@@ -132,7 +135,11 @@ private:
                                          const QByteArray *array = nullptr);
     Response parseNetworkReply(QByteArray &data, QNetworkReply &reply, bool formError = false);
 
+    void loadCachedSpike();
+
     std::shared_ptr<Settings> m_settings;
+
+    QSharedPointer<VpnConnection> m_vpnConnection;
 
     QString m_token{};
     UserInfo m_userInfo{};
@@ -141,6 +148,7 @@ private:
     bool m_authenticated{};
     bool m_spikeErrored{};
     bool m_updateRequired{};
+    bool m_connected{};
 };
 
 #endif // AUTHCONTROLLER_H
