@@ -494,7 +494,7 @@ jobs:
           ANDROID_KEYSTORE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
           ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
         shell: bash
-        run: ./deploy/build_android.sh --aab --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
+        run: ./deploy/build_android.sh --aab --apk x86;armeabi-v7a;arm64-v8a --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
       # - name: "Upload x86_64 apk"
       #   uses: actions/upload-artifact@v4
