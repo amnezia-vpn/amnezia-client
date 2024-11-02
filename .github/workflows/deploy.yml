@@ -458,10 +458,10 @@ jobs:
           dir: ${{ runner.temp }}
           extra: "--external 7z --base ${{ env.QT_MIRROR }}"
 
-      - name: "Grant execute permission for qt-cmake"
-        shell: bash
-        run: |
-          chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
+      # - name: "Grant execute permission for qt-cmake"
+      #   shell: bash
+      #   run: |
+      #     chmod +x ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64/bin/qt-cmake
 
       - name: "Setup ccache"
         uses: hendrikmuhs/ccache-action@v1.2
@@ -496,13 +496,13 @@ jobs:
         shell: bash
         run: ./deploy/build_android.sh --aab --apk all --build-platform ${{ env.ANDROID_BUILD_PLATFORM }}
 
-      - name: "Upload x86_64 apk"
-        uses: actions/upload-artifact@v4
-        with:
-          name: ZloVPN_Android_x86_64
-          path: deploy/build/ZloVPN-x86_64-release.apk
-          compression-level: 0
-          retention-days: 7
+      # - name: "Upload x86_64 apk"
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ZloVPN_Android_x86_64
+      #     path: deploy/build/ZloVPN-x86_64-release.apk
+      #     compression-level: 0
+      #     retention-days: 7
 
       - name: "Upload x86 apk"
         uses: actions/upload-artifact@v4
