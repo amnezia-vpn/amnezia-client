@@ -109,6 +109,7 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::AbortError): errorMessage =  QObject::tr("QFile error: The operation was aborted"); break;
 
     // Billing errors
+    case(ErrorCode::BillingCanceled): errorMessage = QObject::tr("Transaction was canceled by the user"); break;
     case(ErrorCode::BillingError): errorMessage = QObject::tr("Billing error"); break;
     case(ErrorCode::BillingGooglePlayError): errorMessage = QObject::tr("Internal Google Play error, please try again later"); break;
     case(ErrorCode::BillingUnavailable): errorMessage = QObject::tr("Billing is unavailable, please try again later"); break;
