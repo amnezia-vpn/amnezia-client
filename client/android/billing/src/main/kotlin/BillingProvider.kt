@@ -26,14 +26,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
+import org.amnezia.vpn.util.ErrorCode
 import org.amnezia.vpn.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 
 private const val TAG = "BillingProvider"
-private const val RESULT_OK = 1
-private const val RESULT_CANCELED = 0
-private const val RESULT_ERROR = -1
 private const val PRODUCT_ID = "premium"
 
 class BillingProvider(context: Context) : AutoCloseable {
@@ -87,20 +85,18 @@ class BillingProvider(context: Context) : AutoCloseable {
             } catch (e: BillingException) {
                 if (e.isCanceled) {
                     Log.w(TAG, "Billing canceled")
-                    return JSONObject().put("result", RESULT_CANCELED)
+                    return JSONObject().put("responseCode", ErrorCode.BillingCanceled)
                 } else if (e.isRetryable && attemptCount < numberAttempts) {
                     Log.d(TAG, "Retryable error: $e")
                     ++attemptCount
                     delay(1000)
                 } else {
                     Log.e(TAG, "Billing error: $e")
-                    return JSONObject()
-                        .put("result", RESULT_ERROR)
-                        .put("errorCode", e.errorCode)
+                    return JSONObject().put("responseCode", e.errorCode)
                 }
             } catch (_: CancellationException) {
                 Log.w(TAG, "Billing coroutine canceled")
-                return JSONObject().put("result", RESULT_CANCELED)
+                return JSONObject().put("responseCode", ErrorCode.BillingCanceled)
             }
         }
     }
@@ -109,7 +105,7 @@ class BillingProvider(context: Context) : AutoCloseable {
         Log.v(TAG, "Get subscription plans")
 
         val productDetailsList = getProductDetails()
-        val resultJson = JSONObject().put("result", RESULT_OK)
+        val resultJson = JSONObject().put("responseCode", ErrorCode.NoError)
         val productArray = JSONArray().also { resultJson.put("products", it) }
         productDetailsList?.forEach { productDetails ->
             val product = JSONObject().also { productArray.put(it) }
@@ -178,7 +174,7 @@ class BillingProvider(context: Context) : AutoCloseable {
         val countryCode = deferred.await()
 
         return JSONObject()
-            .put("result", RESULT_OK)
+            .put("responseCode", ErrorCode.NoError)
             .put("countryCode", countryCode)
     }
 
@@ -233,7 +229,7 @@ class BillingProvider(context: Context) : AutoCloseable {
         subscriptionPurchases.firstOrNull { it != null }?.let { (billingResult, purchases) ->
             if (!billingResult.isOk) throw BillingException(billingResult)
             return JSONObject()
-                .put("result", RESULT_OK)
+                .put("responseCode", ErrorCode.NoError)
                 .put("purchases", processPurchases(purchases))
         } ?: throw BillingException("Purchase failed")
     }
@@ -241,20 +237,20 @@ class BillingProvider(context: Context) : AutoCloseable {
     private fun processPurchases(purchases: List<Purchase>?): JSONArray {
         val purchaseArray = JSONArray()
         purchases?.forEach { purchase ->
-            val purchaseJson = JSONObject().also { purchaseArray.put(it) }
+            /* val purchaseJson = */ JSONObject().also { purchaseArray.put(it) }
                 .put("purchaseToken", purchase.purchaseToken)
                 .put("purchaseTime", purchase.purchaseTime)
                 .put("purchaseState", purchase.purchaseState)
                 .put("isAcknowledged", purchase.isAcknowledged)
                 .put("isAutoRenewing", purchase.isAutoRenewing)
                 .put("orderId", purchase.orderId)
-                .put("productIds", JSONArray(purchase.products))
+                // .put("productIds", JSONArray(purchase.products))
 
-            purchase.pendingPurchaseUpdate?.let { purchaseUpdate ->
+            /* purchase.pendingPurchaseUpdate?.let { purchaseUpdate ->
                 JSONObject()
                     .put("purchaseToken", purchaseUpdate.purchaseToken)
-                    .put("productIds", JSONArray(purchaseUpdate.products))
-            }.also { purchaseJson.put("pendingPurchaseUpdate", it) }
+                    // .put("productIds", JSONArray(purchaseUpdate.products))
+            }.also { purchaseJson.put("pendingPurchaseUpdate", it) } */
         }
         return purchaseArray
     }
@@ -281,14 +277,14 @@ class BillingProvider(context: Context) : AutoCloseable {
             throw BillingException(result)
         }
 
-        return JSONObject().put("result", RESULT_OK)
+        return JSONObject().put("responseCode", ErrorCode.NoError)
     }
 
     suspend fun getPurchases(): JSONObject {
         Log.v(TAG, "Get purchases")
         val purchases = queryPurchases()
         return JSONObject()
-            .put("result", RESULT_OK)
+            .put("responseCode", ErrorCode.NoError)
             .put("purchases", processPurchases(purchases))
     }
 

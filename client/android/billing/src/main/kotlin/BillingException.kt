@@ -18,7 +18,7 @@ internal class BillingException(
 ) : Exception(billingResult.toString()) {
 
     constructor(msg: String) : this(BillingResult.newBuilder()
-        .setResponseCode(9999)
+        .setResponseCode(DEVELOPER_ERROR)
         .setDebugMessage(msg)
         .build())
 
