@@ -9,7 +9,7 @@
 	url = https://github.com/mitchcurtis/SortFilterProxyModel.git
 [submodule "client/3rd-prebuilt"]
 	path = client/3rd-prebuilt
-	url = https://github.com/amnezia-vpn/3rd-prebuilt
+	url = https://github.com/zloserver/zlovpn-3rd-prebuilt.git
 [submodule "client/3rd/amneziawg-apple"]
 	path = client/3rd/amneziawg-apple
 	url = https://github.com/zloserver/amneziawg-apple
