@@ -2,16 +2,15 @@
 #define CONNECTIONCONTROLLER_H
 
 #include "protocols/vpnprotocol.h"
+#include "ui/controllers/authController.h"
+#include "ui/controllers/importController.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
-#include "ui/models/servers_model.h"
 #include "ui/models/regionsModel.h"
-#include "ui/controllers/importController.h"
-#include "ui/controllers/authController.h"
+#include "ui/models/servers_model.h"
 #include "vpnconnection.h"
 
-class ConnectionController : public QObject
-{
+class ConnectionController : public QObject {
     Q_OBJECT
 
 public:
@@ -22,10 +21,11 @@ public:
     explicit ConnectionController(const QSharedPointer<ImportController> importController,
                                   const QSharedPointer<AuthController> authController,
                                   const QSharedPointer<RegionsModel> regionsModel,
-                                  const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+                                  const QSharedPointer<ServersModel> &serversModel,
+                                  const QSharedPointer<ContainersModel> &containersModel,
                                   const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                  const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
-                                  QObject *parent = nullptr);
+                                  const QSharedPointer<VpnConnection> &vpnConnection,
+                                  const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
     ~ConnectionController() = default;
 
@@ -46,11 +46,13 @@ public slots:
 
     void onTranslationsUpdated();
 
-    ErrorCode updateProtocolConfig(const DockerContainer container, const ServerCredentials &credentials, QJsonObject &containerConfig,
+    ErrorCode updateProtocolConfig(const DockerContainer container, const ServerCredentials &credentials,
+                                   QJsonObject &containerConfig,
                                    QSharedPointer<ServerController> serverController = nullptr);
 
 signals:
-    void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
+                      const QJsonObject &vpnConfiguration);
     void disconnectFromVpn();
     void connectionStateChanged();
 
@@ -67,12 +69,14 @@ signals:
     void updateApiConfigFromTelegram();
     void configFromApiUpdated();
 
+    void splitTunnelingFailed();
+
 private:
     Vpn::ConnectionState getCurrentConnectionState();
     bool isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container);
 
     void continueConnection();
-    
+
     QSharedPointer<ImportController> m_importController;
     QSharedPointer<AuthController> m_authController;
     QSharedPointer<RegionsModel> m_regionsModel;

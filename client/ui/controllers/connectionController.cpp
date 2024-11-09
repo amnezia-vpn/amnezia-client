@@ -30,6 +30,10 @@ ConnectionController::ConnectionController(const QSharedPointer<ImportController
             Qt::QueuedConnection);
     connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn,
             Qt::QueuedConnection);
+    connect(m_vpnConnection.get(), &VpnConnection::splitTunnelingFailed, this, [this]() {
+        emit splitTunnelingFailed();
+        closeConnection();
+    });
 
     connect(this, &ConnectionController::configFromApiUpdated, this, &ConnectionController::continueConnection);
 

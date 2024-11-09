@@ -36,5 +36,7 @@ class IpcInterface
 
     SLOT( void connectionEstablished(const QUuid& uniqueId) );
     SLOT( void connectionClose(const QUuid& uniqueId) );
+
+    SIGNAL( splitTunnelingFailed() );
 };
 

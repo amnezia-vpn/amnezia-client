@@ -2,13 +2,13 @@
 #define VPNCONNECTION_H
 
 #include <QObject>
-#include <QString>
-#include <QScopedPointer>
 #include <QRemoteObjectNode>
+#include <QScopedPointer>
+#include <QString>
 #include <QTimer>
 
-#include "protocols/vpnprotocol.h"
 #include "core/defs.h"
+#include "protocols/vpnprotocol.h"
 #include "settings.h"
 
 #ifdef AMNEZIA_DESKTOP
@@ -21,12 +21,11 @@
 
 using namespace amnezia;
 
-class VpnConnection : public QObject
-{
+class VpnConnection : public QObject {
     Q_OBJECT
 
 public:
-    explicit VpnConnection(std::shared_ptr<Settings> settings, QObject* parent = nullptr);
+    explicit VpnConnection(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
     ~VpnConnection() override;
 
     static QString bytesPerSecToText(quint64 bytes);
@@ -47,8 +46,8 @@ public:
 #endif
 
 public slots:
-    void connectToVpn(int serverIndex,
-        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
+                      const QJsonObject &vpnConfiguration);
 
     void disconnectFromVpn();
 
@@ -61,6 +60,7 @@ signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(Vpn::ConnectionState state, bool getLastError = true);
     void vpnProtocolError(amnezia::ErrorCode error);
+    void splitTunnelingFailed();
 
     void serviceIsNotReady();
 
@@ -81,20 +81,20 @@ private:
     QTimer m_checkTimer;
 
 #ifdef AMNEZIA_DESKTOP
-    IpcClient *m_IpcClient {nullptr};
+    IpcClient *m_IpcClient{nullptr};
 #endif
 
 #ifdef Q_OS_ANDROID
-   AndroidVpnProtocol* androidVpnProtocol = nullptr;
+    AndroidVpnProtocol *androidVpnProtocol = nullptr;
 
-   AndroidVpnProtocol* createDefaultAndroidVpnProtocol();
-   void createAndroidConnections();
+    AndroidVpnProtocol *createDefaultAndroidVpnProtocol();
+    void createAndroidConnections();
 #endif
 
-   void createProtocolConnections();
+    void createProtocolConnections();
 
-   void appendSplitTunnelingConfig();
-   void appendKillSwitchConfig();
+    void appendSplitTunnelingConfig();
+    void appendKillSwitchConfig();
 };
 
 #endif // VPNCONNECTION_H

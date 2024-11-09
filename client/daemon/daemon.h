@@ -14,79 +14,79 @@
 #include "wireguardutils.h"
 
 class Daemon : public QObject {
-  Q_OBJECT
+    Q_OBJECT
 
- public:
-  enum Op {
-    Up,
-    Down,
-    Switch,
-  };
+public:
+    enum Op {
+        Up,
+        Down,
+        Switch,
+    };
 
-  explicit Daemon(QObject* parent);
-  ~Daemon();
+    explicit Daemon(QObject *parent);
+    ~Daemon();
 
-  static Daemon* instance();
+    static Daemon *instance();
 
-  static bool parseConfig(const QJsonObject& obj, InterfaceConfig& config);
+    static bool parseConfig(const QJsonObject &obj, InterfaceConfig &config);
 
-  virtual bool activate(const InterfaceConfig& config);
-  virtual bool deactivate(bool emitSignals = true);
-  virtual QJsonObject getStatus();
+    virtual bool activate(const InterfaceConfig &config);
+    virtual bool deactivate(bool emitSignals = true);
+    virtual QJsonObject getStatus();
 
-  // Callback before any Activating measure is done
-  virtual void prepareActivation(const InterfaceConfig& config, int inetAdapterIndex = 0) {
-      Q_UNUSED(config)  };
-  virtual void activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex = 0) {
-      Q_UNUSED(config)  };
+    // Callback before any Activating measure is done
+    virtual void prepareActivation(const InterfaceConfig &config, int inetAdapterIndex = 0) { Q_UNUSED(config) };
+    virtual bool activateSplitTunnel(const InterfaceConfig &config, int vpnAdapterIndex = 0) {
+        Q_UNUSED(config)
+        return true;
+    };
 
-  QString logs();
-  void cleanLogs();
+    QString logs();
+    void cleanLogs();
 
- signals:
-  void connected(const QString& pubkey);
-  /**
-   * Can be fired if a call to activate() was unsucessfull
-   * and connected systems should rollback
-   */
-  void activationFailure();
-  void disconnected();
-  void backendFailure();
+signals:
+    void connected(const QString &pubkey);
+    /**
+     * Can be fired if a call to activate() was unsucessfull
+     * and connected systems should rollback
+     */
+    void activationFailure();
+    void disconnected();
+    void backendFailure();
 
- private:
-  bool maybeUpdateResolvers(const InterfaceConfig& config);
-  bool addExclusionRoute(const IPAddress& address);
-  bool delExclusionRoute(const IPAddress& address);
+private:
+    bool maybeUpdateResolvers(const InterfaceConfig &config);
+    bool addExclusionRoute(const IPAddress &address);
+    bool delExclusionRoute(const IPAddress &address);
 
- protected:
-  virtual bool run(Op op, const InterfaceConfig& config) {
-    Q_UNUSED(op);
-    Q_UNUSED(config);
-    return true;
-  }
-  virtual bool supportServerSwitching(const InterfaceConfig& config) const;
-  virtual bool switchServer(const InterfaceConfig& config);
-  virtual WireguardUtils* wgutils() const = 0;
-  virtual bool supportIPUtils() const { return false; }
-  virtual IPUtils* iputils() { return nullptr; }
-  virtual bool supportDnsUtils() const { return false; }
-  virtual DnsUtils* dnsutils() { return nullptr; }
+protected:
+    virtual bool run(Op op, const InterfaceConfig &config) {
+        Q_UNUSED(op);
+        Q_UNUSED(config);
+        return true;
+    }
+    virtual bool supportServerSwitching(const InterfaceConfig &config) const;
+    virtual bool switchServer(const InterfaceConfig &config);
+    virtual WireguardUtils *wgutils() const = 0;
+    virtual bool supportIPUtils() const { return false; }
+    virtual IPUtils *iputils() { return nullptr; }
+    virtual bool supportDnsUtils() const { return false; }
+    virtual DnsUtils *dnsutils() { return nullptr; }
 
-  static bool parseStringList(const QJsonObject& obj, const QString& name,
-                              QStringList& list);
+    static bool parseStringList(const QJsonObject &obj, const QString &name, QStringList &list);
 
-  void checkHandshake();
+    void checkHandshake();
 
-  class ConnectionState {
-   public:
-    ConnectionState(){};
-    ConnectionState(const InterfaceConfig& config) { m_config = config; }
-    QDateTime m_date;
-    InterfaceConfig m_config;
-  };
-  QMap<InterfaceConfig::HopType, ConnectionState> m_connections;
-  QHash<IPAddress, int> m_excludedAddrSet;
-  QTimer m_handshakeTimer;
+    class ConnectionState {
+    public:
+        ConnectionState(){};
+        ConnectionState(const InterfaceConfig &config) { m_config = config; }
+        QDateTime m_date;
+        InterfaceConfig m_config;
+    };
+    QMap<InterfaceConfig::HopType, ConnectionState> m_connections;
+    QHash<IPAddress, int> m_excludedAddrSet;
+    QTimer m_handshakeTimer;
 };
 
-#endif  // DAEMON_H
+#endif // DAEMON_H

@@ -96,72 +96,72 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="245"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="249"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>VPN-протоколы не установлены.
  Пожалуйста, установите протокол</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="123"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="127"/>
         <source>Connecting...</source>
         <translation>Подключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="88"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="92"/>
         <source>Region not selected</source>
         <translation>Регион не выбран</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="104"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="108"/>
         <source>Failed to import config</source>
         <translation>Ошибка импорта конфигурации</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="129"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="133"/>
         <source>Connected</source>
         <translation>Подключено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="153"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="157"/>
         <source>Preparing...</source>
         <translation>Подготовка...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="176"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="180"/>
         <source>Settings updated successfully, reconnnection...</source>
         <translation>Настройки успешно обновлены, переподключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="179"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="183"/>
         <source>Settings updated successfully</source>
         <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="240"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="244"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation>Выбранный протокол не поддерживается на данном устройстве</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="265"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="269"/>
         <source>unable to create configuration</source>
         <translation>не удалось создать конфигурацию</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="138"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="142"/>
         <source>Reconnecting...</source>
         <translation>Переподключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="90"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="143"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="158"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="165"/>
+        <location filename="../ui/controllers/connectionController.h" line="94"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="147"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="162"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="169"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="148"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="152"/>
         <source>Disconnecting...</source>
         <translation>Отключение...</translation>
     </message>
@@ -5016,7 +5016,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="397"/>
+        <location filename="../vpnconnection.cpp" line="386"/>
         <source>Mbps</source>
         <translation>Мбит/с</translation>
     </message>
@@ -5114,12 +5114,46 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="178"/>
+        <location filename="../ui/qml/main2.qml" line="171"/>
+        <source>Split tunneling failed</source>
+        <translation>Ошибка раздельного туннелирования</translation>
+    </message>
+    <message>
+        <source>Split tunneling failed to start. This could be due to one of the following reasons:</source>
+        <translation type="vanished">Ошибка запуска раздельного туннелирования. Возможные причины:</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/main2.qml" line="180"/>
+        <source>Possible reasons:</source>
+        <translation type="unfinished">Возможные причины:</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/main2.qml" line="191"/>
+        <source>• You have Mullvad VPN running</source>
+        <translation>• У вас запущен Mullvad VPN</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/main2.qml" line="196"/>
+        <source>• Split tunneling driver failed to start</source>
+        <translation>• Ошибка запуска драйвера раздельного туннелирования</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/main2.qml" line="201"/>
+        <source>• Failed to set up firewall</source>
+        <translation>• Ошибка настройки файрвола</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/main2.qml" line="210"/>
+        <source>Go back</source>
+        <translation type="unfinished">Назад</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/main2.qml" line="264"/>
         <source>Private key passphrase</source>
         <translation>Парольная фраза для закрытого ключа</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="201"/>
+        <location filename="../ui/qml/main2.qml" line="287"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>

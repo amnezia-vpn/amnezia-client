@@ -8,154 +8,155 @@
 #include "ui/models/servers_model.h"
 
 namespace PageLoader {
-Q_NAMESPACE
-enum class PageEnum {
-  PageStart = 0,
-  PageHome,
-  PageShare,
-  PageDeinstalling,
+    Q_NAMESPACE
+    enum class PageEnum {
+        PageStart = 0,
+        PageHome,
+        PageShare,
+        PageDeinstalling,
 
-  PageSettingsServersList,
-  PageSettings,
-  PageSettingsServerData,
-  PageSettingsServerInfo,
-  PageSettingsServerProtocols,
-  PageSettingsServerServices,
-  PageSettingsServerProtocol,
-  PageSettingsConnection,
-  PageSettingsDns,
-  PageSettingsApplication,
-  PageSettingsBackup,
-  PageSettingsAbout,
-  PageSettingsLogging,
-  PageSettingsSplitTunneling,
-  PageSettingsAppSplitTunneling,
+        PageSettingsServersList,
+        PageSettings,
+        PageSettingsServerData,
+        PageSettingsServerInfo,
+        PageSettingsServerProtocols,
+        PageSettingsServerServices,
+        PageSettingsServerProtocol,
+        PageSettingsConnection,
+        PageSettingsDns,
+        PageSettingsApplication,
+        PageSettingsBackup,
+        PageSettingsAbout,
+        PageSettingsLogging,
+        PageSettingsSplitTunneling,
+        PageSettingsAppSplitTunneling,
 
-  PageServiceSftpSettings,
-  PageServiceTorWebsiteSettings,
-  PageServiceDnsSettings,
-  PageServiceSocksProxySettings,
+        PageServiceSftpSettings,
+        PageServiceTorWebsiteSettings,
+        PageServiceDnsSettings,
+        PageServiceSocksProxySettings,
 
-  PageSetupWizardStart,
-  PageSetupWizardCredentials,
-  PageSetupWizardProtocols,
-  PageSetupWizardEasy,
-  PageSetupWizardProtocolSettings,
-  PageSetupWizardInstalling,
-  PageSetupWizardConfigSource,
-  PageSetupWizardTextKey,
-  PageSetupWizardViewConfig,
-  PageSetupWizardQrReader,
-  PageSetupWizardApiServicesList,
-  PageSetupWizardApiServiceInfo,
+        PageSetupWizardStart,
+        PageSetupWizardCredentials,
+        PageSetupWizardProtocols,
+        PageSetupWizardEasy,
+        PageSetupWizardProtocolSettings,
+        PageSetupWizardInstalling,
+        PageSetupWizardConfigSource,
+        PageSetupWizardTextKey,
+        PageSetupWizardViewConfig,
+        PageSetupWizardQrReader,
+        PageSetupWizardApiServicesList,
+        PageSetupWizardApiServiceInfo,
 
-  PageProtocolOpenVpnSettings,
-  PageProtocolShadowSocksSettings,
-  PageProtocolCloakSettings,
-  PageProtocolXraySettings,
-  PageProtocolWireGuardSettings,
-  PageProtocolAwgSettings,
-  PageProtocolIKev2Settings,
-  PageProtocolRaw,
+        PageProtocolOpenVpnSettings,
+        PageProtocolShadowSocksSettings,
+        PageProtocolCloakSettings,
+        PageProtocolXraySettings,
+        PageProtocolWireGuardSettings,
+        PageProtocolAwgSettings,
+        PageProtocolIKev2Settings,
+        PageProtocolRaw,
 
-  PageProtocolWireGuardClientSettings,
-  PageProtocolAwgClientSettings,
+        PageProtocolWireGuardClientSettings,
+        PageProtocolAwgClientSettings,
 
-  PageShareFullAccess,
+        PageShareFullAccess,
 
-  PageDevMenu,
+        PageDevMenu,
 
-  PageLogin,
-  PageRegister,
-  PageUserAccount,
-  PageSettingsAboutOriginal,
-  PageForgotPassword,
-  PageChangePassword,
-  PageChangeEmail,
-  PageFirstSetup,
-  PageLookingForServer,
-  PageUpdateRequired
-};
-Q_ENUM_NS(PageEnum)
+        PageLogin,
+        PageRegister,
+        PageUserAccount,
+        PageSettingsAboutOriginal,
+        PageForgotPassword,
+        PageChangePassword,
+        PageChangeEmail,
+        PageFirstSetup,
+        PageLookingForServer,
+        PageUpdateRequired
+    };
+    Q_ENUM_NS(PageEnum)
 
-static void declareQmlPageEnum() {
-  qmlRegisterUncreatableMetaObject(PageLoader::staticMetaObject, "PageEnum", 1,
-                                   0, "PageEnum", "Error: only enums");
-}
+    static void declareQmlPageEnum() {
+        qmlRegisterUncreatableMetaObject(PageLoader::staticMetaObject, "PageEnum", 1, 0, "PageEnum",
+                                         "Error: only enums");
+    }
 } // namespace PageLoader
 
 class PageController : public QObject {
-  Q_OBJECT
+    Q_OBJECT
 public:
-  explicit PageController(const QSharedPointer<ServersModel> &serversModel,
-                          const std::shared_ptr<Settings> &settings,
-                          QObject *parent = nullptr);
+    explicit PageController(const QSharedPointer<ServersModel> &serversModel, const std::shared_ptr<Settings> &settings,
+                            QObject *parent = nullptr);
 
 public slots:
-  bool isStartPageVisible();
-  QString getPagePath(PageLoader::PageEnum page);
+    bool isStartPageVisible();
+    QString getPagePath(PageLoader::PageEnum page);
 
-  void closeWindow();
-  void hideWindow();
-  void keyPressEvent(Qt::Key key);
+    void closeWindow();
+    void hideWindow();
+    void keyPressEvent(Qt::Key key);
 
-  unsigned int getInitialPageNavigationBarColor();
-  void updateNavigationBarColor(const int color);
+    unsigned int getInitialPageNavigationBarColor();
+    void updateNavigationBarColor(const int color);
 
-  void showOnStartup();
+    void showOnStartup();
 
-  bool isTriggeredByConnectButton();
-  void setTriggeredByConnectButton(bool trigger);
+    bool isTriggeredByConnectButton();
+    void setTriggeredByConnectButton(bool trigger);
 
-  void closeApplication();
+    void closeApplication();
 
-  void setDrawerDepth(const int depth);
-  int getDrawerDepth();
+    void setDrawerDepth(const int depth);
+    int getDrawerDepth();
 
 private slots:
-  void onShowErrorMessage(amnezia::ErrorCode errorCode);
+    void onShowErrorMessage(amnezia::ErrorCode errorCode);
 
 signals:
-  void goToPage(PageLoader::PageEnum page, bool slide = true);
-  void goToStartPage();
-  void goToPageHome();
-  void goToPageSettings();
-  void goToPageViewConfig();
-  void goToPageSettingsServerServices();
-  void goToPageSettingsBackup();
+    void goToPage(PageLoader::PageEnum page, bool slide = true);
+    void goToStartPage();
+    void goToPageHome();
+    void goToPageSettings();
+    void goToPageViewConfig();
+    void goToPageSettingsServerServices();
+    void goToPageSettingsBackup();
 
-  void closePage();
+    void closePage();
 
-  void restorePageHomeState(bool isContainerInstalled = false);
+    void restorePageHomeState(bool isContainerInstalled = false);
 
-  void showErrorMessage(amnezia::ErrorCode);
-  void showErrorMessage(const QString &errorMessage);
-  void showNotificationMessage(const QString &message);
+    void showErrorMessage(amnezia::ErrorCode);
+    void showErrorMessage(const QString &errorMessage);
+    void showNotificationMessage(const QString &message);
 
-  void showBusyIndicator(bool visible);
-  void disableControls(bool disabled);
-  void disableTabBar(bool disabled);
+    void showSplitTunnelingFailed();
 
-  void hideMainWindow();
-  void raiseMainWindow();
+    void showBusyIndicator(bool visible);
+    void disableControls(bool disabled);
+    void disableTabBar(bool disabled);
 
-  void showPassphraseRequestDrawer();
-  void passphraseRequestDrawerClosed(QString passphrase);
+    void hideMainWindow();
+    void raiseMainWindow();
 
-  void escapePressed();
-  void closeTopDrawer();
+    void showPassphraseRequestDrawer();
+    void passphraseRequestDrawerClosed(QString passphrase);
 
-  void forceTabBarActiveFocus();
-  void forceStackActiveFocus();
+    void escapePressed();
+    void closeTopDrawer();
+
+    void forceTabBarActiveFocus();
+    void forceStackActiveFocus();
 
 private:
-  QSharedPointer<ServersModel> m_serversModel;
+    QSharedPointer<ServersModel> m_serversModel;
 
-  std::shared_ptr<Settings> m_settings;
+    std::shared_ptr<Settings> m_settings;
 
-  bool m_isTriggeredByConnectButton;
+    bool m_isTriggeredByConnectButton;
 
-  int m_drawerDepth = 0;
+    int m_drawerDepth = 0;
 };
 
 #endif // PAGECONTROLLER_H

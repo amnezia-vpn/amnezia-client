@@ -15,77 +15,104 @@
 #include <QTextStream>
 #include <QtGlobal>
 
+#include "core/networkUtilities.h"
 #include "dnsutilswindows.h"
 #include "leakdetector.h"
 #include "logger.h"
-#include "core/networkUtilities.h"
 #include "platforms/windows/windowscommons.h"
 #include "platforms/windows/windowsservicemanager.h"
+#include "splitTunnelService.h"
 #include "windowsfirewall.h"
 
 namespace {
-Logger logger("WindowsDaemon");
+    Logger logger("WindowsDaemon");
 }
 
-WindowsDaemon::WindowsDaemon() : Daemon(nullptr), m_splitTunnelManager(this) {
-  MZ_COUNT_CTOR(WindowsDaemon);
+WindowsDaemon::WindowsDaemon() : Daemon(nullptr) {
+    MZ_COUNT_CTOR(WindowsDaemon);
 
-  m_wgutils = new WireguardUtilsWindows(this);
-  m_dnsutils = new DnsUtilsWindows(this);
+    m_wgutils = new WireguardUtilsWindows(this);
+    m_dnsutils = new DnsUtilsWindows(this);
 
-  connect(m_wgutils, &WireguardUtilsWindows::backendFailure, this,
-          &WindowsDaemon::monitorBackendFailure);
-  connect(this, &WindowsDaemon::activationFailure,
-          []() { WindowsFirewall::instance()->disableKillSwitch(); });
+    connect(m_wgutils, &WireguardUtilsWindows::backendFailure, this, &WindowsDaemon::monitorBackendFailure);
+    connect(this, &WindowsDaemon::activationFailure, []() { WindowsFirewall::instance()->disableKillSwitch(); });
 }
 
 WindowsDaemon::~WindowsDaemon() {
-  MZ_COUNT_DTOR(WindowsDaemon);
-  logger.debug() << "Daemon released";
+    MZ_COUNT_DTOR(WindowsDaemon);
+    logger.debug() << "Daemon released";
 }
 
-void WindowsDaemon::prepareActivation(const InterfaceConfig& config, int inetAdapterIndex) {
-  // Before creating the interface we need to check which adapter
-  // routes to the server endpoint
-  if (inetAdapterIndex == 0) {
-      auto serveraddr = QHostAddress(config.m_serverIpv4AddrIn);
-      m_inetAdapterIndex = NetworkUtilities::AdapterIndexTo(serveraddr);
-  } else {
-      m_inetAdapterIndex = inetAdapterIndex;
-  }
-}
-
-void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex) {
-  if (config.m_vpnDisabledApps.length() > 0) {
-      m_splitTunnelManager.start(m_inetAdapterIndex, vpnAdapterIndex);
-      m_splitTunnelManager.setRules(config.m_vpnDisabledApps);
-  } else {
-      m_splitTunnelManager.stop();
-  }
-}
-
-bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
-  if (op == Down) {
-    m_splitTunnelManager.stop();
-    return true;
-  }
-
-  if (op == Up) {
-    logger.debug() << "Tunnel UP, Starting SplitTunneling";
-    if (!WindowsSplitTunnel::isInstalled()) {
-      logger.warning() << "Split Tunnel Driver not Installed yet, fixing this.";
-      WindowsSplitTunnel::installDriver();
+void WindowsDaemon::prepareActivation(const InterfaceConfig &config, int inetAdapterIndex) {
+    // Before creating the interface we need to check which adapter
+    // routes to the server endpoint
+    if (inetAdapterIndex == 0) {
+        auto serveraddr = QHostAddress(config.m_serverIpv4AddrIn);
+        m_inetAdapterIndex = NetworkUtilities::AdapterIndexTo(serveraddr);
+    } else {
+        m_inetAdapterIndex = inetAdapterIndex;
     }
-  }
+}
 
-  activateSplitTunnel(config);
+bool WindowsDaemon::activateSplitTunnel(const InterfaceConfig &config, int vpnAdapterIndex) {
+    bool shouldError = config.m_vpnDisabledApps.length() > 0;
 
-  return true;
+    if (!WinSplitTunnelDriver::CheckLoaded()) {
+        auto error = WinSplitTunnelService::InstallService();
+        if (error != WinSplitTunnelService::InstallError::None &&
+            error != WinSplitTunnelService::InstallError::AlreadyInstalled) {
+            if (shouldError)
+                return false;
+        }
+    }
+
+    auto initResult = m_splitTunnelDriver.init();
+    if (initResult != WinSplitTunnelDriver::InitError::None &&
+        initResult != WinSplitTunnelDriver::InitError::AlreadyInitialized) {
+        if (shouldError)
+            return false;
+    }
+
+    if (!WindowsFirewall::instance()->init() && shouldError) {
+        logger.error() << "Init WFP-Sublayer failed, driver won't be functional";
+        return false;
+    }
+
+    if (!m_splitTunnelDriver.reconfigureDriver(m_inetAdapterIndex, vpnAdapterIndex) && shouldError) {
+        return false;
+    }
+
+    if (config.m_vpnDisabledApps.length() > 0) {
+        if (!m_splitTunnelDriver.setConfig(config.m_vpnDisabledApps)) {
+            return false;
+        }
+    } else {
+        m_splitTunnelDriver.clearConfig();
+    }
+
+    return true;
+}
+
+bool WindowsDaemon::run(Op op, const InterfaceConfig &config) {
+    if (op == Down) {
+        m_splitTunnelDriver.clearConfig();
+        return false;
+    }
+
+    if (op == Up) {
+        logger.debug() << "Tunnel UP";
+    }
+
+    if (!activateSplitTunnel(config)) {
+        return false;
+    }
+
+    return true;
 }
 
 void WindowsDaemon::monitorBackendFailure() {
-  logger.warning() << "Tunnel service is down";
+    logger.warning() << "Tunnel service is down";
 
-  emit backendFailure();
-  deactivate();
+    emit backendFailure();
+    deactivate();
 }

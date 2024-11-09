@@ -10,6 +10,7 @@ import ScreenMarginInfo 1.0
 
 import "Config"
 import "Controls2"
+import "Controls2/TextTypes"
 import "Components"
 import "Pages2"
 
@@ -58,6 +59,10 @@ ApplicationWindow  {
             popupNotificationMessage.closeButtonVisible = false
             popupNotificationMessage.open()
             popupNotificationTimer.start()
+        }
+
+        function onShowSplitTunnelingFailed() {
+            splitTunnelingFailed.open()
         }
 
         function onShowPassphraseRequestDrawer() {
@@ -127,6 +132,87 @@ ApplicationWindow  {
 
         PopupType {
             id: popupErrorMessage
+        }
+    }
+
+    Popup {
+        id: splitTunnelingFailed
+        anchors.centerIn: Overlay.overlay
+        background: Rectangle {
+            radius: 16
+            color: Qt.rgba(14/255, 14/255, 17/255, 1.0)
+            border.color: "transparent"
+        }
+
+        enter: Transition {
+            NumberAnimation { property: "opacity"; from: 0.0; to: 1.0; duration: 100 }
+        }
+        exit: Transition {
+            NumberAnimation { property: "opacity"; from: 1.0; to: 0.0; duration: 100 }
+        }
+
+        modal: true
+        focus: true
+        closePolicy: Popup.NoAutoClose
+
+        padding: 20
+        property int margin: 32
+        property int maxWidth: 380
+        width: Math.min(parent.width - margin, maxWidth)
+
+        ColumnLayout {
+            id: popupContent
+            width: parent.width
+            spacing: 16
+
+            Header2Type {
+                Layout.maximumWidth: parent.width
+
+                headerText: qsTr("Split tunneling failed")
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.maximumWidth: parent.width
+
+                font.pixelSize: 20
+
+                text: qsTr("Possible reasons:")
+                color: AmneziaStyle.color.paleGray
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.maximumWidth: parent.width
+
+                ParagraphTextType {
+                    Layout.alignment: Qt.AlignLeft
+                    Layout.maximumWidth: parent.width
+                    text: qsTr("• You have Mullvad VPN running")
+                }
+                ParagraphTextType {
+                    Layout.alignment: Qt.AlignLeft
+                    Layout.maximumWidth: parent.width
+                    text: qsTr("• Split tunneling driver failed to start")
+                }
+                ParagraphTextType {
+                    Layout.alignment: Qt.AlignLeft
+                    Layout.maximumWidth: parent.width
+                    text: qsTr("• Failed to set up firewall")
+                }
+            }
+
+            BasicButtonType {
+                id: goBackButton
+
+                Layout.fillWidth: true
+
+                text: qsTr("Go back")
+
+                clickedFunc: function() {
+                    splitTunnelingFailed.close()
+                }
+            }
         }
     }
 

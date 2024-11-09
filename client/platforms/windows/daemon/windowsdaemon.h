@@ -6,43 +6,46 @@
 #define WINDOWSDAEMON_H
 
 #include "daemon/daemon.h"
+#include "daemon/daemonError.h"
 #include "dnsutilswindows.h"
+#include "splitTunnelDriver.h"
 #include "windowssplittunnel.h"
 #include "windowstunnelservice.h"
 #include "wireguardutilswindows.h"
 
-#define TUNNEL_SERVICE_NAME L"ZloVPNWGTunnel$ZloVPN"
+#define TUNNEL_SERVICE_NAME L"AmneziaWGTunnel$ZloVPN"
 
 class WindowsDaemon final : public Daemon {
-  Q_DISABLE_COPY_MOVE(WindowsDaemon)
+    Q_DISABLE_COPY_MOVE(WindowsDaemon)
 
- public:
-  WindowsDaemon();
-  ~WindowsDaemon();
+public:
+    WindowsDaemon();
+    ~WindowsDaemon();
 
-  void prepareActivation(const InterfaceConfig& config, int inetAdapterIndex = 0) override;
-  void activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex = 0) override;
+    void prepareActivation(const InterfaceConfig &config, int inetAdapterIndex = 0) override;
+    bool activateSplitTunnel(const InterfaceConfig &config, int vpnAdapterIndex = 0) override;
 
- protected:
-  bool run(Op op, const InterfaceConfig& config) override;
-  WireguardUtils* wgutils() const override { return m_wgutils; }
-  bool supportDnsUtils() const override { return true; }
-  DnsUtils* dnsutils() override { return m_dnsutils; }
+protected:
+    bool run(Op op, const InterfaceConfig &config) override;
+    WireguardUtils *wgutils() const override { return m_wgutils; }
+    bool supportDnsUtils() const override { return true; }
+    DnsUtils *dnsutils() override { return m_dnsutils; }
 
- private:
-  void monitorBackendFailure();
+private:
+    void monitorBackendFailure();
 
- private:
-  enum State {
-    Active,
-    Inactive,
-  };
+private:
+    enum State {
+        Active,
+        Inactive,
+    };
 
-  int m_inetAdapterIndex = -1;
+    int m_inetAdapterIndex = -1;
 
-  WireguardUtilsWindows* m_wgutils = nullptr;
-  DnsUtilsWindows* m_dnsutils = nullptr;
-  WindowsSplitTunnel m_splitTunnelManager;
+    WireguardUtilsWindows *m_wgutils = nullptr;
+    DnsUtilsWindows *m_dnsutils = nullptr;
+    WinSplitTunnelDriver m_splitTunnelDriver{};
+    // WindowsSplitTunnel m_splitTunnelManager;
 };
 
-#endif  // WINDOWSDAEMON_H
+#endif // WINDOWSDAEMON_H

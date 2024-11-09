@@ -438,6 +438,9 @@ void AmneziaApplication::initControllers() {
                 emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             });
 
+    connect(m_connectionController.get(), &ConnectionController::splitTunnelingFailed, this,
+            [this]() { emit m_pageController->showSplitTunnelingFailed(); });
+
     connect(m_connectionController.get(), &ConnectionController::connectButtonClicked, m_connectionController.get(),
             &ConnectionController::toggleConnection, Qt::QueuedConnection);
 
