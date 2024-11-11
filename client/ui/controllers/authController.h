@@ -4,6 +4,7 @@
 #include <QNetworkAccessManager>
 #include <QObject>
 #include <QSharedPointer>
+#include <QMutex>
 #include <optional>
 #include "errorParser.h"
 #include "settings.h"
@@ -130,6 +131,8 @@ signals:
 
     void promocodeActivated();
 
+    void tokenRefreshFinished();
+
 private:
     QNetworkRequest createNetworkRequest(const QString &endpoint, bool needsAuthorization = false,
                                          const QByteArray *array = nullptr);
@@ -137,9 +140,13 @@ private:
 
     void loadCachedSpike();
 
+    void runNetworkRequest(std::function<void()> run);
+
     std::shared_ptr<Settings> m_settings;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
+
+    bool m_refreshingToken{};
 
     QString m_token{};
     UserInfo m_userInfo{};

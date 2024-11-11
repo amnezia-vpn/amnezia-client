@@ -151,29 +151,38 @@ void AuthController::setToken(const QString &token) {
 }
 
 void AuthController::setUnauthenticated() {
+    m_refreshingToken = false;
     m_authenticated = false;
     setToken("");
 }
 
 void AuthController::refreshToken() {
+    m_refreshingToken = true;
+
     QNetworkRequest request = createNetworkRequest(REFRESH_ENDPOINT, true);
     QNetworkReply *reply = amnApp->manager()->post(request, QByteArray());
 
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply);
-        if (!response.isOk()) {
-            setUnauthenticated();
-            return;
-        }
-
-        QJsonDocument document = QJsonDocument::fromJson(data);
-        QString token = document.object()["token"].toString();
-        m_authenticated = true;
-        setToken(token);
+         QByteArray data = reply->readAll();
+         Response response = parseNetworkReply(data, *reply);
+         if (!response.isOk()) {
+             setUnauthenticated();
+             m_refreshingToken = false;
+             emit tokenRefreshFinished();
+             return;
+         }
+        
+         QJsonDocument document = QJsonDocument::fromJson(data);
+         QString token = document.object()["token"].toString();
+         m_authenticated = true;
+         setToken(token);
+        
+         emit loginSuccessfull();
+        
+         m_refreshingToken = false;
+         emit tokenRefreshFinished();
     });
 
-    emit loginSuccessfull();
 }
 
 void AuthController::login(const QString &login, const QString &password) {
@@ -181,26 +190,28 @@ void AuthController::login(const QString &login, const QString &password) {
     body["login"] = login;
     body["password"] = password;
 
-    QJsonDocument doc{body};
-    QByteArray bytes = doc.toJson();
+    runNetworkRequest([this, body]() {
+        QJsonDocument doc{body};
+        QByteArray bytes = doc.toJson();
 
-    QNetworkRequest request = createNetworkRequest(LOGIN_ENDPOINT, false, &bytes);
-    QNetworkReply *reply = amnApp->manager()->post(request, bytes);
+        QNetworkRequest request = createNetworkRequest(LOGIN_ENDPOINT, false, &bytes);
+        QNetworkReply *reply = amnApp->manager()->post(request, bytes);
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply);
-        if (!response.isOk()) {
-            emit errorOccurred(*response.errors);
-            return;
-        }
+        connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+            QByteArray data = reply->readAll();
+            Response response = parseNetworkReply(data, *reply);
+            if (!response.isOk()) {
+                emit errorOccurred(*response.errors);
+                return;
+            }
 
-        QJsonDocument document = QJsonDocument::fromJson(data);
-        QString token = document.object()["token"].toString();
-        setToken(token);
-        m_authenticated = true;
+            QJsonDocument document = QJsonDocument::fromJson(data);
+            QString token = document.object()["token"].toString();
+            setToken(token);
+            m_authenticated = true;
 
-        emit loginSuccessfull();
+            emit loginSuccessfull();
+        });
     });
 }
 
@@ -208,21 +219,23 @@ void AuthController::recoverAccount(const QString &email) {
     QJsonObject body{};
     body["email"] = email;
 
-    QJsonDocument doc{body};
-    QByteArray bytes = doc.toJson();
+    runNetworkRequest([this, body]() {
+        QJsonDocument doc{body};
+        QByteArray bytes = doc.toJson();
 
-    QNetworkRequest request = createNetworkRequest(RECOVERY_ENDPOINT, false, &bytes);
-    QNetworkReply *reply = amnApp->manager()->post(request, bytes);
+        QNetworkRequest request = createNetworkRequest(RECOVERY_ENDPOINT, false, &bytes);
+        QNetworkReply *reply = amnApp->manager()->post(request, bytes);
 
-    connect(reply, &QNetworkReply::finished, [this, reply]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply);
-        if (!response.isOk()) {
-            emit errorOccurred(*response.errors);
-            return;
-        }
+        connect(reply, &QNetworkReply::finished, [this, reply]() {
+            QByteArray data = reply->readAll();
+            Response response = parseNetworkReply(data, *reply);
+            if (!response.isOk()) {
+                emit errorOccurred(*response.errors);
+                return;
+            }
 
-        emit recoveryEmailSent();
+            emit recoveryEmailSent();
+        });
     });
 }
 
@@ -231,21 +244,23 @@ void AuthController::changePassword(const QString &currentPassword, const QStrin
     body["currentPassword"] = currentPassword;
     body["newPassword"] = newPassword;
 
-    QJsonDocument doc{body};
-    QByteArray bytes = doc.toJson();
+    runNetworkRequest([this, body]() {
+        QJsonDocument doc{body};
+        QByteArray bytes = doc.toJson();
 
-    QNetworkRequest request = createNetworkRequest(PASSWORD_CHANGE_ENDPOINT, true, &bytes);
-    QNetworkReply *reply = amnApp->manager()->post(request, bytes);
+        QNetworkRequest request = createNetworkRequest(PASSWORD_CHANGE_ENDPOINT, true, &bytes);
+        QNetworkReply *reply = amnApp->manager()->post(request, bytes);
 
-    connect(reply, &QNetworkReply::finished, [this, reply]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply);
-        if (!response.isOk()) {
-            emit errorOccurred(*response.errors);
-            return;
-        }
+        connect(reply, &QNetworkReply::finished, [this, reply]() {
+            QByteArray data = reply->readAll();
+            Response response = parseNetworkReply(data, *reply);
+            if (!response.isOk()) {
+                emit errorOccurred(*response.errors);
+                return;
+            }
 
-        emit passwordChanged();
+            emit passwordChanged();
+        });
     });
 }
 
@@ -253,25 +268,27 @@ void AuthController::changeEmail(const QString &newEmail) {
     QJsonObject body{};
     body["newEmail"] = newEmail;
 
-    QJsonDocument doc{body};
-    QByteArray bytes = doc.toJson();
+    runNetworkRequest([this, body]() {
+        QJsonDocument doc{body};
+        QByteArray bytes = doc.toJson();
 
-    QNetworkRequest request = createNetworkRequest(EMAIL_CHANGE_ENDPOINT, true, &bytes);
-    QNetworkReply *reply = amnApp->manager()->post(request, bytes);
+        QNetworkRequest request = createNetworkRequest(EMAIL_CHANGE_ENDPOINT, true, &bytes);
+        QNetworkReply *reply = amnApp->manager()->post(request, bytes);
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply);
-        if (!response.isOk()) {
-            if (response.statusCode == 401) {
-                setUnauthenticated();
+        connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+            QByteArray data = reply->readAll();
+            Response response = parseNetworkReply(data, *reply);
+            if (!response.isOk()) {
+                if (response.statusCode == 401) {
+                    setUnauthenticated();
+                }
+
+                emit errorOccurred(*response.errors);
+                return;
             }
 
-            emit errorOccurred(*response.errors);
-            return;
-        }
-
-        emit emailChanged();
+            emit emailChanged();
+        });
     });
 }
 
@@ -279,55 +296,59 @@ void AuthController::activatePromocode(const QString &promocode) {
     QJsonObject body{};
     body["code"] = promocode;
 
-    QJsonDocument doc{body};
-    QByteArray bytes = doc.toJson();
+    runNetworkRequest([this, body]() {
+        QJsonDocument doc{body};
+        QByteArray bytes = doc.toJson();
 
-    QNetworkRequest request = createNetworkRequest(ACTIVATE_PROMOCODE_ENDPOINT, true, &bytes);
-    QNetworkReply *reply = amnApp->manager()->post(request, bytes);
+        QNetworkRequest request = createNetworkRequest(ACTIVATE_PROMOCODE_ENDPOINT, true, &bytes);
+        QNetworkReply *reply = amnApp->manager()->post(request, bytes);
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply);
-        if (!response.isOk()) {
-            if (response.statusCode == 401) {
-                setUnauthenticated();
+        connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+            QByteArray data = reply->readAll();
+            Response response = parseNetworkReply(data, *reply);
+            if (!response.isOk()) {
+                if (response.statusCode == 401) {
+                    setUnauthenticated();
+                }
+
+                emit errorOccurred(*response.errors);
+                return;
             }
 
-            emit errorOccurred(*response.errors);
-            return;
-        }
-
-        refreshUserInfo();
-        emit promocodeActivated();
+            refreshUserInfo();
+            emit promocodeActivated();
+        });
     });
 }
 
 void AuthController::checkApiCompatibility() {
-    QNetworkRequest request = createNetworkRequest(API_COMPAT_ENDPOINT, false);
-    QNetworkReply *reply = amnApp->manager()->get(request);
+    runNetworkRequest([this]() {
+        QNetworkRequest request = createNetworkRequest(API_COMPAT_ENDPOINT, false);
+        QNetworkReply *reply = amnApp->manager()->get(request);
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply);
+        connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+            QByteArray data = reply->readAll();
+            Response response = parseNetworkReply(data, *reply);
 
-        if (!response.isOk()) {
-            emit errorOccurred(*response.errors);
-            return;
-        }
+            if (!response.isOk()) {
+                emit errorOccurred(*response.errors);
+                return;
+            }
 
-        QJsonDocument document = QJsonDocument::fromJson(data);
-        QJsonObject object = document.object();
+            QJsonDocument document = QJsonDocument::fromJson(data);
+            QJsonObject object = document.object();
 
-        uint32_t breakingHash = object["breakingHash"].toInteger();
-        int minVersion = object["minVersion"].toInt();
-        qDebug() << "breakingHash: " << breakingHash << " minVeresion: " << minVersion;
+            uint32_t breakingHash = object["breakingHash"].toInteger();
+            int minVersion = object["minVersion"].toInt();
+            qDebug() << "breakingHash: " << breakingHash << " minVeresion: " << minVersion;
 
-        if (minVersion != API_VERSION || breakingHash != BREAKING_HASH) {
-            m_updateRequired = true;
-        } else {
-            m_updateRequired = false;
-        }
-        emit apiCompatibilityChanged();
+            if (minVersion != API_VERSION || breakingHash != BREAKING_HASH) {
+                m_updateRequired = true;
+            } else {
+                m_updateRequired = false;
+            }
+            emit apiCompatibilityChanged();
+        });
     });
 }
 
@@ -337,61 +358,65 @@ void AuthController::registerUser(const QString &email, const QString &username,
     body["username"] = username;
     body["password"] = password;
 
-    QJsonDocument doc{body};
-    QByteArray bytes = doc.toJson();
+    runNetworkRequest([this, body]() {
+        QJsonDocument doc{body};
+        QByteArray bytes = doc.toJson();
 
-    QNetworkRequest request = createNetworkRequest(REGISTER_ENDPOINT, false, &bytes);
-    QNetworkReply *reply = amnApp->manager()->post(request, bytes);
+        QNetworkRequest request = createNetworkRequest(REGISTER_ENDPOINT, false, &bytes);
+        QNetworkReply *reply = amnApp->manager()->post(request, bytes);
 
-    connect(reply, &QNetworkReply::finished, [this, reply]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply, true);
-        if (!response.isOk()) {
-            emit errorOccurred(*response.errors);
-            return;
-        }
+        connect(reply, &QNetworkReply::finished, [this, reply]() {
+            QByteArray data = reply->readAll();
+            Response response = parseNetworkReply(data, *reply, true);
+            if (!response.isOk()) {
+                emit errorOccurred(*response.errors);
+                return;
+            }
 
-        QJsonDocument document = QJsonDocument::fromJson(data);
-        QString token = document.object()["token"].toString();
-        setToken(token);
-        m_authenticated = true;
+            QJsonDocument document = QJsonDocument::fromJson(data);
+            QString token = document.object()["token"].toString();
+            setToken(token);
+            m_authenticated = true;
 
-        emit registerSuccessfull();
+            emit registerSuccessfull();
+        });
     });
 }
 
 void AuthController::logout() { setUnauthenticated(); }
 
 void AuthController::refreshUserInfo() {
-    QNetworkRequest request = createNetworkRequest(ME_ENDPOINT, true);
-    QNetworkReply *reply = amnApp->manager()->get(request);
+    runNetworkRequest([this]() {
+        QNetworkRequest request = createNetworkRequest(ME_ENDPOINT, true);
+        QNetworkReply *reply = amnApp->manager()->get(request);
 
-    connect(reply, &QNetworkReply::finished, [this, reply]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply);
-        if (!response.isOk()) {
-            if (response.statusCode == 401) {
-                setUnauthenticated();
+        connect(reply, &QNetworkReply::finished, [this, reply]() {
+            QByteArray data = reply->readAll();
+            Response response = parseNetworkReply(data, *reply);
+            if (!response.isOk()) {
+                if (response.statusCode == 401) {
+                    setUnauthenticated();
+                }
+
+                emit errorOccurred(*response.errors);
+                return;
             }
 
-            emit errorOccurred(*response.errors);
-            return;
-        }
+            QJsonDocument document = QJsonDocument::fromJson(data);
 
-        QJsonDocument document = QJsonDocument::fromJson(data);
+            QJsonObject object = document.object();
+            QJsonObject userObject = object["user"].toObject();
 
-        QJsonObject object = document.object();
-        QJsonObject userObject = object["user"].toObject();
+            UserInfo info{};
+            info.username = userObject["username"].toString();
+            info.timeLeft = userObject["timeLeft"].toInteger();
+            info.email = userObject["email"].toString();
+            info.isValid = true;
 
-        UserInfo info{};
-        info.username = userObject["username"].toString();
-        info.timeLeft = userObject["timeLeft"].toInteger();
-        info.email = userObject["email"].toString();
-        info.isValid = true;
+            m_userInfo = info;
 
-        m_userInfo = info;
-
-        emit userInfoUpdated();
+            emit userInfoUpdated();
+        });
     });
 }
 
@@ -402,36 +427,38 @@ static RegionInfo parseRegionInfo(QJsonObject obj) {
 }
 
 void AuthController::refreshServers() {
-    QNetworkRequest request = createNetworkRequest(SERVERS_ENDPOINT, true);
-    QNetworkReply *reply = amnApp->manager()->get(request);
+    runNetworkRequest([this]() {
+        QNetworkRequest request = createNetworkRequest(SERVERS_ENDPOINT, true);
+        QNetworkReply *reply = amnApp->manager()->get(request);
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply);
-        if (!response.isOk()) {
-            if (response.statusCode == 401) {
-                setUnauthenticated();
+        connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+            QByteArray data = reply->readAll();
+            Response response = parseNetworkReply(data, *reply);
+            if (!response.isOk()) {
+                if (response.statusCode == 401) {
+                    setUnauthenticated();
+                }
+
+                emit errorOccurred(*response.errors);
+                return;
             }
 
-            emit errorOccurred(*response.errors);
-            return;
-        }
+            QJsonDocument document = QJsonDocument::fromJson(data);
+            QJsonArray serverArray = document.array();
 
-        QJsonDocument document = QJsonDocument::fromJson(data);
-        QJsonArray serverArray = document.array();
+            QList<RegionInfo> servers{};
 
-        QList<RegionInfo> servers{};
+            for (QJsonValue value: serverArray) {
+                QJsonObject serverObject = value.toObject();
 
-        for (QJsonValue value: serverArray) {
-            QJsonObject serverObject = value.toObject();
+                RegionInfo info = parseRegionInfo(serverObject);
+                servers.append(info);
+            }
 
-            RegionInfo info = parseRegionInfo(serverObject);
-            servers.append(info);
-        }
+            m_regions = servers;
 
-        m_regions = servers;
-
-        emit regionsUpdated();
+            emit regionsUpdated();
+        });
     });
 }
 
@@ -439,55 +466,59 @@ void AuthController::getServerConnectionString(const QString &serverId, ServerSt
     QJsonObject body{};
     body["port"] = 10833;
 
-    QJsonDocument doc{body};
-    QByteArray bytes = doc.toJson();
+    runNetworkRequest([this, body, serverId, stringRequest]() {
+        QJsonDocument doc{body};
+        QByteArray bytes = doc.toJson();
 
-    QNetworkRequest request = createNetworkRequest(CONNECTION_STRING_ENDPOINT + "/" + serverId, true, &bytes);
-    QNetworkReply *reply = amnApp->manager()->post(request, bytes);
+        QNetworkRequest request = createNetworkRequest(CONNECTION_STRING_ENDPOINT + "/" + serverId, true, &bytes);
+        QNetworkReply *reply = amnApp->manager()->post(request, bytes);
 
-    connect(reply, &QNetworkReply::finished, stringRequest, [this, reply, stringRequest]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply);
-        if (!response.isOk()) {
-            if (response.statusCode == 401) {
-                setUnauthenticated();
+        connect(reply, &QNetworkReply::finished, stringRequest, [this, reply, stringRequest]() {
+            QByteArray data = reply->readAll();
+            Response response = parseNetworkReply(data, *reply);
+            if (!response.isOk()) {
+                if (response.statusCode == 401) {
+                    setUnauthenticated();
+                }
+
+                emit stringRequest->errorOccurred(*response.errors);
+                return;
             }
 
-            emit stringRequest->errorOccurred(*response.errors);
-            return;
-        }
-
-        QJsonDocument document = QJsonDocument::fromJson(data);
-        QString connectionUrl = document.object()["url"].toString();
-        emit stringRequest->stringArrived(connectionUrl);
+            QJsonDocument document = QJsonDocument::fromJson(data);
+            QString connectionUrl = document.object()["url"].toString();
+            emit stringRequest->stringArrived(connectionUrl);
+        });
     });
 }
 
 void AuthController::openPaymentLink() {
-    QNetworkRequest request = createNetworkRequest(PAYMENT_ENDPOINT, true);
-    QNetworkReply *reply = amnApp->manager()->get(request);
+    runNetworkRequest([this]() {
+        QNetworkRequest request = createNetworkRequest(PAYMENT_ENDPOINT, true);
+        QNetworkReply *reply = amnApp->manager()->get(request);
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        QByteArray data = reply->readAll();
-        Response response = parseNetworkReply(data, *reply);
-        if (!response.isOk()) {
-            if (response.statusCode == 401) {
-                setUnauthenticated();
+        connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+            QByteArray data = reply->readAll();
+            Response response = parseNetworkReply(data, *reply);
+            if (!response.isOk()) {
+                if (response.statusCode == 401) {
+                    setUnauthenticated();
+                }
+
+                emit errorOccurred(*response.errors);
+                return;
             }
 
-            emit errorOccurred(*response.errors);
-            return;
-        }
-
-        QJsonDocument document = QJsonDocument::fromJson(data);
-        QString paymentUrl = document.object()["url"].toString();
-        if (!QDesktopServices::openUrl(m_spike + paymentUrl)) {
-            Errors errors{};
-            errors.errorMessage = tr("Failed to open payment page");
-            emit errorOccurred(errors);
-        } else {
-            emit paymentLinkOpened();
-        }
+            QJsonDocument document = QJsonDocument::fromJson(data);
+            QString paymentUrl = document.object()["url"].toString();
+            if (!QDesktopServices::openUrl(m_spike + paymentUrl)) {
+                Errors errors{};
+                errors.errorMessage = tr("Failed to open payment page");
+                emit errorOccurred(errors);
+            } else {
+                emit paymentLinkOpened();
+            }
+        });
     });
 }
 
@@ -510,6 +541,16 @@ QNetworkRequest AuthController::createNetworkRequest(const QString &endpoint, bo
     }
 
     return request;
+}
+
+void AuthController::runNetworkRequest(std::function<void()> run) {
+    if (m_refreshingToken) {
+        connect(this, &AuthController::tokenRefreshFinished, this, [this, run]() {
+            run();
+        }, Qt::ConnectionType::SingleShotConnection);
+    } else {
+        run();
+    }
 }
 
 Response AuthController::parseNetworkReply(QByteArray &data, QNetworkReply &reply, bool formError) {

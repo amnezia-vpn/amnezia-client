@@ -80,7 +80,7 @@
 <context>
     <name>AuthController</name>
     <message>
-        <location filename="../ui/controllers/authController.cpp" line="486"/>
+        <location filename="../ui/controllers/authController.cpp" line="516"/>
         <source>Failed to open payment page</source>
         <translation>Произошла ошибка при открытии страницы оплаты.</translation>
     </message>
