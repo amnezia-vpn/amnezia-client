@@ -55,6 +55,12 @@ PageType {
                 id: image
                 source: "qrc:/images/zlovpn.svg"
 
+                // antialiasing
+                sourceSize.width: width
+                sourceSize.height: height
+                smooth: true
+                antialiasing: true
+
                 Layout.alignment: Qt.AlignCenter
                 Layout.topMargin: 16
                 Layout.leftMargin: 16

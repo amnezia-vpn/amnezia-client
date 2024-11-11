@@ -3276,12 +3276,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Приступим</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="54"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="59"/>
         <source>Login</source>
         <translation>Вход</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="75"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="80"/>
         <source>Register</source>
         <translation>Регистрация</translation>
     </message>
