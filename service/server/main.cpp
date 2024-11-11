@@ -1,27 +1,26 @@
 #include <QDir>
 
-#include "version.h"
 #include "localserver.h"
 #include "logger.h"
 #include "systemservice.h"
 #include "utilities.h"
+#include "version.h"
 
 #ifdef Q_OS_WIN
 #include "platforms/windows/daemon/windowsdaemontunnel.h"
 
 namespace {
-int s_argc = 0;
-char** s_argv = nullptr;
-}  // namespace
+    int s_argc = 0;
+    char **s_argv = nullptr;
+} // namespace
 
 #endif
 
-int runApplication(int argc, char** argv)
-{
-    QCoreApplication app(argc,argv);
+int runApplication(int argc, char **argv) {
+    QCoreApplication app(argc, argv);
 
 #ifdef Q_OS_WIN
-    if(argc > 2){
+    if (argc > 2) {
         s_argc = argc;
         s_argv = argv;
         QStringList tokens;
@@ -38,26 +37,21 @@ int runApplication(int argc, char** argv)
 
     LocalServer localServer;
     return app.exec();
-
 }
 
-
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     Utils::initializePath(Logger::systemLogDir());
 
     if (argc >= 2) {
         qInfo() << "Started as console application";
         return runApplication(argc, argv);
-    }
-    else {
+    } else {
         qInfo() << "Started as system service";
 #ifdef Q_OS_WIN
         SystemService systemService(argc, argv);
         return systemService.exec();
 #else
-    return runApplication(argc, argv);
+        return runApplication(argc, argv);
 #endif
-
     }
 }

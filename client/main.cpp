@@ -8,16 +8,15 @@
 #include <QTimer>
 
 #ifdef Q_OS_WIN
-    #include "Windows.h"
+#include "Windows.h"
 #endif
 
 #if defined(Q_OS_IOS)
-    #include "platforms/ios/QtAppDelegate-C-Interface.h"
+#include "platforms/ios/QtAppDelegate-C-Interface.h"
 #endif
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-bool isAnotherInstanceRunning()
-{
+bool isAnotherInstanceRunning() {
     QLocalSocket socket;
     socket.connectToServer("ZloVPNInstance");
     if (socket.waitForConnected(500)) {
@@ -28,8 +27,7 @@ bool isAnotherInstanceRunning()
 }
 #endif
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     Migrations migrationsManager;
     migrationsManager.doMigrations();
 

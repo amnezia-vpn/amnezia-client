@@ -70,12 +70,12 @@ int IpcServer::createPrivilegedProcess() {
     return m_localpid;
 }
 
-int IpcServer::routeAddList(const QString &gw, const QStringList &ips) {
+int IpcServer::routeAddList(const QString &gw, const QStringList &ips, bool autoDetectGateway) {
 #ifdef MZ_DEBUG
     qDebug() << "IpcServer::routeAddList";
 #endif
 
-    return Router::routeAddList(gw, ips);
+    return Router::routeAddList(gw, ips, autoDetectGateway);
 }
 
 bool IpcServer::clearSavedRoutes() {

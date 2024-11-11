@@ -68,7 +68,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state) {
                 QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();
                 QString dns2 = m_vpnConfiguration.value(config_key::dns2).toString();
 
-                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
+                IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2, false);
 
                 if (m_settings->isSitesSplitTunnelingEnabled()) {
                     IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
@@ -79,12 +79,12 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state) {
                             addSitesRoutes(m_vpnProtocol->vpnGateway(), m_settings->routeMode());
                         });
                     } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
-                        IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
+                        IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1", false);
                         IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList()
-                                                                                                  << "128.0.0.0/1");
+                                                                                                  << "128.0.0.0/1", false);
 
-                        IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), QStringList()
-                                                                                                    << remoteAddress());
+                        IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(),
+                                                             QStringList() << remoteAddress(), true);
                         addSitesRoutes(m_vpnProtocol->routeGateway(), m_settings->routeMode());
                     }
                 }
@@ -117,7 +117,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state) {
 
 const QString &VpnConnection::remoteAddress() const { return m_remoteAddress; }
 
-void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode) {
+void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode, bool autoDetectGateway) {
 #ifdef AMNEZIA_DESKTOP
     QStringList ips;
     QStringList sites;
@@ -135,11 +135,11 @@ void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode) 
     ips.removeDuplicates();
 
     // add all IPs immediately
-    IpcClient::Interface()->routeAddList(gw, ips);
+    IpcClient::Interface()->routeAddList(gw, ips, autoDetectGateway);
 
     // re-resolve domains
     for (const QString &site: sites) {
-        const auto &cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo) {
+        const auto &cbResolv = [this, site, gw, mode, ips, autoDetectGateway](const QHostInfo &hostInfo) {
             const QList<QHostAddress> &addresses = hostInfo.addresses();
             QString ipv4Addr;
             for (const QHostAddress &addr: hostInfo.addresses()) {
@@ -147,7 +147,7 @@ void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode) 
                     const QString &ip = addr.toString();
                     // qDebug() << "VpnConnection::addSitesRoutes updating site" << site << ip;
                     if (!ips.contains(ip)) {
-                        IpcClient::Interface()->routeAddList(gw, QStringList() << ip);
+                        IpcClient::Interface()->routeAddList(gw, QStringList() << ip, autoDetectGateway);
                         m_settings->addVpnSite(mode, site, ip);
                     }
                     flushDns();
@@ -166,9 +166,9 @@ void VpnConnection::addRoutes(const QStringList &ips) {
 #ifdef AMNEZIA_DESKTOP
     if (connectionState() == Vpn::ConnectionState::Connected && IpcClient::Interface()) {
         if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
-            IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), ips);
+            IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), ips, false);
         } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
-            IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), ips);
+            IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), ips, true);
         }
     }
 #endif

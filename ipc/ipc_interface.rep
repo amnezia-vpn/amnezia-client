@@ -10,7 +10,7 @@ class IpcInterface
     SLOT( int createPrivilegedProcess() ); // return local pid
 
     // Route functions
-    SLOT( int routeAddList(const QString &gw, const QStringList &ips) );
+    SLOT( int routeAddList(const QString &gw, const QStringList &ips, bool autoDetectGateway) );
     SLOT( bool clearSavedRoutes() );
     SLOT( bool routeDeleteList(const QString &gw, const QStringList &ip) );
     SLOT( void flushDns() );

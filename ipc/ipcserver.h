@@ -1,12 +1,12 @@
 #ifndef IPCSERVER_H
 #define IPCSERVER_H
 
+#include <QJsonObject>
 #include <QLocalServer>
 #include <QObject>
+#include <QRemoteObjectNode>
 #include <QSet>
 #include <QUuid>
-#include <QRemoteObjectNode>
-#include <QJsonObject>
 #include "../client/daemon/interfaceconfig.h"
 
 #include "ipc.h"
@@ -16,13 +16,12 @@
 #include "rep_ipc_interface_source.h"
 #include "rep_ipc_process_tun2socks_source.h"
 
-class IpcServer : public IpcInterfaceSource
-{
+class IpcServer : public IpcInterfaceSource {
 public:
     explicit IpcServer(QObject *parent = nullptr);
     virtual int createPrivilegedProcess() override;
 
-    virtual int routeAddList(const QString &gw, const QStringList &ips) override;
+    virtual int routeAddList(const QString &gw, const QStringList &ips, bool autoDetectGateway = false) override;
     virtual bool clearSavedRoutes() override;
     virtual bool routeDeleteList(const QString &gw, const QStringList &ips) override;
     virtual void flushDns() override;
@@ -39,10 +38,10 @@ public:
     virtual bool enablePeerTraffic(const QJsonObject &configStr) override;
     virtual bool enableKillSwitch(const QJsonObject &excludeAddr, int vpnAdapterIndex) override;
     virtual bool disableKillSwitch() override;
-    virtual bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) override;
-  
-    virtual void connectionEstablished(const QUuid& uniqueId) override;
-    virtual void connectionClose(const QUuid& uniqueId) override;
+    virtual bool updateResolvers(const QString &ifname, const QList<QHostAddress> &resolvers) override;
+
+    virtual void connectionEstablished(const QUuid &uniqueId) override;
+    virtual void connectionClose(const QUuid &uniqueId) override;
     bool hasPendingConnectionClose();
 
     void amneziaKilled();
@@ -51,7 +50,7 @@ private:
     int m_localpid = 0;
 
     struct ProcessDescriptor {
-        ProcessDescriptor (QObject *parent = nullptr) {
+        ProcessDescriptor(QObject *parent = nullptr) {
             serverNode = QSharedPointer<QRemoteObjectHost>(new QRemoteObjectHost(parent));
             ipcProcess = QSharedPointer<IpcServerProcess>(new IpcServerProcess(parent));
             tun2socksProcess = QSharedPointer<IpcProcessTun2Socks>(new IpcProcessTun2Socks(parent));

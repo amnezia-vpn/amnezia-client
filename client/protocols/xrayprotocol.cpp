@@ -124,9 +124,9 @@ ErrorCode XrayProtocol::startTun2Sock() {
             }
 #endif
             if (m_routeMode == 0) {
-                IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
-                IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
-                IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
+                IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress, true);
+                IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1", false);
+                IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1", false);
             }
             IpcClient::Interface()->StopRoutingIpv6();
 #ifdef Q_OS_WIN
