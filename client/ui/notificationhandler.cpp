@@ -49,38 +49,6 @@ NotificationHandler::~NotificationHandler() {
 
 void NotificationHandler::setConnectionState(Vpn::ConnectionState state, bool _)
 {
-    if (state != Vpn::ConnectionState::Connected && state != Vpn::ConnectionState::Disconnected) {
-        return;
-    }
-
-    QString title;
-    QString message;
-
-    switch (state) {
-    case Vpn::ConnectionState::Connected:
-        m_connected = true;
-
-        title = tr("ZloVPN");
-        message = tr("VPN Connected");
-        break;
-
-    case Vpn::ConnectionState::Disconnected:
-        if (m_connected) {
-            m_connected = false;
-            title = tr("ZloVPN");
-            message = tr("VPN Disconnected");
-        }
-        break;
-
-    default:
-        break;
-    }
-
-    Q_ASSERT(title.isEmpty() == message.isEmpty());
-
-    if (!title.isEmpty()) {
-        notifyInternal(VpnState, title, message, 2000);
-    }
 }
 
 void NotificationHandler::onTranslationsUpdated()

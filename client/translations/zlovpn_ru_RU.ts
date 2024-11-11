@@ -463,23 +463,19 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="63"/>
-        <location filename="../ui/notificationhandler.cpp" line="70"/>
         <source>ZloVPN</source>
-        <translation>ZloVPN</translation>
+        <translation type="vanished">ZloVPN</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="64"/>
         <source>VPN Connected</source>
-        <translation>VPN подключен</translation>
+        <translation type="vanished">VPN подключен</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="71"/>
         <source>VPN Disconnected</source>
-        <translation>VPN выключен</translation>
+        <translation type="vanished">VPN выключен</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="94"/>
+        <location filename="../ui/notificationhandler.cpp" line="62"/>
         <source>ZloVPN notification</source>
         <translation>Уведомление ZloVPN</translation>
     </message>
@@ -488,7 +484,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Уведомление AmneziaVPN</translation>
     </message>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="95"/>
+        <location filename="../ui/notificationhandler.cpp" line="63"/>
         <source>Unsecured network detected: </source>
         <translation>Обнаружена незащищенная сеть: </translation>
     </message>
