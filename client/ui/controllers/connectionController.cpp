@@ -67,6 +67,14 @@ ConnectionController::ConnectionController(const QSharedPointer<ImportController
         }
     });
 
+    connect(m_authController.get(), &AuthController::regionsUpdated, this, [this]() {
+        if (m_isFirstStart && m_settings->isAutoConnect()) {
+            openConnection();
+        }
+
+        m_isFirstStart = false;
+    });
+
     m_state = Vpn::ConnectionState::Disconnected;
 }
 

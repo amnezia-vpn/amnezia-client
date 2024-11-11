@@ -6,8 +6,7 @@
 #include "core/controllers/serverController.h"
 #include "settings.h"
 
-class ServersModel : public QAbstractListModel
-{
+class ServersModel : public QAbstractListModel {
     Q_OBJECT
 public:
     enum Roles {
@@ -53,15 +52,20 @@ public:
 
     Q_PROPERTY(int defaultIndex READ getDefaultServerIndex WRITE setDefaultServerIndex NOTIFY defaultServerIndexChanged)
     Q_PROPERTY(QString defaultServerName READ getDefaultServerName NOTIFY defaultServerNameChanged)
-    Q_PROPERTY(QString defaultServerDefaultContainerName READ getDefaultServerDefaultContainerName NOTIFY defaultServerDefaultContainerChanged)
-    Q_PROPERTY(QString defaultServerDescriptionCollapsed READ getDefaultServerDescriptionCollapsed NOTIFY defaultServerDefaultContainerChanged)
-    Q_PROPERTY(QString defaultServerImagePathCollapsed READ getDefaultServerImagePathCollapsed NOTIFY defaultServerDefaultContainerChanged)
-    Q_PROPERTY(QString defaultServerDescriptionExpanded READ getDefaultServerDescriptionExpanded NOTIFY defaultServerDefaultContainerChanged)
-    Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ isDefaultServerDefaultContainerHasSplitTunneling NOTIFY
+    Q_PROPERTY(QString defaultServerDefaultContainerName READ getDefaultServerDefaultContainerName NOTIFY
                        defaultServerDefaultContainerChanged)
+    Q_PROPERTY(QString defaultServerDescriptionCollapsed READ getDefaultServerDescriptionCollapsed NOTIFY
+                       defaultServerDefaultContainerChanged)
+    Q_PROPERTY(QString defaultServerImagePathCollapsed READ getDefaultServerImagePathCollapsed NOTIFY
+                       defaultServerDefaultContainerChanged)
+    Q_PROPERTY(QString defaultServerDescriptionExpanded READ getDefaultServerDescriptionExpanded NOTIFY
+                       defaultServerDefaultContainerChanged)
+    Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ
+                       isDefaultServerDefaultContainerHasSplitTunneling NOTIFY defaultServerDefaultContainerChanged)
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
 
-    Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
+    Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY
+                       processedServerIndexChanged)
 
 public slots:
     void setDefaultServerIndex(const int index);
@@ -111,7 +115,8 @@ public slots:
     QPair<QString, QString> getDnsPair(const int serverIndex);
 
     bool isServerFromApiAlreadyExists(const quint16 crc);
-    bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol);
+    bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType,
+                                      const QString &serviceProtocol);
 
     QVariant getDefaultServerData(const QString roleString);
 
@@ -151,9 +156,66 @@ private:
 
     bool serverHasInstalledContainers(const int serverIndex) const;
 
-    QJsonArray m_servers;
+    QMap<DockerContainer, QJsonObject> containers(int serverIndex);
+    QJsonObject containerConfig(int serverIndex, DockerContainer container);
+
+    bool editServer(int index, const QJsonObject &server) {
+        if (index >= m_servers.size())
+            return false;
+
+        m_servers.replace(index, server);
+        return true;
+    }
+
+    void setContainers(int serverIndex, const QMap<DockerContainer, QJsonObject> &containers) {
+        QJsonObject s = m_servers.at(serverIndex).toObject();
+        QJsonArray c;
+        for (const QJsonObject &o: containers) {
+            c.append(o);
+        }
+        s.insert(config_key::containers, c);
+        editServer(serverIndex, s);
+    }
+
+    void setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config) {
+        if (container == DockerContainer::None) {
+            qCritical() << "Settings::setContainerConfig trying to set config for container == DockerContainer::None";
+            return;
+        }
+        auto c = containers(serverIndex);
+        c[container] = config;
+        c[container][config_key::container] = ContainerProps::containerToString(container);
+        setContainers(serverIndex, c);
+    }
+
+
+    QJsonObject protocolConfig(int serverIndex, DockerContainer container, Proto proto) {
+        const QJsonObject &c = containerConfig(serverIndex, container);
+        return c.value(ProtocolProps::protoToString(proto)).toObject();
+    }
+    void setProtocolConfig(int serverIndex, DockerContainer container, Proto proto, const QJsonObject &config) {
+        QJsonObject c = containerConfig(serverIndex, container);
+        c.insert(ProtocolProps::protoToString(proto), config);
+
+        setContainerConfig(serverIndex, container, c);
+    }
+
+    void clearLastConnectionConfig(int serverIndex, DockerContainer container, Proto proto = Proto::Any) {
+        // recursively remove
+        if (proto == Proto::Any) {
+            for (Proto p: ContainerProps::protocolsForContainer(container)) {
+                clearLastConnectionConfig(serverIndex, container, p);
+            }
+            return;
+        }
+
+        QJsonObject c = protocolConfig(serverIndex, container, proto);
+        c.remove(config_key::last_config);
+        setProtocolConfig(serverIndex, container, proto, c);
+    }
 
     std::shared_ptr<Settings> m_settings;
+    QJsonArray m_servers;
 
     int m_defaultServerIndex;
     int m_processedServerIndex;

@@ -96,72 +96,72 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="249"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="257"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>VPN-протоколы не установлены.
  Пожалуйста, установите протокол</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="127"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="135"/>
         <source>Connecting...</source>
         <translation>Подключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="92"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="100"/>
         <source>Region not selected</source>
         <translation>Регион не выбран</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="108"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="116"/>
         <source>Failed to import config</source>
         <translation>Ошибка импорта конфигурации</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="133"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="141"/>
         <source>Connected</source>
         <translation>Подключено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="157"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="165"/>
         <source>Preparing...</source>
         <translation>Подготовка...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="180"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="188"/>
         <source>Settings updated successfully, reconnnection...</source>
         <translation>Настройки успешно обновлены, переподключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="183"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="191"/>
         <source>Settings updated successfully</source>
         <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="244"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="252"/>
         <source>The selected protocol is not supported on the current platform</source>
         <translation>Выбранный протокол не поддерживается на данном устройстве</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="269"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="277"/>
         <source>unable to create configuration</source>
         <translation>не удалось создать конфигурацию</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="142"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="150"/>
         <source>Reconnecting...</source>
         <translation>Переподключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="94"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="147"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="162"/>
-        <location filename="../ui/controllers/connectionController.cpp" line="169"/>
+        <location filename="../ui/controllers/connectionController.h" line="95"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="155"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="170"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="177"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.cpp" line="152"/>
+        <location filename="../ui/controllers/connectionController.cpp" line="160"/>
         <source>Disconnecting...</source>
         <translation>Отключение...</translation>
     </message>
@@ -613,12 +613,12 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageFirstSetup</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageFirstSetup.qml" line="33"/>
+        <location filename="../ui/qml/Pages2/PageFirstSetup.qml" line="39"/>
         <source>Initial setup is running</source>
         <translation type="unfinished">Прозиводится начальная настройка</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageFirstSetup.qml" line="40"/>
+        <location filename="../ui/qml/Pages2/PageFirstSetup.qml" line="46"/>
         <source>Please wait</source>
         <translation type="unfinished">Пожалуйста подождите</translation>
     </message>
@@ -737,62 +737,62 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageLookingForServer</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="42"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="48"/>
         <source>Looking for server</source>
         <translation type="unfinished">Поиск сервера</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="49"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="55"/>
         <source>Please wait</source>
         <translation type="unfinished">Пожалуйста подождите</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="70"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="76"/>
         <source>Failed to find server</source>
         <translation type="unfinished">Сервер не найден</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="79"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="85"/>
         <source>Possible reasons:</source>
         <translation type="unfinished">Возможные причины:</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="94"/>
         <source>• You are having connection issues</source>
         <translation type="unfinished">• У вас проблемы с подключением к интернету</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="99"/>
         <source>• One of our servers has been blocked</source>
         <translation type="unfinished">• Один из наших серверов заблокирован</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="98"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="104"/>
         <source>• Our servers are down</source>
         <translation type="unfinished">• Наши сервера недоступны</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="109"/>
         <source>• Your app is out of date</source>
         <translation type="unfinished">• Ваше приложение устарело</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="115"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="121"/>
         <source>Website</source>
         <translation type="unfinished">Веб-сайт</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="128"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="134"/>
         <source>Telegram</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="141"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="147"/>
         <source>Email</source>
         <translation type="unfinished">Почта</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageLookingForServer.qml" line="155"/>
         <source>Copied</source>
         <translation type="unfinished">Скопировано</translation>
     </message>
@@ -1755,17 +1755,17 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Amnezia — это бесплатное приложение с открытым исходным кодом. Поддержите разработчиков, если оно вам нравится.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="78"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="84"/>
         <source>ZloVPN is an easy to use VPN application based on AmneziaVPN.</source>
         <translation>ZloVPN - это простое и удобное VPN приложение основанное на AmneziaVPN.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="94"/>
         <source>Contacts</source>
         <translation>Контакты</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="95"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="101"/>
         <source>Telegram</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1774,12 +1774,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">support@zlovpn.com</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="96"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="102"/>
         <source>For issues and suggestions</source>
         <translation>Почта для поддержки и предложений</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="185"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="191"/>
         <source>About AmneziaVPN</source>
         <translation type="unfinished">Об AmneziaVPN</translation>
     </message>
@@ -1816,7 +1816,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="120"/>
         <source>Website</source>
         <translation>Веб-сайт</translation>
     </message>
@@ -1825,7 +1825,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">https://amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="134"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="140"/>
         <source>Software version: %1</source>
         <translation>Версия ПО: %1</translation>
     </message>
@@ -1834,7 +1834,7 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Проверить обновления</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="163"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="169"/>
         <source>Privacy Policy</source>
         <translation>Политика конфиденциальности</translation>
     </message>
@@ -3276,12 +3276,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation type="vanished">Приступим</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="59"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="60"/>
         <source>Login</source>
         <translation>Вход</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="80"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="81"/>
         <source>Register</source>
         <translation>Регистрация</translation>
     </message>
@@ -3665,17 +3665,17 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
 <context>
     <name>PageUpdateRequired</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdateRequired.qml" line="38"/>
+        <location filename="../ui/qml/Pages2/PageUpdateRequired.qml" line="44"/>
         <source>App update required</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdateRequired.qml" line="46"/>
+        <location filename="../ui/qml/Pages2/PageUpdateRequired.qml" line="52"/>
         <source>Install the latest version from our website.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageUpdateRequired.qml" line="67"/>
+        <location filename="../ui/qml/Pages2/PageUpdateRequired.qml" line="73"/>
         <source>Website</source>
         <translation type="unfinished">Веб-сайт</translation>
     </message>

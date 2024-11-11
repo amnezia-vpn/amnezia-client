@@ -89,6 +89,7 @@ private:
 
     std::shared_ptr<Settings> m_settings;
 
+    bool m_isFirstStart = true;
     bool m_isConnected = false;
     bool m_isConnectionInProgress = false;
     QString m_connectionStateText = tr("Connect");

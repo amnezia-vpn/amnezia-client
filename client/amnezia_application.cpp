@@ -453,9 +453,6 @@ void AmneziaApplication::initControllers() {
     m_settingsController.reset(new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel,
                                                       m_appSplitTunnelingModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
-    if (m_settingsController->isAutoConnectEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
-        QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
-    }
     connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled, m_serversModel.get(),
             &ServersModel::toggleAmneziaDns);
 
