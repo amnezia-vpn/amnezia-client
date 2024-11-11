@@ -154,7 +154,7 @@ jobs:
   # ------------------------------------------------------
 
   Build-iOS:
-    runs-on: macos-14
+    runs-on: macos-15
 
     env:
       QT_VERSION: 6.6.2
@@ -165,7 +165,7 @@ jobs:
       - name: "Setup xcode"
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "16"
+          xcode-version: 16
 
       - name: "Install desktop Qt"
         uses: jurplel/install-qt-action@v3
@@ -272,7 +272,7 @@ jobs:
   # ------------------------------------------------------
 
   Build-MacOS:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     env:
       QT_VERSION: 6.5.3
@@ -281,7 +281,7 @@ jobs:
       - name: "Setup xcode"
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "16"
+          xcode-version: 16
 
       - name: "Install Qt"
         uses: jurplel/install-qt-action@v3
