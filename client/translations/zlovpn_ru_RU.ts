@@ -611,7 +611,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageFirstSetup.qml" line="39"/>
         <source>Initial setup is running</source>
-        <translation type="unfinished">Прозиводится начальная настройка</translation>
+        <translation type="unfinished">Производится установка</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageFirstSetup.qml" line="46"/>
