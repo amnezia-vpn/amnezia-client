@@ -615,7 +615,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageFirstSetup.qml" line="46"/>
-        <source>Please wait</source>
+    <source>Please wait</source>
         <translation type="unfinished">Пожалуйста подождите</translation>
     </message>
 </context>
