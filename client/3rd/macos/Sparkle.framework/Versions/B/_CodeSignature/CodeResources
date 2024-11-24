@@ -939,10 +939,10 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			8SHNI2//iEq3D5kTas9tzb/l8Ok=
+			tlp+qOTZ+b/As0npcq04ia0iIfI=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"f121cd236fff884ab70f99136acf6dcdbfe5f0e9" or cdhash H"82f6861d22cb4b317c616706faea20f034a09868"</string>
+			<string>identifier Autoupdate and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: ARTEM DZHEMESIUK (S6TBJMG52K)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 		</dict>
 		<key>Headers/SPUDownloadData.h</key>
 		<dict>
@@ -2107,28 +2107,28 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			FUu8fe4a0BThd4e3aAS1ESFerTA=
+			ddJeHMGJ++d1Qo/GS8kF8xkVWNo=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"154bbc7dee1ad014e17787b76804b511215ead30" or cdhash H"98978bf031c6ea78567452af336111bb74f503e5"</string>
+			<string>identifier "org.sparkle-project.Sparkle.Updater" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: ARTEM DZHEMESIUK (S6TBJMG52K)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 		</dict>
 		<key>XPCServices/Downloader.xpc</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			X5fZetRn2Saen2h7dEPry59CnV0=
+			9AHgqax6AqQfHvqzMEhOm2AFbKc=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"5f97d97ad467d9269e9f687b7443ebcb9f429d5d" or cdhash H"d20a89312b4694cb7637a1beb849e39b54453b2b"</string>
+			<string>identifier "org.sparkle-project.DownloaderService" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: ARTEM DZHEMESIUK (S6TBJMG52K)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 		</dict>
 		<key>XPCServices/Installer.xpc</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			C2FFtOq0VOM5vJmKQYom8Xl9KVk=
+			DUBmTAfKewejbwSJxSsI3f1xbTI=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"0b6145b4eab454e339bc998a418a26f1797d2959" or cdhash H"bfe3d53e82fffda6c87e7dfa656e84ab49371973"</string>
+			<string>identifier "org.sparkle-project.InstallerLauncher" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: ARTEM DZHEMESIUK (S6TBJMG52K)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 		</dict>
 	</dict>
 	<key>rules</key>

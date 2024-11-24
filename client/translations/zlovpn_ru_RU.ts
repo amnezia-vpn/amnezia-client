@@ -267,6 +267,14 @@
     </message>
 </context>
 <context>
+    <name>FirstSetupController</name>
+    <message>
+        <location filename="../core/controllers/firstSetupController.cpp" line="23"/>
+        <source>To install the VPN service</source>
+        <translation type="unfinished">Установить VPN сервис</translation>
+    </message>
+</context>
+<context>
     <name>HomeContainersListView</name>
     <message>
         <location filename="../ui/qml/Components/HomeContainersListView.qml" line="107"/>
@@ -615,7 +623,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageFirstSetup.qml" line="46"/>
-    <source>Please wait</source>
+        <source>Please wait</source>
         <translation type="unfinished">Пожалуйста подождите</translation>
     </message>
 </context>

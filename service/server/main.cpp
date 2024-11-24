@@ -16,9 +16,14 @@ namespace {
 
 #endif
 
+#ifdef Q_OS_MAC
+#include <ZloVPN-Service-Swift.h>
+#endif
+
 int runApplication(int argc, char **argv) {
     QCoreApplication app(argc, argv);
 
+    Logger::init(true);
 #ifdef Q_OS_WIN
     if (argc > 2) {
         s_argc = argc;
@@ -32,6 +37,24 @@ int runApplication(int argc, char **argv) {
             WindowsDaemonTunnel *daemon = new WindowsDaemonTunnel();
             daemon->run(tokens);
         }
+    }
+#endif
+  
+#ifdef Q_OS_MAC
+    if (argc >= 2) {
+      QStringList tokens;
+      for (int i = 1; i < argc; i++) {
+        tokens.append(QString(argv[i]));
+      }
+      
+      if (!tokens.empty()) {
+        qInfo() << "Received keepalive token from parent, initializing keepalive...";
+        QString keepaliveToken = tokens[0];
+        if (!ZloVPNService::initializeKeepalive(keepaliveToken.toStdString())) {
+          qDebug() << "Failed to initialize keepalive, exiting...";
+          return -1;
+        }
+      }
     }
 #endif
 

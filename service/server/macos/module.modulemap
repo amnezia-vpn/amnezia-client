@@ -1,0 +1,3 @@
+module ZloVPNServiceCpp {
+    header "swift_loggers.h"
+}

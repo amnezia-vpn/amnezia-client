@@ -25,7 +25,7 @@ IpcClient::~IpcClient() {
 bool IpcClient::isSocketConnected() const { return m_isSocketConnected; }
 
 IpcClient *IpcClient::Reinitialize(QObject *parent) {
-    if (m_instance) {
+  if (m_instance && m_instance->m_ipcClient) {
         m_instance->m_ipcClient->connectionClose(m_instance->m_uuid);
         // delete m_instance;
     }

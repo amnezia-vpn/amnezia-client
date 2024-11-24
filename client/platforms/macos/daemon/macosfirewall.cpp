@@ -50,7 +50,7 @@ namespace
 static QString resourcesDirPath()
 {
 #ifdef Q_OS_MACOS
-    return QDir::toNativeSeparators(qApp->applicationDirPath()) + "/../Resources";
+    return QDir::toNativeSeparators(QDir::currentPath()) + "/../Resources";
 #endif
 
     return qApp->applicationDirPath();

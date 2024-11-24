@@ -8,6 +8,8 @@
 #include <QUrl>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QThread>
+#include <QMutex>
 
 #include "utilities.h"
 #include "version.h"
@@ -95,7 +97,12 @@ QString Utils::executable(const QString &baseName, bool absPath)
     if (!absPath) {
         return fileName;
     }
+  
+#ifdef ZLOVPN_SERVICE
+    return QDir::currentPath() + "/" + fileName;
+#else
     return QCoreApplication::applicationDirPath() + "/" + fileName;
+#endif
 }
 
 QString Utils::usrExecutable(const QString &baseName)

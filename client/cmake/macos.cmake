@@ -32,8 +32,6 @@ set_target_properties(${PROJECT} PROPERTIES MACOSX_BUNDLE TRUE)
 set(SPARKLE_ED_PUBLIC_KEY $ENV{SPARKLE_ED_PUBLIC_KEY})
 set(SPARKLE_FEED_URL $ENV{SPARKLE_FEED_URL})
 
-set(APPLE_PROJECT_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH})
-
 set_target_properties(${PROJECT} PROPERTIES
         XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
 
@@ -48,9 +46,11 @@ set_target_properties(${PROJECT} PROPERTIES
         XCODE_ATTRIBUTE_PRODUCT_NAME "ZloVPN"
         XCODE_ATTRIBUTE_BUNDLE_INFO_STRING "ZloVPN"
         XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
+        XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
 )
 
 include(${CMAKE_SOURCE_DIR}/cmake/macos-signing.cmake)
+target_sources(${PROJECT} PRIVATE ${CMAKE_SOURCE_DIR}/cmake/ZloVPN.entitlements)
 
 set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.h
@@ -60,7 +60,10 @@ set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.mm
         ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/FirstSetupController.swift
         ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/AutoUpdater.swift
+        ${CMAKE_CURRENT_SOURCE_DIR}/platforms/macos/AuthorizationHelper.swift
 )
+
+target_link_libraries(${PROJECT} PRIVATE SecureXPC serverMacShared)
 
 set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/images/app.icns)
 set(MACOSX_BUNDLE_ICON_FILE app.icns)

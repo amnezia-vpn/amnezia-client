@@ -24,7 +24,9 @@ IpcProcessTun2Socks::~IpcProcessTun2Socks()
 void IpcProcessTun2Socks::start()
 {
     qDebug() << "IpcProcessTun2Socks::start()";
-    m_t2sProcess->setProgram(amnezia::permittedProcessPath(static_cast<amnezia::PermittedProcess>(amnezia::PermittedProcess::Tun2Socks)));
+    QString process = amnezia::permittedProcessPath(static_cast<amnezia::PermittedProcess>(amnezia::PermittedProcess::Tun2Socks));
+    qDebug() << "Starting: " << process;
+    m_t2sProcess->setProgram(process);
     QString XrayConStr = "socks5://127.0.0.1:10833";
 
 #ifdef Q_OS_WIN
@@ -50,8 +52,6 @@ void IpcProcessTun2Socks::start()
     });
 
     connect(m_t2sProcess.data(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &IpcProcessTun2Socks::bungus);
-
-    m_t2sProcess->start();
 
     m_t2sProcess->start();
     m_t2sProcess->waitForStarted();

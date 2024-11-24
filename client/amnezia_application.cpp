@@ -81,6 +81,15 @@ void AmneziaApplication::init() {
                     QCoreApplication::exit(-1);
             },
             Qt::QueuedConnection);
+  
+    m_firstSetupController.reset(new FirstSetupController(this));
+    m_engine->rootContext()->setContextProperty("FirstSetupController", m_firstSetupController.get());
+
+#ifdef Q_OS_MACOS
+  if (!m_firstSetupController->firstSetupNeeded()) {
+    m_firstSetupController->restartService();
+  }
+#endif
 
     m_engine->rootContext()->setContextProperty("Debug", &Logger::Instance());
 
@@ -415,9 +424,6 @@ void AmneziaApplication::initModels() {
 }
 
 void AmneziaApplication::initControllers() {
-    m_firstSetupController.reset(new FirstSetupController(this));
-    m_engine->rootContext()->setContextProperty("FirstSetupController", m_firstSetupController.get());
-
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 

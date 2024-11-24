@@ -19,3 +19,6 @@
 [submodule "client/3rd/Cactus"]
 	path = client/3rd/Cactus
 	url = git@github.com:zloserver/Cactus.git
+[submodule "service/server/3rd/SecureXPC"]
+	path = service/server/3rd/SecureXPC
+	url = https://github.com/zloserver/SecureXPC.git

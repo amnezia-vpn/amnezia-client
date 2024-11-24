@@ -14,6 +14,10 @@
 #include "tapcontroller_win.h"
 #endif
 
+#ifdef Q_OS_MAC
+#include <iostream>
+#endif
+
 namespace {
 Logger logger("WgDaemonServer");
 }

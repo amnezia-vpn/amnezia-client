@@ -1,0 +1,22 @@
+# because we can never have it "just work"
+# https://gitlab.kitware.com/cmake/cmake/-/issues/26195
+function(fixup_target_properties_swift target_name)
+    get_property(compile_options TARGET ${target_name} PROPERTY INTERFACE_COMPILE_OPTIONS)
+    set(munged_properties "")
+    foreach(property IN LISTS compile_options)
+        set(cxx_property "$<$<COMPILE_LANGUAGE:C,CXX,ASM>:${property}>")
+        set(swift_property "SHELL:$<$<COMPILE_LANGUAGE:Swift>:-Xcc ${property}>")
+        list(APPEND munged_properties "${cxx_property}")
+    endforeach()
+    set_property(TARGET ${target_name} PROPERTY INTERFACE_COMPILE_OPTIONS ${munged_properties})
+endfunction()
+
+function (fixup_target_qt_deps_swift target_name)
+    get_target_property(INTERFACE_LIBS ${target_name} INTERFACE_LINK_LIBRARIES)
+    foreach (INTERFACE_LIB ${INTERFACE_LIBS})
+        if (${INTERFACE_LIB} MATCHES "^Qt6::")
+            fixup_target_properties_swift(${INTERFACE_LIB})
+        endif ()
+    endforeach ()
+    fixup_target_properties_swift(${target_name})
+endfunction()

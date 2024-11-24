@@ -1,58 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
-	<key>CFBundleAllowMixedLocalizations</key>
-	<true/>
+	<dict>
+		<key>CFBundleDevelopmentRegion</key>
+		<string>en</string>
+		<key>CFBundleAllowMixedLocalizations</key>
+		<true />
 
-	<key>CFBundleExecutable</key>
-	<string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
+		<key>CFBundleExecutable</key>
+		<string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
 
-	<key>CFBundleIdentifier</key>
-	<string>${MACOSX_BUNDLE_GUI_IDENTIFIER}</string>
+		<key>CFBundleIdentifier</key>
+		<string>${MACOSX_BUNDLE_GUI_IDENTIFIER}</string>
 
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
+		<key>SMPrivilegedExecutables</key>
+		<dict>
+			<key>@BUILD_OSX_LAUNCHER_IDENTIFIER@</key>
+			<string>anchor apple generic and identifier "@BUILD_OSX_LAUNCHER_IDENTIFIER@" and
+				(certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or certificate
+				1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate
+				leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU]
+				= "${BUILD_VPN_DEVELOPERID_TEAM}")</string>
+		</dict>
 
-	<key>CFBundleName</key>
-	<string>${MACOSX_BUNDLE_BUNDLE_NAME}</string>
+		<key>CFBundleInfoDictionaryVersion</key>
+		<string>6.0</string>
 
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
+		<key>CFBundleName</key>
+		<string>${MACOSX_BUNDLE_BUNDLE_NAME}</string>
 
-	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
+		<key>CFBundlePackageType</key>
+		<string>APPL</string>
 
-	<key>CFBundleVersion</key>
-	<string>${MACOSX_BUNDLE_SHORT_VERSION_STRING}</string>
+		<key>CFBundleShortVersionString</key>
+		<string>$(MARKETING_VERSION)</string>
 
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
+		<key>CFBundleVersion</key>
+		<string>${MACOSX_BUNDLE_SHORT_VERSION_STRING}</string>
 
-	<key>LSApplicationCategoryType</key>
-	<string>public.app-category.utilities</string>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false />
 
-	<key>LSMinimumSystemVersion</key>
-	<string>${MACOSX_DEPLOYMENT_TARGET}</string>
+		<key>LSApplicationCategoryType</key>
+		<string>public.app-category.utilities</string>
 
-	<key>LSMultipleInstancesProhibited</key>
-	<true/>
+		<key>LSMinimumSystemVersion</key>
+		<string>${MACOSX_DEPLOYMENT_TARGET}</string>
 
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+		<key>LSMultipleInstancesProhibited</key>
+		<true />
 
-	<key>CFBundleIconFile</key>
-	<string>app.icns</string>
+		<key>NSPrincipalClass</key>
+		<string>NSApplication</string>
 
-	<key>NSHumanReadableCopyright</key>
-	<string>${MACOSX_BUNDLE_COPYRIGHT}</string>
+		<key>CFBundleIconFile</key>
+		<string>app.icns</string>
 
-	<key>NSSupportsAutomaticGraphicsSwitching</key>
-	<true/>
+		<key>NSHumanReadableCopyright</key>
+		<string>${MACOSX_BUNDLE_COPYRIGHT}</string>
 
-    <key>SUPublicEDKey</key>
-    <string>O8VVzMFrXQYD18iXtRUNX6PV0JXRu22YfahYwTj7YFM=</string>
-</dict>
+		<key>NSSupportsAutomaticGraphicsSwitching</key>
+		<true />
+
+		<key>SUPublicEDKey</key>
+		<string>O8VVzMFrXQYD18iXtRUNX6PV0JXRu22YfahYwTj7YFM=</string>
+	</dict>
 </plist>

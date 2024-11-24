@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
 set(PROJECT ZloVPN)
-project(${PROJECT})
+project(${PROJECT} LANGUAGES CXX Swift)
+
+if (APPLE)
+    set(CMAKE_Swift_LANGUAGE_VERSION "5.0")
+endif ()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
@@ -39,22 +43,33 @@ endif ()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 
-set(LIBS ${LIBS}
-        Qt6::Core Qt6::Gui
-        Qt6::Network Qt6::Xml Qt6::RemoteObjects
-        Qt6::Quick Qt6::Svg Qt6::QuickControls2
-        Qt6::Core5Compat Qt6::Concurrent
-)
+set(QT_LIBS Qt6::Core Qt6::Gui
+            Qt6::Network Qt6::Xml Qt6::RemoteObjects
+            Qt6::Quick Qt6::Svg Qt6::QuickControls2
+            Qt6::Core5Compat Qt6::Concurrent)
 
 if (IOS)
-    set(LIBS ${LIBS} Qt6::Multimedia)
+    set(QT_LIBS ${QT_LIBS} Qt6::Multimedia)
 endif ()
 
 if (WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
-    set(LIBS ${LIBS} Qt6::Widgets)
+    set(QT_LIBS ${QT_LIBS} Qt6::Widgets)
 endif ()
 
-qt_standard_project_setup()
+if (APPLE)
+    include(${CMAKE_SOURCE_DIR}/cmake/swift-fixup.cmake)
+    foreach (QT_LIB ${QT_LIBS})
+        fixup_target_qt_deps_swift(${QT_LIB})
+    endforeach ()
+    fixup_target_properties_swift(Qt6::qtpaths)
+    fixup_target_properties_swift(Qt6::Qml)
+    fixup_target_properties_swift(Qt6::CorePrivate)
+    # fixup_target_properties_swift(Qt6::ShaderTools)
+endif ()
+
+set(LIBS ${LIBS} ${QT_LIBS})
+
+qt_standard_project_setup(REQUIRES 6.5)
 qt_add_executable(${PROJECT} MANUAL_FINALIZATION
         ui/controllers/authController.h ui/controllers/authController.cpp
         endpoints.h
@@ -75,6 +90,9 @@ if (APPLE AND NOT IOS)
             XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY "YES"
     )
 
+    set_target_properties(${PROJECT} PROPERTIES
+        BUILD_WITH_INSTALL_RPATH ON
+    )
     # set_target_properties(${PROJECT} PROPERTIES
     #         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/macos/app/Info.plist
     # )
@@ -88,16 +106,12 @@ message(${QML_FILES})
 set_source_files_properties(${QML_FILES_DIR}/Modules/Style/AmneziaStyle.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 set_source_files_properties(${QML_FILES_DIR}/Config/GlobalConfig.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
-if (NOT IOS AND NOT ANDROID)
-    if (${COPY_QT_RESOURCES})
-        qt_add_qml_module(${PROJECT}
-                URI Application
-                VERSION 4.8
-                QML_FILES
-                ${QML_FILES}
-        )
-    endif ()
-endif ()
+qt_add_qml_module(${PROJECT}
+    URI ${PROJECT}
+    VERSION 4.8
+    QML_FILES
+    ${QML_FILES}
+)
 
 if (WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
@@ -328,29 +342,6 @@ if (WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 endif ()
 
-if (APPLE)
-    cmake_policy(SET CMP0099 OLD)
-    cmake_policy(SET CMP0114 NEW)
-
-    if (NOT BUILD_OSX_APP_IDENTIFIER)
-        set(BUILD_OSX_APP_IDENTIFIER com.zloserver.vpn CACHE STRING "OSX Application identifier")
-    endif ()
-    if (NOT BUILD_IOS_APP_IDENTIFIER)
-        set(BUILD_IOS_APP_IDENTIFIER com.zloserver.vpn CACHE STRING "iOS Application identifier")
-    endif ()
-    if (NOT BUILD_IOS_GROUP_IDENTIFIER)
-        set(BUILD_IOS_GROUP_IDENTIFIER group.com.zloserver.vpn CACHE STRING "iOS Group identifier")
-    endif ()
-    if (NOT BUILD_VPN_DEVELOPMENT_TEAM)
-        set(BUILD_VPN_DEVELOPMENT_TEAM S6TBJMG52K CACHE STRING "iOS Development Team identifier")
-    endif ()
-
-    set(CMAKE_XCODE_GENERATE_SCHEME FALSE)
-    set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ${BUILD_VPN_DEVELOPMENT_TEAM})
-    set(CMAKE_XCODE_ATTRIBUTE_GROUP_ID_IOS ${BUILD_IOS_GROUP_IDENTIFIER})
-
-endif ()
-
 if (LINUX AND NOT ANDROID)
     set(LIBS ${LIBS} -static-libstdc++ -static-libgcc -ldl)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
@@ -449,8 +440,16 @@ elseif (APPLE AND NOT IOS)
             TARGET ${PROJECT} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
             $<TARGET_FILE:ZloVPN-service>
-            $<TARGET_FILE_DIR:${PROJECT}>
+            $<TARGET_FILE_DIR:${PROJECT}>/${BUILD_OSX_SERVICE_IDENTIFIER}
             COMMAND_EXPAND_LISTS
+    )
+
+    add_custom_command(
+        TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE:macLauncher>
+        $<TARGET_BUNDLE_DIR:${PROJECT}>/Contents/Library/LaunchServices/${BUILD_OSX_LAUNCHER_IDENTIFIER}
+        COMMAND_EXPAND_LISTS
     )
 
     add_custom_command(
@@ -463,35 +462,35 @@ elseif (APPLE AND NOT IOS)
 endif ()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
-qt_finalize_target(${PROJECT})
+qt_finalize_executable(${PROJECT})
 
 if (APPLE AND NOT IOS)
-    if (${COPY_QT_RESOURCES})
-        qt_generate_deploy_qml_app_script(
-                TARGET ${PROJECT}
-                OUTPUT_SCRIPT shmungus
-        )
+    # if (${COPY_QT_RESOURCES})
+    #     qt_generate_deploy_qml_app_script(
+    #             TARGET ${PROJECT}
+    #             OUTPUT_SCRIPT shmungus
+    #     )
 
-        # todo: this breaks debugging in xcode, comment out if you want debugging to work
-        # note: if you comment this out, the service won't launch properly from the bundle directory
-        set(deploy_script "${CMAKE_CURRENT_BINARY_DIR}/deployqt_$<CONFIG>_${PROJECT}.cmake")
-        file(GENERATE OUTPUT "${deploy_script}" CONTENT "
-            include(\"${QT_DEPLOY_SUPPORT}\")
-            qt_deploy_qml_imports(
-                TARGET ${PROJECT}
-                PLUGINS_FOUND plugins_found
-            )
+    #     # todo: this breaks debugging in xcode, comment out if you want debugging to work
+    #     # note: if you comment this out, the service won't launch properly from the bundle directory
+    #     set(deploy_script "${CMAKE_CURRENT_BINARY_DIR}/deployqt_$<CONFIG>_${PROJECT}.cmake")
+    #     file(GENERATE OUTPUT "${deploy_script}" CONTENT "
+    #         include(\"${QT_DEPLOY_SUPPORT}\")
+    #         qt_deploy_qml_imports(
+    #             TARGET ${PROJECT}
+    #             PLUGINS_FOUND plugins_found
+    #         )
 
-            qt_deploy_runtime_dependencies(
-                EXECUTABLE $<TARGET_FILE:${PROJECT}>
-                ADDITIONAL_MODULES \${plugins_found}
-            )
-        ")
+    #         qt_deploy_runtime_dependencies(
+    #             EXECUTABLE $<TARGET_FILE:${PROJECT}>
+    #             ADDITIONAL_MODULES \${plugins_found}
+    #         )
+    #     ")
 
-        add_custom_command(
-                TARGET ${PROJECT} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -P ${deploy_script}
-                WORKING_DIRECTORY $<TARGET_BUNDLE_DIR:${PROJECT}>/../
-        )
-    endif ()
+    #     add_custom_command(
+    #             TARGET ${PROJECT} POST_BUILD
+    #             COMMAND ${CMAKE_COMMAND} -P ${deploy_script}
+    #             WORKING_DIRECTORY $<TARGET_BUNDLE_DIR:${PROJECT}>/../
+    #     )
+    # endif ()
 endif ()

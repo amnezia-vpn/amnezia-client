@@ -58,11 +58,19 @@ function(_swift_generate_cxx_header target header)
             ${ARG_SEARCH_PATHS}
             ${_SwiftSources}
             ${SDK_FLAGS}
+            -swift-version 5
+            -target x86_64-apple-macos13.0
             -module-name "${ARG_MODULE_NAME}"
             -cxx-interoperability-mode=default
             -emit-clang-header-path ${header_path}
             -F ${CMAKE_SOURCE_DIR}/client/3rd/macos
             -framework Sparkle
+            -L $<TARGET_FILE_DIR:SecureXPC>
+            -I $<TARGET_FILE_DIR:SecureXPC>
+            -l SecureXPC
+            -L $<TARGET_FILE_DIR:serverMacShared>
+            -I $<TARGET_FILE_DIR:serverMacShared>
+            -l serverMacShared
             COMMENT
             "Generating '${header_path}'"
             COMMAND_EXPAND_LISTS)

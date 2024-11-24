@@ -1,10 +1,18 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
+enable_language(Swift)
+
 set(PROJECT ZloVPN-service)
-project(${PROJECT})
+project(${PROJECT} LANGUAGES CXX Swift)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if (APPLE)
+        add_subdirectory("3rd/SecureXPC")
+        add_subdirectory("macShared")
+        add_subdirectory("macLauncher")
+endif ()
 
 find_package(Qt6 REQUIRED COMPONENTS Qml DBus Core Network Widgets RemoteObjects Core5Compat)
 qt_standard_project_setup()
@@ -250,7 +258,22 @@ include_directories(
 )
 
 add_executable(${PROJECT} ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat Qt6::DBus ${LIBS})
+
+set(QT_LIBS Qt6::Core Qt6::Widgets Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat Qt6::DBus)
+target_link_libraries(${PROJECT} PRIVATE ${QT_LIBS} ${LIBS})
+target_compile_definitions(${PROJECT} PRIVATE "ZLOVPN_SERVICE")
+
+if (APPLE)
+    include(${CMAKE_SOURCE_DIR}/cmake/swift-fixup.cmake)
+    foreach (QT_LIB ${QT_LIBS})
+        fixup_target_qt_deps_swift(${QT_LIB})
+    endforeach ()
+    fixup_target_properties_swift(Qt6::qtpaths)
+    fixup_target_properties_swift(Qt6::Qml)
+    fixup_target_properties_swift(Qt6::CorePrivate)
+    # fixup_target_properties_swift(Qt6::ShaderTools)
+endif ()
+
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -284,6 +307,43 @@ if (APPLE)
     target_link_libraries(${PROJECT} PRIVATE ${FW_USER_NOTIFICATIONS})
 
 
+endif ()
+
+if (APPLE)
+        include(${CMAKE_SOURCE_DIR}/cmake/InitializeSwift.cmake)
+        include(${CMAKE_SOURCE_DIR}/cmake/GenerateSwiftHeader.cmake)
+
+        set_target_properties(${PROJECT} PROPERTIES
+                XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
+
+                MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
+                MACOSX_BUNDLE_LONG_VERSION_STRING "${APPLE_PROJECT_VERSION}-${CMAKE_PROJECT_VERSION_TWEAK}"
+                MACOSX_BUNDLE_SHORT_VERSION_STRING "${APPLE_PROJECT_VERSION}"
+
+                XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
+                Swift_MODULE_NAME "ZloVPNService"
+                XCODE_ATTRIBUTE_PRODUCT_MODULE_NAME "ZloVPNService"
+        )
+
+        configure_file(${CMAKE_CURRENT_LIST_DIR}/macos/Info.plist.in ${CMAKE_BINARY_DIR}/service/macos/Info.plist)
+
+        target_link_options(${PROJECT} PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${CMAKE_BINARY_DIR}/service/macos/Info.plist)
+
+        target_link_libraries(${PROJECT} PRIVATE SecureXPC serverMacShared)
+
+        target_sources(${PROJECT} PRIVATE
+                ${CMAKE_CURRENT_SOURCE_DIR}/macos/KeepAliveController.swift
+                ${CMAKE_CURRENT_SOURCE_DIR}/macos/swift_loggers.h
+                ${CMAKE_CURRENT_SOURCE_DIR}/macos/swift_loggers.cpp
+                ${CMAKE_CURRENT_SOURCE_DIR}/macos/module.modulemap)
+
+        # todo: support multiple binaries
+        set(SWIFT_OPTIONS "-cxx-interoperability-mode=default" -target ${CMAKE_OSX_ARCHITECTURES}-apple-macosx${CMAKE_OSX_DEPLOYMENT_TARGET})
+        target_compile_options(${PROJECT} PUBLIC $<$<COMPILE_LANGUAGE:Swift>:${SWIFT_OPTIONS}>)
+
+        _swift_generate_cxx_header(${PROJECT}
+                ${CMAKE_CURRENT_BINARY_DIR}/ZloVPN-Service-Swift.h                
+                SEARCH_PATHS "${CMAKE_CURRENT_SOURCE_DIR}/macos")
 endif ()
 
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface.rep)
