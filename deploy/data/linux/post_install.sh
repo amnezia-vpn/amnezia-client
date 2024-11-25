@@ -19,6 +19,11 @@ date > $LOG_FILE
 echo "Script started" >> $LOG_FILE
 sudo killall -9 $APP_NAME 2>> $LOG_FILE
 
+if command -v steamos-readonly &> /dev/null; then
+        sudo steamos-readonly disable >> $LOG_FILE
+        echo "steamos-readonly disabled" >> $LOG_FILE
+fi
+
 if sudo systemctl is-active --quiet $APP_NAME; then
 	sudo systemctl stop $APP_NAME >> $LOG_FILE
 	sudo systemctl disable $APP_NAME >> $LOG_FILE
@@ -41,6 +46,11 @@ sudo cp $APP_PATH/$APP_NAME.png /usr/share/pixmaps/ >> $LOG_FILE
 sudo chmod 555 /usr/share/applications/$APP_NAME.desktop >> $LOG_FILE
 
 echo "user desktop creation loop ended" >> $LOG_FILE
+
+if command -v steamos-readonly &> /dev/null; then
+        sudo steamos-readonly enable >> $LOG_FILE
+        echo "steamos-readonly enabled" >> $LOG_FILE
+fi
 
 date >> $LOG_FILE
 echo "Service status:" >> $LOG_FILE
