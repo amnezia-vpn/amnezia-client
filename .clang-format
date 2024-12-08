@@ -1,0 +1,39 @@
+BasedOnStyle: WebKit
+AccessModifierOffset: '-4'
+AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: 'true'
+AlignTrailingComments: 'true'
+AllowAllArgumentsOnNextLine: 'true'
+AllowAllParametersOfDeclarationOnNextLine: 'true'
+AllowShortBlocksOnASingleLine: 'false'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortEnumsOnASingleLine: 'false'
+AllowShortFunctionsOnASingleLine: None
+AlwaysBreakTemplateDeclarations: 'No'
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterClass: true
+    AfterControlStatement: false
+    AfterEnum: false
+    AfterFunction: true
+    AfterNamespace: true
+    AfterObjCDeclaration: false
+    AfterStruct: true
+    AfterUnion: false
+    BeforeCatch: false
+    BeforeElse: false
+    IndentBraces: false
+BreakConstructorInitializers: BeforeColon
+ColumnLimit: '120'
+CommentPragmas: '"^!|^:"'
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+ConstructorInitializerIndentWidth: '4'
+ContinuationIndentWidth: '8'
+IndentPPDirectives: BeforeHash
+NamespaceIndentation: All
+PenaltyExcessCharacter: '10'
+PointerAlignment: Right
+SortIncludes: 'true'
+SpaceAfterTemplateKeyword: 'false'
+Standard: Auto
