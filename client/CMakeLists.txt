@@ -463,34 +463,3 @@ endif ()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
 qt_finalize_executable(${PROJECT})
-
-if (APPLE AND NOT IOS)
-    # if (${COPY_QT_RESOURCES})
-    #     qt_generate_deploy_qml_app_script(
-    #             TARGET ${PROJECT}
-    #             OUTPUT_SCRIPT shmungus
-    #     )
-
-    #     # todo: this breaks debugging in xcode, comment out if you want debugging to work
-    #     # note: if you comment this out, the service won't launch properly from the bundle directory
-    #     set(deploy_script "${CMAKE_CURRENT_BINARY_DIR}/deployqt_$<CONFIG>_${PROJECT}.cmake")
-    #     file(GENERATE OUTPUT "${deploy_script}" CONTENT "
-    #         include(\"${QT_DEPLOY_SUPPORT}\")
-    #         qt_deploy_qml_imports(
-    #             TARGET ${PROJECT}
-    #             PLUGINS_FOUND plugins_found
-    #         )
-
-    #         qt_deploy_runtime_dependencies(
-    #             EXECUTABLE $<TARGET_FILE:${PROJECT}>
-    #             ADDITIONAL_MODULES \${plugins_found}
-    #         )
-    #     ")
-
-    #     add_custom_command(
-    #             TARGET ${PROJECT} POST_BUILD
-    #             COMMAND ${CMAKE_COMMAND} -P ${deploy_script}
-    #             WORKING_DIRECTORY $<TARGET_BUNDLE_DIR:${PROJECT}>/../
-    #     )
-    # endif ()
-endif ()

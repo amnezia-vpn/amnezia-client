@@ -283,18 +283,18 @@ jobs:
         with:
           xcode-version: 16
 
-      - name: "Install Qt"
-        uses: jurplel/install-qt-action@v3
+      - name: "Download static Qt"
+        uses: robinraju/release-downloader@v1
         with:
-          version: ${{ env.QT_VERSION }}
-          host: "mac"
-          target: "desktop"
-          arch: "clang_64"
-          modules: "qtremoteobjects qt5compat qtshadertools"
-          dir: ${{ runner.temp }}
-          setup-python: "true"
-          set-env: "true"
-          extra: "--external 7z --base ${{ env.QT_MIRROR }}"
+          repository: "zloserver/qt-static"
+          tag: "v${{ env.QT_VERSION }}"
+          fileName: "qt-static-macOS-${{ env.QT_VERSION }}.tar.gz"
+
+      - name: "Install static qt"
+        run: |
+          mkdir ${{ runner.temp }}/qt6
+          tar -xzvf qt-static-macOS-${{ env.QT_VERSION }}.tar.gz -C ${{ runner.temp }}/qt6
+          echo "QT_BIN_DIR=${{ runner.temp }}/qt6/bin" >> $GITHUB_ENV
 
       - name: "Install create-dmg"
         run: |
@@ -331,7 +331,6 @@ jobs:
 
       - name: "Build project"
         run: |
-          export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
           bash deploy/build_macos.sh
         env:
           MACOS_SIGNING_CERT_BASE64: ${{ secrets.MACOS_SIGNING_CERT_BASE64 }}
