@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
 set(PROJECT ZloVPN)
-project(${PROJECT} LANGUAGES CXX Swift)
+project(${PROJECT} LANGUAGES CXX)
 
 if (APPLE)
+    enable_language(Swift)
     set(CMAKE_Swift_LANGUAGE_VERSION "5.0")
 endif ()
 
