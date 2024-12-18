@@ -24,7 +24,7 @@ Button {
 
     property string leftImageSource
     property string rightImageSource
-    property string leftImageColor
+    property string leftImageColor: textColor
     property bool changeLeftImageSize: true
 
     property bool squareLeftSide: false

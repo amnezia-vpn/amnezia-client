@@ -110,6 +110,7 @@ PageType {
                 text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
 
                 leftImageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
+                leftImageColor: ""
                 rightImageSource: "qrc:/images/controls/chevron-down.svg"
 
                 Keys.onEnterPressed: splitTunnelingButton.clicked()
