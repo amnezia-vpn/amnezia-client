@@ -335,7 +335,8 @@ jobs:
         arch: 'linux_gcc_64'
         modules: ${{ env.QT_MODULES }}
         dir: ${{ runner.temp }}
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_x86_64 Qt'
       uses: jurplel/install-qt-action@v4
@@ -346,7 +347,8 @@ jobs:
         arch: 'android_x86_64'
         modules: ${{ env.QT_MODULES }}
         dir: ${{ runner.temp }}
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_x86 Qt'
       uses: jurplel/install-qt-action@v4
@@ -357,7 +359,8 @@ jobs:
         arch: 'android_x86'
         modules: ${{ env.QT_MODULES }}
         dir: ${{ runner.temp }}
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_armv7 Qt'
       uses: jurplel/install-qt-action@v4
@@ -368,7 +371,8 @@ jobs:
         arch: 'android_armv7'
         modules: ${{ env.QT_MODULES }}
         dir: ${{ runner.temp }}
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_arm64_v8a Qt'
       uses: jurplel/install-qt-action@v4
@@ -379,7 +383,8 @@ jobs:
         arch: 'android_arm64_v8a'
         modules: ${{ env.QT_MODULES }}
         dir: ${{ runner.temp }}
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Grant execute permission for qt-cmake'
       shell: bash
