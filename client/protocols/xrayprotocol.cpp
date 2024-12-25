@@ -1,7 +1,6 @@
 #include "xrayprotocol.h"
 
 #include "utilities.h"
-#include "containers/containers_defs.h"
 #include "core/networkUtilities.h"
 
 #include <QCryptographicHash>
@@ -22,9 +21,8 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent):
 
 XrayProtocol::~XrayProtocol()
 {
+    qDebug() << "XrayProtocol::~XrayProtocol()";
     XrayProtocol::stop();
-    QThread::msleep(200);
-    m_xrayProcess.close();
 }
 
 ErrorCode XrayProtocol::start()
@@ -34,10 +32,6 @@ ErrorCode XrayProtocol::start()
     if (!QFileInfo::exists(xrayExecPath())) {
         setLastError(ErrorCode::XrayExecutableMissing);
         return lastError();
-    }
-
-    if (Utils::processIsRunning(Utils::executable(xrayExecPath(), true))) {
-        Utils::killProcessByName(Utils::executable(xrayExecPath(), true));
     }
 
 #ifdef QT_DEBUG
@@ -54,9 +48,16 @@ ErrorCode XrayProtocol::start()
     qDebug().noquote() << "XrayProtocol::start()"
                        << xrayExecPath() << args.join(" ");
 
-    m_xrayProcess.setProcessChannelMode(QProcess::MergedChannels);
 
+
+    m_xrayProcess.setProcessChannelMode(QProcess::MergedChannels);
     m_xrayProcess.setProgram(xrayExecPath());
+
+    if (Utils::processIsRunning(Utils::executable("xray", false))) {
+        qDebug().noquote() << "kill previos xray";
+        Utils::killProcessByName(Utils::executable("xray", false));
+    }
+
     m_xrayProcess.setArguments(args);
 
     connect(&m_xrayProcess, &QProcess::readyReadStandardOutput, this, [this]() {
@@ -68,13 +69,9 @@ ErrorCode XrayProtocol::start()
     connect(&m_xrayProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
         qDebug().noquote() << "XrayProtocol finished, exitCode, exitStatus" << exitCode << exitStatus;
         setConnectionState(Vpn::ConnectionState::Disconnected);
-        if (exitStatus != QProcess::NormalExit) {
-            emit protocolError(amnezia::ErrorCode::XrayExecutableCrashed);
-            stop();
-        }
-        if (exitCode != 0) {
-            emit protocolError(amnezia::ErrorCode::InternalError);
-            stop();
+        if ((exitStatus != QProcess::NormalExit) || (exitCode != 0)) {
+                emit protocolError(amnezia::ErrorCode::XrayExecutableCrashed);
+                emit setConnectionState(Vpn::ConnectionState::Error);
         }
     });
 
@@ -177,14 +174,14 @@ void XrayProtocol::stop()
     IpcClient::Interface()->StartRoutingIpv6();
 #endif
     qDebug() << "XrayProtocol::stop()";
-    m_xrayProcess.terminate();
+    m_xrayProcess.disconnect();
+    m_xrayProcess.kill();
+    m_xrayProcess.waitForFinished(3000);
     if (m_t2sProcess) {
         m_t2sProcess->stop();
     }
 
-#ifdef Q_OS_WIN
-    Utils::signalCtrl(m_xrayProcess.processId(), CTRL_C_EVENT);
-#endif
+    setConnectionState(Vpn::ConnectionState::Disconnected);
 }
 
 QString XrayProtocol::xrayExecPath()

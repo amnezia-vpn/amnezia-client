@@ -11,7 +11,6 @@ IpcProcessTun2Socks::IpcProcessTun2Socks(QObject *parent) :
     IpcProcessTun2SocksSource(parent),
     m_t2sProcess(QSharedPointer<QProcess>(new QProcess()))
 {
-    connect(m_t2sProcess.data(), &QProcess::stateChanged, this, &IpcProcessTun2Socks::stateChanged);
     qDebug() << "IpcProcessTun2Socks::IpcProcessTun2Socks()";
 
 }
@@ -23,8 +22,10 @@ IpcProcessTun2Socks::~IpcProcessTun2Socks()
 
 void IpcProcessTun2Socks::start()
 {
+    connect(m_t2sProcess.data(), &QProcess::stateChanged, this, &IpcProcessTun2Socks::stateChanged);
     qDebug() << "IpcProcessTun2Socks::start()";
     m_t2sProcess->setProgram(amnezia::permittedProcessPath(static_cast<amnezia::PermittedProcess>(amnezia::PermittedProcess::Tun2Socks)));
+
     QString XrayConStr = "socks5://127.0.0.1:10808";
 
 #ifdef Q_OS_WIN
@@ -41,7 +42,11 @@ void IpcProcessTun2Socks::start()
 
     m_t2sProcess->setArguments(arguments);
 
-    Utils::killProcessByName(m_t2sProcess->program());
+    if (Utils::processIsRunning(Utils::executable("tun2socks", false))) {
+        qDebug().noquote() << "kill previos tun2socks";
+        Utils::killProcessByName(Utils::executable("tun2socks", false));
+    }
+
     m_t2sProcess->start();
 
     connect(m_t2sProcess.data(), &QProcess::readyReadStandardOutput, this, [this]() {
@@ -54,12 +59,10 @@ void IpcProcessTun2Socks::start()
     connect(m_t2sProcess.data(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
         qDebug().noquote() << "tun2socks finished, exitCode, exiStatus" << exitCode << exitStatus;
         emit setConnectionState(Vpn::ConnectionState::Disconnected);
-        if (exitStatus != QProcess::NormalExit){
-            stop();
+        if ((exitStatus != QProcess::NormalExit) || (exitCode != 0)) {
+            emit setConnectionState(Vpn::ConnectionState::Error);
         }
-        if (exitCode !=0 ){
-            stop();
-        }
+
     });
 
     m_t2sProcess->start();
@@ -69,6 +72,8 @@ void IpcProcessTun2Socks::start()
 void IpcProcessTun2Socks::stop()
 {
     qDebug() << "IpcProcessTun2Socks::stop()";
-    m_t2sProcess->close();
+    m_t2sProcess->disconnect();
+    m_t2sProcess->kill();
+    m_t2sProcess->waitForFinished(3000);
 }
 #endif
