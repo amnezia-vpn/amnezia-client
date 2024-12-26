@@ -538,3 +538,13 @@ void Settings::toggleDevGatewayEnv(bool enabled)
 {
     m_isDevGatewayEnv = enabled;
 }
+
+bool Settings::isHomeAdLabelVisible()
+{
+    return value("Conf/homeAdLabelVisible", true).toBool();
+}
+
+void Settings::disableHomeAdLabel()
+{
+    setValue("Conf/homeAdLabelVisible", false);
+}

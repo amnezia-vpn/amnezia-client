@@ -222,6 +222,9 @@ public:
     bool isDevGatewayEnv();
     void toggleDevGatewayEnv(bool enabled);
 
+    bool isHomeAdLabelVisible();
+    void disableHomeAdLabel();
+
 signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);

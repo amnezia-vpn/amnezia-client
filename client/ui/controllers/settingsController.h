@@ -29,6 +29,8 @@ public:
     Q_PROPERTY(QString gatewayEndpoint READ getGatewayEndpoint WRITE setGatewayEndpoint NOTIFY gatewayEndpointChanged)
     Q_PROPERTY(bool isDevGatewayEnv READ isDevGatewayEnv WRITE toggleDevGatewayEnv NOTIFY devGatewayEnvChanged)
 
+    Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
+
 public slots:
     void toggleAmneziaDns(bool enable);
     bool isAmneziaDnsEnabled();
@@ -89,6 +91,9 @@ public slots:
 
     bool isOnTv();
 
+    bool isHomeAdLabelVisible();
+    void disableHomeAdLabel();
+
 signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();
@@ -111,6 +116,8 @@ signals:
     void devModeEnabled();
     void gatewayEndpointChanged(const QString &endpoint);
     void devGatewayEnvChanged(bool enabled);
+
+    void isHomeAdLabelVisibleChanged(bool visible);
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

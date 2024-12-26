@@ -324,6 +324,28 @@ PageType {
                     Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
                 }
             }
+
+            BasicButtonType {
+                id: siteLink2
+                Layout.topMargin: 24
+                Layout.bottomMargin: 16
+                Layout.alignment: Qt.AlignHCenter
+                implicitHeight: 32
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.goldenApricot
+
+                text: qsTr("Site Amnezia")
+
+                rightImageSource: "qrc:/images/controls/external-link.svg"
+
+                clickedFunc: function() {
+                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
+                }
+            }
         }
     }
 }

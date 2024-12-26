@@ -325,3 +325,14 @@ bool SettingsController::isOnTv()
     return false;
 #endif
 }
+
+bool SettingsController::isHomeAdLabelVisible()
+{
+    return m_settings->isHomeAdLabelVisible();
+}
+
+void SettingsController::disableHomeAdLabel()
+{
+    m_settings->disableHomeAdLabel();
+    emit isHomeAdLabelVisibleChanged(false);
+}
