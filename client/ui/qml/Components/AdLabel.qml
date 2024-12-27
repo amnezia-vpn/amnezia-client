@@ -28,7 +28,7 @@ Rectangle {
         cursorShape: Qt.PointingHandCursor
 
         onClicked: function() {
-            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
+            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl() + "/premium")
         }
     }
 

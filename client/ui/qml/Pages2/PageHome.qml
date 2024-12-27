@@ -49,7 +49,6 @@ PageType {
                                        connectButton
             }
 
-
             AdLabel {
                 id: adLabel
 
