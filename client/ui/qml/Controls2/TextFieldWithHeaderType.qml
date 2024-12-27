@@ -183,7 +183,7 @@ Item {
 
         focusPolicy: Qt.NoFocus
         text: root.buttonText
-        imageSource: root.buttonImageSource
+        leftImageSource: root.buttonImageSource
 
         anchors.top: content.top
         anchors.bottom: content.bottom

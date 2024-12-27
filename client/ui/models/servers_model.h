@@ -46,6 +46,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    bool setData(const int index, const QVariant &value, int role = Qt::EditRole);
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant data(const int index, int role = Qt::DisplayRole) const;
 
@@ -115,6 +116,7 @@ public slots:
     QVariant getDefaultServerData(const QString roleString);
 
     QVariant getProcessedServerData(const QString roleString);
+    bool setProcessedServerData(const QString &roleString, const QVariant &value);
 
     bool isDefaultServerDefaultContainerHasSplitTunneling();
 
@@ -127,6 +129,9 @@ protected:
 
 signals:
     void processedServerIndexChanged(const int index);
+    // emitted when the processed server index or processed server data is changed
+    void processedServerChanged();
+
     void defaultServerIndexChanged(const int index);
     void defaultServerNameChanged();
     void defaultServerDescriptionChanged();

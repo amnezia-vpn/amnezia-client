@@ -14,7 +14,7 @@ Popup {
     visible: false
 
     Overlay.modal: Rectangle {
-        color: Qt.rgba(14/255, 14/255, 17/255, 0.8)
+        color: AmneziaStyle.color.translucentMidnightBlack
     }
 
     background: Rectangle {

@@ -92,7 +92,7 @@ PageType {
                 break
             }
             case PageShare.ConfigType.Xray: {
-                ExportController.generateXrayConfig()
+                ExportController.generateXrayConfig(clientNameTextField.textFieldText)
                 shareConnectionDrawer.configCaption = qsTr("Save XRay config")
                 shareConnectionDrawer.configExtension = ".json"
                 shareConnectionDrawer.configFileName = "amnezia_for_xray"
@@ -573,7 +573,7 @@ PageType {
                 visible: accessTypeSelector.currentIndex === 0
 
                 text: qsTr("Share")
-                imageSource: "qrc:/images/controls/share-2.svg"                
+                leftImageSource: "qrc:/images/controls/share-2.svg"
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
 

@@ -3,6 +3,7 @@
 
 #include <QAbstractListModel>
 #include <QJsonArray>
+#include <QJsonObject>
 
 class ApiServicesModel : public QAbstractListModel
 {
@@ -15,10 +16,11 @@ public:
         ServiceDescriptionRole,
         IsServiceAvailableRole,
         SpeedRole,
-        WorkPeriodRole,
+        TimeLimitRole,
         RegionRole,
         FeaturesRole,
-        PriceRole
+        PriceRole,
+        EndDateRole
     };
 
     explicit ApiServicesModel(QObject *parent = nullptr);
@@ -48,8 +50,40 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
+    struct ServiceInfo
+    {
+        QString name;
+        QString speed;
+        QString timeLimit;
+        QString region;
+        QString price;
+
+        QJsonObject object;
+    };
+
+    struct Subscription
+    {
+        QString endDate;
+    };
+
+    struct ApiServicesData
+    {
+        bool isServiceAvailable;
+
+        QString type;
+        QString protocol;
+        QString storeEndpoint;
+
+        ServiceInfo serviceInfo;
+        Subscription subscription;
+
+        QJsonArray availableCountries;
+    };
+
+    ApiServicesData getApiServicesData(const QJsonObject &data);
+
     QString m_countryCode;
-    QJsonArray m_services;
+    QVector<ApiServicesData> m_services;
 
     int m_selectedServiceIndex;
 };

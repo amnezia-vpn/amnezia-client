@@ -22,9 +22,10 @@ Button {
     property int borderWidth: 0
     property int borderFocusedWidth: 1
 
-    property string imageSource
+    property string leftImageSource
     property string rightImageSource
     property string leftImageColor: textColor
+    property bool changeLeftImageSize: true
 
     property bool squareLeftSide: false
 
@@ -127,16 +128,21 @@ Button {
             anchors.centerIn: parent
 
             Image {
-                Layout.preferredHeight: 20
-                Layout.preferredWidth: 20
-
-                source: root.imageSource
-                visible: root.imageSource === "" ? false : true
+                id: leftImage
+                source: root.leftImageSource
+                visible: root.leftImageSource === "" ? false : true
 
                 layer {
-                    enabled: true
+                    enabled: leftImageColor !== "" ? true : false
                     effect: ColorOverlay {
                         color: leftImageColor
+                    }
+                }
+
+                Component.onCompleted: {
+                    if (root.changeLeftImageSize) {
+                        leftImage.Layout.preferredHeight = 20
+                        leftImage.Layout.preferredWidth = 20
                     }
                 }
             }

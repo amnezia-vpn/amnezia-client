@@ -98,7 +98,6 @@ PageType {
                 pressedColor: AmneziaStyle.color.sheerWhite
                 disabledColor: AmneziaStyle.color.mutedGray
                 textColor: AmneziaStyle.color.mutedGray
-                leftImageColor: AmneziaStyle.color.transparent
                 borderWidth: 0
 
                 buttonTextLabel.lineHeight: 20
@@ -110,7 +109,8 @@ PageType {
 
                 text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
 
-                imageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
+                leftImageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
+                leftImageColor: ""
                 rightImageSource: "qrc:/images/controls/chevron-down.svg"
 
                 Keys.onEnterPressed: splitTunnelingButton.clicked()
@@ -166,6 +166,7 @@ PageType {
 
                 anchors.left: parent.left
                 anchors.right: parent.right
+                spacing: 0
 
                 Component.onCompleted: {
                     drawer.collapsedHeight = collapsed.implicitHeight
@@ -267,18 +268,39 @@ PageType {
 
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 89 : 44
+                    Layout.topMargin: 8
+                    Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 61 : 16
                     spacing: 0
 
-                    Image {
-                        Layout.rightMargin: 8
-                        visible: source !== ""
-                        source: ServersModel.defaultServerImagePathCollapsed
-                    }
+                    BasicButtonType {
+                        enabled: (ServersModel.defaultServerImagePathCollapsed !== "") && drawer.isCollapsed
+                        hoverEnabled: enabled
 
-                    LabelTextType {
-                        id: collapsedServerMenuDescription
+                        implicitHeight: 36
+
+                        leftPadding: 16
+                        rightPadding: 16
+
+                        defaultColor: AmneziaStyle.color.transparent
+                        hoveredColor: AmneziaStyle.color.translucentWhite
+                        pressedColor: AmneziaStyle.color.sheerWhite
+                        disabledColor: AmneziaStyle.color.transparent
+                        textColor: AmneziaStyle.color.mutedGray
+
+                        buttonTextLabel.lineHeight: 16
+                        buttonTextLabel.font.pixelSize: 13
+                        buttonTextLabel.font.weight: 400
+
                         text: drawer.isCollapsed ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
+                        leftImageSource: ServersModel.defaultServerImagePathCollapsed
+                        changeLeftImageSize: false
+
+                        rightImageSource: hoverEnabled ? "qrc:/images/controls/chevron-down.svg" : ""
+
+                        onClicked: {
+                            ServersModel.processedIndex = ServersModel.defaultIndex
+                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                        }
                     }
                 }
             }
@@ -316,8 +338,8 @@ PageType {
 
                         rootButtonImageColor: AmneziaStyle.color.midnightBlack
                         rootButtonBackgroundColor: AmneziaStyle.color.paleGray
-                        rootButtonBackgroundHoveredColor: Qt.rgba(215, 216, 219, 0.8)
-                        rootButtonBackgroundPressedColor: Qt.rgba(215, 216, 219, 0.65)
+                        rootButtonBackgroundHoveredColor: AmneziaStyle.color.mistyGray
+                        rootButtonBackgroundPressedColor: AmneziaStyle.color.cloudyGray
                         rootButtonHoveredBorderColor: AmneziaStyle.color.transparent
                         rootButtonDefaultBorderColor: AmneziaStyle.color.transparent
                         rootButtonTextTopMargin: 8

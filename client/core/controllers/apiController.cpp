@@ -50,6 +50,8 @@ namespace
         constexpr char authData[] = "auth_data";
     }
 
+    const int requestTimeoutMsecs = 12 * 1000; // 12 secs
+
     ErrorCode checkErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply)
     {
         if (!sslErrors.empty()) {
@@ -177,7 +179,7 @@ void ApiController::fillServerConfig(const QString &protocol, const ApiControlle
 QStringList ApiController::getProxyUrls()
 {
     QNetworkRequest request;
-    request.setTransferTimeout(7000);
+    request.setTransferTimeout(requestTimeoutMsecs);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     QEventLoop wait;
@@ -280,7 +282,7 @@ void ApiController::updateServerConfigFromApi(const QString &installationUuid, c
 
     if (serverConfig.value(config_key::configVersion).toInt()) {
         QNetworkRequest request;
-        request.setTransferTimeout(7000);
+        request.setTransferTimeout(requestTimeoutMsecs);
         request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
         request.setRawHeader("Authorization", "Api-Key " + serverConfig.value(configKey::accessToken).toString().toUtf8());
         QString endpoint = serverConfig.value(configKey::apiEdnpoint).toString();
@@ -336,7 +338,7 @@ ErrorCode ApiController::getServicesList(QByteArray &responseBody)
 #endif
 
     QNetworkRequest request;
-    request.setTransferTimeout(7000);
+    request.setTransferTimeout(requestTimeoutMsecs);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     request.setUrl(QString("%1v1/services").arg(m_gatewayEndpoint));
@@ -377,6 +379,13 @@ ErrorCode ApiController::getServicesList(QByteArray &responseBody)
 
     auto errorCode = checkErrors(sslErrors, reply);
     reply->deleteLater();
+
+    if (errorCode == ErrorCode::NoError) {
+        if (!responseBody.contains("services")) {
+            return ErrorCode::ApiServicesMissingError;
+        }
+    }
+
     return errorCode;
 }
 
@@ -390,7 +399,7 @@ ErrorCode ApiController::getConfigForService(const QString &installationUuid, co
 #endif
 
     QNetworkRequest request;
-    request.setTransferTimeout(7000);
+    request.setTransferTimeout(requestTimeoutMsecs);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     request.setUrl(QString("%1v1/config").arg(m_gatewayEndpoint));

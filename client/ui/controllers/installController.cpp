@@ -848,7 +848,6 @@ bool InstallController::updateServiceFromApi(const int serverIndex, const QStrin
 
     newServerConfig.insert(configKey::apiConfig, newApiConfig);
     newServerConfig.insert(configKey::authData, authData);
-    newServerConfig.insert(config_key::crc, serverConfig.value(config_key::crc));
     m_serversModel->editServer(newServerConfig, serverIndex);
 
     if (reloadServiceConfig) {

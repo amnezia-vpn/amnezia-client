@@ -14,6 +14,10 @@ public:
 
     QString createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
                          ErrorCode &errorCode);
+
+private:
+    QString prepareServerConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
+                                ErrorCode &errorCode);
 };
 
 #endif // XRAY_CONFIGURATOR_H

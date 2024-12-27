@@ -2679,7 +2679,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="154"/>
         <source>Where to get connection data, step-by-step instructions for buying a VPS</source>
-        <translation>Где взять данные для подключения, пошаговые инстуркции по покупке VPS</translation>
+        <translation>Где взять данные для подключения, пошаговые инструкции по покупке VPS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="170"/>

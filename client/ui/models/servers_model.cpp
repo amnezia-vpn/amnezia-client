@@ -22,7 +22,7 @@ namespace
         constexpr char serviceProtocol[] = "service_protocol";
 
         constexpr char publicKeyInfo[] = "public_key";
-        constexpr char endDate[] = "end_date";
+        constexpr char expiresAt[] = "expires_at";
     }
 }
 
@@ -39,6 +39,9 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) 
         emit ServersModel::defaultServerNameChanged();
         updateDefaultServerContainersModel();
     });
+
+    connect(this, &ServersModel::processedServerIndexChanged, this, &ServersModel::processedServerChanged);
+    connect(this, &ServersModel::dataChanged, this, &ServersModel::processedServerChanged);
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
@@ -77,6 +80,12 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
 
     emit dataChanged(index, index);
     return true;
+}
+
+bool ServersModel::setData(const int index, const QVariant &value, int role)
+{
+    QModelIndex modelIndex = this->index(index);
+    return setData(modelIndex, value, role);
 }
 
 QVariant ServersModel::data(const QModelIndex &index, int role) const
@@ -679,6 +688,18 @@ QVariant ServersModel::getProcessedServerData(const QString roleString)
     return {};
 }
 
+bool ServersModel::setProcessedServerData(const QString &roleString, const QVariant &value)
+{
+    const auto roles = roleNames();
+    for (auto it = roles.begin(); it != roles.end(); it++) {
+        if (QString(it.value()) == roleString) {
+            return setData(m_processedServerIndex, value, it.key());
+        }
+    }
+
+    return false;
+}
+
 bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
 {
     auto server = m_servers.at(m_defaultServerIndex).toObject();
@@ -718,9 +739,9 @@ bool ServersModel::isApiKeyExpired(const int serverIndex)
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
     auto publicKeyInfo = apiConfig.value(configKey::publicKeyInfo).toObject();
-    const QString endDate = publicKeyInfo.value(configKey::endDate).toString();
-    if (endDate.isEmpty()) {
-        publicKeyInfo.insert(configKey::endDate, QDateTime::currentDateTimeUtc().addDays(1).toString(Qt::ISODate));
+    const QString expiresAt = publicKeyInfo.value(configKey::expiresAt).toString();
+    if (expiresAt.isEmpty()) {
+        publicKeyInfo.insert(configKey::expiresAt, QDateTime::currentDateTimeUtc().addDays(1).toString(Qt::ISODate));
         apiConfig.insert(configKey::publicKeyInfo, publicKeyInfo);
         serverConfig.insert(configKey::apiConfig, apiConfig);
         editServer(serverConfig, serverIndex);
@@ -728,8 +749,8 @@ bool ServersModel::isApiKeyExpired(const int serverIndex)
         return false;
     }
 
-    auto endDateDateTime = QDateTime::fromString(endDate, Qt::ISODate).toUTC();
-    if (endDateDateTime < QDateTime::currentDateTimeUtc()) {
+    auto expiresAtDateTime = QDateTime::fromString(expiresAt, Qt::ISODate).toUTC();
+    if (expiresAtDateTime < QDateTime::currentDateTimeUtc()) {
         return true;
     }
     return false;

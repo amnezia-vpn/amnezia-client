@@ -1,24 +1,29 @@
 # Amnezia VPN
-## _The best client for self-hosted VPN_
+
+### _The best client for self-hosted VPN_
+
 
 [![Build Status](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml/badge.svg?branch=dev)](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml?query=branch:dev)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/amnezia-vpn/amnezia-client)
 
-Amnezia is an open-source VPN client, with a key feature that enables you to deploy your own VPN server on your server.
+### [English]([https://github.com/amnezia-vpn/amnezia-client/blob/dev/README_RU.md](https://github.com/amnezia-vpn/amnezia-client/tree/dev?tab=readme-ov-file#)) | [Русский](https://github.com/amnezia-vpn/amnezia-client/blob/dev/README_RU.md)
 
-![Image](https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/uipic4.png)
 
-<br>
+[Amnezia](https://amnezia.org) is an open-source VPN client, with a key feature that enables you to deploy your own VPN server on your server.
 
-<a href="https://amnezia.org/downloads"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/download.png" width="150" style="max-width: 100%;"></a>
-<a href="https://play.google.com/store/search?q=amnezia+vpn&c=apps"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/play.png" width="150" style="max-width: 100%;"></a>
-<a href="https://apps.apple.com/us/app/amneziavpn/id1600529900"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/apl.png" width="150" style="max-width: 100%;"></a>
+[![Image](https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/uipic4.png)](https://amnezia.org)
 
-[Alternative download link (mirror)](https://storage.googleapis.com/kldscp/amnezia.org/downloads)
+### [Website](https://amnezia.org) | [Alt website link](https://storage.googleapis.com/kldscp/amnezia.org) | [Documentation](https://docs.amnezia.org) | [Troubleshooting](https://docs.amnezia.org/troubleshooting)
+
+> [!TIP]
+> If the [Amnezia website](https://amnezia.org) is blocked in your region, you can use an [Alternative website link](https://storage.googleapis.com/kldscp/amnezia.org).
+
+<a href="https://amnezia.org/downloads"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/download-website.svg" width="150" style="max-width: 100%; margin-right: 10px"></a>
+<a href="https://storage.googleapis.com/kldscp/amnezia.org/downloads"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/download-alt.svg" width="150" style="max-width: 100%;"></a>
 
 [All releases](https://github.com/amnezia-vpn/amnezia-client/releases)
 
-<br>
+<br/>
 
 <a href="https://www.testiny.io"><img src="https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/testiny.png" height="28px"></a>
 
@@ -33,7 +38,8 @@ Amnezia is an open-source VPN client, with a key feature that enables you to dep
 
 ## Links
 
-- [https://amnezia.org](https://amnezia.org) - project website | [Alternative link (mirror)](https://storage.googleapis.com/kldscp/amnezia.org)
+- [https://amnezia.org](https://amnezia.org) - Project website | [Alternative link (mirror)](https://storage.googleapis.com/kldscp/amnezia.org)
+- [https://docs.amnezia.org](https://docs.amnezia.org) - Documentation
 - [https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
 - [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Telegram support channel (English) 
 - [https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Telegram support channel (Farsi) 
@@ -182,8 +188,8 @@ Patreon: [https://www.patreon.com/amneziavpn](https://www.patreon.com/amneziavpn
 Bitcoin: bc1q26eevjcg9j0wuyywd2e3uc9cs2w58lpkpjxq6p <br>
 USDT BEP20: 0x6abD576765a826f87D1D95183438f9408C901bE4 <br>
 USDT TRC20: TELAitazF1MZGmiNjTcnxDjEiH5oe7LC9d <br>
-XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3  
-
+XMR: 48spms39jt1L2L5vyw2RQW6CXD6odUd4jFu19GZcDyKKQV9U88wsJVjSbL4CfRys37jVMdoaWVPSvezCQPhHXUW5UKLqUp3 <br> 
+TON: UQDpU1CyKRmg7L8mNScKk9FRc2SlESuI7N-Hby4nX-CcVmns
 ## Acknowledgments
 
 This project is tested with BrowserStack.

@@ -25,6 +25,8 @@ PageType {
     property int pageSettingsApiServerInfo: 3
     property int pageSettingsApiLanguageList: 4
 
+    property var processedServer
+
     defaultActiveFocusItem: focusItem
 
     Connections {
@@ -35,8 +37,18 @@ PageType {
         }
     }
 
+    Connections {
+        target: ServersModel
+
+        function onProcessedServerChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
     SortFilterProxyModel {
         id: proxyServersModel
+        objectName: "proxyServersModel"
+
         sourceModel: ServersModel
         filters: [
             ValueFilter {
@@ -44,147 +56,139 @@ PageType {
                 value: true
             }
         ]
+
+        Component.onCompleted: {
+            root.processedServer = proxyServersModel.get(0)
+        }
     }
 
     Item {
         id: focusItem
-        KeyNavigation.tab: header
+        //KeyNavigation.tab: header
     }
 
     ColumnLayout {
         anchors.fill: parent
 
-        spacing: 16
+        spacing: 4
 
-        Repeater {
-            id: header
-            model: proxyServersModel
+        BackButtonType {
+            id: backButton
 
-            activeFocusOnTab: true
-            onFocusChanged: {
-                header.itemAt(0).focusItem.forceActiveFocus()
+            Layout.topMargin: 20
+            KeyNavigation.tab: headerContent.actionButton
+
+            backButtonFunction: function() {
+                if (nestedStackView.currentIndex === root.pageSettingsApiServerInfo &&
+                        root.processedServer.isCountrySelectionAvailable) {
+                    nestedStackView.currentIndex = root.pageSettingsApiLanguageList
+                } else {
+                    PageController.closePage()
+                }
+            }
+        }
+
+        HeaderType {
+            id: headerContent
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+
+            actionButtonImage: nestedStackView.currentIndex === root.pageSettingsApiLanguageList ? "qrc:/images/controls/settings.svg"
+                                                                                                 : "qrc:/images/controls/edit-3.svg"
+
+            headerText: root.processedServer.name
+            descriptionText: {
+                if (root.processedServer.isServerFromGatewayApi) {
+                    if (nestedStackView.currentIndex === root.pageSettingsApiLanguageList) {
+                        return qsTr("Subscription is valid until ") + ApiServicesModel.getSelectedServiceData("endDate")
+                    } else {
+                        return ApiServicesModel.getSelectedServiceData("serviceDescription")
+                    }
+                } else if (root.processedServer.isServerFromTelegramApi) {
+                    return root.processedServer.serverDescription
+                } else if (root.processedServer.hasWriteAccess) {
+                    return root.processedServer.credentialsLogin + " · " + root.processedServer.hostName
+                } else {
+                    return root.processedServer.hostName
+                }
             }
 
-            delegate: ColumnLayout {
+            KeyNavigation.tab: tabBar
 
-                property alias focusItem: backButton
+            actionButtonFunction: function() {
+                if (nestedStackView.currentIndex === root.pageSettingsApiLanguageList) {
+                    nestedStackView.currentIndex = root.pageSettingsApiServerInfo
+                } else {
+                    serverNameEditDrawer.open()
+                }
+            }
+        }
 
-                id: content
+        DrawerType2 {
+            id: serverNameEditDrawer
 
-                Layout.topMargin: 20
+            parent: root
 
-                BackButtonType {
-                    id: backButton
-                    KeyNavigation.tab: headerContent.actionButton
+            anchors.fill: parent
+            expandedHeight: root.height * 0.35
 
-                    backButtonFunction: function() {
-                        if (nestedStackView.currentIndex === root.pageSettingsApiServerInfo &&
-                                ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
-                            nestedStackView.currentIndex = root.pageSettingsApiLanguageList
-                        } else {
-                            PageController.closePage()
-                        }
+            onClosed: {
+                if (!GC.isMobile()) {
+                    headerContent.actionButton.forceActiveFocus()
+                }
+            }
+
+            expandedContent: ColumnLayout {
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.topMargin: 32
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+
+                Connections {
+                    target: serverNameEditDrawer
+                    enabled: !GC.isMobile()
+                    function onOpened() {
+                        serverName.textField.forceActiveFocus()
                     }
                 }
 
-                HeaderType {
-                    id: headerContent
+                Item {
+                    id: focusItem1
+                    KeyNavigation.tab: serverName.textField
+                }
+
+                TextFieldWithHeaderType {
+                    id: serverName
+
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+                    headerText: qsTr("Server name")
+                    textFieldText: root.processedServer.name
+                    textField.maximumLength: 30
+                    checkEmptyText: true
 
-                    actionButtonImage: nestedStackView.currentIndex === root.pageSettingsApiLanguageList ? "qrc:/images/controls/settings.svg" : "qrc:/images/controls/edit-3.svg"
-
-                    headerText: name
-                    descriptionText: {
-                        if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
-                            return ApiServicesModel.getSelectedServiceData("serviceDescription")
-                        } else if (ServersModel.getProcessedServerData("isServerFromTelegramApi")) {
-                            return serverDescription
-                        } else if (ServersModel.isProcessedServerHasWriteAccess()) {
-                            return credentialsLogin + " · " + hostName
-                        } else {
-                            return hostName
-                        }
-                    }
-
-                    KeyNavigation.tab: tabBar
-
-                    actionButtonFunction: function() {
-                        if (nestedStackView.currentIndex === root.pageSettingsApiLanguageList) {
-                            nestedStackView.currentIndex = root.pageSettingsApiServerInfo
-                        } else {
-                            serverNameEditDrawer.open()
-                        }
-                    }
+                    KeyNavigation.tab: saveButton
                 }
 
-                DrawerType2 {
-                    id: serverNameEditDrawer
+                BasicButtonType {
+                    id: saveButton
 
-                    parent: root
+                    Layout.fillWidth: true
 
-                    anchors.fill: parent
-                    expandedHeight: root.height * 0.35
+                    text: qsTr("Save")
+                    KeyNavigation.tab: focusItem1
 
-                    onClosed: {
-                        if (!GC.isMobile()) {
-                            headerContent.actionButton.forceActiveFocus()
-                        }
-                    }
-
-                    expandedContent: ColumnLayout {
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.topMargin: 32
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
-
-                        Connections {
-                            target: serverNameEditDrawer
-                            enabled: !GC.isMobile()
-                            function onOpened() {
-                                serverName.textField.forceActiveFocus()
-                            }
+                    clickedFunc: function() {
+                        if (serverName.textFieldText === "") {
+                            return
                         }
 
-                        Item {
-                            id: focusItem1
-                            KeyNavigation.tab: serverName.textField
+                        if (serverName.textFieldText !== root.processedServer.name) {
+                            ServersModel.setProcessedServerData("name", serverName.textFieldText);
                         }
-
-                        TextFieldWithHeaderType {
-                            id: serverName
-
-                            Layout.fillWidth: true
-                            headerText: qsTr("Server name")
-                            textFieldText: name
-                            textField.maximumLength: 30
-                            checkEmptyText: true
-
-                            KeyNavigation.tab: saveButton
-                        }
-
-                        BasicButtonType {
-                            id: saveButton
-
-                            Layout.fillWidth: true
-
-                            text: qsTr("Save")
-                            KeyNavigation.tab: focusItem1
-
-                            clickedFunc: function() {
-                                if (serverName.textFieldText === "") {
-                                    return
-                                }
-
-                                if (serverName.textFieldText !== name) {
-                                    name = serverName.textFieldText
-                                }
-                                serverNameEditDrawer.close()
-                            }
-                        }
+                        serverNameEditDrawer.close()
                     }
                 }
             }
@@ -257,8 +261,7 @@ PageType {
 
         StackLayout {
             id: nestedStackView
-            Layout.preferredWidth: root.width
-            Layout.preferredHeight: root.height - tabBar.implicitHeight - header.implicitHeight
+            Layout.fillWidth: true
 
             currentIndex: ServersModel.getProcessedServerData("isServerFromGatewayApi") ?
                               (ServersModel.getProcessedServerData("isCountrySelectionAvailable") ?

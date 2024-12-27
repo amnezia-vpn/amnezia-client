@@ -47,7 +47,6 @@ PageType {
                 KeyNavigation.tab: textKey.textField
             }
 
-
             HeaderType {
                 property bool isVisible: SettingsController.getInstallationUuid() !== "" || PageController.isStartPageVisible()
 

@@ -24,7 +24,7 @@ Popup {
 
     Overlay.modal: Rectangle {
         visible: root.closeButtonVisible
-        color: Qt.rgba(14/255, 14/255, 17/255, 0.8)
+        color: AmneziaStyle.color.translucentMidnightBlack
     }
 
     onOpened: {

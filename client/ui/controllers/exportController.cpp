@@ -121,9 +121,8 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
 
     jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 
-    if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg) {
-        auto clientId = jsonNativeConfig.value(config_key::clientId).toString();
-        errorCode = m_clientManagementModel->appendClient(clientId, clientName, container, credentials, serverController);
+    if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg || protocol == Proto::Xray) {
+        errorCode = m_clientManagementModel->appendClient(jsonNativeConfig, clientName, container, credentials, serverController);
     }
     return errorCode;
 }
@@ -248,10 +247,10 @@ void ExportController::generateCloakConfig()
     emit exportConfigChanged();
 }
 
-void ExportController::generateXrayConfig()
+void ExportController::generateXrayConfig(const QString &clientName)
 {
     QJsonObject nativeConfig;
-    ErrorCode errorCode = generateNativeConfig(DockerContainer::Xray, "", Proto::Xray, nativeConfig);
+    ErrorCode errorCode = generateNativeConfig(DockerContainer::Xray, clientName, Proto::Xray, nativeConfig);
     if (errorCode) {
         emit exportErrorOccurred(errorCode);
         return;

@@ -145,6 +145,7 @@ Button {
 
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: true
+        enabled: root.enabled
 
         onEntered: {
             backgroundRect.color = root.hoveredColor

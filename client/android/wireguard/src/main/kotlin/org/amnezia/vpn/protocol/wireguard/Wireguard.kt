@@ -1,11 +1,12 @@
 package org.amnezia.vpn.protocol.wireguard
 
 import android.net.VpnService.Builder
-import java.io.IOException
-import java.util.Locale
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import org.amnezia.awg.GoBackend
 import org.amnezia.vpn.protocol.Protocol
 import org.amnezia.vpn.protocol.ProtocolState.CONNECTED
@@ -27,6 +28,8 @@ open class Wireguard : Protocol() {
 
     private var tunnelHandle: Int = -1
     protected open val ifName: String = "amn0"
+    private lateinit var scope: CoroutineScope
+    private var statusJob: Job? = null
 
     override val statistics: Statistics
         get() {
@@ -49,45 +52,16 @@ open class Wireguard : Protocol() {
 
     override fun internalInit() {
         if (!isInitialized) loadSharedLibrary(context, "wg-go")
+        if (this::scope.isInitialized) {
+            scope.cancel()
+        }
+        scope = CoroutineScope(Dispatchers.IO)
     }
 
     override suspend fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
         val wireguardConfig = parseConfig(config)
-        val startTime = System.currentTimeMillis()
         start(wireguardConfig, vpnBuilder, protect)
-        waitForConnection(startTime)
-        state.value = CONNECTED
     }
-
-    private suspend fun waitForConnection(startTime: Long) {
-        Log.d(TAG, "Waiting for connection")
-        withContext(Dispatchers.IO) {
-            val time = String.format(Locale.ROOT,"%.3f", startTime / 1000.0)
-            try {
-                delay(1000)
-                var log = getLogcat(time)
-                Log.v(TAG, "First waiting log: $log")
-                // check that there is a connection log,
-                // to avoid infinite connection
-                if (!log.contains("Attaching to interface")) {
-                    Log.w(TAG, "Logs do not contain a connection log")
-                    return@withContext
-                }
-                while (!log.contains("Received handshake response")) {
-                    delay(1000)
-                    log = getLogcat(time)
-                }
-            } catch (e: IOException) {
-                Log.e(TAG, "Failed to get logcat: $e")
-            }
-        }
-    }
-
-    private fun getLogcat(time: String): String =
-        ProcessBuilder("logcat", "--buffer=main", "--format=raw", "*:S AmneziaWG/awg0", "-t", time)
-            .redirectErrorStream(true)
-            .start()
-            .inputStream.reader().readText()
 
     protected open fun parseConfig(config: JSONObject): WireguardConfig {
         val configData = config.getJSONObject("wireguard_config_data")
@@ -178,6 +152,43 @@ open class Wireguard : Protocol() {
             tunnelHandle = -1
             throw VpnStartException("Protect VPN interface: permission not granted or revoked")
         }
+        launchStatusJob()
+    }
+
+    private fun launchStatusJob() {
+        Log.d(TAG, "Launch status job")
+        statusJob = scope.launch {
+            while (true) {
+                val lastHandshake = getLastHandshake()
+                Log.v(TAG, "lastHandshake=$lastHandshake")
+                if (lastHandshake == 0L) {
+                    delay(1000)
+                    continue
+                }
+                if (lastHandshake == -2L || lastHandshake > 0L) state.value = CONNECTED
+                else if (lastHandshake == -1L) state.value = DISCONNECTED
+                statusJob = null
+                break
+            }
+        }
+    }
+
+    private fun getLastHandshake(): Long {
+        if (tunnelHandle == -1) {
+            Log.e(TAG, "Trying to get config of a non-existent tunnel")
+            return -1
+        }
+        val config = GoBackend.awgGetConfig(tunnelHandle)
+        if (config == null) {
+            Log.e(TAG, "Failed to get tunnel config")
+            return -2
+        }
+        val lastHandshake = config.lines().find { it.startsWith("last_handshake_time_sec=") }?.substring(24)?.toLong()
+        if (lastHandshake == null) {
+            Log.e(TAG, "Failed to get last_handshake_time_sec")
+            return -2
+        }
+        return lastHandshake
     }
 
     override fun stopVpn() {
@@ -185,6 +196,8 @@ open class Wireguard : Protocol() {
             Log.w(TAG, "Tunnel already down")
             return
         }
+        statusJob?.cancel()
+        statusJob = null
         val handleToClose = tunnelHandle
         tunnelHandle = -1
         GoBackend.awgTurnOff(handleToClose)

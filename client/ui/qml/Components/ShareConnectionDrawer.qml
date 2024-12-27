@@ -84,7 +84,7 @@ DrawerType2 {
                     Layout.topMargin: 16
 
                     text: qsTr("Share")
-                    imageSource: "qrc:/images/controls/share-2.svg"
+                    leftImageSource: "qrc:/images/controls/share-2.svg"
 
                     KeyNavigation.tab: copyConfigTextButton
 
@@ -120,7 +120,7 @@ DrawerType2 {
                     borderWidth: 1
 
                     text: qsTr("Copy")
-                    imageSource: "qrc:/images/controls/copy.svg"
+                    leftImageSource: "qrc:/images/controls/copy.svg"
 
                     Keys.onReturnPressed: { copyConfigTextButton.clicked() }
                     Keys.onEnterPressed: { copyConfigTextButton.clicked() }
@@ -143,7 +143,7 @@ DrawerType2 {
                     borderWidth: 1
 
                     text: qsTr("Copy config string")
-                    imageSource: "qrc:/images/controls/copy.svg"
+                    leftImageSource: "qrc:/images/controls/copy.svg"
 
                     KeyNavigation.tab: showSettingsButton
                 }

@@ -16,83 +16,82 @@ PageType {
 
     defaultActiveFocusItem: focusItem
 
-    FlickableType {
-        id: fl
+    ColumnLayout {
+        id: header
+
         anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        ColumnLayout {
-            id: content
+        spacing: 0
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        Item {
+            id: focusItem
+            KeyNavigation.tab: backButton
+        }
 
-            spacing: 0
-
-            Item {
-                id: focusItem
-                KeyNavigation.tab: backButton
-            }
-
-            BackButtonType {
-                id: backButton
-                Layout.topMargin: 20
+        BackButtonType {
+            id: backButton
+            Layout.topMargin: 20
 //                KeyNavigation.tab: fileButton.rightButton
-            }
+        }
 
-            HeaderType {
-                Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-                Layout.bottomMargin: 32
+        HeaderType {
+            Layout.fillWidth: true
+            Layout.topMargin: 8
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
+            Layout.bottomMargin: 16
 
-                headerText: qsTr("VPN by Amnezia")
-                descriptionText: qsTr("Choose a VPN service that suits your needs.")
-            }
+            headerText: qsTr("VPN by Amnezia")
+            descriptionText: qsTr("Choose a VPN service that suits your needs.")
+        }
+    }
 
-            ListView {
-                id: containers
-                width: parent.width
-                height: containers.contentItem.height
-                spacing: 16
+    ListView {
+        id: servicesListView
+        anchors.top: header.bottom
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        anchors.topMargin: 16
+        spacing: 0
 
-                currentIndex: 1
-                interactive: false
-                model: ApiServicesModel
+        currentIndex: 1
+        clip: true
+        model: ApiServicesModel
 
-                delegate: Item {
-                    implicitWidth: containers.width
-                    implicitHeight: delegateContent.implicitHeight
+        ScrollBar.vertical: ScrollBar {}
 
-                    ColumnLayout {
-                        id: delegateContent
+        delegate: Item {
+            implicitWidth: servicesListView.width
+            implicitHeight: delegateContent.implicitHeight
 
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+            ColumnLayout {
+                id: delegateContent
 
-                        CardWithIconsType {
-                            id: card
+                anchors.fill: parent
 
-                            Layout.fillWidth: true
-                            Layout.rightMargin: 16
-                            Layout.leftMargin: 16
+                CardWithIconsType {
+                    id: card
 
-                            headerText: name
-                            bodyText: cardDescription
-                            footerText: price
+                    Layout.fillWidth: true
+                    Layout.rightMargin: 16
+                    Layout.leftMargin: 16
+                    Layout.bottomMargin: 16
 
-                            rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                    headerText: name
+                    bodyText: cardDescription
+                    footerText: price
 
-                            onClicked: {
-                                if (isServiceAvailable) {
-                                    ApiServicesModel.setServiceIndex(index)
-                                    PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
-                                }
-                            }
+                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                    enabled: isServiceAvailable
+
+                    onClicked: {
+                        if (isServiceAvailable) {
+                            ApiServicesModel.setServiceIndex(index)
+                            PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
                         }
                     }
                 }

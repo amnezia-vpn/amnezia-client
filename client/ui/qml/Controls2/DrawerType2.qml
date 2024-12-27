@@ -92,7 +92,7 @@ Item {
         id: background
 
         anchors.fill: parent
-        color: root.isCollapsed ? AmneziaStyle.color.transparent : Qt.rgba(14/255, 14/255, 17/255, 0.8)
+        color: root.isCollapsed ? AmneziaStyle.color.transparent : AmneziaStyle.color.translucentMidnightBlack
 
         Behavior on color {
             PropertyAnimation { duration: 200 }

@@ -56,12 +56,15 @@ PageType {
             }
 
             LabelWithImageType {
+                property bool showSubscriptionEndDate: ServersModel.getProcessedServerData("isCountrySelectionAvailable")
+
                 Layout.fillWidth: true
                 Layout.margins: 16
 
                 imageSource: "qrc:/images/controls/history.svg"
-                leftText: qsTr("Work period")
-                rightText: ApiServicesModel.getSelectedServiceData("workPeriod")
+                leftText: showSubscriptionEndDate ? qsTr("Valid until") : qsTr("Work period")
+                rightText: showSubscriptionEndDate ? ApiServicesModel.getSelectedServiceData("endDate")
+                                                   : ApiServicesModel.getSelectedServiceData("workPeriod")
 
                 visible: rightText !== ""
             }
@@ -132,8 +135,8 @@ PageType {
                 implicitHeight: 32
 
                 defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
                 textColor: AmneziaStyle.color.vibrantRed
 
                 text: qsTr("Reload API config")
@@ -172,8 +175,8 @@ PageType {
                 implicitHeight: 32
 
                 defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
                 textColor: AmneziaStyle.color.vibrantRed
 
                 text: qsTr("Remove from application")

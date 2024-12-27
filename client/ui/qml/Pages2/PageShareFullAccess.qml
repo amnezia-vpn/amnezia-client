@@ -135,7 +135,7 @@ PageType {
                 Layout.topMargin: 40
 
                 text: qsTr("Share")
-                imageSource: "qrc:/images/controls/share-2.svg"
+                leftImageSource: "qrc:/images/controls/share-2.svg"
 
                 Keys.onTabPressed: lastItemTabClicked(focusItem)
 

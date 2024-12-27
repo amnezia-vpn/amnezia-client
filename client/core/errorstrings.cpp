@@ -63,7 +63,8 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiConfigTimeoutError): errorMessage = QObject::tr("Server response timeout on api request"); break;
     case (ErrorCode::ApiMissingAgwPublicKey): errorMessage = QObject::tr("Missing AGW public key"); break;
     case (ErrorCode::ApiConfigDecryptionError): errorMessage = QObject::tr("Failed to decrypt response payload"); break;
-      
+    case (ErrorCode::ApiServicesMissingError): errorMessage = QObject::tr("Missing list of available services"); break;
+
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;
     case(ErrorCode::ReadError): errorMessage = QObject::tr("QFile error: An error occurred when reading from the file"); break;

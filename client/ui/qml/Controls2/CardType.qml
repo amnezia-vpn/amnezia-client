@@ -19,7 +19,7 @@ RadioButton {
 
     property string textColor: AmneziaStyle.color.midnightBlack
 
-    property string pressedBorderColor: Qt.rgba(251/255, 178/255, 106/255, 0.3)
+    property string pressedBorderColor: AmneziaStyle.color.softGoldenApricot
     property string selectedBorderColor: AmneziaStyle.color.goldenApricot
     property string defaultBodredColor: AmneziaStyle.color.transparent
     property int borderWidth: 0
