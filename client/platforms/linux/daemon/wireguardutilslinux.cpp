@@ -352,7 +352,7 @@ bool WireguardUtilsLinux::deleteExclusionRoute(const IPAddress& prefix) {
     return m_rtmonitor->deleteExclusionRoute(prefix);
 }
 
-bool WireguardUtilsMacos::excludeLocalNetworks(const QList<IPAddress>& routes) {
+bool WireguardUtilsLinux::excludeLocalNetworks(const QList<IPAddress>& routes) {
   if (!m_rtmonitor) {
     return false;
   }
