@@ -162,11 +162,11 @@ void RouterLinux::flushDns()
         || QFileInfo::exists("/usr/sbin/nscd")
         || QFileInfo::exists("/usr/lib/systemd/system/nscd.service"))
     {
-        p.start("systemctl restart nscd");
+        p.start("systemctl", { "restart", "nscd" });
     }
     else
     {
-        p.start("systemctl restart systemd-resolved");
+        p.start("systemctl", { "restart", "systemd-resolved" });
     }
 
     p.waitForFinished();
