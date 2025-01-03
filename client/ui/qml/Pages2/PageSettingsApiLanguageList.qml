@@ -18,13 +18,13 @@ PageType {
     ListView {
         id: menuContent
 
-        property var selectedText
+        property bool isFocusable: true
 
         width: parent.width
-        height: menuContent.contentItem.height
+        height: parent.height
 
         clip: true
-        interactive: false
+        interactive: true
         model: ApiCountryModel
 
         ButtonGroup {
@@ -34,8 +34,8 @@ PageType {
         delegate: ColumnLayout {
             id: content
 
-            implicitWidth: parent.width
-            implicitHeight: content.implicitHeight
+            width: menuContent.width
+            height: content.implicitHeight
 
             RowLayout {
                 VerticalRadioButton {

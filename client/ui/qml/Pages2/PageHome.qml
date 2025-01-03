@@ -256,11 +256,11 @@ PageType {
                     objectName: "rowLayoutLabel"
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     Layout.topMargin: 8
-                    Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 61 : 16
+                    Layout.bottomMargin: drawer.isCollapsedStateActive ? 44 : ServersModel.isDefaultServerFromApi ? 61 : 16
                     spacing: 0
 
                     BasicButtonType {
-                        enabled: (ServersModel.defaultServerImagePathCollapsed !== "") && drawer.isCollapsed
+                        enabled: (ServersModel.defaultServerImagePathCollapsed !== "") && drawer.isCollapsedStateActive
                         hoverEnabled: enabled
 
                         implicitHeight: 36
@@ -278,8 +278,9 @@ PageType {
                         buttonTextLabel.font.pixelSize: 13
                         buttonTextLabel.font.weight: 400
 
-                        text: drawer.isCollapsed ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
+                        text: drawer.isCollapsedStateActive ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
                         leftImageSource: ServersModel.defaultServerImagePathCollapsed
+                        leftImageColor: ""
                         changeLeftImageSize: false
 
                         rightImageSource: hoverEnabled ? "qrc:/images/controls/chevron-down.svg" : ""

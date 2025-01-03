@@ -221,15 +221,8 @@ PageType {
                             SettingsController.clearSettings()
                             PageController.goToPageHome()
                         }
-
-                        if (!GC.isMobile()) {
-                            // root.defaultActiveFocusItem.forceActiveFocus()
-                        }
                     }
                     var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            // root.defaultActiveFocusItem.forceActiveFocus()
-                        }
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

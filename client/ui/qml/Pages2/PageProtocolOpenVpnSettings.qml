@@ -176,7 +176,6 @@ PageType {
                             headerText: qsTr("Hash")
 
                             drawerParent: root
-                            parentFlickable: fl
 
                             listView: ListViewWithRadioButtonType {
                                 id: hashListView
@@ -225,7 +224,6 @@ PageType {
                             headerText: qsTr("Cipher")
 
                             drawerParent: root
-                            parentFlickable: fl
 
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView

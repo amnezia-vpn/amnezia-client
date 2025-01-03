@@ -36,12 +36,12 @@ PageType {
     ListView {
         id: listview
 
+        property bool isFocusable: true
+
         anchors.top: backButtonLayout.bottom
         anchors.bottom: parent.bottom
 
         width: parent.width
-
-        property bool isFocusable: true
 
         Keys.onTabPressed: {
             FocusController.nextKeyTabItem()
@@ -135,26 +135,6 @@ PageType {
                         }
                     }
 
-                    checkEmptyText: true
-                }
-
-                TextFieldWithHeaderType {
-                    id: mtuTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
-                    headerText: qsTr("MTU")
-                    textFieldText: mtu
-                    textField.validator: IntValidator { bottom: 576; top: 65535 }
-
-                    textField.onEditingFinished: {
-                        if (textFieldText === "") {
-                            textFieldText = "0"
-                        }
-                        if (textFieldText !== mtu) {
-                            mtu = textFieldText
-                        }
-                    }
                     checkEmptyText: true
                 }
 
