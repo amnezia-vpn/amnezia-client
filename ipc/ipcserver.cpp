@@ -228,6 +228,8 @@ bool IpcServer::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterInd
 
 #ifdef Q_OS_LINUX
     // double-check + ensure our firewall is installed and enabled
+    if (!LinuxFirewall::isInstalled())
+        LinuxFirewall::install();
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), blockAll);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), allowNets);

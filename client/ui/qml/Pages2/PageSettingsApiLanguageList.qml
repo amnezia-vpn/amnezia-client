@@ -31,78 +31,74 @@ PageType {
             id: containersRadioButtonGroup
         }
 
-        delegate: Item {
+        delegate: ColumnLayout {
+            id: content
+
             implicitWidth: parent.width
             implicitHeight: content.implicitHeight
 
-            ColumnLayout {
-                id: content
+            RowLayout {
+                VerticalRadioButton {
+                    id: containerRadioButton
 
-                anchors.fill: parent
-
-                RowLayout {
-                    VerticalRadioButton {
-                        id: containerRadioButton
-
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 16
-
-                        text: countryName
-
-                        ButtonGroup.group: containersRadioButtonGroup
-
-                        imageSource: "qrc:/images/controls/download.svg"
-
-                        checked: index === ApiCountryModel.currentIndex
-                        checkable: !ConnectionController.isConnected
-
-                        onClicked: {
-                            if (ConnectionController.isConnected) {
-                                PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
-                                return
-                            }
-
-                            if (index !== ApiCountryModel.currentIndex) {
-                                PageController.showBusyIndicator(true)
-                                var prevIndex = ApiCountryModel.currentIndex
-                                ApiCountryModel.currentIndex = index
-                                if (!InstallController.updateServiceFromApi(ServersModel.defaultIndex, countryCode, countryName)) {
-                                    ApiCountryModel.currentIndex = prevIndex
-                                }
-                            }
-                        }
-
-                        MouseArea {
-                            anchors.fill: containerRadioButton
-                            cursorShape: Qt.PointingHandCursor
-                            enabled: false
-                        }
-
-                        Keys.onEnterPressed: {
-                            if (checkable) {
-                                checked = true
-                            }
-                            containerRadioButton.clicked()
-                        }
-                        Keys.onReturnPressed: {
-                            if (checkable) {
-                                checked = true
-                            }
-                            containerRadioButton.clicked()
-                        }
-                    }
-
-                    Image {
-                        Layout.rightMargin: 32
-                        Layout.alignment: Qt.AlignRight
-
-                        source: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
-                    }
-                }
-
-                DividerType {
                     Layout.fillWidth: true
+                    Layout.leftMargin: 16
+
+                    text: countryName
+
+                    ButtonGroup.group: containersRadioButtonGroup
+
+                    imageSource: "qrc:/images/controls/download.svg"
+
+                    checked: index === ApiCountryModel.currentIndex
+                    checkable: !ConnectionController.isConnected
+
+                    onClicked: {
+                        if (ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
+                            return
+                        }
+
+                        if (index !== ApiCountryModel.currentIndex) {
+                            PageController.showBusyIndicator(true)
+                            var prevIndex = ApiCountryModel.currentIndex
+                            ApiCountryModel.currentIndex = index
+                            if (!InstallController.updateServiceFromApi(ServersModel.defaultIndex, countryCode, countryName)) {
+                                ApiCountryModel.currentIndex = prevIndex
+                            }
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: containerRadioButton
+                        cursorShape: Qt.PointingHandCursor
+                        enabled: false
+                    }
+
+                    Keys.onEnterPressed: {
+                        if (checkable) {
+                            checked = true
+                        }
+                        containerRadioButton.clicked()
+                    }
+                    Keys.onReturnPressed: {
+                        if (checkable) {
+                            checked = true
+                        }
+                        containerRadioButton.clicked()
+                    }
                 }
+
+                Image {
+                    Layout.rightMargin: 32
+                    Layout.alignment: Qt.AlignRight
+
+                    source: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
+                }
+            }
+
+            DividerType {
+                Layout.fillWidth: true
             }
         }
     }

@@ -17,8 +17,6 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     Connections {
         target: SettingsController
 
@@ -36,11 +34,6 @@ PageType {
         }
     }
 
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -48,8 +41,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: makeBackupButton
     }
 
     FlickableType {
@@ -93,6 +84,8 @@ PageType {
 
                 text: qsTr("Make a backup")
 
+                parentFlickable: fl
+
                 clickedFunc: function() {
                     var fileName = ""
                     if (GC.isMobile()) {
@@ -111,8 +104,6 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Backup file saved"))
                     }
                 }
-
-                KeyNavigation.tab: restoreBackupButton
             }
 
             BasicButtonType {
@@ -129,6 +120,8 @@ PageType {
 
                 text: qsTr("Restore from backup")
 
+                parentFlickable: fl
+
                 clickedFunc: function() {
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                                 qsTr("Backup files (*.backup)"))
@@ -136,8 +129,6 @@ PageType {
                         restoreBackup(filePath)
                     }
                 }
-
-                Keys.onTabPressed: lastItemTabClicked()
             }
         }
     }

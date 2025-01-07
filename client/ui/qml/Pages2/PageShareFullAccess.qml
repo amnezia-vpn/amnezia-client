@@ -18,13 +18,6 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -32,8 +25,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: serverSelector
     }
 
     FlickableType {
@@ -85,8 +76,6 @@ PageType {
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
 
-                KeyNavigation.tab: shareButton
-
                 listView: ListViewWithRadioButtonType {
                     id: serverSelectorListView
 
@@ -113,7 +102,7 @@ PageType {
 
                         shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
                         shareConnectionDrawer.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
-                        serverSelector.close()
+                        serverSelector.closeTriggered()
                     }
 
                     Component.onCompleted: {
@@ -137,8 +126,6 @@ PageType {
                 text: qsTr("Share")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
-
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
 
@@ -153,7 +140,7 @@ PageType {
                     shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
                     shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
 
-                    shareConnectionDrawer.open()
+                    shareConnectionDrawer.openTriggered()
                     shareConnectionDrawer.contentVisible = true
 
                     PageController.showBusyIndicator(false)
@@ -166,10 +153,5 @@ PageType {
         id: shareConnectionDrawer
 
         anchors.fill: parent
-        onClosed: {
-            if (!GC.isMobile()) {
-                focusItem.forceActiveFocus()
-            }
-        }
     }
 }

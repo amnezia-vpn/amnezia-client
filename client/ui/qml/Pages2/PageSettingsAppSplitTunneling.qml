@@ -21,8 +21,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     property bool pageEnabled
 
     Component.onCompleted: {
@@ -48,13 +46,15 @@ PageType {
 
     QtObject {
         id: onlyForwardApps
-        property string name: qsTr("Only the apps from the list should have access via VPN")
-        property int type: routeMode.onlyForwardApps
+
+        readonly property string name: qsTr("Only the apps from the list should have access via VPN")
+        readonly property int type: routeMode.onlyForwardApps
     }
     QtObject {
         id: allExceptApps
-        property string name: qsTr("Apps from the list should not have access via VPN")
-        property int type: routeMode.allExceptApps
+        
+        readonly property string name: qsTr("Apps from the list should not have access via VPN")
+        readonly property int type: routeMode.allExceptApps
     }
 
     function getRouteModesModelIndex() {
@@ -64,11 +64,6 @@ PageType {
         } else if (routeMode.allExceptApps === currentRouteMode) {
             return 1
         }
-    }
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
     }
 
     ColumnLayout {
@@ -82,7 +77,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: switcher
         }
 
         RowLayout {
@@ -102,10 +96,6 @@ PageType {
                 Layout.rightMargin: 16
 
                 enabled: root.pageEnabled
-
-                KeyNavigation.tab: selector.enabled ?
-                                       selector :
-                                       searchField.textField
 
                 checked: AppSplitTunnelingModel.isTunnelingEnabled
                 onToggled: {                    
@@ -130,25 +120,23 @@ PageType {
 
             enabled: Qt.platform.os === "android" && root.pageEnabled
 
-            KeyNavigation.tab: searchField.textField
-
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
 
                 model: root.routeModesModel
 
-                currentIndex: getRouteModesModelIndex()
+                selectedIndex: getRouteModesModelIndex()
 
                 clickedFunction: function() {
                     selector.text = selectedText
-                    selector.close()
-                    if (AppSplitTunnelingModel.routeMode !== root.routeModesModel[currentIndex].type) {
-                        AppSplitTunnelingModel.routeMode = root.routeModesModel[currentIndex].type
+                    selector.closeTriggered()
+                    if (AppSplitTunnelingModel.routeMode !== root.routeModesModel[selectedIndex].type) {
+                        AppSplitTunnelingModel.routeMode = root.routeModesModel[selectedIndex].type
                     }
                 }
 
                 Component.onCompleted: {
-                    if (root.routeModesModel[currentIndex].type === AppSplitTunnelingModel.routeMode) {
+                    if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingModel.routeMode) {
                         selector.text = selectedText
                     } else {
                         selector.text = root.routeModesModel[0].name
@@ -158,7 +146,7 @@ PageType {
                 Connections {
                     target: AppSplitTunnelingModel
                     function onRouteModeChanged() {
-                        currentIndex = getRouteModesModelIndex()
+                        selectedIndex = getRouteModesModelIndex()
                     }
                 }
             }
@@ -267,7 +255,6 @@ PageType {
             textFieldPlaceholderText: qsTr("application name")
             buttonImageSource: "qrc:/images/controls/plus.svg"
 
-            Keys.onTabPressed: lastItemTabClicked(focusItem)
             rightButtonClickedOnEnter: true
 
             clickedFunc: function() {
@@ -281,7 +268,7 @@ PageType {
                         AppSplitTunnelingController.addApp(fileName)
                     }
                 } else if (Qt.platform.os === "android"){
-                    installedAppDrawer.open()
+                    installedAppDrawer.openTriggered()
                 }
 
                 PageController.showBusyIndicator(false)

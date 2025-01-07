@@ -346,7 +346,9 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
     }
 
     if (container == DockerContainer::Awg) {
-        if ((oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
+        if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
+             != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
+            || (oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
              != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
             || (oldProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount)
                 != newProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount))
@@ -370,8 +372,10 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
     }
 
     if (container == DockerContainer::WireGuard) {
-        if (oldProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort))
+        if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
+             != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
+            || (oldProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)
+            != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)))
             return true;
     }
 
@@ -607,6 +611,8 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$SFTP_PASSWORD", sftpConfig.value(config_key::password).toString() } });
 
     // Amnezia wireguard vars
+    vars.append({ { "$AWG_SUBNET_IP",
+                    amneziaWireguarConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress) } });
     vars.append({ { "$AWG_SERVER_PORT", amneziaWireguarConfig.value(config_key::port).toString(protocols::awg::defaultPort) } });
 
     vars.append({ { "$JUNK_PACKET_COUNT", amneziaWireguarConfig.value(config_key::junkPacketCount).toString() } });

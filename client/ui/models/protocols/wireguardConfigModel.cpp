@@ -21,6 +21,7 @@ bool WireGuardConfigModel::setData(const QModelIndex &index, const QVariant &val
     }
 
     switch (role) {
+    case Roles::SubnetAddressRole: m_serverProtocolConfig.insert(config_key::subnet_address, value.toString()); break;
     case Roles::PortRole: m_serverProtocolConfig.insert(config_key::port, value.toString()); break;
     case Roles::ClientMtuRole: m_clientProtocolConfig.insert(config_key::mtu, value.toString()); break;
     }
@@ -36,6 +37,7 @@ QVariant WireGuardConfigModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
+    case Roles::SubnetAddressRole: return m_serverProtocolConfig.value(config_key::subnet_address).toString();
     case Roles::PortRole: return m_serverProtocolConfig.value(config_key::port).toString();
     case Roles::ClientMtuRole: return m_clientProtocolConfig.value(config_key::mtu);
     }
@@ -56,6 +58,7 @@ void WireGuardConfigModel::updateModel(const QJsonObject &config)
     m_serverProtocolConfig.insert(config_key::transport_proto,
                                   serverProtocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
     m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);
+    m_serverProtocolConfig[config_key::subnet_address] = serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
     m_serverProtocolConfig[config_key::port] = serverProtocolConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
 
     auto lastConfig = m_serverProtocolConfig.value(config_key::last_config).toString();
@@ -96,6 +99,7 @@ QHash<int, QByteArray> WireGuardConfigModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
 
+    roles[SubnetAddressRole] = "subnetAddress";
     roles[PortRole] = "port";
     roles[ClientMtuRole] = "clientMtu";
 
@@ -108,12 +112,13 @@ WgConfig::WgConfig(const QJsonObject &serverProtocolConfig)
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
     clientMtu = clientProtocolConfig[config_key::mtu].toString(protocols::wireguard::defaultMtu);
 
+    subnetAddress = serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
     port = serverProtocolConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
 }
 
 bool WgConfig::hasEqualServerSettings(const WgConfig &other) const
 {
-    if (port != other.port) {
+    if (subnetAddress != other.subnetAddress || port != other.port) {
         return false;
     }
     return true;

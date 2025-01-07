@@ -36,16 +36,8 @@ DrawerType2 {
         configFileName = "amnezia_config"
     }
 
-    expandedContent: Item {
+    expandedStateContent: Item {
         implicitHeight: root.expandedHeight
-
-        Connections {
-            target: root
-            enabled: !GC.isMobile()
-            function onOpened() {
-                header.forceActiveFocus()
-            }
-        }
 
         Header2Type {
             id: header
@@ -57,24 +49,27 @@ DrawerType2 {
             anchors.rightMargin: 16
 
             headerText: root.headerText
-
-            KeyNavigation.tab: shareButton
         }
 
-        FlickableType {
+        ListView {
+            id: listView
+
             anchors.top: header.bottom
             anchors.bottom: parent.bottom
-            contentHeight: content.height + 32
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-            ColumnLayout {
-                id: content
+            property bool isFocusable: true
 
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
+            ScrollBar.vertical: ScrollBarType {}
 
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
+            model: 1
+
+            clip: true
+            reuseItems: true
+
+            header: ColumnLayout {
+                width: listView.width
 
                 visible: root.contentVisible
 
@@ -82,11 +77,11 @@ DrawerType2 {
                     id: shareButton
                     Layout.fillWidth: true
                     Layout.topMargin: 16
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
                     text: qsTr("Share")
                     leftImageSource: "qrc:/images/controls/share-2.svg"
-
-                    KeyNavigation.tab: copyConfigTextButton
 
                     clickedFunc: function() {
                         var fileName = ""
@@ -111,6 +106,8 @@ DrawerType2 {
                     id: copyConfigTextButton
                     Layout.fillWidth: true
                     Layout.topMargin: 8
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
                     defaultColor: AmneziaStyle.color.transparent
                     hoveredColor: AmneziaStyle.color.translucentWhite
@@ -124,14 +121,14 @@ DrawerType2 {
 
                     Keys.onReturnPressed: { copyConfigTextButton.clicked() }
                     Keys.onEnterPressed: { copyConfigTextButton.clicked() }
-
-                    KeyNavigation.tab: copyNativeConfigStringButton.visible ? copyNativeConfigStringButton : showSettingsButton
                 }
 
                 BasicButtonType {
                     id: copyNativeConfigStringButton
                     Layout.fillWidth: true
                     Layout.topMargin: 8
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
                     visible: false
 
@@ -153,6 +150,8 @@ DrawerType2 {
 
                     Layout.fillWidth: true
                     Layout.topMargin: 24
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
                     defaultColor: AmneziaStyle.color.transparent
                     hoveredColor: AmneziaStyle.color.translucentWhite
@@ -164,10 +163,8 @@ DrawerType2 {
                     text: qsTr("Show connection settings")
 
                     clickedFunc: function() {
-                        configContentDrawer.open()
+                        configContentDrawer.openTriggered()
                     }
-
-                    KeyNavigation.tab: header
                 }
 
                 DrawerType2 {
@@ -178,29 +175,10 @@ DrawerType2 {
                     anchors.fill: parent
                     expandedHeight: parent.height * 0.9
 
-                    onClosed: {
-                        if (!GC.isMobile()) {
-                            header.forceActiveFocus()
-                        }
-                    }
-
-                    expandedContent: Item {
+                    expandedStateContent: Item {
                         id: configContentContainer
 
                         implicitHeight: configContentDrawer.expandedHeight
-
-                        Connections {
-                            target: configContentDrawer
-                            enabled: !GC.isMobile()
-                            function onOpened() {
-                                focusItem.forceActiveFocus()
-                            }
-                        }
-
-                        Item {
-                            id: focusItem
-                            KeyNavigation.tab: backButton
-                        }
 
                         Connections {
                             target: copyNativeConfigStringButton
@@ -231,9 +209,7 @@ DrawerType2 {
                             anchors.right: parent.right
                             anchors.topMargin: 16
 
-                            backButtonFunction: function() { configContentDrawer.close() }
-
-                            KeyNavigation.tab: focusItem
+                            backButtonFunction: function() { configContentDrawer.closeTriggered() }
                         }
 
                         FlickableType {
@@ -302,6 +278,10 @@ DrawerType2 {
                         }
                     }
                 }
+            }
+
+            delegate: ColumnLayout {
+                width: listView.width
 
                 Rectangle {
                     id: qrCodeContainer
@@ -309,6 +289,8 @@ DrawerType2 {
                     Layout.fillWidth: true
                     Layout.preferredHeight: width
                     Layout.topMargin: 20
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
                     visible: ExportController.qrCodesCount > 0
 
@@ -319,6 +301,32 @@ DrawerType2 {
                         smooth: false
 
                         source: ExportController.qrCodesCount ? ExportController.qrCodes[0] : ""
+
+                        property bool isFocusable: true
+
+                        Keys.onTabPressed: {
+                            FocusController.nextKeyTabItem()
+                        }
+
+                        Keys.onBacktabPressed: {
+                            FocusController.previousKeyTabItem()
+                        }
+
+                        Keys.onUpPressed: {
+                            FocusController.nextKeyUpItem()
+                        }
+
+                        Keys.onDownPressed: {
+                            FocusController.nextKeyDownItem()
+                        }
+
+                        Keys.onLeftPressed: {
+                            FocusController.nextKeyLeftItem()
+                        }
+
+                        Keys.onRightPressed: {
+                            FocusController.nextKeyRightItem()
+                        }
 
                         Timer {
                             property int index: 0
@@ -346,6 +354,8 @@ DrawerType2 {
                     Layout.fillWidth: true
                     Layout.topMargin: 24
                     Layout.bottomMargin: 32
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
                     visible: ExportController.qrCodesCount > 0
 

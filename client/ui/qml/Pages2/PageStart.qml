@@ -15,12 +15,12 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: homeTabButton
-
     property bool isControlsDisabled: false
     property bool isTabBarDisabled: false
 
     Connections {
+        objectName: "pageControllerConnection"
+
         target: PageController
 
         function onGoToPageHome() {
@@ -90,19 +90,11 @@ PageType {
                 PageController.closePage()
             }
         }
-
-        function onForceTabBarActiveFocus() {
-            homeTabButton.focus = true
-            tabBar.forceActiveFocus()
-        }
-
-        function onForceStackActiveFocus() {
-            homeTabButton.focus = true
-            tabBarStackView.forceActiveFocus()
-        }
     }
 
     Connections {
+        objectName: "installControllerConnections"
+
         target: InstallController
 
         function onInstallationErrorOccurred(error) {
@@ -165,6 +157,8 @@ PageType {
     }
 
     Connections {
+        objectName: "connectionControllerConnections"
+
         target: ConnectionController
 
         function onReconnectWithUpdatedContainer(message) {
@@ -182,6 +176,8 @@ PageType {
     }
 
     Connections {
+        objectName: "importControllerConnections"
+
         target: ImportController
 
         function onImportErrorOccurred(error, goToPageHome) {
@@ -196,6 +192,8 @@ PageType {
     }
 
     Connections {
+        objectName: "settingsControllerConnections"
+
         target: SettingsController
 
         function onLoggingDisableByWatcher() {
@@ -218,6 +216,7 @@ PageType {
 
     StackViewType {
         id: tabBarStackView
+        objectName: "tabBarStackView"
 
         anchors.top: parent.top
         anchors.right: parent.right
@@ -247,13 +246,28 @@ PageType {
         }
 
         Keys.onPressed: function(event) {
-            PageController.keyPressEvent(event.key)
-            event.accepted = true
+            console.debug(">>>> ", event.key, " Event is caught by StartPage")
+            switch (event.key) {
+            case Qt.Key_Tab:
+            case Qt.Key_Down:
+            case Qt.Key_Right:
+                FocusController.nextKeyTabItem()
+                break
+            case Qt.Key_Backtab:
+            case Qt.Key_Up:
+            case Qt.Key_Left:
+                FocusController.previousKeyTabItem()
+                break
+            default:
+                PageController.keyPressEvent(event.key)
+                event.accepted = true
+            }
         }
     }
 
     TabBar {
         id: tabBar
+        objectName: "tabBar"
 
         anchors.right: parent.right
         anchors.left: parent.left
@@ -269,6 +283,8 @@ PageType {
         enabled: !root.isControlsDisabled && !root.isTabBarDisabled
 
         background: Shape {
+            objectName: "backgroundShape"
+
             width: parent.width
             height: parent.height
 
@@ -289,6 +305,8 @@ PageType {
 
         TabImageButtonType {
             id: homeTabButton
+            objectName: "homeTabButton"
+
             isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
             clickedFunc: function () {
@@ -296,27 +314,26 @@ PageType {
                 ServersModel.processedIndex = ServersModel.defaultIndex
                 tabBar.currentIndex = 0
             }
-
-            KeyNavigation.tab: shareTabButton
-            Keys.onEnterPressed: this.clicked()
-            Keys.onReturnPressed: this.clicked()
         }
 
         TabImageButtonType {
             id: shareTabButton
+            objectName: "shareTabButton"
 
             Connections {
                 target: ServersModel
 
                 function onModelReset() {
-                    var hasServerWithWriteAccess = ServersModel.hasServerWithWriteAccess()
-                    shareTabButton.visible = hasServerWithWriteAccess
-                    shareTabButton.width = hasServerWithWriteAccess ? undefined : 0
+                    if (!SettingsController.isOnTv()) {
+                        var hasServerWithWriteAccess = ServersModel.hasServerWithWriteAccess()
+                        shareTabButton.visible = hasServerWithWriteAccess
+                        shareTabButton.width = hasServerWithWriteAccess ? undefined : 0
+                    }
                 }
             }
 
-            visible: ServersModel.hasServerWithWriteAccess()
-            width: ServersModel.hasServerWithWriteAccess() ? undefined : 0
+            visible: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess()
+            width: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess() ? undefined : 0
 
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"
@@ -324,32 +341,30 @@ PageType {
                 tabBarStackView.goToTabBarPage(PageEnum.PageShare)
                 tabBar.currentIndex = 1
             }
-
-            KeyNavigation.tab: settingsTabButton
         }
 
         TabImageButtonType {
             id: settingsTabButton
+            objectName: "settingsTabButton"
+
             isSelected: tabBar.currentIndex === 2
             image: "qrc:/images/controls/settings-2.svg"
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
                 tabBar.currentIndex = 2
             }
-
-            KeyNavigation.tab: plusTabButton
         }
 
         TabImageButtonType {
             id: plusTabButton
+            objectName: "plusTabButton"
+
             isSelected: tabBar.currentIndex === 3
             image: "qrc:/images/controls/plus.svg"
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSetupWizardConfigSource)
                 tabBar.currentIndex = 3
             }
-
-            Keys.onTabPressed: PageController.forceStackActiveFocus()
         }
     }
 }

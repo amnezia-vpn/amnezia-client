@@ -18,8 +18,6 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: clientNameTextField.textField
-
     enum ConfigType {
         AmneziaConnection,
         OpenVpn,
@@ -47,7 +45,7 @@ PageType {
             shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
             shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
 
-            shareConnectionDrawer.open()
+            shareConnectionDrawer.openTriggered()
             shareConnectionDrawer.contentVisible = false
             PageController.showBusyIndicator(true)
 
@@ -104,7 +102,7 @@ PageType {
         }
 
         function onExportErrorOccurred(error) {
-            shareConnectionDrawer.close()
+            shareConnectionDrawer.closeTriggered()
 
             PageController.showErrorMessage(error)
         }
@@ -119,38 +117,38 @@ PageType {
 
     QtObject {
         id: amneziaConnectionFormat
-        property string name: qsTr("For the AmneziaVPN app")
-        property var type: PageShare.ConfigType.AmneziaConnection
+        readonly property string name: qsTr("For the AmneziaVPN app")
+        readonly property int type: PageShare.ConfigType.AmneziaConnection
     }
     QtObject {
         id: openVpnConnectionFormat
-        property string name: qsTr("OpenVPN native format")
-        property var type: PageShare.ConfigType.OpenVpn
+        readonly property string name: qsTr("OpenVPN native format")
+        readonly property int type: PageShare.ConfigType.OpenVpn
     }
     QtObject {
         id: wireGuardConnectionFormat
-        property string name: qsTr("WireGuard native format")
-        property var type: PageShare.ConfigType.WireGuard
+        readonly property string name: qsTr("WireGuard native format")
+        readonly property int type: PageShare.ConfigType.WireGuard
     }
     QtObject {
         id: awgConnectionFormat
-        property string name: qsTr("AmneziaWG native format")
-        property var type: PageShare.ConfigType.Awg
+        readonly property string name: qsTr("AmneziaWG native format")
+        readonly property int type: PageShare.ConfigType.Awg
     }
     QtObject {
         id: shadowSocksConnectionFormat
-        property string name: qsTr("Shadowsocks native format")
-        property var type: PageShare.ConfigType.ShadowSocks
+        readonly property string name: qsTr("Shadowsocks native format")
+        readonly property int type: PageShare.ConfigType.ShadowSocks
     }
     QtObject {
         id: cloakConnectionFormat
-        property string name: qsTr("Cloak native format")
-        property var type: PageShare.ConfigType.Cloak
+        readonly property string name: qsTr("Cloak native format")
+        readonly property int type: PageShare.ConfigType.Cloak
     }
     QtObject {
         id: xrayConnectionFormat
-        property string name: qsTr("XRay native format")
-        property var type: PageShare.ConfigType.Xray
+        readonly property string name: qsTr("XRay native format")
+        readonly property int type: PageShare.ConfigType.Xray
     }
 
     FlickableType {
@@ -172,16 +170,6 @@ PageType {
 
             spacing: 0
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: header.actionButton
-                onFocusChanged: {
-                    if (focusItem.activeFocus) {
-                        a.contentY = 0
-                    }
-                }
-            }
-
             HeaderType {
                 id: header
                 Layout.fillWidth: true
@@ -191,10 +179,8 @@ PageType {
 
                 actionButtonImage: "qrc:/images/controls/more-vertical.svg"
                 actionButtonFunction: function() {
-                    shareFullAccessDrawer.open()
+                    shareFullAccessDrawer.openTriggered()
                 }
-
-                KeyNavigation.tab: connectionRadioButton
 
                 DrawerType2 {
                     id: shareFullAccessDrawer
@@ -203,13 +189,8 @@ PageType {
 
                     anchors.fill: parent
                     expandedHeight: root.height
-                    onClosed: {
-                        if (!GC.isMobile()) {
-                            clientNameTextField.textField.forceActiveFocus()
-                        }
-                    }
 
-                    expandedContent: ColumnLayout {
+                    expandedStateContent: ColumnLayout {
                         id: shareFullAccessDrawerContent
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -222,14 +203,6 @@ PageType {
                             shareFullAccessDrawer.expandedHeight = shareFullAccessDrawerContent.implicitHeight + 32
                         }
 
-                        Connections {
-                            target: shareFullAccessDrawer
-                            enabled: !GC.isMobile()
-                            function onOpened() {
-                                focusItem.forceActiveFocus()
-                            }
-                        }
-
                         Header2Type {
                             Layout.fillWidth: true
                             Layout.bottomMargin: 16
@@ -240,24 +213,17 @@ PageType {
                             descriptionText: qsTr("Use for your own devices, or share with those you trust to manage the server.")
                         }
 
-                        Item {
-                            id: focusItem
-                            KeyNavigation.tab: shareFullAccessButton.rightButton
-                        }
-
                         LabelWithButtonType {
                             id: shareFullAccessButton
                             Layout.fillWidth: true
 
                             text: qsTr("Share")
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                            KeyNavigation.tab: focusItem
 
                             clickedFunction: function() {
                                 PageController.goToPage(PageEnum.PageShareFullAccess)
-                                shareFullAccessDrawer.close()
+                                shareFullAccessDrawer.closeTriggered()
                             }
-
                         }
                     }
                 }
@@ -288,13 +254,8 @@ PageType {
                         implicitWidth: (root.width - 32) / 2
                         text: qsTr("Connection")
 
-                        KeyNavigation.tab: usersRadioButton
-
                         onClicked: {
                             accessTypeSelector.currentIndex = 0
-                            if (!GC.isMobile()) {
-                                clientNameTextField.textField.forceActiveFocus()
-                            }
                         }
                     }
 
@@ -305,15 +266,12 @@ PageType {
                         implicitWidth: (root.width - 32) / 2
                         text: qsTr("Users")
 
-                        KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ? clientNameTextField.textField : serverSelector
-
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
-                            focusItem.forceActiveFocus()
                         }
                     }
                 }
@@ -342,9 +300,6 @@ PageType {
                 textField.maximumLength: 20
 
                 checkEmptyText: true
-
-                KeyNavigation.tab: serverSelector
-
             }
 
             DropDownType {
@@ -385,19 +340,19 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        if (serverSelector.currentIndex !== serverSelectorListView.currentIndex) {
-                            serverSelector.currentIndex = serverSelectorListView.currentIndex
+                        if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
+                            serverSelector.currentIndex = serverSelectorListView.selectedIndex
                             serverSelector.severSelectorIndexChanged()
                         }
 
-                        serverSelector.close()
+                        serverSelector.closeTriggered()
                     }
 
                     Component.onCompleted: {
                         if (ServersModel.isDefaultServerHasWriteAccess() && ServersModel.getDefaultServerData("hasInstalledContainers")) {
-                            serverSelectorListView.currentIndex = proxyServersModel.mapFromSource(ServersModel.defaultIndex)
+                            serverSelectorListView.selectedIndex = proxyServersModel.mapFromSource(ServersModel.defaultIndex)
                         } else {
-                            serverSelectorListView.currentIndex = 0
+                            serverSelectorListView.selectedIndex = 0
                         }
 
                         serverSelectorListView.triggerCurrentItem()
@@ -405,11 +360,9 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
+                        ServersModel.processedIndex = proxyServersModel.mapToSource(selectedIndex)
                     }
                 }
-
-                KeyNavigation.tab: protocolSelector
             }
 
             DropDownType {
@@ -445,12 +398,10 @@ PageType {
                         ]
                     }
 
-                    currentIndex: 0
-
                     clickedFunction: function() {
                         handler()
 
-                        protocolSelector.close()
+                        protocolSelector.closeTriggered()
                     }
 
                     Connections {
@@ -458,7 +409,7 @@ PageType {
 
                         function onSeverSelectorIndexChanged() {
                             var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
-                            protocolSelectorListView.currentIndex = defaultContainer
+                            protocolSelectorListView.selectedIndex = defaultContainer
                             protocolSelectorListView.triggerCurrentItem()
                         }
                     }
@@ -473,7 +424,7 @@ PageType {
 
                         protocolSelector.text = selectedText
 
-                        ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(currentIndex))
+                        ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(selectedIndex))
 
                         fillConnectionTypeModel()
 
@@ -488,7 +439,7 @@ PageType {
                     function fillConnectionTypeModel() {
                         root.connectionTypesModel = [amneziaConnectionFormat]
 
-                        var index = proxyContainersModel.mapToSource(currentIndex)
+                        var index = proxyContainersModel.mapToSource(selectedIndex)
 
                         if (index === ContainerProps.containerFromString("amnezia-openvpn")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
@@ -508,12 +459,6 @@ PageType {
                         }
                     }
                 }
-
-                KeyNavigation.tab: accessTypeSelector.currentIndex === 0 ?
-                                       exportTypeSelector :
-                                       isSearchBarVisible ?
-                                           searchTextField.textField :
-                                           usersHeader.actionButton
             }
 
             DropDownType {
@@ -549,7 +494,7 @@ PageType {
                     clickedFunction: function() {
                         exportTypeSelector.text = selectedText
                         exportTypeSelector.currentIndex = currentIndex
-                        exportTypeSelector.close()
+                        exportTypeSelector.closeTriggered()
                     }
 
                     Component.onCompleted: {
@@ -557,9 +502,6 @@ PageType {
                         exportTypeSelector.currentIndex = currentIndex
                     }
                 }
-
-                KeyNavigation.tab: shareButton
-
             }
 
             BasicButtonType {
@@ -575,7 +517,6 @@ PageType {
                 text: qsTr("Share")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 parentFlickable: a
 
@@ -584,7 +525,6 @@ PageType {
                         ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
                     }
                 }
-
             }
 
             Header2Type {
@@ -600,11 +540,6 @@ PageType {
                 actionButtonFunction: function() {
                     root.isSearchBarVisible = true
                 }
-
-                Keys.onTabPressed: clientsListView.model.count > 0 ?
-                                       clientsListView.forceActiveFocus() :
-                                       lastItemTabClicked(focusItem)
-
             }
 
             RowLayout {
@@ -618,35 +553,13 @@ PageType {
 
                     textFieldPlaceholderText: qsTr("Search")
 
-                    Connections {
-                        target: root
-                        function onIsSearchBarVisibleChanged() {
-                            if (root.isSearchBarVisible) {
-                                searchTextField.textField.forceActiveFocus()
-                            } else {
-                                searchTextField.textFieldText = ""
-                                if (!GC.isMobile()) {
-                                    usersHeader.actionButton.forceActiveFocus()
-                                }
-                            }
-                        }
-                    }
-
                     Keys.onEscapePressed: {
                         root.isSearchBarVisible = false
                     }
 
                     function navigateTo() {
-                        if (GC.isMobile()) {
-                            focusItem.forceActiveFocus()
-                            return;
-                        }
-
                         if (searchTextField.textFieldText === "") {
                             root.isSearchBarVisible = false
-                            usersHeader.actionButton.forceActiveFocus()
-                        } else {
-                            closeSearchButton.forceActiveFocus()
                         }
                     }
 
@@ -659,16 +572,6 @@ PageType {
                     id: closeSearchButton
                     image: "qrc:/images/controls/close.svg"
                     imageColor: AmneziaStyle.color.paleGray
-
-                    Keys.onTabPressed: {
-                        if (!GC.isMobile()) {
-                            if (clientsListView.model.count > 0) {
-                                clientsListView.forceActiveFocus()
-                            } else {
-                                lastItemTabClicked(focusItem)
-                            }
-                        }
-                    }
 
                     function clickedFunc() {
                         root.isSearchBarVisible = false
@@ -687,6 +590,8 @@ PageType {
 
                 visible: accessTypeSelector.currentIndex === 1
 
+                property bool isFocusable: true
+
                 model: SortFilterProxyModel {
                     id: proxyClientManagementModel
                     sourceModel: ClientManagementModel
@@ -698,44 +603,11 @@ PageType {
                 }
 
                 clip: true
-                interactive: false
-
-                activeFocusOnTab: true
-                focus: true
-                Keys.onTabPressed: {
-                    if (!GC.isMobile()) {
-                        if (currentIndex < this.count - 1) {
-                            this.incrementCurrentIndex()
-                            currentItem.focusItem.forceActiveFocus()
-                        } else {
-                            this.currentIndex = 0
-                            lastItemTabClicked(focusItem)
-                        }
-                    }
-                }
-
-                onActiveFocusChanged: {
-                    if (focus && !GC.isMobile()) {
-                        currentIndex = 0
-                        currentItem.focusItem.forceActiveFocus()
-                    }
-                }
-
-                onCurrentIndexChanged: {
-                    if (currentItem) {
-                        if (currentItem.y < a.contentY) {
-                            a.contentY = currentItem.y
-                        } else if (currentItem.y + currentItem.height + clientsListView.y > a.contentY + a.height) {
-                            a.contentY = currentItem.y + clientsListView.y + currentItem.height - a.height
-                        }
-                    }
-                }
+                reuseItems: true
 
                 delegate: Item {
                     implicitWidth: clientsListView.width
                     implicitHeight: delegateContent.implicitHeight
-
-                    property alias focusItem: clientFocusItem.rightButton
 
                     ColumnLayout {
                         id: delegateContent
@@ -755,7 +627,7 @@ PageType {
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {
-                                clientInfoDrawer.open()
+                                clientInfoDrawer.openTriggered()
                             }
                         }
 
@@ -766,17 +638,11 @@ PageType {
 
                             parent: root
 
-                            onClosed: {
-                                if (!GC.isMobile()) {
-                                    focusItem.forceActiveFocus()
-                                }
-                            }
-
                             width: root.width
                             height: root.height
 
-                            expandedContent: ColumnLayout {
-                                id: expandedContent
+                            expandedStateContent: ColumnLayout {
+                                id: expandedStateContent
                                 anchors.top: parent.top
                                 anchors.left: parent.left
                                 anchors.right: parent.right
@@ -785,15 +651,7 @@ PageType {
                                 anchors.rightMargin: 16
 
                                 onImplicitHeightChanged: {
-                                    clientInfoDrawer.expandedHeight = expandedContent.implicitHeight + 32
-                                }
-
-                                Connections {
-                                    target: clientInfoDrawer
-                                    enabled: !GC.isMobile()
-                                    function onOpened() {
-                                        focusItem1.forceActiveFocus()
-                                    }
+                                    clientInfoDrawer.expandedHeight = expandedStateContent.implicitHeight + 32
                                 }
 
                                 Header2TextType {
@@ -846,11 +704,6 @@ PageType {
                                     text: qsTr("Allowed IPs: %1").arg(allowedIps)
                                 }
 
-                                Item {
-                                    id: focusItem1
-                                    KeyNavigation.tab: renameButton
-                                }
-
                                 BasicButtonType {
                                     id: renameButton
                                     Layout.fillWidth: true
@@ -865,10 +718,8 @@ PageType {
 
                                     text: qsTr("Rename")
 
-                                    KeyNavigation.tab: revokeButton
-
                                     clickedFunc: function() {
-                                        clientNameEditDrawer.open()
+                                        clientNameEditDrawer.openTriggered()
                                     }
 
                                     DrawerType2 {
@@ -879,32 +730,13 @@ PageType {
                                         anchors.fill: parent
                                         expandedHeight: root.height * 0.35
 
-                                        onClosed: {
-                                            if (!GC.isMobile()) {
-                                                focusItem1.forceActiveFocus()
-                                            }
-                                        }
-
-                                        expandedContent: ColumnLayout {
+                                        expandedStateContent: ColumnLayout {
                                             anchors.top: parent.top
                                             anchors.left: parent.left
                                             anchors.right: parent.right
                                             anchors.topMargin: 32
                                             anchors.leftMargin: 16
                                             anchors.rightMargin: 16
-
-                                            Connections {
-                                                target: clientNameEditDrawer
-                                                enabled: !GC.isMobile()
-                                                function onOpened() {
-                                                    clientNameEditor.textField.forceActiveFocus()
-                                                }
-                                            }
-
-                                            Item {
-                                                id: focusItem2
-                                                KeyNavigation.tab: clientNameEditor.textField
-                                            }
 
                                             TextFieldWithHeaderType {
                                                 id: clientNameEditor
@@ -913,8 +745,6 @@ PageType {
                                                 textFieldText: clientName
                                                 textField.maximumLength: 20
                                                 checkEmptyText: true
-
-                                                KeyNavigation.tab: saveButton
                                             }
 
                                             BasicButtonType {
@@ -923,7 +753,6 @@ PageType {
                                                 Layout.fillWidth: true
 
                                                 text: qsTr("Save")
-                                                KeyNavigation.tab: focusItem2
 
                                                 clickedFunc: function() {
                                                     if (clientNameEditor.textFieldText === "") {
@@ -937,7 +766,7 @@ PageType {
                                                                                       ContainersModel.getProcessedContainerIndex(),
                                                                                       ServersModel.getProcessedServerCredentials())
                                                         PageController.showBusyIndicator(false)
-                                                        clientNameEditDrawer.close()
+                                                        clientNameEditDrawer.closeTriggered()
                                                     }
                                                 }
                                             }
@@ -958,7 +787,6 @@ PageType {
                                     borderWidth: 1
 
                                     text: qsTr("Revoke")
-                                    KeyNavigation.tab: focusItem1
 
                                     clickedFunc: function() {
                                         var headerText = qsTr("Revoke the config for a user - %1?").arg(clientName)
@@ -967,12 +795,12 @@ PageType {
                                         var noButtonText = qsTr("Cancel")
 
                                         var yesButtonFunction = function() {
-                                            clientInfoDrawer.close()
+                                            clientInfoDrawer.closeTriggered()
                                             root.revokeConfig(index)
                                         }
                                         var noButtonFunction = function() {
                                             if (!GC.isMobile()) {
-                                                focusItem1.forceActiveFocus()
+                                                // focusItem1.forceActiveFocus()
                                             }
                                         }
 
@@ -991,18 +819,5 @@ PageType {
         id: shareConnectionDrawer
 
         anchors.fill: parent
-        onClosed: {
-            if (!GC.isMobile()) {
-                clientNameTextField.textField.forceActiveFocus()
-            }
-        }
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onPressed: function(mouse) {
-            forceActiveFocus()
-            mouse.accepted = false
-        }
     }
 }

@@ -11,7 +11,9 @@ class SystemController : public QObject
 public:
     explicit SystemController(const std::shared_ptr<Settings> &setting, QObject *parent = nullptr);
 
-    static void saveFile(QString fileName, const QString &data);
+    static void saveFile(const QString &fileName, const QString &data);
+    static bool readFile(const QString &fileName, QByteArray &data);
+    static bool readFile(const QString &fileName, QString &data);
 
 public slots:
     QString getFileName(const QString &acceptLabel, const QString &nameFilter, const QString &selectedFile = "",
@@ -20,6 +22,8 @@ public slots:
     void setQmlRoot(QObject *qmlRoot);
 
     bool isAuthenticated();
+    void sendTouch(float x, float y);
+
 signals:
     void fileDialogClosed(const bool isAccepted);
 

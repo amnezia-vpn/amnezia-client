@@ -15,8 +15,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     FlickableType {
         id: fl
         anchors.top: parent.top
@@ -31,11 +29,6 @@ PageType {
             anchors.right: parent.right
 
             spacing: 0
-
-            Item {
-                id: focusItem
-//                KeyNavigation.tab: backButton
-            }
 
             LabelWithImageType {
                 Layout.fillWidth: true
@@ -111,9 +104,6 @@ PageType {
 
                 descriptionOnTop: true
 
-//                parentFlickable: fl
-//                KeyNavigation.tab: passwordLabel.eyeButton
-
                 rightImageSource: "qrc:/images/controls/copy.svg"
                 rightImageColor: AmneziaStyle.color.paleGray
 
@@ -140,8 +130,6 @@ PageType {
                 textColor: AmneziaStyle.color.vibrantRed
 
                 text: qsTr("Reload API config")
-
-//                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunc: function() {
                     var headerText = qsTr("Reload API config?")
@@ -180,8 +168,6 @@ PageType {
                 textColor: AmneziaStyle.color.vibrantRed
 
                 text: qsTr("Remove from application")
-
-//                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunc: function() {
                     var headerText = qsTr("Remove from application?")

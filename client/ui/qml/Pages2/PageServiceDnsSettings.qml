@@ -16,13 +16,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: backButtonLayout
 
@@ -34,7 +27,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: removeButton
         }
     }
 
@@ -71,8 +63,6 @@ PageType {
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: AmneziaStyle.color.vibrantRed
-
-                Keys.onTabPressed: root.lastItemTabClicked()
 
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())

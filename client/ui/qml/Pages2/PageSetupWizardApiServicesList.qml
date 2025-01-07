@@ -14,8 +14,6 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     ColumnLayout {
         id: header
 
@@ -25,15 +23,9 @@ PageType {
 
         spacing: 0
 
-        Item {
-            id: focusItem
-            KeyNavigation.tab: backButton
-        }
-
         BackButtonType {
             id: backButton
             Layout.topMargin: 20
-//                KeyNavigation.tab: fileButton.rightButton
         }
 
         HeaderType {
@@ -50,6 +42,7 @@ PageType {
 
     ListView {
         id: servicesListView
+
         anchors.top: header.bottom
         anchors.right: parent.right
         anchors.left: parent.left
@@ -57,15 +50,20 @@ PageType {
         anchors.topMargin: 16
         spacing: 0
 
-        currentIndex: 1
+        property bool isFocusable: true
+        
         clip: true
+        reuseItems: true
+
         model: ApiServicesModel
 
-        ScrollBar.vertical: ScrollBar {}
+        ScrollBar.vertical: ScrollBarType {}
 
         delegate: Item {
             implicitWidth: servicesListView.width
             implicitHeight: delegateContent.implicitHeight
+
+            enabled: isServiceAvailable
 
             ColumnLayout {
                 id: delegateContent
@@ -86,14 +84,15 @@ PageType {
 
                     rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                    enabled: isServiceAvailable
-
                     onClicked: {
                         if (isServiceAvailable) {
                             ApiServicesModel.setServiceIndex(index)
                             PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
                         }
                     }
+                    
+                    Keys.onEnterPressed: clicked()
+                    Keys.onReturnPressed: clicked()
                 }
             }
         }

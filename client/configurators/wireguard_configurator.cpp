@@ -120,7 +120,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         }
     }
 
-    QString subnetIp = containerConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
+    QString subnetIp = containerConfig.value(m_protocolName).toObject().value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
     {
         QStringList l = subnetIp.split(".", Qt::SkipEmptyParts);
         if (l.isEmpty()) {

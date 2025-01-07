@@ -17,7 +17,7 @@ ListView {
 
     property bool dividerVisible: false
 
-    currentIndex: 0
+    property int selectedIndex: 0
 
     width: rootWidth
     height: menuContent.contentItem.height
@@ -45,7 +45,7 @@ ListView {
                 rightImageSource: imageSource
 
                 clickedFunction: function() {
-                    menuContent.currentIndex = index
+                    menuContent.selectedIndex = index
                     menuContent.selectedText = name
                     if (menuContent.clickedFunction && typeof menuContent.clickedFunction === "function") {
                         menuContent.clickedFunction()
@@ -62,7 +62,7 @@ ListView {
         }
 
         Component.onCompleted: {
-            if (menuContent.currentIndex === index) {
+            if (menuContent.selectedIndex === index) {
                 menuContent.selectedText = name
             }
         }

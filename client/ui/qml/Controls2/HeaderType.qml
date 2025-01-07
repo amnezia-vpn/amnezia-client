@@ -19,8 +19,6 @@ Item {
 
     property string descriptionText
 
-    focus: true
-
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 

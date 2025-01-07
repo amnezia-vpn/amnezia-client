@@ -146,6 +146,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/transfer.h
     ${CMAKE_CURRENT_LIST_DIR}/core/enums/apiEnums.h
     ${CMAKE_CURRENT_LIST_DIR}/../common/logger/logger.h
+    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlUtils.h
 )
 
 # Mozilla headres
@@ -197,6 +198,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess.cpp
     ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess_new.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../common/logger/logger.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/utils/qmlUtils.cpp
 )
 
 # Mozilla sources

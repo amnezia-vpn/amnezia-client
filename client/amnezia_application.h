@@ -19,6 +19,7 @@
 #include "ui/controllers/exportController.h"
 #include "ui/controllers/importController.h"
 #include "ui/controllers/installController.h"
+#include "ui/controllers/focusController.h"
 #include "ui/controllers/pageController.h"
 #include "ui/controllers/settingsController.h"
 #include "ui/controllers/sitesController.h"
@@ -124,6 +125,7 @@ private:
 #endif
 
     QScopedPointer<ConnectionController> m_connectionController;
+    QScopedPointer<FocusController> m_focusController;
     QScopedPointer<PageController> m_pageController;
     QScopedPointer<InstallController> m_installController;
     QScopedPointer<ImportController> m_importController;

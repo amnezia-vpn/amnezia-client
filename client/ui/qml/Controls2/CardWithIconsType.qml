@@ -25,10 +25,15 @@ Button {
 
     property real textOpacity: 1.0
 
+    property alias focusItem: rightImage
+
+    property FlickableType parentFlickable
+
     hoverEnabled: true
 
     background: Rectangle {
         id: backgroundRect
+
         anchors.fill: parent
         radius: 16
 
@@ -39,13 +44,31 @@ Button {
         }
     }
 
+    function ensureVisible(item) {
+        if (item.activeFocus) {
+            if (root.parentFlickable) {
+                root.parentFlickable.ensureVisible(root)
+            }
+        }
+    }
+
+    onFocusChanged: {
+        ensureVisible(root)
+    }
+
+    focusItem.onFocusChanged: {
+        root.ensureVisible(focusItem)
+    }
+
     contentItem: Item {
         anchors.left: parent.left
         anchors.right: parent.right
 
         implicitHeight: content.implicitHeight
+
         RowLayout {
             id: content
+
             anchors.fill: parent
 
             Image {
@@ -61,6 +84,7 @@ Button {
             }
 
             ColumnLayout {
+
                 ListItemTitleType {
                     text: root.headerText
                     visible: text !== ""
@@ -123,6 +147,7 @@ Button {
 
                 Rectangle {
                     id: rightImageBackground
+
                     anchors.fill: parent
                     radius: 12
                     color: "transparent"
@@ -131,10 +156,9 @@ Button {
                         PropertyAnimation { duration: 200 }
                     }
                 }
+
                 onClicked: {
-                    if (clickedFunction && typeof clickedFunction === "function") {
-                        clickedFunction()
-                    }
+                    root.clicked()
                 }
             }
         }

@@ -15,6 +15,7 @@ struct AwgConfig
 {
     AwgConfig(const QJsonObject &jsonConfig);
 
+    QString subnetAddress;
     QString port;
 
     QString clientMtu;
@@ -43,7 +44,8 @@ class AwgConfigModel : public QAbstractListModel
 
 public:
     enum Roles {
-        PortRole = Qt::UserRole + 1,
+        SubnetAddressRole = Qt::UserRole + 1,
+        PortRole,
 
         ClientMtuRole,
         ClientJunkPacketCountRole,

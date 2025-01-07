@@ -16,13 +16,6 @@ PageType {
 
     property bool showContent: false
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -30,8 +23,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: showContentButton
     }
 
     Connections {
@@ -107,7 +98,8 @@ PageType {
                 textColor: AmneziaStyle.color.goldenApricot
 
                 text: showContent ? qsTr("Collapse content") : qsTr("Show content")
-                KeyNavigation.tab: connectButton
+
+                parentFlickable: fl
 
                 clickedFunc: function() {
                     showContent = !showContent
@@ -185,8 +177,6 @@ PageType {
         anchors.right: parent.right
         anchors.rightMargin: 16
         anchors.leftMargin: 16
-
-        Keys.onTabPressed: lastItemTabClicked(focusItem)
 
         BasicButtonType {
             id: connectButton

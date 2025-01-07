@@ -13,13 +13,6 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    defaultActiveFocusItem: hostname.textField
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -28,100 +21,133 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20
 
-        KeyNavigation.tab: hostname.textField
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    FlickableType {
-        id: fl
+    ListView {
+        id: listView
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        ColumnLayout {
-            id: content
+        property bool isFocusable: true
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
+        Keys.onTabPressed: {
+            FocusController.nextKeyTabItem()
+        }
 
-            spacing: 16
+        Keys.onBacktabPressed: {
+            FocusController.previousKeyTabItem()
+        }
+
+        Keys.onUpPressed: {
+            FocusController.nextKeyUpItem()
+        }
+
+        Keys.onDownPressed: {
+            FocusController.nextKeyDownItem()
+        }
+
+        Keys.onLeftPressed: {
+            FocusController.nextKeyLeftItem()
+        }
+
+        Keys.onRightPressed: {
+            FocusController.nextKeyRightItem()
+        }
+
+        ScrollBar.vertical: ScrollBarType {}
+
+        header: ColumnLayout {
+            width: listView.width
 
             HeaderType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16
 
                 headerText: qsTr("Configure your server")
             }
+        }
+
+        model: inputFields
+        spacing: 16
+        clip: true
+        reuseItems: true
+
+        delegate: ColumnLayout {
+            property alias textField: _textField.textField
+
+            width: listView.width
 
             TextFieldWithHeaderType {
-                id: hostname
+                id: _textField
 
                 Layout.fillWidth: true
-                headerText: qsTr("Server IP address [:port]")
-                textFieldPlaceholderText: qsTr("255.255.255.255:22")
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                textField.onFocusChanged: {
-                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                }
+                property bool hidePassword: hideText
 
-                KeyNavigation.tab: username.textField
-            }
+                headerText: title
+                textField.echoMode: hideText ? TextInput.Password : TextInput.Normal
+                buttonImageSource: imageSource
+                textFieldPlaceholderText: placeholderText
+                textField.text: textFieldText
 
-            TextFieldWithHeaderType {
-                id: username
+                rightButtonClickedOnEnter: true
 
-                Layout.fillWidth: true
-                headerText: qsTr("SSH Username")
-                textFieldPlaceholderText: "root"
-
-                textField.onFocusChanged: {
-                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                }
-
-                KeyNavigation.tab: secretData.textField
-            }
-
-            TextFieldWithHeaderType {
-                id: secretData
-
-                property bool hidePassword: true
-
-                Layout.fillWidth: true
-                headerText: qsTr("Password or SSH private key")
-                textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
-                buttonImageSource: textFieldText !== "" ? (hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg")
-                                                        : ""
-
-                clickedFunc: function() {
-                    hidePassword = !hidePassword
+                clickedFunc: function () {
+                    clickedHandler()
                 }
 
                 textField.onFocusChanged: {
-                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                    var _currentIndex = listView.currentIndex
+                    var _currentItem = listView.itemAtIndex(_currentIndex).children[0]
+                    listView.model[_currentIndex].textFieldText = _currentItem.textFieldText.replace(/^\s+|\s+$/g, '')
                 }
 
-                KeyNavigation.tab: continueButton
+                textField.onTextChanged: {
+                    var _currentIndex = listView.currentIndex
+                    textFieldText = textField.text
+
+                    if (_currentIndex === vars.secretDataIndex) {
+                        buttonImageSource = textFieldText !== "" ? (hideText ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg") : ""
+                    }
+                }
             }
+        }
+
+        footer: ColumnLayout {
+            width: listView.width
 
             BasicButtonType {
                 id: continueButton
 
                 Layout.fillWidth: true
-                Layout.topMargin: 24
+                Layout.topMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: qsTr("Continue")
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
-
                 clickedFunc: function() {
-                    forceActiveFocus()
-                    if (!isCredentialsFilled()) {
+                    if (!root.isCredentialsFilled()) {
                         return
                     }
 
                     InstallController.setShouldCreateServer(true)
-                    InstallController.setProcessedServerCredentials(hostname.textField.text, username.textField.text, secretData.textField.text)
+                    var _hostname = listView.itemAtIndex(vars.hostnameIndex).children[0].textFieldText
+                    var _username = listView.itemAtIndex(vars.usernameIndex).children[0].textFieldText
+                    var _secretData = listView.itemAtIndex(vars.secretDataIndex).children[0].textFieldText
+
+                    InstallController.setProcessedServerCredentials(_hostname, _username, _secretData)
 
                     PageController.showBusyIndicator(true)
                     var isConnectionOpened = InstallController.checkSshConnection()
@@ -136,7 +162,10 @@ PageType {
 
             LabelTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 12
+                Layout.topMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16
 
                 text: qsTr("All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties")
             }
@@ -145,6 +174,8 @@ PageType {
                 id: siteLink
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 Layout.bottomMargin: 16
 
                 headerText: qsTr("How to run your VPN server")
@@ -163,21 +194,78 @@ PageType {
     function isCredentialsFilled() {
         var hasEmptyField = false
 
-        if (hostname.textFieldText === "") {
-            hostname.errorText = qsTr("Ip address cannot be empty")
+        var _hostname = listView.itemAtIndex(vars.hostnameIndex).children[0]
+        if (_hostname.textFieldText === "") {
+            _hostname.errorText = qsTr("Ip address cannot be empty")
             hasEmptyField = true
-        } else if (!hostname.textField.acceptableInput) {
-            hostname.errorText = qsTr("Enter the address in the format 255.255.255.255:88")
+        } else if (!_hostname.textField.acceptableInput) {
+            _hostname.errorText = qsTr("Enter the address in the format 255.255.255.255:88")
         }
 
-        if (username.textFieldText === "") {
-            username.errorText = qsTr("Login cannot be empty")
+        var _username = listView.itemAtIndex(vars.usernameIndex).children[0]
+        if (_username.textFieldText === "") {
+            _username.errorText = qsTr("Login cannot be empty")
             hasEmptyField = true
         }
-        if (secretData.textFieldText === "") {
-            secretData.errorText = qsTr("Password/private key cannot be empty")
+
+        var _secretData = listView.itemAtIndex(vars.secretDataIndex).children[0]
+        if (_secretData.textFieldText === "") {
+            _secretData.errorText = qsTr("Password/private key cannot be empty")
             hasEmptyField = true
         }
+
         return !hasEmptyField
+    }
+
+    property list<QtObject> inputFields: [
+        hostname,
+        username,
+        secretData
+    ]
+
+    QtObject {
+        id: hostname
+
+        property string title: qsTr("Server IP address [:port]")
+        readonly property string placeholderText: qsTr("255.255.255.255:22")
+        property string textFieldText: ""
+        property bool hideText: false
+        property string imageSource: ""
+        readonly property var clickedHandler: function() {
+            console.debug(">>> Server IP address text field was clicked!!!")
+            clicked()
+        }
+    }
+
+    QtObject {
+        id: username
+
+        property string title: qsTr("SSH Username")
+        readonly property string placeholderText: "root"
+        property string textFieldText: ""
+        property bool hideText: false
+        property string imageSource: ""
+        readonly property var clickedHandler: undefined
+    }
+
+    QtObject {
+        id: secretData
+
+        property string title: qsTr("Password or SSH private key")
+        readonly property string placeholderText: ""
+        property string textFieldText: ""
+        property bool hideText: true
+        property string imageSource: textFieldText !== "" ? (hideText ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg") : ""
+        readonly property var clickedHandler: function() {
+            hideText = !hideText
+        }
+    }
+
+    QtObject {
+        id: vars
+
+        readonly property int hostnameIndex: 0
+        readonly property int usernameIndex: 1
+        readonly property int secretDataIndex: 2
     }
 }

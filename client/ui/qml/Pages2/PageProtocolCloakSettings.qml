@@ -16,13 +16,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.trafficFromField.textField
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: backButtonLayout
 
@@ -34,7 +27,6 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: listview.currentItem.trafficFromField.textField
         }
     }
 
@@ -56,11 +48,13 @@ PageType {
             ListView {
                 id: listview
 
+                property int selectedIndex: 0
+
                 width: parent.width
                 height: listview.contentItem.height
 
                 clip: true
-                interactive: false
+                reuseItems: true
 
                 model: CloakConfigModel
 
@@ -110,8 +104,6 @@ PageType {
                                     }
                                 }
                             }
-
-                            KeyNavigation.tab: portTextField.textField
                         }
 
                         TextFieldWithHeaderType {
@@ -130,8 +122,6 @@ PageType {
                                     port = textFieldText
                                 }
                             }
-
-                            KeyNavigation.tab: cipherDropDown
                         }
 
                         DropDownType {
@@ -143,7 +133,6 @@ PageType {
                             headerText: qsTr("Cipher")
 
                             drawerParent: root
-                            KeyNavigation.tab: saveRestartButton
 
                             listView: ListViewWithRadioButtonType {
                                 id: cipherListView
@@ -161,7 +150,7 @@ PageType {
                                 clickedFunction: function() {
                                     cipherDropDown.text = selectedText
                                     cipher = cipherDropDown.text
-                                    cipherDropDown.close()
+                                    cipherDropDown.closeTriggered()
                                 }
 
                                 Component.onCompleted: {
@@ -169,7 +158,7 @@ PageType {
 
                                     for (var i = 0; i < cipherListView.model.count; i++) {
                                         if (cipherListView.model.get(i).name === cipherDropDown.text) {
-                                            currentIndex = i
+                                            selectedIndex = i
                                         }
                                     }
                                 }
@@ -184,7 +173,6 @@ PageType {
                             Layout.bottomMargin: 24
 
                             text: qsTr("Save")
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                             clickedFunc: function() {
                                 forceActiveFocus()

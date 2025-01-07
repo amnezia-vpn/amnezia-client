@@ -34,6 +34,9 @@ public:
     void resetLastServer(int serverIndex);
     void saveFile(const QString &fileName, const QString &data);
     QString openFile(const QString &filter);
+    int getFd(const QString &fileName);
+    void closeFd();
+    QString getFileName(const QString &uri);
     bool isCameraPresent();
     bool isOnTv();
     void startQrReaderActivity();
@@ -48,6 +51,7 @@ public:
     bool isNotificationPermissionGranted();
     void requestNotificationPermission();
     bool requestAuthentication();
+    void sendTouch(float x, float y);
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);

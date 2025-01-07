@@ -11,7 +11,7 @@
     <uses-feature android:name="android.hardware.camera.any" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <!-- for TV -->
-    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.software.leanback" android:required="true" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
     <!-- The following comment will be replaced upon deployment with default features based on the dependencies
@@ -85,6 +85,13 @@
             android:theme="@style/Translucent" />
 
         <activity android:name=".AuthActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:exported="false"
+            android:theme="@style/Translucent" />
+
+        <activity android:name=".TvFilePicker"
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
             android:taskAffinity=""

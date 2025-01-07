@@ -14,8 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     ColumnLayout {
         id: content
 
@@ -32,11 +30,6 @@ PageType {
             Layout.preferredHeight: 287
         }
 
-        Item {
-            id: focusItem
-            KeyNavigation.tab: startButton
-        }
-
         BasicButtonType {
             id: startButton
             Layout.fillWidth: true
@@ -50,8 +43,6 @@ PageType {
             clickedFunc: function() {
                 PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
             }
-
-            Keys.onTabPressed: lastItemTabClicked(focusItem)
         }
     }
 }

@@ -26,7 +26,7 @@ DrawerType2 {
         id: installedAppsModel
     }
 
-    expandedContent: Item {
+    expandedStateContent: Item {
         id: container
 
         implicitHeight: expandedHeight
@@ -43,7 +43,7 @@ DrawerType2 {
             BackButtonType {
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
                 backButtonFunction: function() {
-                    root.close()
+                    root.closeTriggered()
                 }
             }
 
@@ -69,6 +69,8 @@ DrawerType2 {
                 clip: true
                 interactive: true
 
+                property bool isFocusable: true
+
                 model: SortFilterProxyModel {
                     id: proxyInstalledAppsModel
                     sourceModel: installedAppsModel
@@ -79,10 +81,7 @@ DrawerType2 {
                     }
                 }
 
-                ScrollBar.vertical: ScrollBar {
-                    id: scrollBar
-                    policy: ScrollBar.AlwaysOn
-                }
+                ScrollBar.vertical: ScrollBarType {}
 
                 ButtonGroup {
                     id: buttonGroup
@@ -155,7 +154,7 @@ DrawerType2 {
                 PageController.showBusyIndicator(true)
                 AppSplitTunnelingController.addApps(installedAppsModel.getSelectedAppsInfo())
                 PageController.showBusyIndicator(false)
-                root.close()
+                root.closeTriggered()
             }
         }
     }

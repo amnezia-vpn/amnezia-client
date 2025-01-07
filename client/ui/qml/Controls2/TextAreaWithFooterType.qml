@@ -78,9 +78,6 @@ Rectangle {
                 placeholderText: root.placeholderText
                 text: root.text
 
-
-                KeyNavigation.tab: firstButton
-
                 onCursorVisibleChanged:  {
                     if (textArea.cursorVisible) {
                         fl.interactive = true

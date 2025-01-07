@@ -17,55 +17,15 @@ ListView {
     property var rootWidth
     property var selectedText
 
-    property bool a: true
-
     width: rootWidth
-    height: menuContent.contentItem.height
+    height: contentItem.height
 
     clip: true
-    interactive: false
+    snapMode: ListView.SnapToItem
 
-    property FlickableType parentFlickable
-    property var lastItemTabClicked
+    ScrollBar.vertical: ScrollBarType {}
 
-    property int currentFocusIndex: 0
-
-    activeFocusOnTab: true
-    onActiveFocusChanged: {
-        if (activeFocus) {
-            this.currentFocusIndex = 0
-            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
-        }
-    }
-
-    Keys.onTabPressed: {
-        if (currentFocusIndex < this.count - 1) {
-            currentFocusIndex += 1
-            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
-        } else {
-            currentFocusIndex = 0
-            if (lastItemTabClicked && typeof lastItemTabClicked === "function") {
-                lastItemTabClicked()
-            }
-        }
-    }
-
-    onVisibleChanged: {
-         if (visible) {
-             currentFocusIndex = 0
-             focusItem.forceActiveFocus()
-         }
-     }
-
-    Item {
-        id: focusItem
-    }
-
-    onCurrentFocusIndexChanged: {
-        if (parentFlickable) {
-            parentFlickable.ensureVisible(this.itemAtIndex(currentFocusIndex))
-        }
-    }
+    property bool isFocusable: true
 
     ButtonGroup {
         id: containersRadioButtonGroup
@@ -74,12 +34,6 @@ ListView {
     delegate: Item {
         implicitWidth: rootWidth
         implicitHeight: content.implicitHeight
-
-        onActiveFocusChanged: {
-            if (activeFocus) {
-                containerRadioButton.forceActiveFocus()
-            }
-        }
 
         ColumnLayout {
             id: content
@@ -111,13 +65,13 @@ ListView {
                     }
 
                     if (checked) {
-                        containersDropDown.close()
+                        containersDropDown.closeTriggered()
                         ServersModel.setDefaultContainer(ServersModel.defaultIndex, proxyDefaultServerContainersModel.mapToSource(index))
                     } else {
                         ContainersModel.setProcessedContainerIndex(proxyDefaultServerContainersModel.mapToSource(index))
                         InstallController.setShouldCreateServer(false)
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
-                        containersDropDown.close()
+                        containersDropDown.closeTriggered()
                     }
                 }
 

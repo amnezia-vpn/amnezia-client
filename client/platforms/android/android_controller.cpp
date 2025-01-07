@@ -163,9 +163,7 @@ QString AndroidController::openFile(const QString &filter)
     QString fileName;
     connect(this, &AndroidController::fileOpened, this,
             [&fileName, &wait](const QString &uri) {
-                qDebug() << "Android event: file opened; uri:" << uri;
-                fileName = QQmlFile::urlToLocalFileOrQrc(uri);
-                qDebug() << "Android opened filename:" << fileName;
+                fileName = uri;
                 wait.quit();
             },
             static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
@@ -173,6 +171,25 @@ QString AndroidController::openFile(const QString &filter)
                        QJniObject::fromString(filter).object<jstring>());
     wait.exec();
     return fileName;
+}
+
+int AndroidController::getFd(const QString &fileName)
+{
+    return callActivityMethod<jint>("getFd", "(Ljava/lang/String;)I",
+                                    QJniObject::fromString(fileName).object<jstring>());
+}
+
+void AndroidController::closeFd()
+{
+    callActivityMethod("closeFd", "()V");
+}
+
+QString AndroidController::getFileName(const QString &uri)
+{
+    auto fileName = callActivityMethod<jstring, jstring>("getFileName", "(Ljava/lang/String;)Ljava/lang/String;",
+                                                         QJniObject::fromString(uri).object<jstring>());
+    QJniEnvironment env;
+    return AndroidUtils::convertJString(env.jniEnv(), fileName.object<jstring>());
 }
 
 bool AndroidController::isCameraPresent()
@@ -285,6 +302,11 @@ bool AndroidController::requestAuthentication()
     callActivityMethod("requestAuthentication", "()V");
     wait.exec();
     return result;
+}
+
+void AndroidController::sendTouch(float x, float y)
+{
+    callActivityMethod("sendTouch", "(FF)V", x, y);
 }
 
 // Moving log processing to the Android side

@@ -82,14 +82,12 @@ void SitesController::removeSite(int index)
 
 void SitesController::importSites(const QString &fileName, bool replaceExisting)
 {
-    QFile file(fileName);
-
-    if (!file.open(QIODevice::ReadOnly)) {
+    QByteArray jsonData;
+    if (!SystemController::readFile(fileName, jsonData)) {
         emit errorOccurred(tr("Can't open file: %1").arg(fileName));
         return;
     }
 
-    QByteArray jsonData = file.readAll();
     QJsonDocument jsonDocument = QJsonDocument::fromJson(jsonData);
     if (jsonDocument.isNull()) {
         emit errorOccurred(tr("Failed to parse JSON data from file: %1").arg(fileName));

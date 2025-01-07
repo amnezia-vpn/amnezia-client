@@ -11,26 +11,13 @@ import "../Config"
 DrawerType2 {
     id: root
 
-    expandedContent: Item {
+    expandedStateContent: Item {
         id: container
 
         implicitHeight: root.height * 0.9
 
         Component.onCompleted: {
             root.expandedHeight = container.implicitHeight
-        }
-
-        Connections {
-            target: root
-            enabled: !GC.isMobile()
-            function onOpened() {
-                focusItem.forceActiveFocus()
-            }
-        }
-
-        Item {
-            id: focusItem
-            KeyNavigation.tab: backButton
         }
 
         ColumnLayout {
@@ -43,167 +30,148 @@ DrawerType2 {
 
             BackButtonType {
                 id: backButton
+
+                Layout.fillWidth: true
+
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
-                backButtonFunction: function() { root.close() }
-                KeyNavigation.tab: listView
+                backButtonFunction: function() { root.closeTriggered() }
+            }
+
+            Header2Type {
+                id: header
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                headerText: qsTr("Choose language")
             }
         }
 
-        FlickableType {
+        ListView {
+            id: listView
+
             anchors.top: backButtonLayout.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            contentHeight: content.implicitHeight
 
-            ColumnLayout {
-                id: content
+            property bool isFocusable: true
+            property int selectedIndex: LanguageModel.currentLanguageIndex
 
-                anchors.fill: parent
+            clip: true
+            reuseItems: true
 
-                Header2Type {
-                    id: header
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.leftMargin: 16
+            ScrollBar.vertical: ScrollBarType {}
 
-                    headerText: qsTr("Choose language")
-                }
+            model: LanguageModel
 
-                ListView {
-                    id: listView
+            ButtonGroup {
+                id: buttonGroup
+            }
 
-                    Layout.fillWidth: true
-                    height: listView.contentItem.height
+            delegate: Item {
+                implicitWidth: root.width
+                implicitHeight: delegateContent.implicitHeight
 
-                    clip: true
-                    interactive: false
+                ColumnLayout {
+                    id: delegateContent
 
-                    model: LanguageModel
-                    currentIndex: LanguageModel.currentLanguageIndex
+                    anchors.fill: parent
 
-                    ButtonGroup {
-                        id: buttonGroup
-                    }
+                    RadioButton {
+                        id: radioButton
 
-                    property int currentFocusIndex: 0
+                        implicitWidth: parent.width
+                        implicitHeight: radioButtonContent.implicitHeight
 
-                    activeFocusOnTab: true
-                    onActiveFocusChanged: {
-                        if (activeFocus) {
-                            this.currentFocusIndex = 0
-                            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
-                        }
-                    }
+                        hoverEnabled: true
 
-                    Keys.onTabPressed: {
-                        if (currentFocusIndex < this.count - 1) {
-                            currentFocusIndex += 1
-                            this.itemAtIndex(currentFocusIndex).forceActiveFocus()
-                        } else {
-                            listViewFocusItem.forceActiveFocus()
-                            focusItem.forceActiveFocus()
-                        }
-                    }
+                        property bool isFocusable: true
 
-                    Item {
-                        id: listViewFocusItem
                         Keys.onTabPressed: {
-                            root.forceActiveFocus()
+                            FocusController.nextKeyTabItem()
                         }
-                    }
 
-                    onVisibleChanged: {
-                        if (visible) {
-                            listViewFocusItem.forceActiveFocus()
-                            focusItem.forceActiveFocus()
+                        Keys.onBacktabPressed: {
+                            FocusController.previousKeyTabItem()
                         }
-                    }
 
-                    delegate: Item {
-                        implicitWidth: root.width
-                        implicitHeight: delegateContent.implicitHeight
+                        Keys.onUpPressed: {
+                            FocusController.nextKeyUpItem()
+                        }
 
-                        onActiveFocusChanged: {
-                            if (activeFocus) {
-                                radioButton.forceActiveFocus()
+                        Keys.onDownPressed: {
+                            FocusController.nextKeyDownItem()
+                        }
+
+                        Keys.onLeftPressed: {
+                            FocusController.nextKeyLeftItem()
+                        }
+
+                        Keys.onRightPressed: {
+                            FocusController.nextKeyRightItem()
+                        }
+
+                        indicator: Rectangle {
+                            width: parent.width - 1
+                            height: parent.height
+                            color: radioButton.hovered ? AmneziaStyle.color.slateGray : AmneziaStyle.color.onyxBlack
+                            border.color: radioButton.focus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.transparent
+                            border.width: radioButton.focus ? 1 : 0
+
+                            Behavior on color {
+                                PropertyAnimation { duration: 200 }
+                            }
+                            Behavior on border.color {
+                                PropertyAnimation { duration: 200 }
                             }
                         }
 
-                        ColumnLayout {
-                            id: delegateContent
-
+                        RowLayout {
+                            id: radioButtonContent
                             anchors.fill: parent
 
-                            RadioButton {
-                                id: radioButton
+                            anchors.rightMargin: 16
+                            anchors.leftMargin: 16
 
-                                implicitWidth: parent.width
-                                implicitHeight: radioButtonContent.implicitHeight
+                            spacing: 0
 
-                                hoverEnabled: true
+                            z: 1
 
-                                indicator: Rectangle {
-                                    width: parent.width - 1
-                                    height: parent.height
-                                    color: radioButton.hovered ? AmneziaStyle.color.slateGray : AmneziaStyle.color.onyxBlack
-                                    border.color: radioButton.focus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.transparent
-                                    border.width: radioButton.focus ? 1 : 0
+                            ParagraphTextType {
+                                Layout.fillWidth: true
+                                Layout.topMargin: 20
+                                Layout.bottomMargin: 20
 
-                                    Behavior on color {
-                                        PropertyAnimation { duration: 200 }
-                                    }
-                                    Behavior on border.color {
-                                        PropertyAnimation { duration: 200 }
-                                    }
-                                }
+                                text: languageName
+                            }
 
-                                RowLayout {
-                                    id: radioButtonContent
-                                    anchors.fill: parent
+                            Image {
+                                source: "qrc:/images/controls/check.svg"
+                                visible: radioButton.checked
 
-                                    anchors.rightMargin: 16
-                                    anchors.leftMargin: 16
+                                width: 24
+                                height: 24
 
-                                    spacing: 0
-
-                                    z: 1
-
-                                    ParagraphTextType {
-                                        Layout.fillWidth: true
-                                        Layout.topMargin: 20
-                                        Layout.bottomMargin: 20
-
-                                        text: languageName
-                                    }
-
-                                    Image {
-                                        source: "qrc:/images/controls/check.svg"
-                                        visible: radioButton.checked
-
-                                        width: 24
-                                        height: 24
-
-                                        Layout.rightMargin: 8
-                                    }
-                                }
-
-                                ButtonGroup.group: buttonGroup
-                                checked: listView.currentIndex === index
-
-                                onClicked: {
-                                    listView.currentIndex = index
-                                    LanguageModel.changeLanguage(languageIndex)
-                                    root.close()
-                                }
+                                Layout.rightMargin: 8
                             }
                         }
 
-                        Keys.onEnterPressed: radioButton.clicked()
-                        Keys.onReturnPressed: radioButton.clicked()
+                        ButtonGroup.group: buttonGroup
+                        checked: listView.selectedIndex === index
+
+                        onClicked: {
+                            listView.selectedIndex = index
+                            LanguageModel.changeLanguage(languageIndex)
+                            root.closeTriggered()
+                        }
                     }
                 }
+
+                Keys.onEnterPressed: radioButton.clicked()
+                Keys.onReturnPressed: radioButton.clicked()
             }
         }
     }

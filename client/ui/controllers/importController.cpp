@@ -9,6 +9,7 @@
 
 #include "core/errorstrings.h"
 #include "core/serialization/serialization.h"
+#include "systemController.h"
 #include "utilities.h"
 
 #ifdef Q_OS_ANDROID
@@ -76,17 +77,18 @@ ImportController::ImportController(const QSharedPointer<ServersModel> &serversMo
 
 bool ImportController::extractConfigFromFile(const QString &fileName)
 {
-    QFile file(fileName);
-
-    if (file.open(QIODevice::ReadOnly)) {
-        QString data = file.readAll();
-
-        m_configFileName = QFileInfo(file.fileName()).fileName();
-        return extractConfigFromData(data);
+    QString data;
+    if (!SystemController::readFile(fileName, data)) {
+        emit importErrorOccurred(ErrorCode::ImportOpenConfigError, false);
+        return false;
     }
-
-    emit importErrorOccurred(ErrorCode::ImportOpenConfigError, false);
-    return false;
+    m_configFileName = QFileInfo(QFile(fileName).fileName()).fileName();
+#ifdef Q_OS_ANDROID
+    if (m_configFileName.isEmpty()) {
+        m_configFileName = AndroidController::instance()->getFileName(fileName);
+    }
+#endif
+    return extractConfigFromData(data);
 }
 
 bool ImportController::extractConfigFromData(QString data)

@@ -21,6 +21,7 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     }
 
     switch (role) {
+    case Roles::SubnetAddressRole: m_serverProtocolConfig.insert(config_key::subnet_address, value.toString()); break;
     case Roles::PortRole: m_serverProtocolConfig.insert(config_key::port, value.toString()); break;
 
     case Roles::ClientMtuRole: m_clientProtocolConfig.insert(config_key::mtu, value.toString()); break;
@@ -58,6 +59,7 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
+    case Roles::SubnetAddressRole: return m_serverProtocolConfig.value(config_key::subnet_address).toString();
     case Roles::PortRole: return m_serverProtocolConfig.value(config_key::port).toString();
 
     case Roles::ClientMtuRole: return m_clientProtocolConfig.value(config_key::mtu);
@@ -92,6 +94,7 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
     m_serverProtocolConfig.insert(config_key::transport_proto,
                                   serverProtocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
     m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);
+    m_serverProtocolConfig[config_key::subnet_address] = serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
     m_serverProtocolConfig[config_key::port] = serverProtocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
     m_serverProtocolConfig[config_key::junkPacketCount] =
             serverProtocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
@@ -168,6 +171,7 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
 
+    roles[SubnetAddressRole] = "subnetAddress";
     roles[PortRole] = "port";
 
     roles[ClientMtuRole] = "clientMtu";
@@ -197,6 +201,7 @@ AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig)
     clientJunkPacketMinSize = clientProtocolConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize);
     clientJunkPacketMaxSize = clientProtocolConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize);
 
+    subnetAddress = serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
     port = serverProtocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
     serverJunkPacketCount = serverProtocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
     serverJunkPacketMinSize = serverProtocolConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize);
@@ -216,7 +221,7 @@ AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig)
 
 bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
 {
-    if (port != other.port || serverJunkPacketCount != other.serverJunkPacketCount
+    if (subnetAddress != other.subnetAddress || port != other.port || serverJunkPacketCount != other.serverJunkPacketCount
         || serverJunkPacketMinSize != other.serverJunkPacketMinSize || serverJunkPacketMaxSize != other.serverJunkPacketMaxSize
         || serverInitPacketJunkSize != other.serverInitPacketJunkSize || serverResponsePacketJunkSize != other.serverResponsePacketJunkSize
         || serverInitPacketMagicHeader != other.serverInitPacketMagicHeader
