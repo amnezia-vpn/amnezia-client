@@ -10,16 +10,15 @@ FocusController::FocusController(QQmlApplicationEngine *engine, QObject *parent)
       m_focusChain {},
       m_focusedItem { nullptr },
       m_rootObjects {},
-      m_defaultFocusItem { QSharedPointer<QQuickItem>() },
+      m_defaultFocusItem { nullptr },
       m_lvfc { nullptr }
 {
-    QObject::connect(m_engine.get(), &QQmlApplicationEngine::objectCreated, this,
-                     [this](QObject *object, const QUrl &url) {
-                         QQuickItem *newDefaultFocusItem = object->findChild<QQuickItem *>("defaultFocusItem");
-                         if (newDefaultFocusItem && m_defaultFocusItem != newDefaultFocusItem) {
-                             m_defaultFocusItem.reset(newDefaultFocusItem);
-                         }
-                     });
+    QObject::connect(m_engine, &QQmlApplicationEngine::objectCreated, this, [this](QObject *object, const QUrl &url) {
+        QQuickItem *newDefaultFocusItem = object->findChild<QQuickItem *>("defaultFocusItem");
+        if (newDefaultFocusItem && m_defaultFocusItem != newDefaultFocusItem) {
+            m_defaultFocusItem = newDefaultFocusItem;
+        }
+    });
 
     QObject::connect(this, &FocusController::focusedItemChanged, this,
                      [this]() { m_focusedItem->forceActiveFocus(Qt::TabFocusReason); });
@@ -65,7 +64,7 @@ void FocusController::setFocusItem(QQuickItem *item)
 
 void FocusController::setFocusOnDefaultItem()
 {
-    setFocusItem(m_defaultFocusItem.get());
+    setFocusItem(m_defaultFocusItem);
 }
 
 void FocusController::pushRootObject(QObject *object)
