@@ -70,7 +70,7 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
                     .arg(speed);
         } else if (serviceType == serviceType::amneziaFree){
             QString description = tr("VPN to access blocked sites in regions with high levels of Internet censorship. ");
-            if (isServiceAvailable) {
+            if (!isServiceAvailable) {
                 description += tr("<p><a style=\"color: #EB5757;\">Not available in your region. If you have VPN enabled, disable it, return to the previous screen, and try again.</a>");
             }
             return description;
@@ -86,7 +86,7 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     }
     case IsServiceAvailableRole: {
         if (serviceType == serviceType::amneziaFree) {
-            if (isServiceAvailable) {
+            if (!isServiceAvailable) {
                 return false;
             }
         }
