@@ -42,11 +42,11 @@ private:
     void focusPreviousListViewItem();
     void dropListView();
 
-    QSharedPointer<QQmlApplicationEngine> m_engine; // Pointer to engine to get root object
-    QList<QObject *> m_focusChain;                  // List of current objects to be focused
-    QQuickItem *m_focusedItem;                      // Pointer to the active focus item
-    QStack<QObject *> m_rootObjects;
-    QSharedPointer<QQuickItem> m_defaultFocusItem;
+    QQmlApplicationEngine *m_engine; // Pointer to engine to get root object
+    QList<QObject *> m_focusChain;   // List of current objects to be focused
+    QQuickItem *m_focusedItem;       // Pointer to the active focus item
+    QStack<QObject *> m_rootObjects; // Pointer to stack of roots for focus chain
+    QQuickItem *m_defaultFocusItem;
 
     ListViewFocusController *m_lvfc; // ListView focus manager
 

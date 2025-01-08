@@ -12,7 +12,7 @@ Item {
     readonly property string drawerExpandedStateName: "expanded"
     readonly property string drawerCollapsedStateName: "collapsed"
 
-    readonly property bool isOpened: isExpandedStateActive() || (isCollapsedStateActive && (dragArea.drag.active === true))
+    readonly property bool isOpened: isExpandedStateActive() || (isCollapsedStateActive() && (dragArea.drag.active === true))
     readonly property bool isClosed: isCollapsedStateActive() && (dragArea.drag.active === false)
 
     property Component collapsedStateContent
@@ -123,7 +123,7 @@ Item {
         id: background
 
         anchors.fill: parent
-        color: root.isCollapsed ? AmneziaStyle.color.transparent : AmneziaStyle.color.translucentMidnightBlack
+        color: root.isCollapsedStateActive() ? AmneziaStyle.color.transparent : AmneziaStyle.color.translucentMidnightBlack
 
         Behavior on color {
             PropertyAnimation { duration: 200 }

@@ -20,7 +20,6 @@ Item {
         id: timer
         interval: 200 // Milliseconds
         onTriggered: {
-            console.debug(">>> PageType timer triggered")
             FocusController.resetRootObject()
             FocusController.setFocusOnDefaultItem()
         }

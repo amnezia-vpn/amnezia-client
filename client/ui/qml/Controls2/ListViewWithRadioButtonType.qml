@@ -38,7 +38,9 @@ ListView {
 
     function triggerCurrentItem() {
         var item = root.itemAtIndex(selectedIndex)
-        item.selectable.clicked()
+        if (item) {
+            item.selectable.clicked()
+        }
     }
 
     delegate: ColumnLayout {
