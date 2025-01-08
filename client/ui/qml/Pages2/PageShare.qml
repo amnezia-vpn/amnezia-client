@@ -355,6 +355,7 @@ PageType {
                             serverSelectorListView.selectedIndex = 0
                         }
 
+                        serverSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
                         serverSelectorListView.triggerCurrentItem()
                     }
 
@@ -410,6 +411,7 @@ PageType {
                         function onSeverSelectorIndexChanged() {
                             var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
                             protocolSelectorListView.selectedIndex = defaultContainer
+                            protocolSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
                             protocolSelectorListView.triggerCurrentItem()
                         }
                     }

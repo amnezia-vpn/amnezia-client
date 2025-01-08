@@ -338,7 +338,6 @@ PageType {
                             objectName: "containersListView"
 
                             rootWidth: root.width
-                            height: 500 // TODO: make calculated
 
                             Connections {
                                 objectName: "rowLayoutConnections"

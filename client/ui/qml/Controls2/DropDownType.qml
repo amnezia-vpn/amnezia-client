@@ -216,9 +216,7 @@ Item {
             ColumnLayout {
                 id: header
 
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
+                anchors.fill: parent
                 anchors.topMargin: 16
 
                 BackButtonType {
@@ -226,31 +224,21 @@ Item {
                     backButtonImage: root.headerBackButtonImage
                     backButtonFunction: function() { menu.closeTriggered() }
                 }
-            }
-
-            Column {
-                id: col
-                anchors.top: header.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 16
-
-                spacing: 16
 
                 Header2Type {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.leftMargin: 16
-                    anchors.rightMargin: 16
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.bottomMargin: 16
+                    Layout.fillWidth: true
 
                     headerText: root.headerText
-
-                    width: parent.width
                 }
 
                 Loader {
                     id: listViewLoader
                     sourceComponent: root.listView
+
+                    Layout.fillHeight: true
                 }
             }
         }

@@ -30,6 +30,8 @@ ListView {
 
     property bool isFocusable: true
 
+    ScrollBar.vertical: ScrollBarType {}
+
     ButtonGroup {
         id: buttonGroup
     }
