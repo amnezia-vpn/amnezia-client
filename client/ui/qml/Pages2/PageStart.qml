@@ -348,7 +348,7 @@ PageType {
             objectName: "settingsTabButton"
 
             isSelected: tabBar.currentIndex === 2
-            image: "qrc:/images/controls/settings-2.svg"
+            image: "qrc:/images/controls/settings.svg"
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
                 tabBar.currentIndex = 2
