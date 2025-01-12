@@ -144,6 +144,7 @@ PageType {
 
                 model: root.routeModesModel
 
+                selectedIndex: getRouteModesModelIndex()
 
                 clickedFunction: function() {
                     selector.text = selectedText
