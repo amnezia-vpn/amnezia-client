@@ -20,8 +20,9 @@ Rectangle {
     color: AmneziaStyle.color.transparent
     radius: 13
 
-    visible: GC.isDesktop() && ServersModel.isDefaultServerFromApi
-             && ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && SettingsController.isHomeAdLabelVisible
+    visible: false
+    // visible: GC.isDesktop() && ServersModel.isDefaultServerFromApi
+    //          && ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && SettingsController.isHomeAdLabelVisible
 
     MouseArea {
         anchors.fill: parent
