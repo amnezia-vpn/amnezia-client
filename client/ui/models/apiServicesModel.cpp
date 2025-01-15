@@ -68,17 +68,19 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
             return tr("Classic VPN for comfortable work, downloading large files and watching videos. "
                       "Works for any sites. Speed up to %1 MBit/s")
                     .arg(speed);
-        } else if (serviceType == serviceType::amneziaFree){
+        } else if (serviceType == serviceType::amneziaFree) {
             QString description = tr("VPN to access blocked sites in regions with high levels of Internet censorship. ");
             if (!isServiceAvailable) {
-                description += tr("<p><a style=\"color: #EB5757;\">Not available in your region. If you have VPN enabled, disable it, return to the previous screen, and try again.</a>");
+                description += tr("<p><a style=\"color: #EB5757;\">Not available in your region. If you have VPN enabled, disable it, "
+                                  "return to the previous screen, and try again.</a>");
             }
             return description;
         }
     }
     case ServiceDescriptionRole: {
         if (serviceType == serviceType::amneziaPremium) {
-            return tr("Amnezia Premium - A classic VPN for comfortable work, downloading large files, and watching videos in high resolution. "
+            return tr("Amnezia Premium - A classic VPN for comfortable work, downloading large files, and watching videos in high "
+                      "resolution. "
                       "It works for all websites, even in countries with the highest level of internet censorship.");
         } else {
             return tr("Amnezia Free is a free VPN to bypass blocking in countries with high levels of internet censorship");
@@ -143,7 +145,15 @@ void ApiServicesModel::updateModel(const QJsonObject &data)
         m_selectedServiceIndex = 0;
     } else {
         for (const auto &service : services) {
-            m_services.push_back(getApiServicesData(service.toObject()));
+            auto serviceObject = service.toObject();
+
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+            if (serviceObject.value(configKey::serviceType).toString() == serviceType::amneziaPremium) {
+                continue;
+            }
+#endif
+
+            m_services.push_back(getApiServicesData(serviceObject));
         }
     }
 
@@ -228,7 +238,7 @@ QHash<int, QByteArray> ApiServicesModel::roleNames() const
 
 ApiServicesModel::ApiServicesData ApiServicesModel::getApiServicesData(const QJsonObject &data)
 {
-    auto serviceInfo =  data.value(configKey::serviceInfo).toObject();
+    auto serviceInfo = data.value(configKey::serviceInfo).toObject();
     auto serviceType = data.value(configKey::serviceType).toString();
     auto serviceProtocol = data.value(configKey::serviceProtocol).toString();
     auto availableCountries = data.value(configKey::availableCountries).toArray();
