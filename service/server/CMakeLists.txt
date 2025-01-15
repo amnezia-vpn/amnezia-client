@@ -127,6 +127,7 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsutils.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowspingsender.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsnetworkwatcher.h
+        ${CMAKE_CURRENT_LIST_DIR}/../../client/daemon/daemonerrors.h
     )
 
     set(SOURCES ${SOURCES}

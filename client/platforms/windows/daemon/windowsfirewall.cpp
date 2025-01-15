@@ -9,11 +9,12 @@
 #include <guiddef.h>
 #include <initguid.h>
 #include <netfw.h>
-//#include <qaccessible.h>
-#include <Ws2tcpip.h>
-
+#include <qaccessible.h>
+#include <qassert.h>
 #include <stdio.h>
 #include <windows.h>
+#include <Ws2tcpip.h>
+#include "winsock.h"
 
 #include <QApplication>
 #include <QFileInfo>
@@ -27,7 +28,6 @@
 #include "leakdetector.h"
 #include "logger.h"
 #include "platforms/windows/windowsutils.h"
-#include "winsock.h"
 
 #define IPV6_ADDRESS_SIZE 16
 
@@ -49,18 +49,13 @@ constexpr uint8_t HIGH_WEIGHT = 13;
 constexpr uint8_t MAX_WEIGHT = 15;
 }  // namespace
 
-WindowsFirewall* WindowsFirewall::instance() {
-  if (s_instance == nullptr) {
-    s_instance = new WindowsFirewall(qApp);
+WindowsFirewall* WindowsFirewall::create(QObject* parent) {
+  if (s_instance != nullptr) {
+    // Only one instance of the firewall is allowed
+//    Q_ASSERT(false);
+    return s_instance;
   }
-  return s_instance;
-}
-
-WindowsFirewall::WindowsFirewall(QObject* parent) : QObject(parent) {
-  MZ_COUNT_CTOR(WindowsFirewall);
-  Q_ASSERT(s_instance == nullptr);
-
-  HANDLE engineHandle = NULL;
+  HANDLE engineHandle = nullptr;
   DWORD result = ERROR_SUCCESS;
   // Use dynamic sessions for efficiency and safety:
   //  -> Filtering policy objects are deleted even when the application crashes/
@@ -71,15 +66,24 @@ WindowsFirewall::WindowsFirewall(QObject* parent) : QObject(parent) {
 
   logger.debug() << "Opening the filter engine.";
 
-  result =
-      FwpmEngineOpen0(NULL, RPC_C_AUTHN_WINNT, NULL, &session, &engineHandle);
+  result = FwpmEngineOpen0(nullptr, RPC_C_AUTHN_WINNT, nullptr, &session,
+                           &engineHandle);
 
   if (result != ERROR_SUCCESS) {
     WindowsUtils::windowsLog("FwpmEngineOpen0 failed");
-    return;
+    return nullptr;
   }
   logger.debug() << "Filter engine opened successfully.";
-  m_sessionHandle = engineHandle;
+  if (!initSublayer()) {
+    return nullptr;
+  }
+  s_instance = new WindowsFirewall(engineHandle, parent);
+  return s_instance;
+}
+
+WindowsFirewall::WindowsFirewall(HANDLE session, QObject* parent)
+    : QObject(parent), m_sessionHandle(session) {
+  MZ_COUNT_CTOR(WindowsFirewall);
 }
 
 WindowsFirewall::~WindowsFirewall() {
@@ -89,15 +93,8 @@ WindowsFirewall::~WindowsFirewall() {
   }
 }
 
-bool WindowsFirewall::init() {
-  if (m_init) {
-    logger.warning() << "Alread initialised FW_WFP layer";
-    return true;
-  }
-  if (m_sessionHandle == INVALID_HANDLE_VALUE) {
-    logger.error() << "Cant Init Sublayer with invalid wfp handle";
-    return false;
-  }
+// static
+bool WindowsFirewall::initSublayer() {
   // If we were not able to aquire a handle, this will fail anyway.
   // We need to open up another handle because of wfp rules:
   // If a wfp resource was created with SESSION_DYNAMIC,
@@ -157,11 +154,10 @@ bool WindowsFirewall::init() {
     return false;
   }
   logger.debug() << "Initialised Sublayer";
-  m_init = true;
   return true;
 }
 
-bool WindowsFirewall::enableKillSwitch(int vpnAdapterIndex) {
+bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
 // Checks if the FW_Rule was enabled succesfully,
 // disables the whole killswitch and returns false if not.
 #define FW_OK(rule)                                                       \
@@ -184,7 +180,7 @@ bool WindowsFirewall::enableKillSwitch(int vpnAdapterIndex) {
     }                                                                     \
   }
 
-  logger.info() << "Enabling Killswitch Using Adapter:" << vpnAdapterIndex;
+  logger.info() << "Enabling firewall Using Adapter:" << vpnAdapterIndex;
   FW_OK(allowTrafficOfAdapter(vpnAdapterIndex, MED_WEIGHT,
                               "Allow usage of VPN Adapter"));
   FW_OK(allowDHCPTraffic(MED_WEIGHT, "Allow DHCP Traffic"));
@@ -198,6 +194,36 @@ bool WindowsFirewall::enableKillSwitch(int vpnAdapterIndex) {
   logger.debug() << "Killswitch on! Rules:" << m_activeRules.length();
   return true;
 #undef FW_OK
+}
+
+// Allow unprotected traffic sent to the following local address ranges.
+bool WindowsFirewall::enableLanBypass(const QList<IPAddress>& ranges) {
+  // Start the firewall transaction
+  auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
+  if (result != ERROR_SUCCESS) {
+    disableKillSwitch();
+    return false;
+  }
+  auto cleanup = qScopeGuard([&] {
+    FwpmTransactionAbort0(m_sessionHandle);
+    disableKillSwitch();
+  });
+
+  // Blocking unprotected traffic
+  for (const IPAddress& prefix : ranges) {
+    if (!allowTrafficTo(prefix, LOW_WEIGHT + 1, "Allow LAN bypass traffic")) {
+      return false;
+    }
+  }
+
+  result = FwpmTransactionCommit0(m_sessionHandle);
+  if (result != ERROR_SUCCESS) {
+    logger.error() << "FwpmTransactionCommit0 failed with error:" << result;
+    return false;
+  }
+
+  cleanup.dismiss();
+  return true;
 }
 
 bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
@@ -238,10 +264,10 @@ bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
 
   if (!config.m_excludedAddresses.empty()) {
     for (const QString& i : config.m_excludedAddresses) {
-      logger.debug() << "range: " << i;
+      logger.debug() << "excludedAddresses range: " << i;
 
-      if (!allowTrafficToRange(i, HIGH_WEIGHT,
-                          "Allow Ecxlude route", config.m_serverPublicKey)) {
+      if (!allowTrafficTo(i, HIGH_WEIGHT,
+                               "Allow Ecxlude route", config.m_serverPublicKey)) {
         return false;
       }
     }
@@ -421,9 +447,59 @@ bool WindowsFirewall::allowTrafficOfAdapter(int networkAdapter, uint8_t weight,
   return true;
 }
 
+bool WindowsFirewall::allowTrafficTo(const IPAddress& addr, int weight,
+                                     const QString& title,
+                                     const QString& peer) {
+  GUID layerKeyOut;
+  GUID layerKeyIn;
+  if (addr.type() == QAbstractSocket::IPv4Protocol) {
+    layerKeyOut = FWPM_LAYER_ALE_AUTH_CONNECT_V4;
+    layerKeyIn = FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4;
+  } else {
+    layerKeyOut = FWPM_LAYER_ALE_AUTH_CONNECT_V6;
+    layerKeyIn = FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V6;
+  }
+
+  // Match the IP address range.
+  FWPM_FILTER_CONDITION0 cond[1] = {};
+  FWP_RANGE0 ipRange;
+  QByteArray lowIpV6Buffer;
+  QByteArray highIpV6Buffer;
+
+  importAddress(addr.address(), ipRange.valueLow, &lowIpV6Buffer);
+  importAddress(addr.broadcastAddress(), ipRange.valueHigh, &highIpV6Buffer);
+
+  cond[0].fieldKey = FWPM_CONDITION_IP_REMOTE_ADDRESS;
+  cond[0].matchType = FWP_MATCH_RANGE;
+  cond[0].conditionValue.type = FWP_RANGE_TYPE;
+  cond[0].conditionValue.rangeValue = &ipRange;
+
+  // Assemble the Filter base
+  FWPM_FILTER0 filter;
+  memset(&filter, 0, sizeof(filter));
+  filter.action.type = FWP_ACTION_PERMIT;
+  filter.weight.type = FWP_UINT8;
+  filter.weight.uint8 = weight;
+  filter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
+  filter.numFilterConditions = 1;
+  filter.filterCondition = cond;
+
+  // Send the filters down to the firewall.
+  QString description = "Permit traffic %1 " + addr.toString();
+  filter.layerKey = layerKeyOut;
+  if (!enableFilter(&filter, title, description.arg("to"), peer)) {
+    return false;
+  }
+  filter.layerKey = layerKeyIn;
+  if (!enableFilter(&filter, title, description.arg("from"), peer)) {
+    return false;
+  }
+  return true;
+}
+
 bool WindowsFirewall::allowTrafficTo(const QHostAddress& targetIP, uint port,
-                                          int weight, const QString& title,
-                                          const QString& peer) {
+                                     int weight, const QString& title,
+                                     const QString& peer) {
   bool isIPv4 = targetIP.protocol() == QAbstractSocket::IPv4Protocol;
   GUID layerOut =
       isIPv4 ? FWPM_LAYER_ALE_AUTH_CONNECT_V4 : FWPM_LAYER_ALE_AUTH_CONNECT_V6;
@@ -479,57 +555,6 @@ bool WindowsFirewall::allowTrafficTo(const QHostAddress& targetIP, uint port,
   if (!enableFilter(&filter, title,
                     description.arg("from").arg(targetIP.toString()).arg(port),
                     peer)) {
-    return false;
-  }
-  return true;
-}
-
-bool WindowsFirewall::allowTrafficToRange(const IPAddress& addr, uint8_t weight,
-                                     const QString& title,
-                                     const QString& peer) {
-  QString description("Allow traffic %1 %2 ");
-
-  auto lower = addr.address();
-  auto upper = addr.broadcastAddress();
-
-  const bool isV4 = addr.type() == QAbstractSocket::IPv4Protocol;
-  const GUID layerKeyOut =
-      isV4 ? FWPM_LAYER_ALE_AUTH_CONNECT_V4 : FWPM_LAYER_ALE_AUTH_CONNECT_V6;
-  const GUID layerKeyIn = isV4 ? FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4
-                               : FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V6;
-
-  // Assemble the Filter base
-  FWPM_FILTER0 filter;
-  memset(&filter, 0, sizeof(filter));
-  filter.action.type = FWP_ACTION_PERMIT;
-  filter.weight.type = FWP_UINT8;
-  filter.weight.uint8 = weight;
-  filter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
-
-  FWPM_FILTER_CONDITION0 cond[1] = {0};
-  FWP_RANGE0 ipRange;
-  QByteArray lowIpV6Buffer;
-  QByteArray highIpV6Buffer;
-
-  importAddress(lower, ipRange.valueLow, &lowIpV6Buffer);
-  importAddress(upper, ipRange.valueHigh, &highIpV6Buffer);
-
-  cond[0].fieldKey = FWPM_CONDITION_IP_REMOTE_ADDRESS;
-  cond[0].matchType = FWP_MATCH_RANGE;
-  cond[0].conditionValue.type = FWP_RANGE_TYPE;
-  cond[0].conditionValue.rangeValue = &ipRange;
-
-  filter.numFilterConditions = 1;
-  filter.filterCondition = cond;
-
-  filter.layerKey = layerKeyOut;
-  if (!enableFilter(&filter, title, description.arg("to").arg(addr.toString()),
-                    peer)) {
-    return false;
-  }
-  filter.layerKey = layerKeyIn;
-  if (!enableFilter(&filter, title,
-                    description.arg("from").arg(addr.toString()), peer)) {
     return false;
   }
   return true;
@@ -734,7 +759,7 @@ bool WindowsFirewall::blockTrafficTo(const IPAddress& addr, uint8_t weight,
   filter.weight.uint8 = weight;
   filter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
 
-  FWPM_FILTER_CONDITION0 cond[1] = {0};
+  FWPM_FILTER_CONDITION0 cond[1] = {};
   FWP_RANGE0 ipRange;
   QByteArray lowIpV6Buffer;
   QByteArray highIpV6Buffer;

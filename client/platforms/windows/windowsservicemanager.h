@@ -12,7 +12,7 @@
 #include "Winsvc.h"
 
 /**
- * @brief The WindowsServiceManager provides control over the MozillaVPNBroker
+ * @brief The WindowsServiceManager provides control over the a
  * service via SCM
  */
 class WindowsServiceManager : public QObject {
@@ -20,7 +20,10 @@ class WindowsServiceManager : public QObject {
   Q_DISABLE_COPY_MOVE(WindowsServiceManager)
 
  public:
-  WindowsServiceManager(LPCWSTR serviceName);
+  // Creates a WindowsServiceManager for the Named service.
+  // returns nullptr if
+  static std::unique_ptr<WindowsServiceManager> open(const QString serviceName);
+  WindowsServiceManager(SC_HANDLE serviceManager, SC_HANDLE service);
   ~WindowsServiceManager();
 
   // true if the Service is running
@@ -45,8 +48,6 @@ class WindowsServiceManager : public QObject {
   // See
   // SERVICE_STOPPED,SERVICE_STOP_PENDING,SERVICE_START_PENDING,SERVICE_RUNNING
   SERVICE_STATUS_PROCESS getStatus();
-  bool m_has_access = false;
-  LPWSTR m_serviceName;
   SC_HANDLE m_serviceManager;
   SC_HANDLE m_service;  // Service handle with r/w priv.
   DWORD m_state_target;

@@ -114,8 +114,19 @@ bool Daemon::activate(const InterfaceConfig& config) {
 
   // Bring up the wireguard interface if not already done.
   if (!wgutils()->interfaceExists()) {
+    // Create the interface.
     if (!wgutils()->addInterface(config)) {
       logger.error() << "Interface creation failed.";
+      return false;
+    }
+  }
+
+  // Bring the interface up.
+  if (supportIPUtils()) {
+    if (!iputils()->addInterfaceIPs(config)) {
+      return false;
+    }
+    if (!iputils()->setMTUAndUp(config)) {
       return false;
     }
   }
@@ -133,15 +144,6 @@ bool Daemon::activate(const InterfaceConfig& config) {
 
   if (!maybeUpdateResolvers(config)) {
     return false;
-  }
-
-  if (supportIPUtils()) {
-    if (!iputils()->addInterfaceIPs(config)) {
-      return false;
-    }
-    if (!iputils()->setMTUAndUp(config)) {
-      return false;
-    }
   }
 
   // set routing

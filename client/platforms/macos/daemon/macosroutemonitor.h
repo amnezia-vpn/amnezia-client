@@ -24,8 +24,8 @@ class MacosRouteMonitor final : public QObject {
   MacosRouteMonitor(const QString& ifname, QObject* parent = nullptr);
   ~MacosRouteMonitor();
 
-  bool insertRoute(const IPAddress& prefix);
-  bool deleteRoute(const IPAddress& prefix);
+  bool insertRoute(const IPAddress& prefix, int flags = 0);
+  bool deleteRoute(const IPAddress& prefix, int flags = 0);
   int interfaceFlags() { return m_ifflags; }
 
   bool addExclusionRoute(const IPAddress& prefix);
@@ -37,7 +37,7 @@ class MacosRouteMonitor final : public QObject {
   void handleRtmUpdate(const struct rt_msghdr* msg, const QByteArray& payload);
   void handleIfaceInfo(const struct if_msghdr* msg, const QByteArray& payload);
   bool rtmSendRoute(int action, const IPAddress& prefix, unsigned int ifindex,
-                    const void* gateway);
+                    const void* gateway, int flags = 0);
   bool rtmFetchRoutes(int family);
   static void rtmAppendAddr(struct rt_msghdr* rtm, size_t maxlen, int rtaddr,
                             const void* sa);

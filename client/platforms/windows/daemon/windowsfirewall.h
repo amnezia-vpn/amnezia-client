@@ -26,18 +26,27 @@ struct FWP_CONDITION_VALUE0_;
 
 class WindowsFirewall final : public QObject {
  public:
-  ~WindowsFirewall();
+  /**
+   * @brief Opens the Windows Filtering Platform, initializes the session,
+   * sublayer. Returns a WindowsFirewall object if successful, otherwise
+   * nullptr. If there is already a WindowsFirewall object, it will be returned.
+   *
+   * @param parent - parent QObject
+   * @return WindowsFirewall* - nullptr if failed to open the Windows Filtering
+   * Platform.
+   */
+  static WindowsFirewall* create(QObject* parent);
+  ~WindowsFirewall() override;
 
-  static WindowsFirewall* instance();
-  bool init();
-
-  bool enableKillSwitch(int vpnAdapterIndex);
+  bool enableInterface(int vpnAdapterIndex);
+  bool enableLanBypass(const QList<IPAddress>& ranges);
   bool enablePeerTraffic(const InterfaceConfig& config);
   bool disablePeerTraffic(const QString& pubkey);
   bool disableKillSwitch();
 
  private:
-  WindowsFirewall(QObject* parent);
+  static bool initSublayer();
+  WindowsFirewall(HANDLE session, QObject* parent);
   HANDLE m_sessionHandle;
   bool m_init = false;
   QList<uint64_t> m_activeRules;
@@ -50,11 +59,10 @@ class WindowsFirewall final : public QObject {
   bool blockTrafficTo(const IPAddress& addr, uint8_t weight,
                       const QString& title, const QString& peer = QString());
   bool blockTrafficOnPort(uint port, uint8_t weight, const QString& title);
+  bool allowTrafficTo(const IPAddress& addr, int weight, const QString& title,
+                      const QString& peer = QString());
   bool allowTrafficTo(const QHostAddress& targetIP, uint port, int weight,
                       const QString& title, const QString& peer = QString());
-  bool allowTrafficToRange(const IPAddress& addr, uint8_t weight,
-                           const QString& title,
-                           const QString& peer);
   bool allowTrafficOfAdapter(int networkAdapter, uint8_t weight,
                              const QString& title);
   bool allowDHCPTraffic(uint8_t weight, const QString& title);

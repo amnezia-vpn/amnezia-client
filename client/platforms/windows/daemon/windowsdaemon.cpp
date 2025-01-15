@@ -5,6 +5,7 @@
 #include "windowsdaemon.h"
 
 #include <Windows.h>
+#include <qassert.h>
 
 #include <QCoreApplication>
 #include <QJsonDocument>
@@ -15,28 +16,34 @@
 #include <QTextStream>
 #include <QtGlobal>
 
+#include "daemon/daemonerrors.h"
 #include "dnsutilswindows.h"
 #include "leakdetector.h"
 #include "logger.h"
-#include "core/networkUtilities.h"
+#include "platforms/windows/daemon/windowsfirewall.h"
+#include "platforms/windows/daemon/windowssplittunnel.h"
 #include "platforms/windows/windowscommons.h"
-#include "platforms/windows/windowsservicemanager.h"
 #include "windowsfirewall.h"
+
+#include "core/networkUtilities.h"
 
 namespace {
 Logger logger("WindowsDaemon");
 }
 
-WindowsDaemon::WindowsDaemon() : Daemon(nullptr), m_splitTunnelManager(this) {
+WindowsDaemon::WindowsDaemon() : Daemon(nullptr) {
   MZ_COUNT_CTOR(WindowsDaemon);
+  m_firewallManager = WindowsFirewall::create(this);
+  Q_ASSERT(m_firewallManager != nullptr);
 
-  m_wgutils = new WireguardUtilsWindows(this);
+  m_wgutils = WireguardUtilsWindows::create(m_firewallManager, this);
   m_dnsutils = new DnsUtilsWindows(this);
+  m_splitTunnelManager = WindowsSplitTunnel::create(m_firewallManager);
 
-  connect(m_wgutils, &WireguardUtilsWindows::backendFailure, this,
+  connect(m_wgutils.get(), &WireguardUtilsWindows::backendFailure, this,
           &WindowsDaemon::monitorBackendFailure);
   connect(this, &WindowsDaemon::activationFailure,
-          []() { WindowsFirewall::instance()->disableKillSwitch(); });
+          [this]() { m_firewallManager->disableKillSwitch(); });
 }
 
 WindowsDaemon::~WindowsDaemon() {
@@ -57,28 +64,42 @@ void WindowsDaemon::prepareActivation(const InterfaceConfig& config, int inetAda
 
 void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex) {
   if (config.m_vpnDisabledApps.length() > 0) {
-      m_splitTunnelManager.start(m_inetAdapterIndex, vpnAdapterIndex);
-      m_splitTunnelManager.setRules(config.m_vpnDisabledApps);
+      m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex);
+      m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps);
   } else {
-      m_splitTunnelManager.stop();
+      m_splitTunnelManager->stop();
   }
 }
 
 bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
-  if (op == Down) {
-    m_splitTunnelManager.stop();
+  if (!m_splitTunnelManager) {
+    if (config.m_vpnDisabledApps.length() > 0) {
+      // The Client has sent us a list of disabled apps, but we failed
+      // to init the the split tunnel driver.
+      // So let the client know this was not possible
+      emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_INIT_FAILURE);
+    }
     return true;
   }
 
-  if (op == Up) {
-    logger.debug() << "Tunnel UP, Starting SplitTunneling";
-    if (!WindowsSplitTunnel::isInstalled()) {
-      logger.warning() << "Split Tunnel Driver not Installed yet, fixing this.";
-      WindowsSplitTunnel::installDriver();
-    }
+  if (op == Down) {
+    m_splitTunnelManager->stop();
+    return true;
   }
-
-  activateSplitTunnel(config);
+  if (config.m_vpnDisabledApps.length() > 0) {
+    if (!m_splitTunnelManager->start(m_inetAdapterIndex)) {
+      emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
+    };
+    if (!m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps)) {
+      emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_EXCLUDE_FAILURE);
+    };
+    // Now the driver should be running (State == 4)
+    if (!m_splitTunnelManager->isRunning()) {
+      emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
+    }
+    return true;
+  }
+  m_splitTunnelManager->stop();
 
   return true;
 }

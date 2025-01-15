@@ -297,31 +297,6 @@ QList<WireguardUtils::PeerStatus> WireguardUtilsLinux::getPeerStatus() {
     return peerList;
 }
 
-
-void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
-{
-    // double-check + ensure our firewall is installed and enabled
-    if (!LinuxFirewall::isInstalled()) LinuxFirewall::install();
-
-    // Note: rule precedence is handled inside IpTablesFirewall
-    LinuxFirewall::ensureRootAnchorPriority();
-
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), params.blockAll);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), params.allowNets);
-    LinuxFirewall::updateAllowNets(params.allowAddrs);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), params.blockNets);
-    LinuxFirewall::updateBlockNets(params.blockAddrs);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
-    LinuxFirewall::updateDNSServers(params.dnsServers);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
-}
-
 bool WireguardUtilsLinux::updateRoutePrefix(const IPAddress& prefix) {
     if (!m_rtmonitor) {
         return false;
@@ -375,6 +350,26 @@ bool WireguardUtilsLinux::deleteExclusionRoute(const IPAddress& prefix) {
         return false;
     }
     return m_rtmonitor->deleteExclusionRoute(prefix);
+}
+
+bool WireguardUtilsLinux::excludeLocalNetworks(const QList<IPAddress>& routes) {
+  if (!m_rtmonitor) {
+    return false;
+  }
+
+  // Explicitly discard LAN traffic that makes its way into the tunnel. This
+  // doesn't really exclude the LAN traffic, we just don't take any action to
+  // overrule the routes of other interfaces.
+  bool result = true;
+  for (const auto& prefix : routes) {
+    logger.error() << "Attempting to exclude:" << prefix.toString();
+    if (!m_rtmonitor->insertRoute(prefix)) {
+      result = false;
+    }
+  }
+
+  // TODO: A kill switch would be nice though :)
+  return result;
 }
 
 QString WireguardUtilsLinux::uapiCommand(const QString& command) {
@@ -449,4 +444,28 @@ QString WireguardUtilsLinux::waitForTunnelName(const QString& filename) {
     }
 
     return QString();
+}
+
+void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
+{
+    // double-check + ensure our firewall is installed and enabled
+    if (!LinuxFirewall::isInstalled()) LinuxFirewall::install();
+
+    // Note: rule precedence is handled inside IpTablesFirewall
+    LinuxFirewall::ensureRootAnchorPriority();
+
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), params.blockAll);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), params.allowNets);
+    LinuxFirewall::updateAllowNets(params.allowAddrs);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), params.blockNets);
+    LinuxFirewall::updateBlockNets(params.blockAddrs);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
+    LinuxFirewall::updateDNSServers(params.dnsServers);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
 }

@@ -358,8 +358,8 @@ void MacosRouteMonitor::rtmAppendAddr(struct rt_msghdr* rtm, size_t maxlen,
 }
 
 bool MacosRouteMonitor::rtmSendRoute(int action, const IPAddress& prefix,
-                                     unsigned int ifindex,
-                                     const void* gateway) {
+                                     unsigned int ifindex, const void* gateway,
+                                     int flags) {
   constexpr size_t rtm_max_size = sizeof(struct rt_msghdr) +
                                   sizeof(struct sockaddr_in6) * 2 +
                                   sizeof(struct sockaddr_storage);
@@ -370,7 +370,7 @@ bool MacosRouteMonitor::rtmSendRoute(int action, const IPAddress& prefix,
   rtm->rtm_version = RTM_VERSION;
   rtm->rtm_type = action;
   rtm->rtm_index = ifindex;
-  rtm->rtm_flags = RTF_STATIC | RTF_UP;
+  rtm->rtm_flags = flags | RTF_STATIC | RTF_UP;
   rtm->rtm_addrs = 0;
   rtm->rtm_pid = 0;
   rtm->rtm_seq = m_rtseq++;
@@ -490,7 +490,7 @@ bool MacosRouteMonitor::rtmFetchRoutes(int family) {
   return false;
 }
 
-bool MacosRouteMonitor::insertRoute(const IPAddress& prefix) {
+bool MacosRouteMonitor::insertRoute(const IPAddress& prefix, int flags) {
   struct sockaddr_dl datalink;
   memset(&datalink, 0, sizeof(datalink));
   datalink.sdl_family = AF_LINK;
@@ -502,11 +502,11 @@ bool MacosRouteMonitor::insertRoute(const IPAddress& prefix) {
   datalink.sdl_slen = 0;
   memcpy(&datalink.sdl_data, qPrintable(m_ifname), datalink.sdl_nlen);
 
-  return rtmSendRoute(RTM_ADD, prefix, m_ifindex, &datalink);
+  return rtmSendRoute(RTM_ADD, prefix, m_ifindex, &datalink, flags);
 }
 
-bool MacosRouteMonitor::deleteRoute(const IPAddress& prefix) {
-  return rtmSendRoute(RTM_DELETE, prefix, m_ifindex, nullptr);
+bool MacosRouteMonitor::deleteRoute(const IPAddress& prefix, int flags) {
+  return rtmSendRoute(RTM_DELETE, prefix, m_ifindex, nullptr, flags);
 }
 
 bool MacosRouteMonitor::addExclusionRoute(const IPAddress& prefix) {

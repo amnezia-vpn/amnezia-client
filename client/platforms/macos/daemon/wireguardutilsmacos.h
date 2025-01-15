@@ -35,6 +35,9 @@ class WireguardUtilsMacos final : public WireguardUtils {
 
   bool addExclusionRoute(const IPAddress& prefix) override;
   bool deleteExclusionRoute(const IPAddress& prefix) override;
+
+  bool excludeLocalNetworks(const QList<IPAddress>& lanAddressRanges) override;
+
   void applyFirewallRules(FirewallParams& params);
 
  signals:
