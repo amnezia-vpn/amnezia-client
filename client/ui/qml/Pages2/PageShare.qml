@@ -481,9 +481,11 @@ PageType {
                 headerText: qsTr("Connection format")
 
                 listView: ListViewWithRadioButtonType {
+                    id: exportTypeSelectorListView
+
                     onCurrentIndexChanged: {
-                        exportTypeSelector.currentIndex = currentIndex
-                        exportTypeSelector.text = selectedText
+                        exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
+                        exportTypeSelector.text = exportTypeSelectorListView.selectedText
                     }
 
                     rootWidth: root.width
@@ -494,14 +496,14 @@ PageType {
                     currentIndex: 0
 
                     clickedFunction: function() {
-                        exportTypeSelector.text = selectedText
-                        exportTypeSelector.currentIndex = currentIndex
+                        exportTypeSelector.text = exportTypeSelectorListView.selectedText
+                        exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
                         exportTypeSelector.closeTriggered()
                     }
 
                     Component.onCompleted: {
-                        exportTypeSelector.text = selectedText
-                        exportTypeSelector.currentIndex = currentIndex
+                        exportTypeSelector.text = exportTypeSelectorListView.selectedText
+                        exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
                     }
                 }
             }
