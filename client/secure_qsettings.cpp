@@ -15,6 +15,12 @@
 
 using namespace QKeychain;
 
+namespace {
+constexpr auto settingsKeyTag{"settingsKeyTag"};
+constexpr auto settingsIvTag{"settingsIvTag"};
+constexpr auto keyChainName{"AmneziaVPN-Keychain"};
+}
+
 SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent)
     : QObject { parent }, m_settings(organization, application, parent), encryptedKeys({ "Servers/serversList" })
 {
@@ -49,7 +55,7 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
     // check if value is not encrypted, v. < 2.0.x
     retVal = m_settings.value(key);
     if (retVal.isValid()) {
-        if (retVal.userType() == QVariant::ByteArray && retVal.toByteArray().mid(0, magicString.size()) == magicString) {
+        if (retVal.userType() == QMetaType::QByteArray && retVal.toByteArray().mid(0, magicString.size()) == magicString) {
 
             if (getEncKey().isEmpty() || getEncIv().isEmpty()) {
                 qCritical() << "SecureQSettings::setValue Decryption requested, but key is empty";
