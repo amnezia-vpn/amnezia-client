@@ -249,12 +249,12 @@ Can&apos;t be disabled for current server</source>
         <translation type="vanished">Недійсний файл конфігурації</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="659"/>
+        <location filename="../ui/controllers/importController.cpp" line="648"/>
         <source>Scanned %1 of %2.</source>
         <translation>Відскановано %1 з %2.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="694"/>
+        <location filename="../ui/controllers/importController.cpp" line="683"/>
         <source>In the imported configuration, potentially dangerous lines were found:</source>
         <translation>У імпортованій конфігурації знайдено потенційно небезпечні рядки:</translation>
     </message>
@@ -3769,7 +3769,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="460"/>
+        <location filename="../vpnconnection.cpp" line="471"/>
         <source>Mbps</source>
         <translation>Mbps</translation>
     </message>

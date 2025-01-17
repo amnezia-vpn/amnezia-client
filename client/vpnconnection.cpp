@@ -334,12 +334,16 @@ void VpnConnection::appendKillSwitchConfig()
 
 void VpnConnection::appendSplitTunnelingConfig()
 {
+    /* issue_42
     bool allowSiteBasedSplitTunneling = true;
+    */
 
     // this block is for old native configs and for old self-hosted configs
     auto protocolName = m_vpnConfiguration.value(config_key::vpnproto).toString();
     if (protocolName == ProtocolProps::protoToString(Proto::Awg) || protocolName == ProtocolProps::protoToString(Proto::WireGuard)) {
+        /* issue_42
         allowSiteBasedSplitTunneling = false;
+        */
         auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
         if (configData.value(config_key::allowed_ips).isString()) {
             QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configData.value(config_key::allowed_ips).toString().split(", "));
@@ -378,10 +382,12 @@ void VpnConnection::appendSplitTunnelingConfig()
             }
         }
 
+        /*
         QJsonArray allowedIpsJsonArray = configData.value(config_key::allowed_ips).toArray();
         if (allowedIpsJsonArray.contains("0.0.0.0/0") && allowedIpsJsonArray.contains("::/0")) {
             allowSiteBasedSplitTunneling = true;
         }
+        */
     }
 
     Settings::RouteMode routeMode = Settings::RouteMode::VpnAllSites;
@@ -390,8 +396,11 @@ void VpnConnection::appendSplitTunnelingConfig()
     if (m_settings->isSitesSplitTunnelingEnabled()) {
     */
         routeMode = m_settings->routeMode();
+        qDebug() << "routeMode " << routeMode;
 
+        /* issue_42
         if (allowSiteBasedSplitTunneling) {
+        */
             auto sites = m_settings->getVpnIps(routeMode);
             for (const auto &site : sites) {
                 sitesJsonArray.append(site);
@@ -406,7 +415,9 @@ void VpnConnection::appendSplitTunnelingConfig()
                 sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
                 sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
             }
+        /* issue_42
         }
+        */
     /* issue_5
     }
     */

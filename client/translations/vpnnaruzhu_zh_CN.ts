@@ -240,12 +240,12 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>ImportController</name>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="659"/>
+        <location filename="../ui/controllers/importController.cpp" line="648"/>
         <source>Scanned %1 of %2.</source>
         <translation>扫描 %1 of %2.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/importController.cpp" line="694"/>
+        <location filename="../ui/controllers/importController.cpp" line="683"/>
         <source>In the imported configuration, potentially dangerous lines were found:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3871,7 +3871,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="460"/>
+        <location filename="../vpnconnection.cpp" line="471"/>
         <source>Mbps</source>
         <translation></translation>
     </message>

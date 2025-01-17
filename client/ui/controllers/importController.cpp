@@ -433,17 +433,6 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
 
     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(", "));
 
-    /**
-     * Amnezia demands to allow split tunneling:
-     *  AllowedIPs = 0.0.0.0/0, ::/0
-     * To avoid update old keys, add both parameters to protocol config by default
-     */
-    if (allowedIpsJsonArray.contains("0.0.0.0/0")) {
-        if (!allowedIpsJsonArray.contains("::/0")) {
-            allowedIpsJsonArray.append("::/0");
-        }
-    }
-
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
 
     QString protocolName = "wireguard";
