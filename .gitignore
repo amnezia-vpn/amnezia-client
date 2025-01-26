@@ -10,6 +10,8 @@ deploy/build_64/*
 winbuild*.bat
 .cache/
 
+# Translations
+#translations
 
 # Qt-es
 /.qmake.cache
@@ -117,6 +119,9 @@ captures/
 *.iml
 .idea/
 
+# Visual Studio
+.vs/
+
 # Keystore files
 # Uncomment the following lines if you do not want to check your keystore files in.
 #*.jks
@@ -134,3 +139,5 @@ out/
 
 # CMake files
 CMakeFiles/
+CMakePresets.json
+CMakeUserPresets.json
