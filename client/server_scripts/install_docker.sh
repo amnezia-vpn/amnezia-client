@@ -12,8 +12,8 @@ if ! command -v docker > /dev/null 2>&1; then \
   sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
   sleep 5; sudo systemctl enable --now docker; sleep 5;\
 fi;\
-if [ "$(cat /sys/module/apparmor/parameters/enabled)" = "Y" ]; then \
-  if ! command -v aa-status > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst apparmor; fi;\
+if [ "$(cat /sys/module/apparmor/parameters/enabled 2>/dev/null)" = "Y" ]; then \
+  if ! command -v apparmor_parser > /dev/null 2>&1; then sudo $pm $check_pkgs; sudo $pm $silent_inst apparmor; fi;\
 fi;\
 if [ "$(systemctl is-active docker)" != "active" ]; then \
   sudo $pm $check_pkgs; sudo $pm $silent_inst $docker_pkg;\
