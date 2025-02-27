@@ -213,6 +213,26 @@ PageType {
 
             LabelWithButtonType {
                 Layout.fillWidth: true
+
+                visible: footer.isVisibleForAmneziaFree
+
+                text: qsTr("Connected devices")
+
+                descriptionText: qsTr("To manage connected devices")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    ApiSettingsController.updateApiDevicesModel()
+                    PageController.goToPage(PageEnum.PageSettingsApiDevices)
+                }
+            }
+
+            DividerType {
+                visible: footer.isVisibleForAmneziaFree
+            }
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
                 Layout.topMargin: footer.isVisibleForAmneziaFree ? 0 : 32
 
                 text: qsTr("Support")
@@ -292,12 +312,13 @@ PageType {
 
                 clickedFunc: function() {
                     var headerText = qsTr("Deactivate the subscription on this device?")
+                    var descriptionText = qsTr("The next time the “Connect” button is pressed, the device will be activated again")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("The next time the “Connect” button is pressed, the device will be activated again"))
+                            PageController.showNotificationMessage(qsTr("Cannot deactivate subscription during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
                             if (ApiConfigsController.deactivateDevice()) {
@@ -309,7 +330,7 @@ PageType {
                     var noButtonFunction = function() {
                     }
 
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 

@@ -93,6 +93,9 @@ void CoreController::initModels()
 
     m_apiAccountInfoModel.reset(new ApiAccountInfoModel(this));
     m_engine->rootContext()->setContextProperty("ApiAccountInfoModel", m_apiAccountInfoModel.get());
+
+    m_apiDevicesModel.reset(new ApiDevicesModel(this));
+    m_engine->rootContext()->setContextProperty("ApiDevicesModel", m_apiDevicesModel.get());
 }
 
 void CoreController::initControllers()
@@ -132,7 +135,8 @@ void CoreController::initControllers()
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
 
-    m_apiSettingsController.reset(new ApiSettingsController(m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_settings));
+    m_apiSettingsController.reset(
+            new ApiSettingsController(m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiSettingsController", m_apiSettingsController.get());
 
     m_apiConfigsController.reset(new ApiConfigsController(m_serversModel, m_apiServicesModel, m_settings));

@@ -31,6 +31,7 @@ public slots:
                                   bool reloadServiceConfig = false);
     bool updateServiceFromTelegram(const int serverIndex);
     bool deactivateDevice();
+    bool deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode);
 
     bool isConfigValid();
 
@@ -43,6 +44,8 @@ signals:
     void updateServerFromApiFinished();
 
     void vpnKeyExportReady();
+
+    void externalDeviceDeactivated();
 
 private:
     struct ApiPayloadData

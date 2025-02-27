@@ -229,6 +229,7 @@
         <file>ui/qml/Pages2/PageSettingsApiSupport.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiInstructions.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiNativeConfigs.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApiDevices.qml</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>

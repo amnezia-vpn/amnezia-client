@@ -1,7 +1,7 @@
 #include "apiConfigsController.h"
 
-#include <QEventLoop>
 #include <QClipboard>
+#include <QEventLoop>
 
 #include "amnezia_application.h"
 #include "configurators/wireguard_configurator.h"
@@ -251,6 +251,7 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
 
         newServerConfig.insert(configKey::apiConfig, newApiConfig);
         newServerConfig.insert(configKey::authData, authData);
+        // newServerConfig.insert(
 
         m_serversModel->editServer(newServerConfig, serverIndex);
         if (reloadServiceConfig) {
@@ -350,6 +351,45 @@ bool ApiConfigsController::deactivateDevice()
 
     serverConfigObject.remove(config_key::containers);
     m_serversModel->editServer(serverConfigObject, serverIndex);
+
+    return true;
+}
+
+bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode)
+{
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+
+    auto serverIndex = m_serversModel->getProcessedServerIndex();
+    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+
+    if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV2) {
+        return true;
+    }
+
+    QString protocol = apiConfigObject.value(configKey::serviceProtocol).toString();
+    ApiPayloadData apiPayloadData = generateApiPayloadData(protocol);
+
+    QJsonObject apiPayload = fillApiPayload(protocol, apiPayloadData);
+    apiPayload[configKey::userCountryCode] = apiConfigObject.value(configKey::userCountryCode);
+    apiPayload[configKey::serverCountryCode] = serverCountryCode;
+    apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
+    apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
+    apiPayload[configKey::uuid] = uuid;
+
+    QByteArray responseBody;
+    ErrorCode errorCode = gatewayController.post(QString("%1v1/revoke_config"), apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
+        emit errorOccurred(errorCode);
+        return false;
+    }
+
+    if (uuid == m_settings->getInstallationUuid(true)) {
+        serverConfigObject.remove(config_key::containers);
+        m_serversModel->editServer(serverConfigObject, serverIndex);
+    }
+
+    emit externalDeviceDeactivated();
 
     return true;
 }
