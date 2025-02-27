@@ -148,7 +148,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
 
     QByteArray encryptedResponseBody = reply->readAll();
 
-    if (sslErrors.isEmpty() && shouldBypassProxy(reply, encryptedResponseBody, false)) {
+    if (sslErrors.isEmpty() && shouldBypassProxy(reply, encryptedResponseBody, true, key, iv, salt)) {
         auto requestFunction = [&request, &encryptedResponseBody, &requestBody](const QString &url) {
             request.setUrl(url);
             return amnApp->networkManager()->post(request, QJsonDocument(requestBody).toJson());
