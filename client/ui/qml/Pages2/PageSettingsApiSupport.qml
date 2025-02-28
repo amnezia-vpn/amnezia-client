@@ -16,92 +16,110 @@ import "../Components"
 PageType {
     id: root
 
-    ColumnLayout {
-        id: backButtonLayout
+    QtObject {
+        id: telegram
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+        readonly property string title: qsTr("Telegram")
+        readonly property string description: "@" + ApiAccountInfoModel.getTelegramBotLink()
+        readonly property string link: "https://t.me/" + ApiAccountInfoModel.getTelegramBotLink()
+    }
 
+    QtObject {
+        id: techSupport
+
+        readonly property string title: qsTr("For technical support")
+        readonly property string description: qsTr("support@amnezia.org")
+        readonly property string link: "mailto:support@amnezia.org"
+    }
+
+    QtObject {
+        id: paymentSupport
+
+        readonly property string title: qsTr("For payment issues")
+        readonly property string description: qsTr("help@vpnpay.io")
+        readonly property string link: "mailto:help@vpnpay.io"
+    }
+
+    QtObject {
+        id: site
+
+        readonly property string title: qsTr("Site")
+        readonly property string description: qsTr("amnezia.org")
+        readonly property string link: LanguageModel.getCurrentSiteUrl()
+    }
+
+    property list<QtObject> supportModel: [
+        telegram,
+        techSupport,
+        paymentSupport,
+        site
+    ]
+
+    ListViewType {
+        id: listView
+
+        anchors.fill: parent
         anchors.topMargin: 20
+        anchors.bottomMargin: 24
 
-        BackButtonType {
-            id: backButton
-        }
+        model: supportModel
 
+        header: ColumnLayout {
+            width: listView.width
 
-        HeaderType {
-            id: header
+            BackButtonType {
+                id: backButton
+            }
 
-            Layout.fillWidth: true
-            Layout.rightMargin: 16
-            Layout.leftMargin: 16
+            HeaderType {
+                id: header
 
-            headerText: qsTr("Support")
-            descriptionText: qsTr("Our technical support specialists are ready to help you at any time")
-        }
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
 
-        LabelWithButtonType {
-            Layout.fillWidth: true
-
-            readonly property string telegramBotLink: ApiAccountInfoModel.getTelegramBotLink()
-
-            text: qsTr("Telegram")
-            descriptionText: "@" + telegramBotLink
-            rightImageSource: "qrc:/images/controls/external-link.svg"
-
-            clickedFunction: function() {
-                Qt.openUrlExternally("https://t.me/" + telegramBotLink)
+                headerText: qsTr("Support")
+                descriptionText: qsTr("Our technical support specialists are ready to help you at any time")
             }
         }
 
-        DividerType {}
+        delegate: ColumnLayout {
+            width: listView.width
 
-        LabelWithButtonType {
-            Layout.fillWidth: true
-
-            text: qsTr("Mail")
-            descriptionText: qsTr("support@amnezia.org")
-            rightImageSource: "qrc:/images/controls/external-link.svg"
-
-            clickedFunction: function() {
-                Qt.openUrlExternally(qsTr("mailto:support@amnezia.org"))
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                text: title
+                descriptionText: description
+                rightImageSource: "qrc:/images/controls/external-link.svg"
+                clickedFunction: function() {
+                    Qt.openUrlExternally(link)
+                }
             }
+            DividerType {}
         }
 
-        DividerType {}
 
-        LabelWithButtonType {
-            Layout.fillWidth: true
+        footer: ColumnLayout {
+            width: listView.width
 
-            text: qsTr("Site")
-            descriptionText: qsTr("amnezia.org")
-            rightImageSource: "qrc:/images/controls/external-link.svg"
+            LabelWithButtonType {
+                id: supportUuid
+                Layout.fillWidth: true
 
-            clickedFunction: function() {
-                Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
-            }
-        }
+                text: qsTr("Support tag")
+                descriptionText: SettingsController.getInstallationUuid()
 
-        DividerType {}
+                descriptionOnTop: true
 
-        LabelWithButtonType {
-            id: supportUuid
-            Layout.fillWidth: true
+                rightImageSource: "qrc:/images/controls/copy.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
 
-            text: qsTr("Support tag")
-            descriptionText: SettingsController.getInstallationUuid()
-
-            descriptionOnTop: true
-
-            rightImageSource: "qrc:/images/controls/copy.svg"
-            rightImageColor: AmneziaStyle.color.paleGray
-
-            clickedFunction: function() {
-                GC.copyToClipBoard(descriptionText)
-                PageController.showNotificationMessage(qsTr("Copied"))
-                if (!GC.isMobile()) {
-                    this.rightButton.forceActiveFocus()
+                clickedFunction: function() {
+                    GC.copyToClipBoard(descriptionText)
+                    PageController.showNotificationMessage(qsTr("Copied"))
+                    if (!GC.isMobile()) {
+                        this.rightButton.forceActiveFocus()
+                    }
                 }
             }
         }

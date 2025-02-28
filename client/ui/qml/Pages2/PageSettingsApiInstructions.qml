@@ -107,7 +107,6 @@ PageType {
             width: listView.width
 
             LabelWithButtonType {
-                id: telegramButton
                 Layout.fillWidth: true
                 Layout.topMargin: 6
 
