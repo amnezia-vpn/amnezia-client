@@ -58,6 +58,19 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     case IsComponentVisibleRole: {
         return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2;
     }
+    case HasExpiredWorkerRole: {
+        for (int i = 0; i < m_issuedConfigsInfo.size(); i++) {
+            QJsonObject issuedConfigObject = m_issuedConfigsInfo.at(i).toObject();
+
+            auto lastDownloaded = QDateTime::fromString(issuedConfigObject.value(apiDefs::key::lastDownloaded).toString());
+            auto workerLastUpdated = QDateTime::fromString(issuedConfigObject.value(apiDefs::key::workerLastUpdated).toString());
+
+            if (lastDownloaded < workerLastUpdated) {
+                return true;
+            }
+        }
+        return false;
+    }
     }
 
     return QVariant();
@@ -124,6 +137,7 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[ConnectedDevicesRole] = "connectedDevices";
     roles[ServiceDescriptionRole] = "serviceDescription";
     roles[IsComponentVisibleRole] = "isComponentVisible";
+    roles[HasExpiredWorkerRole] = "hasExpiredWorker";
 
     return roles;
 }

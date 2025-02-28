@@ -5,6 +5,8 @@
 #include <QJsonArray>
 #include <QVector>
 
+#include "settings.h"
+
 class ApiDevicesModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -13,10 +15,12 @@ public:
     enum Roles {
         OsVersionRole = Qt::UserRole + 1,
         SupportTagRole,
-        CountryCodeRole
+        CountryCodeRole,
+        LastUpdateRole,
+        IsCurrentDeviceRole
     };
 
-    explicit ApiDevicesModel(QObject *parent = nullptr);
+    explicit ApiDevicesModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
@@ -42,5 +46,7 @@ private:
     };
 
     QVector<IssuedConfigInfo> m_issuedConfigs;
+
+    std::shared_ptr<Settings> m_settings;
 };
 #endif // APIDEVICESMODEL_H

@@ -19,14 +19,6 @@ import "../Components"
 PageType {
     id: root
 
-    Connections { //херня какая-то переделать
-        target: ApiConfigsController
-
-        function onExternalDeviceDeactivated() {
-            PageController.showBusyIndicator(false)
-        }
-    }
-
     ListViewType {
         id: listView
 
@@ -74,8 +66,8 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 6
 
-                text: osVersion
-                descriptionText: supportTag
+                text: osVersion + (isCurrentDevice ? qsTr(" (current device)") : "")
+                descriptionText: qsTr("Support tag: ") + "\n" + supportTag + "\n" + qsTr("Last updated: ") + lastUpdate
                 rightImageSource: "qrc:/images/controls/trash.svg"
 
                 clickedFunction: function() {
@@ -85,11 +77,7 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        PageController.showBusyIndicator(true)
-                        if (ApiConfigsController.deactivateExternalDevice(supportTag, countryCode)) {
-                            ApiSettingsController.getAccountInfo(true)
-                        }
-                        PageController.showBusyIndicator(false)
+                        Qt.callLater(deactivateExternalDevice, supportTag, countryCode)
                     }
                     var noButtonFunction = function() {
                     }
@@ -100,5 +88,13 @@ PageType {
 
             DividerType {}
         }
+    }
+
+    function deactivateExternalDevice(supportTag, countryCode) {
+        PageController.showBusyIndicator(true)
+        if (ApiConfigsController.deactivateExternalDevice(supportTag, countryCode)) {
+            ApiSettingsController.getAccountInfo(true)
+        }
+        PageController.showBusyIndicator(false)
     }
 }

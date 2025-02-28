@@ -17,7 +17,8 @@ public:
         ConnectedDevicesRole,
         ServiceDescriptionRole,
         EndDateRole,
-        IsComponentVisibleRole
+        IsComponentVisibleRole,
+        HasExpiredWorkerRole
     };
 
     explicit ApiAccountInfoModel(QObject *parent = nullptr);

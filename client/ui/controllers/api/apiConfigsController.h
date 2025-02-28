@@ -45,8 +45,6 @@ signals:
 
     void vpnKeyExportReady();
 
-    void externalDeviceDeactivated();
-
 private:
     struct ApiPayloadData
     {

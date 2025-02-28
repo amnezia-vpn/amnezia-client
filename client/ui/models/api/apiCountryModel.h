@@ -14,7 +14,8 @@ public:
         CountryNameRole = Qt::UserRole + 1,
         CountryCodeRole,
         CountryImageCodeRole,
-        IsIssuedRole
+        IsIssuedRole,
+        IsWorkerExpiredRole
     };
 
     explicit ApiCountryModel(QObject *parent = nullptr);

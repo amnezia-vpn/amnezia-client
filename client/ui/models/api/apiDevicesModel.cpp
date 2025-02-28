@@ -12,7 +12,7 @@ namespace
     constexpr QLatin1String gatewayAccount("gateway_account");
 }
 
-ApiDevicesModel::ApiDevicesModel(QObject *parent) : QAbstractListModel(parent)
+ApiDevicesModel::ApiDevicesModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
 }
 
@@ -38,6 +38,12 @@ QVariant ApiDevicesModel::data(const QModelIndex &index, int role) const
     }
     case CountryCodeRole: {
         return issuedConfigInfo.countryCode;
+    }
+    case LastUpdateRole: {
+        return QDateTime::fromString(issuedConfigInfo.lastDownloaded, Qt::ISODate).toLocalTime().toString("d MMM yyyy");
+    }
+    case IsCurrentDeviceRole: {
+        return issuedConfigInfo.installationUuid == m_settings->getInstallationUuid(false);
     }
     }
 
@@ -78,5 +84,7 @@ QHash<int, QByteArray> ApiDevicesModel::roleNames() const
     roles[OsVersionRole] = "osVersion";
     roles[SupportTagRole] = "supportTag";
     roles[CountryCodeRole] = "countryCode";
+    roles[LastUpdateRole] = "lastUpdate";
+    roles[IsCurrentDeviceRole] = "isCurrentDevice";
     return roles;
 }

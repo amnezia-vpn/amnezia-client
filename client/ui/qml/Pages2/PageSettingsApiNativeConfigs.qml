@@ -58,6 +58,9 @@ PageType {
                 Layout.topMargin: 6
 
                 text: countryName
+                descriptionText: isWorkerExpired ? qsTr("The configuration needs to be reissued") : ""
+                descriptionColor: AmneziaStyle.color.vibrantRed
+
                 leftImageSource: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
                 rightImageSource: isIssued ? "qrc:/images/controls/more-vertical.svg" : "qrc:/images/controls/download.svg"
 

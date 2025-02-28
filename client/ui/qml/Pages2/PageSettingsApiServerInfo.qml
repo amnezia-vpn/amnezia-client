@@ -28,7 +28,7 @@ PageType {
 
         readonly property string title: qsTr("Subscription status")
         readonly property string contentKey: "subscriptionStatus"
-        readonly property string objectImageSource: "qrc:/images/controls/map-pin.svg"
+        readonly property string objectImageSource: "qrc:/images/controls/info.svg"
     }
 
     QtObject {
@@ -44,7 +44,7 @@ PageType {
 
         readonly property string title: qsTr("Connected devices")
         readonly property string contentKey: "connectedDevices"
-        readonly property string objectImageSource: "qrc:/images/controls/gauge.svg"
+        readonly property string objectImageSource: "qrc:/images/controls/monitor.svg"
     }
 
     property var processedServer
@@ -158,11 +158,28 @@ PageType {
 
             readonly property bool isVisibleForAmneziaFree: ApiAccountInfoModel.data("isComponentVisible")
 
+            WarningType {
+                id: warning
+
+                Layout.topMargin: 32
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.fillWidth: true
+
+                backGroundColor: AmneziaStyle.color.translucentRichBrown
+
+                textString: qsTr("Configurations have been updated for some countries. Download and install the updated configuration files")
+
+                iconPath: "qrc:/images/controls/alert-circle.svg"
+
+                visible: ApiAccountInfoModel.data("hasExpiredWorker")
+            }
+
             LabelWithButtonType {
                 id: vpnKey
 
                 Layout.fillWidth: true
-                Layout.topMargin: 32
+                Layout.topMargin: warning.visible ? 16 : 32
 
                 visible: false //footer.isVisibleForAmneziaFree
 
@@ -192,7 +209,7 @@ PageType {
 
             LabelWithButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 32
+                Layout.topMargin: warning.visible ? 16 : 32
 
                 visible: footer.isVisibleForAmneziaFree
 

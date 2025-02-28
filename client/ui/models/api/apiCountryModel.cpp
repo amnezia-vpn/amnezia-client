@@ -44,6 +44,9 @@ QVariant ApiCountryModel::data(const QModelIndex &index, int role) const
     case IsIssuedRole: {
         return isIssued;
     }
+    case IsWorkerExpiredRole: {
+        return issuedConfigInfo.lastDownloaded < issuedConfigInfo.workerLastUpdated;
+    }
     }
 
     return QVariant();
@@ -114,5 +117,6 @@ QHash<int, QByteArray> ApiCountryModel::roleNames() const
     roles[CountryCodeRole] = "countryCode";
     roles[CountryImageCodeRole] = "countryImageCode";
     roles[IsIssuedRole] = "isIssued";
+    roles[IsWorkerExpiredRole] = "isWorkerExpired";
     return roles;
 }

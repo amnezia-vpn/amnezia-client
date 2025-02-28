@@ -230,6 +230,7 @@
         <file>ui/qml/Pages2/PageSettingsApiInstructions.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiNativeConfigs.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiDevices.qml</file>
+        <file>images/controls/monitor.svg</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>

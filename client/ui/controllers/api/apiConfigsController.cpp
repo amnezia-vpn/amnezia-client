@@ -389,8 +389,6 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
         m_serversModel->editServer(serverConfigObject, serverIndex);
     }
 
-    emit externalDeviceDeactivated();
-
     return true;
 }
 
