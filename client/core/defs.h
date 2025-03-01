@@ -53,7 +53,7 @@ namespace amnezia
         ServerDockerFailedError = 203,
         ServerCancelInstallation = 204,
         ServerUserNotInSudo = 205,
-        ServerPackageManagerError = 206,
+        ServerPacketManagerError = 206,
         SudoPackageIsNotPreinstalled = 207,
         ServerUserNotAllowedInSudoers = 208,
         ServerUserPasswordRequired = 209,
