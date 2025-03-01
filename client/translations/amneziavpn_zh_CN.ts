@@ -3675,13 +3675,13 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="22"/>
-        <source>The user does not have permission to use sudo</source>
-        <translation>用户没有root权限</translation>
+        <source>The user is not a member of the sudo group</source>
+        <translation>用户不是 sudo 组的成员</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="23"/>
-        <source>Server error: Packet manager error</source>
-        <translation type="unfinished"></translation>
+        <source>Server error: Package manager error</source>
+        <translation>服务器错误：包管理器错误</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>

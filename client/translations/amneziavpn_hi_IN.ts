@@ -3434,13 +3434,13 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="22"/>
-        <source>The user does not have permission to use sudo</source>
-        <translation>उपयोगकर्ता के पास sudo का उपयोग करने की अनुमति नहीं है</translation>
+        <source>The user is not a member of the sudo group</source>
+        <translation>उपयोगकर्ता sudo समूह का सदस्य नहीं है</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="23"/>
-        <source>Server error: Packet manager error</source>
-        <translation>सर्वर त्रुटि: पैकेट प्रबंधक त्रुटि</translation>
+        <source>Server error: Package manager error</source>
+        <translation>सर्वर त्रुटि: पैकेज प्रबंधक त्रुटि</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>

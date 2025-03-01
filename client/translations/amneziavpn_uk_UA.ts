@@ -3700,13 +3700,13 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="22"/>
-        <source>The user does not have permission to use sudo</source>
-        <translation>The user does not have permission to use sudo</translation>
+        <source>The user is not a member of the sudo group</source>
+        <translation>Користувач не входить до групи sudo</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="23"/>
-        <source>Server error: Packet manager error</source>
-        <translation type="unfinished"></translation>
+        <source>Server error: Package manager error</source>
+        <translation>Помилка сервера: помилка менеджера пакетів</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
