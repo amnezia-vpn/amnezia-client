@@ -3468,8 +3468,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="22"/>
-        <source>The user does not have permission to use sudo</source>
-        <translation>The user does not have permission to use sudo</translation>
+        <source>The user is not a member of the sudo group</source>
+        <translation>کاربر عضو گروه sudo نیست</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
@@ -3590,8 +3590,8 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="23"/>
-        <source>Server error: Packet manager error</source>
-        <translation>Server error: Packet manager error</translation>
+        <source>Server error: Package manager error</source>
+        <translation>خطای سرور: خطای مدیر بسته</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="34"/>

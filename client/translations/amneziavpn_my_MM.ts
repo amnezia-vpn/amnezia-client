@@ -3330,8 +3330,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="22"/>
-        <source>The user does not have permission to use sudo</source>
-        <translation>ဤအသုံးပြုသူသည် sudo ကိုအသုံးပြုရန်ခွင့်ပြုချက်မရှိပါ</translation>
+        <source>The user is not a member of the sudo group</source>
+        <translation>ဤအသုံးပြုသူသည် sudo အဖွဲ့၏ အဖွဲ့ဝင်မဟုတ်ပါ</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
@@ -3395,8 +3395,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="23"/>
-        <source>Server error: Packet manager error</source>
-        <translation>ဆာဗာ မှားယွင်းမှု: Packet Manager မှားယွင်းမှု</translation>
+        <source>Server error: Package manager error</source>
+        <translation>ဆာဗာ အမှား- Package manager အမှား</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="34"/>

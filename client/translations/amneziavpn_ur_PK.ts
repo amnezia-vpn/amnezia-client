@@ -3433,8 +3433,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="22"/>
-        <source>The user does not have permission to use sudo</source>
-        <translation>صارف کو sudo استعمال کرنے کی اجازت نہیں ہے</translation>
+        <source>The user is not a member of the sudo group</source>
+        <translation>صارف sudo گروپ کا رکن نہیں ہے</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
@@ -3498,7 +3498,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="23"/>
-        <source>Server error: Packet manager error</source>
+        <source>Server error: Package manager error</source>
         <translation>سرور خطا: پیکیج منیجر خطا</translation>
     </message>
     <message>
