@@ -3331,7 +3331,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../core/errorstrings.cpp" line="22"/>
         <source>The user is not a member of the sudo group</source>
-        <translation>အသုံးပြုသူသည် sudo အုပ်စု၏ အဖွဲ့ဝင်မဟုတ်ပါ</translation>
+        <translation>ဤအသုံးပြုသူသည် sudo အုပ်စု၏အဖွဲ့ဝင်မဟုတ်ပါ</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
