@@ -1,4 +1,4 @@
-CUR_USER=$(whoami);\
+CUR_USER=$(whoami 2>/dev/null || echo ~ | sed 's/.*\///');\
 sudo mkdir -p $DOCKERFILE_FOLDER;\
 sudo chown $CUR_USER $DOCKERFILE_FOLDER;\
 if ! sudo docker network ls | grep -q amnezia-dns-net; then sudo docker network create \
