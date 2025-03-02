@@ -345,7 +345,7 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
     arr.push_back(containers);
 
     QString hostName;
-    const static QRegularExpression hostNameRegExp("remote (.*) [0-9]*");
+    const static QRegularExpression hostNameRegExp("remote\\s+([^\\s]+)");
     QRegularExpressionMatch hostNameMatch = hostNameRegExp.match(data);
     if (hostNameMatch.hasMatch()) {
         hostName = hostNameMatch.captured(1);
