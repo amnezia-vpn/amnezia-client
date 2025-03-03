@@ -262,7 +262,7 @@ bool GatewayController::shouldBypassProxy(QNetworkReply *reply, const QByteArray
     } else if (responseBody.contains("html")) {
         qDebug() << "The response contains an html tag";
         return true;
-    } else if (checkEncryption) {
+    } else if (reply->error() == QNetworkReply::NetworkError::NoError && checkEncryption) {
         try {
             QSimpleCrypto::QBlockCipher blockCipher;
             static_cast<void>(blockCipher.decryptAesBlockCipher(responseBody, key, iv, "", salt));

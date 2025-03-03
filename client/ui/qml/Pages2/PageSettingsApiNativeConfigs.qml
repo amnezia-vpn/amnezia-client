@@ -46,7 +46,7 @@ PageType {
                 Layout.leftMargin: 16
 
                 headerText: qsTr("Configuration files")
-                descriptionText: qsTr("To connect a router or AmneziaWG application")
+                descriptionText: qsTr("For router setup or the AmneziaWG app")
             }
         }
 
@@ -123,13 +123,13 @@ PageType {
                         Layout.fillWidth: true
                         Layout.margins: 16
 
-                        headerText: qsTr("Configuration file ") + moreOptionsDrawer.countryName
+                        headerText: moreOptionsDrawer.countryName + qsTr(" configuration file")
                     }
 
                     LabelWithButtonType {
                         Layout.fillWidth: true
 
-                        text: qsTr("Create a new")
+                        text: qsTr("Generate a new configuration file")
                         descriptionText: qsTr("The previously created one will stop working")
 
                         clickedFunction: function() {
@@ -193,9 +193,15 @@ PageType {
     }
 
     function showQuestion(isConfigIssue, countryCode, countryName) {
-        var headerText = qsTr("Revoke the actual %1 configuration file?").arg(countryName)
-        var descriptionText = qsTr("The previously created file will no longer be valid. It will not be possible to connect using it.")
-        var yesButtonText = qsTr("Continue")
+        var headerText
+        if (isConfigIssue) {
+            headerText = qsTr("Generate a new %1 configuration file?").arg(countryName)
+        } else {
+            headerText = qsTr("Revoke the current %1 configuration file?").arg(countryName)
+        }
+
+        var descriptionText = qsTr("Your previous configuration file will no longer work, and it will not be possible to connect using it")
+        var yesButtonText = isConfigIssue ? qsTr("Download") : qsTr("Continue")
         var noButtonText = qsTr("Cancel")
 
         var yesButtonFunction = function() {

@@ -27,7 +27,7 @@ PageType {
     QtObject {
         id: techSupport
 
-        readonly property string title: qsTr("For technical support")
+        readonly property string title: qsTr("Email Support")
         readonly property string description: qsTr("support@amnezia.org")
         readonly property string link: "mailto:support@amnezia.org"
     }
@@ -35,7 +35,7 @@ PageType {
     QtObject {
         id: paymentSupport
 
-        readonly property string title: qsTr("For payment issues")
+        readonly property string title: qsTr("Email Billing & Orders")
         readonly property string description: qsTr("help@vpnpay.io")
         readonly property string link: "mailto:help@vpnpay.io"
     }
@@ -43,7 +43,7 @@ PageType {
     QtObject {
         id: site
 
-        readonly property string title: qsTr("Site")
+        readonly property string title: qsTr("Website")
         readonly property string description: qsTr("amnezia.org")
         readonly property string link: LanguageModel.getCurrentSiteUrl()
     }
@@ -79,7 +79,7 @@ PageType {
                 Layout.leftMargin: 16
 
                 headerText: qsTr("Support")
-                descriptionText: qsTr("Our technical support specialists are ready to help you at any time")
+                descriptionText: qsTr("Our technical support specialists are available to assist you at any time")
             }
         }
 
