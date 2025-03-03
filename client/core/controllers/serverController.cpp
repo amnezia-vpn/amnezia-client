@@ -774,12 +774,12 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
         return ErrorCode::ServerUserNotInSudo;
     if (credentials.userName != "root" && stdOut.contains("sudo:") && !stdOut.contains("uname:") && stdOut.contains("not found"))
         return ErrorCode::SudoPackageIsNotPreinstalled;
+    if (stdOut.contains("can't cd to") || stdOut.contains("Permission denied") || stdOut.contains("No such file or directory"))
+        return ErrorCode::ServerUserDirectoryNotAccessible;
     if (stdOut.contains("sudoers"))
         return ErrorCode::ServerUserNotAllowedInSudoers;
     if (stdOut.contains("password is required"))
         return ErrorCode::ServerUserPasswordRequired;
-    if (stdOut.contains("can't cd to") || stdOut.contains("Permission denied") || stdOut.contains("No such file or directory"))
-        return ErrorCode::ServerUserDirectoryNotAccessible;
 
     return error;
 }
