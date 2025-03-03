@@ -14,10 +14,15 @@ extension UIApplication {
   var keyWindows: [UIWindow] {
     connectedScenes
       .compactMap {
+        guard let windowScene = $0 as? UIWindowScene else { return nil }
         if #available(iOS 15.0, *) {
-          ($0 as? UIWindowScene)?.keyWindow
+          guard let keywindow = windowScene.keyWindow else {
+            windowScene.windows.first?.makeKey()
+            return windowScene.windows.first
+          }
+          return keywindow
         } else {
-          ($0 as? UIWindowScene)?.windows.first { $0.isKeyWindow }
+          return windowScene.windows.first { $0.isKeyWindow }
         }
       }
   }
