@@ -774,7 +774,7 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
         return ErrorCode::ServerUserNotInSudo;
     if (credentials.userName != "root" && stdOut.contains("sudo:") && !stdOut.contains("uname:") && stdOut.contains("not found"))
         return ErrorCode::SudoPackageIsNotPreinstalled;
-    if (stdOut.contains("not allowed") || stdOut.contains("sudoers"))
+    if (stdOut.contains("sudoers"))
         return ErrorCode::ServerUserNotAllowedInSudoers;
     if (stdOut.contains("password is required"))
         return ErrorCode::ServerUserPasswordRequired;
