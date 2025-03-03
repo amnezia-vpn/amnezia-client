@@ -778,6 +778,8 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
         return ErrorCode::ServerUserNotAllowedInSudoers;
     if (stdOut.contains("password is required"))
         return ErrorCode::ServerUserPasswordRequired;
+    if (stdOut.contains("can't cd to") || stdOut.contains("Permission denied") || stdOut.contains("No such file or directory"))
+        return ErrorCode::ServerUserDirectoryNotAccessible;
 
     return error;
 }
