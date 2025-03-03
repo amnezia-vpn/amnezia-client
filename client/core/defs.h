@@ -55,9 +55,9 @@ namespace amnezia
         ServerUserNotInSudo = 205,
         ServerPacketManagerError = 206,
         SudoPackageIsNotPreinstalled = 207,
-        ServerUserNotAllowedInSudoers = 208,
-        ServerUserPasswordRequired = 209,
-        ServerUserDirectoryNotAccessible = 210,
+        ServerUserDirectoryNotAccessible = 208,
+        ServerUserNotAllowedInSudoers = 209,
+        ServerUserPasswordRequired = 210,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,
