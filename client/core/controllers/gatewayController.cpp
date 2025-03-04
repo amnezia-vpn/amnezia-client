@@ -157,12 +157,12 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
         auto replyProcessingFunction = [&encryptedResponseBody, &reply, &sslErrors, &key, &iv, &salt,
                                         this](QNetworkReply *nestedReply, const QList<QSslError> &nestedSslErrors) {
             encryptedResponseBody = nestedReply->readAll();
-            if (!sslErrors.isEmpty() || !shouldBypassProxy(nestedReply, encryptedResponseBody, true, key, iv, salt)) {
+            reply = nestedReply;
+            if (!sslErrors.isEmpty() || shouldBypassProxy(nestedReply, encryptedResponseBody, true, key, iv, salt)) {
                 sslErrors = nestedSslErrors;
-                reply = nestedReply;
-                return true;
+                return false;
             }
-            return false;
+            return true;
         };
 
         bypassProxy(endpoint, reply, requestFunction, replyProcessingFunction);
@@ -212,45 +212,45 @@ QStringList GatewayController::getProxyUrls()
         wait.exec();
 
         if (reply->error() == QNetworkReply::NetworkError::NoError) {
-            break;
-        }
-        reply->deleteLater();
-    }
+            auto encryptedResponseBody = reply->readAll();
+            reply->deleteLater();
 
-    auto encryptedResponseBody = reply->readAll();
-    reply->deleteLater();
+            EVP_PKEY *privateKey = nullptr;
+            QByteArray responseBody;
+            try {
+                if (!m_isDevEnvironment) {
+                    QCryptographicHash hash(QCryptographicHash::Sha512);
+                    hash.addData(key);
+                    QByteArray hashResult = hash.result().toHex();
 
-    EVP_PKEY *privateKey = nullptr;
-    QByteArray responseBody;
-    try {
-        if (!m_isDevEnvironment) {
-            QCryptographicHash hash(QCryptographicHash::Sha512);
-            hash.addData(key);
-            QByteArray hashResult = hash.result().toHex();
+                    QByteArray key = QByteArray::fromHex(hashResult.left(64));
+                    QByteArray iv = QByteArray::fromHex(hashResult.mid(64, 32));
 
-            QByteArray key = QByteArray::fromHex(hashResult.left(64));
-            QByteArray iv = QByteArray::fromHex(hashResult.mid(64, 32));
+                    QByteArray ba = QByteArray::fromBase64(encryptedResponseBody);
 
-            QByteArray ba = QByteArray::fromBase64(encryptedResponseBody);
+                    QSimpleCrypto::QBlockCipher blockCipher;
+                    responseBody = blockCipher.decryptAesBlockCipher(ba, key, iv);
+                } else {
+                    responseBody = encryptedResponseBody;
+                }
+            } catch (...) {
+                Utils::logException();
+                qCritical() << "error loading private key from environment variables or decrypting payload" << encryptedResponseBody;
+                continue;
+            }
 
-            QSimpleCrypto::QBlockCipher blockCipher;
-            responseBody = blockCipher.decryptAesBlockCipher(ba, key, iv);
+            auto endpointsArray = QJsonDocument::fromJson(responseBody).array();
+
+            QStringList endpoints;
+            for (const auto &endpoint : endpointsArray) {
+                endpoints.push_back(endpoint.toString());
+            }
+            return endpoints;
         } else {
-            responseBody = encryptedResponseBody;
+            reply->deleteLater();
         }
-    } catch (...) {
-        Utils::logException();
-        qCritical() << "error loading private key from environment variables or decrypting payload" << encryptedResponseBody;
-        return {};
     }
-
-    auto endpointsArray = QJsonDocument::fromJson(responseBody).array();
-
-    QStringList endpoints;
-    for (const auto &endpoint : endpointsArray) {
-        endpoints.push_back(endpoint.toString());
-    }
-    return endpoints;
+    return {};
 }
 
 bool GatewayController::shouldBypassProxy(QNetworkReply *reply, const QByteArray &responseBody, bool checkEncryption, const QByteArray &key,
@@ -296,7 +296,7 @@ void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *repl
         connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
         wait.exec();
 
-        if (!replyProcessingFunction(reply, sslErrors)) {
+        if (replyProcessingFunction(reply, sslErrors)) {
             break;
         }
     }
