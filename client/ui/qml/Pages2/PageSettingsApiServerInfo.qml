@@ -26,7 +26,7 @@ PageType {
     QtObject {
         id: statusObject
 
-        readonly property string title: qsTr("Subscription status")
+        readonly property string title: qsTr("Subscription Status")
         readonly property string contentKey: "subscriptionStatus"
         readonly property string objectImageSource: "qrc:/images/controls/info.svg"
     }
@@ -34,7 +34,7 @@ PageType {
     QtObject {
         id: endDateObject
 
-        readonly property string title: qsTr("Valid until")
+        readonly property string title: qsTr("Valid Until")
         readonly property string contentKey: "endDate"
         readonly property string objectImageSource: "qrc:/images/controls/history.svg"
     }
@@ -42,7 +42,7 @@ PageType {
     QtObject {
         id: deviceCountObject
 
-        readonly property string title: qsTr("Active connections")
+        readonly property string title: qsTr("Active Connections")
         readonly property string contentKey: "connectedDevices"
         readonly property string objectImageSource: "qrc:/images/controls/monitor.svg"
     }
@@ -183,7 +183,7 @@ PageType {
 
                 visible: false //footer.isVisibleForAmneziaFree
 
-                text: qsTr("Subscription key")
+                text: qsTr("Subscription Key")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
@@ -191,7 +191,7 @@ PageType {
 
                     shareConnectionDrawer.openTriggered()
                     shareConnectionDrawer.isSelfHostedConfig = false;
-                    shareConnectionDrawer.shareButtonText = qsTr("Save VPN key to file")
+                    shareConnectionDrawer.shareButtonText = qsTr("Save VPN key as a file")
                     shareConnectionDrawer.copyButtonText = qsTr("Copy VPN key")
 
 
@@ -213,7 +213,7 @@ PageType {
 
                 visible: footer.isVisibleForAmneziaFree
 
-                text: qsTr("Configuration files")
+                text: qsTr("Configuration Files")
 
                 descriptionText: qsTr("Manage configuration files")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
@@ -233,7 +233,7 @@ PageType {
 
                 visible: footer.isVisibleForAmneziaFree
 
-                text: qsTr("Active devices")
+                text: qsTr("Active Devices")
 
                 descriptionText: qsTr("Manage currently connected devices")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
