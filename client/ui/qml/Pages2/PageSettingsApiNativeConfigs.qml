@@ -45,7 +45,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: qsTr("Configuration files")
+                headerText: qsTr("Configuration Files")
                 descriptionText: qsTr("For router setup or the AmneziaWG app")
             }
         }
