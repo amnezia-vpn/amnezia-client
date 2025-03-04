@@ -65,8 +65,8 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     case CardDescriptionRole: {
         auto speed = apiServiceData.serviceInfo.speed;
         if (serviceType == serviceType::amneziaPremium) {
-            return tr("Amnezia Premium is VPN for comfortable work, downloading large files and watching videos in 8K resolution. "
-                      "Works for any sites with no restrictions. Speed up to %1 MBit/s. Unlimited traffic.")
+            return tr("Amnezia Premium is classic VPN for seamless work, downloading large files, and watching videos. "
+                      "Access all websites and online resources. Speeds up to %1 Mbps.")
                     .arg(speed);
         } else if (serviceType == serviceType::amneziaFree) {
             QString description = tr("AmneziaFree provides free unlimited access to a basic set of web sites, such as Facebook, Instagram, Twitter (X), Discord, Telegram, and others. YouTube is not included in the free plan.");
@@ -79,8 +79,8 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
     }
     case ServiceDescriptionRole: {
         if (serviceType == serviceType::amneziaPremium) {
-            return tr("Amnezia Premium is VPN for comfortable work, downloading large files and watching videos in 8K resolution. "
-                      "Works for any sites with no restrictions.");
+            return tr("Amnezia Premium is classic VPN for for seamless work, downloading large files, and watching videos. "
+                      "Access all websites and online resources.");
         } else {
             return tr("AmneziaFree provides free unlimited access to a basic set of web sites, such as Facebook, Instagram, Twitter (X), Discord, Telegram, and others. YouTube is not included in the free plan.");
         }
