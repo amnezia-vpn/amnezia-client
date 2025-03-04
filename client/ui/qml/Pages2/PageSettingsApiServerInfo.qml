@@ -215,7 +215,7 @@ PageType {
 
                 text: qsTr("Configuration files")
 
-                descriptionText: qsTr("To connect a router or AmneziaWG application")
+                descriptionText: qsTr("Manage configuration files")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

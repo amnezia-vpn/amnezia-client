@@ -76,8 +76,8 @@ PageType {
                         return
                     }
 
-                    var headerText = qsTr("Deactivate the subscription on selected device")
-                    var descriptionText = qsTr("The next time the “Connect” button is pressed, the device will be activated again")
+                    var headerText = qsTr("Are you sure you want to unlink this device?")
+                    var descriptionText = qsTr("This will unlink the device from your subscription. You can reconnect it anytime by pressing Connect.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 
