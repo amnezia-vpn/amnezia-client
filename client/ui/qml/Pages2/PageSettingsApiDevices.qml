@@ -42,7 +42,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: qsTr("Active devices")
+                headerText: qsTr("Active Devices")
                 descriptionText: qsTr("Manage currently connected devices")
             }
 
