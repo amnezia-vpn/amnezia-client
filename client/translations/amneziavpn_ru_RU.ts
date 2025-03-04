@@ -1625,12 +1625,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="79"/>
-        <source>Deactivate the subscription on selected device</source>
+        <source>Are you sure you want to unlink this device?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="80"/>
-        <source>The next time the “Connect” button is pressed, the device will be activated again</source>
+        <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;Connect.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1886,7 +1886,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="218"/>
-        <source>To connect a router or AmneziaWG application</source>
+        <source>Manage configuration files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
