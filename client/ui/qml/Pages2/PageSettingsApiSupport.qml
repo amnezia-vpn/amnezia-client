@@ -27,7 +27,7 @@ PageType {
     QtObject {
         id: techSupport
 
-        readonly property string title: qsTr("Email Support")
+        readonly property string title: qsTr("Email")
         readonly property string description: qsTr("support@amnezia.org")
         readonly property string link: "mailto:support@amnezia.org"
     }
