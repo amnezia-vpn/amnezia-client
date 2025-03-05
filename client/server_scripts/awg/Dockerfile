@@ -1,4 +1,4 @@
-FROM amneziavpn/amnezia-wg:latest
+FROM amneziavpn/euphoria:latest
 
 LABEL maintainer="AmneziaVPN"
 

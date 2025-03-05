@@ -51,6 +51,7 @@ class InterfaceConfig {
   QString m_responsePacketMagicHeader;
   QString m_underloadPacketMagicHeader;
   QString m_transportPacketMagicHeader;
+  QString m_luaCodec;
 
   QJsonObject toJson() const;
   QString toWgConf(

@@ -130,6 +130,9 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   if (!m_transportPacketMagicHeader.isNull()) {
     out << "H4 = " << m_transportPacketMagicHeader << "\n";
   }
+  if (!m_luaCodec.isNull()) {
+    out << "LuaCodec = " << m_luaCodec << "\n";
+  }
 
   // If any extra config was provided, append it now.
   for (const QString& key : extra.keys()) {

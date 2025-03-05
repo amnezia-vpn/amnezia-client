@@ -46,6 +46,9 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     case Roles::ServerTransportPacketMagicHeaderRole:
         m_serverProtocolConfig.insert(config_key::transportPacketMagicHeader, value.toString());
         break;
+    case Roles::ServerLuaCodecRole:
+        m_serverProtocolConfig.insert(config_key::luaCodec, value.toString());
+        break;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -76,6 +79,7 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ServerResponsePacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::responsePacketMagicHeader);
     case Roles::ServerUnderloadPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::underloadPacketMagicHeader);
     case Roles::ServerTransportPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::transportPacketMagicHeader);
+    case Roles::ServerLuaCodecRole: return m_serverProtocolConfig.value(config_key::luaCodec);
     }
 
     return QVariant();
@@ -114,6 +118,8 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
             serverProtocolConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader);
     m_serverProtocolConfig[config_key::transportPacketMagicHeader] =
             serverProtocolConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader);
+    m_serverProtocolConfig[config_key::luaCodec] =
+            serverProtocolConfig.value(config_key::luaCodec).toString(protocols::awg::defaultLuaCodec);
 
     auto lastConfig = m_serverProtocolConfig.value(config_key::last_config).toString();
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
@@ -188,6 +194,7 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ServerResponsePacketMagicHeaderRole] = "serverResponsePacketMagicHeader";
     roles[ServerUnderloadPacketMagicHeaderRole] = "serverUnderloadPacketMagicHeader";
     roles[ServerTransportPacketMagicHeaderRole] = "serverTransportPacketMagicHeader";
+    roles[ServerLuaCodecRole] = "serverLuaCodec";
 
     return roles;
 }
@@ -217,6 +224,7 @@ AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig)
             serverProtocolConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader);
     serverTransportPacketMagicHeader =
             serverProtocolConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader);
+    serverLuaCodec = serverProtocolConfig.value(config_key::luaCodec).toString(protocols::awg::defaultLuaCodec);
 }
 
 bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
@@ -227,7 +235,8 @@ bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
         || serverInitPacketMagicHeader != other.serverInitPacketMagicHeader
         || serverResponsePacketMagicHeader != other.serverResponsePacketMagicHeader
         || serverUnderloadPacketMagicHeader != other.serverUnderloadPacketMagicHeader
-        || serverTransportPacketMagicHeader != other.serverTransportPacketMagicHeader) {
+        || serverTransportPacketMagicHeader != other.serverTransportPacketMagicHeader
+        || serverLuaCodec != other.serverLuaCodec) {
         return false;
     }
     return true;

@@ -398,6 +398,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                                 serverConfigMap.value(config_key::underloadPacketMagicHeader);
                         containerConfig[config_key::transportPacketMagicHeader] =
                                 serverConfigMap.value(config_key::transportPacketMagicHeader);
+                        containerConfig[config_key::luaCodec] = serverConfigMap.value(config_key::luaCodec);
                     } else if (protocol == Proto::Sftp) {
                         stdOut.clear();
                         script = QString("sudo docker inspect --format '{{.Config.Cmd}}' %1").arg(name);

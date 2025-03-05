@@ -129,6 +129,9 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   if (!config.m_transportPacketMagicHeader.isEmpty()) {
     out << "h4=" << config.m_transportPacketMagicHeader << "\n";
   }
+  if (!config.m_luaCodec.isEmpty()) {
+    out << "lua_codec=" << config.m_luaCodec << "\n";
+  }
 
   int err = uapiErrno(uapiCommand(message));
   if (err != 0) {

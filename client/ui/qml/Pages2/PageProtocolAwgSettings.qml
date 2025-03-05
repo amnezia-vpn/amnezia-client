@@ -316,6 +316,21 @@ PageType {
                     checkEmptyText: true
                 }
 
+                TextFieldWithHeaderType {
+                    id: luaCodecTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("Lua Codec")
+                    textField.text: serverLuaCodec
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== serverLuaCodec) {
+                            serverLuaCodec = textField.text
+                        }
+                    }
+                }
+
                 BasicButtonType {
                     id: saveRestartButton
 

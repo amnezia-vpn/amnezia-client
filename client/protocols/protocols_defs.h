@@ -76,6 +76,7 @@ namespace amnezia
         constexpr char responsePacketMagicHeader[] = "H2";
         constexpr char underloadPacketMagicHeader[] = "H3";
         constexpr char transportPacketMagicHeader[] = "H4";
+        constexpr char luaCodec[] = "LuaCodec";
 
         constexpr char openvpn[] = "openvpn";
         constexpr char wireguard[] = "wireguard";
@@ -216,6 +217,7 @@ namespace amnezia
             constexpr char defaultResponsePacketMagicHeader[] = "3288052141";
             constexpr char defaultTransportPacketMagicHeader[] = "2528465083";
             constexpr char defaultUnderloadPacketMagicHeader[] = "1766607858";
+            constexpr char defaultLuaCodec[] = "";
         }
 
         namespace socks5Proxy

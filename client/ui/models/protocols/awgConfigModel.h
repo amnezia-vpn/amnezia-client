@@ -32,6 +32,7 @@ struct AwgConfig
     QString serverResponsePacketMagicHeader;
     QString serverUnderloadPacketMagicHeader;
     QString serverTransportPacketMagicHeader;
+    QString serverLuaCodec;
 
     bool hasEqualServerSettings(const AwgConfig &other) const;
     bool hasEqualClientSettings(const AwgConfig &other) const;
@@ -60,7 +61,8 @@ public:
         ServerInitPacketMagicHeaderRole,
         ServerResponsePacketMagicHeaderRole,
         ServerUnderloadPacketMagicHeaderRole,
-        ServerTransportPacketMagicHeaderRole
+        ServerTransportPacketMagicHeaderRole,
+        ServerLuaCodecRole
     };
 
     explicit AwgConfigModel(QObject *parent = nullptr);

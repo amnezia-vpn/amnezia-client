@@ -401,6 +401,9 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!obj.value("H4").isNull()) {
     config.m_transportPacketMagicHeader = obj.value("H4").toString();
   }
+  if (!obj.value("LuaCodec").isNull()) {
+    config.m_luaCodec = obj.value("LuaCodec").toString();
+  }
 
   return true;
 }

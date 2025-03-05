@@ -41,6 +41,7 @@ QString AwgConfigurator::createConfig(const ServerCredentials &credentials, Dock
     jsonConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
     jsonConfig[config_key::mtu] =
             containerConfig.value(ProtocolProps::protoToString(Proto::Awg)).toObject().value(config_key::mtu).toString(protocols::awg::defaultMtu);
+    jsonConfig[config_key::luaCodec] = configMap.value(config_key::luaCodec);
 
     return QJsonDocument(jsonConfig).toJson();
 }
