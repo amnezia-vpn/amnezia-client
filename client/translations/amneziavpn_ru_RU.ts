@@ -4043,7 +4043,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="24"/>
-        <source>Server error: Packet manager error</source>
+        <source>Server error: Package manager error</source>
         <translation>Ошибка сервера: ошибка менеджера пакетов</translation>
     </message>
     <message>
