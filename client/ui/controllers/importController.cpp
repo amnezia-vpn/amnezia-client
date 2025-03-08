@@ -27,8 +27,6 @@ namespace
     ConfigTypes checkConfigFormat(const QString &config)
     {
         const QString openVpnConfigPatternCli = "client";
-        const QString openVpnConfigPatternProto1 = "proto tcp";
-        const QString openVpnConfigPatternProto2 = "proto udp";
         const QString openVpnConfigPatternDriver1 = "dev tun";
         const QString openVpnConfigPatternDriver2 = "dev tap";
 
@@ -53,14 +51,13 @@ namespace
                    || (config.contains(amneziaConfigPatternHostName) && config.contains(amneziaConfigPatternUserName)
                        && config.contains(amneziaConfigPatternPassword))) {
             return ConfigTypes::Amnezia;
-        } else if (config.contains(openVpnConfigPatternCli)
-                   && (config.contains(openVpnConfigPatternProto1) || config.contains(openVpnConfigPatternProto2))
-                   && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
-            return ConfigTypes::OpenVpn;
         } else if (config.contains(wireguardConfigPatternSectionInterface) && config.contains(wireguardConfigPatternSectionPeer)) {
             return ConfigTypes::WireGuard;
         } else if ((config.contains(xrayConfigPatternInbound)) && (config.contains(xrayConfigPatternOutbound))) {
             return ConfigTypes::Xray;
+        } else if (config.contains(openVpnConfigPatternCli)
+            && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
+            return ConfigTypes::OpenVpn;
         }
         return ConfigTypes::Invalid;
     }
@@ -345,7 +342,7 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
     arr.push_back(containers);
 
     QString hostName;
-    const static QRegularExpression hostNameRegExp("remote (.*) [0-9]*");
+    const static QRegularExpression hostNameRegExp("remote\\s+([^\\s]+)");
     QRegularExpressionMatch hostNameMatch = hostNameRegExp.match(data);
     if (hostNameMatch.hasMatch()) {
         hostName = hostNameMatch.captured(1);

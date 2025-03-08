@@ -140,7 +140,7 @@ PageType {
                 }
                 onClicked: {
                     if (!checkable) {
-                        PageController.showNotificationMessage(qsTr("Cannot change killSwitch settings during active connection"))
+                        PageController.showNotificationMessage(qsTr("Cannot change KillSwitch settings during active connection"))
                     }
                 }
             }

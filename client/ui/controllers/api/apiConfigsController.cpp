@@ -407,7 +407,7 @@ bool ApiConfigsController::isConfigValid()
         return updateServiceFromGateway(serverIndex, "", "");
     } else if (configSource && m_serversModel->isApiKeyExpired(serverIndex)) {
         qDebug() << "attempt to update api config by expires_at event";
-        if (configSource == apiDefs::ConfigSource::Telegram) {
+        if (configSource == apiDefs::ConfigSource::AmneziaGateway) {
             return updateServiceFromGateway(serverIndex, "", "");
         } else {
             m_serversModel->removeApiConfig(serverIndex);

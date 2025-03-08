@@ -48,8 +48,8 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     }
     case ServiceDescriptionRole: {
         if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2) {
-            return tr("Classic VPN for comfortable work, downloading large files and watching videos. Works for any sites. Speed up to 200 "
-                      "Mb/s");
+            return tr("Classic VPN for seamless work, downloading large files, and watching videos. Access all websites and online resources. "
+                      "Speeds up to 200 Mbps");
         } else if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
             return tr("Free unlimited access to a basic set of websites such as Facebook, Instagram, Twitter (X), Discord, Telegram and "
                       "more. YouTube is not included in the free plan.");

@@ -42,8 +42,8 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                headerText: qsTr("Connected devices")
-                descriptionText: qsTr("To manage connected devices")
+                headerText: qsTr("Active Devices")
+                descriptionText: qsTr("Manage currently connected devices")
             }
 
             WarningType {
@@ -71,8 +71,13 @@ PageType {
                 rightImageSource: "qrc:/images/controls/trash.svg"
 
                 clickedFunction: function() {
-                    var headerText = qsTr("Deactivate the subscription on selected device")
-                    var descriptionText = qsTr("The next time the “Connect” button is pressed, the device will be activated again")
+                    if (isCurrentDevice && ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
+                        return
+                    }
+
+                    var headerText = qsTr("Are you sure you want to unlink this device?")
+                    var descriptionText = qsTr("This will unlink the device from your subscription. You can reconnect it anytime by pressing Connect.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 

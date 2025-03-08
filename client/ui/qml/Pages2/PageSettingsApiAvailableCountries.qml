@@ -81,7 +81,7 @@ PageType {
                 actionButtonImage: "qrc:/images/controls/settings.svg"
 
                 headerText: root.processedServer.name
-                descriptionText: qsTr("Locations for connection")
+                descriptionText: qsTr("Location for connection")
 
                 actionButtonFunction: function() {
                     PageController.showBusyIndicator(true)
