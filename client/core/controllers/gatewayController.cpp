@@ -200,9 +200,9 @@ QStringList GatewayController::getProxyUrls()
 
     QStringList proxyStorageUrl;
     if (m_isDevEnvironment) {
-        proxyStorageUrl = QStringList { DEV_S3_ENDPOINT };
+        proxyStorageUrl = QString(DEV_S3_ENDPOINT).split(", ");
     } else {
-        proxyStorageUrl = QStringList { PROD_S3_ENDPOINT };
+        proxyStorageUrl = QString(PROD_S3_ENDPOINT).split(", ");
     }
 
     QByteArray key = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
