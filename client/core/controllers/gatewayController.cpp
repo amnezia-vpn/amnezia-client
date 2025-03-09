@@ -198,16 +198,16 @@ QStringList GatewayController::getProxyUrls()
     QList<QSslError> sslErrors;
     QNetworkReply *reply;
 
-    QStringList proxyStorageUrl;
+    QStringList proxyStorageUrls;
     if (m_isDevEnvironment) {
-        proxyStorageUrl = QString(DEV_S3_ENDPOINT).split(", ");
+        proxyStorageUrls = QString(DEV_S3_ENDPOINT).split(", ");
     } else {
-        proxyStorageUrl = QString(PROD_S3_ENDPOINT).split(", ");
+        proxyStorageUrls = QString(PROD_S3_ENDPOINT).split(", ");
     }
 
     QByteArray key = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
 
-    for (const auto &proxyStorageUrl : proxyStorageUrl) {
+    for (const auto &proxyStorageUrl : proxyStorageUrls) {
         request.setUrl(proxyStorageUrl);
         reply = amnApp->networkManager()->get(request);
 
