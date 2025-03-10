@@ -4044,7 +4044,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="24"/>
         <source>Server error: Package manager error</source>
-        <translation>Ошибка сервера: ошибка менеджера пакетов</translation>
+        <translation>Ошибка сервера: Ошибка менеджера пакетов</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="27"/>

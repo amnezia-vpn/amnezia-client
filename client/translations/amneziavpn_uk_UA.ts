@@ -3706,7 +3706,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="23"/>
         <source>Server error: Package manager error</source>
-        <translation>Помилка сервера: помилка менеджера пакетів</translation>
+        <translation>Помилка сервера: Помилка менеджера пакетів</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
