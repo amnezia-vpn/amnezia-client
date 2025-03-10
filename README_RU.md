@@ -6,11 +6,11 @@
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/amnezia-vpn/amnezia-client)
 
 ### [English](https://github.com/amnezia-vpn/amnezia-client/blob/dev/README.md) | Русский
-[AmneziaVPN](https://amnezia.org) — это open sourse VPN-клиент, ключевая особенность которого заключается в возможности развернуть собственный VPN на вашем сервере.
+[AmneziaVPN](https://amnezia.org) — это open source VPN-клиент, ключевая особенность которого заключается в возможности развернуть собственный VPN на вашем сервере.
 
 [![Image](https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/uipic4.png)](https://amnezia.org)
 
-### [Сайт](https://amnezia.org) | [Зеркало на сайт](https://storage.googleapis.com/amnezia/amnezia.org) | [Документация](https://docs.amnezia.org) | [Решение проблем](https://docs.amnezia.org/troubleshooting)
+### [Сайт](https://amnezia.org) | [Зеркало сайта](https://storage.googleapis.com/amnezia/amnezia.org) | [Документация](https://docs.amnezia.org) | [Решение проблем](https://docs.amnezia.org/troubleshooting)
 
 > [!TIP]
 > Если [сайт Amnezia](https://amnezia.org) заблокирован в вашем регионе, вы можете воспользоваться [ссылкой на зеркало](https://storage.googleapis.com/amnezia/amnezia.org).
@@ -30,7 +30,7 @@
 - Классические VPN-протоколы: OpenVPN, WireGuard и IKEv2.
 - Протоколы с маскировкой трафика (обфускацией): OpenVPN с плагином [Cloak](https://github.com/cbeuw/Cloak), Shadowsocks (OpenVPN over Shadowsocks), [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/) and XRay.
 - Поддержка Split Tunneling — добавляйте любые сайты или приложения в список, чтобы включить VPN только для них.
-- Поддерживает платформы: Windows, MacOS, Linux, Android, iOS.
+- Поддерживает платформы: Windows, macOS, Linux, Android, iOS.
 - Поддержка конфигурации протокола AmneziaWG на [бета-прошивке Keenetic](https://docs.keenetic.com/ua/air/kn-1611/en/6319-latest-development-release.html#UUID-186c4108-5afd-c10b-f38a-cdff6c17fab3_section-idm33192196168192-improved).
 
 ## Ссылки
@@ -38,10 +38,10 @@
 - [https://amnezia.org](https://amnezia.org) - Веб-сайт проекта | [Альтернативная ссылка (зеркало)](https://storage.googleapis.com/kldscp/amnezia.org)
 - [https://docs.amnezia.org](https://docs.amnezia.org) - Документация
 - [https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
-- [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Канал поддржки в Telegram (Английский)
-- [https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Канал поддржки в Telegram (Фарси)
-- [https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Канал поддржки в Telegram (Мьянма) 
-- [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Канал поддржки в Telegram  (Русский)
+- [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Канал поддержки в Telegram (Английский)
+- [https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Канал поддержки в Telegram (Фарси)
+- [https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Канал поддержки в Telegram (Мьянма) 
+- [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Канал поддержки в Telegram  (Русский)
 - [https://vpnpay.io/en/amnezia-premium/](https://vpnpay.io/en/amnezia-premium/) - Amnezia Premium | [Зеркало](https://storage.googleapis.com/kldscp/vpnpay.io/ru/amnezia-premium\)
 
 ## Технологии
@@ -80,8 +80,8 @@ git submodule update --init --recursive
 Проверьте папку deploy для скриптов сборки.
 
 ### Как собрать iOS-приложение из исходного кода на MacOS
-1. Убедитесь, что у вас установлен XCode версии 14 или выше.
-2. Для генерации проекта XCode используется QT. Требуется версия QT 6.6.2. Установите QT для MacOS здесь или через QT Online Installer. Необходимые модули:
+1. Убедитесь, что у вас установлен Xcode версии 14 или выше.
+2. Для генерации проекта Xcode используется QT. Требуется версия QT 6.6.2. Установите QT для MacOS здесь или через QT Online Installer. Необходимые модули:
 - MacOS
 - iOS
 - Модуль совместимости с Qt 5
@@ -117,7 +117,7 @@ $QT_IOS_BIN/qt-cmake . -B build-ios -GXcode -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR
 export PATH=$(PATH):/path/to/GOPATH/bin
 ```
 
-6. Откройте проект в XCode. Теперь вы можете тестировать, архивировать или публиковать приложение.
+6. Откройте проект в Xcode. Теперь вы можете тестировать, архивировать или публиковать приложение.
    
 Если сборка завершится с ошибкой:
 ```
