@@ -47,8 +47,7 @@ PageType {
         readonly property string description: qsTr("For reviews and bug reports")
         readonly property string imageSource: "qrc:/images/controls/mail.svg"
         readonly property var handler: function() {
-            GC.copyToClipBoard(title)
-            PageController.showNotificationMessage(qsTr("Copied"))
+            Qt.openUrlExternally(qsTr("mailto:support@amnezia.org"))
         }
     }
 

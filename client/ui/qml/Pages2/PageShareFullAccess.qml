@@ -141,7 +141,6 @@ PageType {
                     shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
 
                     shareConnectionDrawer.openTriggered()
-                    shareConnectionDrawer.contentVisible = true
 
                     PageController.showBusyIndicator(false)
                 }

@@ -22,7 +22,9 @@ DrawerType2 {
 
     property string headerText
     property string configContentHeaderText
-    property string contentVisible
+    property string shareButtonText: qsTr("Share")
+    property string copyButtonText: qsTr("Copy")
+    property bool isSelfHostedConfig: true
 
     property string configExtension: ".vpn"
     property string configCaption: qsTr("Save AmneziaVPN config")
@@ -71,8 +73,6 @@ DrawerType2 {
             header: ColumnLayout {
                 width: listView.width
 
-                visible: root.contentVisible
-
                 BasicButtonType {
                     id: shareButton
                     Layout.fillWidth: true
@@ -80,7 +80,7 @@ DrawerType2 {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
 
-                    text: qsTr("Share")
+                    text: root.shareButtonText
                     leftImageSource: "qrc:/images/controls/share-2.svg"
 
                     clickedFunc: function() {
@@ -116,7 +116,7 @@ DrawerType2 {
                     textColor: AmneziaStyle.color.paleGray
                     borderWidth: 1
 
-                    text: qsTr("Copy")
+                    text: root.copyButtonText
                     leftImageSource: "qrc:/images/controls/copy.svg"
 
                     Keys.onReturnPressed: { copyConfigTextButton.clicked() }
@@ -152,6 +152,8 @@ DrawerType2 {
                     Layout.topMargin: 24
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
+
+                    visible: root.isSelfHostedConfig
 
                     defaultColor: AmneziaStyle.color.transparent
                     hoveredColor: AmneziaStyle.color.translucentWhite
@@ -283,6 +285,8 @@ DrawerType2 {
             delegate: ColumnLayout {
                 width: listView.width
 
+                property bool isQrCodeVisible: root.isSelfHostedConfig ? ExportController.qrCodesCount > 0 : ApiConfigsController.qrCodesCount > 0
+
                 Rectangle {
                     id: qrCodeContainer
 
@@ -292,7 +296,7 @@ DrawerType2 {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
 
-                    visible: ExportController.qrCodesCount > 0
+                    visible: isQrCodeVisible
 
                     color: "white"
 
@@ -300,7 +304,8 @@ DrawerType2 {
                         anchors.fill: parent
                         smooth: false
 
-                        source: ExportController.qrCodesCount ? ExportController.qrCodes[0] : ""
+                        source: root.isSelfHostedConfig ? (isQrCodeVisible ? ExportController.qrCodes[0] : "") :
+                                                          (isQrCodeVisible ? ApiConfigsController.qrCodes[0] : "")
 
                         property bool isFocusable: true
 
@@ -331,15 +336,17 @@ DrawerType2 {
                         Timer {
                             property int index: 0
                             interval: 1000
-                            running: ExportController.qrCodesCount > 0
+                            running: isQrCodeVisible
                             repeat: true
                             onTriggered: {
-                                if (ExportController.qrCodesCount > 0) {
+                                if (isQrCodeVisible) {
                                     index++
-                                    if (index >= ExportController.qrCodesCount) {
+                                    let qrCodesCount = root.isSelfHostedConfig ? ExportController.qrCodesCount : ApiConfigsController.qrCodesCount
+                                    if (index >= qrCodesCount) {
                                         index = 0
                                     }
-                                    parent.source = ExportController.qrCodes[index]
+
+                                    parent.source = root.isSelfHostedConfig ? ExportController.qrCodes[index] : ApiConfigsController.qrCodes[index]
                                 }
                             }
                         }
@@ -357,7 +364,7 @@ DrawerType2 {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
 
-                    visible: ExportController.qrCodesCount > 0
+                    visible: isQrCodeVisible
 
                     horizontalAlignment: Text.AlignHCenter
                     text: qsTr("To read the QR code in the Amnezia app, select \"Add server\" → \"I have data to connect\" → \"QR code, key or settings file\"")

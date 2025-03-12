@@ -44,7 +44,6 @@ void SitesController::addSite(QString hostname)
             QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
                                       Q_ARG(QStringList, QStringList() << hostname));
         }
-        QMetaObject::invokeMethod(m_vpnConnection.get(), "flushDns", Qt::QueuedConnection);
     };
 
     const auto &resolveCallback = [this, processSite](const QHostInfo &hostInfo) {
@@ -75,7 +74,6 @@ void SitesController::removeSite(int index)
 
     QMetaObject::invokeMethod(m_vpnConnection.get(), "deleteRoutes", Qt::QueuedConnection,
                               Q_ARG(QStringList, QStringList() << hostname));
-    QMetaObject::invokeMethod(m_vpnConnection.get(), "flushDns", Qt::QueuedConnection);
 
     emit finished(tr("Site removed: %1").arg(hostname));
 }
@@ -124,7 +122,6 @@ void SitesController::importSites(const QString &fileName, bool replaceExisting)
     m_sitesModel->addSites(sites, replaceExisting);
 
     QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection, Q_ARG(QStringList, ips));
-    QMetaObject::invokeMethod(m_vpnConnection.get(), "flushDns", Qt::QueuedConnection);
 
     emit finished(tr("Import completed"));
 }

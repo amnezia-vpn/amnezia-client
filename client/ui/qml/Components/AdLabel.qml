@@ -54,7 +54,7 @@ Rectangle {
             Layout.rightMargin: 10
             Layout.leftMargin: 10
 
-            text: qsTr("Amnezia Premium - for access to any website")
+            text: qsTr("Amnezia Premium - for access to all websites and online resources")
             color: AmneziaStyle.color.pearlGray
 
             lineHeight: 18

@@ -297,7 +297,23 @@ PageType {
 
                         onClicked: {
                             ServersModel.processedIndex = ServersModel.defaultIndex
-                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
+
+                            if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
+                                if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
+                                    PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
+                                } else {
+                                    PageController.showBusyIndicator(true)
+                                    let result = ApiSettingsController.getAccountInfo(false)
+                                    PageController.showBusyIndicator(false)
+                                    if (!result) {
+                                        return
+                                    }
+
+                                    PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+                                }
+                            } else {
+                                PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                            }
                         }
                     }
                 }

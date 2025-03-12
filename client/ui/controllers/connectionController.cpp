@@ -5,10 +5,8 @@
 #else
     #include <QApplication>
 #endif
-#include <QtConcurrent>
 
 #include "core/controllers/vpnConfigurationController.h"
-#include "core/enums/apiEnums.h"
 #include "version.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
@@ -27,7 +25,7 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
     connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
 
-    connect(this, &ConnectionController::configFromApiUpdated, this, &ConnectionController::continueConnection);
+    connect(this, &ConnectionController::connectButtonClicked, this, &ConnectionController::toggleConnection, Qt::QueuedConnection);
 
     m_state = Vpn::ConnectionState::Disconnected;
 }
@@ -35,8 +33,7 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 void ConnectionController::openConnection()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
-    {
+    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true)) {
         emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
         return;
     }
@@ -44,26 +41,24 @@ void ConnectionController::openConnection()
 
     int serverIndex = m_serversModel->getDefaultServerIndex();
     QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
-    auto configVersion = serverConfig.value(config_key::configVersion).toInt();
 
-    emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
+    DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
 
-    if (configVersion == ApiConfigSources::Telegram
-        && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        emit updateApiConfigFromTelegram();
-        } else if (configVersion == ApiConfigSources::AmneziaGateway
-        && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        emit updateApiConfigFromGateway();
-    } else if (configVersion && m_serversModel->isApiKeyExpired(serverIndex)) {
-        qDebug() << "attempt to update api config by expires_at event";
-        if (configVersion == ApiConfigSources::Telegram) {
-            emit updateApiConfigFromTelegram();
-        } else {
-            emit updateApiConfigFromGateway();
-        }
-    } else {
-        continueConnection();
+    if (!m_containersModel->isSupportedByCurrentPlatform(container)) {
+        emit connectionErrorOccurred(ErrorCode::NotSupportedOnThisPlatform);
+        return;
     }
+
+    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
+
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+
+    auto dns = m_serversModel->getDnsPair(serverIndex);
+
+    auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container);
+    emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);
 }
 
 void ConnectionController::closeConnection()
@@ -167,7 +162,7 @@ void ConnectionController::toggleConnection()
     } else if (isConnected()) {
         closeConnection();
     } else {
-        openConnection();
+        emit prepareConfig();
     }
 }
 
@@ -179,99 +174,4 @@ bool ConnectionController::isConnectionInProgress() const
 bool ConnectionController::isConnected() const
 {
     return m_isConnected;
-}
-
-bool ConnectionController::isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container)
-{
-    for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
-        QString protocolConfig =
-                containerConfig.value(ProtocolProps::protoToString(protocol)).toObject().value(config_key::last_config).toString();
-
-        if (protocolConfig.isEmpty()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void ConnectionController::continueConnection()
-{
-    int serverIndex = m_serversModel->getDefaultServerIndex();
-    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
-    auto configVersion = serverConfig.value(config_key::configVersion).toInt();
-
-    if (!m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        emit noInstalledContainers();
-        emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
-        return;
-    }
-
-    DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
-
-    if (!m_containersModel->isSupportedByCurrentPlatform(container)) {
-        emit connectionErrorOccurred(tr("The selected protocol is not supported on the current platform"));
-        return;
-    }
-
-    if (container == DockerContainer::None) {
-        emit connectionErrorOccurred(tr("VPN Protocols is not installed.\n Please install VPN container at first"));
-        return;
-    }
-
-    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
-
-    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
-    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
-    ErrorCode errorCode = updateProtocolConfig(container, credentials, containerConfig, serverController);
-    if (errorCode != ErrorCode::NoError) {
-        emit connectionErrorOccurred(errorCode);
-        return;
-    }
-
-    auto dns = m_serversModel->getDnsPair(serverIndex);
-
-    auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container, errorCode);
-    if (errorCode != ErrorCode::NoError) {
-        emit connectionErrorOccurred(tr("unable to create configuration"));
-        return;
-    }
-
-    emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);
-}
-
-ErrorCode ConnectionController::updateProtocolConfig(const DockerContainer container, const ServerCredentials &credentials,
-                                                     QJsonObject &containerConfig, QSharedPointer<ServerController> serverController)
-{
-    QFutureWatcher<ErrorCode> watcher;
-
-    if (serverController.isNull()) {
-        serverController.reset(new ServerController(m_settings));
-    }
-
-    QFuture<ErrorCode> future = QtConcurrent::run([this, container, &credentials, &containerConfig, &serverController]() {
-        ErrorCode errorCode = ErrorCode::NoError;
-        if (!isProtocolConfigExists(containerConfig, container)) {
-            VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
-            errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig);
-            if (errorCode != ErrorCode::NoError) {
-                return errorCode;
-            }
-            m_serversModel->updateContainerConfig(container, containerConfig);
-
-            errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig,
-                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
-            if (errorCode != ErrorCode::NoError) {
-                return errorCode;
-            }
-        }
-        return errorCode;
-    });
-
-    QEventLoop wait;
-    connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
-    watcher.setFuture(future);
-    wait.exec();
-
-    return watcher.result();
 }

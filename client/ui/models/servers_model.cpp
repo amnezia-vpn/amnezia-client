@@ -1,7 +1,7 @@
 #include "servers_model.h"
 
+#include "core/api/apiDefs.h"
 #include "core/controllers/serverController.h"
-#include "core/enums/apiEnums.h"
 #include "core/networkUtilities.h"
 
 #ifdef Q_OS_IOS
@@ -132,10 +132,10 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return serverHasInstalledContainers(index.row());
     }
     case IsServerFromTelegramApiRole: {
-        return server.value(config_key::configVersion).toInt() == ApiConfigSources::Telegram;
+        return server.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::Telegram;
     }
     case IsServerFromGatewayApiRole: {
-        return server.value(config_key::configVersion).toInt() == ApiConfigSources::AmneziaGateway;
+        return server.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway;
     }
     case ApiConfigRole: {
         return apiConfig;
@@ -261,7 +261,7 @@ void ServersModel::setProcessedServerIndex(const int index)
     updateContainersModel();
     if (data(index, IsServerFromGatewayApiRole).toBool()) {
         if (data(index, IsCountrySelectionAvailableRole).toBool()) {
-            emit updateApiLanguageModel();
+            emit updateApiCountryModel();
         }
         emit updateApiServicesModel();
     }

@@ -140,7 +140,7 @@ signals:
     void defaultServerContainersUpdated(const QJsonArray &containers);
     void defaultServerDefaultContainerChanged(const int containerIndex);
 
-    void updateApiLanguageModel();
+    void updateApiCountryModel();
     void updateApiServicesModel();
 
 private:

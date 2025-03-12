@@ -22,8 +22,6 @@ PageType {
     readonly property int pageSettingsServerProtocols: 0
     readonly property int pageSettingsServerServices: 1
     readonly property int pageSettingsServerData: 2
-    readonly property int pageSettingsApiServerInfo: 3
-    readonly property int pageSettingsApiLanguageList: 4
 
     property var processedServer
 
@@ -71,15 +69,6 @@ PageType {
         BackButtonType {
             id: backButton
             objectName: "backButton"
-
-            backButtonFunction: function() {
-                if (nestedStackView.currentIndex === root.pageSettingsApiServerInfo &&
-                        root.processedServer.isCountrySelectionAvailable) {
-                    nestedStackView.currentIndex = root.pageSettingsApiLanguageList
-                } else {
-                    PageController.closePage()
-                }
-            }
         }
 
         HeaderType {
@@ -91,18 +80,11 @@ PageType {
             Layout.rightMargin: 16
             Layout.bottomMargin: 10
 
-            actionButtonImage: nestedStackView.currentIndex === root.pageSettingsApiLanguageList ? "qrc:/images/controls/settings.svg"
-                                                                                                 : "qrc:/images/controls/edit-3.svg"
+            actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
             headerText: root.processedServer.name
             descriptionText: {
-                if (root.processedServer.isServerFromGatewayApi) {
-                    if (nestedStackView.currentIndex === root.pageSettingsApiLanguageList) {
-                        return qsTr("Subscription is valid until ") + ApiServicesModel.getSelectedServiceData("endDate")
-                    } else {
-                        return ApiServicesModel.getSelectedServiceData("serviceDescription")
-                    }
-                } else if (root.processedServer.isServerFromTelegramApi) {
+                if (root.processedServer.isServerFromTelegramApi) {
                     return root.processedServer.serverDescription
                 } else if (root.processedServer.hasWriteAccess) {
                     return root.processedServer.credentialsLogin + " · " + root.processedServer.hostName
@@ -112,60 +94,19 @@ PageType {
             }
 
             actionButtonFunction: function() {
-                if (nestedStackView.currentIndex === root.pageSettingsApiLanguageList) {
-                    nestedStackView.currentIndex = root.pageSettingsApiServerInfo
-                } else {
-                    serverNameEditDrawer.openTriggered()
-                }
+                serverNameEditDrawer.openTriggered()
             }
         }
 
-        DrawerType2 {
+        RenameServerDrawer {
             id: serverNameEditDrawer
-            objectName: "serverNameEditDrawer"
 
             parent: root
 
             anchors.fill: parent
             expandedHeight: root.height * 0.35
 
-            expandedStateContent: ColumnLayout {
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 32
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
-
-                TextFieldWithHeaderType {
-                    id: serverName
-
-                    Layout.fillWidth: true
-                    headerText: qsTr("Server name")
-                    textField.text: root.processedServer.name
-                    textField.maximumLength: 30
-                    checkEmptyText: true
-                }
-
-                BasicButtonType {
-                    id: saveButton
-
-                    Layout.fillWidth: true
-
-                    text: qsTr("Save")
-
-                    clickedFunc: function() {
-                        if (serverName.textField.text === "") {
-                            return
-                        }
-
-                        if (serverName.textField.text !== root.processedServer.name) {
-                            ServersModel.setProcessedServerData("name", serverName.textField.text);
-                        }
-                        serverNameEditDrawer.closeTriggered()
-                    }
-                }
-            }
+            serverNameText: root.processedServer.name
         }
 
         TabBar {
@@ -180,8 +121,6 @@ PageType {
             background: Rectangle {
                 color: AmneziaStyle.color.transparent
             }
-
-            visible: !ServersModel.getProcessedServerData("isServerFromGatewayApi")
 
 
             TabButtonType {
@@ -221,9 +160,7 @@ PageType {
 
             Layout.fillWidth: true
 
-            currentIndex: ServersModel.getProcessedServerData("isServerFromGatewayApi") ?
-                              (ServersModel.getProcessedServerData("isCountrySelectionAvailable") ?
-                                   root.pageSettingsApiLanguageList : root.pageSettingsApiServerInfo) : tabBar.currentIndex
+            currentIndex: tabBar.currentIndex
 
             PageSettingsServerProtocols {
                 id: protocolsPage
@@ -237,16 +174,6 @@ PageType {
 
             PageSettingsServerData {
                 id: dataPage
-                stackView: root.stackView
-            }
-
-            PageSettingsApiServerInfo {
-                id: apiInfoPage
-                stackView: root.stackView
-            }
-
-            PageSettingsApiLanguageList {
-                id: apiLanguageListPage
                 stackView: root.stackView
             }
         }

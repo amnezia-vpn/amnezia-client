@@ -709,7 +709,7 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     QString transportProto = containerConfig.value(config_key::transport_proto).toString(defaultTransportProto);
 
     // TODO reimplement with netstat
-    QString script = QString("which lsof &>/dev/null || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);
+    QString script = QString("which lsof > /dev/null 2>&1 || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);
     for (auto &port : fixedPorts) {
         script = script.append("|:%1").arg(port);
     }

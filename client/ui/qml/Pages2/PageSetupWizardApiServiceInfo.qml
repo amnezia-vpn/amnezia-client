@@ -138,7 +138,7 @@ PageType {
                 PageController.closePage()
             } else {
                 PageController.showBusyIndicator(true)
-                InstallController.installServiceFromApi()
+                ApiConfigsController.importServiceFromGateway()
                 PageController.showBusyIndicator(false)
             }
         }

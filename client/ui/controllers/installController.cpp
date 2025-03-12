@@ -6,8 +6,8 @@
 #include <QJsonObject>
 #include <QRandomGenerator>
 #include <QStandardPaths>
+#include <QtConcurrent>
 
-#include "core/controllers/apiController.h"
 #include "core/controllers/serverController.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/networkUtilities.h"
@@ -15,6 +15,7 @@
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "utilities.h"
+#include "core/api/apiUtils.h"
 
 namespace
 {
@@ -39,14 +40,12 @@ namespace
 InstallController::InstallController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                      const QSharedPointer<ProtocolsModel> &protocolsModel,
                                      const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                     const QSharedPointer<ApiServicesModel> &apiServicesModel, const std::shared_ptr<Settings> &settings,
-                                     QObject *parent)
+                                     const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_protocolModel(protocolsModel),
       m_clientManagementModel(clientManagementModel),
-      m_apiServicesModel(apiServicesModel),
       m_settings(settings)
 {
 }
@@ -773,109 +772,79 @@ void InstallController::addEmptyServer()
     emit installServerFinished(tr("Server added successfully"));
 }
 
-bool InstallController::fillAvailableServices()
+bool InstallController::isConfigValid()
 {
-    ApiController apiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
+    int serverIndex = m_serversModel->getDefaultServerIndex();
+    QJsonObject serverConfigObject = m_serversModel->getServerConfig(serverIndex);
 
-    QByteArray responseBody;
-    ErrorCode errorCode = apiController.getServicesList(responseBody);
-    if (errorCode != ErrorCode::NoError) {
-        emit installationErrorOccurred(errorCode);
+    if (apiUtils::isServerFromApi(serverConfigObject)) {
+        return true;
+    }
+
+    if (!m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
+        emit noInstalledContainers();
         return false;
     }
 
-    QJsonObject data = QJsonDocument::fromJson(responseBody).object();
-    m_apiServicesModel->updateModel(data);
-    return true;
-}
+    DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
 
-bool InstallController::installServiceFromApi()
-{
-    if (m_serversModel->isServerFromApiAlreadyExists(m_apiServicesModel->getCountryCode(), m_apiServicesModel->getSelectedServiceType(),
-                                                     m_apiServicesModel->getSelectedServiceProtocol())) {
-        emit installationErrorOccurred(ErrorCode::ApiConfigAlreadyAdded);
+    if (container == DockerContainer::None) {
+        emit installationErrorOccurred(ErrorCode::NoInstalledContainersError);
         return false;
     }
 
-    ApiController apiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
-    QJsonObject serverConfig;
+    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
 
-    ErrorCode errorCode = apiController.getConfigForService(m_settings->getInstallationUuid(true), m_apiServicesModel->getCountryCode(),
-                                                            m_apiServicesModel->getSelectedServiceType(),
-                                                            m_apiServicesModel->getSelectedServiceProtocol(), "", QJsonObject(), serverConfig);
-    if (errorCode != ErrorCode::NoError) {
-        emit installationErrorOccurred(errorCode);
-        return false;
-    }
+    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
+    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
 
-    auto serviceInfo = m_apiServicesModel->getSelectedServiceInfo();
-    QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
-    apiConfig.insert(configKey::serviceInfo, serviceInfo);
-    apiConfig.insert(configKey::userCountryCode, m_apiServicesModel->getCountryCode());
-    apiConfig.insert(configKey::serviceType, m_apiServicesModel->getSelectedServiceType());
-    apiConfig.insert(configKey::serviceProtocol, m_apiServicesModel->getSelectedServiceProtocol());
+    QFutureWatcher<ErrorCode> watcher;
 
-    serverConfig.insert(configKey::apiConfig, apiConfig);
+    QFuture<ErrorCode> future = QtConcurrent::run([this, container, &credentials, &containerConfig, &serverController]() {
+        ErrorCode errorCode = ErrorCode::NoError;
 
-    m_serversModel->addServer(serverConfig);
-    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
-    return true;
-}
+        auto isProtocolConfigExists = [](const QJsonObject &containerConfig, const DockerContainer container) {
+            for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
+                QString protocolConfig =
+                        containerConfig.value(ProtocolProps::protoToString(protocol)).toObject().value(config_key::last_config).toString();
 
-bool InstallController::updateServiceFromApi(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
-                                             bool reloadServiceConfig)
-{
-    ApiController apiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
+                if (protocolConfig.isEmpty()) {
+                    return false;
+                }
+            }
+            return true;
+        };
 
-    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
-    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
-    auto authData = serverConfig.value(configKey::authData).toObject();
+        if (!isProtocolConfigExists(containerConfig, container)) {
+            VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
+            errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig);
+            if (errorCode != ErrorCode::NoError) {
+                return errorCode;
+            }
+            m_serversModel->updateContainerConfig(container, containerConfig);
 
-    QJsonObject newServerConfig;
-    ErrorCode errorCode = apiController.getConfigForService(
-            m_settings->getInstallationUuid(true), apiConfig.value(configKey::userCountryCode).toString(),
-            apiConfig.value(configKey::serviceType).toString(), apiConfig.value(configKey::serviceProtocol).toString(), newCountryCode,
-            authData, newServerConfig);
-    if (errorCode != ErrorCode::NoError) {
-        emit installationErrorOccurred(errorCode);
-        return false;
-    }
-
-    QJsonObject newApiConfig = newServerConfig.value(configKey::apiConfig).toObject();
-    newApiConfig.insert(configKey::userCountryCode, apiConfig.value(configKey::userCountryCode));
-    newApiConfig.insert(configKey::serviceType, apiConfig.value(configKey::serviceType));
-    newApiConfig.insert(configKey::serviceProtocol, apiConfig.value(configKey::serviceProtocol));
-
-    newServerConfig.insert(configKey::apiConfig, newApiConfig);
-    newServerConfig.insert(configKey::authData, authData);
-    m_serversModel->editServer(newServerConfig, serverIndex);
-
-    if (reloadServiceConfig) {
-        emit reloadServerFromApiFinished(tr("API config reloaded"));
-    } else if (newCountryName.isEmpty()) {
-        emit updateServerFromApiFinished();
-    } else {
-        emit changeApiCountryFinished(tr("Successfully changed the country of connection to %1").arg(newCountryName));
-    }
-    return true;
-}
-
-void InstallController::updateServiceFromTelegram(const int serverIndex)
-{
-    ApiController *apiController = new ApiController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv());
-
-    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
-
-    apiController->updateServerConfigFromApi(m_settings->getInstallationUuid(true), serverIndex, serverConfig);
-    connect(apiController, &ApiController::finished, this, [this, apiController](const QJsonObject &config, const int serverIndex) {
-        m_serversModel->editServer(config, serverIndex);
-        emit updateServerFromApiFinished();
-        apiController->deleteLater();
+            errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig,
+                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
+            if (errorCode != ErrorCode::NoError) {
+                return errorCode;
+            }
+        }
+        return errorCode;
     });
-    connect(apiController, &ApiController::errorOccurred, this, [this, apiController](ErrorCode errorCode) {
+
+    QEventLoop wait;
+    connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
+    watcher.setFuture(future);
+    wait.exec();
+
+    ErrorCode errorCode = watcher.result();
+
+    if (errorCode != ErrorCode::NoError) {
         emit installationErrorOccurred(errorCode);
-        apiController->deleteLater();
-    });
+        return false;
+    }
+    return true;
 }
 
 bool InstallController::isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig,

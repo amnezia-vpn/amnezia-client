@@ -5,6 +5,7 @@
 #include <QRegExp>
 #include <QString>
 #include <QHostAddress>
+#include <QNetworkReply>
 
 
 class NetworkUtilities : public QObject
@@ -30,7 +31,6 @@ public:
     static QString ipAddressFromIpWithSubnet(const QString ip);
 
     static QStringList summarizeRoutes(const QStringList &ips, const QString cidr);
-
 };
 
 #endif // NETWORKUTILITIES_H

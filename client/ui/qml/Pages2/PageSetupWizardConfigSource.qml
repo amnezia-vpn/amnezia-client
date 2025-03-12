@@ -254,7 +254,7 @@ PageType {
         property bool isVisible: true
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            var result = InstallController.fillAvailableServices()
+            var result = ApiConfigsController.fillAvailableServices()
             PageController.showBusyIndicator(false)
             if (result) {
                 PageController.goToPage(PageEnum.PageSetupWizardApiServicesList)

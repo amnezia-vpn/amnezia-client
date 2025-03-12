@@ -2,6 +2,7 @@
 #define APICOUNTRYMODEL_H
 
 #include <QAbstractListModel>
+#include <QHash>
 #include <QJsonArray>
 
 class ApiCountryModel : public QAbstractListModel
@@ -12,7 +13,9 @@ public:
     enum Roles {
         CountryNameRole = Qt::UserRole + 1,
         CountryCodeRole,
-        CountryImageCodeRole
+        CountryImageCodeRole,
+        IsIssuedRole,
+        IsWorkerExpiredRole
     };
 
     explicit ApiCountryModel(QObject *parent = nullptr);
@@ -24,7 +27,8 @@ public:
     Q_PROPERTY(int currentIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
 
 public slots:
-    void updateModel(const QJsonArray &data, const QString &currentCountryCode);
+    void updateModel(const QJsonArray &countries, const QString &currentCountryCode);
+    void updateIssuedConfigsInfo(const QJsonArray &issuedConfigs);
 
     int getCurrentIndex();
     void setCurrentIndex(const int i);
@@ -36,7 +40,23 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    QJsonArray m_countries;
+    struct IssuedConfigInfo
+    {
+        QString installationUuid;
+        QString workerLastUpdated;
+        QString lastDownloaded;
+        QString sourceType;
+        QString osVersion;
+    };
+
+    struct CountryInfo
+    {
+        QString countryName;
+        QString countryCode;
+    };
+
+    QVector<CountryInfo> m_countries;
+    QHash<QString, IssuedConfigInfo> m_issuedConfigs;
     int m_currentIndex;
 };
 

@@ -192,7 +192,7 @@
         <file>ui/qml/Pages2/PageServiceTorWebsiteSettings.qml</file>
         <file>ui/qml/Pages2/PageSettings.qml</file>
         <file>ui/qml/Pages2/PageSettingsAbout.qml</file>
-        <file>ui/qml/Pages2/PageSettingsApiLanguageList.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApiAvailableCountries.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiServerInfo.qml</file>
         <file>ui/qml/Pages2/PageSettingsApplication.qml</file>
         <file>ui/qml/Pages2/PageSettingsAppSplitTunneling.qml</file>
@@ -224,6 +224,13 @@
         <file>ui/qml/Pages2/PageShare.qml</file>
         <file>ui/qml/Pages2/PageShareFullAccess.qml</file>
         <file>ui/qml/Pages2/PageStart.qml</file>
+        <file>ui/qml/Components/RenameServerDrawer.qml</file>
+        <file>ui/qml/Controls2/ListViewType.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApiSupport.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApiInstructions.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApiNativeConfigs.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApiDevices.qml</file>
+        <file>images/controls/monitor.svg</file>
         <file>ui/qml/DefaultVpn/Controls/DropDownType.qml</file>
         <file>ui/qml/DefaultVpn/main.qml</file>
         <file>ui/qml/DefaultVpn/Pages/PageHome.qml</file>

@@ -36,16 +36,6 @@ PageType {
             PageController.showErrorMessage(message)
         }
 
-        function onRemoveProcessedServerFinished(finishedMessage) {
-            if (!ServersModel.getServersCount()) {
-                PageController.goToPageHome()
-            } else {
-                PageController.goToStartPage()
-                PageController.goToPage(PageEnum.PageSettingsServersList)
-            }
-            PageController.showNotificationMessage(finishedMessage)
-        }
-
         function onRebootProcessedServerFinished(finishedMessage) {
             PageController.showNotificationMessage(finishedMessage)
         }
