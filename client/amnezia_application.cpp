@@ -61,7 +61,7 @@ void AmneziaApplication::init()
 {
     m_engine = new QQmlApplicationEngine;
 
-    const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
+    const QUrl url(QStringLiteral("qrc:/ui/qml/DefaultVpn/main.qml"));
     QObject::connect(
             m_engine, &QQmlApplicationEngine::objectCreated, this,
             [url](QObject *obj, const QUrl &objUrl) {
@@ -78,7 +78,7 @@ void AmneziaApplication::init()
 
     m_coreController.reset(new CoreController(m_vpnConnection, m_settings, m_engine));
 
-    m_engine->addImportPath("qrc:/ui/qml/Modules/");
+    m_engine->addImportPath("qrc:/ui/qml/DefaultVpn");
     m_engine->load(url);
 
     m_coreController->setQmlRoot();
@@ -153,7 +153,7 @@ void AmneziaApplication::loadFonts()
 {
     QQuickStyle::setStyle("Basic");
 
-    QFontDatabase::addApplicationFont(":/fonts/pt-root-ui_vf.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/VelaSans-GX.ttf");
 }
 
 bool AmneziaApplication::parseCommands()

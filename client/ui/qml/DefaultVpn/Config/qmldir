@@ -1,0 +1,4 @@
+module Config
+
+singleton DeviceInfo 1.0 DeviceInfo.qml
+singleton Style 1.0 Style.qml

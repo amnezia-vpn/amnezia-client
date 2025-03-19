@@ -51,7 +51,7 @@ QString PageController::getPagePath(PageLoader::PageEnum page)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<PageLoader::PageEnum>();
     QString pageName = metaEnum.valueToKey(static_cast<int>(page));
-    return "qrc:/ui/qml/Pages2/" + pageName + ".qml";
+    return "qrc:/ui/qml/DefaultVpn/Pages/" + pageName + ".qml";
 }
 
 void PageController::closeWindow()
