@@ -439,6 +439,10 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
 
     ErrorCode error =
             runScript(credentials,
@@ -447,6 +451,8 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
     
     if (stdOut.contains("runc doesn't work on cgroups v2"))
         return ErrorCode::ServerRuncNotWorkOnCgroupsV2;
+    if (stdOut.contains("cgroup mountpoint does not exist"))
+        return ErrorCode::ServerCgroupMountpointDoesNotExist;
 
     return error;
 }
@@ -458,24 +464,16 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
-    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
-        stdOut += data + "\n";
-        return ErrorCode::NoError;
-    };
 
     ErrorCode e = runScript(credentials,
                             replaceVars(amnezia::scriptData(ProtocolScriptType::run_container, container),
                                         genVarsForScript(credentials, container, config)),
-                            cbReadStdOut, cbReadStdErr);
+                            cbReadStdOut);
 
     if (stdOut.contains("address already in use"))
         return ErrorCode::ServerPortAlreadyAllocatedError;
     if (stdOut.contains("is already in use by container"))
         return ErrorCode::ServerPortAlreadyAllocatedError;
-    if (stdOut.contains("runc doesn't work on cgroups v2") )
-        return ErrorCode::ServerRuncNotWorkOnCgroupsV2;
-    if (stdOut.contains("cgroup mountpoint does not exist"))
-        return ErrorCode::ServerCgroupMountpointDoesNotExist;
     if (stdOut.contains("invalid publish"))
         return ErrorCode::ServerDockerFailedError;
 
