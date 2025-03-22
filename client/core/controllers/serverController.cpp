@@ -439,15 +439,11 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
-    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
-        stdOut += data + "\n";
-        return ErrorCode::NoError;
-    };
 
     ErrorCode error =
             runScript(credentials,
                       replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
-                      cbReadStdOut);
+                      cbReadStdOut, cbReadStdErr);
     
     if (stdOut.contains("runc doesn't work on cgroups v2"))
         return ErrorCode::ServerRuncNotWorkOnCgroupsV2;
