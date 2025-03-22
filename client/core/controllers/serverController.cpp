@@ -467,6 +467,8 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
         return ErrorCode::ServerPortAlreadyAllocatedError;
     if (stdOut.contains("is already in use by container"))
         return ErrorCode::ServerPortAlreadyAllocatedError;
+    if (stdOut.contains("runc doesn't work on cgroups v2") )
+        return ErrorCode::ServerRuncNotWorkOnCgroupsV2;
     if (stdOut.contains("cgroup mountpoint does not exist"))
         return ErrorCode::ServerCgroupMountpointDoesNotExist;
     if (stdOut.contains("invalid publish"))
