@@ -465,7 +465,7 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
     ErrorCode e = runScript(credentials,
                             replaceVars(amnezia::scriptData(ProtocolScriptType::run_container, container),
                                         genVarsForScript(credentials, container, config)),
-                            cbReadStdOut);
+                            cbReadStdOut, cbReadStdErr);
 
     if (stdOut.contains("address already in use"))
         return ErrorCode::ServerPortAlreadyAllocatedError;
