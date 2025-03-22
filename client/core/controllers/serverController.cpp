@@ -444,12 +444,12 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         return ErrorCode::NoError;
     };
 
-    errorCode error =
+    ErrorCode error =
             runScript(credentials,
                       replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
                       cbReadStdOut, cbReadStdErr);
     
-    if (stdOut.contains("runc doesn't work on cgroups v2") )
+    if (stdOut.contains("runc doesn't work on cgroups v2"))
         return ErrorCode::ServerRuncNotWorkOnCgroupsV2;
 
     return error;
