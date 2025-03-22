@@ -457,6 +457,10 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
 
     ErrorCode e = runScript(credentials,
                             replaceVars(amnezia::scriptData(ProtocolScriptType::run_container, container),
