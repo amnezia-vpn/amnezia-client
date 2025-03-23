@@ -449,10 +449,10 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
                       replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
                       cbReadStdOut, cbReadStdErr);
     
-    if (stdOut.contains("runc doesn't work on cgroups v2"))
-        return ErrorCode::ServerRuncNotWorkOnCgroupsV2;
+    if (stdOut.contains("doesn't work on cgroups v2"))
+        return ErrorCode::ServerDockerOnCgroupsV2;
     if (stdOut.contains("cgroup mountpoint does not exist"))
-        return ErrorCode::ServerCgroupMountpointDoesNotExist;
+        return ErrorCode::ServerCgroupMountpoint;
 
     return error;
 }

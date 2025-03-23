@@ -58,8 +58,8 @@ namespace amnezia
         ServerUserDirectoryNotAccessible = 208,
         ServerUserNotAllowedInSudoers = 209,
         ServerUserPasswordRequired = 210,
-        ServerRuncNotWorkOnCgroupsV2 = 211,
-        ServerCgroupMountpointDoesNotExist = 212,
+        ServerDockerOnCgroupsV2 = 211,
+        ServerCgroupMountpoint = 212,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,

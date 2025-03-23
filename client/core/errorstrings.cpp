@@ -26,8 +26,8 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::ServerUserDirectoryNotAccessible): errorMessage = QObject::tr("The server user's home directory is not accessible"); break;
     case(ErrorCode::ServerUserNotAllowedInSudoers): errorMessage = QObject::tr("Action not allowed in sudoers"); break;
     case(ErrorCode::ServerUserPasswordRequired): errorMessage = QObject::tr("The user's password is required"); break;
-    case(ErrorCode::ServerRuncNotWorkOnCgroupsV2): errorMessage = QObject::tr("Docker error: Runc dosn't work on cgroups v2"); break;
-    case(ErrorCode::ServerCgroupMountpointDoesNotExist): errorMessage = QObject::tr("Docker error: cgroup mountpoint does not exist"); break;
+    case(ErrorCode::ServerDockerOnCgroupsV2): errorMessage = QObject::tr("Docker error: dosn't work on cgroups v2"); break;
+    case(ErrorCode::ServerCgroupMountpoint): errorMessage = QObject::tr("Server error: cgroup mountpoint does not exist"); break;
 
     // Libssh errors
     case(ErrorCode::SshRequestDeniedError): errorMessage = QObject::tr("SSH request was denied"); break;
