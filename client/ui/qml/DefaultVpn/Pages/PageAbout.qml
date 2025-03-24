@@ -46,13 +46,15 @@ Page {
         }
 
         XSmallTextType {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
             Layout.topMargin: 24
             text: qsTr("Support group in Telegram")
         }
 
         MediumTextType {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
             Layout.topMargin: 8
             text: "@DefaultVPNSupport"
             color: Style.color.accent1
@@ -64,13 +66,15 @@ Page {
         }
 
         XSmallTextType {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
             Layout.topMargin: 24
             text: qsTr("E-mail for technical support")
         }
 
         MediumTextType {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
             Layout.topMargin: 8
             text: "support@dfvpn.com"
             color: Style.color.accent1
@@ -82,13 +86,15 @@ Page {
         }
 
         XSmallTextType {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
             Layout.topMargin: 24
             text: qsTr("Site")
         }
 
         MediumTextType {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
             Layout.topMargin: 8
             text: "dfvpn.com"
             color: Style.color.accent1
@@ -104,7 +110,8 @@ Page {
         }
 
         MediumTextType {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
             text: qsTr("Privacy policy")
             color: Style.color.accent1
             MouseArea {
@@ -115,7 +122,8 @@ Page {
         }
 
         XSmallTextType {
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
+            horizontalAlignment: Text.AlignHCenter
             Layout.topMargin: 16
             text: qsTr("v. %1").arg(SettingsController.getAppVersion())
             color: Style.color.gray7
