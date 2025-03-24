@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>fonts/pt-root-ui_vf.ttf</file>
+        <file>images/about.png</file>
         <file>images/amneziaBigLogo.png</file>
         <file>images/AmneziaVPN.png</file>
         <file>images/controls/alert-circle.svg</file>
@@ -55,6 +56,7 @@
         <file>images/controls/telegram.svg</file>
         <file>images/controls/text-cursor.svg</file>
         <file>images/controls/trash.svg</file>
+        <file>images/controls/warning-info.svg</file>
         <file>images/controls/x-circle.svg</file>
         <file>images/tray/active.png</file>
         <file>images/tray/default.png</file>
@@ -234,6 +236,7 @@
         <file>ui/qml/DefaultVpn/Controls/DropDownType.qml</file>
         <file>ui/qml/DefaultVpn/main.qml</file>
         <file>ui/qml/DefaultVpn/Pages/PageHome.qml</file>
+        <file>ui/qml/DefaultVpn/Pages/PageAbout.qml</file>
         <file>ui/qml/DefaultVpn/Controls/TextTypes/MediumTextType.qml</file>
         <file>ui/qml/DefaultVpn/Config/DeviceInfo.qml</file>
         <file>ui/qml/DefaultVpn/Config/qmldir</file>
