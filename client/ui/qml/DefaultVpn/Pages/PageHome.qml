@@ -21,18 +21,28 @@ Page {
 
         spacing: 0
 
-        Text {
-            lineHeight: 68
-            lineHeightMode: Text.FixedHeight
+        RowLayout {
+            Layout.fillWidth: true
+                    
+            Text {
+                Layout.fillWidth: true
+                lineHeight: 68
+                lineHeightMode: Text.FixedHeight
 
-            color: Style.color.gray2
-            font.pixelSize: 56
-            font.weight: 700
-            font.family: Style.font
+                color: Style.color.gray2
+                font.pixelSize: 56
+                font.weight: 700
+                font.family: Style.font
 
-            horizontalAlignment: Qt.AlignLeft
+                horizontalAlignment: Qt.AlignLeft
 
-            text: ConnectionController.isConnected ? qsTr("Online") : qsTr("Offline")
+                text: ConnectionController.isConnected ? qsTr("Online") : qsTr("Offline")
+            }
+
+            WhiteButtonNoBorder {
+                imageSource: "qrc:/images/controls/warning-info.svg"
+                onClicked: PageController.goToPage(PageEnum.PageAbout)
+            }
         }
 
         Item {
