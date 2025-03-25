@@ -1,3 +1,3 @@
 package org.amnezia.vpn
 
-class OpenVpnService : AmneziaVpnService()
+class OpenVpnService : DefaultVpnService()

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
-set(PROJECT AmneziaVPN)
+set(PROJECT DefaultVPN)
 project(${PROJECT})
 
 
@@ -70,23 +70,23 @@ qt6_add_resources(QRC ${QRC} ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 # -- i18n begin
 set(CMAKE_AUTORCC ON)
 
-set(AMNEZIAVPN_TS_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru_RU.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_zh_CN.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_fa_IR.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ar_EG.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_my_MM.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_uk_UA.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ur_PK.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_hi_IN.ts
+set(DEFAULTVPN_TS_FILES
+    ${CMAKE_CURRENT_LIST_DIR}/translations/defaultvpn_ru_RU.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/defaultvpn_zh_CN.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/defaultvpn_fa_IR.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/defaultvpn_ar_EG.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/defaultvpn_my_MM.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/defaultvpn_uk_UA.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/defaultvpn_ur_PK.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/defaultvpn_hi_IN.ts
 )
 
-file(GLOB_RECURSE AMNEZIAVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)
+file(GLOB_RECURSE DEFAULTVPN_TS_SOURCES *.qrc *.cpp *.h *.ui)
 
-qt_create_translation(AMNEZIAVPN_QM_FILES ${AMNEZIAVPN_TS_SOURCES} ${AMNEZIAVPN_TS_FILES})
+qt_create_translation(DEFAULTVPN_QM_FILES ${DEFAULTVPN_TS_SOURCES} ${DEFAULTVPN_TS_FILES})
 
 set(QM_FILE_LIST "")
-foreach(FILE ${AMNEZIAVPN_QM_FILES})
+foreach(FILE ${DEFAULTVPN_QM_FILES})
     get_filename_component(QM_FILE_NAME ${FILE} NAME)
     list(APPEND QM_FILE_LIST "<file>${QM_FILE_NAME}</file>")
 endforeach()
@@ -127,8 +127,8 @@ endif()
 
 if(WIN32)
     configure_file(
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/defaultvpn.rc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/defaultvpn.rc
     )
 
     set(LIBS ${LIBS}
@@ -148,13 +148,13 @@ if(APPLE)
     cmake_policy(SET CMP0114 NEW)
 
     if(NOT BUILD_OSX_APP_IDENTIFIER)
-        set(BUILD_OSX_APP_IDENTIFIER org.amnezia.AmneziaVPN CACHE STRING "OSX Application identifier")
+        set(BUILD_OSX_APP_IDENTIFIER org.amneziaUnipessoal.DefaultVPN CACHE STRING "OSX Application identifier")
     endif()
     if(NOT BUILD_IOS_APP_IDENTIFIER)
-        set(BUILD_IOS_APP_IDENTIFIER org.amnezia.AmneziaVPN CACHE STRING "iOS Application identifier")
+        set(BUILD_IOS_APP_IDENTIFIER org.amneziaUnipessoal.DefaultVPN CACHE STRING "iOS Application identifier")
     endif()
     if(NOT BUILD_IOS_GROUP_IDENTIFIER)
-        set(BUILD_IOS_GROUP_IDENTIFIER group.org.amnezia.AmneziaVPN CACHE STRING "iOS Group identifier")
+        set(BUILD_IOS_GROUP_IDENTIFIER group.org.amneziaUnipessoal.DefaultVPN CACHE STRING "iOS Group identifier")
     endif()
     if(NOT BUILD_VPN_DEVELOPMENT_TEAM)
         set(BUILD_VPN_DEVELOPMENT_TEAM X7UJ388FXK CACHE STRING "Amnezia VPN Development Team")

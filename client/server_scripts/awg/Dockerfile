@@ -1,6 +1,6 @@
-FROM amneziavpn/amnezia-wg:latest
+FROM defaultvpn/amnezia-wg:latest
 
-LABEL maintainer="AmneziaVPN"
+LABEL maintainer="DefaultVPN"
 
 #Install required packages
 RUN apk add --no-cache bash curl dumb-init

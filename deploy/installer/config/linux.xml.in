@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
-    <Name>AmneziaVPN</Name>
+    <Name>DefaultVPN</Name>
     <Version>@CMAKE_PROJECT_VERSION@</Version>
-    <Title>AmneziaVPN</Title>
-    <Publisher>AmneziaVPN</Publisher>
-    <StartMenuDir>AmneziaVPN</StartMenuDir>
-    <TargetDir>@ApplicationsDir@/AmneziaVPN</TargetDir>
+    <Title>DefaultVPN</Title>
+    <Publisher>DefaultVPN</Publisher>
+    <StartMenuDir>DefaultVPN</StartMenuDir>
+    <TargetDir>@ApplicationsDir@/DefaultVPN</TargetDir>
     <WizardDefaultWidth>600</WizardDefaultWidth>
     <WizardDefaultHeight>380</WizardDefaultHeight>
     <WizardStyle>Modern</WizardStyle>
@@ -19,9 +19,9 @@
     <DisableAuthorizationFallback>true</DisableAuthorizationFallback>
     <RemoteRepositories>
         <Repository>
-            <Url>https://amneziavpn.org/updates/linux</Url>
+            <Url>https://defaultvpn.org/updates/linux</Url>
             <Enabled>true</Enabled>
-            <DisplayName>AmneziaVPN - repository for Linux</DisplayName>
+            <DisplayName>DefaultVPN - repository for Linux</DisplayName>
         </Repository>
     </RemoteRepositories>
 </Installer>

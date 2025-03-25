@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_NAME=AmneziaVPN
+APP_NAME=DefaultVPN
 LOG_FOLDER=/var/log/$APP_NAME
 LOG_FILE="$LOG_FOLDER/post-uninstall.log"
 APP_PATH=/opt/$APP_NAME
@@ -18,7 +18,7 @@ if command -v steamos-readonly &> /dev/null; then
 	echo "steamos-readonly disabled" >> $LOG_FILE
 fi
 
-ls /opt/AmneziaVPN/client/lib/* | while IFS=: read -r dir; do
+ls /opt/DefaultVPN/client/lib/* | while IFS=: read -r dir; do
 	sudo unlink $dir  >> $LOG_FILE
 done
 

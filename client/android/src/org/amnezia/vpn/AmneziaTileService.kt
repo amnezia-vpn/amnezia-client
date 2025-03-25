@@ -29,7 +29,7 @@ import org.amnezia.vpn.protocol.ProtocolState.UNKNOWN
 import org.amnezia.vpn.util.Log
 
 private const val TAG = "AmneziaTileService"
-private const val DEFAULT_TILE_LABEL = "AmneziaVPN"
+private const val DEFAULT_TILE_LABEL = "DefaultVPN"
 
 class AmneziaTileService : TileService() {
 
@@ -101,7 +101,7 @@ class AmneziaTileService : TileService() {
             Log.d(TAG, "Start listening")
             vpnProto = VpnStateStore.getVpnState().vpnProto
             vpnProto.also { proto ->
-                if (proto != null && AmneziaVpnService.isRunning(applicationContext, proto.processName)) {
+                if (proto != null && DefaultVpnService.isRunning(applicationContext, proto.processName)) {
                     Log.d(TAG, "Vpn service is running")
                     doBindService()
                 } else {

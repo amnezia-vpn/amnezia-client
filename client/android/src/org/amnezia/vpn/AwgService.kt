@@ -1,3 +1,3 @@
 package org.amnezia.vpn
 
-class AwgService : AmneziaVpnService()
+class AwgService : DefaultVpnService()

@@ -119,7 +119,7 @@ using ProcessInfo = struct {
 
 constexpr static const auto DRIVER_SYMLINK = L"\\\\.\\MULLVADSPLITTUNNEL";
 constexpr static const auto DRIVER_FILENAME = "mullvad-split-tunnel.sys";
-constexpr static const auto DRIVER_SERVICE_NAME = L"AmneziaVPNSplitTunnel";
+constexpr static const auto DRIVER_SERVICE_NAME = L"DefaultVPNSplitTunnel";
 constexpr static const auto MV_SERVICE_NAME = L"MullvadVPN";
 
 #pragma endregion

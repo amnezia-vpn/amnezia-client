@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>AmneziaVPN-service</string>
+    <string>DefaultVPN-service</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/Applications/AmneziaVPN.app/Contents/MacOS/AmneziaVPN-service</string>
+        <string>/Applications/DefaultVPN.app/Contents/MacOS/DefaultVPN-service</string>
     </array>
     <key>KeepAlive</key>
     <true/>

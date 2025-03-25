@@ -9,7 +9,7 @@
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/ios_controller.h"
-    #include <AmneziaVPN-Swift.h>
+    #include <DefaultVPN-Swift.h>
 #endif
 
 CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
@@ -195,9 +195,9 @@ void CoreController::initAppleController()
         emit m_settingsController->importBackupFromOutside(filePath);
     });
 
-    QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled()); });
+    QTimer::singleShot(0, this, [this]() { DefaultVPN::toggleScreenshots(m_settings->isScreenshotsEnabled()); });
 
-    connect(m_settings.get(), &Settings::screenshotsEnabledChanged, [](bool enabled) { AmneziaVPN::toggleScreenshots(enabled); });
+    connect(m_settings.get(), &Settings::screenshotsEnabledChanged, [](bool enabled) { DefaultVPN::toggleScreenshots(enabled); });
 #endif
 }
 
@@ -238,7 +238,7 @@ void CoreController::updateTranslator(const QLocale &locale)
         QCoreApplication::removeTranslator(m_translator.get());
     }
 
-    QString strFileName = QString(":/translations/amneziavpn") + QLatin1String("_") + locale.name() + ".qm";
+    QString strFileName = QString(":/translations/defaultvpn") + QLatin1String("_") + locale.name() + ".qm";
     if (m_translator->load(strFileName)) {
         if (QCoreApplication::installTranslator(m_translator.get())) {
             m_settings->setAppLanguage(locale);

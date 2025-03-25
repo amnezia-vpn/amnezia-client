@@ -30,7 +30,7 @@ Window  {
         PageController.closeWindow()
     }
 
-    title: "AmneziaVPN"
+    title: "DefaultVPN"
 
     Item { // This item is needed for focus handling
         id: defaultFocusItem

@@ -1,0 +1,14 @@
+[Unit]
+Description=DefaultVPN Service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=/opt/DefaultVPN/service/DefaultVPN-service.sh
+Environment=LD_LIBRARY_PATH=/opt/DefaultVPN/client/lib
+
+[Install]
+WantedBy=multi-user.target

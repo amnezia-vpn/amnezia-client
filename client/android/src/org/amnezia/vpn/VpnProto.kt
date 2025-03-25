@@ -10,7 +10,7 @@ import org.amnezia.vpn.protocol.xray.Xray
 enum class VpnProto(
     val label: String,
     val processName: String,
-    val serviceClass: Class<out AmneziaVpnService>
+    val serviceClass: Class<out DefaultVpnService>
 ) {
     WIREGUARD(
         "WireGuard",

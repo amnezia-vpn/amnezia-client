@@ -104,7 +104,7 @@ PageType {
                 id: about
                 Layout.fillWidth: true
 
-                text: qsTr("About AmneziaVPN")
+                text: qsTr("About DefaultVPN")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: "qrc:/images/controls/amnezia.svg"
 

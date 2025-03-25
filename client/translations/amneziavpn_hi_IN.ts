@@ -408,8 +408,8 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/notificationhandler.cpp" line="63"/>
         <location filename="../ui/notificationhandler.cpp" line="70"/>
-        <source>AmneziaVPN</source>
-        <translation>AmneziaVPN</translation>
+        <source>DefaultVPN</source>
+        <translation>DefaultVPN</translation>
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="64"/>
@@ -423,8 +423,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="94"/>
-        <source>AmneziaVPN notification</source>
-        <translation>AmneziaVPN अधिसूचना</translation>
+        <source>DefaultVPN notification</source>
+        <translation>DefaultVPN अधिसूचना</translation>
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="95"/>
@@ -1337,8 +1337,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="110"/>
-        <source>About AmneziaVPN</source>
-        <translation>AmneziaVPN के बारे में</translation>
+        <source>About DefaultVPN</source>
+        <translation>DefaultVPN के बारे में</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="126"/>
@@ -1681,8 +1681,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="212"/>
-        <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>सभी सेटिंग्स डिफ़ॉल्ट पर रीसेट हो जाएंगी. सभी स्थापित AmneziaVPN सेवाएँ अभी भी सर्वर पर रहेंगी।.</translation>
+        <source>All settings will be reset to default. All installed DefaultVPN services will still remain on the server.</source>
+        <translation>सभी सेटिंग्स डिफ़ॉल्ट पर रीसेट हो जाएंगी. सभी स्थापित DefaultVPN सेवाएँ अभी भी सर्वर पर रहेंगी।.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="213"/>
@@ -1719,8 +1719,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="74"/>
-        <source>The backup will contain your passwords and private keys for all servers added to AmneziaVPN. Keep this information in a secure place.</source>
-        <translation>बैकअप में AmneziaVPN में जोड़े गए सभी सर्वरों के लिए आपके पासवर्ड और निजी कुंजी शामिल होंगी। इस जानकारी को सुरक्षित स्थान पर रखें.</translation>
+        <source>The backup will contain your passwords and private keys for all servers added to DefaultVPN. Keep this information in a secure place.</source>
+        <translation>बैकअप में DefaultVPN में जोड़े गए सभी सर्वरों के लिए आपके पासवर्ड और निजी कुंजी शामिल होंगी। इस जानकारी को सुरक्षित स्थान पर रखें.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="85"/>
@@ -1983,7 +1983,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="174"/>
-        <source>AmneziaVPN logs</source>
+        <source>DefaultVPN logs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2003,7 +2003,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="203"/>
-        <source>AmneziaVPN-service logs</source>
+        <source>DefaultVPN-service logs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2122,8 +2122,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="163"/>
-        <source>All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>सभी स्थापित AmneziaVPN सेवाएँ अभी भी सर्वर पर रहेंगी.</translation>
+        <source>All installed DefaultVPN services will still remain on the server.</source>
+        <translation>सभी स्थापित DefaultVPN सेवाएँ अभी भी सर्वर पर रहेंगी.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="196"/>
@@ -2868,8 +2868,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="120"/>
-        <source>For the AmneziaVPN app</source>
-        <translation>AmneziaVPN ऐप के लिए</translation>
+        <source>For the DefaultVPN app</source>
+        <translation>DefaultVPN ऐप के लिए</translation>
     </message>
     <message>
         <source>OpenVpn native format</source>
@@ -3687,7 +3687,7 @@ Immediately after receiving the first data packet, Cloak authenticates the incom
 
 If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
 
-* Available in the AmneziaVPN across all platforms
+* Available in the DefaultVPN across all platforms
 * High power consumption on mobile devices
 * Flexible settings
 * Not recognised by DPI analysis systems
@@ -3705,7 +3705,7 @@ OpenVPN क्लाइंट और सर्वर के बीच सभी 
 
 यदि आपके क्षेत्र में इंटरनेट सेंसरशिप अत्यधिक स्तर पर है, तो हम आपको सलाह देते हैं कि पहले कनेक्शन से क्लोक पर केवल ओपनवीपीएन का उपयोग करें।
 
-* सभी प्लेटफार्मों पर AmneziaVPN में उपलब्ध है
+* सभी प्लेटफार्मों पर DefaultVPN में उपलब्ध है
 * मोबाइल उपकरणों पर उच्च बिजली की खपत
 * लचीली सेटिंग्स
 * डीपीआई विश्लेषण प्रणालियों द्वारा मान्यता प्राप्त नहीं
@@ -3718,7 +3718,7 @@ OpenVPN क्लाइंट और सर्वर के बीच सभी 
 WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
 WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the DefaultVPN across all platforms
 * Low power consumption
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
@@ -3727,7 +3727,7 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
 वायरगार्ड सभी उपकरणों पर स्थिर वीपीएन कनेक्शन और उच्च प्रदर्शन प्रदान करता है। यह हार्ड-कोडित एन्क्रिप्शन सेटिंग्स का उपयोग करता है। ओपनवीपीएन की तुलना में वायरगार्ड में कम विलंबता और बेहतर डेटा ट्रांसफर थ्रूपुट है।
 वायरगार्ड अपने विशिष्ट पैकेट हस्ताक्षरों के कारण अवरुद्ध होने के प्रति अतिसंवेदनशील है। कुछ अन्य वीपीएन प्रोटोकॉल के विपरीत, जो अस्पष्टता तकनीकों को नियोजित करते हैं, वायरगार्ड पैकेट के सुसंगत हस्ताक्षर पैटर्न को अधिक आसानी से पहचाना जा सकता है और इस प्रकार उन्नत डीप पैकेट निरीक्षण (डीपीआई) सिस्टम और अन्य नेटवर्क निगरानी उपकरणों द्वारा अवरुद्ध किया जा सकता है।
 
-* सभी प्लेटफार्मों पर AmneziaVPN में उपलब्ध है
+* सभी प्लेटफार्मों पर DefaultVPN में उपलब्ध है
 * कम बिजली की खपत
 * सेटिंग्स की न्यूनतम संख्या
 * डीपीआई विश्लेषण प्रणालियों द्वारा आसानी से पहचाना जाना, अवरुद्ध होने की आशंका
@@ -3781,7 +3781,7 @@ For more detailed information, you can
         <source>OpenVPN stands as one of the most popular and time-tested VPN protocols available.
 It employs its unique security protocol, leveraging the strength of SSL/TLS for encryption and key exchange. Furthermore, OpenVPN&apos;s support for a multitude of authentication methods makes it versatile and adaptable, catering to a wide range of devices and operating systems. Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, which continually reinforces its security. With a strong balance of performance, security, and compatibility, OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the DefaultVPN across all platforms
 * Normal power consumption on mobile devices
 * Flexible customisation to suit user needs to work with different operating systems and devices
 * Recognised by DPI analysis systems and therefore susceptible to blocking
@@ -3789,7 +3789,7 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
         <translation>OpenVPN उपलब्ध सबसे लोकप्रिय और समय-परीक्षणित वीपीएन प्रोटोकॉल में से एक है।
 यह एन्क्रिप्शन और कुंजी विनिमय के लिए एसएसएल/टीएलएस की ताकत का लाभ उठाते हुए, अपने अद्वितीय सुरक्षा प्रोटोकॉल को नियोजित करता है। इसके अलावा, कई प्रमाणीकरण विधियों के लिए ओपनवीपीएन का समर्थन इसे उपकरणों और ऑपरेटिंग सिस्टम की एक विस्तृत श्रृंखला को पूरा करते हुए बहुमुखी और अनुकूलनीय बनाता है। अपनी ओपन-सोर्स प्रकृति के कारण, ओपनवीपीएन को वैश्विक समुदाय द्वारा व्यापक जांच से लाभ मिलता है, जो लगातार इसकी सुरक्षा को मजबूत करता है। प्रदर्शन, सुरक्षा और अनुकूलता के मजबूत संतुलन के साथ, ओपनवीपीएन गोपनीयता के प्रति जागरूक व्यक्तियों और व्यवसायों के लिए शीर्ष विकल्प बना हुआ है।
 
-* सभी प्लेटफार्मों पर AmneziaVPN में उपलब्ध है
+* सभी प्लेटफार्मों पर DefaultVPN में उपलब्ध है
 * मोबाइल उपकरणों पर सामान्य बिजली की खपत
 * विभिन्न ऑपरेटिंग सिस्टम और उपकरणों के साथ काम करने के लिए उपयोगकर्ता की जरूरतों के अनुरूप लचीला अनुकूलन
 * डीपीआई विश्लेषण प्रणालियों द्वारा मान्यता प्राप्त और इसलिए अवरुद्ध होने के लिए अतिसंवेदनशील
@@ -3799,13 +3799,13 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
         <location filename="../containers/containers_defs.cpp" line="162"/>
         <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
 
-* Available in the AmneziaVPN only on desktop platforms
+* Available in the DefaultVPN only on desktop platforms
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
         <translation>शैडोसॉक्स, SOCKS5 प्रोटोकॉल से प्रेरित होकर, AEAD सिफर का उपयोग करके कनेक्शन की सुरक्षा करता है। हालाँकि शैडोसॉक्स को विवेकपूर्ण और पहचानने में चुनौतीपूर्ण बनाया गया है, यह एक मानक HTTPS कनेक्शन के समान नहीं है। हालाँकि, कुछ ट्रैफ़िक विश्लेषण प्रणालियाँ अभी भी शैडोसॉक्स कनेक्शन का पता लगा सकती हैं। Amnezia में सीमित समर्थन के कारण, AmneziaWG प्रोटोकॉल का उपयोग करने की अनुशंसा की जाती है।
 
-* AmneziaVPN केवल डेस्कटॉप प्लेटफ़ॉर्म पर उपलब्ध है
+* DefaultVPN केवल डेस्कटॉप प्लेटफ़ॉर्म पर उपलब्ध है
 * कॉन्फ़िगर करने योग्य एन्क्रिप्शन प्रोटोकॉल
 * कुछ डीपीआई सिस्टम द्वारा पता लगाने योग्य
 * टीसीपी नेटवर्क प्रोटोकॉल पर काम करता है।.</translation>
@@ -3816,7 +3816,7 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. AmneziaWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
 This means that AmneziaWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the DefaultVPN across all platforms
 * Low power consumption
 * Minimum number of settings
 * Not recognised by DPI analysis systems, resistant to blocking
@@ -3825,7 +3825,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 जबकि वायरगार्ड अपनी दक्षता के लिए जाना जाता है, इसके विशिष्ट पैकेट हस्ताक्षरों के कारण इसे आसानी से पहचाने जाने में समस्याएँ थीं। AmneziaWG बेहतर अस्पष्टीकरण विधियों का उपयोग करके इस समस्या को हल करता है, जिससे इसका ट्रैफ़िक नियमित इंटरनेट ट्रैफ़िक के साथ मिश्रित हो जाता है।
 इसका मतलब यह है कि AmneziaWG स्टील्थ की एक अतिरिक्त परत जोड़ते हुए मूल के तेज़ प्रदर्शन को बनाए रखता है, जिससे यह तेज़ और विवेकपूर्ण वीपीएन कनेक्शन चाहने वालों के लिए एक बढ़िया विकल्प बन जाता है।
 
-* सभी प्लेटफार्मों पर AmneziaVPN में उपलब्ध है
+* सभी प्लेटफार्मों पर DefaultVPN में उपलब्ध है
 * कम बिजली की खपत
 * सेटिंग्स की न्यूनतम संख्या
 * डीपीआई विश्लेषण प्रणालियों द्वारा मान्यता प्राप्त नहीं, अवरोधन के प्रति प्रतिरोधी
@@ -3848,7 +3848,7 @@ VMess, VLESS और XTLS-Vision ट्रांसपोर्ट जैसे �
 One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
 
-* Available in the AmneziaVPN only on Windows
+* Available in the DefaultVPN only on Windows
 * Low power consumption, on mobile devices
 * Minimal configuration
 * Recognised by DPI analysis systems
@@ -3857,7 +3857,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 इसकी विशिष्ट विशेषताओं में से एक नेटवर्क और उपकरणों के बीच तेजी से स्विच करने की क्षमता है, जो इसे गतिशील नेटवर्क वातावरण में विशेष रूप से अनुकूली बनाती है।
 हालाँकि यह सुरक्षा, स्थिरता और गति का मिश्रण प्रदान करता है, यह ध्यान रखना आवश्यक है कि IKEv2 को आसानी से पहचाना जा सकता है और अवरुद्ध होने की संभावना है।
 
-* केवल विंडोज़ पर AmneziaVPN में उपलब्ध है
+* केवल विंडोज़ पर DefaultVPN में उपलब्ध है
 * मोबाइल उपकरणों पर कम बिजली की खपत
 * न्यूनतम विन्यास
 * डीपीआई विश्लेषण प्रणालियों द्वारा मान्यता प्राप्त
@@ -4103,8 +4103,8 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="28"/>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="35"/>
-        <source>Save AmneziaVPN config</source>
-        <translation>AmneziaVPN कॉन्फ़िगरेशन सहेजें</translation>
+        <source>Save DefaultVPN config</source>
+        <translation>DefaultVPN कॉन्फ़िगरेशन सहेजें</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="83"/>

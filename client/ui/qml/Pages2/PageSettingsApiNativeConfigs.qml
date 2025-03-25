@@ -20,7 +20,7 @@ PageType {
     id: root
 
     property string configExtension: ".conf"
-    property string configCaption: qsTr("Save AmneziaVPN config")
+    property string configCaption: qsTr("Save DefaultVPN config")
 
     ListViewType {
         id: listView

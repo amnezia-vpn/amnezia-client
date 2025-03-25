@@ -9,8 +9,8 @@
 #define APP_MAJOR_VERSION "@APP_MAJOR_VERSION@"
 #endif
 
-#define APPLICATION_NAME    "AmneziaVPN"
-#define SERVICE_NAME        "AmneziaVPN-service"
-#define ORGANIZATION_NAME   "AmneziaVPN.ORG"
+#define APPLICATION_NAME    "DefaultVPN"
+#define SERVICE_NAME        "DefaultVPN-service"
+#define ORGANIZATION_NAME   "DefaultVPN.ORG"
 
 #endif  // VERSION_H

@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-// Copyright (c) 2024 AmneziaVPN
-// This file has been modified for AmneziaVPN
+// Copyright (c) 2024 DefaultVPN
+// This file has been modified for DefaultVPN
 //
 // This file is based on the work of the Qv2ray VPN client.
 // The original code of the Qv2ray, A Qt frontend for V2Ray. Written in C++ and licensed under GPL3.

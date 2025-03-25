@@ -5,7 +5,7 @@
 #include "core/networkUtilities.h"
 
 #ifdef Q_OS_IOS
-    #include <AmneziaVPN-Swift.h>
+    #include <DefaultVPN-Swift.h>
 #endif
 
 namespace
@@ -766,7 +766,7 @@ void ServersModel::removeApiConfig(const int serverIndex)
                                .arg(serverConfig[config_key::hostName].toString())
                                .arg(serverConfig[config_key::vpnproto].toString());
 
-    AmneziaVPN::removeVPNC(vpncName.toStdString());
+    DefaultVPN::removeVPNC(vpncName.toStdString());
 #endif
 
     serverConfig.remove(config_key::dns1);

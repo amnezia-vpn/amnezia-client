@@ -1,6 +1,6 @@
 FROM mvance/unbound:latest
 
-LABEL maintainer="AmneziaVPN" 
+LABEL maintainer="DefaultVPN"
 
 RUN echo " \n\
 domain-insecure: \"coin.\"\n\

@@ -1,5 +1,5 @@
 FROM alpine:3.15
-LABEL maintainer="AmneziaVPN"
+LABEL maintainer="DefaultVPN"
 
 ARG SS_RELEASE="v1.18.1"
 ARG CLOAK_RELEASE="v2.8.0"

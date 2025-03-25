@@ -237,7 +237,7 @@ PageType {
     }
 
     property list<QtObject> variants: [
-        amneziaVpn,
+        defaultVpn,
         selfHostVpn,
         backupRestore,
         fileOpen,
@@ -246,7 +246,7 @@ PageType {
     ]
     
     QtObject {
-        id: amneziaVpn
+        id: defaultVpn
 
         property string title: qsTr("VPN by Amnezia")
         property string description: qsTr("Connect to classic paid and free VPN services from Amnezia")

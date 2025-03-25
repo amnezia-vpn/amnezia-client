@@ -11,7 +11,7 @@
 #endif
 
 #ifdef Q_OS_IOS
-    #include <AmneziaVPN-Swift.h>
+    #include <DefaultVPN-Swift.h>
 #endif
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
@@ -77,7 +77,7 @@ void SettingsController::toggleLogging(bool enable)
 {
     m_settings->setSaveLogs(enable);
 #ifdef Q_OS_IOS
-    AmneziaVPN::toggleLogging(enable);
+    DefaultVPN::toggleLogging(enable);
 #endif
     if (enable == true) {
         qInfo().noquote() << QString("Logging has enabled on %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
@@ -170,7 +170,7 @@ void SettingsController::clearSettings()
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
 #ifdef Q_OS_IOS
-    AmneziaVPN::clearSettings();
+    DefaultVPN::clearSettings();
 #endif
 }
 

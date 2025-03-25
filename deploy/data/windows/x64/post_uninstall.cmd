@@ -1,12 +1,12 @@
 set AmneziaPath=%~dp0
 echo %AmneziaPath%
 
-"%AmneziaPath%\AmneziaVPN.exe" -c
+"%AmneziaPath%\DefaultVPN.exe" -c
 timeout /t 1
-sc stop AmneziaVPN-service
-sc delete AmneziaVPN-service
-sc stop AmneziaWGTunnel$AmneziaVPN
-sc delete AmneziaWGTunnel$AmneziaVPN
-taskkill /IM "AmneziaVPN-service.exe" /F
-taskkill /IM "AmneziaVPN.exe" /F
+sc stop DefaultVPN-service
+sc delete DefaultVPN-service
+sc stop AmneziaWGTunnel$DefaultVPN
+sc delete AmneziaWGTunnel$DefaultVPN
+taskkill /IM "DefaultVPN-service.exe" /F
+taskkill /IM "DefaultVPN.exe" /F
 exit /b 0
