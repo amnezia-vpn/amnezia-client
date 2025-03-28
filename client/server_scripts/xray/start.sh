@@ -5,6 +5,11 @@
 echo "Container startup"
 #ifconfig eth0:0 $SERVER_IP_ADDRESS netmask 255.255.255.255 up
 
+# check if nf_tables is loaded
+if lsmod | grep -qw nf_tables; then
+    ln -sf /sbin/xtables-nft-multi /sbin/iptables
+fi
+
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 iptables -A INPUT -p icmp -j ACCEPT
