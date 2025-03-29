@@ -1,3 +1,8 @@
+# Create docker volume if not exists
+if ! sudo docker volume ls | grep -q $CONTAINER_NAME; then
+    sudo docker volume create $CONTAINER_NAME
+fi
+
 # Run container
 sudo docker run -d \
 --log-driver none \
