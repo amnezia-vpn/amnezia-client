@@ -1,8 +1,3 @@
-# check if nf_tables is loaded
-if lsmod | grep -qw nf_tables; then
-    sudo update-alternatives --set iptables /usr/sbin/iptables-nft
-fi
-
 sudo sysctl -w net.ipv4.ip_forward=1
 sudo iptables -C INPUT -p icmp --icmp-type echo-request -j DROP || sudo iptables -A INPUT -p icmp --icmp-type echo-request -j DROP
 

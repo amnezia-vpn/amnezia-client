@@ -7,3 +7,8 @@ if ! sudo docker network ls | grep -q amnezia-dns-net; then sudo docker network 
   --opt com.docker.network.bridge.name=amn0 \
   amnezia-dns-net;\
 fi
+
+# check if nf_tables is loaded
+if lsmod | grep -qw nf_tables; then
+    sudo update-alternatives --set iptables /usr/sbin/iptables-nft
+fi
