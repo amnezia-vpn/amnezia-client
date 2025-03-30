@@ -417,13 +417,13 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
 
 ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
-    QString sctiptFileName = QString("/opt/amnezia/setup_host_firewall.sh")
-    errorCode = uploadFileToHost(credentials, amnezia::scriptData(SharedScriptType::setup_host_firewall).toUtf8(), sctiptFileName);
+    QString sctiptFileName = QString("/opt/amnezia/setup_host_firewall.sh");
+    ErrorCode errorCode = uploadFileToHost(credentials, amnezia::scriptData(SharedScriptType::setup_host_firewall).toUtf8(), sctiptFileName);
 
     if (errorCode)
         return errorCode;
 
-    ErrorCode errorCode = runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::prepare_host), genVarsForScript(credentials, container)));
+    errorCode = runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::prepare_host), genVarsForScript(credentials, container)));
 
     if (errorCode)
         return errorCode;
