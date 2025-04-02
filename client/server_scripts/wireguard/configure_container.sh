@@ -9,7 +9,9 @@ echo $WIREGUARD_SERVER_PUBLIC_KEY > /opt/amnezia/wireguard/wireguard_server_publ
 WIREGUARD_PSK=$(wg genpsk)
 echo $WIREGUARD_PSK > /opt/amnezia/wireguard/wireguard_psk.key
 
-WIREGUARD_SERVER_IP=$(echo $WIREGUARD_SUBNET_IP | sed 's/\.0$/\.1/')
+IFS='.' read -r a b c d <<< "$WIREGUARD_SUBNET_IP"
+((d++))
+WIREGUARD_SERVER_IP="${a}.${b}.${c}.${d}"
 
 cat > /opt/amnezia/wireguard/wg0.conf <<EOF
 [Interface]

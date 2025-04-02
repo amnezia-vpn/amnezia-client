@@ -124,6 +124,7 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
                                       .toObject()
                                       .value(config_key::subnet_address)
                                       .toString(protocols::wireguard::defaultSubnetAddress));
+            lastIp.setAddress(lastIp.toIPv4Address() + 1);
         } else {
             lastIp = ips.last();
         }
@@ -131,7 +132,6 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         switch (lastOctet) {
         case 254: result.setAddress(lastIp.toIPv4Address() + 3); break;
         case 255: result.setAddress(lastIp.toIPv4Address() + 2); break;
-        case 0: result.setAddress(lastIp.toIPv4Address() + 2); break;
         default: result.setAddress(lastIp.toIPv4Address() + 1); break;
         }
 
