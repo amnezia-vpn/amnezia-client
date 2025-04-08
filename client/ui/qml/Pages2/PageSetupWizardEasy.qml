@@ -78,7 +78,7 @@ PageType {
                 height: containers.contentItem.height
                 spacing: 16
 
-                currentIndex: 1
+                currentIndex: 0
                 clip: true
                 interactive: false
                 model: proxyContainersModel

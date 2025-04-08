@@ -1,5 +1,6 @@
 #include "coreController.h"
 
+#include <QDirIterator>
 #include <QTranslator>
 
 #if defined(Q_OS_ANDROID)
@@ -238,7 +239,23 @@ void CoreController::updateTranslator(const QLocale &locale)
         QCoreApplication::removeTranslator(m_translator.get());
     }
 
-    QString strFileName = QString(":/translations/defaultvpn") + QLatin1String("_") + locale.name() + ".qm";
+    QStringList availableTranslations;
+    QDirIterator it(":/translations", QStringList("defaultvpn_*.qm"), QDir::Files);
+    while (it.hasNext()) {
+        availableTranslations << it.next();
+    }
+
+    // This code allow to load translation for the language only, without country code
+    const QString lang = locale.name().split("_").first();
+    const QString translationFilePrefix = QString(":/translations/defaultvpn_") + lang;
+    QString strFileName = QString(":/translations/defaultvpn_%1.qm").arg(locale.name());
+    for (const QString &translation : availableTranslations) {
+        if (translation.contains(translationFilePrefix)) {
+            strFileName = translation;
+            break;
+        }
+    }
+
     if (m_translator->load(strFileName)) {
         if (QCoreApplication::installTranslator(m_translator.get())) {
             m_settings->setAppLanguage(locale);

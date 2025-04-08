@@ -757,10 +757,6 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
 
 ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, DockerContainer container)
 {
-    if (credentials.userName == "root") {
-        return ErrorCode::NoError;
-    }
-
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
@@ -774,8 +770,16 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
     const QString scriptData = amnezia::scriptData(SharedScriptType::check_user_in_sudo);
     ErrorCode error = runScript(credentials, replaceVars(scriptData, genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
-    if (!stdOut.contains("sudo"))
+    if (credentials.userName != "root" && stdOut.contains("sudo:") && !stdOut.contains("uname:") && stdOut.contains("not found"))
+        return ErrorCode::ServerSudoPackageIsNotPreinstalled;
+    if (credentials.userName != "root" && !stdOut.contains("sudo") && !stdOut.contains("wheel"))
         return ErrorCode::ServerUserNotInSudo;
+    if (stdOut.contains("can't cd to") || stdOut.contains("Permission denied") || stdOut.contains("No such file or directory"))
+        return ErrorCode::ServerUserDirectoryNotAccessible;
+    if (stdOut.contains("sudoers") || stdOut.contains("is not allowed to run sudo on"))
+        return ErrorCode::ServerUserNotAllowedInSudoers;
+    if (stdOut.contains("password is required"))
+        return ErrorCode::ServerUserPasswordRequired;
 
     return error;
 }

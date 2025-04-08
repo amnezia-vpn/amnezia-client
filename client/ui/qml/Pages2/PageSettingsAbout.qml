@@ -252,7 +252,7 @@ PageType {
                 text: qsTr("Privacy Policy")
 
                 clickedFunc: function() {
-                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl() + "/policy")
+                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl("policy"))
                 }
             }
         }
