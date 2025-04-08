@@ -87,17 +87,30 @@ Page {
             Layout.topMargin: 24
             Layout.fillWidth: true
 
-            text: qsTr("Remove server")
+            text: qsTr("Delete server")
+            defaultTextColor: Style.color.error
+            hoveredTextColor: Style.color.error
+            pressedTextColor: Style.color.error
 
-            onClicked: function() {
-                PageController.showBusyIndicator(true)
-                InstallController.removeProcessedServer()
-                PageController.showBusyIndicator(false)
-            }
+            onClicked: deleteConfirmationDialog.open()
         }
 
         Item {
             Layout.fillHeight: true
+        }
+    }
+
+    ConfirmationDialog {
+        id: deleteConfirmationDialog
+        title: qsTr("Are you sure you want to remove the server from the app?")
+        description: qsTr("You won't be able to connect to it")
+        confirmButtonText: qsTr("Yes, delete anyway")
+        cancelButtonText: qsTr("No, keep it")
+        
+        onConfirm: function() {
+            PageController.showBusyIndicator(true)
+            InstallController.removeProcessedServer()
+            PageController.showBusyIndicator(false)
         }
     }
 }

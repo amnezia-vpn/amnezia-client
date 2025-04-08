@@ -24,6 +24,8 @@ QtObject {
         readonly property color white: '#FFFFFF'
 
         readonly property color transparentBlack: Qt.rgba(14/255, 14/255, 17/255, 0.8)
+        readonly property color fivePercentBlack: Qt.rgba(0, 0, 0, 0.05)
+        readonly property color transparentWhite: Qt.rgba(1, 1, 1, 0.75)
     }
 
     readonly property string font: "Vela Sans GX"

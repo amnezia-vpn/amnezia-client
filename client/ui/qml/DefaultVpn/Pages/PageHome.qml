@@ -40,8 +40,10 @@ Page {
             }
 
             WhiteButtonNoBorder {
-                imageSource: "qrc:/images/controls/warning-info.svg"
-                onClicked: PageController.goToPage(PageEnum.PageAbout)
+                Layout.rightMargin: -8
+                Layout.topMargin: -16
+                imageSource: "qrc:/images/controls/settings.svg"
+                onClicked: PageController.goToPage(PageEnum.PageSettings)
             }
         }
 
@@ -58,6 +60,7 @@ Page {
 
         RowLayout {
             DropDownType {
+                id: defaultServerDropDown
                 Layout.fillWidth: true
 
                 text: ServersModel.defaultServerName
@@ -73,6 +76,27 @@ Page {
                 onClicked: function() {
                     PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
                 }
+            }
+        }
+
+        DropDownType {
+            id: countryDropDown
+            Layout.fillWidth: false
+            Layout.topMargin: 10
+            Layout.preferredWidth: defaultServerDropDown.width
+
+            visible: ServersModel.isDefaultServerFromApi && 
+                     ServersModel.defaultServerDescriptionCollapsed !== "" && 
+                     ServersModel.defaultServerDescriptionCollapsed !== ServersModel.defaultServerName
+
+            text: ServersModel.defaultServerDescriptionCollapsed
+
+            onClicked: function() {
+                if (ConnectionController.isConnected) {
+                    PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
+                    return
+                }
+                PageController.goToPage(PageEnum.PageCountrySelector)
             }
         }
 
