@@ -139,6 +139,19 @@
     </message>
 </context>
 <context>
+    <name>ConfirmationDialog</name>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Components/ConfirmationDialog.qml" line="18"/>
+        <source>Confirm</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Components/ConfirmationDialog.qml" line="19"/>
+        <source>Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ConnectButton</name>
     <message>
         <location filename="../ui/qml/Components/ConnectButton.qml" line="54"/>
@@ -444,12 +457,16 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>NotificationHandler</name>
     <message>
-        <location filename="../ui/notificationhandler.cpp" line="63"/>
-        <location filename="../ui/notificationhandler.cpp" line="70"/>
         <source>AmneziaVPN</source>
-        <translation>The translation of &quot;AmneziaVPN&quot; in Urdu would be:
+        <translation type="vanished">The translation of &quot;AmneziaVPN&quot; in Urdu would be:
 
 امنیزیا وی پی ای</translation>
+    </message>
+    <message>
+        <location filename="../ui/notificationhandler.cpp" line="63"/>
+        <location filename="../ui/notificationhandler.cpp" line="70"/>
+        <source>DefaultVPN</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="64"/>
@@ -463,13 +480,58 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="94"/>
+        <source>DefaultVPN notification</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>AmneziaVPN notification</source>
-        <translation>امنیزیا وی پی این کی اطلاعات</translation>
+        <translation type="vanished">امنیزیا وی پی این کی اطلاعات</translation>
     </message>
     <message>
         <location filename="../ui/notificationhandler.cpp" line="95"/>
         <source>Unsecured network detected: </source>
         <translation>غیر محفوظ نیٹ ورک کا پتہ لگایا گیا ہے: </translation>
+    </message>
+</context>
+<context>
+    <name>PageAbout</name>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageAbout.qml" line="52"/>
+        <source>Support group in Telegram</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageAbout.qml" line="72"/>
+        <source>E-mail for technical support</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageAbout.qml" line="92"/>
+        <source>Site</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageAbout.qml" line="115"/>
+        <source>Privacy policy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageAbout.qml" line="128"/>
+        <source>v. %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PageCountrySelector</name>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageCountrySelector.qml" line="37"/>
+        <source>Amnezia Premium servers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageCountrySelector.qml" line="122"/>
+        <source>Unable change server location while there is an active connection</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -528,6 +590,26 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <source>Unable change server while there is an active connection</source>
         <translation type="vanished">فعال کنکشن موجود ہونے کی وجہ سے سرور تبدیل کرنے میں ناکام ہیں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageHome.qml" line="39"/>
+        <source>Online</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageHome.qml" line="39"/>
+        <source>Offline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageHome.qml" line="55"/>
+        <source>Connection to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageHome.qml" line="96"/>
+        <source>Unable change server location while there is an active connection</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1356,6 +1438,7 @@ Already installed containers were found on the server. All installed containers 
     <name>PageSettings</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="39"/>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettings.qml" line="38"/>
         <source>Settings</source>
         <translation>ترتیبات</translation>
     </message>
@@ -1381,8 +1464,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="107"/>
+        <source>About DefaultVPN</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>About AmneziaVPN</source>
-        <translation>AmneziaVPN کے بارے میں</translation>
+        <translation type="vanished">AmneziaVPN کے بارے میں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="123"/>
@@ -1393,6 +1480,16 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="142"/>
         <source>Close application</source>
         <translation>براہ کرم ایپلیکیشن بند کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettings.qml" line="75"/>
+        <source>Logging</source>
+        <translation type="unfinished">لاگنگ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettings.qml" line="125"/>
+        <source>About</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1644,9 +1741,13 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageSettingsApiNativeConfigs</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="23"/>
         <source>Save AmneziaVPN config</source>
-        <translation type="unfinished">AmneziaVPN ترتیب کو محفوظ کریں</translation>
+        <translation type="obsolete">AmneziaVPN ترتیب کو محفوظ کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="23"/>
+        <source>Save DefaultVPN config</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="48"/>
@@ -1817,11 +1918,13 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="300"/>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="338"/>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="375"/>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="142"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="304"/>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="105"/>
         <source>Cannot reload API config during active connection</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1857,8 +1960,84 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="379"/>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="123"/>
         <source>Cannot remove server during active connection</source>
         <translation type="unfinished">چالو کنکشن کے دوران سرور کو ہٹایا نہیں جا سکتا</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="75"/>
+        <source>Amnezia Premium settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="85"/>
+        <source>Subscription expires on</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="101"/>
+        <source>Reset API configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="116"/>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="139"/>
+        <source>Reset API configuration?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="140"/>
+        <source>This will reload the API configuration from the server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="141"/>
+        <source>Reset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="153"/>
+        <source>Are you sure you want to remove the server from the app?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="154"/>
+        <source>You won&apos;t be able to connect to it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="155"/>
+        <source>Yes, delete anyway</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="156"/>
+        <source>No, keep it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="170"/>
+        <source>Amnezia Premium subscription has expired</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="171"/>
+        <source>Order a new subscription</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="172"/>
+        <source>Go to order</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml" line="173"/>
+        <source>Close</source>
+        <translation type="unfinished">بند</translation>
     </message>
 </context>
 <context>
@@ -2069,8 +2248,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="212"/>
+        <source>All settings will be reset to default. All installed DefaultVPN services will still remain on the server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>تمام ترتیبات کو معمولی حالت پر لوٹایا جائے گا۔ سب انسٹال کیے گئے امنیزیا وی پی این سروسزسرورپرموجودرہیںگی.</translation>
+        <translation type="vanished">تمام ترتیبات کو معمولی حالت پر لوٹایا جائے گا۔ سب انسٹال کیے گئے امنیزیا وی پی این سروسزسرورپرموجودرہیںگی.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="213"/>
@@ -2106,9 +2289,13 @@ Already installed containers were found on the server. All installed containers 
         <translation>آپ اپنی ترتیبات کو بیک اپ فائل میں محفوظ کرکے اگلی دفعہ جب آپ ایپلیکیشن کو انسٹال کریں تو انہیں بحال کرنے کے لئے استعمال کرسکتے ہیں۔</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="74"/>
         <source>The backup will contain your passwords and private keys for all servers added to AmneziaVPN. Keep this information in a secure place.</source>
-        <translation>بیک اپ میں آپ کے تمام سرورز جنہیں AmneziaVPN میں شامل کیا گیا ہے، ان کے پاسورڈ اور نجی کلید شامل ہوں گے۔ اس معلومات کو ایک محفوظ جگہ میں محفوظ رکھیں.</translation>
+        <translation type="vanished">بیک اپ میں آپ کے تمام سرورز جنہیں AmneziaVPN میں شامل کیا گیا ہے، ان کے پاسورڈ اور نجی کلید شامل ہوں گے۔ اس معلومات کو ایک محفوظ جگہ میں محفوظ رکھیں.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="74"/>
+        <source>The backup will contain your passwords and private keys for all servers added to DefaultVPN. Keep this information in a secure place.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="85"/>
@@ -2301,6 +2488,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="48"/>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsLogging.qml" line="45"/>
         <source>Logging</source>
         <translation>لاگنگ</translation>
     </message>
@@ -2320,24 +2508,38 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="186"/>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="215"/>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsLogging.qml" line="89"/>
         <source>Save</source>
         <translation>محفوظ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="187"/>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="216"/>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsLogging.qml" line="90"/>
         <source>Logs files (*.log)</source>
         <translation>لاگ فائلیں (*.log)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="196"/>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="225"/>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsLogging.qml" line="99"/>
         <source>Logs file saved</source>
         <translation>لاگ فائل محفوظ ہوگئی</translation>
     </message>
     <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsLogging.qml" line="72"/>
+        <source>In case of application failures, enable logging to find the problem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsLogging.qml" line="82"/>
         <source>Save logs to file</source>
-        <translation type="vanished">لاگوں کو فائل میں محفوظ کریں</translation>
+        <translation>لاگوں کو فائل میں محفوظ کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsLogging.qml" line="108"/>
+        <source>Open logs</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="61"/>
@@ -2370,8 +2572,8 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="176"/>
-        <source>AmneziaVPN logs</source>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="205"/>
+        <source>DefaultVPN-service logs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2385,13 +2587,13 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="204"/>
-        <source>Service logs</source>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="176"/>
+        <source>DefaultVPN logs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="205"/>
-        <source>AmneziaVPN-service logs</source>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="204"/>
+        <source>Service logs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2479,6 +2681,11 @@ Already installed containers were found on the server. All installed containers 
         <translation>کیا آپ ایپلیکیشن سے سرور کو ہٹانا چاہتے ہیں؟</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="153"/>
+        <source>All installed DefaultVPN services will still remain on the server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="159"/>
         <source>Cannot remove server during active connection</source>
         <translation>چالو کنکشن کے دوران سرور کو ہٹایا نہیں جا سکتا</translation>
@@ -2509,9 +2716,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>چالو کنکشن کے دوران API ترتیبات کو دوبارہ ترتیب نہیں دی جا سکتی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="153"/>
         <source>All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>سرور پر تمام انسٹال شدہ AmneziaVPN سروسز محفوظ رہیں گے.</translation>
+        <translation type="vanished">سرور پر تمام انسٹال شدہ AmneziaVPN سروسز محفوظ رہیں گے.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="186"/>
@@ -2543,6 +2749,41 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="151"/>
         <source>Management</source>
         <translation>مینجمنٹ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsServerInfo.qml" line="61"/>
+        <source>Server settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsServerInfo.qml" line="73"/>
+        <source>Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsServerInfo.qml" line="90"/>
+        <source>Delete server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsServerInfo.qml" line="105"/>
+        <source>Are you sure you want to remove the server from the app?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsServerInfo.qml" line="106"/>
+        <source>You won&apos;t be able to connect to it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsServerInfo.qml" line="107"/>
+        <source>Yes, delete anyway</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsServerInfo.qml" line="108"/>
+        <source>No, keep it</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2635,6 +2876,11 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="39"/>
         <source>Servers</source>
         <translation>سرور</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsServersList.qml" line="53"/>
+        <source>Connect to</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2920,6 +3166,31 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <source>Key as text</source>
         <translation type="vanished">متن کے طور پر کلید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSetupWizardConfigSource.qml" line="65"/>
+        <source>Adding a server to&#xa0;connect to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSetupWizardConfigSource.qml" line="77"/>
+        <source>Key</source>
+        <translation type="unfinished">کلید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSetupWizardConfigSource.qml" line="88"/>
+        <source>VPN://</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSetupWizardConfigSource.qml" line="97"/>
+        <source>Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/DefaultVpn/Pages/PageSetupWizardConfigSource.qml" line="103"/>
+        <source>Unsupported config file</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3242,9 +3513,8 @@ Already installed containers were found on the server. All installed containers 
         <translation>&quot;XRay کنفیگ کو محفوظ کریں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageShare.qml" line="119"/>
         <source>For the AmneziaVPN app</source>
-        <translation>AmneziaVPN ایپ کے لئے</translation>
+        <translation type="vanished">AmneziaVPN ایپ کے لئے</translation>
     </message>
     <message>
         <source>OpenVpn native format</source>
@@ -3406,6 +3676,11 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageShare.qml" line="38"/>
         <source>Config revoked</source>
         <translation>کنفیگ منسوخ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageShare.qml" line="119"/>
+        <source>For the DefaultVPN app</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="124"/>
@@ -4090,11 +4365,21 @@ Already installed containers were found on the server. All installed containers 
         <source>OpenVPN stands as one of the most popular and time-tested VPN protocols available.
 It employs its unique security protocol, leveraging the strength of SSL/TLS for encryption and key exchange. Furthermore, OpenVPN&apos;s support for a multitude of authentication methods makes it versatile and adaptable, catering to a wide range of devices and operating systems. Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, which continually reinforces its security. With a strong balance of performance, security, and compatibility, OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the DefaultVPN across all platforms
 * Normal power consumption on mobile devices
 * Flexible customisation to suit user needs to work with different operating systems and devices
 * Recognised by DPI systems and therefore susceptible to blocking
 * Can operate over both TCP and UDP network protocols.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="159"/>
+        <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
+
+* Available in the DefaultVPN only on desktop platforms
+* Configurable encryption protocol
+* Detectable by some DPI systems
+* Works over TCP network protocol.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4109,7 +4394,7 @@ Cloak can modify packet metadata so that it completely masks VPN traffic as norm
 
 Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the DefaultVPN across all platforms
 * High power consumption on mobile devices
 * Flexible settings
 * Not recognised by detection systems
@@ -4123,7 +4408,7 @@ Immediately after receiving the first data packet, Cloak authenticates the incom
 WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
 WireGuard is very susceptible to detection and blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the DefaultVPN across all platforms
 * Low power consumption
 * Minimum number of settings
 * Easily recognised by DPI analysis systems, susceptible to blocking
@@ -4136,11 +4421,24 @@ WireGuard is very susceptible to detection and blocking due to its distinct pack
 While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. AmneziaWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
 This means that AmneziaWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
 
-* Available in the AmneziaVPN across all platforms
+* Available in the DefaultVPN across all platforms
 * Low power consumption
 * Minimum number of settings
 * Not recognised by traffic analysis systems
 * Works over UDP network protocol.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="225"/>
+        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
+One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
+While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
+
+* Available in the DefaultVPN only on Windows
+* Low power consumption, on mobile devices
+* Minimal configuration
+* Recognised by DPI analysis systems
+* Works over UDP network protocol, ports 500 and 4500.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4264,14 +4562,13 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
         <translation type="vanished">OpenVPN دستیاب سب سے زیادہ مقبول اور وقتی آزمائشی VPN پروٹوکولز میں سے ایک ہے۔ یہ انکرپشن اور کلیدی تبادلے کے لیے SSL/TLS کی طاقت کا فائدہ اٹھاتے ہوئے اپنا منفرد سیکیورٹی پروٹوکول استعمال کرتا ہے۔ مزید برآں، توثیق کے بہت سے طریقوں کے لیے OpenVPN کی حمایت اسے ورسٹائل اور قابل موافق بناتی ہے، جو آلات اور آپریٹنگ سسٹم کی ایک وسیع رینج کو پورا کرتی ہے۔ اوپن سورس کی نوعیت کی وجہ سے، اوپن وی پی این کو عالمی برادری کی طرف سے وسیع جانچ سے فائدہ ہوتا ہے، جو اس کی سلامتی کو مسلسل تقویت دیتا ہے۔ کارکردگی، سیکورٹی اور مطابقت کے مضبوط توازن کے ساتھ، OpenVPN رازداری کے بارے میں شعور رکھنے والے افراد اور کاروباروں کے لیے یکساں انتخاب ہے۔ * تمام پلیٹ فارمز پر AmneziaVPN میں دستیاب ہے * موبائل آلات پر بجلی کی عام کھپت * صارف کو مختلف آپریٹنگ سسٹمز اور ڈیوائسز کے ساتھ کام کرنے کی ضرورت کے مطابق لچکدار تخصیص * DPI تجزیہ سسٹمز کے ذریعہ پہچانا جاتا ہے اور اس وجہ سے بلاک کرنے کا خطرہ ہوتا ہے * TCP اور UDP دونوں نیٹ ورک پر کام کر سکتا ہے۔ پروٹوکول</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="159"/>
         <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
 
 * Available in the AmneziaVPN only on desktop platforms
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
-        <translation>شیڈو ساکس، SOCKS5 پروٹوکول سے متاثر، AEAD سائفر کا استعمال کرتے ہوئے کنکشن کی حفاظت کرتا ہے۔ اگرچہ شیڈو ساکس کو سمجھدار اور شناخت کرنے کے لیے چیلنج کرنے کے لیے ڈیزائن کیا گیا ہے، لیکن یہ معیاری HTTPS کنکشن سے مماثل نہیں ہے۔ تاہم، کچھ ٹریفک تجزیہ نظام اب بھی شیڈو ساکس کنکشن کا پتہ لگا سکتے ہیں۔ Amnezia میں محدود تعاون کی وجہ سے، AmneziaWG پروٹوکول استعمال کرنے کی سفارش کی جاتی ہے۔ * صرف ڈیسک ٹاپ پلیٹ فارمز پر AmneziaVPN میں دستیاب ہے * قابل ترتیب انکرپشن پروٹوکول * کچھ DPI سسٹمز کے ذریعے قابل شناخت * TCP نیٹ ورک پروٹوکول پر کام کرتا ہے.</translation>
+        <translation type="vanished">شیڈو ساکس، SOCKS5 پروٹوکول سے متاثر، AEAD سائفر کا استعمال کرتے ہوئے کنکشن کی حفاظت کرتا ہے۔ اگرچہ شیڈو ساکس کو سمجھدار اور شناخت کرنے کے لیے چیلنج کرنے کے لیے ڈیزائن کیا گیا ہے، لیکن یہ معیاری HTTPS کنکشن سے مماثل نہیں ہے۔ تاہم، کچھ ٹریفک تجزیہ نظام اب بھی شیڈو ساکس کنکشن کا پتہ لگا سکتے ہیں۔ Amnezia میں محدود تعاون کی وجہ سے، AmneziaWG پروٹوکول استعمال کرنے کی سفارش کی جاتی ہے۔ * صرف ڈیسک ٹاپ پلیٹ فارمز پر AmneziaVPN میں دستیاب ہے * قابل ترتیب انکرپشن پروٹوکول * کچھ DPI سسٹمز کے ذریعے قابل شناخت * TCP نیٹ ورک پروٹوکول پر کام کرتا ہے.</translation>
     </message>
     <message>
         <source>A modern iteration of the popular VPN protocol, AmneziaWG builds upon the foundation set by WireGuard, retaining its simplified architecture and high-performance capabilities across devices.
@@ -4286,7 +4583,6 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation type="vanished">ایک معاصر اشارہ جاتا ہے مقبول وی پی این پروٹوکول کا امنیزیہ ڈبلیو جی۔ امنیزیہ ڈبلیو جی وائر گارڈ کے بنیادی ڈھانچے پر مبنی ہے، جس نے اس کی آسانی سے معماری اور ایکسیلنٹ کارکردگی کی خصوصیات کو برقرار رکھا۔ جبکہ وائر گارڈ کو اس کی کارآمدی کے لئے جانا جاتا ہے، اس میں اپنے ممتاز پیکٹ سائنیچرز کی وجہ سے آسانی سے پہچان میں مسائل پیش آتے تھے۔ امنیزیہ ڈبلیو جی اس مسئلے کا حل پیش کرتا ہے بہتر اوبفسکیشن میتھڈس کے ذریعے، جس سے اس کی ٹریفک عام انٹرنیٹ ٹریفک کے ساتھ مل جل کر رہتی ہے۔ اس سے مطلب یہ ہے کہ امنیزیہ ڈبلیو جی نے اصل وائر گارڈ کی تیزی کارکردگی کو برقرار رکھا جبکہ اس میں ایک اضافی پردہ شامل کیا، جو اسے ایک تیز اور پرانے طریقہ سے وی پی این کنکشن کی درخواست کرنے والوں کے لئے ایک عمدہ چوئس بناتا ہے۔ * تمام پلیٹ فارمز پر دستیاب ہے * کم بجلی کی استعمال * کم سیٹنگز کی تعداد * ڈی پی آئی تجزیہ سسٹمز سے پہچانا نہیں جاتا، بند کرنے کے لئے مزید مضبوط ہے * یو ڈی پی نیٹ ورک پروٹوکول پر کام کرتا ہے۔</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="225"/>
         <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
 One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
@@ -4296,7 +4592,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation>IKEv2، IPSec انکرپشن پرت کے ساتھ جوڑا، ایک جدید اور مستحکم VPN پروٹوکول کے طور پر کھڑا ہے۔ اس کی امتیازی خصوصیات میں سے ایک نیٹ ورکس اور ڈیوائسز کے درمیان تیزی سے سوئچ کرنے کی صلاحیت ہے، جو اسے متحرک نیٹ ورک کے ماحول میں خاص طور پر موافق بناتی ہے۔ اگرچہ یہ سیکیورٹی، استحکام اور رفتار کا امتزاج پیش کرتا ہے، لیکن یہ نوٹ کرنا ضروری ہے کہ IKEv2 کا آسانی سے پتہ لگایا جا سکتا ہے اور یہ بلاک کرنے کے لیے حساس ہے۔ * صرف ونڈوز پر AmneziaVPN میں دستیاب ہے * کم بجلی کی کھپت، موبائل ڈیوائسز پر * کم سے کم کنفیگریشن * DPI تجزیہ سسٹمز کے ذریعے پہچانا جاتا ہے * UDP نیٹ ورک پروٹوکول، پورٹ 500 اور 4500 پر کام .کرتا ہے</translation>
+        <translation type="vanished">IKEv2، IPSec انکرپشن پرت کے ساتھ جوڑا، ایک جدید اور مستحکم VPN پروٹوکول کے طور پر کھڑا ہے۔ اس کی امتیازی خصوصیات میں سے ایک نیٹ ورکس اور ڈیوائسز کے درمیان تیزی سے سوئچ کرنے کی صلاحیت ہے، جو اسے متحرک نیٹ ورک کے ماحول میں خاص طور پر موافق بناتی ہے۔ اگرچہ یہ سیکیورٹی، استحکام اور رفتار کا امتزاج پیش کرتا ہے، لیکن یہ نوٹ کرنا ضروری ہے کہ IKEv2 کا آسانی سے پتہ لگایا جا سکتا ہے اور یہ بلاک کرنے کے لیے حساس ہے۔ * صرف ونڈوز پر AmneziaVPN میں دستیاب ہے * کم بجلی کی کھپت، موبائل ڈیوائسز پر * کم سے کم کنفیگریشن * DPI تجزیہ سسٹمز کے ذریعے پہچانا جاتا ہے * UDP نیٹ ورک پروٹوکول، پورٹ 500 اور 4500 پر کام .کرتا ہے</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="237"/>
@@ -4549,10 +4845,8 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>ShareConnectionDrawer</name>
     <message>
-        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="30"/>
-        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="37"/>
         <source>Save AmneziaVPN config</source>
-        <translation>AmneziaVPN ترتیب کو محفوظ کریں</translation>
+        <translation type="vanished">AmneziaVPN ترتیب کو محفوظ کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="25"/>
@@ -4563,6 +4857,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="26"/>
         <source>Copy</source>
         <translation>کاپی</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="30"/>
+        <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="37"/>
+        <source>Save DefaultVPN config</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ShareConnectionDrawer.qml" line="191"/>

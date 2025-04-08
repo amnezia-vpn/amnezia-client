@@ -1,13 +1,11 @@
 #include "languageModel.h"
 
-LanguageModel::LanguageModel(std::shared_ptr<Settings> settings, QObject *parent)
-    : m_settings(settings), QAbstractListModel(parent)
+LanguageModel::LanguageModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<LanguageSettings::AvailableLanguageEnum>();
     for (int i = 0; i < metaEnum.keyCount(); i++) {
-        m_availableLanguages.push_back(
-            LanguageModelData {getLocalLanguageName(static_cast<LanguageSettings::AvailableLanguageEnum>(i)),
-                              static_cast<LanguageSettings::AvailableLanguageEnum>(i) });
+        m_availableLanguages.push_back(LanguageModelData { getLocalLanguageName(static_cast<LanguageSettings::AvailableLanguageEnum>(i)),
+                                                           static_cast<LanguageSettings::AvailableLanguageEnum>(i) });
     }
 }
 
@@ -50,8 +48,7 @@ QString LanguageModel::getLocalLanguageName(const LanguageSettings::AvailableLan
     case LanguageSettings::AvailableLanguageEnum::Burmese: strLanguage = "မြန်မာဘာသာ"; break;
     case LanguageSettings::AvailableLanguageEnum::Urdu: strLanguage = "اُرْدُوْ"; break;
     case LanguageSettings::AvailableLanguageEnum::Hindi: strLanguage = "हिन्दी"; break;
-    default:
-        break;
+    default: break;
     }
 
     return strLanguage;
@@ -104,11 +101,12 @@ QString LanguageModel::getCurrentLanguageName()
     return m_availableLanguages[getCurrentLanguageIndex()].name;
 }
 
-QString LanguageModel::getCurrentSiteUrl()
+QString LanguageModel::getCurrentSiteUrl(const QString &path)
 {
     auto language = static_cast<LanguageSettings::AvailableLanguageEnum>(getCurrentLanguageIndex());
     switch (language) {
-    case LanguageSettings::AvailableLanguageEnum::Russian: return "https://storage.googleapis.com/amnezia/amnezia.org";
-    default: return "https://amnezia.org";
+    case LanguageSettings::AvailableLanguageEnum::Russian:
+        return "https://storage.googleapis.com/amnezia/amnezia.org" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
+    default: return QString("https://amnezia.org") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
     }
 }
