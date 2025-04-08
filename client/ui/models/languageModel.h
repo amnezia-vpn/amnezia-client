@@ -59,7 +59,7 @@ public slots:
     int getCurrentLanguageIndex();
     int getLineHeightAppend();
     QString getCurrentLanguageName();
-    QString getCurrentSiteUrl();
+    QString getCurrentSiteUrl(const QString &path = "");
 
 signals:
     void updateTranslations(const QLocale &locale);
