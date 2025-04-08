@@ -4,7 +4,7 @@ set(PROJECT DefaultVPN)
 
 project(${PROJECT} VERSION 1.0.0.0
         DESCRIPTION "DefaultVPN"
-        HOMEPAGE_URL "https://amnezia.org/"
+        HOMEPAGE_URL "https://dfvpn.com/"
 )
 
 string(TIMESTAMP CURRENT_DATE "%Y-%m-%d")
