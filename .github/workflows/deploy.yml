@@ -10,7 +10,7 @@ env:
 
 jobs:
   Build-Linux-Ubuntu:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
 
     env:
       QT_VERSION: 6.6.2
@@ -47,7 +47,7 @@ jobs:
 
     - name: 'Build project'
       run: |
-        sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
+        sudo apt-get install libxkbcommon-x11-0
         export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64/bin
         export QIF_BIN_DIR=${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin
         bash deploy/build_linux.sh
