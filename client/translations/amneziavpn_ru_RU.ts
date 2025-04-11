@@ -538,12 +538,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="68"/>
         <source>Gateway endpoint</source>
-        <translation>Конечная точка шлюза</translation>
+        <translation>Gateway endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="97"/>
         <source>Dev gateway environment</source>
-        <translation>Среда разработки шлюза</translation>
+        <translation>Dev gateway environment</translation>
     </message>
 </context>
 <context>
@@ -673,47 +673,47 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="146"/>
         <source>Jc - Junk packet count</source>
-        <translation>Jc - Количество мусорных пакетов</translation>
+        <translation>Jc - Junk packet count</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="168"/>
         <source>Jmin - Junk packet minimum size</source>
-        <translation>Jmin - Минимальный размер мусорных пакетов</translation>
+        <translation>Jmin - Junk packet minimum size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="186"/>
         <source>Jmax - Junk packet maximum size</source>
-        <translation>Jmax - Максимальный размер мусорных пакетов</translation>
+        <translation>Jmax - Junk packet maximum size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="204"/>
         <source>S1 - Init packet junk size</source>
-        <translation>S1 - Размер мусора инициализационного пакета</translation>
+        <translation>S1 - Init packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="228"/>
         <source>S2 - Response packet junk size</source>
-        <translation>S2 - Размер мусора ответного пакета</translation>
+        <translation>S2 - Response packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="252"/>
         <source>H1 - Init packet magic header</source>
-        <translation>H1 - Магический заголовок инициализационного пакета</translation>
+        <translation>H1 - Init packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="270"/>
         <source>H2 - Response packet magic header</source>
-        <translation>H2 - Магический заголовок ответного пакета</translation>
+        <translation>H2 - Response packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="288"/>
         <source>H4 - Transport packet magic header</source>
-        <translation>H4 - Магический заголовок транспортного пакета</translation>
+        <translation>H4 - Transport packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="306"/>
         <source>H3 - Underload packet magic header</source>
-        <translation>H3 - Магический заголовок предзагрузочного пакета</translation>
+        <translation>H3 - Underload packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="354"/>
@@ -1482,7 +1482,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="123"/>
         <source>Dev console</source>
-        <translation>Консоль разработчика</translation>
+        <translation>Dev console</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="142"/>
