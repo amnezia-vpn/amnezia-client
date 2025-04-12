@@ -10,7 +10,7 @@
     <message>
         <location filename="../ui/qml/Components/AdLabel.qml" line="57"/>
         <source>Amnezia Premium - for access to all websites and online resources</source>
-        <translation>Amnezia Premium - для доступа к любым сайтам и онлайн ресурсам</translation>
+        <translation>Amnezia Premium - доступ ко всем сайтам и онлайн ресурсам</translation>
     </message>
 </context>
 <context>
@@ -110,12 +110,12 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="68"/>
         <source>Amnezia Premium is classic VPN for seamless work, downloading large files, and watching videos. Access all websites and online resources. Speeds up to %1 Mbps.</source>
-        <translation>Amnezia Premium это классический VPN для комфортной работы, загрузки больших файлов, и просмотра видео. Доступ ко всем сайтам и онлайн ресурсам. Скорость до %1 Мбит/с.</translation>
+        <translation>Amnezia Premium - это классический VPN для комфортной работы, загрузки больших файлов и просмотра видео. Доступ ко всем сайтам и онлайн ресурсам. Скорость - до %1 Мбит/с.</translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="82"/>
         <source>Amnezia Premium is classic VPN for for seamless work, downloading large files, and watching videos. Access all websites and online resources.</source>
-        <translation>Amnezia Premium это классический VPN для комфортной работы, загрузки больших файлов, и просмотра видео. Доступ ко всем сайтам и онлайн ресурсам.</translation>
+        <translation>Amnezia Premium - это классический VPN для комфортной работы, загрузки больших файлов и просмотра видео. Доступ ко всем сайтам и онлайн ресурсам.</translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="97"/>
@@ -359,12 +359,12 @@ Can&apos;t be disabled for current server</source>
     <message>
         <location filename="../ui/controllers/importController.cpp" line="685"/>
         <source>This configuration contains an OpenVPN setup. OpenVPN configurations can include malicious scripts, so only add it if you fully trust the provider of this config. </source>
-        <translation>Эта конфигурация содержит OpenVPN настройку. Конфигурации OpenVPN могут содержать вредоносные скрипты, поэтом добавляйте их только если полностью доверяете поставщику этой конфигурации. </translation>
+        <translation>Эта конфигурация содержит настройки OpenVPN. Конфигурации OpenVPN могут содержать вредоносные скрипты, поэтому добавляйте их только в том случае, если полностью доверяете источнику этого файла. </translation>
     </message>
     <message>
         <location filename="../ui/controllers/importController.cpp" line="689"/>
         <source>&lt;br&gt;In the imported configuration, potentially dangerous lines were found:</source>
-        <translation>&lt;br&gt;В импортированной конфигурации были обнаружены потенциально опасные строки:</translation>
+        <translation>&lt;br&gt;В импортированной конфигурации обнаружены потенциально опасные строки:</translation>
     </message>
     <message>
         <source>In the imported configuration, potentially dangerous lines were found:</source>
@@ -1616,7 +1616,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="45"/>
         <source>Active Devices</source>
-        <translation>Активные Устройства</translation>
+        <translation>Активные устройства</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="46"/>
@@ -1773,7 +1773,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="48"/>
         <source>Configuration Files</source>
-        <translation>Файл Конфигурации</translation>
+        <translation>Файлы конфигурации</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="49"/>
@@ -1919,37 +1919,37 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="29"/>
         <source>Subscription Status</source>
-        <translation>Статус Подписки</translation>
+        <translation>Статус подписки</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="37"/>
         <source>Valid Until</source>
-        <translation>Действительна До</translation>
+        <translation>Действительна до</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="45"/>
         <source>Active Connections</source>
-        <translation>Активные Соединения</translation>
+        <translation>Активные соединения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="186"/>
         <source>Subscription Key</source>
-        <translation>Ключ Для Подключения</translation>
+        <translation>Ключ для подключения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="194"/>
         <source>Save VPN key as a file</source>
-        <translation>Сохранить VPN-ключ в файле</translation>
+        <translation>Сохранить VPN-ключ в файл</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="216"/>
         <source>Configuration Files</source>
-        <translation>Файлы Конфигурации</translation>
+        <translation>Файлы конфигурации</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="236"/>
         <source>Active Devices</source>
-        <translation>Активные Устройства</translation>
+        <translation>Активные устройства</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="238"/>
@@ -2394,7 +2394,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="143"/>
         <source>Cannot change KillSwitch settings during active connection</source>
-        <translation>Невозможно изменить настройки аварийного выключателя во время активного соединения</translation>
+        <translation>Невозможно изменить настройки KillSwitch во время активного подключения</translation>
     </message>
     <message>
         <source>Cannot change killSwitch settings during active connection</source>
@@ -2561,12 +2561,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="175"/>
         <source>Client logs</source>
-        <translation>Логи клиента</translation>
+        <translation>Логи приложения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="176"/>
         <source>AmneziaVPN logs</source>
-        <translation>Логи AmneziaVPN</translation>
+        <translation>AmneziaVPN logs</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="142"/>
@@ -2581,12 +2581,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="204"/>
         <source>Service logs</source>
-        <translation>Логи сервиса</translation>
+        <translation>Логи службы</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="205"/>
         <source>AmneziaVPN-service logs</source>
-        <translation>Логи AmneziaVPN-сервиса</translation>
+        <translation>AmneziaVPN-service logs</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="78"/>
@@ -3071,7 +3071,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="109"/>
         <source>Support tag</source>
-        <translation>Тег поддержки</translation>
+        <translation>Support tag</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="120"/>
