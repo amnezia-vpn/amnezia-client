@@ -3659,7 +3659,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="726"/>
         <source>Allowed IPs: %1</source>
-        <translation>Доступные IP: %1</translation>
+        <translation>Разрешенные подсети: %1</translation>
     </message>
     <message>
         <source>Creation date: </source>
@@ -4114,12 +4114,12 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="25"/>
         <source>The sudo package is not pre-installed on the server</source>
-        <translation>Пакет sudo не установлен на сервере</translation>
+        <translation>Пакет sudo не установлен на сервере по умолчанию</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
         <source>The server user&apos;s home directory is not accessible</source>
-        <translation>Домашний каталог пользователя сервера не доступен</translation>
+        <translation>Домашний каталог пользователя сервера недоступен</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="27"/>
@@ -4328,7 +4328,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="70"/>
         <source>Missing AGW public key</source>
-        <translation>Отсутствует открытый ключ AGW</translation>
+        <translation>Отсутствует публичный ключ AGW</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="71"/>
