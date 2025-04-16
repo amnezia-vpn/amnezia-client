@@ -310,7 +310,7 @@ bool ApiConfigsController::deactivateDevice()
     auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
-    if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV2) {
+    if (!apiUtils::isPremiumServer(serverConfigObject)) {
         return true;
     }
 
@@ -345,7 +345,7 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
     auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
-    if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV2) {
+    if (!apiUtils::isPremiumServer(serverConfigObject)) {
         return true;
     }
 

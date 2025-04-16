@@ -28,24 +28,24 @@ PageType {
         id: techSupport
 
         readonly property string title: qsTr("Email")
-        readonly property string description: qsTr("support@amnezia.org")
-        readonly property string link: "mailto:support@amnezia.org"
+        readonly property string description: ApiAccountInfoModel.getEmailLink()
+        readonly property string link: "mailto:" + ApiAccountInfoModel.getEmailLink()
     }
 
     QtObject {
         id: paymentSupport
 
         readonly property string title: qsTr("Email Billing & Orders")
-        readonly property string description: qsTr("help@vpnpay.io")
-        readonly property string link: "mailto:help@vpnpay.io"
+        readonly property string description: ApiAccountInfoModel.getBillingEmailLink()
+        readonly property string link: "mailto:" + ApiAccountInfoModel.getBillingEmailLink()
     }
 
     QtObject {
         id: site
 
         readonly property string title: qsTr("Website")
-        readonly property string description: qsTr("amnezia.org")
-        readonly property string link: LanguageModel.getCurrentSiteUrl()
+        readonly property string description: ApiAccountInfoModel.getSiteLink()
+        readonly property string link: ApiAccountInfoModel.getFullSiteLink()
     }
 
     property list<QtObject> supportModel: [

@@ -10,7 +10,7 @@
     <message>
         <location filename="../ui/qml/Components/AdLabel.qml" line="57"/>
         <source>Amnezia Premium - for access to all websites and online resources</source>
-        <translation type="unfinished"></translation>
+        <translation>Amnezia Premium - доступ ко всем сайтам и онлайн ресурсам</translation>
     </message>
 </context>
 <context>
@@ -110,12 +110,12 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="68"/>
         <source>Amnezia Premium is classic VPN for seamless work, downloading large files, and watching videos. Access all websites and online resources. Speeds up to %1 Mbps.</source>
-        <translation type="unfinished"></translation>
+        <translation>Amnezia Premium - это классический VPN для комфортной работы, загрузки больших файлов и просмотра видео. Доступ ко всем сайтам и онлайн ресурсам. Скорость - до %1 Мбит/с.</translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="82"/>
         <source>Amnezia Premium is classic VPN for for seamless work, downloading large files, and watching videos. Access all websites and online resources.</source>
-        <translation type="unfinished"></translation>
+        <translation>Amnezia Premium - это классический VPN для комфортной работы, загрузки больших файлов и просмотра видео. Доступ ко всем сайтам и онлайн ресурсам.</translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="97"/>
@@ -372,12 +372,12 @@ Can&apos;t be disabled for current server</source>
     <message>
         <location filename="../ui/controllers/importController.cpp" line="685"/>
         <source>This configuration contains an OpenVPN setup. OpenVPN configurations can include malicious scripts, so only add it if you fully trust the provider of this config. </source>
-        <translation type="unfinished"></translation>
+        <translation>Эта конфигурация содержит настройки OpenVPN. Конфигурации OpenVPN могут содержать вредоносные скрипты, поэтому добавляйте их только в том случае, если полностью доверяете источнику этого файла. </translation>
     </message>
     <message>
         <location filename="../ui/controllers/importController.cpp" line="689"/>
         <source>&lt;br&gt;In the imported configuration, potentially dangerous lines were found:</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;br&gt;В импортированной конфигурации обнаружены потенциально опасные строки:</translation>
     </message>
     <message>
         <source>In the imported configuration, potentially dangerous lines were found:</source>
@@ -600,12 +600,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="68"/>
         <source>Gateway endpoint</source>
-        <translation type="unfinished"></translation>
+        <translation>Gateway endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="97"/>
         <source>Dev gateway environment</source>
-        <translation type="unfinished"></translation>
+        <translation>Dev gateway environment</translation>
     </message>
 </context>
 <context>
@@ -755,47 +755,47 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="146"/>
         <source>Jc - Junk packet count</source>
-        <translation type="unfinished"></translation>
+        <translation>Jc - Junk packet count</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="168"/>
         <source>Jmin - Junk packet minimum size</source>
-        <translation type="unfinished"></translation>
+        <translation>Jmin - Junk packet minimum size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="186"/>
         <source>Jmax - Junk packet maximum size</source>
-        <translation type="unfinished"></translation>
+        <translation>Jmax - Junk packet maximum size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="204"/>
         <source>S1 - Init packet junk size</source>
-        <translation type="unfinished"></translation>
+        <translation>S1 - Init packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="228"/>
         <source>S2 - Response packet junk size</source>
-        <translation type="unfinished"></translation>
+        <translation>S2 - Response packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="252"/>
         <source>H1 - Init packet magic header</source>
-        <translation type="unfinished"></translation>
+        <translation>H1 - Init packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="270"/>
         <source>H2 - Response packet magic header</source>
-        <translation type="unfinished"></translation>
+        <translation>H2 - Response packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="288"/>
         <source>H4 - Transport packet magic header</source>
-        <translation type="unfinished"></translation>
+        <translation>H4 - Transport packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="306"/>
         <source>H3 - Underload packet magic header</source>
-        <translation type="unfinished"></translation>
+        <translation>H3 - Underload packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="354"/>
@@ -1569,7 +1569,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="123"/>
         <source>Dev console</source>
-        <translation type="unfinished"></translation>
+        <translation>Dev console</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="142"/>
@@ -1713,7 +1713,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="45"/>
         <source>Active Devices</source>
-        <translation type="unfinished"></translation>
+        <translation>Активные устройства</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="46"/>
@@ -1867,14 +1867,9 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">Файл конфигурации</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="23"/>
-        <source>Save DefaultVPN config</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="48"/>
         <source>Configuration Files</source>
-        <translation type="unfinished"></translation>
+        <translation>Файлы конфигурации</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="49"/>
@@ -2020,37 +2015,37 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="29"/>
         <source>Subscription Status</source>
-        <translation type="unfinished"></translation>
+        <translation>Статус подписки</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="37"/>
         <source>Valid Until</source>
-        <translation type="unfinished"></translation>
+        <translation>Действительна до</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="45"/>
         <source>Active Connections</source>
-        <translation type="unfinished"></translation>
+        <translation>Активные соединения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="186"/>
         <source>Subscription Key</source>
-        <translation type="unfinished"></translation>
+        <translation>Ключ для подключения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="194"/>
         <source>Save VPN key as a file</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить VPN-ключ в файл</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="216"/>
         <source>Configuration Files</source>
-        <translation type="unfinished"></translation>
+        <translation>Файлы конфигурации</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="236"/>
         <source>Active Devices</source>
-        <translation type="unfinished"></translation>
+        <translation>Активные устройства</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="238"/>
@@ -2224,7 +2219,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="30"/>
         <source>Email</source>
-        <translation type="unfinished"></translation>
+        <translation>Email</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="31"/>
@@ -2581,7 +2576,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="143"/>
         <source>Cannot change KillSwitch settings during active connection</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно изменить настройки KillSwitch во время активного подключения</translation>
     </message>
     <message>
         <source>Cannot change killSwitch settings during active connection</source>
@@ -2763,12 +2758,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="175"/>
         <source>Client logs</source>
-        <translation type="unfinished"></translation>
+        <translation>Логи приложения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="205"/>
-        <source>DefaultVPN-service logs</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="176"/>
+        <source>AmneziaVPN logs</source>
+        <translation>AmneziaVPN logs</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="142"/>
@@ -2781,14 +2776,14 @@ Already installed containers were found on the server. All installed containers 
         <translation>Сохранить логи</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="176"/>
-        <source>DefaultVPN logs</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="204"/>
         <source>Service logs</source>
-        <translation type="unfinished"></translation>
+        <translation>Логи службы</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="205"/>
+        <source>AmneziaVPN-service logs</source>
+        <translation>AmneziaVPN-service logs</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="78"/>
@@ -3317,7 +3312,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="109"/>
         <source>Support tag</source>
-        <translation type="unfinished"></translation>
+        <translation>Support tag</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="120"/>
@@ -3934,7 +3929,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="726"/>
         <source>Allowed IPs: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Разрешенные подсети: %1</translation>
     </message>
     <message>
         <source>Creation date: </source>
@@ -4389,22 +4384,22 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="25"/>
         <source>The sudo package is not pre-installed on the server</source>
-        <translation type="unfinished"></translation>
+        <translation>Пакет sudo не установлен на сервере по умолчанию</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="26"/>
         <source>The server user&apos;s home directory is not accessible</source>
-        <translation type="unfinished"></translation>
+        <translation>Домашний каталог пользователя сервера недоступен</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="27"/>
         <source>Action not allowed in sudoers</source>
-        <translation type="unfinished"></translation>
+        <translation>Действие не разрешено в sudoers</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="28"/>
         <source>The user&apos;s password is required</source>
-        <translation type="unfinished"></translation>
+        <translation>Требуется пароль пользователя</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="31"/>
@@ -4603,7 +4598,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="70"/>
         <source>Missing AGW public key</source>
-        <translation type="unfinished"></translation>
+        <translation>Отсутствует публичный ключ AGW</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="71"/>
@@ -4613,7 +4608,7 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="72"/>
         <source>Missing list of available services</source>
-        <translation type="unfinished"></translation>
+        <translation>Отсутствует список доступных сервисов</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="73"/>
@@ -5571,7 +5566,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="415"/>
+        <location filename="../vpnconnection.cpp" line="421"/>
         <source>Mbps</source>
         <translation>Мбит/с</translation>
     </message>
