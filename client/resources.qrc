@@ -245,7 +245,7 @@
         <file>ui/qml/DefaultVpn/Controls/TextTypes/XSmallTextType.qml</file>
         <file>ui/qml/DefaultVpn/Controls/ButtonType.qml</file>
         <file>ui/qml/DefaultVpn/Pages/PageSettingsServersList.qml</file>
-        <file>ui/qml/DefaultVpn/Pages/PageCountrySelector.qml</file>
+        <file>ui/qml/DefaultVpn/Pages/PageSettingsApiAvailableCountries.qml</file>
         <file>ui/qml/DefaultVpn/Pages/PageSettingsApiServerInfo.qml</file>
         <file>ui/qml/DefaultVpn/Controls/TextTypes/Header1TextType.qml</file>
         <file>ui/qml/DefaultVpn/Controls/TextTypes/Header3TextType.qml</file>

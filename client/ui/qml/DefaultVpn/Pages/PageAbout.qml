@@ -117,7 +117,7 @@ Page {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: Qt.openUrlExternally("https://dfvpn.com/policy")
+                onClicked: Qt.openUrlExternally("https://dfvpn.com/privacy")
             }
         }
 

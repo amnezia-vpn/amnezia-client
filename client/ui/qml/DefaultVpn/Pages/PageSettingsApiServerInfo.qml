@@ -14,31 +14,6 @@ import "../Controls/TextTypes"
 Page {
     id: root
 
-    Component.onCompleted: checkSubscriptionStatus()
-
-    // This timer is used to delay the opening of the expired subscription dialog
-    // to avoid conflicts of blur effect with transition to the page animation
-    Timer {
-        id: subscriptionDialogTimer
-        interval: 280
-        repeat: false
-        onTriggered: expiredSubscriptionDialog.open()
-    }
-
-    Connections {
-        target: ApiAccountInfoModel
-        function onModelReset() {
-            checkSubscriptionStatus()
-        }
-    }
-
-    function checkSubscriptionStatus() {
-        const status = ApiAccountInfoModel.data("subscriptionStatus")
-        if (status === "expired") {
-            subscriptionDialogTimer.start()
-        }
-    }
-
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
@@ -98,7 +73,7 @@ Page {
                 Layout.topMargin: 24
                 Layout.fillWidth: true
                 
-                text: qsTr("Reset API configuration")
+                text: qsTr("Reload API configuration")
 
                 onClicked: {
                     if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
@@ -162,18 +137,6 @@ Page {
                 PageController.closePage()
             }
             PageController.showBusyIndicator(false)
-        }
-    }
-
-    ConfirmationDialog {
-        id: expiredSubscriptionDialog
-        title: qsTr("Amnezia Premium subscription has expired")
-        description: qsTr("Order a new subscription")
-        confirmButtonText: qsTr("Go to order")
-        cancelButtonText: qsTr("Close")
-        
-        onConfirm: function() {
-            Qt.openUrlExternally("https://storage.googleapis.com/kldscp/vpnpay.io/ru/amnezia-premium")
         }
     }
 } 
