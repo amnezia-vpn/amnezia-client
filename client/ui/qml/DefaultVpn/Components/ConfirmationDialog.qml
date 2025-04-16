@@ -64,21 +64,21 @@ Popup {
 
             BlueButtonNoBorder {
                 Layout.fillWidth: true
-                text: root.cancelButtonText
+                text: root.confirmButtonText
                 onClicked: {
-                    if (root.onCancel) {
-                        root.onCancel()
+                    if (root.onConfirm) {
+                        root.onConfirm()
                     }
                     root.close()
                 }
             }
 
-            WhiteButtonWithBorder {
+            WhiteButtonNoBorder {
                 Layout.fillWidth: true
-                text: root.confirmButtonText
+                text: root.cancelButtonText
                 onClicked: {
-                    if (root.onConfirm) {
-                        root.onConfirm()
+                    if (root.onCancel) {
+                        root.onCancel()
                     }
                     root.close()
                 }

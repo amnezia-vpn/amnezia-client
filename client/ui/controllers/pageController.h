@@ -18,7 +18,6 @@ namespace PageLoader
         PageAbout,
 
         PageSettingsServersList,
-        PageCountrySelector,
         PageSettings,
         PageSettingsServerData,
         PageSettingsServerInfo,

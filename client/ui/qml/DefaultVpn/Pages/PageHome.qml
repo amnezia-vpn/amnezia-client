@@ -95,7 +95,7 @@ Page {
                     return
                 }
                 ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
-                PageController.goToPage(PageEnum.PageCountrySelector)
+                PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
             }
         }
 
