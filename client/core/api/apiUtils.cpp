@@ -32,15 +32,17 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
 
         constexpr QLatin1String servicePremium("amnezia-premium");
         constexpr QLatin1String serviceFree("amnezia-free");
+        constexpr QLatin1String serviceExternalPremium("external-premium");
 
         auto apiConfigObject = serverConfigObject.value(apiDefs::key::apiConfig).toObject();
-        auto stackType = apiConfigObject.value(apiDefs::key::stackType).toString();
         auto serviceType = apiConfigObject.value(apiDefs::key::serviceType).toString();
 
-        if (serviceType == servicePremium || stackType == stackPremium) {
+        if (serviceType == servicePremium) {
             return apiDefs::ConfigType::AmneziaPremiumV2;
-        } else if (serviceType == serviceFree || stackType == stackFree) {
+        } else if (serviceType == serviceFree) {
             return apiDefs::ConfigType::AmneziaFreeV3;
+        } else if (serviceType == serviceExternalPremium) {
+            return apiDefs::ConfigType::ExternalPremium;
         }
     }
     default: {
@@ -66,6 +68,7 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         return amnezia::ErrorCode::NoError;
     } else if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
                || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
+        qDebug() << reply->error();
         return amnezia::ErrorCode::ApiConfigTimeoutError;
     } else {
         QString err = reply->errorString();
@@ -84,4 +87,11 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
 
     qDebug() << "something went wrong";
     return amnezia::ErrorCode::InternalError;
+}
+
+bool apiUtils::isPremiumServer(const QJsonObject &serverConfigObject)
+{
+    static const QSet<apiDefs::ConfigType> premiumTypes = { apiDefs::ConfigType::AmneziaPremiumV1, apiDefs::ConfigType::AmneziaPremiumV2,
+                                                            apiDefs::ConfigType::ExternalPremium };
+    return premiumTypes.contains(getConfigType(serverConfigObject));
 }
