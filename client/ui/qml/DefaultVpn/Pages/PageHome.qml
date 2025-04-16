@@ -85,9 +85,7 @@ Page {
             Layout.topMargin: 10
             Layout.preferredWidth: defaultServerDropDown.width
 
-            visible: ServersModel.isDefaultServerFromApi && 
-                     ServersModel.defaultServerDescriptionCollapsed !== "" && 
-                     ServersModel.defaultServerDescriptionCollapsed !== ServersModel.defaultServerName
+            visible: ServersModel.defaultServerImagePathCollapsed !== ""
 
             text: ServersModel.defaultServerDescriptionCollapsed
 
@@ -96,6 +94,7 @@ Page {
                     PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
                     return
                 }
+                ServersModel.setProcessedServerIndex(ServersModel.defaultIndex)
                 PageController.goToPage(PageEnum.PageCountrySelector)
             }
         }

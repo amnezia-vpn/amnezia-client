@@ -65,6 +65,8 @@ Page {
         }
 
         XSmallTextType {
+            visible: false
+
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.bottomMargin: 8
@@ -74,6 +76,8 @@ Page {
         }
 
         InputType {
+            visible: false
+
             id: textKey
 
             Layout.leftMargin: 16

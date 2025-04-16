@@ -14,7 +14,7 @@ TextField {
 
     property string defaultBackgroundColor: Style.color.white
     property string defaultBorderColor: Style.color.gray3
-    property string defaultTextColor: Style.color.gray6
+    property string defaultTextColor: Style.color.black
 
     property string hoveredBackgroundColor: Style.color.white
     property string hoveredBorderColor: Style.color.gray6
@@ -44,6 +44,7 @@ TextField {
 
     selectionColor:  Style.color.accent1
     selectedTextColor: Style.color.white
+    placeholderTextColor: Style.color.gray6
 
     font.pixelSize: 17
     font.weight: 400
