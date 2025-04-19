@@ -6,6 +6,7 @@
 #define INTERFACECONFIG_H
 
 #include <QList>
+#include <QMap>
 #include <QString>
 
 #include "ipaddress.h"
