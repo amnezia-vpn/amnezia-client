@@ -2,6 +2,8 @@
 
 #include "protocols/protocols_defs.h"
 
+#include "ui/models/protocols/utils.h"
+
 OpenVpnConfigModel::OpenVpnConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
@@ -73,9 +75,7 @@ void OpenVpnConfigModel::updateModel(const QJsonObject &config)
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::openvpn).toObject();
 
-    m_protocolConfig.insert(
-            config_key::subnet_address,
-            protocolConfig.value(amnezia::config_key::subnet_address).toString(amnezia::protocols::openvpn::defaultSubnetAddress));
+    updateConfig(protocolConfig, config_key::subnet_address, amnezia::protocols::openvpn::defaultSubnetAddress);
 
     QString transportProto;
     if (m_container == DockerContainer::OpenVpn) {
@@ -84,22 +84,31 @@ void OpenVpnConfigModel::updateModel(const QJsonObject &config)
         transportProto = "tcp";
     }
 
-    m_protocolConfig.insert(config_key::transport_proto, transportProto);
+    const std::pair<const char *, std::variant<const char *, bool>> defaults[] = {
+        { config_key::transport_proto, transportProto.toUtf8().constData() },
+        { config_key::port, protocols::openvpn::defaultPort },
+        { config_key::ncp_disable, protocols::openvpn::defaultNcpDisable },
+        { config_key::cipher, protocols::openvpn::defaultCipher },
+        { config_key::hash, protocols::openvpn::defaultHash },
+        { config_key::block_outside_dns, protocols::openvpn::defaultBlockOutsideDns },
+        { config_key::tls_auth, protocols::openvpn::defaultTlsAuth },
+        { config_key::additional_client_config, protocols::openvpn::defaultAdditionalClientConfig },
+    };
 
-    m_protocolConfig.insert(config_key::ncp_disable,
-                            protocolConfig.value(config_key::ncp_disable).toBool(protocols::openvpn::defaultNcpDisable));
-    m_protocolConfig.insert(config_key::cipher, protocolConfig.value(config_key::cipher).toString(protocols::openvpn::defaultCipher));
-    m_protocolConfig.insert(config_key::hash, protocolConfig.value(config_key::hash).toString(protocols::openvpn::defaultHash));
-    m_protocolConfig.insert(config_key::block_outside_dns,
-                            protocolConfig.value(config_key::block_outside_dns).toBool(protocols::openvpn::defaultBlockOutsideDns));
-    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(protocols::openvpn::defaultPort));
-    m_protocolConfig.insert(config_key::tls_auth, protocolConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth));
-    m_protocolConfig.insert(
-            config_key::additional_client_config,
-            protocolConfig.value(config_key::additional_client_config).toString(protocols::openvpn::defaultAdditionalClientConfig));
-    m_protocolConfig.insert(
-            config_key::additional_server_config,
-            protocolConfig.value(config_key::additional_server_config).toString(protocols::openvpn::defaultAdditionalServerConfig));
+    for (const auto &[key, def] : defaults) {
+        const auto configKey = key;
+        const auto defaultValue = def;
+        std::visit([&](auto &&defaultValue_) { updateConfig(protocolConfig, configKey, defaultValue_); }, defaultValue);
+    }
+
+    updateConfig(protocolConfig, config_key::transport_proto, transportProto.toUtf8().constData());
+    updateConfig(protocolConfig, config_key::ncp_disable, protocols::openvpn::defaultNcpDisable);
+    updateConfig(protocolConfig, config_key::cipher, protocols::openvpn::defaultCipher);
+    updateConfig(protocolConfig, config_key::hash, protocols::openvpn::defaultHash);
+    updateConfig(protocolConfig, config_key::block_outside_dns, protocols::openvpn::defaultBlockOutsideDns);
+    updateConfig(protocolConfig, config_key::port, protocols::openvpn::defaultPort);
+    updateConfig(protocolConfig, config_key::tls_auth, protocols::openvpn::defaultTlsAuth);
+    updateConfig(protocolConfig, config_key::additional_client_config, protocols::openvpn::defaultAdditionalClientConfig);
 
     endResetModel();
 }

@@ -4,6 +4,8 @@
 
 #include "protocols/protocols_defs.h"
 
+#include "ui/models/protocols/utils.h"
+
 AwgConfigModel::AwgConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
@@ -90,40 +92,45 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
 
     QJsonObject serverProtocolConfig = config.value(config_key::awg).toObject();
 
-    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Awg), Proto::Awg);
-    m_serverProtocolConfig.insert(config_key::transport_proto,
-                                  serverProtocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
-    m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);
-    m_serverProtocolConfig[config_key::subnet_address] = serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
-    m_serverProtocolConfig[config_key::port] = serverProtocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
-    m_serverProtocolConfig[config_key::junkPacketCount] =
-            serverProtocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
-    m_serverProtocolConfig[config_key::junkPacketMinSize] =
-            serverProtocolConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize);
-    m_serverProtocolConfig[config_key::junkPacketMaxSize] =
-            serverProtocolConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize);
-    m_serverProtocolConfig[config_key::initPacketJunkSize] =
-            serverProtocolConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize);
-    m_serverProtocolConfig[config_key::responsePacketJunkSize] =
-            serverProtocolConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize);
-    m_serverProtocolConfig[config_key::initPacketMagicHeader] =
-            serverProtocolConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader);
-    m_serverProtocolConfig[config_key::responsePacketMagicHeader] =
-            serverProtocolConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader);
-    m_serverProtocolConfig[config_key::underloadPacketMagicHeader] =
-            serverProtocolConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader);
-    m_serverProtocolConfig[config_key::transportPacketMagicHeader] =
-            serverProtocolConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader);
+    const auto defaultTransportProto =
+            ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Awg), Proto::Awg);
 
-    auto lastConfig = m_serverProtocolConfig.value(config_key::last_config).toString();
+    updateConfig(serverProtocolConfig, config_key::transport_proto, defaultTransportProto.toUtf8().constData());
+    m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);
+
+    const std::pair<const char *, const char *> serverDefaults[] = {
+        { config_key::subnet_address, protocols::wireguard::defaultSubnetAddress },
+        { config_key::port, protocols::wireguard::defaultPort },
+        { config_key::junkPacketCount, protocols::awg::defaultJunkPacketCount },
+        { config_key::junkPacketMinSize, protocols::awg::defaultJunkPacketMinSize },
+        { config_key::junkPacketMaxSize, protocols::awg::defaultJunkPacketMaxSize },
+        { config_key::initPacketJunkSize, protocols::awg::defaultInitPacketJunkSize },
+        { config_key::responsePacketJunkSize, protocols::awg::defaultResponsePacketJunkSize },
+        { config_key::initPacketMagicHeader, protocols::awg::defaultInitPacketMagicHeader },
+        { config_key::responsePacketMagicHeader, protocols::awg::defaultResponsePacketMagicHeader },
+        { config_key::underloadPacketMagicHeader, protocols::awg::defaultUnderloadPacketMagicHeader },
+        { config_key::transportPacketMagicHeader, protocols::awg::defaultTransportPacketMagicHeader },
+    };
+
+    for (const auto &[key, defaultValue] : serverDefaults)
+        updateConfig(serverProtocolConfig, key, defaultValue);
+
+    const auto lastConfig = m_serverProtocolConfig.value(config_key::last_config).toString();
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
-    m_clientProtocolConfig[config_key::mtu] = clientProtocolConfig[config_key::mtu].toString(protocols::awg::defaultMtu);
-    m_clientProtocolConfig[config_key::junkPacketCount] =
-            clientProtocolConfig.value(config_key::junkPacketCount).toString(m_serverProtocolConfig[config_key::junkPacketCount].toString());
-    m_clientProtocolConfig[config_key::junkPacketMinSize] =
-            clientProtocolConfig.value(config_key::junkPacketMinSize).toString(m_serverProtocolConfig[config_key::junkPacketMinSize].toString());
-    m_clientProtocolConfig[config_key::junkPacketMaxSize] =
-            clientProtocolConfig.value(config_key::junkPacketMaxSize).toString(m_serverProtocolConfig[config_key::junkPacketMaxSize].toString());
+
+    const std::pair<const char *, const char *> clientDefaults[] = {
+        { config_key::mtu, protocols::awg::defaultMtu },
+        { config_key::junkPacketCount,
+          m_serverProtocolConfig[config_key::junkPacketCount].toString().toUtf8().constData() },
+        { config_key::junkPacketMinSize,
+          m_serverProtocolConfig[config_key::junkPacketMinSize].toString().toUtf8().constData() },
+        { config_key::junkPacketMaxSize,
+          m_serverProtocolConfig[config_key::junkPacketMaxSize].toString().toUtf8().constData() },
+    };
+
+    for (const auto &[key, defaultValue] : clientDefaults)
+        updateConfig(clientProtocolConfig, key, defaultValue);
+
     endResetModel();
 }
 

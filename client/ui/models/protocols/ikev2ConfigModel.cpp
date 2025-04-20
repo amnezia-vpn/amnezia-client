@@ -2,6 +2,8 @@
 
 #include "protocols/protocols_defs.h"
 
+#include "ui/models/protocols/utils.h"
+
 Ikev2ConfigModel::Ikev2ConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
@@ -49,8 +51,8 @@ void Ikev2ConfigModel::updateModel(const QJsonObject &config)
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::shadowsocks).toObject();
 
-    m_protocolConfig.insert(config_key::cipher, protocolConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher));
-    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort));
+    updateConfig(protocolConfig, config_key::cipher, protocols::shadowsocks::defaultCipher);
+    updateConfig(protocolConfig, config_key::port, protocols::shadowsocks::defaultPort);
 
     endResetModel();
 }

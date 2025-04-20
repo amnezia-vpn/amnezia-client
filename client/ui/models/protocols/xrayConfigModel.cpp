@@ -2,6 +2,8 @@
 
 #include "protocols/protocols_defs.h"
 
+#include "ui/models/protocols/utils.h"
+
 XrayConfigModel::XrayConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
@@ -47,11 +49,20 @@ void XrayConfigModel::updateModel(const QJsonObject &config)
     m_fullConfig = config;
     QJsonObject protocolConfig = config.value(config_key::xray).toObject();
 
-    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Xray), Proto::Xray);
-    m_protocolConfig.insert(config_key::transport_proto,
-                            protocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
-    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(protocols::xray::defaultPort));
-    m_protocolConfig.insert(config_key::site, protocolConfig.value(config_key::site).toString(protocols::xray::defaultSite));
+    if (protocolConfig.contains(config_key::transport_proto)) {
+        auto transportProto = protocolConfig.value(config_key::transport_proto)
+                                      .toString(ProtocolProps::transportProtoToString(
+                                              ProtocolProps::defaultTransportProto(Proto::Xray), Proto::Xray));
+        m_protocolConfig[config_key::transport_proto] = transportProto;
+    }
+
+    const std::pair<const char *, const char *> defaults[] = {
+            { config_key::port, protocols::xray::defaultPort },
+            { config_key::site, protocols::xray::defaultSite },
+    };
+
+    for (const auto &[key, def] : defaults)
+        updateConfig(protocolConfig, key, def);
 
     endResetModel();
 }

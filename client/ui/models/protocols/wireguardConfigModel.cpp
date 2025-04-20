@@ -4,6 +4,8 @@
 
 #include "protocols/protocols_defs.h"
 
+#include "ui/models/protocols/utils.h"
+
 WireGuardConfigModel::WireGuardConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
@@ -55,15 +57,23 @@ void WireGuardConfigModel::updateModel(const QJsonObject &config)
 
     auto defaultTransportProto =
             ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::WireGuard), Proto::WireGuard);
-    m_serverProtocolConfig.insert(config_key::transport_proto,
-                                  serverProtocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
+    updateConfig(serverProtocolConfig, config_key::transport_proto, defaultTransportProto.toUtf8().constData());
+
+    const std::pair<const char *, const char *> serverDefaults[] = {
+        { config_key::transport_proto, defaultTransportProto.toUtf8().constData() },
+        { config_key::subnet_address, protocols::wireguard::defaultSubnetAddress },
+        { config_key::port, protocols::wireguard::defaultPort },
+    };
+
+    for (const auto &[key, def] : serverDefaults)
+        updateConfig(serverProtocolConfig, key, def);
+
+
     m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);
-    m_serverProtocolConfig[config_key::subnet_address] = serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
-    m_serverProtocolConfig[config_key::port] = serverProtocolConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
 
     auto lastConfig = m_serverProtocolConfig.value(config_key::last_config).toString();
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
-    m_clientProtocolConfig[config_key::mtu] = clientProtocolConfig[config_key::mtu].toString(protocols::wireguard::defaultMtu);
+    updateConfig(clientProtocolConfig, config_key::mtu, protocols::wireguard::defaultMtu);
 
     endResetModel();
 }
