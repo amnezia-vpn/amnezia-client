@@ -171,6 +171,11 @@ ErrorCode OpenVpnProtocol::start()
         return lastError();
     }
 
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    IpcClient::Interface()->addKillSwitchAllowedRange(QStringList(NetworkUtilities::getIPAddress(
+            m_configData.value(amnezia::config_key::hostName).toString())));
+#endif
+
     // Detect default gateway
 #ifdef Q_OS_MAC
     QProcess p;

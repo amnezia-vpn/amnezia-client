@@ -44,7 +44,7 @@ PageType {
 
             spacing: 0
 
-            HeaderType {
+            BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.topMargin: 24
 

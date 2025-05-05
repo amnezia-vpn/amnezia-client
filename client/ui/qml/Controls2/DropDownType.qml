@@ -239,6 +239,7 @@ Item {
                     sourceComponent: root.listView
 
                     Layout.fillHeight: true
+                    Layout.fillWidth: true
                 }
             }
         }

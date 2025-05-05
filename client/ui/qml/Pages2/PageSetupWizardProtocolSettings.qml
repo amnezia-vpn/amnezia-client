@@ -96,7 +96,7 @@ PageType {
                             Layout.leftMargin: -16
                         }
 
-                        HeaderType {
+                        BaseHeaderType {
                             id: header
 
                             Layout.fillWidth: true

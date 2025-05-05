@@ -12,6 +12,7 @@
     #include <winsock.h>
     #include <QNetworkInterface>
     #include "qendian.h"
+    #include <QSettings>
 #endif
 #ifdef Q_OS_LINUX
     #include <arpa/inet.h>
@@ -183,6 +184,17 @@ int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
     return routeInfo.dwForwardIfIndex;
 #endif
     return 0;
+}
+
+bool NetworkUtilities::checkIpv6Enabled() {
+#ifdef Q_OS_WIN
+    QSettings RegHLM("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters",
+                     QSettings::NativeFormat);
+    int ret = RegHLM.value("DisabledComponents", 0).toInt();
+    qDebug() << "Check for Windows disabled IPv6 return " << ret;
+    return (ret != 255);
+#endif
+    return true;
 }
 
 #ifdef Q_OS_WIN

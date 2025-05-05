@@ -12,8 +12,47 @@ qt_standard_project_setup()
 
 configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
+set(QSIMPLECRYPTO_DIR ${CMAKE_CURRENT_LIST_DIR}/../../client/3rd/QSimpleCrypto/src)
+
+
+set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../client/3rd-prebuilt/3rd-prebuilt/openssl/")
+set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
+
+set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/windows/include")
+if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libssl.lib")
+    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
+else()
+    set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libssl.lib")
+    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
+endif()
+
+
+if(WIN32)
+    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/windows/include")
+    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
+    else()
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
+    endif()
+elseif(APPLE AND NOT IOS)
+    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/macos/include")
+    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libcrypto.a")
+elseif(LINUX)
+    set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/linux/include")
+    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/x86_64/libcrypto.a")
+endif()
+
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+
+include_directories(
+    ${OPENSSL_INCLUDE_DIR}
+    ${QSIMPLECRYPTO_DIR}
+)
+
 set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/secure_qsettings.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/networkUtilities.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.h
@@ -22,12 +61,20 @@ set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/localserver.h
     ${CMAKE_CURRENT_LIST_DIR}/../../common/logger/logger.h
     ${CMAKE_CURRENT_LIST_DIR}/router.h
+    ${CMAKE_CURRENT_LIST_DIR}/killswitch.h
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
+    ${QSIMPLECRYPTO_DIR}/include/QAead.h
+    ${QSIMPLECRYPTO_DIR}/include/QBlockCipher.h
+    ${QSIMPLECRYPTO_DIR}/include/QRsa.h
+    ${QSIMPLECRYPTO_DIR}/include/QSimpleCrypto_global.h
+    ${QSIMPLECRYPTO_DIR}/include/QX509.h
+    ${QSIMPLECRYPTO_DIR}/include/QX509Store.h
 )
 
 set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../../client/utilities.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/secure_qsettings.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/networkUtilities.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserverprocess.cpp
@@ -36,7 +83,13 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../../common/logger/logger.cpp
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/router.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/killswitch.cpp
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.cpp
+    ${QSIMPLECRYPTO_DIR}/sources/QAead.cpp
+    ${QSIMPLECRYPTO_DIR}/sources/QBlockCipher.cpp
+    ${QSIMPLECRYPTO_DIR}/sources/QRsa.cpp
+    ${QSIMPLECRYPTO_DIR}/sources/QX509.cpp
+    ${QSIMPLECRYPTO_DIR}/sources/QX509Store.cpp
 )
 
 # Mozilla headres
@@ -133,6 +186,7 @@ if(WIN32)
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/tapcontroller_win.cpp
         ${CMAKE_CURRENT_LIST_DIR}/router_win.cpp
+
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemon.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemontunnel.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsfirewall.cpp
@@ -159,6 +213,8 @@ if(WIN32)
         gdi32
         Advapi32
         Kernel32
+        ${OPENSSL_LIB_CRYPTO_PATH}
+        qt6keychain
     )
 
     add_compile_definitions(_WINSOCKAPI_)
@@ -203,6 +259,9 @@ if(APPLE)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/wireguardutilsmacos.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/macos/daemon/macosfirewall.cpp
     )
+
+    set(LIBS ${OPENSSL_LIB_CRYPTO_PATH} qt6keychain)
+
 endif()
 
 if(LINUX)
@@ -233,6 +292,9 @@ if(LINUX)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxroutemonitor.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/linux/daemon/linuxfirewall.cpp
     )
+
+    set(LIBS ${OPENSSL_LIB_CRYPTO_PATH} qt6keychain -static-libstdc++ -static-libgcc -ldl)
+
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../src/qtservice.cmake)
@@ -244,6 +306,7 @@ include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/../../common/logger
     ${CMAKE_CURRENT_BINARY_DIR}
 )
+
 
 add_executable(${PROJECT} ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat Qt6::DBus ${LIBS})

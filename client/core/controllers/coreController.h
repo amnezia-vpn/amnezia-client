@@ -8,6 +8,7 @@
 #include "ui/controllers/api/apiConfigsController.h"
 #include "ui/controllers/api/apiSettingsController.h"
 #include "ui/controllers/appSplitTunnelingController.h"
+#include "ui/controllers/allowedDnsController.h"
 #include "ui/controllers/connectionController.h"
 #include "ui/controllers/exportController.h"
 #include "ui/controllers/focusController.h"
@@ -18,6 +19,7 @@
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
 
+#include "ui/models/allowed_dns_model.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/protocols/cloakConfigModel.h"
@@ -80,6 +82,7 @@ private:
     void initAutoConnectHandler();
     void initAmneziaDnsToggledHandler();
     void initPrepareConfigHandler();
+    void initStrictKillSwitchHandler();
 
     QQmlApplicationEngine *m_engine {}; // TODO use parent child system here?
     std::shared_ptr<Settings> m_settings;
@@ -102,6 +105,7 @@ private:
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
+    QScopedPointer<AllowedDnsController> m_allowedDnsController;
 
     QScopedPointer<ApiSettingsController> m_apiSettingsController;
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
@@ -112,6 +116,7 @@ private:
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<ProtocolsModel> m_protocolsModel;
     QSharedPointer<SitesModel> m_sitesModel;
+    QSharedPointer<AllowedDnsModel> m_allowedDnsModel;
     QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
 

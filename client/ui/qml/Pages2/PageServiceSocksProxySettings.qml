@@ -77,7 +77,7 @@ PageType {
 
                     spacing: 0
 
-                    HeaderType {
+                    BaseHeaderType {
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
@@ -217,7 +217,7 @@ PageType {
                                 }
                             }
 
-                            HeaderType {
+                            BaseHeaderType {
                                 Layout.fillWidth: true
 
                                 headerText: qsTr("SOCKS5 settings")

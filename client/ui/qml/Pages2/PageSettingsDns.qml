@@ -50,7 +50,7 @@ PageType {
 
             spacing: 16
 
-            HeaderType {
+            BaseHeaderType {
                 Layout.fillWidth: true
 
                 headerText: qsTr("DNS servers")

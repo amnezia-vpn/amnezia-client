@@ -69,7 +69,7 @@ PageType {
                 Layout.topMargin: 20
             }
 
-            HeaderType {
+            HeaderTypeWithButton {
                 id: headerContent
                 objectName: "headerContent"
 
@@ -133,12 +133,6 @@ PageType {
                             }
                             PageController.showBusyIndicator(false)
                         }
-                    }
-
-                    MouseArea {
-                        anchors.fill: containerRadioButton
-                        cursorShape: Qt.PointingHandCursor
-                        enabled: false
                     }
 
                     Keys.onEnterPressed: {

@@ -48,15 +48,19 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     }
     case ServiceDescriptionRole: {
         if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2) {
-            return tr("Classic VPN for seamless work, downloading large files, and watching videos. Access all websites and online resources. "
+            return tr("Classic VPN for seamless work, downloading large files, and watching videos. Access all websites and online "
+                      "resources. "
                       "Speeds up to 200 Mbps");
         } else if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
             return tr("Free unlimited access to a basic set of websites such as Facebook, Instagram, Twitter (X), Discord, Telegram and "
                       "more. YouTube is not included in the free plan.");
+        } else {
+            return "";
         }
     }
     case IsComponentVisibleRole: {
-        return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2;
+        return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2
+                || m_accountInfoData.configType == apiDefs::ConfigType::ExternalPremium;
     }
     case HasExpiredWorkerRole: {
         for (int i = 0; i < m_issuedConfigsInfo.size(); i++) {
@@ -93,6 +97,8 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
 
     m_accountInfoData = accountInfoData;
 
+    m_supportInfo = accountInfoObject.value(apiDefs::key::supportInfo).toObject();
+
     endResetModel();
 }
 
@@ -121,12 +127,27 @@ QJsonArray ApiAccountInfoModel::getIssuedConfigsInfo()
 
 QString ApiAccountInfoModel::getTelegramBotLink()
 {
-    if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
-        return tr("amnezia_free_support_bot");
-    } else if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2) {
-        return tr("amnezia_premium_support_bot");
-    }
-    return "";
+    return m_supportInfo.value(apiDefs::key::telegram).toString();
+}
+
+QString ApiAccountInfoModel::getEmailLink()
+{
+    return m_supportInfo.value(apiDefs::key::email).toString();
+}
+
+QString ApiAccountInfoModel::getBillingEmailLink()
+{
+    return m_supportInfo.value(apiDefs::key::billingEmail).toString();
+}
+
+QString ApiAccountInfoModel::getSiteLink()
+{
+    return m_supportInfo.value(apiDefs::key::websiteName).toString();
+}
+
+QString ApiAccountInfoModel::getFullSiteLink()
+{
+    return m_supportInfo.value(apiDefs::key::website).toString();
 }
 
 QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const

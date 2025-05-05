@@ -43,7 +43,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            HeaderType {
+            BaseHeaderType {
                 id: header
 
                 Layout.fillWidth: true

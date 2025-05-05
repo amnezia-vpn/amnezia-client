@@ -39,7 +39,7 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
-            HeaderType {
+            BaseHeaderType {
                 id: header
 
                 Layout.fillWidth: true

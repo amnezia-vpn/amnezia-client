@@ -10,7 +10,8 @@ namespace apiDefs
         AmneziaFreeV3,
         AmneziaPremiumV1,
         AmneziaPremiumV2,
-        SelfHosted
+        SelfHosted,
+        ExternalPremium
     };
 
     enum ConfigSource {
@@ -43,6 +44,13 @@ namespace apiDefs
         constexpr QLatin1String maxDeviceCount("max_device_count");
         constexpr QLatin1String subscriptionEndDate("subscription_end_date");
         constexpr QLatin1String issuedConfigs("issued_configs");
+
+        constexpr QLatin1String supportInfo("support_info");
+        constexpr QLatin1String email("email");
+        constexpr QLatin1String billingEmail("billing_email");
+        constexpr QLatin1String website("website");
+        constexpr QLatin1String websiteName("website_name");
+        constexpr QLatin1String telegram("telegram");
     }
 
     const int requestTimeoutMsecs = 12 * 1000; // 12 secs
