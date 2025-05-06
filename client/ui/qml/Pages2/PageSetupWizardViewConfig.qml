@@ -61,7 +61,7 @@ PageType {
             anchors.rightMargin: 16
             anchors.leftMargin: 16
 
-            HeaderType {
+            BaseHeaderType {
                 headerText: qsTr("New connection")
             }
 

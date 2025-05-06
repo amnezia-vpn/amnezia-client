@@ -75,7 +75,7 @@ PageType {
 
                         spacing: 0
 
-                        HeaderType {
+                        BaseHeaderType {
                             Layout.fillWidth: true
                             headerText: qsTr("XRay settings")
                         }

@@ -29,6 +29,8 @@
 #include "logger.h"
 #include "platforms/windows/windowsutils.h"
 
+#include "killswitch.h"
+
 #define IPV6_ADDRESS_SIZE 16
 
 // ID for the Firewall Sublayer
@@ -180,16 +182,29 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
     }                                                                     \
   }
 
-  logger.info() << "Enabling firewall Using Adapter:" << vpnAdapterIndex;
+  logger.info() << "Enabling Killswitch Using Adapter:" << vpnAdapterIndex;
+  if (vpnAdapterIndex < 0)
+  {
+    IPAddress allv4("0.0.0.0/0");
+    if (!blockTrafficTo(allv4, MED_WEIGHT,
+                        "Block Internet", "killswitch")) {
+        return false;
+    }
+    IPAddress allv6("::/0");
+    if (!blockTrafficTo(allv6, MED_WEIGHT,
+                        "Block Internet", "killswitch")) {
+      return false;
+    }
+  } else
   FW_OK(allowTrafficOfAdapter(vpnAdapterIndex, MED_WEIGHT,
-                              "Allow usage of VPN Adapter"));
+                                  "Allow usage of VPN Adapter"));
   FW_OK(allowDHCPTraffic(MED_WEIGHT, "Allow DHCP Traffic"));
-  FW_OK(allowHyperVTraffic(MED_WEIGHT, "Allow Hyper-V Traffic"));
+  FW_OK(allowHyperVTraffic(MAX_WEIGHT, "Allow Hyper-V Traffic"));
   FW_OK(allowTrafficForAppOnAll(getCurrentPath(), MAX_WEIGHT,
                                 "Allow all for AmneziaVPN.exe"));
   FW_OK(blockTrafficOnPort(53, MED_WEIGHT, "Block all DNS"));
-  FW_OK(
-      allowLoopbackTraffic(MED_WEIGHT, "Allow Loopback traffic on device %1"));
+  FW_OK(allowLoopbackTraffic(MED_WEIGHT,
+                             "Allow Loopback traffic on device %1"));
 
   logger.debug() << "Killswitch on! Rules:" << m_activeRules.length();
   return true;
@@ -225,6 +240,37 @@ bool WindowsFirewall::enableLanBypass(const QList<IPAddress>& ranges) {
   cleanup.dismiss();
   return true;
 }
+
+// Allow unprotected traffic sent to the following address ranges.
+bool WindowsFirewall::allowTrafficRange(const QStringList& ranges) {
+  // Start the firewall transaction
+  auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
+  if (result != ERROR_SUCCESS) {
+    disableKillSwitch();
+    return false;
+  }
+  auto cleanup = qScopeGuard([&] {
+      FwpmTransactionAbort0(m_sessionHandle);
+      disableKillSwitch();
+  });
+
+  for (const QString& addr : ranges) {
+    logger.debug() << "Allow killswitch exclude: " << addr;
+    if (!allowTrafficTo(QHostAddress(addr), LOW_WEIGHT + 1, "Allow killswitch bypass traffic")) {
+      return false;
+    }
+  }
+
+  result = FwpmTransactionCommit0(m_sessionHandle);
+  if (result != ERROR_SUCCESS) {
+    logger.error() << "FwpmTransactionCommit0 failed with error:" << result;
+    return false;
+  }
+
+  cleanup.dismiss();
+  return true;
+}
+
 
 bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
   // Start the firewall transaction
@@ -262,12 +308,20 @@ bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
     }
   }
 
+  for (const QString& dns : config.m_allowedDnsServers) {
+    logger.debug() << "Allow DNS: " << dns;
+    if (!allowTrafficTo(QHostAddress(dns), 53, HIGH_WEIGHT,
+                        "Allow DNS-Server", config.m_serverPublicKey)) {
+      return false;
+    }
+  }
+
   if (!config.m_excludedAddresses.empty()) {
     for (const QString& i : config.m_excludedAddresses) {
       logger.debug() << "excludedAddresses range: " << i;
 
       if (!allowTrafficTo(i, HIGH_WEIGHT,
-                               "Allow Ecxlude route", config.m_serverPublicKey)) {
+                          "Allow Ecxlude route", config.m_serverPublicKey)) {
         return false;
       }
     }
@@ -313,37 +367,41 @@ bool WindowsFirewall::disablePeerTraffic(const QString& pubkey) {
 }
 
 bool WindowsFirewall::disableKillSwitch() {
-  auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
-  auto cleanup = qScopeGuard([&] {
+  return KillSwitch::instance()->disableKillSwitch();
+}
+
+bool WindowsFirewall::allowAllTraffic() {
+    auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
+    auto cleanup = qScopeGuard([&] {
+        if (result != ERROR_SUCCESS) {
+            FwpmTransactionAbort0(m_sessionHandle);
+        }
+    });
     if (result != ERROR_SUCCESS) {
-      FwpmTransactionAbort0(m_sessionHandle);
+      logger.error() << "FwpmTransactionBegin0 failed. Return value:.\n"
+                     << result;
+      return false;
     }
-  });
-  if (result != ERROR_SUCCESS) {
-    logger.error() << "FwpmTransactionBegin0 failed. Return value:.\n"
-                   << result;
-    return false;
-  }
 
-  for (const auto& filterID : m_peerRules.values()) {
-    FwpmFilterDeleteById0(m_sessionHandle, filterID);
-  }
+    for (const auto& filterID : m_peerRules.values()) {
+      FwpmFilterDeleteById0(m_sessionHandle, filterID);
+    }
 
-  for (const auto& filterID : qAsConst(m_activeRules)) {
-    FwpmFilterDeleteById0(m_sessionHandle, filterID);
-  }
+    for (const auto& filterID : qAsConst(m_activeRules)) {
+      FwpmFilterDeleteById0(m_sessionHandle, filterID);
+    }
 
-  // Commit!
-  result = FwpmTransactionCommit0(m_sessionHandle);
-  if (result != ERROR_SUCCESS) {
-    logger.error() << "FwpmTransactionCommit0 failed. Return value:.\n"
-                   << result;
-    return false;
-  }
-  m_peerRules.clear();
-  m_activeRules.clear();
-  logger.debug() << "Firewall Disabled!";
-  return true;
+           // Commit!
+    result = FwpmTransactionCommit0(m_sessionHandle);
+    if (result != ERROR_SUCCESS) {
+      logger.error() << "FwpmTransactionCommit0 failed. Return value:.\n"
+                     << result;
+      return false;
+    }
+    m_peerRules.clear();
+    m_activeRules.clear();
+    logger.debug() << "Firewall Disabled!";
+    return true;
 }
 
 bool WindowsFirewall::allowTrafficForAppOnAll(const QString& exePath,

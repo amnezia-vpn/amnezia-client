@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QSettings>
 
-#include "keychain.h"
+#include "../client/3rd/qtkeychain/qtkeychain/keychain.h"
 
 class SecureQSettings : public QObject
 {

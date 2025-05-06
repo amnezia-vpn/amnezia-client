@@ -48,6 +48,9 @@ void CoreController::initModels()
     m_sitesModel.reset(new SitesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
 
+    m_allowedDnsModel.reset(new AllowedDnsModel(m_settings, this));
+    m_engine->rootContext()->setContextProperty("AllowedDnsModel", m_allowedDnsModel.get());
+
     m_appSplitTunnelingModel.reset(new AppSplitTunnelingModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("AppSplitTunnelingModel", m_appSplitTunnelingModel.get());
 
@@ -129,6 +132,9 @@ void CoreController::initControllers()
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
+
+    m_allowedDnsController.reset(new AllowedDnsController(m_settings, m_allowedDnsModel));
+    m_engine->rootContext()->setContextProperty("AllowedDnsController", m_allowedDnsController.get());
 
     m_appSplitTunnelingController.reset(new AppSplitTunnelingController(m_settings, m_appSplitTunnelingModel));
     m_engine->rootContext()->setContextProperty("AppSplitTunnelingController", m_appSplitTunnelingController.get());
@@ -219,6 +225,7 @@ void CoreController::initSignalHandlers()
     initPrepareConfigHandler();
     initImportPremiumV2VpnKeyHandler();
     initShowMigrationDrawerHandler();
+    initStrictKillSwitchHandler();
 }
 
 void CoreController::initNotificationHandler()
@@ -378,6 +385,10 @@ void CoreController::initShowMigrationDrawerHandler()
             m_apiPremV1MigrationController->showMigrationDrawer();
         }
     });
+void CoreController::initStrictKillSwitchHandler()
+{
+    connect(m_settingsController.get(), &SettingsController::strictKillSwitchEnabledChanged, 
+            m_vpnConnection.get(), &VpnConnection::onKillSwitchModeChanged);
 }
 
 QSharedPointer<PageController> CoreController::pageController() const

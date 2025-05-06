@@ -5,13 +5,12 @@
 
 #include "ipc.h"
 #include "localserver.h"
-#include "utilities.h"
 
-#include "router.h"
+#include "killswitch.h"
 #include "logger.h"
 
 #ifdef Q_OS_WIN
-#include "tapcontroller_win.h"
+    #include "tapcontroller_win.h"
 #endif
 
 namespace {
@@ -46,6 +45,8 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
         logger.error() << "Failed to initialize the server";
         return;
     }
+
+    KillSwitch::instance()->init();
 
 #ifdef Q_OS_LINUX
     // Signal handling for a proper shutdown.

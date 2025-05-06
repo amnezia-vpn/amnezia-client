@@ -13,16 +13,17 @@
     #include <QApplication>
 #endif
 
+#include "core/networkUtilities.h"
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
 #include "core/scripts_registry.h"
-#include "core/server_defs.h"
 #include "settings.h"
 #include "utilities.h"
 
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
+
 
 OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
                                          QObject *parent)
@@ -122,12 +123,14 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
             // Prevent ipv6 leak
-            config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
+            if (NetworkUtilities::checkIpv6Enabled()) {
+                config.append("ifconfig-ipv6 fd15:53b6:dead::2/64  fd15:53b6:dead::1\n");
+            }
 #endif
             config.append("block-ipv6\n");
         } else if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
 
-            // no redirect-gateway
+               // no redirect-gateway
         } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
             config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");

@@ -45,7 +45,7 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
-            HeaderType {
+            HeaderTypeWithButton {
                 id: moreButton
 
                 property bool isVisible: SettingsController.getInstallationUuid() !== "" || PageController.isStartPageVisible()
@@ -76,7 +76,7 @@ PageType {
                         anchors.right: parent.right
                         spacing: 0
 
-                        HeaderType {
+                        BaseHeaderType {
                             Layout.fillWidth: true
                             Layout.topMargin: 32
                             Layout.leftMargin: 16

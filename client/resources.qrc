@@ -129,6 +129,7 @@
         <file>ui/qml/Components/SettingsContainersListView.qml</file>
         <file>ui/qml/Components/ShareConnectionDrawer.qml</file>
         <file>ui/qml/Components/TransportProtoSelector.qml</file>
+        <file>ui/qml/Components/AddSitePanel.qml</file>
         <file>ui/qml/Config/GlobalConfig.qml</file>
         <file>ui/qml/Config/qmldir</file>
         <file>ui/qml/Controls2/BackButtonType.qml</file>
@@ -143,7 +144,9 @@
         <file>ui/qml/Controls2/DropDownType.qml</file>
         <file>ui/qml/Controls2/FlickableType.qml</file>
         <file>ui/qml/Controls2/Header2Type.qml</file>
-        <file>ui/qml/Controls2/HeaderType.qml</file>
+        <file>ui/qml/Controls2/BaseHeaderType.qml</file>
+        <file>ui/qml/Controls2/HeaderTypeWithButton.qml</file>
+        <file>ui/qml/Controls2/HeaderTypeWithSwitcher.qml</file>
         <file>ui/qml/Controls2/HorizontalRadioButton.qml</file>
         <file>ui/qml/Controls2/ImageButtonType.qml</file>
         <file>ui/qml/Controls2/LabelWithButtonType.qml</file>
@@ -199,6 +202,8 @@
         <file>ui/qml/Pages2/PageSettingsBackup.qml</file>
         <file>ui/qml/Pages2/PageSettingsConnection.qml</file>
         <file>ui/qml/Pages2/PageSettingsDns.qml</file>
+        <file>ui/qml/Pages2/PageSettingsKillSwitch.qml</file>
+        <file>ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml</file>
         <file>ui/qml/Pages2/PageSettingsLogging.qml</file>
         <file>ui/qml/Pages2/PageSettingsServerData.qml</file>
         <file>ui/qml/Pages2/PageSettingsServerInfo.qml</file>

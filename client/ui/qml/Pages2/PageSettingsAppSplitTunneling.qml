@@ -79,29 +79,22 @@ PageType {
             id: backButton
         }
 
-        RowLayout {
-            HeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
+        HeaderTypeWithSwitcher {
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
-                headerText: qsTr("App split tunneling")
+            headerText: qsTr("App split tunneling")
 
+            enabled: root.pageEnabled
+            showSwitcher: true
+            switcher {
+                checked: AppSplitTunnelingModel.isTunnelingEnabled
                 enabled: root.pageEnabled
             }
-
-            SwitcherType {
-                id: switcher
-
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-
-                enabled: root.pageEnabled
-
-                checked: AppSplitTunnelingModel.isTunnelingEnabled
-                onToggled: {                    
-                    AppSplitTunnelingModel.toggleSplitTunneling(checked)
-                    selector.text = root.routeModesModel[getRouteModesModelIndex()].name
-                }
+            switcherFunction: function(checked) {
+                AppSplitTunnelingModel.toggleSplitTunneling(checked)
+                selector.text = root.routeModesModel[getRouteModesModelIndex()].name
             }
         }
 

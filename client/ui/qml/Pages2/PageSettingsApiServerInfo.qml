@@ -93,7 +93,7 @@ PageType {
                 Layout.topMargin: 20
             }
 
-            HeaderType {
+            HeaderTypeWithButton {
                 id: headerContent
                 objectName: "headerContent"
 
