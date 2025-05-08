@@ -93,9 +93,9 @@ PageType {
                                     var tmpText = textField.text
                                     tmpText = tmpText.toLocaleLowerCase()
 
-                                    var indexHttps = tmpText.indexOf("https://")
-                                    if (indexHttps === 0) {
+                                    if (tmpText.startsWith("https://")) {
                                         tmpText = textField.text.substring(8)
+                                        site = tmpText
                                     } else {
                                         site = textField.text
                                     }

@@ -171,7 +171,7 @@ ErrorCode OpenVpnProtocol::start()
         return lastError();
     }
 
-#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+#ifdef AMNEZIA_DESKTOP
     IpcClient::Interface()->addKillSwitchAllowedRange(QStringList(NetworkUtilities::getIPAddress(
             m_configData.value(amnezia::config_key::hostName).toString())));
 #endif
