@@ -69,7 +69,7 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
                       "Access all websites and online resources. Speeds up to %1 Mbps.")
                     .arg(speed);
         } else if (serviceType == serviceType::amneziaFree) {
-            QString description = tr("AmneziaFree provides free unlimited access to a basic set of web sites, such as Facebook, Instagram, Twitter (X), Discord, Telegram, and others. YouTube is not included in the free plan.");
+            QString description = tr("Amnezia Free provides unlimited, free access to a basic set of websites and apps, including Facebook, Instagram, Twitter (X), Discord, Telegram, and more. YouTube is not included in the free plan.");
             if (!isServiceAvailable) {
                 description += tr("<p><a style=\"color: #EB5757;\">Not available in your region. If you have VPN enabled, disable it, "
                                   "return to the previous screen, and try again.</a>");
@@ -82,7 +82,7 @@ QVariant ApiServicesModel::data(const QModelIndex &index, int role) const
             return tr("Amnezia Premium is classic VPN for for seamless work, downloading large files, and watching videos. "
                       "Access all websites and online resources.");
         } else {
-            return tr("AmneziaFree provides free unlimited access to a basic set of web sites, such as Facebook, Instagram, Twitter (X), Discord, Telegram, and others. YouTube is not included in the free plan.");
+            return tr("Amnezia Free provides unlimited, free access to a basic set of websites and apps, including Facebook, Instagram, Twitter (X), Discord, Telegram, and more. YouTube is not included in the free plan.");
         }
     }
     case IsServiceAvailableRole: {
