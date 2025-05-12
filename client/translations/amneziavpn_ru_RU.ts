@@ -3075,8 +3075,6 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="109"/>
         <source>Export client logs</source>
         <translation type="unfinished"></translation>
-		<source>Support tag</source>
-		<translation>Support tag</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="119"/>
