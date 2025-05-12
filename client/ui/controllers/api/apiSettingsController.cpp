@@ -62,7 +62,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
 
     QByteArray responseBody;
 
-    if (apiUtils::getConfigType(serverConfig) == apiDefs::ConfigType::AmneziaPremiumV2) {
+    if (apiUtils::isPremiumServer(serverConfig)) {
         ErrorCode errorCode = gatewayController.post(QString("%1v1/account_info"), apiPayload, responseBody);
         if (errorCode != ErrorCode::NoError) {
             emit errorOccurred(errorCode);

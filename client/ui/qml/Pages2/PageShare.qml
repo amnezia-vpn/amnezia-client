@@ -169,7 +169,7 @@ PageType {
 
             spacing: 0
 
-            HeaderType {
+            HeaderTypeWithButton {
                 id: header
                 Layout.fillWidth: true
                 Layout.topMargin: 24

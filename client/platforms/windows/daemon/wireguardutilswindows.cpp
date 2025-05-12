@@ -14,8 +14,6 @@
 
 #include "leakdetector.h"
 #include "logger.h"
-#include "platforms/windows/windowscommons.h"
-#include "windowsdaemon.h"
 #include "windowsfirewall.h"
 
 #pragma comment(lib, "iphlpapi.lib")
@@ -269,6 +267,13 @@ bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
   if (result == ERROR_OBJECT_ALREADY_EXISTS) {
     return true;
   }
+
+  // Case for ipv6 route with disabled ipv6
+  if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol
+      && result == ERROR_NOT_FOUND) {
+    return true;
+  }
+
   if (result != NO_ERROR) {
     logger.error() << "Failed to create route to"
                    << prefix.toString()

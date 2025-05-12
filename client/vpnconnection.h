@@ -48,14 +48,14 @@ public:
 
 public slots:
     void connectToVpn(int serverIndex,
-        const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
+    const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
 
     void disconnectFromVpn();
-
 
     void addRoutes(const QStringList &ips);
     void deleteRoutes(const QStringList &ips);
     void flushDns();
+    void onKillSwitchModeChanged(bool enabled);
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);

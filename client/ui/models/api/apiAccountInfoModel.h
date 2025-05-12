@@ -33,7 +33,12 @@ public slots:
 
     QJsonArray getAvailableCountries();
     QJsonArray getIssuedConfigsInfo();
+
     QString getTelegramBotLink();
+    QString getEmailLink();
+    QString getBillingEmailLink();
+    QString getSiteLink();
+    QString getFullSiteLink();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -51,6 +56,7 @@ private:
     AccountInfoData m_accountInfoData;
     QJsonArray m_availableCountries;
     QJsonArray m_issuedConfigsInfo;
+    QJsonObject m_supportInfo;
 };
 
 #endif // APIACCOUNTINFOMODEL_H

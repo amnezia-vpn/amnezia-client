@@ -59,7 +59,7 @@ PageType {
 
             spacing: 16
 
-            HeaderType {
+            BaseHeaderType {
                 id: header
 
                 implicitWidth: parent.width

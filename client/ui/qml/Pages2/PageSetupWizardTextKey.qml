@@ -33,7 +33,7 @@ PageType {
                 Layout.topMargin: 20
             }
 
-            HeaderType {
+            BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16

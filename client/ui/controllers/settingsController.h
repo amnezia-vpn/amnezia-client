@@ -24,6 +24,8 @@ public:
     Q_PROPERTY(QString secondaryDns READ getSecondaryDns WRITE setSecondaryDns NOTIFY secondaryDnsChanged)
     Q_PROPERTY(bool isLoggingEnabled READ isLoggingEnabled WRITE toggleLogging NOTIFY loggingStateChanged)
     Q_PROPERTY(bool isNotificationPermissionGranted READ isNotificationPermissionGranted NOTIFY onNotificationStateChanged)
+    Q_PROPERTY(bool isKillSwitchEnabled READ isKillSwitchEnabled WRITE toggleKillSwitch NOTIFY killSwitchEnabledChanged)
+    Q_PROPERTY(bool strictKillSwitchEnabled READ isStrictKillSwitchEnabled WRITE toggleStrictKillSwitch NOTIFY strictKillSwitchEnabledChanged)
 
     Q_PROPERTY(bool isDevModeEnabled READ isDevModeEnabled NOTIFY devModeEnabled)
     Q_PROPERTY(QString gatewayEndpoint READ getGatewayEndpoint WRITE setGatewayEndpoint NOTIFY gatewayEndpointChanged)
@@ -75,6 +77,9 @@ public slots:
     bool isKillSwitchEnabled();
     void toggleKillSwitch(bool enable);
 
+    bool isStrictKillSwitchEnabled();
+    void toggleStrictKillSwitch(bool enable);
+
     bool isNotificationPermissionGranted();
     void requestNotificationPermission();
 
@@ -98,6 +103,8 @@ signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();
     void loggingStateChanged();
+    void killSwitchEnabledChanged();
+    void strictKillSwitchEnabledChanged(bool enabled);
 
     void restoreBackupFinished();
     void changeSettingsFinished(const QString &finishedMessage);
