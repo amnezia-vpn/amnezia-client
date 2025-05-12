@@ -88,6 +88,20 @@ Page {
             placeholderText: qsTr("VPN://")
         }
 
+        WhiteButtonWithBorder {
+            Layout.topMargin: 24
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.fillWidth: true
+
+            text: qsTr("Insert")
+
+            onClicked: function() {
+                textKey.text = ""
+                textKey.paste()
+            }
+        }
+
         BlueButtonNoBorder {
             Layout.topMargin: 24
             Layout.leftMargin: 16
