@@ -71,7 +71,7 @@ PageType {
                 id: backButton
             }
 
-            HeaderType {
+            BaseHeaderType {
                 id: header
 
                 Layout.fillWidth: true

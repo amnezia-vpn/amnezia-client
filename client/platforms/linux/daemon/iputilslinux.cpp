@@ -31,7 +31,9 @@ IPUtilsLinux::~IPUtilsLinux() {
 }
 
 bool IPUtilsLinux::addInterfaceIPs(const InterfaceConfig& config) {
-  return addIP4AddressToDevice(config) && addIP6AddressToDevice(config);
+  bool ret = addIP4AddressToDevice(config);
+  addIP6AddressToDevice(config);
+  return ret;
 }
 
 bool IPUtilsLinux::setMTUAndUp(const InterfaceConfig& config) {

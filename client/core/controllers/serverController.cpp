@@ -138,7 +138,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 
     if (overwriteMode == libssh::ScpOverwriteMode::ScpOverwriteExisting) {
         e = runScript(credentials,
-                      replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(path),
+                      replaceVars(QStringLiteral("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName, path),
                                   genVarsForScript(credentials, container)),
                       cbReadStd, cbReadStd);
 
@@ -146,7 +146,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
             return e;
     } else if (overwriteMode == libssh::ScpOverwriteMode::ScpAppendToExisting) {
         e = runScript(credentials,
-                      replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(tmpFileName),
+                      replaceVars(QStringLiteral("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName, tmpFileName),
                                   genVarsForScript(credentials, container)),
                       cbReadStd, cbReadStd);
 
@@ -154,7 +154,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
             return e;
 
         e = runScript(credentials,
-                      replaceVars(QString("sudo docker exec -i $CONTAINER_NAME sh -c \"cat %1 >> %2\"").arg(tmpFileName).arg(path),
+                      replaceVars(QStringLiteral("sudo docker exec -i $CONTAINER_NAME sh -c \"cat %1 >> %2\"").arg(tmpFileName, path),
                                   genVarsForScript(credentials, container)),
                       cbReadStd, cbReadStd);
 
@@ -177,7 +177,7 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
 
     errorCode = ErrorCode::NoError;
 
-    QString script = QString("sudo docker exec -i %1 sh -c \"xxd -p \'%2\'\"").arg(ContainerProps::containerToString(container)).arg(path);
+    QString script = QStringLiteral("sudo docker exec -i %1 sh -c \"xxd -p '%2'\"").arg(ContainerProps::containerToString(container), path);
 
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -383,6 +383,13 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
         return true;
     }
 
+    if (container == DockerContainer::Xray) {
+        if (oldProtoConfig.value(config_key::port).toString(protocols::xray::defaultPort)
+            != newProtoConfig.value(config_key::port).toString(protocols::xray::defaultPort)) {
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -439,15 +446,22 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
 
-    errorCode =
+    ErrorCode error =
             runScript(credentials,
                       replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
-                      cbReadStdOut);
-    if (errorCode)
-        return errorCode;
+                      cbReadStdOut, cbReadStdErr);
+    
+    if (stdOut.contains("doesn't work on cgroups v2"))
+        return ErrorCode::ServerDockerOnCgroupsV2;
+    if (stdOut.contains("cgroup mountpoint does not exist"))
+        return ErrorCode::ServerCgroupMountpoint;
 
-    return errorCode;
+    return error;
 }
 
 ErrorCode ServerController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)

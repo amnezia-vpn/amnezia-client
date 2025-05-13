@@ -145,7 +145,7 @@ void ExportController::generateOpenVpnConfig(const QString &clientName)
     }
 
     QStringList lines = nativeConfig.value(config_key::config).toString().replace("\r", "").split("\n");
-    for (const QString &line : lines) {
+    for (const QString &line : std::as_const(lines)) {
         m_config.append(line + "\n");
     }
 
@@ -163,7 +163,7 @@ void ExportController::generateWireGuardConfig(const QString &clientName)
     }
 
     QStringList lines = nativeConfig.value(config_key::config).toString().replace("\r", "").split("\n");
-    for (const QString &line : lines) {
+    for (const QString &line : std::as_const(lines)) {
         m_config.append(line + "\n");
     }
 
@@ -183,7 +183,7 @@ void ExportController::generateAwgConfig(const QString &clientName)
     }
 
     QStringList lines = nativeConfig.value(config_key::config).toString().replace("\r", "").split("\n");
-    for (const QString &line : lines) {
+    for (const QString &line : std::as_const(lines)) {
         m_config.append(line + "\n");
     }
 
@@ -211,7 +211,7 @@ void ExportController::generateShadowSocksConfig()
     }
 
     QStringList lines = QString(QJsonDocument(nativeConfig).toJson()).replace("\r", "").split("\n");
-    for (const QString &line : lines) {
+    for (const QString &line : std::as_const(lines)) {
         m_config.append(line + "\n");
     }
 
@@ -240,7 +240,7 @@ void ExportController::generateCloakConfig()
     nativeConfig.insert("ProxyMethod", "shadowsocks");
 
     QStringList lines = QString(QJsonDocument(nativeConfig).toJson()).replace("\r", "").split("\n");
-    for (const QString &line : lines) {
+    for (const QString &line : std::as_const(lines)) {
         m_config.append(line + "\n");
     }
 
@@ -257,7 +257,7 @@ void ExportController::generateXrayConfig(const QString &clientName)
     }
 
     QStringList lines = QString(QJsonDocument(nativeConfig).toJson()).replace("\r", "").split("\n");
-    for (const QString &line : lines) {
+    for (const QString &line : std::as_const(lines)) {
         m_config.append(line + "\n");
     }
 

@@ -1,7 +1,7 @@
 #include "secure_qsettings.h"
 
-#include "QAead.h"
-#include "QBlockCipher.h"
+#include "../client/3rd/QSimpleCrypto/src/include/QAead.h"
+#include "../client/3rd/QSimpleCrypto/src/include/QBlockCipher.h"
 #include "utilities.h"
 #include <QDataStream>
 #include <QDebug>

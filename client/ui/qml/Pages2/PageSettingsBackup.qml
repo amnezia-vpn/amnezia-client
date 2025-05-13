@@ -60,7 +60,7 @@ PageType {
 
             spacing: 16
 
-            HeaderType {
+            BaseHeaderType {
                 Layout.fillWidth: true
 
                 headerText: qsTr("Back up your configuration")

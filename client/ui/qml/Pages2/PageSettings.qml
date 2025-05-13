@@ -29,7 +29,7 @@ PageType {
 
             spacing: 0
 
-            HeaderType {
+            BaseHeaderType {
                 id: header
                 Layout.fillWidth: true
                 Layout.topMargin: 24

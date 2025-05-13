@@ -41,6 +41,10 @@ if [ -z "${QT_VERSION+x}" ]; then
     QT_BIN_DIR=/opt/Qt/$QT_VERSION/gcc_64/bin
   elif [ -f $HOME/Qt/$QT_VERSION/gcc_64/bin/qmake ]; then
     QT_BIN_DIR=$HOME/Qt/$QT_VERSION/gcc_64/bin
+  elif [ -f /usr/lib/qt6/bin/qmake ]; then
+    QT_BIN_DIR=/usr/lib/qt6/bin
+  elif [ -f /usr/lib/x86_64-linux-gnu/qt6/bin/qmake ]; then
+    QT_BIN_DIR=/usr/lib/x86_64-linux-gnu/qt6/bin
   fi
 fi
 
@@ -56,7 +60,7 @@ echo "Building App..."
 cd $BUILD_DIR
 
 $QT_BIN_DIR/qt-cmake -S $PROJECT_DIR
-cmake --build . --config release
+cmake --build . -j --config release
 
 # Build and run tests here
 
