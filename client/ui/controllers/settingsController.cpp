@@ -140,9 +140,6 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
 {
     bool ok = m_settings->restoreAppConfig(data);
     if (ok) {
-        QJsonObject newConfigData = QJsonDocument::fromJson(data).object();
-
-
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX) || defined(Q_OS_MACX)
         bool autoStartEnabled = m_settings->isAutoStart();
         toggleAutoStart(autoStartEnabled);
