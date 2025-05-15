@@ -144,18 +144,8 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
 
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX) || defined(Q_OS_MACX)
-        //bool autoStartEnabled = newConfigData.value("Conf/autoStart").toBool();
         bool autoStartEnabled = m_settings->isAutoStart();
-
-        qDebug() << "Restored autoStartEnabled:" << autoStartEnabled;
-        qDebug() << "Settings value:" << m_settings->isAutoStart();
-
-        //m_settings->setAutoStart(autoStartEnabled);
         toggleAutoStart(autoStartEnabled);
-
-        qDebug() << "Restored autoStartEnabled:" << autoStartEnabled;
-        qDebug() << "Settings value:" << m_settings->isAutoStart();
-        //m_settings->sync();
 #endif
 
         m_serversModel->resetModel();
