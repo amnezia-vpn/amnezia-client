@@ -90,6 +90,7 @@ public slots:
     void addServer(const QJsonObject &server);
     void editServer(const QJsonObject &server, const int serverIndex);
     void removeServer();
+    void removeServer(const int serverIndex);
 
     QJsonObject getServerConfig(const int serverIndex);
 

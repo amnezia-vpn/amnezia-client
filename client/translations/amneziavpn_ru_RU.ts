@@ -100,8 +100,8 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="72"/>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="85"/>
-        <source>AmneziaFree provides free unlimited access to a basic set of web sites, such as Facebook, Instagram, Twitter (X), Discord, Telegram, and others. YouTube is not included in the free plan.</source>
-        <translation>AmneziaFree предоставляет бесплатный неограниченный доступ к базовому набору сайтов и приложений, таким как Facebook, Instagram, Twitter (X), Discord, Telegram и другим. YouTube не включен в бесплатный тариф.</translation>
+        <source>Amnezia Free provides unlimited, free access to a basic set of websites and apps, including Facebook, Instagram, Twitter (X), Discord, Telegram, and more. YouTube is not included in the free plan.</source>
+        <translation>Amnezia Free позволяет бесплатно и без ограничений пользоваться базовым набором сайтов и приложений, включая Facebook, Instagram, Twitter (X), Discord, Telegram и другие. YouTube не входит в бесплатный тариф.</translation>
     </message>
     <message>
         <source>Amnezia Premium is VPN for comfortable work, downloading large files and watching videos in 8K resolution. Works for any sites with no restrictions.</source>
@@ -126,6 +126,11 @@
         <location filename="../ui/models/api/apiServicesModel.cpp" line="104"/>
         <source>%1 days</source>
         <translation>%1 дней</translation>
+    </message>
+    <message>
+        <location filename="../ui/models/api/apiServicesModel.cpp" line="111"/>
+        <source></source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="113"/>
@@ -1655,8 +1660,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="80"/>
+        <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
+        <translation>Это отключит устройство от вашей подписки. Вы можете повторно подключить его в любое время, нажав &quot;Перезагрузить конфигурацию API&quot; в настройках подписки на устройстве.</translation>
+    </message>
+    <message>
         <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;Connect.</source>
-        <translation>Это устройство будет отвязано от вашей подписки. Вы можете подключить его снова в любой момент, нажав кнопку &quot;Подключиться&quot;.</translation>
+        <translation type="vanished">Это устройство будет отвязано от вашей подписки. Вы можете подключить его снова в любой момент, нажав кнопку &quot;Подключиться&quot;.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="81"/>
@@ -2007,8 +2016,12 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="336"/>
+        <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
+        <translation>Это отключит устройство от вашей подписки. Вы можете повторно подключить его в любое время, нажав &quot;Перезагрузить конфигурацию API&quot; в настройках подписки на устройстве.</translation>
+    </message>
+    <message>
         <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;Connect.</source>
-        <translation>Это устройство будет отвязано от вашей подписки. Вы можете подключить его снова в любой момент, нажав кнопку Подключиться.</translation>
+        <translation type="vanished">Это устройство будет отвязано от вашей подписки. Вы можете подключить его снова в любой момент, нажав кнопку Подключиться.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="342"/>
@@ -2619,11 +2632,6 @@ Already installed containers were found on the server. All installed containers 
         <translation>Новые установленные протоколы и сервисы не обнаружены</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="92"/>
-        <source></source>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="115"/>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="154"/>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="192"/>
@@ -2786,11 +2794,6 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="175"/>
         <source>Clear %1 profile?</source>
         <translation>Очистить профиль %1?</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="137"/>
-        <source></source>
-        <translation></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="98"/>
@@ -3045,7 +3048,7 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="vanished">Что у вас есть?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="298"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="328"/>
         <source>File with connection settings</source>
         <translation>Файл с настройками подключения</translation>
     </message>
@@ -3054,112 +3057,135 @@ It&apos;s okay as long as it&apos;s from someone you trust.</source>
         <translation type="vanished">Файл с настройками подключения или резервной копией</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="56"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="58"/>
         <source>Connection</source>
         <translation>Соединение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="83"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="85"/>
         <source>Settings</source>
         <translation>Настройки</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="95"/>
         <source>Enable logs</source>
         <translation>Включить запись логов</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="109"/>
+        <source>Export client logs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="119"/>
+        <source>Save</source>
+        <translation type="unfinished">Сохранить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="120"/>
+        <source>Logs files (*.log)</source>
+        <translation type="unfinished">Файлы логов (*.log)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="129"/>
+        <source>Logs file saved</source>
+        <translation type="unfinished">Файл с логами сохранен</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="139"/>
         <source>Support tag</source>
         <translation>Support tag</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="120"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="150"/>
         <source>Copied</source>
         <translation>Скопировано</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="169"/>
         <source>Insert the key, add a configuration file or scan the QR-code</source>
         <translation>Вставьте ключ, добавьте файл конфигурации или отсканируйте QR-код</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="179"/>
         <source>Insert key</source>
         <translation>Вставьте ключ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="150"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="180"/>
         <source>Insert</source>
         <translation>Вставить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="168"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="198"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="185"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="215"/>
         <source>Other connection options</source>
         <translation>Другие варианты подключения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="228"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="258"/>
         <source>Site Amnezia</source>
         <translation>Сайт Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="251"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="281"/>
         <source>VPN by Amnezia</source>
         <translation>VPN от Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="282"/>
         <source>Connect to classic paid and free VPN services from Amnezia</source>
         <translation>Подключайтесь к классическим платным и бесплатным VPN-сервисам от Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="268"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="298"/>
         <source>Self-hosted VPN</source>
         <translation>Self-hosted VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="269"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="299"/>
         <source>Configure Amnezia VPN on your own server</source>
         <translation>Настроить VPN на собственном сервере</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="280"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="310"/>
         <source>Restore from backup</source>
         <translation>Восстановить из резервной копии</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="279"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="311"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="329"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="348"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="363"/>
         <source></source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="285"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="315"/>
         <source>Open backup file</source>
         <translation>Открыть резервную копию</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="286"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="316"/>
         <source>Backup files (*.backup)</source>
         <translation>Файлы резервных копий (*.backup)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="305"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="335"/>
         <source>Open config file</source>
         <translation>Открыть файл с конфигурацией</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="317"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="347"/>
         <source>QR code</source>
         <translation>QR-код</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="332"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="362"/>
         <source>I have nothing</source>
         <translation>У меня ничего нет</translation>
     </message>
@@ -4404,95 +4430,56 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Создайте на сервере файловое хранилище для безопасного хранения и передачи файлов.</translation>
     </message>
     <message>
-        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for protecting against blocking.
+        <location filename="../containers/containers_defs.cpp" line="186"/>
+        <source>AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
 
-OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client and the server.
+AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
 
-Cloak protects OpenVPN from detection and blocking. 
+Features:
+* Available on all AmneziaVPN platforms
+* Low battery consumption on mobile devices
+* Minimal settings required
+* Undetectable by traffic analysis systems (DPI)
+* Operates over UDP protocol</source>
+        <translation>AmneziaWG — современный VPN-протокол на основе WireGuard, сочетающий простую архитектуру и высокую производительность на всех устройствах. Он устраняет основной недостаток WireGuard (лёгкое обнаружение трафика системами DPI) за счёт эффективного маскирования VPN-трафика под обычный интернет-трафик.
 
-Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
+Таким образом, AmneziaWG идеально подойдёт тем, кто ищет быстрое и незаметное VPN-соединение.
 
-Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
-
-If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
-
-* Available in the AmneziaVPN across all platforms
-* High power consumption on mobile devices
-* Flexible settings
-* Not recognised by DPI analysis systems
-* Works over TCP network protocol, 443 port.
-</source>
-        <translation type="vanished">Это связка протокола OpenVPN и плагина Cloak, разработанная специально для защиты от блокировки.
-
-OpenVPN обеспечивает безопасное VPN-соединение, шифруя весь интернет-трафик между клиентом и сервером.
-
-Cloak защищает OpenVPN от обнаружения и блокировки.
-
-Cloak изменяет метаданные пакетов таким образом, что полностью маскирует VPN-трафик под обычный веб-трафик, а также защищает VPN от обнаружения с помощью активного зондирования. Это делает его очень защищенным от обнаружения.
-
-Сразу после получения первого пакета данных Cloak устанавливает подлинность входящего соединения. Если аутентификация не проходит, плагин маскирует сервер под фальшивый веб-сайт, и ваш VPN становится невидимым для систем анализа трафика.
-
-Если в вашем регионе наблюдается жесткая интернет-цензура, мы советуем вам уже при первом подключении использовать только OpenVPN over Cloak.
-
-* Доступен в AmneziaVPN на всех платформах
-* Высокое энергопотребление на мобильных устройствах
-* Гибкие настройки
-* Не распознается системами DPI-анализа
-* Работает по сетевому протоколу TCP, использует порт 443</translation>
-    </message>
-    <message>
-        <source>A relatively new popular VPN protocol with a simplified architecture.
-WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
-WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
-
-* Available in the AmneziaVPN across all platforms
-* Low power consumption
-* Minimum number of settings
-* Easily recognised by DPI analysis systems, susceptible to blocking
-* Works over UDP network protocol.</source>
-        <translation type="vanished">Относительно новый и популярный VPN-протокол с простой архитектурой.
-WireGuard обеспечивает стабильное VPN-соединение и высокую производительность на всех устройствах. Он использует строго заданные настройки шифрования. WireGuard по сравнению с OpenVPN имеет меньшую задержку и лучшую пропускную способность при передаче данных.
-WireGuard очень уязвим для блокировки из-за характерных сигнатур пакетов. В отличие от некоторых других VPN-протоколов, использующих методы обфускации, последовательные сигнатуры пакетов WireGuard легче идентифицируются и, следовательно, могут блокироваться современными Deep Packet Inspection (DPI) системами и другими инструментами для сетевого мониторинга.
-
-* Доступен в AmneziaVPN на всех платформах
+Особенности:
+* Доступен во всех версиях AmneziaVPN
 * Низкое энергопотребление на мобильных устройствах
-* Минимальная конфигурация
-* Легко распознается системами DPI-анализа, поддается блокировке
-* Работает по сетевому протоколу UDP</translation>
+* Минимум настроек
+* Незаметен для систем анализа трафика (DPI)
+* Работает по протоколу UDP
+		</translation>
     </message>
     <message>
-        <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
-It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data. 
-This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
-Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
-        <translation type="vanished">Протокол REALITY, новаторская разработка создателей XRay, специально спроектирован для противодействия самой строгой цензуре с помощью нового способа обхода блокировок.
-Он уникальным образом идентифицирует цензоров на этапе TLS-рукопожатия, беспрепятственно работая в качестве прокси для реальных клиентов и перенаправляя цензоров на реальные сайты, такие как google.com, тем самым предъявляя подлинный TLS-сертификат и данные.
-REALITY отличается от аналогичных технологий благодаря способности без специальной настройки маскировать веб-трафик так, как будто он поступает со случайных легитимных сайтов.
-В отличие от более старых протоколов, таких как VMess, VLESS и транспорт XTLS-Vision, технология распознавания &quot;друг или враг&quot; на этапе TLS-рукопожатия повышает безопасность и обходит обнаружение сложными системами DPI-анализа, которые используют методы активного зондирования. Это делает REALITY эффективным решением для поддержания свободы интернета в регионах с жесткой цензурой.</translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="225"/>
-        <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
-One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
-While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
+        <location filename="../containers/containers_defs.cpp" line="198"/>
+        <source>REALITY is an innovative protocol developed by the creators of XRay, designed specifically to combat high levels of internet censorship. REALITY identifies censorship systems during the TLS handshake, redirecting suspicious traffic seamlessly to legitimate websites like google.com while providing genuine TLS certificates. This allows VPN traffic to blend indistinguishably with regular web traffic without special configuration.
+Unlike older protocols such as VMess, VLESS, and XTLS-Vision, REALITY incorporates an advanced built-in &quot;friend-or-foe&quot; detection mechanism, effectively protecting against DPI and other traffic analysis methods.
 
-* Available in the AmneziaVPN only on Windows
-* Low power consumption, on mobile devices
-* Minimal configuration
-* Recognised by DPI analysis systems
-* Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation>IKEv2 в сочетании с уровнем шифрования IPSec представляет собой современный и стабильный VPN-протокол.
-Он может быстро переключаться между сетями и устройствами, что делает его особенно адаптивным в динамичных сетевых средах. 
-Несмотря на сочетание безопасности, стабильности и скорости, необходимо отметить, что IKEv2 легко обнаруживается и подвержен блокировке.
+Features:
+* Resistant to active probing and DPI detection
+* No special configuration required to disguise traffic
+* Highly effective in heavily censored regions
+* Minimal battery consumption on devices
+* Operates over TCP protocol</source>
+        <translation>REALITY — это инновационный протокол от разработчиков XRay, специально созданный для эффективного противодействия жесткой интернет-цензуре.
 
-* Доступен в AmneziaVPN только для Windows
-* Низкое энергопотребление на мобильных устройствах
-* Минимальная конфигурация
-* Распознается системами DPI-анализа
-* Работает по сетевому протоколу UDP, использует порты 500 и 4500</translation>
+REALITY распознаёт системы блокировки во время TLS-рукопожатия и незаметно перенаправляет подозрительные запросы на реальные сайты, такие как google.com, предъявляя подлинные TLS-сертификаты. Это позволяет маскировать VPN-трафик под обычный веб-трафик без дополнительных настроек.
+
+В отличие от протоколов старого поколения (VMess, VLESS и XTLS-Vision), REALITY использует встроенную технологию распознавания «свой-чужой», надёжно защищая от DPI и других методов сетевого анализа.
+
+Особенности:
+* Устойчив к активному зондированию и DPI-системам
+* Не требует специальной настройки для маскировки трафика
+* Эффективен в регионах с жесткой цензурой
+* Минимальное энергопотребление на устройствах
+* Работает по протоколу TCP
+		</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="237"/>
+        <location filename="../containers/containers_defs.cpp" line="222"/>
         <source>DNS Service</source>
         <translation>Сервис DNS</translation>
     </message>
@@ -4503,7 +4490,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="101"/>
-        <location filename="../containers/containers_defs.cpp" line="236"/>
+        <location filename="../containers/containers_defs.cpp" line="221"/>
         <source>Website in Tor network</source>
         <translation>Веб-сайт в сети Tor</translation>
     </message>
@@ -4543,109 +4530,140 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation>XRay с REALITY маскирует VPN-трафик под веб-трафик. Обладает высокой устойчивостью к обнаружению и обеспечивает высокую скорость соединения.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="143"/>
-        <source>OpenVPN stands as one of the most popular and time-tested VPN protocols available.
-It employs its unique security protocol, leveraging the strength of SSL/TLS for encryption and key exchange. Furthermore, OpenVPN&apos;s support for a multitude of authentication methods makes it versatile and adaptable, catering to a wide range of devices and operating systems. Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, which continually reinforces its security. With a strong balance of performance, security, and compatibility, OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.
-
-* Available in the AmneziaVPN across all platforms
-* Normal power consumption on mobile devices
-* Flexible customisation to suit user needs to work with different operating systems and devices
-* Recognised by DPI systems and therefore susceptible to blocking
-* Can operate over both TCP and UDP network protocols.</source>
-        <translation>OpenVPN является одним из самых популярных и проверенных временем VPN-протоколов. Он использует собственный протокол безопасности, и криптографические протоколы SSL/TLS  для шифрования и обмена ключами. Более того, поддержка  множества методов аутентификации делает OpenVPN универсальным, адаптируемым и подходящим для широкого спектра устройств и операционных систем. Благодаря своему открытому коду, OpenVPN подвергается тщательной проверке со стороны мирового сообщества, что постоянно укрепляет его безопасность. Имея отличный баланс между производительностью, безопасностью и совместимостью OpenVPN остается лучшим выбором для людей и компаний, заботящихся о конфиденциальности, однако OpenVPN легко распознается современными системами анализа трафика. 
-Доступен в AmneziaVPN на всех платформах
-Нормальное энергопотребление на мобильных устройствах
-Гибкая настройка полезная при работе с различными операционными системами и устройствами
-Распознается системами DPI и, следовательно, уязвим к блокировкам
-Может работать как по TCP, так и по UDP протоколу.</translation>
+        <location filename="../containers/containers_defs.cpp" line="136"/>
+        <source></source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="168"/>
-        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for protecting against detection.
+        <location filename="../containers/containers_defs.cpp" line="143"/>
+        <source>OpenVPN is one of the most popular and reliable VPN protocols. It uses SSL/TLS encryption, supports a wide variety of devices and operating systems, and is continuously improved by the community due to its open-source nature. It provides a good balance between speed and security but is easily recognized by DPI systems, making it susceptible to blocking.
 
-OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client and the server.
+Features:
+* Available on all AmneziaVPN platforms
+* Normal battery consumption on mobile devices
+* Flexible customization for various devices and OS
+* Operates over both TCP and UDP protocols</source>
+        <translation>OpenVPN — один из самых популярных и надежных VPN-протоколов. Он использует шифрование SSL/TLS, совместим со множеством устройств и ОС, а благодаря открытому коду постоянно совершенствуется сообществом. Имеет хороший баланс скорости и безопасности, но легко распознаётся системами DPI, что делает его уязвимым к блокировкам.
 
-Cloak protects OpenVPN from detection. 
+Особенности:
+* Доступен во всех приложениях AmneziaVPN
+* Нормальное энергопотребление на мобильных устройствах
+* Гибкие настройки под разные устройства и ОС
+* Работает по TCP и UDP</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="154"/>
+        <source>Shadowsocks is based on the SOCKS5 protocol and encrypts connections using AEAD cipher. Although designed to be discreet, it doesn&apos;t mimic a standard HTTPS connection and can be detected by some DPI systems. Due to limited support in Amnezia, we recommend using the AmneziaWG protocol.
 
-Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
-
-Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
-
-* Available in the AmneziaVPN across all platforms
-* High power consumption on mobile devices
-* Flexible settings
-* Not recognised by detection systems
-* Works over TCP network protocol, 443 port.
+Features:
+* Available in AmneziaVPN only on desktop platforms
+* Customizable encryption protocol
+* Detectable by some DPI systems
+* Operates over TCP protocol
 </source>
-        <translation>Это связка протокола OpenVPN и плагина Cloak, созданная специально для защиты от обнаружения.
+        <translation>Shadowsocks основан на протоколе SOCKS5 и шифрует соединение алгоритмом AEAD. Он разработан так, чтобы быть малозаметным, однако не идентичен HTTPS, поэтому может распознаваться некоторыми системами DPI. В связи с ограниченной поддержкой в Amnezia, рекомендуем использовать протокол AmneziaWG.
 
-OpenVPN обеспечивает безопасное VPN-соединение, шифруя весь интернет-трафик между клиентом и сервером.
+Особенности:
+* Доступен только на ПК в AmneziaVPN
+* Настраиваемое шифрование
+* Может обнаруживаться некоторыми DPI-системами
+* Работает по протоколу TCP</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="163"/>
+        <source>This combination includes the OpenVPN protocol and the Cloak plugin, specifically designed to protect against blocking.
 
-Плагин Cloak защищает OpenVPN от обнаружения. 
+OpenVPN securely encrypts all internet traffic between your device and the server.
 
-Cloak может изменять метаданные пакета, чтобы  полностью замаскировать VPN-трафик под обычный веб-трафик, а также защищает VPN от обнаружения с помощью метода Active Probing. Это делает его очень устойчивым к обнаружению.
+The Cloak plugin further protects the connection from DPI detection. It modifies traffic metadata to disguise VPN traffic as regular web traffic and prevents detection through active probing. If an incoming connection fails authentication, Cloak serves a fake website, making your VPN invisible to traffic analysis systems.
 
-Сразу после получения первого пакета данных Cloak аутентифицирует входящее соединение, если аутентификация не удалась, плагин маскирует сервер под настоящий веб-сайт, и ваш VPN становится невидимым для систем анализа. Имеет низкую скорость работы в сравнении с другими похожими протоколами.
+In regions with heavy internet censorship, we strongly recommend using OpenVPN with Cloak from your first connection.
 
-* Доступно в AmneziaVPN на всех платформах.
+Features:
+* Available on all AmneziaVPN platforms
+* High power consumption on mobile devices
+* Flexible configuration options
+* Undetectable by DPI systems
+* Operates over TCP protocol on port 443</source>
+        <translation>Эта комбинация состоит из протокола OpenVPN и плагина Cloak, специально разработанных для защиты от блокировок.
+
+OpenVPN надёжно шифрует весь интернет-трафик между вами и сервером.
+
+Плагин Cloak дополнительно защищает соединение от распознавания системами DPI. Он изменяет метаданные трафика, маскируя VPN-подключение под обычный веб-трафик, и предотвращает обнаружение с помощью активного зондирования. Если попытка подключения не прошла аутентификацию, Cloak выдаёт поддельный веб-сайт, делая VPN невидимым для анализирующих систем.
+
+Если в вашем регионе сильная интернет-цензура, мы рекомендуем сразу использовать OpenVPN с плагином Cloak.
+
+Особенности:
+* Доступен на всех платформах AmneziaVPN
 * Высокое энергопотребление на мобильных устройствах
 * Гибкие настройки
-* Не распознается системами обнаружения.
-* Работает по сетевому протоколу TCP, порт 443.
-</translation>
+* Незаметен для систем DPI-анализа
+* Использует протокол TCP на порту 443</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="185"/>
-        <source>A relatively new popular VPN protocol with a simplified architecture.
-WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
-WireGuard is very susceptible to detection and blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
+        <location filename="../containers/containers_defs.cpp" line="176"/>
+        <source>WireGuard is a modern, streamlined VPN protocol offering stable connectivity and excellent performance across all devices. It uses fixed encryption settings, delivering lower latency and higher data transfer speeds compared to OpenVPN. However, WireGuard is easily identifiable by DPI systems due to its distinctive packet signatures, making it susceptible to blocking.
 
-* Available in the AmneziaVPN across all platforms
-* Low power consumption
-* Minimum number of settings
-* Easily recognised by DPI analysis systems, susceptible to blocking
-* Works over UDP network protocol.</source>
-        <translation>Популярный VPN-протокол с упрощенной архитектурой.
-WireGuard обеспечивает стабильное VPN-соединение и высокую производительность на всех устройствах. Он использует закодированные настройки шифрования. WireGuard по сравнению с OpenVPN имеет меньшую задержку и лучшую пропускную способность передачи данных.
-WireGuard очень чувствителен к обнаружению и блокировке из-за различных сигнатур пакетов. В отличие от некоторых других VPN протоколов, использующих методы запутывания, последовательные шаблоны сигнатур пакетов WireGuard легко идентифицируются системами анализа трафика.
+Features:
+* Available on all AmneziaVPN platforms
+* Low power consumption on mobile devices
+* Minimal configuration required
+* Easily detected by DPI systems (susceptible to blocking)
+* Operates over UDP protocol</source>
+        <translation>WireGuard — современный и простой VPN-протокол, который обеспечивает стабильное соединение и высокую скорость передачи данных на любых устройствах. Он использует фиксированные настройки шифрования, имеет меньшую задержку и выше пропускную способность по сравнению с OpenVPN.
 
-* Доступно в AmneziaVPN на всех платформах.
-* Низкое энергопотребление
-* Минимальное количество настроек
-* Легко распознается системами анализа DPI, подвержен блокировке.
-* Работает по сетевому протоколу UDP.</translation>
+Однако WireGuard легко распознаётся системами DPI из-за характерных сигнатур трафика, что делает его уязвимым к блокировкам.
+
+Особенности:
+* Доступен на всех платформах AmneziaVPN
+* Низкое энергопотребление на мобильных устройствах
+* Минимум настроек
+* Легко определяется DPI-системами (подвержен блокировкам)
+* Работает по протоколу UDP</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="198"/>
-        <source>A modern iteration of the popular VPN protocol, AmneziaWG builds upon the foundation set by WireGuard, retaining its simplified architecture and high-performance capabilities across devices.
-While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. AmneziaWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
-This means that AmneziaWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
+        <location filename="../containers/containers_defs.cpp" line="211"/>
+        <source>IKEv2, combined with IPSec encryption, is a modern and reliable VPN protocol. It reconnects quickly when switching networks or devices, making it ideal for dynamic network environments. While it provides good security and speed, it&apos;s easily recognized by DPI systems and susceptible to blocking.
 
-* Available in the AmneziaVPN across all platforms
-* Low power consumption
-* Minimum number of settings
-* Not recognised by traffic analysis systems
-* Works over UDP network protocol.</source>
-        <translation>AmneziaWG — это современная версия популярного VPN протокола, основанная на базе WireGuard, сохранившая упрощенную архитектуру и высокопроизводительные возможности на всех устройствах.
-Хотя WireGuard известен своей эффективностью, обнаружить его довольно легко из-за различных сигнатур пакетов. AmneziaWG решает эту проблему, используя более совершенные методы работы, смешивая свой трафик с обычным интернет-трафиком.
-Это означает, что AmneziaWG сохраняет высокую производительность оригинала, добавляя при этом дополнительный уровень скрытности, что делает его отличным выбором для тех, кому нужно быстрое и незаметное VPN-соединение.
+Features:
+* Available in AmneziaVPN only on Windows
+* Low battery consumption on mobile devices
+* Minimal configuration required
+* Detectable by DPI analysis systems(easily blocked)
+* Operates over UDP protocol(ports 500 and 4500)</source>
+        <translation>IKEv2 — современный и стабильный VPN-протокол, работающий совместно с шифрованием IPSec. Он обеспечивает быстрое переподключение при смене сети или устройства, отлично подходит для динамичных сетевых условий. Несмотря на хорошую скорость и безопасность, легко распознаётся системами DPI и подвержен блокировкам.
 
-* Доступно в AmneziaVPN на всех платформах.
-* Низкое энергопотребление
-* Минимальное количество настроек
-* Не распознается системами анализа трафика.
-* Работает по сетевому протоколу UDP.</translation>
+Особенности:
+* Доступен в AmneziaVPN только на Windows
+* Низкое энергопотребление на мобильных устройствах
+* Минимум настроек
+* Распознаётся DPI-системами (легко блокируется)
+* Работает по UDP (порты 500 и 4500)</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="214"/>
-        <source>The REALITY protocol, a pioneering development by the creators of XRay, is designed to provide the highest level of protection against detection through its innovative approach to security and privacy.
-It uniquely identifies attackers during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting attackers to genuine websites, thus presenting an authentic TLS certificate and data. 
-This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
-Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security. This makes REALITY a robust solution for maintaining internet freedom.</source>
-        <translation>Протокол REALITY, современная разработка от создателей XRay. Призван обеспечить высочайший уровень защиты от обнаружения благодаря инновационному подходу к безопасности и конфиденциальности.
-Он безошибочно идентифицирует злоумышленников на этапе установления связи TLS, беспрепятственно работая в качестве прокси-сервера для оригинального клиента и перенаправляя злоумышленников на подлинные веб-сайты, предоставляя тем самым подлинный сертификат TLS и данные. 
-Эта расширенная возможность отличает REALITY от аналогичных технологий тем, что способна маскироваться под случайный веб-трафик без использования специальных настроек. 
-В отличие от старых протоколов, таких как VMess, VLESS и транспорт XTLS-Vision, REALITY имеет инновационную технологию распознавания «свой-чужой».Это делает REALITY надежным решением для обеспечения доступа к свободному интернету.</translation>
+        <source>
+			AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard’s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
+
+			AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
+
+			Features:
+
+			* Available on all AmneziaVPN platforms
+			* Low battery consumption on mobile devices
+			* Minimal settings required
+			* Undetectable by traffic analysis systems (DPI)
+			* Operates over UDP protocol
+		</source>
+        <translation type="obsolete">AmneziaWG — современный VPN-протокол на основе WireGuard, сочетающий простую архитектуру и высокую производительность на всех устройствах. Он устраняет основной недостаток WireGuard (лёгкое обнаружение трафика системами DPI) за счёт эффективного маскирования VPN-трафика под обычный интернет-трафик.
+
+Таким образом, AmneziaWG идеально подойдёт тем, кто ищет быстрое и незаметное VPN-соединение.
+
+Особенности:
+* Доступен во всех версиях AmneziaVPN
+* Низкое энергопотребление на мобильных устройствах
+* Минимум настроек
+* Незаметен для систем анализа трафика (DPI)
+* Работает по протоколу UDP</translation>
     </message>
     <message>
         <source>WireGuard - New popular VPN protocol with high performance, high speed and low power consumption. Recommended for regions with low levels of censorship.</source>
@@ -4674,50 +4692,7 @@ Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REAL
         <translation>Замените текущий DNS-сервер на свой собственный. Это повысит уровень вашей конфиденциальности.</translation>
     </message>
     <message>
-        <source>OpenVPN stands as one of the most popular and time-tested VPN protocols available.
-It employs its unique security protocol, leveraging the strength of SSL/TLS for encryption and key exchange. Furthermore, OpenVPN&apos;s support for a multitude of authentication methods makes it versatile and adaptable, catering to a wide range of devices and operating systems. Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, which continually reinforces its security. With a strong balance of performance, security, and compatibility, OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.
-
-* Available in the AmneziaVPN across all platforms
-* Normal power consumption on mobile devices
-* Flexible customisation to suit user needs to work with different operating systems and devices
-* Recognised by DPI analysis systems and therefore susceptible to blocking
-* Can operate over both TCP and UDP network protocols.</source>
-        <translation type="vanished">OpenVPN — один из самых популярных и проверенных временем VPN-протоколов.
-В нем используется уникальный протокол безопасности, опирающийся на SSL/TLS для шифрования и обмена ключами. Кроме того, OpenVPN поддерживает множество методов аутентификации, что делает его универсальным и адаптируемым к широкому спектру устройств и операционных систем. Благодаря открытому исходному коду OpenVPN подвергается тщательному анализу со стороны мирового сообщества, что постоянно повышает его безопасность. Оптимальное соотношение производительности, безопасности и совместимости делает OpenVPN лучшим выбором как для частных лиц, так и для компаний, заботящихся о конфиденциальности.
-
-* Доступен в AmneziaVPN на всех платформах
-* Нормальное энергопотребление на мобильных устройствах
-* Гибкая настройка под нужды пользователя для работы с различными операционными системами и устройствами
-* Распознается системами DPI-анализа и поэтому подвержен блокировке
-* Может работать по сетевым протоколам TCP и UDP</translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="159"/>
-        <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
-
-* Available in the AmneziaVPN only on desktop platforms
-* Configurable encryption protocol
-* Detectable by some DPI systems
-* Works over TCP network protocol.</source>
-        <translation>Shadowsocks создан на основе протокола SOCKS5, защищает соединение с помощью шифра AEAD. Несмотря на то, что протокол Shadowsocks разработан таким образом, чтобы быть незаметным и сложным для идентификации, он не идентичен стандартному HTTPS-соединению, поэтому некоторые системы анализа трафика всё же могут обнаружить соединение Shadowsocks. В связи с ограниченной поддержкой в Amnezia рекомендуется использовать протокол AmneziaWG.
-
-* Доступен в AmneziaVPN только для ПК и ноутбуков
-* Настраиваемый протокол шифрования
-* Распознается некоторыми системами DPI-анализа
-* Работает по сетевому протоколу TCP.</translation>
-    </message>
-    <message>
-        <source>The REALITY protocol, a pioneering development by the creators of XRay, is specifically designed to counteract the highest levels of internet censorship through its novel approach to evasion.
-    It uniquely identifies censors during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting censors to genuine websites like google.com, thus presenting an authentic TLS certificate and data.
-    This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations.
-    Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security and circumvents detection by sophisticated DPI systems employing active probing techniques. This makes REALITY a robust solution for maintaining internet freedom in environments with stringent censorship.</source>
-        <translation type="vanished">Протокол REALITY, новаторская разработка создателей XRay, специально спроектирован для противодействия самой строгой цензуре с помощью нового способа обхода блокировок.
-    Он уникальным образом идентифицирует цензоров на этапе TLS-рукопожатия, беспрепятственно работая в качестве прокси для реальных клиентов и перенаправляя цензоров на реальные сайты, такие как google.com, тем самым предъявляя подлинный TLS-сертификат и данные.
-    REALITY отличается от аналогичных технологий благодаря способности без специальной настройки маскировать веб-трафик так, как будто он поступает со случайных легитимных сайтов.
-    В отличие от более старых протоколов, таких как VMess, VLESS и XTLS-Vision, технология распознавания &quot;друг или враг&quot; на этапе TLS-рукопожатия повышает безопасность и обходит обнаружение сложными системами DPI-анализа, которые используют методы активного зондирования. Это делает REALITY эффективным решением для поддержания свободы интернета в регионах с жесткой цензурой.</translation>
-    </message>
-    <message>
-        <location filename="../containers/containers_defs.cpp" line="239"/>
+        <location filename="../containers/containers_defs.cpp" line="224"/>
         <source>After installation, Amnezia will create a
 
  file storage on your server. You will be able to access it using
@@ -4734,84 +4709,6 @@ For more detailed information, you can
 
 Более подробную информацию вы можете
 найти в разделе поддержки &quot;Создание файлового хранилища SFTP.&quot;</translation>
-    </message>
-    <message>
-        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for blocking protection.
-
-OpenVPN provides a secure VPN connection by encrypting all Internet traffic between the client and the server.
-
-Cloak protects OpenVPN from detection and blocking. 
-
-Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
-
-Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
-
-If there is a extreme level of Internet censorship in your region, we advise you to use only OpenVPN over Cloak from the first connection
-
-* Available in the AmneziaVPN across all platforms
-* High power consumption on mobile devices
-* Flexible settings
-* Not recognised by DPI analysis systems
-* Works over TCP network protocol, 443 port.
-</source>
-        <translation type="vanished">OpenVPN over Cloak - это комбинация протокола OpenVPN и плагина Cloak, разработанного специально для защиты от обнаружения и блокировок.
-
-Протокол OpenVPN обеспечивает безопасное VPN-соединение за счет шифрования всего интернет-трафика между клиентом и сервером.
-
-Плагин Cloak защищает OpenVPN от обнаружения и блокировок. 
-
-Cloak может изменять метаданные пакетов. Он полностью маскирует VPN-трафик под обычный веб-трафик, а также защищает VPN от обнаружения с помощью Active Probing. Это делает его очень устойчивым к обнаружению
-
-Сразу же после получения первого пакета данных Cloak проверяет подлинность входящего соединения. Если аутентификация не проходит, плагин маскирует сервер под поддельный сайт, и ваш VPN становится невидимым для аналитических систем.
-
-Если в вашем регионе экстремальный уровень цензуры в Интернете, мы советуем вам с первого подключения использовать только OpenVPN over Cloak
-
-* Доступен в AmneziaVPN для всех платформ
-* Высокое энергопотребление на мобильных устройствах
-* Гибкие настройки
-* Не распознается системами DPI-анализа
-* Работает по сетевому протоколу TCP, 443 порт.
-</translation>
-    </message>
-    <message>
-        <source>A relatively new popular VPN protocol with a simplified architecture.
-Provides stable VPN connection, high performance on all devices. Uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
-WireGuard is very susceptible to blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
-
-* Available in the AmneziaVPN across all platforms
-* Low power consumption
-* Minimum number of settings
-* Easily recognised by DPI analysis systems, susceptible to blocking
-* Works over UDP network protocol.</source>
-        <translation type="vanished">WireGuard - относительно новый популярный VPN-протокол с упрощенной архитектурой.
-Обеспечивает стабильное VPN-соединение, высокую производительность на всех устройствах. Использует жестко заданные настройки шифрования. WireGuard по сравнению с OpenVPN имеет меньшую задержку и лучшую пропускную способность при передаче данных.
-WireGuard очень восприимчив к блокированию из-за особенностей сигнатур пакетов. В отличие от некоторых других VPN-протоколов, использующих методы обфускации, последовательные сигнатуры пакетов WireGuard легче выявляются и, соответственно, блокируются современными системами глубокой проверки пакетов (DPI) и другими средствами сетевого мониторинга.
-
-* Доступен в AmneziaVPN для всех платформ
-* Низкое энергопотребление
-* Минимальное количество настроек
-* Легко распознается системами DPI-анализа, подвержен блокировке
-* Работает по сетевому протоколу UDP.</translation>
-    </message>
-    <message>
-        <source>A modern iteration of the popular VPN protocol, AmneziaWG builds upon the foundation set by WireGuard, retaining its simplified architecture and high-performance capabilities across devices.
-While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. AmneziaWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
-This means that AmneziaWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
-
-* Available in the AmneziaVPN across all platforms
-* Low power consumption
-* Minimum number of settings
-* Not recognised by DPI analysis systems, resistant to blocking
-* Works over UDP network protocol.</source>
-        <translation type="vanished">AmneziaWG — усовершенствованная версия популярного VPN-протокола WireGuard. AmneziaWG опирается на фундамент, заложенный WireGuard, сохраняя упрощенную архитектуру и высокую производительность на различных устройствах.
-Хотя WireGuard известен своей эффективностью, у него были проблемы с обнаружением из-за характерных сигнатур пакетов. AmneziaWG решает эту проблему за счет использования более совершенных методов обфускации, благодаря чему его трафик сливается с обычным интернет-трафиком.
-Таким образом, AmneziaWG сохраняет высокую производительность оригинального протокола, добавляя при этом дополнительный уровень скрытности, что делает его отличным выбором для тех, кому нужно быстрое и незаметное VPN-соединение.
-
-* Доступен в AmneziaVPN на всех платформах
-* Низкое энергопотребление на мобильных устройствах
-* Минимальное количество настроек
-* Не распознается системами DPI-анализа, устойчив к блокировке
-* Работает по сетевому протоколу UDP</translation>
     </message>
     <message>
         <source>AmneziaWG container</source>
@@ -4894,7 +4791,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     <message>
         <location filename="../protocols/protocols_defs.cpp" line="81"/>
         <location filename="../containers/containers_defs.cpp" line="104"/>
-        <location filename="../containers/containers_defs.cpp" line="243"/>
+        <location filename="../containers/containers_defs.cpp" line="228"/>
         <source>SOCKS5 proxy server</source>
         <translation>Прокси-сервер SOCKS5</translation>
     </message>
@@ -5308,12 +5205,12 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation type="vanished">Хочу просто повысить уровень приватности</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="338"/>
+        <location filename="../containers/containers_defs.cpp" line="323"/>
         <source>Automatic</source>
         <translation>Автоматическая</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="346"/>
+        <location filename="../containers/containers_defs.cpp" line="331"/>
         <source>AmneziaWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation>Будет установлен протокол AmneziaWG. Он обеспечивает высокую скорость соединения и гарантирует стабильную работу даже в самых сложных условиях.</translation>
     </message>

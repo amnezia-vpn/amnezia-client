@@ -74,6 +74,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiServicesMissingError): errorMessage = QObject::tr("Missing list of available services"); break;
     case (ErrorCode::ApiConfigLimitError): errorMessage = QObject::tr("The limit of allowed configurations per subscription has been exceeded"); break;
     case (ErrorCode::ApiNotFoundError): errorMessage = QObject::tr("Error when retrieving configuration from API"); break;
+    case (ErrorCode::ApiMigrationError): errorMessage = QObject::tr("A migration error occurred. Please contact our technical support"); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;
