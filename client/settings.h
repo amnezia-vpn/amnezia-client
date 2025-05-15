@@ -229,6 +229,9 @@ public:
     bool isHomeAdLabelVisible();
     void disableHomeAdLabel();
 
+    bool isPremV1MigrationReminderActive();
+    void disablePremV1MigrationReminder();
+    
     QStringList allowedDnsServers() const;
     void setAllowedDnsServers(const QStringList &servers);
 
