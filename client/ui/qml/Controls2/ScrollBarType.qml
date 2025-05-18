@@ -7,5 +7,5 @@ import "../Controls2"
 ScrollBar {
     id: root
     
-    policy: parent.height >= parent.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
+    policy: ScrollBar.AsNeeded
 }

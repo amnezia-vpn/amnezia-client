@@ -13,7 +13,7 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 
 
-ListView {
+ListViewType {
     id: root
 
     width: parent.width
