@@ -14,7 +14,7 @@
     <message>
         <location filename="../ui/controllers/allowedDnsController.cpp" line="27"/>
         <source>The address does not look like a valid IP address</source>
-        <translation>Адрес не похож на существующий IP-адрес</translation>
+        <translation>Адрес не похож на корректный IP-адрес</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsController.cpp" line="32"/>
@@ -29,7 +29,7 @@
     <message>
         <location filename="../ui/controllers/allowedDnsController.cpp" line="44"/>
         <source>DNS server removed: %1</source>
-        <translation>DNS сервер убран: %1</translation>
+        <translation>DNS сервер удален: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsController.cpp" line="51"/>
@@ -109,17 +109,17 @@
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="53"/>
         <source>Switch to the new Amnezia Premium subscription</source>
-        <translation>Переключиться на новую подписку Amnezia Premium</translation>
+        <translation>Перейдите на новый тип подписки Amnezia Premium</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="73"/>
         <source>We&apos;ll preserve all remaining days of your current subscription and give you an extra month as a thank you. </source>
-        <translation>Мы сохраним все оставшиеся дни вашей текущей подписки и подарим вам дополнительный месяц в качестве благодарности. </translation>
+        <translation>Мы сохраним все оставшиеся дни текущей подписки и подарим дополнительный месяц в благодарность за переход. </translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="74"/>
         <source>This new subscription type will be actively developed with more locations and features added regularly. Currently available:</source>
-        <translation>Этот новый тип подписки будет активно развиваться с регулярным добавлением новых местоположений и функций. В настоящее время доступно:</translation>
+        <translation>Именно новый тип подписки будет активно развиваться и пополняться новыми локациями и функциями. Уже доступны:</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="76"/>
@@ -2455,7 +2455,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="114"/>
         <source>DNS servers from the list will remain accessible when Kill Switch is triggered</source>
-        <translation>DNS сервера из списка будут доступны при срабатывании Kill Switch</translation>
+        <translation>DNS-серверы из списка будут доступны при срабатывании Kill Switch</translation>
     </message>
 </context>
 <context>
@@ -2463,12 +2463,12 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="45"/>
         <source>DNS Exceptions</source>
-        <translation>Исключенные DNS</translation>
+        <translation>Исключения для DNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="46"/>
-        <source>DNS servers from the list will remain accessible when Kill Switch is triggered</source>
-        <translation>DNS сервера из списка будут доступны при срабатывании Kill Switch</translation>
+        <source>DNS servers listed here will be excluded from KillSwitch restrictions and remain accessible when KillSwitch is active.</source>
+        <translation>Перечисленные DNS-серверы будут исключены из ограничений KillSwitch и останутся доступными при активном KillSwitch.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="106"/>
@@ -2731,7 +2731,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="266"/>
         <source>Switch to the new Amnezia Premium subscription</source>
-        <translation>Переключиться на новую подписку Amnezia Premium</translation>
+        <translation>Перейти на новый тип подписки Amnezia Premium</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="148"/>
@@ -4186,7 +4186,7 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="77"/>
-        <source>A migration error occurred. Please contact our technical support</source>
+        <source>A migration has error occurred. Please contact our technical support</source>
         <translation>Произошла ошибка миграции. Обратитесь в нашу техническую поддержку</translation>
     </message>
     <message>
