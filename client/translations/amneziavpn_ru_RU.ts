@@ -2377,7 +2377,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="111"/>
         <source>Settings have been reset</source>
-        <translation>Настройки сброшены</translation>
+        <translation>Настройки были сброшены</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="125"/>

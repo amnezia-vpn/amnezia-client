@@ -85,7 +85,7 @@ PageType {
                 checked: SettingsController.strictKillSwitchEnabled
 
                 text: qsTr("Strict KillSwitch")
-                descriptionText: qsTr("Internet connection is blocked even if VPN was turned off manually or not started")
+                descriptionText: qsTr("Internet connection is blocked even when VPN is turned off manually or hasn't started")
 
                 onClicked: function() {
                     var headerText = qsTr("Just a little heads-up")
