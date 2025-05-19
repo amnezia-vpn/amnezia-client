@@ -123,23 +123,23 @@
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="76"/>
-        <source>&lt;li&gt;9 locations (with more coming soon)&lt;/li&gt;</source>
-        <translation>&lt;li&gt;9 местоположений (скоро будет ещё больше)&lt;/li&gt;</translation>
+        <source>&lt;li&gt;13 locations (with more coming soon)&lt;/li&gt;</source>
+        <translation>&lt;li&gt;13 локаций (их число будет расти)&lt;/li&gt;</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="77"/>
         <source>&lt;li&gt;Easier switching between countries in the app&lt;/li&gt;</source>
-        <translation>&lt;li&gt;Ещё более лёгкое переключение между странами в приложении&lt;/li&gt;</translation>
+        <translation>&lt;li&gt;Удобное переключение между странами в приложении&lt;/li&gt;</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="78"/>
         <source>&lt;li&gt;Personal dashboard to manage your subscription&lt;/li&gt;</source>
-        <translation>Личный кабинет для управления Вашими подписками</translation>
+        <translation>Личный кабинет для управления подпиской</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="80"/>
         <source>Old keys will be deactivated after switching.</source>
-        <translation>Старые ключи будут деактивированы после переключения.</translation>
+        <translation>После перехода старые ключи перестанут работать.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="91"/>
@@ -154,12 +154,12 @@
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="103"/>
         <source>No old format subscriptions for a given email</source>
-        <translation>Никаких подписок старого формата для данного email</translation>
+        <translation>Для указанного адреса электронной почты нет подписок старого типа</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="114"/>
         <source>Enter the email you used for your current subscription</source>
-        <translation>Введите email, используемый для текущей подписки</translation>
+        <translation>Укажите адрес почты, который использовали при заказе текущей подписки</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="136"/>
@@ -180,7 +180,7 @@
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="177"/>
         <source>No more reminders? You can always switch to the new format in the server settings</source>
-        <translation>Нет напоминаний? Вы всегда можете переключиться на новый формат в настройках сервера</translation>
+        <translation>Отключить напоминания? Вы всегда сможете перейти на новый тип подписки в настройках сервера</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="179"/>
@@ -193,7 +193,7 @@
     <message>
         <location filename="../ui/qml/Components/ApiPremV1SubListDrawer.qml" line="55"/>
         <source>Choose Subscription</source>
-        <translation>Выбрать Подписку</translation>
+        <translation>Выбрать подписку</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1SubListDrawer.qml" line="74"/>
@@ -203,7 +203,7 @@
     <message>
         <location filename="../ui/qml/Components/ApiPremV1SubListDrawer.qml" line="76"/>
         <source>Purchase Date: </source>
-        <translation>Дата оплаты: </translation>
+        <translation>Дата покупки: </translation>
     </message>
 </context>
 <context>
@@ -596,12 +596,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Components/OtpCodeDrawer.qml" line="44"/>
         <source>OTP code was sent to your email</source>
-        <translation>OTP код был отправлен на ваш email</translation>
+        <translation>Одноразовый код был отправлен на ваш email</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/OtpCodeDrawer.qml" line="55"/>
         <source>OTP Code</source>
-        <translation>OTP Код</translation>
+        <translation>Одноразовый код</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/OtpCodeDrawer.qml" line="66"/>
@@ -640,13 +640,13 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="43"/>
         <source>You&apos;ve successfully switched to the new Amnezia Premium subscription!</source>
-        <translation>Вы успешно переключились на новую подписку Amnezia Premium!</translation>
+        <translation>Вы успешно перешли на новый тип подписки Amnezia Premium!</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="44"/>
         <source>Old keys will no longer work. Please use your new subscription key to connect. 
 Thank you for staying with us!</source>
-        <translation>Старые ключи больше не будут работать. Пожалуйста, используйте Ваш новый ключ подписки для соединения. 
+        <translation>Старые ключи перестанут работать. Пожалуйста, используйте новый ключ для подключения.
 Спасибо, что остаетесь с нами!</translation>
     </message>
     <message>
@@ -2400,12 +2400,12 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="41"/>
         <source>Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental exposure of your IP and DNS queries if the connection drops</source>
-        <translation>Включите, чтобы гарантировать прохождение сетевого трафика через защищенный VPN-туннель, предотвращая случайное раскрытие Вашего IP и DNS-запросов в случае обрыва соединения</translation>
+        <translation>Включите, чтобы весь сетевой трафик проходил только через безопасный VPN-туннель. Это предотвратит случайное раскрытие вашего IP-адреса и DNS-запросов при разрыве соединения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="52"/>
-        <source>Cannot change killSwitch settings during active connection</source>
-        <translation>Невозможно изменить настройки аварийного выключателя во время активного соединения</translation>
+        <source>KillSwitch settings cannot be changed during an active connection</source>
+        <translation>Настройки KillSwitch нельзя изменить во время активного подключения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="68"/>
@@ -2414,8 +2414,8 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
-        <source>Internet connection is blocked if VPN connection drops accidentally</source>
-        <translation>Интернет-соединение блокируется, если VPN-соединение случайно оборвётся</translation>
+        <source>Internet access is blocked if the VPN disconnects unexpectedly</source>
+        <translation>Доступ в интернет блокируется при разрыве VPN-соединения</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="87"/>
@@ -2425,17 +2425,17 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="88"/>
         <source>Internet connection is blocked even if VPN was turned off manually or not started</source>
-        <translation>Интернет-соединение блокируется,даже если VPN был выключен вручную или не запущен</translation>
+        <translation>Доступ в интернет блокируется, даже если VPN отключен вручную или не был запущен</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="91"/>
         <source>Just a little heads-up</source>
-        <translation>Просто небольшое предупреждение</translation>
+        <translation>Небольшое предупреждение</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
-        <source>If you disconnect from VPN or the VPN connection drops while the Strict Kill Switch is turned on, your internet access will be disabled. To restore it, connect to VPN, change the Kill Switch mode or turn the Kill Switch off.</source>
-        <translation>Если вы отключитесь от VPN или соединение VPN прервется при включенном Strict Kill Switch, ваш доступ в Интернет будет отключен. Чтобы восстановить его, подключитесь к VPN, измените режим Kill Switch или выключите Kill Switch.</translation>
+        <source>If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.</source>
+        <translation>Если VPN отключится или соединение прервётся при включённом Strict KillSwitch, доступ в интернет будет заблокирован. Чтобы восстановить доступ, снова подключитесь к VPN или отключите (измените) режим KillSwitch.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
@@ -2450,12 +2450,12 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="113"/>
         <source>DNS Exceptions</source>
-        <translation>Исключенные DNS</translation>
+        <translation>Исключения для DNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="114"/>
-        <source>DNS servers from the list will remain accessible when Kill Switch is triggered</source>
-        <translation>DNS-серверы из списка будут доступны при срабатывании Kill Switch</translation>
+        <source>DNS servers listed here will be excluded from KillSwitch restrictions and remain accessible when KillSwitch is active.</source>
+        <translation>DNS-серверы из списка будут доступны при срабатывании Kill Switch и останутся доступными при активном KillSwitch.</translation>
     </message>
 </context>
 <context>
