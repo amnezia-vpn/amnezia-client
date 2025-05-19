@@ -111,7 +111,7 @@ PageType {
 
                 enabled: true
                 text: qsTr("DNS Exceptions")
-                descriptionText: qsTr("DNS servers listed here will be excluded from KillSwitch restrictions and remain accessible when KillSwitch is active.")
+                descriptionText: qsTr("DNS servers listed here will remain accessible when KillSwitch is active.")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

@@ -2424,7 +2424,7 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="88"/>
-        <source>Internet connection is blocked even if VPN was turned off manually or not started</source>
+        <source>Internet connection is blocked even when VPN is turned off manually or hasn't started</source>
         <translation>Доступ в интернет блокируется, даже если VPN отключен вручную или не был запущен</translation>
     </message>
     <message>
@@ -2454,8 +2454,8 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="114"/>
-        <source>DNS servers listed here will be excluded from KillSwitch restrictions and remain accessible when KillSwitch is active.</source>
-        <translation>DNS-серверы из списка будут доступны при срабатывании Kill Switch и останутся доступными при активном KillSwitch.</translation>
+        <source>DNS servers listed here will remain accessible when KillSwitch is active.</source>
+        <translation>DNS-серверы из этого списка останутся доступными при активном KillSwitch.</translation>
     </message>
 </context>
 <context>
