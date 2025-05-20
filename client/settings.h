@@ -85,6 +85,15 @@ public:
         setValue("Conf/autoConnect", enabled);
     }
 
+    bool isAutoStart() const
+    {
+        return value("Conf/autoStart", false).toBool();
+    }
+    void setAutoStart(bool enabled)
+    {
+        setValue("Conf/autoStart", enabled);
+    }
+
     bool isStartMinimized() const
     {
         return value("Conf/startMinimized", false).toBool();
