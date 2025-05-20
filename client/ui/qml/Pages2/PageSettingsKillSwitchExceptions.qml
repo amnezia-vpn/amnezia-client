@@ -43,7 +43,7 @@ PageType {
             Layout.leftMargin: 16
 
             headerText: qsTr("DNS Exceptions")
-            descriptionText: qsTr("DNS servers from the list will remain accessible when Kill Switch is triggered")
+            descriptionText: qsTr("DNS servers listed here will remain accessible when KillSwitch is active")
         }
     }
 

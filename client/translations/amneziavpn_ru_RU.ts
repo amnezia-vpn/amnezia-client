@@ -89,17 +89,17 @@
 <context>
     <name>ApiConfigsController</name>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="203"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="207"/>
         <source>%1 installed successfully.</source>
         <translation>%1 успешно установлен.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="257"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="262"/>
         <source>API config reloaded</source>
         <translation>Конфигурация API перезагружена</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="261"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="266"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>Страна подключения изменена на %1</translation>
     </message>
@@ -149,7 +149,7 @@
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="92"/>
         <source>mail@example.com</source>
-        <translation type="unfinished"></translation>
+        <translation>mail@example.com</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="103"/>
@@ -242,7 +242,7 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="111"/>
         <source></source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="113"/>
@@ -377,9 +377,6 @@
         <source>&amp;SelectAll</source>
         <translation>Выбрать всё</translation>
     </message>
-</context>
-<context>
-    <name>ExportController</name>
 </context>
 <context>
     <name>HomeContainersListView</name>
@@ -1764,9 +1761,6 @@ Thank you for staying with us!</source>
     </message>
 </context>
 <context>
-    <name>PageSettingsApiLanguageList</name>
-</context>
-<context>
     <name>PageSettingsApiNativeConfigs</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="23"/>
@@ -2424,7 +2418,7 @@ Thank you for staying with us!</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="88"/>
-        <source>Internet connection is blocked even when VPN is turned off manually or hasn't started</source>
+        <source>Internet connection is blocked even when VPN is turned off manually or hasn&apos;t started</source>
         <translation>Доступ в интернет блокируется, даже если VPN отключен вручную или не был запущен</translation>
     </message>
     <message>
@@ -2466,9 +2460,17 @@ Thank you for staying with us!</source>
         <translation>Исключения для DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="46"/>
         <source>DNS servers listed here will be excluded from KillSwitch restrictions and remain accessible when KillSwitch is active.</source>
-        <translation>Перечисленные DNS-серверы будут исключены из ограничений KillSwitch и останутся доступными при активном KillSwitch.</translation>
+        <translation type="vanished">Перечисленные DNS-серверы будут исключены из ограничений KillSwitch и останутся доступными при активном KillSwitch.</translation>
+    </message>
+    <message>
+        <source>DNS servers from the list will remain accessible when KillSwitch is triggered</source>
+        <translation type="vanished">DNS-серверы из этого списка будут исключены из ограничений KillSwitch и останутся доступными при активном KillSwitch.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="46"/>
+        <source>DNS servers listed here will remain accessible when KillSwitch is active</source>
+        <translation>DNS-серверы из этого списка останутся доступными при активном KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="106"/>
@@ -4078,6 +4080,11 @@ Thank you for staying with us!</source>
         <translation>Данная конфигурация уже была добавлена в приложение</translation>
     </message>
     <message>
+        <location filename="../core/errorstrings.cpp" line="77"/>
+        <source>A migration error has occurred. Please contact our technical support</source>
+        <translation>Произошла ошибка миграции. Обратитесь в нашу техническую поддержку</translation>
+    </message>
+    <message>
         <location filename="../core/errorstrings.cpp" line="92"/>
         <source>ErrorCode: %1. </source>
         <translation>Код ошибки: %1. </translation>
@@ -4185,9 +4192,8 @@ Thank you for staying with us!</source>
         <translation>Превышен лимит разрешенных конфигураций для одной подписки</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="77"/>
         <source>A migration has error occurred. Please contact our technical support</source>
-        <translation>Произошла ошибка миграции. Обратитесь в нашу техническую поддержку</translation>
+        <translation type="vanished">Произошла ошибка миграции. Обратитесь в нашу техническую поддержку</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="80"/>
@@ -4342,7 +4348,7 @@ REALITY распознаёт системы блокировки во время
     <message>
         <location filename="../containers/containers_defs.cpp" line="136"/>
         <source></source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="143"/>
