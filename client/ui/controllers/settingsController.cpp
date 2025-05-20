@@ -146,10 +146,8 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         QString valueStr = newConfigData.value("Conf/autoStart").toString().toLower();
         bool autoStartEnabled = (valueStr == "true");
         //bool autoStartEnabled = m_settings->isAutoStart();
-        if (autoStartEnabled != isAutoStartEnabled()) {
-            toggleAutoStart(autoStartEnabled);
+        toggleAutoStart(autoStartEnabled);
             //m_settings->setAutoStart(autoStartEnabled);
-        }
 #endif
         m_serversModel->resetModel();
         m_languageModel->changeLanguage(
@@ -202,39 +200,8 @@ bool SettingsController::isAutoStartEnabled()
 
 void SettingsController::toggleAutoStart(bool enable)
 {
-/*#ifdef Q_OS_WINDOWS
-    if (enable) {
-        QString exePath = QCoreApplication::applicationFilePath();
-        QString shortcutName = "AmneziaVPN.lnk";
-
-        QString startupFolder = QDir::homePath() +
-                "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup";
-
-        QString shortcutPath = QDir::toNativeSeparators(startupFolder + "/" + shortcutName);
-        QString targetPath = QDir::toNativeSeparators(exePath);
-
-        QProcess::execute("powershell", {
-                                                "-Command",
-                                                QString(""
-                                                        "$WshShell = New-Object -ComObject WScript.Shell; "
-                                                        "$Shortcut = $WshShell.CreateShortcut('%1'); "
-                                                        "$Shortcut.TargetPath = '%2'; "
-                                                        "$Shortcut.WorkingDirectory = '%3'; "
-                                                        "$Shortcut.Save()"
-                                                        ).arg(shortcutPath, targetPath, QFileInfo(targetPath).absolutePath())
-                                        });
-    } else {
-        QString startupFolder = QDir::homePath()
-        + "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup";
-        QString shortcutPath = QDir::toNativeSeparators(startupFolder + "/AmneziaVPN.lnk");
-        QFile::remove(shortcutPath);
-        QSettings runKey("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat);
-        runKey.remove("AmneziaVPN");
-    }
-#else
     Autostart::setAutostart(enable);
-#endif*/
-    Autostart::setAutostart(enable);
+    qDebug() << "toggleAutoStart called with" << enable;
 }
 
 bool SettingsController::isStartMinimizedEnabled()
