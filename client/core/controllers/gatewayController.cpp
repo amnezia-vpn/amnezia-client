@@ -36,6 +36,8 @@ namespace
     constexpr QLatin1String errorResponsePattern1("No active configuration found for");
     constexpr QLatin1String errorResponsePattern2("No non-revoked public key found for");
     constexpr QLatin1String errorResponsePattern3("Account not found.");
+
+    constexpr QLatin1String updateRequestResponsePattern("client version update is required");
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
@@ -306,6 +308,13 @@ bool GatewayController::shouldBypassProxy(QNetworkReply *reply, const QByteArray
     } else if (reply->error() == QNetworkReply::NetworkError::ContentNotFoundError) {
         if (responseBody.contains(errorResponsePattern1) || responseBody.contains(errorResponsePattern2)
             || responseBody.contains(errorResponsePattern3)) {
+            return false;
+        } else {
+            qDebug() << reply->error();
+            return true;
+        }
+    } else if (reply->error() == QNetworkReply::NetworkError::OperationNotImplementedError) {
+        if (responseBody.contains(updateRequestResponsePattern)) {
             return false;
         } else {
             qDebug() << reply->error();

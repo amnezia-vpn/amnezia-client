@@ -77,6 +77,7 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
     apiPayload[configKey::serverCountryCode] = serverCountryCode;
     apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
     apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/native_config"), apiPayload, responseBody);
@@ -109,6 +110,7 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
     apiPayload[configKey::serverCountryCode] = serverCountryCode;
     apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
     apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/revoke_native_config"), apiPayload, responseBody);
@@ -188,6 +190,7 @@ bool ApiConfigsController::importServiceFromGateway()
     apiPayload[configKey::userCountryCode] = userCountryCode;
     apiPayload[configKey::serviceType] = serviceType;
     apiPayload[configKey::uuid] = installationUuid;
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/config"), apiPayload, responseBody);
@@ -233,6 +236,7 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
     apiPayload[configKey::userCountryCode] = userCountryCode;
     apiPayload[configKey::serviceType] = serviceType;
     apiPayload[configKey::uuid] = installationUuid;
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
 
     if (!newCountryCode.isEmpty()) {
         apiPayload[configKey::serverCountryCode] = newCountryCode;
@@ -330,6 +334,7 @@ bool ApiConfigsController::deactivateDevice()
     apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
     apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
     apiPayload[configKey::uuid] = m_settings->getInstallationUuid(true);
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/revoke_config"), apiPayload, responseBody);
@@ -366,6 +371,7 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
     apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
     apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
     apiPayload[configKey::uuid] = uuid;
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/revoke_config"), apiPayload, responseBody);
