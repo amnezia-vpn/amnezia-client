@@ -118,6 +118,7 @@ namespace amnezia
         ApiConfigLimitError = 1108,
         ApiNotFoundError = 1109,
         ApiMigrationError = 1110,
+        ApiUpdateRequestError = 1111,
 
         // QFile errors
         OpenError = 1200,
