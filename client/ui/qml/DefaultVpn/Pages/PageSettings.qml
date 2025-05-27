@@ -49,6 +49,56 @@ Page {
             spacing: 2
 
             RadioButton {
+                id: languageRadioButton
+                Layout.fillWidth: true
+                background: Rectangle {
+                    anchors.fill: parent
+                    radius: 8
+                    color: languageRadioButton.hovered ? Style.color.gray1 : Style.color.transparent
+                }
+
+                indicator: Item { }
+
+                contentItem: RowLayout {
+                    id: content
+
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    implicitHeight: content.implicitHeight
+
+                    Header3TextType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 8
+                        Layout.topMargin: 19
+                        Layout.bottomMargin: 19
+
+                        text: qsTr("Language")
+                        color: languageRadioButton.hovered ? Style.color.gray9 : Style.color.black
+                    }
+
+                    Image {
+                        Layout.rightMargin: 8
+                        source: "qrc:/images/controls/chevron-right.svg"
+
+                        layer {
+                            enabled: true
+                            effect: ColorOverlay {
+                                color: Style.color.black
+                            }
+                        }
+                    }
+                }
+
+                onClicked: PageController.goToPage(PageEnum.PageSettingsLanguage)
+
+                MouseArea {
+                    anchors.fill: languageRadioButton
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
+                }
+            }
+
+            RadioButton {
                 id: loggingRadioButton
                 Layout.fillWidth: true
                 background: Rectangle {
@@ -60,11 +110,11 @@ Page {
                 indicator: Item { }
 
                 contentItem: RowLayout {
-                    id: content
+                    id: content2
 
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    implicitHeight: content.implicitHeight
+                    implicitHeight: content2.implicitHeight
 
                     Header3TextType {
                         Layout.fillWidth: true
@@ -110,7 +160,7 @@ Page {
                 indicator: Item { }
 
                 contentItem: RowLayout {
-                    id: content2
+                    id: content3
 
                     anchors.left: parent.left
                     anchors.right: parent.right

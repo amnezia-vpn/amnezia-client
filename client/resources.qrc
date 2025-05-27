@@ -267,6 +267,7 @@
         <file>ui/qml/DefaultVpn/Controls/BusyIndicatorType.qml</file>
         <file>images/controls/connect-button.svg</file>
         <file>fonts/VelaSans-GX.ttf</file>
+        <file>ui/qml/DefaultVpn/Pages/PageSettingsLanguage.qml</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>

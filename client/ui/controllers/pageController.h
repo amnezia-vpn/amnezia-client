@@ -30,6 +30,7 @@ namespace PageLoader
         PageSettingsBackup,
         PageSettingsAbout,
         PageSettingsLogging,
+        PageSettingsLanguage,
         PageSettingsSplitTunneling,
         PageSettingsAppSplitTunneling,
         PageSettingsKillSwitch,
