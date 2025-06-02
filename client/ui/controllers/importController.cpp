@@ -665,27 +665,27 @@ void ImportController::checkForMaliciousStrings(const QJsonObject &serverConfig)
                     containerConfig[ProtocolProps::protoToString(Proto::OpenVpn)].toObject()[config_key::last_config].toString();
             QString protocolConfigJson = QJsonDocument::fromJson(protocolConfig.toUtf8()).object()[config_key::config].toString();
 
-            const QRegularExpression regExp { "(\\w+-\\w+|\\w+)" };
-            const size_t dangerousTagsMaxCount = 3;
-
             // https://github.com/OpenVPN/openvpn/blob/master/doc/man-sections/script-options.rst
             QStringList dangerousTags {
                 "up", "tls-verify", "ipchange", "client-connect", "route-up", "route-pre-down", "client-disconnect", "down", "learn-address", "auth-user-pass-verify"
             };
 
             QStringList maliciousStrings;
-            QStringList lines = protocolConfigJson.replace("\r", "").split("\n");
-            for (const QString &l : lines) {
-                QRegularExpressionMatch match = regExp.match(l);
-                if (dangerousTags.contains(match.captured(0))) {
-                    maliciousStrings << l;
+            QStringList lines = protocolConfigJson.split('\n', Qt::SkipEmptyParts);
+
+            for (const QString &rawLine : lines) {
+                QString line = rawLine.trimmed();
+
+                QString command = line.section(' ', 0, 0, QString::SectionSkipEmpty);
+                if (dangerousTags.contains(command, Qt::CaseInsensitive)) {
+                    maliciousStrings << rawLine;
                 }
             }
 
             m_maliciousWarningText = tr("This configuration contains an OpenVPN setup. OpenVPN configurations can include malicious "
                                         "scripts, so only add it if you fully trust the provider of this config. ");
 
-            if (maliciousStrings.size() >= dangerousTagsMaxCount) {
+            if (!maliciousStrings.isEmpty()) {
                 m_maliciousWarningText.push_back(tr("<br>In the imported configuration, potentially dangerous lines were found:"));
                 for (const auto &string : maliciousStrings) {
                     m_maliciousWarningText.push_back(QString("<br><i>%1</i>").arg(string));

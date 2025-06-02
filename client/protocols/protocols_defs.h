@@ -95,6 +95,8 @@ namespace amnezia
         constexpr char splitTunnelApps[] = "splitTunnelApps";
         constexpr char appSplitTunnelType[] = "appSplitTunnelType";
 
+        constexpr char allowedDnsServers[] = "allowedDnsServers";
+
         constexpr char killSwitchOption[] = "killSwitchOption";
 
         constexpr char crc[] = "crc";

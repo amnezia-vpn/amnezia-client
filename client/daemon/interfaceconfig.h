@@ -6,6 +6,7 @@
 #define INTERFACECONFIG_H
 
 #include <QList>
+#include <QMap>
 #include <QString>
 
 #include "ipaddress.h"
@@ -37,6 +38,7 @@ class InterfaceConfig {
   QList<IPAddress> m_allowedIPAddressRanges;
   QStringList m_excludedAddresses;
   QStringList m_vpnDisabledApps;
+  QStringList m_allowedDnsServers;
   bool m_killSwitchEnabled;
 #if defined(MZ_ANDROID) || defined(MZ_IOS)
   QString m_installationId;

@@ -18,7 +18,8 @@ ListView {
     property var selectedText
 
     width: rootWidth
-    height: contentItem.height
+    anchors.top: parent.top
+    anchors.bottom: parent.bottom
 
     clip: true
     snapMode: ListView.SnapToItem

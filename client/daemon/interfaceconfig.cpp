@@ -48,6 +48,13 @@ QJsonObject InterfaceConfig::toJson() const {
   }
   json.insert("excludedAddresses", jsExcludedAddresses);
 
+
+  QJsonArray jsAllowedDnsServers;
+  for (const QString& i : m_allowedDnsServers) {
+    jsAllowedDnsServers.append(QJsonValue(i));
+  }
+  json.insert("allowedDnsServers", jsAllowedDnsServers);
+
   QJsonArray disabledApps;
   for (const QString& i : m_vpnDisabledApps) {
     disabledApps.append(QJsonValue(i));

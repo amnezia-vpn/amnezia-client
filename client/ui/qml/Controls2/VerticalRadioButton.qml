@@ -20,7 +20,11 @@ RadioButton {
     property string selectedColor: AmneziaStyle.color.transparent
 
     property string textColor: AmneziaStyle.color.paleGray
+    property string textDisabledColor: AmneziaStyle.color.mutedGray
     property string selectedTextColor: AmneziaStyle.color.goldenApricot
+    property string selectedTextDisabledColor: AmneziaStyle.color.burntOrange
+    property string descriptionColor: AmneziaStyle.color.mutedGray
+    property string descriptionDisabledColor: AmneziaStyle.color.charcoalGray
 
     property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
@@ -29,6 +33,12 @@ RadioButton {
     property bool showImage
 
     property bool isFocusable: true
+
+    
+    property string radioButtonInnerCirclePressedSource: "qrc:/images/controls/radio-button-inner-circle-pressed.png"
+    property string radioButtonInnerCircleSource: "qrc:/images/controls/radio-button-inner-circle.png"
+    property string radioButtonPressedSource: "qrc:/images/controls/radio-button-pressed.svg"
+    property string radioButtonDefaultSource: "qrc:/images/controls/radio-button.svg"
 
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
@@ -94,14 +104,15 @@ RadioButton {
                 if (showImage) {
                     return imageSource
                 } else if (root.pressed) {
-                    return "qrc:/images/controls/radio-button-inner-circle-pressed.png"
+                    return root.radioButtonInnerCirclePressedSource
                 } else if (root.checked) {
-                    return "qrc:/images/controls/radio-button-inner-circle.png"
+                    return root.radioButtonInnerCircleSource
                 }
 
                 return ""
             }
 
+            opacity: root.enabled ? 1.0 : 0.3
             anchors.centerIn: parent
 
             width: 24
@@ -113,12 +124,13 @@ RadioButton {
                 if (showImage) {
                     return ""
                 } else if (root.pressed || root.checked) {
-                    return "qrc:/images/controls/radio-button-pressed.svg"
+                    return root.radioButtonPressedSource
                 } else {
-                    return "qrc:/images/controls/radio-button.svg"
+                    return root.radioButtonDefaultSource
                 }
             }
 
+            opacity: root.enabled ? 1.0 : 0.3
             anchors.centerIn: parent
 
             width: 24
@@ -148,10 +160,11 @@ RadioButton {
                 elide: root.textElide
 
                 color: {
-                    if (root.checked) {
-                        return selectedTextColor
+                    if (root.enabled) {
+                        return root.checked ? selectedTextColor : textColor
+                    } else {
+                        return root.checked ? selectedTextDisabledColor : textDisabledColor
                     }
-                    return textColor
                 }
 
                 Layout.fillWidth: true
@@ -164,7 +177,7 @@ RadioButton {
             CaptionTextType {
                 id: description
 
-                color: AmneziaStyle.color.mutedGray
+                color: root.enabled ? root.descriptionColor : root.descriptionDisabledColor
                 text: root.descriptionText
 
                 visible: root.descriptionText !== ""
@@ -177,6 +190,7 @@ RadioButton {
     MouseArea {
         anchors.fill: root
         cursorShape: Qt.PointingHandCursor
+        preventStealing: false
         enabled: false
     }
 }

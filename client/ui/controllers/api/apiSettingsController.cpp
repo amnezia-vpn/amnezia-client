@@ -48,7 +48,8 @@ bool ApiSettingsController::getAccountInfo(bool reload)
         wait.exec();
     }
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
 
     auto processedIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfig = m_serversModel->getServerConfig(processedIndex);
@@ -62,12 +63,10 @@ bool ApiSettingsController::getAccountInfo(bool reload)
 
     QByteArray responseBody;
 
-    if (apiUtils::getConfigType(serverConfig) == apiDefs::ConfigType::AmneziaPremiumV2) {
-        ErrorCode errorCode = gatewayController.post(QString("%1v1/account_info"), apiPayload, responseBody);
-        if (errorCode != ErrorCode::NoError) {
-            emit errorOccurred(errorCode);
-            return false;
-        }
+    ErrorCode errorCode = gatewayController.post(QString("%1v1/account_info"), apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return false;
     }
 
     QJsonObject accountInfo = QJsonDocument::fromJson(responseBody).object();

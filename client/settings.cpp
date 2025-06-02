@@ -443,6 +443,16 @@ void Settings::setKillSwitchEnabled(bool enabled)
     setValue("Conf/killSwitchEnabled", enabled);
 }
 
+bool Settings::isStrictKillSwitchEnabled() const
+{
+    return value("Conf/strictKillSwitchEnabled", false).toBool();
+}
+
+void Settings::setStrictKillSwitchEnabled(bool enabled)
+{
+    setValue("Conf/strictKillSwitchEnabled", enabled);
+}
+
 QString Settings::getInstallationUuid(const bool needCreate)
 {
     auto uuid = value("Conf/installationUuid", "").toString();
@@ -547,4 +557,24 @@ bool Settings::isHomeAdLabelVisible()
 void Settings::disableHomeAdLabel()
 {
     setValue("Conf/homeAdLabelVisible", false);
+}
+
+bool Settings::isPremV1MigrationReminderActive()
+{
+    return value("Conf/premV1MigrationReminderActive", true).toBool();
+}
+
+void Settings::disablePremV1MigrationReminder()
+{
+    setValue("Conf/premV1MigrationReminderActive", false);
+}
+
+QStringList Settings::allowedDnsServers() const
+{
+    return value("Conf/allowedDnsServers").toStringList();
+}
+
+void Settings::setAllowedDnsServers(const QStringList &servers)
+{
+    setValue("Conf/allowedDnsServers", servers);
 }
