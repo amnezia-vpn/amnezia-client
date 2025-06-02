@@ -33,8 +33,8 @@ if(DEPLOY)
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
         XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
-        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "Yaroslav macos.org.amnezia.AmneziaVPN.network"
-        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "Yaroslav macos.org.amnezia.AmneziaVPN.network"
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "distr macos.org.amnezia.amneziaVPN.NE"
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "dev macos.org.amnezia.amneziaVPN.NE"
     )
 else()
     set_target_properties(AmneziaVPNNetworkExtension PROPERTIES
