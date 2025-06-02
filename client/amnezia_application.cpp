@@ -12,6 +12,7 @@
 #include <QTextDocument>
 #include <QTimer>
 #include <QTranslator>
+#include <QEvent>
 
 #include "logger.h"
 #include "ui/controllers/pageController.h"
@@ -205,6 +206,22 @@ void AmneziaApplication::startLocalServer() {
     });
 }
 #endif
+
+bool AmneziaApplication::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::Close) {
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+        quit();
+#else
+        if (m_coreController && m_coreController->pageController()) {
+            m_coreController->pageController()->hideMainWindow();
+        }
+#endif
+        return true; // eat the close
+    }
+    // call base QObject::eventFilter
+    return QObject::eventFilter(watched, event);
+}
 
 QQmlApplicationEngine *AmneziaApplication::qmlEngine() const
 {

@@ -60,6 +60,8 @@ private:
     QThread m_vpnConnectionThread;
 
     QNetworkAccessManager *m_nam;
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
 };
 
 #endif // AMNEZIA_APPLICATION_H

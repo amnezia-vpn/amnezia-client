@@ -59,29 +59,11 @@ QString PageController::getPagePath(PageLoader::PageEnum page)
 
 void PageController::closeWindow()
 {
-#ifdef Q_OS_ANDROID
+// On mobile platforms, quit app on close; on desktop, just hide window
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     qApp->quit();
-
-#elif defined(MACOS_NE)
-    // macOS App Store build with Network Extension: hide UI, then gracefully disconnect NE and quit
-    emit hideMainWindow();
-    {
-        auto ctrl = IosController::Instance();
-        // when NE state changes to Disconnected, quit app
-        connect(ctrl, &IosController::connectionStateChanged, this, [=](Vpn::ConnectionState s) {
-            if (s == Vpn::ConnectionState::Disconnected) {
-                qApp->quit();
-            }
-        });
-        ctrl->disconnectVpn();
-    }
-
 #else
-    if (m_serversModel->getServersCount() == 0) {
-        qApp->quit();
-    } else {
-        emit hideMainWindow();
-    }
+    emit hideMainWindow();
 #endif
 }
 
@@ -132,7 +114,7 @@ void PageController::showOnStartup()
     } else {
 #if defined(Q_OS_WIN) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
         emit hideMainWindow();
-#elif defined(Q_OS_MACX) and defined(MACOS_NE)
+#elif defined(Q_OS_MACX) && !defined(MACOS_NE)
         setDockIconVisible(false);
 #endif
     }
