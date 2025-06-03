@@ -154,10 +154,6 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
             autoStart = newConfigData["Conf/autoStart"].toBool();
         }
         toggleAutoStart(autoStart);
-
-        //QString valueStr = newConfigData.value("Conf/autoStart").toString().toLower();
-        //bool autoStartEnabled = (valueStr == "true");
-        //toggleAutoStart(autoStartEnabled);
 #endif
         m_serversModel->resetModel();
         m_languageModel->changeLanguage(
