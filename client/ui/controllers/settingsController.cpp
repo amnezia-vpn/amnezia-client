@@ -126,7 +126,13 @@ void SettingsController::clearLogs()
 
 void SettingsController::backupAppConfig(const QString &fileName)
 {
-    SystemController::saveFile(fileName, m_settings->backupAppConfig());
+    QByteArray data = m_settings->backupAppConfig();
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    QJsonObject config = doc.object();
+
+    config["Conf/autoStart"] = Autostart::isAutostart();
+
+    SystemController::saveFile(fileName, QJsonDocument(config).toJson());
 }
 
 void SettingsController::restoreAppConfig(const QString &fileName)
@@ -143,9 +149,15 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         QJsonObject newConfigData = QJsonDocument::fromJson(data).object();
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX) || defined(Q_OS_MACX)
-        QString valueStr = newConfigData.value("Conf/autoStart").toString().toLower();
-        bool autoStartEnabled = (valueStr == "true");
-        toggleAutoStart(autoStartEnabled);
+        bool autoStart = false;
+        if (newConfigData.contains("Conf/autoStart")) {
+            autoStart = newConfigData["Conf/autoStart"].toBool();
+        }
+        toggleAutoStart(autoStart);
+
+        //QString valueStr = newConfigData.value("Conf/autoStart").toString().toLower();
+        //bool autoStartEnabled = (valueStr == "true");
+        //toggleAutoStart(autoStartEnabled);
 #endif
         m_serversModel->resetModel();
         m_languageModel->changeLanguage(
