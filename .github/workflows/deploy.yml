@@ -20,6 +20,8 @@ jobs:
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
       DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
       DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
     - name: 'Install Qt'
@@ -90,6 +92,8 @@ jobs:
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
       DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
       DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
     - name: 'Get sources'
@@ -156,6 +160,8 @@ jobs:
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
       DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
       DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
     - name: 'Setup xcode'
@@ -243,7 +249,7 @@ jobs:
 
 # ------------------------------------------------------
 
-  Build-MacOS:
+  Build-MacOS-old:
     runs-on: macos-latest
 
     env:
@@ -255,6 +261,78 @@ jobs:
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
       DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
       DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+
+    steps:
+    - name: 'Setup xcode'
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '15.4.0'
+
+    - name: 'Install Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'mac'
+        target: 'desktop'
+        arch: 'clang_64'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        set-env: 'true'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install Qt Installer Framework ${{ env.QIF_VERSION }}'
+      run: |
+        mkdir -pv ${{ runner.temp }}/Qt/Tools/QtInstallerFramework
+        wget https://qt.amzsvc.com/tools/ifw/${{ env.QIF_VERSION }}.zip
+        unzip ${{ env.QIF_VERSION }}.zip -d ${{ runner.temp }}/Qt/Tools/QtInstallerFramework/
+
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: 'Build project'
+      run: |
+        export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
+        export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
+        bash deploy/build_macos.sh
+
+    - name: 'Upload installer artifact'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_MacOS_old_installer
+        path: AmneziaVPN.dmg
+        retention-days: 7
+
+    - name: 'Upload unpacked artifact'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_MacOS_old_unpacked
+        path: deploy/build/client/AmneziaVPN.app
+        retention-days: 7
+
+# ------------------------------------------------------
+
+  Build-MacOS:
+    runs-on: macos-latest
+
+    env:
+      QT_VERSION: 6.8.0
+      QIF_VERSION: 4.8.1
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
     - name: 'Setup xcode'
@@ -324,6 +402,8 @@ jobs:
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
       DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
       DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
     - name: 'Install desktop Qt'

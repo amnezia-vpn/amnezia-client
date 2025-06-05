@@ -303,8 +303,7 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
       data->Age++;
       continue;
     }
-    logger.debug() << "Capturing route to"
-                   << logger.sensitive(prefix.toString());
+    logger.debug() << "Capturing route to" << prefix.toString();
 
     // Clone the route and direct it into the VPN tunnel.
     data = new MIB_IPFORWARD_ROW2;
@@ -354,8 +353,7 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
       continue;
     }
 
-    logger.debug() << "Removing route capture for"
-                   << logger.sensitive(i.key().toString());
+    logger.debug() << "Removing route capture for" << i.key().toString();
 
     // Otherwise, this route is no longer in use.
     DWORD result = DeleteIpForwardEntry2(data);
@@ -368,8 +366,7 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
 }
 
 bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
-  logger.debug() << "Adding exclusion route for"
-                 << logger.sensitive(prefix.toString());
+  logger.debug() << "Adding exclusion route for" << prefix.toString();
 
   // Silently ignore non-routeable addresses.
   QHostAddress addr = prefix.address();
@@ -437,7 +434,7 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
 
 bool WindowsRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
   logger.debug() << "Deleting exclusion route for"
-                 << logger.sensitive(prefix.address().toString());
+                 << prefix.address().toString();
 
   MIB_IPFORWARD_ROW2* data = m_exclusionRoutes.take(prefix);
   if (data == nullptr) {
@@ -447,7 +444,7 @@ bool WindowsRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
   DWORD result = DeleteIpForwardEntry2(data);
   if ((result != ERROR_NOT_FOUND) && (result != NO_ERROR)) {
     logger.error() << "Failed to delete route to"
-                   << logger.sensitive(prefix.toString())
+                   << prefix.toString()
                    << "result:" << result;
   }
 
@@ -465,7 +462,7 @@ void WindowsRouteMonitor::flushRouteTable(
     DWORD result = DeleteIpForwardEntry2(data);
     if ((result != ERROR_NOT_FOUND) && (result != NO_ERROR)) {
       logger.error() << "Failed to delete route to"
-                     << logger.sensitive(i.key().toString())
+                     << i.key().toString()
                      << "result:" << result;
     }
     delete data;

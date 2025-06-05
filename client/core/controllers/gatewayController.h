@@ -15,7 +15,8 @@ class GatewayController : public QObject
     Q_OBJECT
 
 public:
-    explicit GatewayController(const QString &gatewayEndpoint, bool isDevEnvironment, int requestTimeoutMsecs, QObject *parent = nullptr);
+    explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
+                               const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
     amnezia::ErrorCode get(const QString &endpoint, QByteArray &responseBody);
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
@@ -30,6 +31,7 @@ private:
     int m_requestTimeoutMsecs;
     QString m_gatewayEndpoint;
     bool m_isDevEnvironment = false;
+    bool m_isStrictKillSwitchEnabled = false;
 };
 
 #endif // GATEWAYCONTROLLER_H

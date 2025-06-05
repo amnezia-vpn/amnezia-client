@@ -148,6 +148,9 @@ void CoreController::initControllers()
 
     m_apiConfigsController.reset(new ApiConfigsController(m_serversModel, m_apiServicesModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigsController.get());
+
+    m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversModel, m_settings, this));
+    m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
 }
 
 void CoreController::initAndroidController()
@@ -220,6 +223,8 @@ void CoreController::initSignalHandlers()
     initAutoConnectHandler();
     initAmneziaDnsToggledHandler();
     initPrepareConfigHandler();
+    initImportPremiumV2VpnKeyHandler();
+    initShowMigrationDrawerHandler();
     initStrictKillSwitchHandler();
 }
 
@@ -363,10 +368,29 @@ void CoreController::initPrepareConfigHandler()
     });
 }
 
+void CoreController::initImportPremiumV2VpnKeyHandler()
+{
+    connect(m_apiPremV1MigrationController.get(), &ApiPremV1MigrationController::importPremiumV2VpnKey, this, [this](const QString &vpnKey) {
+        m_importController->extractConfigFromData(vpnKey);
+        m_importController->importConfig();
+
+        emit m_apiPremV1MigrationController->migrationFinished();
+    });
+}
+
+void CoreController::initShowMigrationDrawerHandler()
+{
+    QTimer::singleShot(1000, this, [this]() {
+        if (m_apiPremV1MigrationController->isPremV1MigrationReminderActive() && m_apiPremV1MigrationController->hasConfigsToMigration()) {
+            m_apiPremV1MigrationController->showMigrationDrawer();
+        }
+    });
+}
+
 void CoreController::initStrictKillSwitchHandler()
 {
-    connect(m_settingsController.get(), &SettingsController::strictKillSwitchEnabledChanged, 
-            m_vpnConnection.get(), &VpnConnection::onKillSwitchModeChanged);
+    connect(m_settingsController.get(), &SettingsController::strictKillSwitchEnabledChanged, m_vpnConnection.get(),
+            &VpnConnection::onKillSwitchModeChanged);
 }
 
 QSharedPointer<PageController> CoreController::pageController() const
