@@ -561,7 +561,7 @@ void Settings::disableHomeAdLabel()
 
 bool Settings::isPremV1MigrationReminderActive()
 {
-    return value("Conf/premV1MigrationReminderActive", true).toBool();
+    return value("Conf/premV1MigrationReminderActive", false).toBool();
 }
 
 void Settings::disablePremV1MigrationReminder()
