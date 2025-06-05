@@ -130,6 +130,7 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     // Enable the windows firewall
     NET_IFINDEX ifindex;
     ConvertInterfaceLuidToIndex(&luid, &ifindex);
+    m_firewall->allowAllTraffic();
     m_firewall->enableInterface(ifindex);
   }
 

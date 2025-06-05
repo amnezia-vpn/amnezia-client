@@ -134,7 +134,7 @@ ErrorCode XrayProtocol::startTun2Sock()
                     // killSwitch toggle
                     if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
                         if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
-                            IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
+                            IpcClient::Interface()->enableKillSwitch(m_configData, netInterfaces.at(i).index());
                         }
                         m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
                         m_configData.insert("vpnGateway", m_vpnGateway);

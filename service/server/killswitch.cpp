@@ -255,6 +255,9 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
 
 bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex) {
 #ifdef Q_OS_WIN
+    if (configStr.value("splitTunnelType").toInt() != 0) {
+        WindowsFirewall::create(this)->allowAllTraffic();
+    }
     return WindowsFirewall::create(this)->enableInterface(vpnAdapterIndex);
 #endif
 
