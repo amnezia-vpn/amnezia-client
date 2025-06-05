@@ -88,6 +88,7 @@ PageType {
 
             LabelWithButtonType {
                 Layout.fillWidth: true
+                visible: link !== ""
                 text: title
                 descriptionText: description
                 rightImageSource: "qrc:/images/controls/external-link.svg"

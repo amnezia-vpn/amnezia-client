@@ -174,11 +174,12 @@ public:
 
     QLocale getAppLanguage()
     {
-        return value("Conf/appLanguage", QLocale()).toLocale();
+        QString localeStr = m_settings.value("Conf/appLanguage").toString();
+        return QLocale(localeStr);
     };
     void setAppLanguage(QLocale locale)
     {
-        setValue("Conf/appLanguage", locale);
+        setValue("Conf/appLanguage", locale.name());
     };
 
     bool isScreenshotsEnabled() const

@@ -149,8 +149,7 @@ bool Daemon::activate(const InterfaceConfig& config) {
   // set routing
   for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
     if (!wgutils()->updateRoutePrefix(ip)) {
-      logger.debug() << "Routing configuration failed for"
-                     << logger.sensitive(ip.toString());
+      logger.debug() << "Routing configuration failed for" << ip.toString();
       return false;
     }
   }

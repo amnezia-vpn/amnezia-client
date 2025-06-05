@@ -29,17 +29,20 @@ bool ApiPremV1MigrationController::hasConfigsToMigration()
         vpnKeys.append(vpnKey);
     }
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
-    QJsonObject apiPayload;
+    if (!vpnKeys.isEmpty()) {
+        GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                            m_settings->isStrictKillSwitchEnabled());
+        QJsonObject apiPayload;
 
-    apiPayload["configs"] = vpnKeys;
-    QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/prem-v1/is-active-subscription"), apiPayload, responseBody);
+        apiPayload["configs"] = vpnKeys;
+        QByteArray responseBody;
+        ErrorCode errorCode = gatewayController.post(QString("%1v1/prem-v1/is-active-subscription"), apiPayload, responseBody);
 
-    auto migrationsStatus = QJsonDocument::fromJson(responseBody).object();
-    for (const auto &migrationStatus : migrationsStatus) {
-        if (migrationStatus == "not_found") {
-            return true;
+        auto migrationsStatus = QJsonDocument::fromJson(responseBody).object();
+        for (const auto &migrationStatus : migrationsStatus) {
+            if (migrationStatus == "not_found") {
+                return true;
+            }
         }
     }
 
@@ -48,7 +51,8 @@ bool ApiPremV1MigrationController::hasConfigsToMigration()
 
 void ApiPremV1MigrationController::getSubscriptionList(const QString &email)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
     QJsonObject apiPayload;
 
     apiPayload[apiDefs::key::email] = email;
@@ -80,7 +84,8 @@ void ApiPremV1MigrationController::sendMigrationCode(const int subscriptionIndex
     QTimer::singleShot(1000, &wait, &QEventLoop::quit);
     wait.exec();
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
     QJsonObject apiPayload;
 
     apiPayload[apiDefs::key::email] = m_email;
@@ -97,7 +102,8 @@ void ApiPremV1MigrationController::sendMigrationCode(const int subscriptionIndex
 
 void ApiPremV1MigrationController::migrate(const QString &migrationCode)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
     QJsonObject apiPayload;
 
     apiPayload[apiDefs::key::email] = m_email;
