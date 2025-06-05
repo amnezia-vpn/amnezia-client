@@ -41,21 +41,27 @@ bool apiUtils::isServerFromApi(const QJsonObject &serverConfigObject)
 apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObject)
 {
     auto configVersion = serverConfigObject.value(apiDefs::key::configVersion).toInt();
+
     switch (configVersion) {
     case apiDefs::ConfigSource::Telegram: {
+        constexpr QLatin1String freeV2Endpoint(FREE_V2_ENDPOINT);
+        constexpr QLatin1String premiumV1Endpoint(PREM_V1_ENDPOINT);
+
+        auto apiEndpoint = serverConfigObject.value(apiDefs::key::apiEndpoint).toString();
+
+        if (apiEndpoint.contains(premiumV1Endpoint)) {
+            return apiDefs::ConfigType::AmneziaPremiumV1;
+        } else if (apiEndpoint.contains(freeV2Endpoint)) {
+            return apiDefs::ConfigType::AmneziaFreeV2;
+        }
     };
     case apiDefs::ConfigSource::AmneziaGateway: {
         constexpr QLatin1String servicePremium("amnezia-premium");
         constexpr QLatin1String serviceFree("amnezia-free");
         constexpr QLatin1String serviceExternalPremium("external-premium");
 
-        constexpr QLatin1String freeV2Endpoint(FREE_V2_ENDPOINT);
-        constexpr QLatin1String premiumV1Endpoint(PREM_V1_ENDPOINT);
-
         auto apiConfigObject = serverConfigObject.value(apiDefs::key::apiConfig).toObject();
         auto serviceType = apiConfigObject.value(apiDefs::key::serviceType).toString();
-
-        auto apiEndpoint = serverConfigObject.value(apiDefs::key::apiEndpoint).toString();
 
         if (serviceType == servicePremium) {
             return apiDefs::ConfigType::AmneziaPremiumV2;
@@ -63,10 +69,6 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
             return apiDefs::ConfigType::AmneziaFreeV3;
         } else if (serviceType == serviceExternalPremium) {
             return apiDefs::ConfigType::ExternalPremium;
-        } else if (apiEndpoint.contains(premiumV1Endpoint)) {
-            return apiDefs::ConfigType::AmneziaPremiumV1;
-        } else if (apiEndpoint.contains(freeV2Endpoint)) {
-            return apiDefs::ConfigType::AmneziaFreeV2;
         }
     }
     default: {
@@ -94,6 +96,9 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
                || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
         qDebug() << reply->error();
         return amnezia::ErrorCode::ApiConfigTimeoutError;
+    } else if (reply->error() == QNetworkReply::NetworkError::OperationNotImplementedError) {
+        qDebug() << reply->error();
+        return amnezia::ErrorCode::ApiUpdateRequestError;
     } else {
         QString err = reply->errorString();
         int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
