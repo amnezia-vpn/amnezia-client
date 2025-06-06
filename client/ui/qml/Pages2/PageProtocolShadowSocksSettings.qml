@@ -140,8 +140,6 @@ PageType {
                                     cipherDropDown.text = cipher
 
                                     for (var i = 0; i < cipherListView.model.count; i++) {
-                                        const element = cipherListView.model.get(i)
-
                                         if (cipherListView.model.get(i).name === cipherDropDown.text) {
                                             cipherListView.selectedIndex = i
                                         }
