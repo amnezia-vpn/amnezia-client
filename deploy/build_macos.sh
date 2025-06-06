@@ -31,20 +31,14 @@ BUNDLE_DIR=$OUT_APP_DIR/$APP_FILENAME
 PREBUILT_DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/deploy-prebuilt/macos
 DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/macos
 
-INSTALLER_DATA_DIR=$BUILD_DIR/installer/packages/$APP_DOMAIN/data
-INSTALLER_BUNDLE_DIR=$BUILD_DIR/installer/$APP_FILENAME
-DMG_FILENAME=$PROJECT_DIR/${APP_NAME}.dmg
 
 # Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
 QT_VERSION=6.4.3;
-QIF_VERSION=4.6
 QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
-QIF_BIN_DIR=$QT_BIN_DIR/../../../Tools/QtInstallerFramework/$QIF_VERSION/bin
 fi
 
 echo "Using Qt in $QT_BIN_DIR"
-echo "Using QIF in $QIF_BIN_DIR"
 
 
 # Checking env
@@ -113,58 +107,90 @@ if [ "${MAC_CERT_PW+x}" ]; then
 fi
 
 echo "Packaging installer..."
-mkdir -p $INSTALLER_DATA_DIR
-cp -av $PROJECT_DIR/deploy/installer $BUILD_DIR
-cp -av $DEPLOY_DATA_DIR/post_install.sh $INSTALLER_DATA_DIR/post_install.sh
-cp -av $DEPLOY_DATA_DIR/post_uninstall.sh $INSTALLER_DATA_DIR/post_uninstall.sh
-cp -av $DEPLOY_DATA_DIR/$PLIST_NAME $INSTALLER_DATA_DIR/$PLIST_NAME
+PKG_DIR=$BUILD_DIR/pkg
+PKG_ROOT=$PKG_DIR/root
+SCRIPTS_DIR=$PKG_DIR/scripts
+RESOURCES_DIR=$PKG_DIR/resources
+INSTALL_PKG=$PKG_DIR/${APP_NAME}_install.pkg
+UNINSTALL_PKG=$PKG_DIR/${APP_NAME}_uninstall.pkg
+FINAL_PKG=$PKG_DIR/${APP_NAME}.pkg
+UNINSTALL_SCRIPTS_DIR=$PKG_DIR/uninstall_scripts
 
-chmod a+x $INSTALLER_DATA_DIR/post_install.sh $INSTALLER_DATA_DIR/post_uninstall.sh
+mkdir -p "$PKG_ROOT/Applications" "$SCRIPTS_DIR" "$RESOURCES_DIR" "$UNINSTALL_SCRIPTS_DIR"
 
-cd $BUNDLE_DIR 
-tar czf $INSTALLER_DATA_DIR/$APP_NAME.tar.gz ./
+cp -R "$BUNDLE_DIR" "$PKG_ROOT/Applications"
+cp "$DEPLOY_DATA_DIR/$PLIST_NAME" "$PKG_ROOT/Applications/$APP_FILENAME/$PLIST_NAME"
+cp "$DEPLOY_DATA_DIR/post_install.sh" "$SCRIPTS_DIR/post_install.sh"
+cp "$DEPLOY_DATA_DIR/post_uninstall.sh" "$UNINSTALL_SCRIPTS_DIR/postinstall"
+mkdir -p "$RESOURCES_DIR/scripts"
+cp "$DEPLOY_DATA_DIR/check_install.sh" "$RESOURCES_DIR/scripts/check_install.sh"
+cp "$DEPLOY_DATA_DIR/check_uninstall.sh" "$RESOURCES_DIR/scripts/check_uninstall.sh"
 
-echo "Building installer..."
-$QIF_BIN_DIR/binarycreator --offline-only -v -c $BUILD_DIR/installer/config/macos.xml -p $BUILD_DIR/installer/packages -f $INSTALLER_BUNDLE_DIR
+cat > "$SCRIPTS_DIR/postinstall" <<'EOS'
+#!/bin/bash
+SCRIPT_DIR="$(dirname "$0")"
+bash "$SCRIPT_DIR/post_install.sh"
+exit 0
+EOS
+
+chmod +x "$SCRIPTS_DIR"/*
+chmod +x "$UNINSTALL_SCRIPTS_DIR"/*
+chmod +x "$RESOURCES_DIR/scripts"/*
+cp "$PROJECT_DIR/LICENSE" "$RESOURCES_DIR/LICENSE"
+
+APP_VERSION=$(grep -m1 -E 'project\(' "$PROJECT_DIR/CMakeLists.txt" | sed -E 's/.*VERSION ([0-9.]+).*/\1/')
+echo "Building component package $INSTALL_PKG ..."
+pkgbuild --root "$PKG_ROOT" \
+         --identifier "$APP_DOMAIN" \
+         --version "$APP_VERSION" \
+         --install-location "/" \
+         --scripts "$SCRIPTS_DIR" \
+         "$INSTALL_PKG"
+
+# Build uninstaller component package
+UNINSTALL_COMPONENT_PKG=$PKG_DIR/${APP_NAME}_uninstall_component.pkg
+echo "Building uninstaller component package $UNINSTALL_COMPONENT_PKG ..."
+pkgbuild --nopayload \
+         --identifier "$APP_DOMAIN.uninstall" \
+         --version "$APP_VERSION" \
+         --scripts "$UNINSTALL_SCRIPTS_DIR" \
+         "$UNINSTALL_COMPONENT_PKG"
+
+# Wrap uninstaller component in a distribution package for clearer UI
+echo "Building uninstaller distribution package $UNINSTALL_PKG ..."
+UNINSTALL_RESOURCES=$PKG_DIR/uninstall_resources
+rm -rf "$UNINSTALL_RESOURCES"
+mkdir -p "$UNINSTALL_RESOURCES"
+cp "$DEPLOY_DATA_DIR/uninstall_welcome.html" "$UNINSTALL_RESOURCES"
+cp "$DEPLOY_DATA_DIR/uninstall_conclusion.html" "$UNINSTALL_RESOURCES"
+productbuild \
+  --distribution "$DEPLOY_DATA_DIR/distribution_uninstall.xml" \
+  --package-path "$PKG_DIR" \
+  --resources "$UNINSTALL_RESOURCES" \
+  "$UNINSTALL_PKG"
+
+cp "$PROJECT_DIR/deploy/data/macos/distribution.xml" "$PKG_DIR/distribution.xml"
+
+echo "Creating final installer $FINAL_PKG ..."
+productbuild --distribution "$PKG_DIR/distribution.xml" --package-path "$PKG_DIR" --resources "$RESOURCES_DIR" "$FINAL_PKG"
 
 if [ "${MAC_CERT_PW+x}" ]; then
-  echo "Signing installer bundle..."
+  echo "Signing installer package..."
   security unlock-keychain -p $TEMP_PASS $KEYCHAIN
-  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "$MAC_SIGNER_ID" $INSTALLER_BUNDLE_DIR
-  /usr/bin/codesign --verify -vvvv $INSTALLER_BUNDLE_DIR || true
+  /usr/bin/codesign --force --verbose --timestamp -o runtime --sign "$MAC_SIGNER_ID" "$FINAL_PKG"
+  /usr/bin/codesign --verify -vvvv "$FINAL_PKG" || true
 
   if [ "${NOTARIZE_APP+x}" ]; then
-    echo "Notarizing installer bundle..."
-    /usr/bin/ditto -c -k --keepParent $INSTALLER_BUNDLE_DIR $PROJECT_DIR/Installer_bundle_to_notarize.zip
-    xcrun notarytool submit $PROJECT_DIR/Installer_bundle_to_notarize.zip --apple-id $APPLE_DEV_EMAIL --team-id $MAC_TEAM_ID --password $APPLE_DEV_PASSWORD
-    rm $PROJECT_DIR/Installer_bundle_to_notarize.zip
+    echo "Notarizing installer package..."
+    xcrun notarytool submit "$FINAL_PKG" --apple-id $APPLE_DEV_EMAIL --team-id $MAC_TEAM_ID --password $APPLE_DEV_PASSWORD
     sleep 300
-    xcrun stapler staple $INSTALLER_BUNDLE_DIR
-    xcrun stapler validate $INSTALLER_BUNDLE_DIR
-    spctl -a -vvvv $INSTALLER_BUNDLE_DIR || true
+    xcrun stapler staple "$FINAL_PKG"
+    xcrun stapler validate "$FINAL_PKG"
+    spctl -a -vvvv "$FINAL_PKG" || true
   fi
 fi
 
-echo "Building DMG installer..."
-# Allow Terminal to make changes in Privacy & Security > App Management
-hdiutil create -size 256mb -volname AmneziaVPN -srcfolder $BUILD_DIR/installer/$APP_NAME.app -ov -format UDZO $DMG_FILENAME
-
-if [ "${MAC_CERT_PW+x}" ]; then
-  echo "Signing DMG installer..."
-  security unlock-keychain -p $TEMP_PASS $KEYCHAIN
-  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "$MAC_SIGNER_ID" $DMG_FILENAME
-  /usr/bin/codesign --verify -vvvv $DMG_FILENAME || true
-
-  if [ "${NOTARIZE_APP+x}" ]; then
-    echo "Notarizing DMG installer..."
-    xcrun notarytool submit $DMG_FILENAME --apple-id $APPLE_DEV_EMAIL --team-id $MAC_TEAM_ID --password $APPLE_DEV_PASSWORD
-    sleep 300
-    xcrun stapler staple $DMG_FILENAME
-    xcrun stapler validate $DMG_FILENAME
-  fi
-fi
-
-echo "Finished, artifact is $DMG_FILENAME"
+echo "Finished, artifact is $FINAL_PKG"
 
 # restore keychain
 security default-keychain -s login.keychain
