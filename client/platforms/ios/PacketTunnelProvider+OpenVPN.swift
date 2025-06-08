@@ -181,10 +181,8 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
                     ipv6Settings.includedRoutes = [ipv6DefaultRoute]
                     NSLog("[Route] Added default IPv6 route (::/0)")
                 }
-
             }
         }
-
         // Set the network settings for the current tunneling session.
         setTunnelNetworkSettings(networkSettings, completionHandler: completionHandler)
     }

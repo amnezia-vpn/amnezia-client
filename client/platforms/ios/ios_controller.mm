@@ -122,16 +122,13 @@ bool IosController::initialize()
 
 bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configuration)
 {
-    
     m_proto = proto;
     m_rawConfig = configuration;
     m_serverAddress = configuration.value(config_key::hostName).toString().toNSString();
-    
+
     if (proto == amnezia::Proto::OpenVpn) {
         QJsonObject ovpn = configuration["openvpn_config_data"].toObject();
         QString ovpnConfig = ovpn["config"].toString();
-
-        // Danh sách directive không hỗ trợ từng dòng
         QStringList unsupportedDirectives = {
             "resolv-retry",
             "persist-key",
@@ -142,9 +139,6 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
 
         QStringList lines = ovpnConfig.split('\n');
         QStringList filteredLines;
-
-        bool insideTlsAuthBlock = false;
-
         for (const QString &line : lines) {
             QString trimmedLine = line.trimmed();
             
@@ -160,16 +154,11 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
                 filteredLines.append(line);
             }
         }
-
-        // Nối lại cấu hình đã lọc
         ovpnConfig = filteredLines.join("\n");
-
-        // Gán lại vào config JSON
         ovpn["config"] = ovpnConfig;
         m_rawConfig["openvpn_config_data"] = ovpn;
     }
-
-
+    
     QString tunnelName;
     if (configuration.value(config_key::description).toString().isEmpty()) {
         tunnelName = QString("%1 %2")
@@ -302,10 +291,8 @@ void IosController::checkStatus()
 void IosController::vpnStatusDidChange(void *pNotification)
 {
     NETunnelProviderSession *session = (NETunnelProviderSession *)pNotification;
-    
-    qDebug() << "IosController::vpnStatusDidChange - Session pointer:" << session;
-    
-    if (session /* && session == TunnelManager.session*/  ) {
+
+    if (session /* && session == TunnelManager.session */ ) {
         qDebug() << "IosController::vpnStatusDidChange" << iosStatusToState(session.status) << session;
 
         if (session.status == NEVPNStatusDisconnected) {
@@ -313,16 +300,7 @@ void IosController::vpnStatusDidChange(void *pNotification)
                 [session fetchLastDisconnectErrorWithCompletionHandler:^(NSError * _Nullable error) {
                     if (error != nil) {
                         qDebug() << "Disconnect error" << error.domain << error.code << error.localizedDescription;
-                        
-                        //MARK: Debug error
-                        if (error.userInfo) {
-                                qDebug() << "  UserInfo:";
-                                for (NSString *key in error.userInfo.allKeys) {
-                                    id value = error.userInfo[key];
-                                    qDebug() << "    " << key << ":" << value;
-                                }
-                            }
-                        /////
+
                         if ([error.domain isEqualToString:NEVPNConnectionErrorDomain]) {
                             switch (error.code) {
                                 case NEVPNConnectionErrorOverslept:
@@ -426,7 +404,7 @@ bool IosController::setupOpenVPN()
 {
     QJsonObject ovpn = m_rawConfig[ProtocolProps::key_proto_config_data(amnezia::Proto::OpenVpn)].toObject();
     QString ovpnConfig = ovpn[config_key::config].toString();
-   
+
     QJsonObject openVPNConfig {};
     openVPNConfig.insert(config_key::config, ovpnConfig);
 
@@ -435,10 +413,7 @@ bool IosController::setupOpenVPN()
     } else {
         openVPNConfig.insert(config_key::mtu, protocols::openvpn::defaultMtu);
     }
-    
-    
-    
-    
+
     openVPNConfig.insert(config_key::splitTunnelType, m_rawConfig[config_key::splitTunnelType]);
 
     QJsonArray splitTunnelSites = m_rawConfig[config_key::splitTunnelSites].toArray();
