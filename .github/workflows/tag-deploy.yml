@@ -20,6 +20,8 @@ jobs:
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
       DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
       DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
     - name: 'Install desktop Qt'

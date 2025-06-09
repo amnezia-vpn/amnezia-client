@@ -4,10 +4,6 @@
 <context>
     <name>AdLabel</name>
     <message>
-        <source>Amnezia Premium - for access to any website</source>
-        <translation type="vanished">Amnezia Premium - для доступа к любым сайтам</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Components/AdLabel.qml" line="57"/>
         <source>Amnezia Premium - for access to all websites and online resources</source>
         <translation>Amnezia Premium - доступ ко всем сайтам и онлайн ресурсам</translation>
@@ -93,19 +89,121 @@
 <context>
     <name>ApiConfigsController</name>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="203"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="210"/>
         <source>%1 installed successfully.</source>
         <translation>%1 успешно установлен.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="257"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="266"/>
         <source>API config reloaded</source>
         <translation>Конфигурация API перезагружена</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="261"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="270"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>Страна подключения изменена на %1</translation>
+    </message>
+</context>
+<context>
+    <name>ApiPremV1MigrationDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="53"/>
+        <source>Switch to the new Amnezia Premium subscription</source>
+        <translation>Перейдите на новый тип подписки Amnezia Premium</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="73"/>
+        <source>We&apos;ll preserve all remaining days of your current subscription and give you an extra month as a thank you. </source>
+        <translation>Мы сохраним все оставшиеся дни текущей подписки и подарим дополнительный месяц в благодарность за переход. </translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="74"/>
+        <source>This new subscription type will be actively developed with more locations and features added regularly. Currently available:</source>
+        <translation>Именно новый тип подписки будет активно развиваться и пополняться новыми локациями и функциями. Уже доступны:</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="76"/>
+        <source>&lt;li&gt;13 locations (with more coming soon)&lt;/li&gt;</source>
+        <translation>&lt;li&gt;13 локаций (их число будет расти)&lt;/li&gt;</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="77"/>
+        <source>&lt;li&gt;Easier switching between countries in the app&lt;/li&gt;</source>
+        <translation>&lt;li&gt;Удобное переключение между странами в приложении&lt;/li&gt;</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="78"/>
+        <source>&lt;li&gt;Personal dashboard to manage your subscription&lt;/li&gt;</source>
+        <translation>&lt;li&gt;Личный кабинет для управления подпиской&lt;/li&gt;</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="80"/>
+        <source>Old keys will be deactivated after switching.</source>
+        <translation>После перехода старые ключи перестанут работать.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="91"/>
+        <source>Email</source>
+        <translation>Email</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="92"/>
+        <source>mail@example.com</source>
+        <translation>mail@example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="103"/>
+        <source>No old format subscriptions for a given email</source>
+        <translation>Для указанного адреса электронной почты нет подписок старого типа</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="114"/>
+        <source>Enter the email you used for your current subscription</source>
+        <translation>Укажите адрес почты, который использовали при заказе текущей подписки</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="136"/>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="178"/>
+        <source>Continue</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="156"/>
+        <source>Remind me later</source>
+        <translation>Напомнить позже</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="174"/>
+        <source>Don&apos;t remind me again</source>
+        <translation>Больше не напоминать</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="177"/>
+        <source>No more reminders? You can always switch to the new format in the server settings</source>
+        <translation>Отключить напоминания? Вы всегда сможете перейти на новый тип подписки в настройках сервера</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="179"/>
+        <source>Cancel</source>
+        <translation>Отменить</translation>
+    </message>
+</context>
+<context>
+    <name>ApiPremV1SubListDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1SubListDrawer.qml" line="55"/>
+        <source>Choose Subscription</source>
+        <translation>Выбрать подписку</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1SubListDrawer.qml" line="74"/>
+        <source>Order ID: </source>
+        <translation>ID заказа: </translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1SubListDrawer.qml" line="76"/>
+        <source>Purchase Date: </source>
+        <translation>Дата покупки: </translation>
     </message>
 </context>
 <context>
@@ -134,7 +232,7 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="97"/>
         <source>%1 MBit/s</source>
-        <translation></translation>
+        <translation>%1 Мбит/с</translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="104"/>
@@ -144,7 +242,7 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="111"/>
         <source></source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="113"/>
@@ -273,7 +371,7 @@
 <context>
     <name>ContextMenuType</name>
     <message>
-        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="9"/>
+        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="10"/>
         <source>C&amp;ut</source>
         <translation>Вырезать</translation>
     </message>
@@ -283,18 +381,15 @@
         <translation>Копировать</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="21"/>
+        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="20"/>
         <source>&amp;Paste</source>
         <translation>Вставить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="29"/>
+        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="27"/>
         <source>&amp;SelectAll</source>
         <translation>Выбрать всё</translation>
     </message>
-</context>
-<context>
-    <name>ExportController</name>
 </context>
 <context>
     <name>HomeContainersListView</name>
@@ -507,7 +602,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
 </context>
 <context>
-    <name>PageAbout</name>
+    <name>OtpCodeDrawer</name>
     <message>
         <location filename="../ui/qml/DefaultVpn/Pages/PageAbout.qml" line="52"/>
         <source>Support group in Telegram</source>
@@ -570,27 +665,44 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="77"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="43"/>
+        <source>You&apos;ve successfully switched to the new Amnezia Premium subscription!</source>
+        <translation>Вы успешно перешли на новый тип подписки Amnezia Premium!</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="44"/>
+        <source>Old keys will no longer work. Please use your new subscription key to connect. 
+Thank you for staying with us!</source>
+        <translation>Старые ключи перестанут работать. Пожалуйста, используйте новый ключ для подключения.
+Спасибо, что остаетесь с нами!</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="45"/>
+        <source>Continue</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="102"/>
         <source>Logging enabled</source>
         <translation>Логирование включено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="144"/>
         <source>Split tunneling enabled</source>
         <translation>Раздельное туннелирование включено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="144"/>
         <source>Split tunneling disabled</source>
         <translation>Раздельное туннелирование выключено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="353"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="378"/>
         <source>VPN protocol</source>
         <translation>VPN-протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="406"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="431"/>
         <source>Servers</source>
         <translation>Серверы</translation>
     </message>
@@ -1501,10 +1613,6 @@ Already installed containers were found on the server. All installed containers 
         <translation>support@amnezia.org</translation>
     </message>
     <message>
-        <source>Mail</source>
-        <translation type="vanished">Почта</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="47"/>
         <source>For reviews and bug reports</source>
         <translation>Для отзывов и сообщений об ошибках</translation>
@@ -1576,10 +1684,6 @@ Already installed containers were found on the server. All installed containers 
 </context>
 <context>
     <name>PageSettingsApiDevices</name>
-    <message>
-        <source>Active devices</source>
-        <translation type="vanished">Активные устройства</translation>
-    </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="45"/>
         <source>Active Devices</source>
@@ -2037,12 +2141,12 @@ Already installed containers were found on the server. All installed containers 
         <translation>Наши специалисты технической поддержки всегда готовы помочь вам.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="110"/>
         <source>Support tag</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="120"/>
         <source>Copied</source>
         <translation>Скопировано</translation>
     </message>
@@ -2295,14 +2399,6 @@ Already installed containers were found on the server. All installed containers 
         <translation>Соединение</translation>
     </message>
     <message>
-        <source>Auto connect</source>
-        <translation type="vanished">Автоподключение</translation>
-    </message>
-    <message>
-        <source>Connect to VPN on app start</source>
-        <translation type="vanished">Подключение к VPN при запуске приложения</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="52"/>
         <source>Use AmneziaDNS</source>
         <translation>Использовать AmneziaDNS</translation>
@@ -2403,7 +2499,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="111"/>
         <source>Settings have been reset</source>
-        <translation>Настройки сброшены</translation>
+        <translation>Настройки были сброшены</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="125"/>
@@ -2600,21 +2696,6 @@ Already installed containers were found on the server. All installed containers 
         <translation>Файл с логами сохранен</translation>
     </message>
     <message>
-        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsLogging.qml" line="72"/>
-        <source>In case of application failures, enable logging to find the problem</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsLogging.qml" line="82"/>
-        <source>Save logs to file</source>
-        <translation>Сохранить логи в файл</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/DefaultVpn/Pages/PageSettingsLogging.qml" line="108"/>
-        <source>Open logs</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="61"/>
         <source>Enable logs</source>
         <translation>Включить запись логов</translation>
@@ -2777,6 +2858,11 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="236"/>
         <source>Cannot reset API config during active connection</source>
         <translation>Невозможно сбросить конфигурацию API во время активного соединения</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="266"/>
+        <source>Switch to the new Amnezia Premium subscription</source>
+        <translation>Перейти на новый тип подписки Amnezia Premium</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="148"/>
@@ -3522,10 +3608,6 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageShare.qml" line="129"/>
         <source>WireGuard native format</source>
         <translation>Оригинальный формат WireGuard</translation>
-    </message>
-    <message>
-        <source>VPN Access</source>
-        <translation type="vanished">VPN-Доступ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="254"/>
@@ -4443,7 +4525,7 @@ REALITY распознаёт системы блокировки во время
     <message>
         <location filename="../containers/containers_defs.cpp" line="136"/>
         <source></source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="143"/>

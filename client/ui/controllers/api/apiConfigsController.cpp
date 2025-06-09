@@ -63,7 +63,8 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
         return false;
     }
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
 
     auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
@@ -76,6 +77,8 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
     apiPayload[configKey::serverCountryCode] = serverCountryCode;
     apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
     apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/native_config"), apiPayload, responseBody);
@@ -94,7 +97,8 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
 
 bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
 
     auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
@@ -107,6 +111,8 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
     apiPayload[configKey::serverCountryCode] = serverCountryCode;
     apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
     apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/revoke_native_config"), apiPayload, responseBody);
@@ -140,7 +146,8 @@ void ApiConfigsController::copyVpnKeyToClipboard()
 
 bool ApiConfigsController::fillAvailableServices()
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
 
     QJsonObject apiPayload;
     apiPayload[configKey::osVersion] = QSysInfo::productType();
@@ -171,7 +178,8 @@ bool ApiConfigsController::importServiceFromGateway()
         return false;
     }
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
 
     auto installationUuid = m_settings->getInstallationUuid(true);
     auto userCountryCode = m_apiServicesModel->getCountryCode();
@@ -184,6 +192,8 @@ bool ApiConfigsController::importServiceFromGateway()
     apiPayload[configKey::userCountryCode] = userCountryCode;
     apiPayload[configKey::serviceType] = serviceType;
     apiPayload[configKey::uuid] = installationUuid;
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/config"), apiPayload, responseBody);
@@ -211,7 +221,8 @@ bool ApiConfigsController::importServiceFromGateway()
 bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                                     bool reloadServiceConfig)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
 
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
@@ -228,6 +239,8 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
     apiPayload[configKey::userCountryCode] = userCountryCode;
     apiPayload[configKey::serviceType] = serviceType;
     apiPayload[configKey::uuid] = installationUuid;
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
 
     if (!newCountryCode.isEmpty()) {
         apiPayload[configKey::serverCountryCode] = newCountryCode;
@@ -274,7 +287,8 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     QThread::msleep(10);
 #endif
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
 
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto installationUuid = m_settings->getInstallationUuid(true);
@@ -304,7 +318,8 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
 
 bool ApiConfigsController::deactivateDevice()
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
 
     auto serverIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
@@ -323,6 +338,8 @@ bool ApiConfigsController::deactivateDevice()
     apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
     apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
     apiPayload[configKey::uuid] = m_settings->getInstallationUuid(true);
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/revoke_config"), apiPayload, responseBody);
@@ -339,7 +356,8 @@ bool ApiConfigsController::deactivateDevice()
 
 bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
 
     auto serverIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
@@ -358,6 +376,8 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
     apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
     apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
     apiPayload[configKey::uuid] = uuid;
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/revoke_config"), apiPayload, responseBody);
