@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
 set(PROJECT DefaultVPN)
 
-project(${PROJECT} VERSION 1.0.2.0
+project(${PROJECT} VERSION 1.0.2.1
         DESCRIPTION "DefaultVPN"
         HOMEPAGE_URL "https://dfvpn.com/"
 )
