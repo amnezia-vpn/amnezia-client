@@ -23,7 +23,6 @@ Page {
             WhiteButtonNoBorder {
                 id: backButton
                 imageSource: "qrc:/images/controls/arrow-left.svg"
-                
                 onClicked: PageController.closePage()
             }
         }
@@ -33,48 +32,47 @@ Page {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.fillWidth: true
-
-            text: qsTr("Amnezia Premium servers")
-
+            text: qsTr("Select Language")
             horizontalAlignment: Qt.AlignLeft
             verticalAlignment: Qt.AlignVCenter
         }
 
         ButtonGroup {
-            id: countriesRadioButtonGroup
+            id: languageButtonGroup
         }
 
         ListView {
-            id: countriesListView
+            id: languageListView
 
             Layout.topMargin: 16
             Layout.fillHeight: true
             Layout.fillWidth: true
 
-            model: ApiCountryModel
-            currentIndex: ApiCountryModel.currentIndex
+            model: LanguageModel
+            currentIndex: LanguageModel.currentLanguageIndex
 
             ScrollBar.vertical: ScrollBar {}
 
             delegate: Item {
-                required property string countryName
-                required property string countryCode
-                required property string countryImageCode
+                required property string languageName
+                required property int languageIndex
                 required property int index
 
-                implicitWidth: countriesListView.width
-                implicitHeight: countryItem.implicitHeight
+                implicitWidth: languageListView.width
+                implicitHeight: languageItem.implicitHeight
+
+                visible: languageName === "English" || languageName === "Русский"
 
                 RadioButton {
-                    id: countryItem
+                    id: languageItem
 
                     anchors.fill: parent
                     anchors.rightMargin: 16
                     anchors.leftMargin: 16
 
-                    ButtonGroup.group: countriesRadioButtonGroup
+                    ButtonGroup.group: languageButtonGroup
 
-                    checked: index === countriesListView.currentIndex
+                    checked: languageIndex === LanguageModel.currentLanguageIndex
 
                     indicator: Item { }
 
@@ -89,7 +87,7 @@ Page {
                         Rectangle {
                             anchors.fill: parent
                             radius: 8
-                            color: countryItem.checked ? Style.color.gray1 : Style.color.transparent
+                            color: languageItem.checked ? Style.color.gray1 : Style.color.transparent
                         }
 
                         RowLayout {
@@ -102,38 +100,30 @@ Page {
                                 Layout.topMargin: 19
                                 Layout.bottomMargin: 19
 
-                                text: countryName
+                                text: languageName
 
-                                color: countryItem.hovered ? Style.color.gray9 : Style.color.black
+                                color: languageItem.hovered ? Style.color.gray9 : Style.color.black
                             }
 
                             Image {
                                 Layout.rightMargin: 8
-                                width: 32
+                                width: 24
                                 height: 24
-                                source: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
+                                source: "qrc:/images/controls/check.svg"
+                                visible: languageItem.checked
                             }
                         }
                     }
 
-                    onClicked: function() {
-                        if (ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
-                            return
+                    onClicked: {
+                        if (languageIndex !== LanguageModel.currentLanguageIndex) {
+                            LanguageModel.changeLanguage(languageIndex);
+                            PageController.closePage();
                         }
-
-                        PageController.showBusyIndicator(true)
-                        var prevIndex = ApiCountryModel.currentIndex
-                        ApiCountryModel.currentIndex = index
-                        if (!ApiConfigsController.updateServiceFromGateway(ServersModel.defaultIndex, countryCode, countryName)) {
-                            ApiCountryModel.currentIndex = prevIndex
-                        }
-                        PageController.showBusyIndicator(false)
-                        PageController.closePage()
                     }
 
                     MouseArea {
-                        anchors.fill: countryItem
+                        anchors.fill: languageItem
                         cursorShape: Qt.PointingHandCursor
                         enabled: false
                     }
@@ -141,4 +131,4 @@ Page {
             }
         }
     }
-} 
+}

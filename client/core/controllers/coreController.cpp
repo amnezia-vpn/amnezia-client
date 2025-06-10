@@ -26,9 +26,9 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
 
     initNotificationHandler();
 
-    // auto locale = m_settings->getAppLanguage();
-    // m_translator.reset(new QTranslator());
-    // updateTranslator(locale);
+    auto locale = m_settings->getAppLanguage();
+    m_translator.reset(new QTranslator());
+    updateTranslator(locale);
 }
 
 void CoreController::initModels()

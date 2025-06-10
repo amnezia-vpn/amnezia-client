@@ -267,6 +267,8 @@
         <file>ui/qml/DefaultVpn/Controls/BusyIndicatorType.qml</file>
         <file>images/controls/connect-button.svg</file>
         <file>fonts/VelaSans-GX.ttf</file>
+        <file>ui/qml/DefaultVpn/Pages/PageSettingsLanguage.qml</file>
+        <file>ui/qml/DefaultVpn/Components/SettingsButtonNoBorder.qml</file>
         <file>ui/qml/Components/ApiPremV1MigrationDrawer.qml</file>
         <file>ui/qml/Components/ApiPremV1SubListDrawer.qml</file>
         <file>ui/qml/Components/OtpCodeDrawer.qml</file>
