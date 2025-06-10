@@ -320,6 +320,9 @@ PageType {
 
                         rightImageSource: hoverEnabled ? "qrc:/images/controls/chevron-down.svg" : ""
 
+                        Keys.onEnterPressed: this.clicked()
+                        Keys.onReturnPressed: this.clicked()
+
                         onClicked: {
                             ServersModel.processedIndex = ServersModel.defaultIndex
 
