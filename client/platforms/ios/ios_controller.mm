@@ -10,6 +10,7 @@
 
 #include "../protocols/vpnprotocol.h"
 #import "ios_controller_wrapper.h"
+#import "StoreKitController.h"
 
 const char* Action::start = "start";
 const char* Action::restart = "restart";
@@ -857,6 +858,36 @@ QString IosController::openFile() {
     wait.exec();
 
     return filePath;
+}
+
+bool IosController::purchaseProduct(const QString &productId)
+{
+    __block BOOL success = NO;
+    StoreKitController *controller = [StoreKitController sharedInstance];
+    QEventLoop wait;
+    [controller purchaseProduct:productId.toNSString() completion:^(BOOL s, NSError * _Nullable error) {
+        Q_UNUSED(error);
+        success = s;
+        emit finished();
+    }];
+    QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
+    wait.exec();
+    return success;
+}
+
+bool IosController::restorePurchases()
+{
+    __block BOOL success = NO;
+    StoreKitController *controller = [StoreKitController sharedInstance];
+    QEventLoop wait;
+    [controller restorePurchasesWithCompletion:^(BOOL s, NSError * _Nullable error) {
+        Q_UNUSED(error);
+        success = s;
+        emit finished();
+    }];
+    QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
+    wait.exec();
+    return success;
 }
 
 void IosController::requestInetAccess() {

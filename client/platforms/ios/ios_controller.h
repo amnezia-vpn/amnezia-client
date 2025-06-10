@@ -54,6 +54,9 @@ public:
     bool shareText(const QStringList &filesToSend);
     QString openFile();
 
+    bool purchaseProduct(const QString &productId);
+    bool restorePurchases();
+
     void requestInetAccess();
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
