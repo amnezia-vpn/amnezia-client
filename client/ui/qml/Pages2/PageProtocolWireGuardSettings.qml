@@ -158,8 +158,8 @@ PageType {
                                 showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
 
-                            Keys.onEnterPressed: saveButton.clicked()
-                            Keys.onReturnPressed: saveButton.clicked()
+                            Keys.onEnterPressed: this.clicked()
+                            Keys.onReturnPressed: this.clicked()
                         }
                     }
                 }

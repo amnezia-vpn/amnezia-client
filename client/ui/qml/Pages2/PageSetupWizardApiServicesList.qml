@@ -91,8 +91,8 @@ PageType {
                         }
                     }
                     
-                    Keys.onEnterPressed: clicked()
-                    Keys.onReturnPressed: clicked()
+                    Keys.onEnterPressed: this.clicked()
+                    Keys.onReturnPressed: this.clicked()
                 }
             }
         }

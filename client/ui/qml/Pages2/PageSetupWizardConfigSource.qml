@@ -234,6 +234,9 @@ PageType {
                 leftImageSource: imageSource
 
                 onClicked: { handler() }
+
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
             }
         }
 

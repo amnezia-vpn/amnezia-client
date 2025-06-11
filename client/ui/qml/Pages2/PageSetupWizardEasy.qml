@@ -118,6 +118,9 @@ PageType {
                                 containers.containerDefaultPort = ProtocolProps.getPortForInstall(defaultContainerProto)
                                 containers.containerDefaultTransportProto = ProtocolProps.defaultTransportProto(defaultContainerProto)
                             }
+
+                            Keys.onEnterPressed: this.clicked()
+                            Keys.onReturnPressed: this.clicked()
                         }
                     }
                 }
@@ -147,6 +150,9 @@ PageType {
                 onClicked: function() {
                     isEasySetup = false
                 }
+
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
             }
 
             BasicButtonType {

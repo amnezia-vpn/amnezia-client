@@ -286,8 +286,8 @@ PageType {
                 moreActionsDrawer.openTriggered()
             }
 
-            Keys.onReturnPressed: addSiteButtonImage.clicked()
-            Keys.onEnterPressed: addSiteButtonImage.clicked()
+            Keys.onReturnPressed: this.clicked()
+            Keys.onEnterPressed: this.clicked()
         }
     }
 

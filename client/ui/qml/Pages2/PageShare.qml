@@ -256,6 +256,9 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 0
                         }
+
+                        Keys.onEnterPressed: this.clicked()
+                        Keys.onReturnPressed: this.clicked()
                     }
 
                     HorizontalRadioButton {
@@ -272,6 +275,9 @@ PageType {
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
+
+                        Keys.onEnterPressed: this.clicked()
+                        Keys.onReturnPressed: this.clicked()
                     }
                 }
             }

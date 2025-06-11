@@ -177,6 +177,9 @@ PageType {
                 onClicked: {
                     Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl("starter-guide"))
                 }
+
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
             }
         }
     }
