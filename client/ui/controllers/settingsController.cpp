@@ -175,7 +175,7 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
         m_settings->setAutoConnect(false);
-        m_settings->setStartMinimized(enable);
+        m_settings->setStartMinimized(false);
         m_settings->setKillSwitchEnabled(false);
         m_settings->setStrictKillSwitchEnabled(false);
 #endif
