@@ -131,6 +131,8 @@ void SettingsController::backupAppConfig(const QString &fileName)
     QJsonObject config = doc.object();
 
     config["Conf/autoStart"] = Autostart::isAutostart();
+    config["Conf/killSwitchEnabled"] = isKillSwitchEnabled();
+    config["Conf/strictKillSwitchEnabled"] = isStrictKillSwitchEnabled();
 
     SystemController::saveFile(fileName, QJsonDocument(config).toJson());
 }
@@ -155,6 +157,7 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         }
         toggleAutoStart(autoStart);
 #endif
+
         m_serversModel->resetModel();
         m_languageModel->changeLanguage(
                 static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
@@ -169,6 +172,13 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         bool siteSplittunnelingEnabled = newConfigData.value("Conf/sitesSplitTunnelingEnabled").toBool();
         m_sitesModel->setRouteMode(siteSplitTunnelingRouteMode);
         m_sitesModel->toggleSplitTunneling(siteSplittunnelingEnabled);
+
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+        m_settings->setAutoConnect(false);
+        m_settings->setStartMinimized(enable);
+        m_settings->setKillSwitchEnabled(false);
+        m_settings->setStrictKillSwitchEnabled(false);
+#endif
 
         emit restoreBackupFinished();
     } else {
