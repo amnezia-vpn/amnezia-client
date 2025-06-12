@@ -60,6 +60,8 @@ namespace amnezia
         ServerUserPasswordRequired = 210,
         ServerDockerOnCgroupsV2 = 211,
         ServerCgroupMountpoint = 212,
+        ServerPodmanIsNotSupported = 213,
+        ServerDockerStatusIsNotActive = 214,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,

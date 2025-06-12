@@ -416,7 +416,11 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
     qDebug().noquote() << "ServerController::installDockerWorker" << stdOut;
     if (stdOut.contains("lock"))
         return ErrorCode::ServerPacketManagerError;
-    if (stdOut.contains("command not found"))
+    if (stdOut.contains("Podman is not supported"))
+        return ErrorCode::ServerPodmanIsNotSupported;
+    if (stdOut.contains("Status Docker is not active"))
+        return ErrorCode::ServerDockerStatusIsNotActive;
+    if (stdOut.contains("sudo:") && stdOut.contains("not found"))
         return ErrorCode::ServerDockerFailedError;
 
     return error;

@@ -28,6 +28,8 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::ServerUserPasswordRequired): errorMessage = QObject::tr("The user's password is required"); break;
     case(ErrorCode::ServerDockerOnCgroupsV2): errorMessage = QObject::tr("Docker error: runc doesn't work on cgroups v2"); break;
     case(ErrorCode::ServerCgroupMountpoint): errorMessage = QObject::tr("Server error: cgroup mountpoint does not exist"); break;
+    case(ErrorCode::ServerPodmanIsNotSupported): errorMessage = QObject::tr("Server error: podman-docker is not supported"); break;
+    case(ErrorCode::ServerDockerStatusIsNotActive): errorMessage = QObject::tr("Server error: Docker status is not active"); break;
 
     // Libssh errors
     case(ErrorCode::SshRequestDeniedError): errorMessage = QObject::tr("SSH request was denied"); break;
