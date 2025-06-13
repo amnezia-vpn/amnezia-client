@@ -46,22 +46,11 @@ signals:
     void vpnKeyExportReady();
 
 private:
-    struct ApiPayloadData
-    {
-        OpenVpnConfigurator::ConnectionData certRequest;
-
-        QString wireGuardClientPrivKey;
-        QString wireGuardClientPubKey;
-    };
-
-    ApiPayloadData generateApiPayloadData(const QString &protocol);
-    QJsonObject fillApiPayload(const QString &protocol, const ApiPayloadData &apiPayloadData);
-    void fillServerConfig(const QString &protocol, const ApiPayloadData &apiPayloadData, const QByteArray &apiResponseBody,
-                          QJsonObject &serverConfig);
-
     QList<QString> getQrCodes();
     int getQrCodesCount();
     QString getVpnKey();
+
+    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
 
     QList<QString> m_qrCodes;
     QString m_vpnKey;
