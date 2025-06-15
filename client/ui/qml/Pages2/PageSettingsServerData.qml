@@ -257,6 +257,24 @@ PageType {
             DividerType {
                 visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
             }
+
+            LabelWithButtonType {
+                id: labelWithButton6
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+                Layout.fillWidth: true
+
+                text: qsTr("Switch to the new Amnezia Premium subscription")
+                textColor: AmneziaStyle.color.vibrantRed
+
+                clickedFunction: function() {
+                    PageController.goToPageHome()
+                    ApiPremV1MigrationController.showMigrationDrawer()
+                }
+            }
+
+            DividerType {
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+            }
         }
     }
 }

@@ -559,6 +559,16 @@ void Settings::disableHomeAdLabel()
     setValue("Conf/homeAdLabelVisible", false);
 }
 
+bool Settings::isPremV1MigrationReminderActive()
+{
+    return value("Conf/premV1MigrationReminderActive", true).toBool();
+}
+
+void Settings::disablePremV1MigrationReminder()
+{
+    setValue("Conf/premV1MigrationReminderActive", false);
+}
+
 QStringList Settings::allowedDnsServers() const
 {
     return value("Conf/allowedDnsServers").toStringList();

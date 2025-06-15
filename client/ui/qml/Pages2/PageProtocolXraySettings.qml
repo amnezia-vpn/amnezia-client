@@ -103,8 +103,29 @@ PageType {
                             }
                         }
 
+                        TextFieldWithHeaderType {
+                            id: portTextField
+                            Layout.fillWidth: true
+                            Layout.topMargin: 16
+
+                            enabled: delegateItem.isEnabled
+
+                            headerText: qsTr("Port")
+                            textField.text: port
+                            textField.maximumLength: 5
+                            textField.validator: IntValidator { bottom: 1; top: 65535 }
+
+                            textField.onEditingFinished: {
+                                if (textField.text !== port) {
+                                    port = textField.text
+                                }
+                            }
+
+                            checkEmptyText: true
+                        }
+
                         BasicButtonType {
-                            id: basicButton
+                            id: saveButton
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
