@@ -42,14 +42,8 @@ PageType {
 
         enabled: ServersModel.isProcessedServerHasWriteAccess()
 
-        model: OpenVpnConfigModel
-
-        delegate: ColumnLayout {
+        header: ColumnLayout {
             width: listView.width
-
-            property alias vpnAddressSubnetTextField: vpnAddressSubnetTextField
-
-            spacing: 0
 
             BaseHeaderType {
                 Layout.fillWidth: true
@@ -58,331 +52,408 @@ PageType {
 
                 headerText: qsTr("OpenVPN settings")
             }
+        }
 
-            TextFieldWithHeaderType {
-                id: vpnAddressSubnetTextField
+        model: ListModel {
+            ListElement { type: "subnetHeader" }
+            ListElement { type: "networkProtocolText" }
+            ListElement { type: "protoSelector" }
+            ListElement { type: "portTextField" }
+            ListElement { type: "encryptionSection" }
+            ListElement { type: "checkboxSection" }
+            ListElement { type: "clientCommands" }
+            ListElement { type: "serverCommands" }
+        }
 
-                Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+        delegate: DelegateChooser {
 
-                headerText: qsTr("VPN address subnet")
-                textField.text: subnetAddress
+            role: "type"
 
-                textField.onEditingFinished: {
-                    if (textField.text !== subnetAddress) {
-                        subnetAddress = textField.text
-                    }
-                }
-            }
-
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Network protocol")
-            }
-
-            TransportProtoSelector {
-                id: transportProtoSelector
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                rootWidth: root.width
-
-                enabled: isTransportProtoEditable
-
-                currentIndex: {
-                    return transportProto === "tcp" ? 1 : 0
-                }
-
-                onCurrentIndexChanged: {
-                    if (transportProto === "tcp" && currentIndex === 0) {
-                        transportProto = "udp"
-                    } else if (transportProto === "udp" && currentIndex === 1) {
-                        transportProto = "tcp"
-                    }
-                }
-            }
-
-            TextFieldWithHeaderType {
-                id: portTextField
-
-                Layout.fillWidth: true
-                Layout.topMargin: 40
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                enabled: listView.enabled
-
-                headerText: qsTr("Port")
-                textField.text: port
-                textField.maximumLength: 5
-                textField.validator: IntValidator { bottom: 1; top: 65535 }
-
-                textField.onEditingFinished: {
-                    if (textField.text !== port) {
-                        port = textField.text
-                    }
-                }
-            }
-
-            SwitcherType {
-                id: autoNegotiateEncryprionSwitcher
-
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Auto-negotiate encryption")
-                checked: autoNegotiateEncryprion
-
-                onCheckedChanged: {
-                    if (checked !== autoNegotiateEncryprion) {
-                        autoNegotiateEncryprion = checked
-                    }
-                }
-            }
-
-            DropDownType {
-                id: hashDropDown
-                Layout.fillWidth: true
-                Layout.topMargin: 20
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                enabled: !autoNegotiateEncryprionSwitcher.checked
-
-                descriptionText: qsTr("Hash")
-                headerText: qsTr("Hash")
-
-                drawerParent: root
-
-                listView: ListViewWithRadioButtonType {
-                    id: hashListView
-
-                    rootWidth: root.width
-
-                    model: ListModel {
-                        ListElement { name : qsTr("SHA512") }
-                        ListElement { name : qsTr("SHA384") }
-                        ListElement { name : qsTr("SHA256") }
-                        ListElement { name : qsTr("SHA3-512") }
-                        ListElement { name : qsTr("SHA3-384") }
-                        ListElement { name : qsTr("SHA3-256") }
-                        ListElement { name : qsTr("whirlpool") }
-                        ListElement { name : qsTr("BLAKE2b512") }
-                        ListElement { name : qsTr("BLAKE2s256") }
-                        ListElement { name : qsTr("SHA1") }
-                    }
-
-                    clickedFunction: function() {
-                        hashDropDown.text = selectedText
-                        hash = hashDropDown.text
-                        hashDropDown.closeTriggered()
-                    }
-
-                    Component.onCompleted: {
-                        hashDropDown.text = hash
-
-                        for (var i = 0; i < hashListView.model.count; i++) {
-                            if (hashListView.model.get(i).name === hashDropDown.text) {
-                                currentIndex = i
-                            }
-
-                            Keys.onEnterPressed: saveButton.clicked()
-                            Keys.onReturnPressed: saveButton.clicked()
-                        }
-                    }
-                }
-            }
-
-            DropDownType {
-                id: cipherDropDown
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                enabled: !autoNegotiateEncryprionSwitcher.checked
-
-                descriptionText: qsTr("Cipher")
-                headerText: qsTr("Cipher")
-
-                drawerParent: root
-
-                listView: ListViewWithRadioButtonType {
-                    id: cipherListView
-
-                    rootWidth: root.width
-
-                    model: ListModel {
-                        ListElement { name : qsTr("AES-256-GCM") }
-                        ListElement { name : qsTr("AES-192-GCM") }
-                        ListElement { name : qsTr("AES-128-GCM") }
-                        ListElement { name : qsTr("AES-256-CBC") }
-                        ListElement { name : qsTr("AES-192-CBC") }
-                        ListElement { name : qsTr("AES-128-CBC") }
-                        ListElement { name : qsTr("ChaCha20-Poly1305") }
-                        ListElement { name : qsTr("ARIA-256-CBC") }
-                        ListElement { name : qsTr("CAMELLIA-256-CBC") }
-                        ListElement { name : qsTr("none") }
-                    }
-
-                    clickedFunction: function() {
-                        cipherDropDown.text = selectedText
-                        cipher = cipherDropDown.text
-                        cipherDropDown.closeTriggered()
-                    }
-
-                    Component.onCompleted: {
-                        cipherDropDown.text = cipher
-
-                        for (var i = 0; i < cipherListView.model.count; i++) {
-                            if (cipherListView.model.get(i).name === cipherDropDown.text) {
-                                currentIndex = i
-                            }
-                        }
-                    }
-                }
-            }
-
-            Rectangle {
-                id: contentRect
-                Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.preferredHeight: checkboxLayout.implicitHeight
-                color: AmneziaStyle.color.onyxBlack
-                radius: 16
-
-                Connections {
-                    target: tlsAuthCheckBox
-                    enabled: !GC.isMobile()
-
-                    function onFocusChanged() {
-                        if (tlsAuthCheckBox.activeFocus) {
-                            fl.ensureVisible(contentRect)
-                        }
-                    }
-                }
-
+            DelegateChoice {
+                // property alias vpnAddressSubnetTextField: vpnAddressSubnetTextField
+                roleValue: "subnetHeader"
                 ColumnLayout {
-                    id: checkboxLayout
+                    width: listView.width
 
-                    anchors.fill: parent
-                    CheckBoxType {
-                        id: tlsAuthCheckBox
+                    TextFieldWithHeaderType {
+                        id: vpnAddressSubnetTextField
+
                         Layout.fillWidth: true
+                        Layout.topMargin: 32
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                        text: qsTr("TLS auth")
-                        checked: tlsAuth
+                        headerText: qsTr("VPN address subnet")
+                        textField.text: OpenVpnConfigModel.subnetAddress
 
-                        onCheckedChanged: {
-                            if (checked !== tlsAuth) {
-                                console.log("tlsAuth changed to: " + checked)
-                                tlsAuth = checked
-                            }
-                        }
-                    }
-
-                    DividerType {}
-
-                    CheckBoxType {
-                        id: blockDnsCheckBox
-                        Layout.fillWidth: true
-
-                        text: qsTr("Block DNS requests outside of VPN")
-                        checked: blockDns
-
-                        onCheckedChanged: {
-                            if (checked !== blockDns) {
-                                blockDns = checked
+                        textField.onEditingFinished: {
+                            if (textField.text !== OpenVpnConfigModel.subnetAddress) {
+                                OpenVpnConfigModel.subnetAddress = textField.text
                             }
                         }
                     }
                 }
             }
 
-            SwitcherType {
-                id: additionalClientCommandsSwitcher
-                Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+            DelegateChoice {
+                roleValue: "networkProtocolText"
+                ColumnLayout {
+                    width: listView.width
 
-                checked: additionalClientCommands !== ""
+                    ParagraphTextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 32
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                text: qsTr("Additional client configuration commands")
-
-                onCheckedChanged: {
-                    if (!checked) {
-                        additionalClientCommands = ""
+                        text: qsTr("Network protocol")
                     }
                 }
             }
 
-            TextAreaType {
-                id: additionalClientCommandsTextArea
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+            DelegateChoice {
+                roleValue: "protoSelector"
+                ColumnLayout {
+                    width: listView.width
 
-                visible: additionalClientCommandsSwitcher.checked
+                    TransportProtoSelector {
+                        id: transportProtoSelector
 
-                textAreaText: additionalClientCommands
-                placeholderText: qsTr("Commands:")
+                        Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        rootWidth: root.width
 
-                textArea.onEditingFinished: {
-                    if (additionalClientCommands !== textAreaText) {
-                        additionalClientCommands = textAreaText
+                        enabled: OpenVpnConfigModel.isTransportProtoEditable
+
+                        currentIndex: {
+                            return OpenVpnConfigModel.transportProto === "tcp" ? 1 : 0
+                        }
+
+                        onCurrentIndexChanged: {
+                            if (OpenVpnConfigModel.transportProto === "tcp" && currentIndex === 0) {
+                                OpenVpnConfigModel.transportProto = "udp"
+                            } else if (OpenVpnConfigModel.transportProto === "udp" && currentIndex === 1) {
+                                OpenVpnConfigModel.transportProto = "tcp"
+                            }
+                        }
                     }
                 }
             }
 
-            SwitcherType {
-                id: additionalServerCommandsSwitcher
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+            DelegateChoice {
+                roleValue: "portTextField"
+                ColumnLayout {
+                    width: listView.width
 
-                checked: additionalServerCommands !== ""
+                    TextFieldWithHeaderType {
+                        id: portTextField
 
-                text: qsTr("Additional server configuration commands")
+                        Layout.fillWidth: true
+                        Layout.topMargin: 40
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                onCheckedChanged: {
-                    if (!checked) {
-                        additionalServerCommands = ""
+                        enabled: OpenVpnConfigModel.isPortEditable
+
+                        headerText: qsTr("Port")
+                        textField.text: OpenVpnConfigModel.port
+                        textField.maximumLength: 5
+                        textField.validator: IntValidator { bottom: 1; top: 65535 }
+
+                        textField.onEditingFinished: {
+                            if (textField.text !== OpenVpnConfigModel.port) {
+                                OpenVpnConfigModel.port = textField.text
+                            }
+                        }
                     }
                 }
             }
 
-            TextAreaType {
-                id: additionalServerCommandsTextArea
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+            DelegateChoice {
+                roleValue: "encryptionSection"
+                ColumnLayout {
+                    width: listView.width
 
-                visible: additionalServerCommandsSwitcher.checked
+                    SwitcherType {
+                        id: autoNegotiateEncryprionSwitcher
 
-                textAreaText: additionalServerCommands
-                placeholderText: qsTr("Commands:")
+                        Layout.fillWidth: true
+                        Layout.topMargin: 24
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                textArea.onEditingFinished: {
-                    if (additionalServerCommands !== textAreaText) {
-                        additionalServerCommands = textAreaText
+                        text: qsTr("Auto-negotiate encryption")
+                        checked: OpenVpnConfigModel.autoNegotiateEncryption
+
+                        onCheckedChanged: {
+                            if (checked !== OpenVpnConfigModel.autoNegotiateEncryprion) {
+                                OpenVpnConfigModel.autoNegotiateEncryprion = checked
+                            }
+                        }
+                    }
+
+                    DropDownType {
+                        id: hashDropDown
+
+                        Layout.fillWidth: true
+                        Layout.topMargin: 20
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        enabled: !autoNegotiateEncryprionSwitcher.checked
+
+                        descriptionText: qsTr("Hash")
+                        headerText: qsTr("Hash")
+
+                        drawerParent: root
+
+                        listView: ListViewWithRadioButtonType {
+                            id: hashListView
+
+                            rootWidth: root.width
+
+                            model: ListModel {
+                                ListElement { name : qsTr("SHA512") }
+                                ListElement { name : qsTr("SHA384") }
+                                ListElement { name : qsTr("SHA256") }
+                                ListElement { name : qsTr("SHA3-512") }
+                                ListElement { name : qsTr("SHA3-384") }
+                                ListElement { name : qsTr("SHA3-256") }
+                                ListElement { name : qsTr("whirlpool") }
+                                ListElement { name : qsTr("BLAKE2b512") }
+                                ListElement { name : qsTr("BLAKE2s256") }
+                                ListElement { name : qsTr("SHA1") }
+                            }
+
+                            clickedFunction: function() {
+                                hashDropDown.text = selectedText
+                                OpenVpnConfigModel.hash = hashDropDown.text
+                                hashDropDown.closeTriggered()
+                            }
+
+                            Component.onCompleted: {
+                                hashDropDown.text = OpenVpnConfigModel.hash
+
+                                for (var i = 0; i < hashListView.model.count; i++) {
+                                    if (hashListView.model.get(i).name === hashDropDown.text) {
+                                        currentIndex = i
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    DropDownType {
+                        id: cipherDropDown
+
+                        Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        enabled: !autoNegotiateEncryprionSwitcher.checked
+
+                        descriptionText: qsTr("Cipher")
+                        headerText: qsTr("Cipher")
+
+                        drawerParent: root
+
+                        listView: ListViewWithRadioButtonType {
+                            id: cipherListView
+
+                            rootWidth: root.width
+
+                            model: ListModel {
+                                ListElement { name : qsTr("AES-256-GCM") }
+                                ListElement { name : qsTr("AES-192-GCM") }
+                                ListElement { name : qsTr("AES-128-GCM") }
+                                ListElement { name : qsTr("AES-256-CBC") }
+                                ListElement { name : qsTr("AES-192-CBC") }
+                                ListElement { name : qsTr("AES-128-CBC") }
+                                ListElement { name : qsTr("ChaCha20-Poly1305") }
+                                ListElement { name : qsTr("ARIA-256-CBC") }
+                                ListElement { name : qsTr("CAMELLIA-256-CBC") }
+                                ListElement { name : qsTr("none") }
+                            }
+
+                            clickedFunction: function() {
+                                cipherDropDown.text = selectedText
+                                OpenVpnConfigModel.cipher = cipherDropDown.text
+                                cipherDropDown.closeTriggered()
+                            }
+
+                            Component.onCompleted: {
+                                cipherDropDown.text = OpenVpnConfigModel.cipher
+
+                                for (var i = 0; i < cipherListView.model.count; i++) {
+                                    if (cipherListView.model.get(i).name === cipherDropDown.text) {
+                                        currentIndex = i
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
+
+            DelegateChoice {
+                roleValue: "checkboxSection"
+                ColumnLayout {
+                    width: listView.width
+
+                    Rectangle {
+                        id: contentRect
+
+                        Layout.fillWidth: true
+                        Layout.topMargin: 32
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.preferredHeight: checkboxLayout.implicitHeight
+                        color: AmneziaStyle.color.onyxBlack
+                        radius: 16
+
+                        ColumnLayout {
+                            id: checkboxLayout
+
+                            anchors.fill: parent
+
+                            CheckBoxType {
+                                id: tlsAuthCheckBox
+
+                                Layout.fillWidth: true
+
+                                text: qsTr("TLS auth")
+                                checked: OpenVpnConfigModel.tlsAuth
+
+                                onCheckedChanged: {
+                                    if (checked !== OpenVpnConfigModel.tlsAuth) {
+                                        console.log("tlsAuth changed to: " + checked)
+                                        OpenVpnConfigModel.tlsAuth = checked
+                                    }
+                                }
+                            }
+
+                            DividerType {}
+
+                            CheckBoxType {
+                                id: blockDnsCheckBox
+
+                                Layout.fillWidth: true
+
+                                text: qsTr("Block DNS requests outside of VPN")
+                                checked: OpenVpnConfigModel.blockDns
+
+                                onCheckedChanged: {
+                                    if (checked !== OpenVpnConfigModel.blockDns) {
+                                        OpenVpnConfigModel.blockDns = checked
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            DelegateChoice {
+                roleValue: "clientCommands"
+                ColumnLayout {
+
+                    width: listView.width
+
+                    SwitcherType {
+                        id: additionalClientCommandsSwitcher
+
+                        Layout.fillWidth: true
+                        Layout.topMargin: 32
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        checked: OpenVpnConfigModel.additionalClientCommands !== ""
+
+                        text: qsTr("Additional client configuration commands")
+
+                        onCheckedChanged: {
+                            if (!checked) {
+                                OpenVpnConfigModel.additionalClientCommands = ""
+                            }
+                            // listView.positionViewAtIndex(index, ListView.Beginning)
+                        }
+                    }
+
+                    TextAreaType {
+                        id: additionalClientCommandsTextArea
+
+                        Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        visible: additionalClientCommandsSwitcher.checked
+
+                        textAreaText: OpenVpnConfigModel.additionalClientCommands
+                        placeholderText: qsTr("Commands:")
+
+                        textArea.onEditingFinished: {
+                            if (OpenVpnConfigModel.additionalClientCommands !== textAreaText) {
+                                OpenVpnConfigModel.additionalClientCommands = textAreaText
+                            }
+                        }
+                    }
+                }
+            }
+
+            DelegateChoice {
+                roleValue: "serverCommands"
+                ColumnLayout {
+                    width: listView.width
+
+                    SwitcherType {
+                        id: additionalServerCommandsSwitcher
+
+                        Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        checked: OpenVpnConfigModel.additionalServerCommands !== ""
+
+                        text: qsTr("Additional server configuration commands")
+
+                        onCheckedChanged: {
+                            if (!checked) {
+                                OpenVpnConfigModel.additionalServerCommands = ""
+                            }
+                            // listView.positionViewAtIndex(index, ListView.Beginning)
+                        }
+                    }
+
+                    TextAreaType {
+                        id: additionalServerCommandsTextArea
+
+                        Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        visible: additionalServerCommandsSwitcher.checked
+
+                        textAreaText: OpenVpnConfigModel.additionalServerCommands
+                        placeholderText: qsTr("Commands:")
+
+                        textArea.onEditingFinished: {
+                            if (OpenVpnConfigModel.additionalServerCommands !== textAreaText) {
+                                OpenVpnConfigModel.additionalServerCommands = textAreaText
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        footer: ColumnLayout {
+            width: listView.width
 
             BasicButtonType {
                 id: saveRestartButton
