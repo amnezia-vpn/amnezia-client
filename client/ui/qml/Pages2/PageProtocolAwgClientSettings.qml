@@ -171,7 +171,6 @@ PageType {
                     }
 
                     checkEmptyText: true
-
                 }
 
                 Header2TextType {
@@ -256,6 +255,105 @@ PageType {
 
                     headerText: "H4 - Transport packet magic header"
                     textField.text: serverTransportPacketMagicHeader
+                }
+
+                TextFieldWithHeaderType {
+                    id: i1JunkPacketTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    enabled: false
+
+                    headerText: "I1 - First special junk packet"
+                    textField.text: serverI1JunkPacket
+                }
+
+                TextFieldWithHeaderType {
+                    id: i2JunkPacketTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    enabled: false
+
+                    headerText: "I2 - Second special junk packet"
+                    textField.text: serverI2JunkPacket
+                }
+
+                TextFieldWithHeaderType {
+                    id: i3JunkPacketTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    enabled: false
+
+                    headerText: "I3 - Third special junk packet"
+                    textField.text: serverI3JunkPacket
+                }
+
+                TextFieldWithHeaderType {
+                    id: i4JunkPacketTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    enabled: false
+
+                    headerText: "I4 - Fourth special junk packet"
+                    textField.text: serverI4JunkPacket
+                }
+
+                TextFieldWithHeaderType {
+                    id: i5JunkPacketTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    enabled: false
+
+                    headerText: "I5 - Fifth special junk packet"
+                    textField.text: serverI5JunkPacket
+                }
+
+                TextFieldWithHeaderType {
+                    id: j1JunkPacketTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    enabled: false
+
+                    headerText: "J1 - First controlled junk packet"
+                    textField.text: serverJ1JunkPacket
+                }
+
+                TextFieldWithHeaderType {
+                    id: j2JunkPacketTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    enabled: false
+
+                    headerText: "J2 - Second controlled junk packet"
+                    textField.text: serverJ2JunkPacket
+                }
+
+                TextFieldWithHeaderType {
+                    id: j3JunkPacketTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    enabled: false
+
+                    headerText: "J3 - Third controlled junk packet"
+                    textField.text: serverJ3JunkPacket
+                }
+
+                TextFieldWithHeaderType {
+                    id: iTimeTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    enabled: false
+
+                    headerText: "Itime - Special handshake timeout"
+                    textField.text: serverSepciaHandshaketIntervalTime
                 }
             }
         }
