@@ -66,6 +66,9 @@ IosController::IosController() : QObject()
     s_instance = this;
     m_iosControllerWrapper = [[IosControllerWrapper alloc] initWithCppController:this];
 
+    // Initialize StoreKitController early to start observing the payment queue
+    [StoreKitController sharedInstance];
+
     [[NSNotificationCenter defaultCenter]
         removeObserver: (__bridge NSObject *)m_iosControllerWrapper];
     [[NSNotificationCenter defaultCenter]
