@@ -6,7 +6,10 @@
 #import <StoreKit/StoreKit.h>
 
 @interface StoreKitController () <SKProductsRequestDelegate, SKPaymentTransactionObserver>
-@property (nonatomic, copy) void (^purchaseCompletion)(BOOL success, NSError *_Nullable error);
+@property (nonatomic, copy) void (^purchaseCompletion)(BOOL success,
+                                                       NSString *_Nullable transactionId,
+                                                       NSString *_Nullable productId,
+                                                       NSError *_Nullable error);
 @property (nonatomic, copy) void (^restoreCompletion)(BOOL success, NSError *_Nullable error);
 @property (nonatomic, strong) SKProductsRequest *productsRequest;
 @end
@@ -38,7 +41,10 @@
 }
 
 - (void)purchaseProduct:(NSString *)productIdentifier
-             completion:(void (^)(BOOL success, NSError *_Nullable error))completion
+             completion:(void (^)(BOOL success,
+                                  NSString *_Nullable transactionId,
+                                  NSString *_Nullable productId,
+                                  NSError *_Nullable error))completion
 {
     self.purchaseCompletion = completion;
     self.productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithObject:productIdentifier]];
@@ -62,7 +68,7 @@
             NSError *error = [NSError errorWithDomain:@"StoreKitController"
                                                  code:0
                                              userInfo:@{ NSLocalizedDescriptionKey : @"Product not found" }];
-            self.purchaseCompletion(NO, error);
+            self.purchaseCompletion(NO, nil, nil, error);
             self.purchaseCompletion = nil;
         }
         return;
@@ -75,7 +81,7 @@
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error
 {
     if (self.purchaseCompletion) {
-        self.purchaseCompletion(NO, error);
+        self.purchaseCompletion(NO, nil, nil, error);
         self.purchaseCompletion = nil;
     }
     self.productsRequest = nil;
@@ -89,7 +95,10 @@
         switch (transaction.transactionState) {
         case SKPaymentTransactionStatePurchased:
             if (self.purchaseCompletion) {
-                self.purchaseCompletion(YES, nil);
+                self.purchaseCompletion(YES,
+                                       transaction.transactionIdentifier,
+                                       transaction.payment.productIdentifier,
+                                       nil);
                 self.purchaseCompletion = nil;
             }
             [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
@@ -97,7 +106,10 @@
             break;
         case SKPaymentTransactionStateFailed:
             if (self.purchaseCompletion) {
-                self.purchaseCompletion(NO, transaction.error);
+                self.purchaseCompletion(NO,
+                                       transaction.transactionIdentifier,
+                                       transaction.payment.productIdentifier,
+                                       transaction.error);
                 self.purchaseCompletion = nil;
             }
             [[SKPaymentQueue defaultQueue] finishTransaction:transaction];

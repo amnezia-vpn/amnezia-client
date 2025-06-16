@@ -2,6 +2,7 @@
 #define IOS_CONTROLLER_H
 
 #include "protocols/vpnprotocol.h"
+#include <functional>
 
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
@@ -54,8 +55,13 @@ public:
     bool shareText(const QStringList &filesToSend);
     QString openFile();
 
-    bool purchaseProduct(const QString &productId);
-    bool restorePurchases();
+    void purchaseProduct(const QString &productId,
+                         std::function<void(bool success,
+                                            const QString &transactionId,
+                                            const QString &purchasedProductId,
+                                            const QString &errorString)> &&callback);
+    void restorePurchases(std::function<void(bool success,
+                                             const QString &errorString)> &&callback);
 
     void requestInetAccess();
 signals:

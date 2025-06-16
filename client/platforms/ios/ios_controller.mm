@@ -863,34 +863,48 @@ QString IosController::openFile() {
     return filePath;
 }
 
-bool IosController::purchaseProduct(const QString &productId)
+void IosController::purchaseProduct(const QString &productId,
+                                   std::function<void(bool success,
+                                                      const QString &transactionId,
+                                                      const QString &purchasedProductId,
+                                                      const QString &errorString)> &&callback)
 {
-    __block BOOL success = NO;
     StoreKitController *controller = [StoreKitController sharedInstance];
-    QEventLoop wait;
-    [controller purchaseProduct:productId.toNSString() completion:^(BOOL s, NSError * _Nullable error) {
-        Q_UNUSED(error);
-        success = s;
-        emit finished();
+    [controller purchaseProduct:productId.toNSString() completion:^(BOOL s,
+                                                                   NSString * _Nullable transactionId,
+                                                                   NSString * _Nullable prodId,
+                                                                   NSError * _Nullable error) {
+        QString txId;
+        QString pId;
+        QString err;
+        if (transactionId) {
+            txId = QString::fromUtf8(transactionId.UTF8String);
+        }
+        if (prodId) {
+            pId = QString::fromUtf8(prodId.UTF8String);
+        }
+        if (error) {
+            err = QString::fromUtf8(error.localizedDescription.UTF8String);
+        }
+        if (callback) {
+            callback(s, txId, pId, err);
+        }
     }];
-    QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
-    wait.exec();
-    return success;
 }
 
-bool IosController::restorePurchases()
+void IosController::restorePurchases(std::function<void(bool success,
+                                                       const QString &errorString)> &&callback)
 {
-    __block BOOL success = NO;
     StoreKitController *controller = [StoreKitController sharedInstance];
-    QEventLoop wait;
     [controller restorePurchasesWithCompletion:^(BOOL s, NSError * _Nullable error) {
-        Q_UNUSED(error);
-        success = s;
-        emit finished();
+        QString err;
+        if (error) {
+            err = QString::fromUtf8(error.localizedDescription.UTF8String);
+        }
+        if (callback) {
+            callback(s, err);
+        }
     }];
-    QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
-    wait.exec();
-    return success;
 }
 
 void IosController::requestInetAccess() {

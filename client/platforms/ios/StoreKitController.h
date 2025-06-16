@@ -12,7 +12,10 @@
 + (instancetype)sharedInstance;
 
 - (void)purchaseProduct:(NSString *)productIdentifier
-             completion:(void (^)(BOOL success, NSError *_Nullable error))completion;
+             completion:(void (^)(BOOL success,
+                                  NSString *_Nullable transactionId,
+                                  NSString *_Nullable productId,
+                                  NSError *_Nullable error))completion;
 
 - (void)restorePurchasesWithCompletion:(void (^)(BOOL success, NSError *_Nullable error))completion;
 
