@@ -18,6 +18,7 @@ namespace
     {
         constexpr char cloak[] = "cloak";
         constexpr char awg[] = "awg";
+        constexpr char xray[] = "xray";
 
         constexpr char apiEndpoint[] = "api_endpoint";
         constexpr char accessToken[] = "api_key";
@@ -50,6 +51,8 @@ namespace
 
         QString wireGuardClientPrivKey;
         QString wireGuardClientPubKey;
+
+        QString xrayUuid;
     };
 
     struct GatewayRequestData
@@ -106,7 +109,10 @@ namespace
             auto connData = WireguardConfigurator::genClientKeys();
             protocolData.wireGuardClientPubKey = connData.clientPubKey;
             protocolData.wireGuardClientPrivKey = connData.clientPrivKey;
+        } else if (protocol == configKey::xray) {
+            protocolData.xrayUuid = QUuid::createUuid().toString(QUuid::WithoutBraces);
         }
+
         return protocolData;
     }
 
@@ -151,18 +157,19 @@ namespace
             }
             auto container = containers.at(0).toObject();
             QString containerName = ContainerProps::containerTypeToString(DockerContainer::Awg);
-            auto containerConfig = container.value(containerName).toObject();
-            auto protocolConfig = QJsonDocument::fromJson(containerConfig.value(config_key::last_config).toString().toUtf8()).object();
-            containerConfig[config_key::junkPacketCount] = protocolConfig.value(config_key::junkPacketCount);
-            containerConfig[config_key::junkPacketMinSize] = protocolConfig.value(config_key::junkPacketMinSize);
-            containerConfig[config_key::junkPacketMaxSize] = protocolConfig.value(config_key::junkPacketMaxSize);
-            containerConfig[config_key::initPacketJunkSize] = protocolConfig.value(config_key::initPacketJunkSize);
-            containerConfig[config_key::responsePacketJunkSize] = protocolConfig.value(config_key::responsePacketJunkSize);
-            containerConfig[config_key::initPacketMagicHeader] = protocolConfig.value(config_key::initPacketMagicHeader);
-            containerConfig[config_key::responsePacketMagicHeader] = protocolConfig.value(config_key::responsePacketMagicHeader);
-            containerConfig[config_key::underloadPacketMagicHeader] = protocolConfig.value(config_key::underloadPacketMagicHeader);
-            containerConfig[config_key::transportPacketMagicHeader] = protocolConfig.value(config_key::transportPacketMagicHeader);
-            container[containerName] = containerConfig;
+            auto serverProtocolConfig = container.value(containerName).toObject();
+            auto clientProtocolConfig =
+                    QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
+            serverProtocolConfig[config_key::junkPacketCount] = clientProtocolConfig.value(config_key::junkPacketCount);
+            serverProtocolConfig[config_key::junkPacketMinSize] = clientProtocolConfig.value(config_key::junkPacketMinSize);
+            serverProtocolConfig[config_key::junkPacketMaxSize] = clientProtocolConfig.value(config_key::junkPacketMaxSize);
+            serverProtocolConfig[config_key::initPacketJunkSize] = clientProtocolConfig.value(config_key::initPacketJunkSize);
+            serverProtocolConfig[config_key::responsePacketJunkSize] = clientProtocolConfig.value(config_key::responsePacketJunkSize);
+            serverProtocolConfig[config_key::initPacketMagicHeader] = clientProtocolConfig.value(config_key::initPacketMagicHeader);
+            serverProtocolConfig[config_key::responsePacketMagicHeader] = clientProtocolConfig.value(config_key::responsePacketMagicHeader);
+            serverProtocolConfig[config_key::underloadPacketMagicHeader] = clientProtocolConfig.value(config_key::underloadPacketMagicHeader);
+            serverProtocolConfig[config_key::transportPacketMagicHeader] = clientProtocolConfig.value(config_key::transportPacketMagicHeader);
+            container[containerName] = serverProtocolConfig;
             containers.replace(0, container);
             newServerConfig[config_key::containers] = containers;
             configStr = QString(QJsonDocument(newServerConfig).toJson());
