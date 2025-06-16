@@ -2,6 +2,7 @@
 #define UPDATECONTROLLER_H
 
 #include <QObject>
+#include <QNetworkReply>
 
 #include "settings.h"
 
@@ -23,8 +24,19 @@ signals:
     void updateFound();
 
 private:
+    bool fetchGatewayUrl();
+    bool fetchVersionInfo();
+    bool fetchChangelog();
+    bool fetchReleaseDate();
+    bool isNewVersionAvailable();
+    bool doSyncGet(const QString& endpoint, QByteArray& outData);
+    void setupNetworkErrorHandling(QNetworkReply* reply, const QString& operation);
+    void handleNetworkError(QNetworkReply* reply, const QString& operation);
+    QString composeDownloadUrl();
+    
     std::shared_ptr<Settings> m_settings;
 
+    QString m_baseUrl;
     QString m_changelogText;
     QString m_version;
     QString m_releaseDate;
