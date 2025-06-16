@@ -66,6 +66,7 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
         } else {
             server.insert(config_key::description, value.toString());
         }
+        server.insert(config_key::nameOverriddenByUser, true);
         m_settings->editServer(index.row(), server);
         m_servers.replace(index.row(), server);
         if (index.row() == m_defaultServerIndex) {

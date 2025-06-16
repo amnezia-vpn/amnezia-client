@@ -89,17 +89,17 @@
 <context>
     <name>ApiConfigsController</name>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="207"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="210"/>
         <source>%1 installed successfully.</source>
         <translation>%1 успешно установлен.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="262"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="266"/>
         <source>API config reloaded</source>
         <translation>Конфигурация API перезагружена</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="266"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="270"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>Страна подключения изменена на %1</translation>
     </message>
@@ -358,7 +358,7 @@
 <context>
     <name>ContextMenuType</name>
     <message>
-        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="9"/>
+        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="10"/>
         <source>C&amp;ut</source>
         <translation>Вырезать</translation>
     </message>
@@ -368,12 +368,12 @@
         <translation>Копировать</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="21"/>
+        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="20"/>
         <source>&amp;Paste</source>
         <translation>Вставить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="29"/>
+        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="27"/>
         <source>&amp;SelectAll</source>
         <translation>Выбрать всё</translation>
     </message>
@@ -2412,42 +2412,42 @@ Thank you for staying with us!</source>
         <translation>Доступ в интернет блокируется при разрыве VPN-соединения</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="87"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="88"/>
         <source>Strict KillSwitch</source>
         <translation>Strict KillSwitch</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="88"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="89"/>
         <source>Internet connection is blocked even when VPN is turned off manually or hasn&apos;t started</source>
         <translation>Доступ в интернет блокируется, даже если VPN отключен вручную или не был запущен</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
         <source>Just a little heads-up</source>
         <translation>Небольшое предупреждение</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
         <source>If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.</source>
         <translation>Если VPN отключится или соединение прервётся при включённом Strict KillSwitch, доступ в интернет будет заблокирован. Чтобы восстановить доступ, снова подключитесь к VPN или отключите (измените) режим KillSwitch.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="94"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="94"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="95"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="113"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="116"/>
         <source>DNS Exceptions</source>
         <translation>Исключения для DNS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="114"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="117"/>
         <source>DNS servers listed here will remain accessible when KillSwitch is active.</source>
         <translation>DNS-серверы из этого списка останутся доступными при активном KillSwitch.</translation>
     </message>
@@ -4085,7 +4085,12 @@ Thank you for staying with us!</source>
         <translation>Произошла ошибка миграции. Обратитесь в нашу техническую поддержку</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="92"/>
+        <location filename="../core/errorstrings.cpp" line="78"/>
+        <source>Please update the application to use this feature</source>
+        <translation>Пожалуйста, обновите приложение, чтобы использовать эту функцию</translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="93"/>
         <source>ErrorCode: %1. </source>
         <translation>Код ошибки: %1. </translation>
     </message>
@@ -4196,37 +4201,37 @@ Thank you for staying with us!</source>
         <translation type="vanished">Произошла ошибка миграции. Обратитесь в нашу техническую поддержку</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="80"/>
+        <location filename="../core/errorstrings.cpp" line="81"/>
         <source>QFile error: The file could not be opened</source>
         <translation>Ошибка QFile: не удалось открыть файл</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="81"/>
+        <location filename="../core/errorstrings.cpp" line="82"/>
         <source>QFile error: An error occurred when reading from the file</source>
         <translation>Ошибка QFile: произошла ошибка при чтении из файла</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="82"/>
+        <location filename="../core/errorstrings.cpp" line="83"/>
         <source>QFile error: The file could not be accessed</source>
         <translation>Ошибка QFile: не удалось получить доступ к файлу</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="83"/>
+        <location filename="../core/errorstrings.cpp" line="84"/>
         <source>QFile error: An unspecified error occurred</source>
         <translation>Ошибка QFile: произошла неизвестная ошибка</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="84"/>
+        <location filename="../core/errorstrings.cpp" line="85"/>
         <source>QFile error: A fatal error occurred</source>
         <translation>Ошибка QFile: произошла фатальная ошибка</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="85"/>
+        <location filename="../core/errorstrings.cpp" line="86"/>
         <source>QFile error: The operation was aborted</source>
         <translation>Ошибка QFile: операция была прервана</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="89"/>
+        <location filename="../core/errorstrings.cpp" line="90"/>
         <source>Internal error</source>
         <translation>Внутренняя ошибка</translation>
     </message>
