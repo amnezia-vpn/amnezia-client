@@ -14,8 +14,8 @@ done
 PROJECT_DIR=$(pwd)
 DEPLOY_DIR=$PROJECT_DIR/deploy
 
-mkdir -p $DEPLOY_DIR/build
-BUILD_DIR=$DEPLOY_DIR/build
+mkdir -p "$DEPLOY_DIR/build"
+BUILD_DIR="$DEPLOY_DIR/build"
 
 echo "Project dir: ${PROJECT_DIR}" 
 echo "Build dir: ${BUILD_DIR}"
@@ -28,6 +28,7 @@ PLIST_NAME=$APP_NAME.plist
 OUT_APP_DIR=$BUILD_DIR/client
 BUNDLE_DIR=$OUT_APP_DIR/$APP_FILENAME
 
+# Prebuilt deployment assets are available via the symlink under deploy/data
 PREBUILT_DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/deploy-prebuilt/macos
 DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/macos
 
@@ -42,15 +43,15 @@ echo "Using Qt in $QT_BIN_DIR"
 
 
 # Checking env
-$QT_BIN_DIR/qt-cmake --version
+"$QT_BIN_DIR/qt-cmake" --version
 cmake --version
 clang -v
 
 # Build App
 echo "Building App..."
-cd $BUILD_DIR
+cd "$BUILD_DIR"
 
-$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR -B $BUILD_DIR
+"$QT_BIN_DIR/qt-cmake" -S "$PROJECT_DIR" -B "$BUILD_DIR"
 cmake --build . --config release --target all
 
 # Build and run tests here
@@ -63,51 +64,43 @@ echo "____________________________________"
 echo "Packaging ..."
 
 
-cp -Rv $PREBUILT_DEPLOY_DATA_DIR/* $BUNDLE_DIR/Contents/macOS
-$QT_BIN_DIR/macdeployqt $OUT_APP_DIR/$APP_FILENAME -always-overwrite -qmldir=$PROJECT_DIR
-cp -av $BUILD_DIR/service/server/$APP_NAME-service $BUNDLE_DIR/Contents/macOS
-cp -Rv $PROJECT_DIR/deploy/data/macos/* $BUNDLE_DIR/Contents/macOS
-rm -f $BUNDLE_DIR/Contents/macOS/post_install.sh $BUNDLE_DIR/Contents/macOS/post_uninstall.sh
+cp -Rv "$PREBUILT_DEPLOY_DATA_DIR"/* "$BUNDLE_DIR/Contents/macOS"
+"$QT_BIN_DIR/macdeployqt" "$OUT_APP_DIR/$APP_FILENAME" -always-overwrite -qmldir="$PROJECT_DIR"
+cp -av "$BUILD_DIR/service/server/$APP_NAME-service" "$BUNDLE_DIR/Contents/macOS"
+rsync -av --exclude="$PLIST_NAME" --exclude=post_install.sh --exclude=post_uninstall.sh "$DEPLOY_DATA_DIR/" "$BUNDLE_DIR/Contents/macOS/"
 
 if [ "${MAC_CERT_PW+x}" ]; then
 
   CERTIFICATE_P12=$DEPLOY_DIR/PrivacyTechAppleCertDeveloperId.p12
-  WWDRCA=$DEPLOY_DIR/WWDRCA.cer
-  KEYCHAIN=amnezia.build.macos.keychain
-  TEMP_PASS=tmp_pass
+mkdir -p "$PKG_DIR" "$SCRIPTS_DIR" "$RESOURCES_DIR" "$UNINSTALL_SCRIPTS_DIR"
 
-  security create-keychain -p $TEMP_PASS $KEYCHAIN || true
-  security default-keychain -s $KEYCHAIN
-  security unlock-keychain -p $TEMP_PASS $KEYCHAIN
-
-  security default-keychain
-  security list-keychains
-
-  security import $WWDRCA -k $KEYCHAIN -T /usr/bin/codesign || true
-  security import $CERTIFICATE_P12 -k $KEYCHAIN -P $MAC_CERT_PW -T /usr/bin/codesign || true
-
-  security set-key-partition-list -S apple-tool:,apple: -k $TEMP_PASS $KEYCHAIN
+# Ensure launchd plist is present in the app bundle root
+cp "$DEPLOY_DATA_DIR/$PLIST_NAME" "$BUNDLE_DIR/$PLIST_NAME"
+pkgbuild --component "$BUNDLE_DIR" \
+         --install-location "/Applications" \
   security find-identity -p codesigning
 
   echo "Signing App bundle..."
-  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "$MAC_SIGNER_ID" $BUNDLE_DIR
-  /usr/bin/codesign --verify -vvvv $BUNDLE_DIR || true
-  spctl -a -vvvv $BUNDLE_DIR || true
+  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "$MAC_SIGNER_ID" "$BUNDLE_DIR"
+  /usr/bin/codesign --verify -vvvv "$BUNDLE_DIR" || true
+  spctl -a -vvvv "$BUNDLE_DIR" || true
 
   if [ "${NOTARIZE_APP+x}" ]; then
     echo "Notarizing App bundle..."
-    /usr/bin/ditto -c -k --keepParent $BUNDLE_DIR $PROJECT_DIR/Bundle_to_notarize.zip
-    xcrun notarytool submit $PROJECT_DIR/Bundle_to_notarize.zip --apple-id $APPLE_DEV_EMAIL --team-id $MAC_TEAM_ID --password $APPLE_DEV_PASSWORD
-    rm $PROJECT_DIR/Bundle_to_notarize.zip
+    /usr/bin/ditto -c -k --keepParent "$BUNDLE_DIR" "$PROJECT_DIR/Bundle_to_notarize.zip"
+    xcrun notarytool submit "$PROJECT_DIR/Bundle_to_notarize.zip" --apple-id "$APPLE_DEV_EMAIL" --team-id "$MAC_TEAM_ID" --password "$APPLE_DEV_PASSWORD"
+    rm "$PROJECT_DIR/Bundle_to_notarize.zip"
     sleep 300
-    xcrun stapler staple $BUNDLE_DIR
-    xcrun stapler validate $BUNDLE_DIR
-    spctl -a -vvvv $BUNDLE_DIR || true
+    xcrun stapler staple "$BUNDLE_DIR"
+    xcrun stapler validate "$BUNDLE_DIR"
+    spctl -a -vvvv "$BUNDLE_DIR" || true
   fi
 fi
 
 echo "Packaging installer..."
 PKG_DIR=$BUILD_DIR/pkg
+# Remove any stale packaging data from previous runs
+rm -rf "$PKG_DIR"
 PKG_ROOT=$PKG_DIR/root
 SCRIPTS_DIR=$PKG_DIR/scripts
 RESOURCES_DIR=$PKG_DIR/resources
@@ -145,6 +138,7 @@ pkgbuild --root "$PKG_ROOT" \
          --version "$APP_VERSION" \
          --install-location "/" \
          --scripts "$SCRIPTS_DIR" \
+         ${MAC_INSTALLER_SIGNER_ID:+--sign "$MAC_INSTALLER_SIGNER_ID"} \
          "$INSTALL_PKG"
 
 # Build uninstaller component package
@@ -154,6 +148,7 @@ pkgbuild --nopayload \
          --identifier "$APP_DOMAIN.uninstall" \
          --version "$APP_VERSION" \
          --scripts "$UNINSTALL_SCRIPTS_DIR" \
+         ${MAC_INSTALLER_SIGNER_ID:+--sign "$MAC_INSTALLER_SIGNER_ID"} \
          "$UNINSTALL_COMPONENT_PKG"
 
 # Wrap uninstaller component in a distribution package for clearer UI
@@ -167,30 +162,29 @@ productbuild \
   --distribution "$DEPLOY_DATA_DIR/distribution_uninstall.xml" \
   --package-path "$PKG_DIR" \
   --resources "$UNINSTALL_RESOURCES" \
+  ${MAC_INSTALLER_SIGNER_ID:+--sign "$MAC_INSTALLER_SIGNER_ID"} \
   "$UNINSTALL_PKG"
 
 cp "$PROJECT_DIR/deploy/data/macos/distribution.xml" "$PKG_DIR/distribution.xml"
 
 echo "Creating final installer $FINAL_PKG ..."
-productbuild --distribution "$PKG_DIR/distribution.xml" --package-path "$PKG_DIR" --resources "$RESOURCES_DIR" "$FINAL_PKG"
+productbuild --distribution "$PKG_DIR/distribution.xml" \
+             --package-path "$PKG_DIR" \
+             --resources "$RESOURCES_DIR" \
+             ${MAC_INSTALLER_SIGNER_ID:+--sign "$MAC_INSTALLER_SIGNER_ID"} \
+             "$FINAL_PKG"
+
+if [ "${MAC_CERT_PW+x}" ] && [ "${NOTARIZE_APP+x}" ]; then
+  echo "Notarizing installer package..."
+  xcrun notarytool submit "$FINAL_PKG" --apple-id "$APPLE_DEV_EMAIL" --team-id "$MAC_TEAM_ID" --password "$APPLE_DEV_PASSWORD"
+  sleep 300
+  xcrun stapler staple "$FINAL_PKG"
+  xcrun stapler validate "$FINAL_PKG"
+fi
 
 if [ "${MAC_CERT_PW+x}" ]; then
-  echo "Signing installer package..."
-  security unlock-keychain -p $TEMP_PASS $KEYCHAIN
-  /usr/bin/codesign --force --verbose --timestamp -o runtime --sign "$MAC_SIGNER_ID" "$FINAL_PKG"
   /usr/bin/codesign --verify -vvvv "$FINAL_PKG" || true
-
-  if [ "${NOTARIZE_APP+x}" ]; then
-    echo "Notarizing installer package..."
-    xcrun notarytool submit "$FINAL_PKG" --apple-id $APPLE_DEV_EMAIL --team-id $MAC_TEAM_ID --password $APPLE_DEV_PASSWORD
-    sleep 300
-    xcrun stapler staple "$FINAL_PKG"
-    xcrun stapler validate "$FINAL_PKG"
-    spctl -a -vvvv "$FINAL_PKG" || true
-  fi
+  spctl -a -vvvv "$FINAL_PKG" || true
 fi
 
 echo "Finished, artifact is $FINAL_PKG"
-
-# restore keychain
-security default-keychain -s login.keychain
