@@ -167,6 +167,9 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         bool appSplittunnelingEnabled = newConfigData.value("Conf/appsSplitTunnelingEnabled").toBool();
         m_appSplitTunnelingModel->setRouteMode(appSplitTunnelingRouteMode);
         m_appSplitTunnelingModel->toggleSplitTunneling(appSplittunnelingEnabled);
+        #if defined(Q_OS_WINDOWS)
+            m_appSplitTunnelingModel->setRouteMode(static_cast<int>(Settings::AppsRouteMode::VpnAllExceptApps));
+        #endif
 #endif
         int siteSplitTunnelingRouteMode = newConfigData.value("Conf/routeMode").toInt();
         bool siteSplittunnelingEnabled = newConfigData.value("Conf/sitesSplitTunnelingEnabled").toBool();
