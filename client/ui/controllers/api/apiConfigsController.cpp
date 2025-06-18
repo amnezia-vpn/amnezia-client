@@ -483,6 +483,15 @@ void ApiConfigsController::fillServerConfig(const QString &protocol, const ApiPa
         containerConfig[config_key::responsePacketMagicHeader] = protocolConfig.value(config_key::responsePacketMagicHeader);
         containerConfig[config_key::underloadPacketMagicHeader] = protocolConfig.value(config_key::underloadPacketMagicHeader);
         containerConfig[config_key::transportPacketMagicHeader] = protocolConfig.value(config_key::transportPacketMagicHeader);
+        containerConfig[config_key::specialJunk1] = protocolConfig.value(config_key::specialJunk1);
+        containerConfig[config_key::specialJunk2] = protocolConfig.value(config_key::specialJunk2);
+        containerConfig[config_key::specialJunk3] = protocolConfig.value(config_key::specialJunk3);
+        containerConfig[config_key::specialJunk4] = protocolConfig.value(config_key::specialJunk4);
+        containerConfig[config_key::specialJunk5] = protocolConfig.value(config_key::specialJunk5);
+        containerConfig[config_key::controlledJunk1] = protocolConfig.value(config_key::controlledJunk1);
+        containerConfig[config_key::controlledJunk2] = protocolConfig.value(config_key::controlledJunk2);
+        containerConfig[config_key::controlledJunk3] = protocolConfig.value(config_key::controlledJunk3);
+        containerConfig[config_key::specialHandshakeTimeout] = protocolConfig.value(config_key::specialHandshakeTimeout);
         container[containerName] = containerConfig;
         containers.replace(0, container);
         newServerConfig[config_key::containers] = containers;

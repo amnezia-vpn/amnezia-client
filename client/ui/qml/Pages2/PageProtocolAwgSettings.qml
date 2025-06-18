@@ -317,169 +317,137 @@ PageType {
                 }
 
                 TextFieldWithHeaderType {
-                    id: I1JunkPacketTextField
+                    id: i1JunkPacketTextField
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
                     headerText: qsTr("I1 - First special junk packet")
-                    textField.text: serverI1JunkPacket
-                    textField.validator: IntValidator { bottom: 0 }
+                    textField.text: serverSpecialJunk["I1"]
 
                     textField.onEditingFinished: {
                         if (textField.text !== serverI1JunkPacket) {
                             serverI1JunkPacket = textField.text
                         }
                     }
-
-                    checkEmptyText: true
                 }
 
                 TextFieldWithHeaderType {
-                    id: I2JunkPacketTextField
+                    id: i2JunkPacketTextField
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
                     headerText: qsTr("I2 - Second special junk packet")
-                    textField.text: serverI2JunkPacket
-                    textField.validator: IntValidator { bottom: 0 }
+                    textField.text: serverSpecialJunk["I2"]
 
                     textField.onEditingFinished: {
                         if (textField.text !== serverI2JunkPacket) {
                             serverI2JunkPacket = textField.text
                         }
                     }
-
-                    checkEmptyText: true
                 }
 
                 TextFieldWithHeaderType {
-                    id: I3JunkPacketTextField
+                    id: i3JunkPacketTextField
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
                     headerText: qsTr("I3 - Third special junk packet")
-                    textField.text: serverI3JunkPacket
-                    textField.validator: IntValidator { bottom: 0 }
+                    textField.text: serverSpecialJunk["I3"]
 
                     textField.onEditingFinished: {
                         if (textField.text !== serverI3JunkPacket) {
                             serverI3JunkPacket = textField.text
                         }
                     }
-
-                    checkEmptyText: true
                 }
 
                 TextFieldWithHeaderType {
-                    id: I4JunkPacketTextField
+                    id: i4JunkPacketTextField
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
                     headerText: qsTr("I4 - Fourth special junk packet")
-                    textField.text: serverI4JunkPacket
-                    textField.validator: IntValidator { bottom: 0 }
+                    textField.text: serverSpecialJunk["I4"]
 
                     textField.onEditingFinished: {
                         if (textField.text !== serverI4JunkPacket) {
                             serverI4JunkPacket = textField.text
                         }
                     }
-
-                    checkEmptyText: true
                 }
 
                 TextFieldWithHeaderType {
-                    id: I5JunkPacketTextField
+                    id: i5JunkPacketTextField
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
                     headerText: qsTr("I5 - Fifth special junk packet")
-                    textField.text: serverI5JunkPacket
-                    textField.validator: IntValidator { bottom: 0 }
+                    textField.text: serverSpecialJunk["I5"]
 
                     textField.onEditingFinished: {
                         if (textField.text !== serverI5JunkPacket) {
                             serverI5JunkPacket = textField.text
                         }
                     }
-
-                    checkEmptyText: true
                 }
 
                 TextFieldWithHeaderType {
-                    id: J1JunkPacketTextField
+                    id: j1JunkPacketTextField
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
                     headerText: qsTr("J1 - First controlled junk packet")
-                    textField.text: serverJ1JunkPacket
-                    textField.validator: IntValidator { bottom: 0 }
+                    textField.text: serverControlledJunk["J1"]
 
                     textField.onEditingFinished: {
                         if (textField.text !== serverJ1JunkPacket) {
                             serverJ1JunkPacket = textField.text
                         }
                     }
-
-                    checkEmptyText: true
                 }
 
                 TextFieldWithHeaderType {
-                    id: J2JunkPacketTextField
+                    id: j2JunkPacketTextField
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
                     headerText: qsTr("J2 - Second controlled junk packet")
-                    textField.text: serverJ2JunkPacket
-                    textField.validator: IntValidator { bottom: 0 }
+                    textField.text: serverControlledJunk[J2]
 
                     textField.onEditingFinished: {
                         if (textField.text !== serverJ2JunkPacket) {
                             serverJ2JunkPacket = textField.text
                         }
                     }
-
-                    checkEmptyText: true
                 }
 
                 TextFieldWithHeaderType {
-                    id: J3JunkPacketTextField
+                    id: j3JunkPacketTextField
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
                     headerText: qsTr("J3 - Third controlled junk packet")
-                    textField.text: serverJ3JunkPacket
-                    textField.validator: IntValidator { bottom: 0 }
+                    textField.text: serverControlledJunk[J3]
 
                     textField.onEditingFinished: {
                         if (textField.text !== serverJ3JunkPacket) {
                             serverJ3JunkPacket = textField.text
                         }
                     }
-
-                    checkEmptyText: true
                 }
 
                 TextFieldWithHeaderType {
-                    id: ItimeTextField
+                    id: iTimeTextField
                     Layout.fillWidth: true
                     Layout.topMargin: 16
 
                     headerText: qsTr("Itime - Special handshake timeout")
-                    textField.text: serverSepciaHandshaketIntervalTime
+                    textField.text: serverSpeciaHandshakeIntervalTime
                     textField.validator: IntValidator { bottom: 0 }
 
                     textField.onEditingFinished: {
-                        if (textField.text !== serverSepcialHandshakeIntervalTime) {
-                            serverSepcialHandshakeIntervalTime = textField.text
-                        }
-                    }
-
-                    checkEmptyText: true
-
-                    onActiveFocusChanged: {
-                        if(activeFocus) {
-                            listview.positionViewAtEnd()
+                        if (textField.text !== serverSepcialHandshakeTimeout) {
+                            serverSepcialHandshakeTimeout = textField.text
                         }
                     }
                 }
@@ -500,15 +468,15 @@ PageType {
                              junkPacketMaxSizeTextField.errorText === "" &&
                              junkPacketMinSizeTextField.errorText === "" &&
                              junkPacketCountTextField.errorText === "" &&
-                             I1JunkPacketTextField.errorText === "" &&
-                             I2JunkPacketTextField.errorText === "" &&
-                             I3JunkPacketTextField.errorText === "" &&
-                             I4JunkPacketTextField.errorText === "" &&
-                             I5JunkPacketTextField.errorText === "" &&
-                             J1JunkPacketTextField.errorText === "" &&
-                             J2JunkPacketTextField.errorText === "" &&
-                             J3JunkPacketTextField.errorText === "" &&
-                             ItimeTextField.errorText === "" &&
+                             i1JunkPacketTextField.errorText === "" &&
+                             i2JunkPacketTextField.errorText === "" &&
+                             i3JunkPacketTextField.errorText === "" &&
+                             i4JunkPacketTextField.errorText === "" &&
+                             i5JunkPacketTextField.errorText === "" &&
+                             j1JunkPacketTextField.errorText === "" &&
+                             j2JunkPacketTextField.errorText === "" &&
+                             j3JunkPacketTextField.errorText === "" &&
+                             iTimeTextField.errorText === "" &&
                              portTextField.errorText === "" &&
                              vpnAddressSubnetTextField.errorText === ""
 

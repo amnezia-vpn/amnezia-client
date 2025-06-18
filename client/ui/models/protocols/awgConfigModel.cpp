@@ -25,18 +25,34 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     case Roles::PortRole: m_serverProtocolConfig.insert(config_key::port, value.toString()); break;
 
     case Roles::ClientMtuRole: m_clientProtocolConfig.insert(config_key::mtu, value.toString()); break;
-    case Roles::ClientJunkPacketCountRole: m_clientProtocolConfig.insert(config_key::junkPacketCount, value.toString()); break;
-    case Roles::ClientJunkPacketMinSizeRole: m_clientProtocolConfig.insert(config_key::junkPacketMinSize, value.toString()); break;
-    case Roles::ClientJunkPacketMaxSizeRole: m_clientProtocolConfig.insert(config_key::junkPacketMaxSize, value.toString()); break;
+    case Roles::ClientJunkPacketCountRole:
+        m_clientProtocolConfig.insert(config_key::junkPacketCount, value.toString());
+        break;
+    case Roles::ClientJunkPacketMinSizeRole:
+        m_clientProtocolConfig.insert(config_key::junkPacketMinSize, value.toString());
+        break;
+    case Roles::ClientJunkPacketMaxSizeRole:
+        m_clientProtocolConfig.insert(config_key::junkPacketMaxSize, value.toString());
+        break;
 
-    case Roles::ServerJunkPacketCountRole: m_serverProtocolConfig.insert(config_key::junkPacketCount, value.toString()); break;
-    case Roles::ServerJunkPacketMinSizeRole: m_serverProtocolConfig.insert(config_key::junkPacketMinSize, value.toString()); break;
-    case Roles::ServerJunkPacketMaxSizeRole: m_serverProtocolConfig.insert(config_key::junkPacketMaxSize, value.toString()); break;
-    case Roles::ServerInitPacketJunkSizeRole: m_serverProtocolConfig.insert(config_key::initPacketJunkSize, value.toString()); break;
+    case Roles::ServerJunkPacketCountRole:
+        m_serverProtocolConfig.insert(config_key::junkPacketCount, value.toString());
+        break;
+    case Roles::ServerJunkPacketMinSizeRole:
+        m_serverProtocolConfig.insert(config_key::junkPacketMinSize, value.toString());
+        break;
+    case Roles::ServerJunkPacketMaxSizeRole:
+        m_serverProtocolConfig.insert(config_key::junkPacketMaxSize, value.toString());
+        break;
+    case Roles::ServerInitPacketJunkSizeRole:
+        m_serverProtocolConfig.insert(config_key::initPacketJunkSize, value.toString());
+        break;
     case Roles::ServerResponsePacketJunkSizeRole:
         m_serverProtocolConfig.insert(config_key::responsePacketJunkSize, value.toString());
         break;
-    case Roles::ServerInitPacketMagicHeaderRole: m_serverProtocolConfig.insert(config_key::initPacketMagicHeader, value.toString()); break;
+    case Roles::ServerInitPacketMagicHeaderRole:
+        m_serverProtocolConfig.insert(config_key::initPacketMagicHeader, value.toString());
+        break;
     case Roles::ServerResponsePacketMagicHeaderRole:
         m_serverProtocolConfig.insert(config_key::responsePacketMagicHeader, value.toString());
         break;
@@ -45,6 +61,33 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
         break;
     case Roles::ServerTransportPacketMagicHeaderRole:
         m_serverProtocolConfig.insert(config_key::transportPacketMagicHeader, value.toString());
+        break;
+    case Roles::ServerSpecialJunk1Role:
+        m_serverProtocolConfig.insert(config_key::specialJunk1, value.toString());
+        break;
+    case Roles::ServerSpecialJunk2Role:
+        m_serverProtocolConfig.insert(config_key::specialJunk2, value.toString());
+        break;
+    case Roles::ServerSpecialJunk3Role:
+        m_serverProtocolConfig.insert(config_key::specialJunk3, value.toString());
+        break;
+    case Roles::ServerSpecialJunk4Role:
+        m_serverProtocolConfig.insert(config_key::specialJunk4, value.toString());
+        break;
+    case Roles::ServerSpecialJunk5Role:
+        m_serverProtocolConfig.insert(config_key::specialJunk5, value.toString());
+        break;
+    case Roles::ServerControlledJunk1Role:
+        m_serverProtocolConfig.insert(config_key::controlledJunk1, value.toString());
+        break;
+    case Roles::ServerControlledJunk2Role:
+        m_serverProtocolConfig.insert(config_key::controlledJunk2, value.toString());
+        break;
+    case Roles::ServerControlledJunk3Role:
+        m_serverProtocolConfig.insert(config_key::controlledJunk3, value.toString());
+        break;
+    case Roles::ServerSpecialHandshakeTimeoutRole:
+        m_serverProtocolConfig.insert(config_key::specialHandshakeTimeout, value.toString());
         break;
     }
 
@@ -71,11 +114,25 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ServerJunkPacketMinSizeRole: return m_serverProtocolConfig.value(config_key::junkPacketMinSize);
     case Roles::ServerJunkPacketMaxSizeRole: return m_serverProtocolConfig.value(config_key::junkPacketMaxSize);
     case Roles::ServerInitPacketJunkSizeRole: return m_serverProtocolConfig.value(config_key::initPacketJunkSize);
-    case Roles::ServerResponsePacketJunkSizeRole: return m_serverProtocolConfig.value(config_key::responsePacketJunkSize);
+    case Roles::ServerResponsePacketJunkSizeRole:
+        return m_serverProtocolConfig.value(config_key::responsePacketJunkSize);
     case Roles::ServerInitPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::initPacketMagicHeader);
-    case Roles::ServerResponsePacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::responsePacketMagicHeader);
-    case Roles::ServerUnderloadPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::underloadPacketMagicHeader);
-    case Roles::ServerTransportPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::transportPacketMagicHeader);
+    case Roles::ServerResponsePacketMagicHeaderRole:
+        return m_serverProtocolConfig.value(config_key::responsePacketMagicHeader);
+    case Roles::ServerUnderloadPacketMagicHeaderRole:
+        return m_serverProtocolConfig.value(config_key::underloadPacketMagicHeader);
+    case Roles::ServerTransportPacketMagicHeaderRole:
+        return m_serverProtocolConfig.value(config_key::transportPacketMagicHeader);
+    case Roles::ServerSpecialJunk1Role: return m_serverProtocolConfig.value(config_key::specialJunk1);
+    case Roles::ServerSpecialJunk2Role: return m_serverProtocolConfig.value(config_key::specialJunk2);
+    case Roles::ServerSpecialJunk3Role: return m_serverProtocolConfig.value(config_key::specialJunk3);
+    case Roles::ServerSpecialJunk4Role: return m_serverProtocolConfig.value(config_key::specialJunk4);
+    case Roles::ServerSpecialJunk5Role: return m_serverProtocolConfig.value(config_key::specialJunk5);
+    case Roles::ServerControlledJunk1Role: return m_serverProtocolConfig.value(config_key::controlledJunk1);
+    case Roles::ServerControlledJunk2Role: return m_serverProtocolConfig.value(config_key::controlledJunk2);
+    case Roles::ServerControlledJunk3Role: return m_serverProtocolConfig.value(config_key::controlledJunk3);
+    case Roles::ServerSpecialHandshakeTimeoutRole:
+        return m_serverProtocolConfig.value(config_key::specialHandshakeTimeout);
     }
 
     return QVariant();
@@ -90,12 +147,15 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
 
     QJsonObject serverProtocolConfig = config.value(config_key::awg).toObject();
 
-    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Awg), Proto::Awg);
+    auto defaultTransportProto =
+            ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Awg), Proto::Awg);
     m_serverProtocolConfig.insert(config_key::transport_proto,
                                   serverProtocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
     m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);
-    m_serverProtocolConfig[config_key::subnet_address] = serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
-    m_serverProtocolConfig[config_key::port] = serverProtocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
+    m_serverProtocolConfig[config_key::subnet_address] =
+            serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
+    m_serverProtocolConfig[config_key::port] =
+            serverProtocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
     m_serverProtocolConfig[config_key::junkPacketCount] =
             serverProtocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
     m_serverProtocolConfig[config_key::junkPacketMinSize] =
@@ -105,25 +165,51 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
     m_serverProtocolConfig[config_key::initPacketJunkSize] =
             serverProtocolConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize);
     m_serverProtocolConfig[config_key::responsePacketJunkSize] =
-            serverProtocolConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize);
+            serverProtocolConfig.value(config_key::responsePacketJunkSize)
+                    .toString(protocols::awg::defaultResponsePacketJunkSize);
     m_serverProtocolConfig[config_key::initPacketMagicHeader] =
-            serverProtocolConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader);
+            serverProtocolConfig.value(config_key::initPacketMagicHeader)
+                    .toString(protocols::awg::defaultInitPacketMagicHeader);
     m_serverProtocolConfig[config_key::responsePacketMagicHeader] =
-            serverProtocolConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader);
+            serverProtocolConfig.value(config_key::responsePacketMagicHeader)
+                    .toString(protocols::awg::defaultResponsePacketMagicHeader);
     m_serverProtocolConfig[config_key::underloadPacketMagicHeader] =
-            serverProtocolConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader);
+            serverProtocolConfig.value(config_key::underloadPacketMagicHeader)
+                    .toString(protocols::awg::defaultUnderloadPacketMagicHeader);
     m_serverProtocolConfig[config_key::transportPacketMagicHeader] =
-            serverProtocolConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader);
+            serverProtocolConfig.value(config_key::transportPacketMagicHeader)
+                    .toString(protocols::awg::defaultTransportPacketMagicHeader);
+    m_serverProtocolConfig[config_key::specialJunk1] =
+            serverProtocolConfig.value(config_key::specialJunk1).toString(protocols::awg::defaultSpecialJunk1);
+    m_serverProtocolConfig[config_key::specialJunk2] =
+            serverProtocolConfig.value(config_key::specialJunk2).toString(protocols::awg::defaultSpecialJunk2);
+    m_serverProtocolConfig[config_key::specialJunk3] =
+            serverProtocolConfig.value(config_key::specialJunk3).toString(protocols::awg::defaultSpecialJunk3);
+    m_serverProtocolConfig[config_key::specialJunk4] =
+            serverProtocolConfig.value(config_key::specialJunk4).toString(protocols::awg::defaultSpecialJunk4);
+    m_serverProtocolConfig[config_key::specialJunk5] =
+            serverProtocolConfig.value(config_key::specialJunk5).toString(protocols::awg::defaultSpecialJunk5);
+    m_serverProtocolConfig[config_key::controlledJunk1] =
+            serverProtocolConfig.value(config_key::controlledJunk1).toString(protocols::awg::defaultControlledJunk1);
+    m_serverProtocolConfig[config_key::controlledJunk2] =
+            serverProtocolConfig.value(config_key::controlledJunk2).toString(protocols::awg::defaultControlledJunk2);
+    m_serverProtocolConfig[config_key::controlledJunk3] =
+            serverProtocolConfig.value(config_key::controlledJunk3).toString(protocols::awg::defaultControlledJunk3);
+    m_serverProtocolConfig[config_key::specialHandshakeTimeout] =
+            serverProtocolConfig.value(config_key::specialHandshakeTimeout).toString(protocols::awg::defaultSpecialHandshakeTimeout);
 
     auto lastConfig = m_serverProtocolConfig.value(config_key::last_config).toString();
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
     m_clientProtocolConfig[config_key::mtu] = clientProtocolConfig[config_key::mtu].toString(protocols::awg::defaultMtu);
     m_clientProtocolConfig[config_key::junkPacketCount] =
-            clientProtocolConfig.value(config_key::junkPacketCount).toString(m_serverProtocolConfig[config_key::junkPacketCount].toString());
+            clientProtocolConfig.value(config_key::junkPacketCount)
+                    .toString(m_serverProtocolConfig[config_key::junkPacketCount].toString());
     m_clientProtocolConfig[config_key::junkPacketMinSize] =
-            clientProtocolConfig.value(config_key::junkPacketMinSize).toString(m_serverProtocolConfig[config_key::junkPacketMinSize].toString());
+            clientProtocolConfig.value(config_key::junkPacketMinSize)
+                    .toString(m_serverProtocolConfig[config_key::junkPacketMinSize].toString());
     m_clientProtocolConfig[config_key::junkPacketMaxSize] =
-            clientProtocolConfig.value(config_key::junkPacketMaxSize).toString(m_serverProtocolConfig[config_key::junkPacketMaxSize].toString());
+            clientProtocolConfig.value(config_key::junkPacketMaxSize)
+                    .toString(m_serverProtocolConfig[config_key::junkPacketMaxSize].toString());
     endResetModel();
 }
 
@@ -189,6 +275,16 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ServerUnderloadPacketMagicHeaderRole] = "serverUnderloadPacketMagicHeader";
     roles[ServerTransportPacketMagicHeaderRole] = "serverTransportPacketMagicHeader";
 
+    roles[ServerSpecialJunk1Role] = "specialJunk1";
+    roles[ServerSpecialJunk2Role] = "specialJunk2";
+    roles[ServerSpecialJunk3Role] = "specialJunk3";
+    roles[ServerSpecialJunk4Role] = "specialJunk4";
+    roles[ServerSpecialJunk5Role] = "specialJunk5";
+    roles[ServerControlledJunk1Role] = "controlledJunk1";
+    roles[ServerControlledJunk2Role] = "controlledJunk2";
+    roles[ServerControlledJunk3Role] = "controlledJunk3";
+    roles[ServerSpecialHandshakeTimeoutRole] = "specialHandshakeTimeout";
+
     return roles;
 }
 
@@ -197,37 +293,67 @@ AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig)
     auto lastConfig = serverProtocolConfig.value(config_key::last_config).toString();
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
     clientMtu = clientProtocolConfig[config_key::mtu].toString(protocols::awg::defaultMtu);
-    clientJunkPacketCount = clientProtocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
-    clientJunkPacketMinSize = clientProtocolConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize);
-    clientJunkPacketMaxSize = clientProtocolConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize);
+    clientJunkPacketCount =
+            clientProtocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
+    clientJunkPacketMinSize =
+            clientProtocolConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize);
+    clientJunkPacketMaxSize =
+            clientProtocolConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize);
 
-    subnetAddress = serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
+    subnetAddress =
+            serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
     port = serverProtocolConfig.value(config_key::port).toString(protocols::awg::defaultPort);
-    serverJunkPacketCount = serverProtocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
-    serverJunkPacketMinSize = serverProtocolConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize);
-    serverJunkPacketMaxSize = serverProtocolConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize);
-    serverInitPacketJunkSize = serverProtocolConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize);
-    serverResponsePacketJunkSize =
-            serverProtocolConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize);
-    serverInitPacketMagicHeader =
-            serverProtocolConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader);
-    serverResponsePacketMagicHeader =
-            serverProtocolConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader);
-    serverUnderloadPacketMagicHeader =
-            serverProtocolConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader);
-    serverTransportPacketMagicHeader =
-            serverProtocolConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader);
+    serverJunkPacketCount =
+            serverProtocolConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
+    serverJunkPacketMinSize =
+            serverProtocolConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize);
+    serverJunkPacketMaxSize =
+            serverProtocolConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize);
+    serverInitPacketJunkSize =
+            serverProtocolConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize);
+    serverResponsePacketJunkSize = serverProtocolConfig.value(config_key::responsePacketJunkSize)
+                                           .toString(protocols::awg::defaultResponsePacketJunkSize);
+    serverInitPacketMagicHeader = serverProtocolConfig.value(config_key::initPacketMagicHeader)
+                                          .toString(protocols::awg::defaultInitPacketMagicHeader);
+    serverResponsePacketMagicHeader = serverProtocolConfig.value(config_key::responsePacketMagicHeader)
+                                              .toString(protocols::awg::defaultResponsePacketMagicHeader);
+    serverUnderloadPacketMagicHeader = serverProtocolConfig.value(config_key::underloadPacketMagicHeader)
+                                               .toString(protocols::awg::defaultUnderloadPacketMagicHeader);
+    serverTransportPacketMagicHeader = serverProtocolConfig.value(config_key::transportPacketMagicHeader)
+                                               .toString(protocols::awg::defaultTransportPacketMagicHeader);
+    serverSpecialJunk[config_key::specialJunk1] =
+            serverProtocolConfig.value(config_key::specialJunk1).toString(protocols::awg::defaultSpecialJunk1);
+    serverSpecialJunk[config_key::specialJunk2] =
+            serverProtocolConfig.value(config_key::specialJunk2).toString(protocols::awg::defaultSpecialJunk2);
+    serverSpecialJunk[config_key::specialJunk3] =
+            serverProtocolConfig.value(config_key::specialJunk3).toString(protocols::awg::defaultSpecialJunk3);
+    serverSpecialJunk[config_key::specialJunk4] =
+            serverProtocolConfig.value(config_key::specialJunk4).toString(protocols::awg::defaultSpecialJunk4);
+    serverSpecialJunk[config_key::specialJunk5] =
+            serverProtocolConfig.value(config_key::specialJunk5).toString(protocols::awg::defaultSpecialJunk5);
+    serverControlledJunk[config_key::controlledJunk1] =
+            serverProtocolConfig.value(config_key::controlledJunk1).toString(protocols::awg::defaultControlledJunk1);
+    serverControlledJunk[config_key::controlledJunk2] =
+            serverProtocolConfig.value(config_key::controlledJunk2).toString(protocols::awg::defaultControlledJunk2);
+    serverControlledJunk[config_key::controlledJunk3] =
+            serverProtocolConfig.value(config_key::controlledJunk3).toString(protocols::awg::defaultControlledJunk3);
+    serverSpecialHandshakeTimeout = serverProtocolConfig.value(config_key::specialHandshakeTimeout)
+                                            .toString(protocols::awg::defaultSpecialHandshakeTimeout);
 }
 
 bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
 {
     if (subnetAddress != other.subnetAddress || port != other.port || serverJunkPacketCount != other.serverJunkPacketCount
-        || serverJunkPacketMinSize != other.serverJunkPacketMinSize || serverJunkPacketMaxSize != other.serverJunkPacketMaxSize
-        || serverInitPacketJunkSize != other.serverInitPacketJunkSize || serverResponsePacketJunkSize != other.serverResponsePacketJunkSize
+        || serverJunkPacketMinSize != other.serverJunkPacketMinSize
+        || serverJunkPacketMaxSize != other.serverJunkPacketMaxSize
+        || serverInitPacketJunkSize != other.serverInitPacketJunkSize
+        || serverResponsePacketJunkSize != other.serverResponsePacketJunkSize
         || serverInitPacketMagicHeader != other.serverInitPacketMagicHeader
         || serverResponsePacketMagicHeader != other.serverResponsePacketMagicHeader
         || serverUnderloadPacketMagicHeader != other.serverUnderloadPacketMagicHeader
-        || serverTransportPacketMagicHeader != other.serverTransportPacketMagicHeader) {
+        || serverTransportPacketMagicHeader != other.serverTransportPacketMagicHeader
+        || serverSpecialJunk != other.serverSpecialJunk || serverControlledJunk != other.serverControlledJunk
+        || serverSpecialHandshakeTimeout != other.serverSpecialHandshakeTimeout) {
         return false;
     }
     return true;
@@ -236,7 +362,8 @@ bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
 bool AwgConfig::hasEqualClientSettings(const AwgConfig &other) const
 {
     if (clientMtu != other.clientMtu || clientJunkPacketCount != other.clientJunkPacketCount
-        || clientJunkPacketMinSize != other.clientJunkPacketMinSize || clientJunkPacketMaxSize != other.clientJunkPacketMaxSize) {
+        || clientJunkPacketMinSize != other.clientJunkPacketMinSize
+        || clientJunkPacketMaxSize != other.clientJunkPacketMaxSize) {
         return false;
     }
     return true;

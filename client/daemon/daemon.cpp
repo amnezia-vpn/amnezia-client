@@ -404,6 +404,34 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
     config.m_transportPacketMagicHeader = obj.value("H4").toString();
   }
 
+  if (!obj.value("I1").isNull()) {
+    config.m_specialJunk["I1"] = obj.value("I1").toString();  
+  }
+  if (!obj.value("I2").isNull()) {
+    config.m_specialJunk["I2"] = obj.value("I2").toString();  
+  }
+  if (!obj.value("I3").isNull()) {
+    config.m_specialJunk["I3"] = obj.value("I3").toString();  
+  }
+  if (!obj.value("I4").isNull()) {
+    config.m_specialJunk["I4"] = obj.value("I4").toString();  
+  }
+  if (!obj.value("I5").isNull()) {
+    config.m_specialJunk["I5"] = obj.value("I5").toString();  
+  }
+  if (!obj.value("J1").isNull()) {
+    config.m_controlledJunk["J1"] = obj.value("J1").toString();  
+  }
+  if (!obj.value("J2").isNull()) {
+    config.m_controlledJunk["J2"] = obj.value("J2").toString();  
+  }
+  if (!obj.value("J3").isNull()) {
+    config.m_controlledJunk["J3"] = obj.value("J3").toString();  
+  }
+  if (!obj.value("Itime").isNull()) {
+    config.m_specialHandshakeTimeout = obj.value("Itime").toString();  
+  }
+
   return true;
 }
 

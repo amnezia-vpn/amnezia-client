@@ -138,6 +138,16 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
     out << "H4 = " << m_transportPacketMagicHeader << "\n";
   }
 
+  for (const QString& key : m_specialJunk.keys()) {
+    out << key << " = " << m_specialJunk[key] << "\n";
+  }
+  for (const QString& key : m_controlledJunk.keys()) {
+    out << key << " = " << m_controlledJunk[key] << "\n";
+  }
+  if (!m_specialHandshakeTimeout.isNull()) {
+    out << "Itime = " << m_specialHandshakeTimeout << "\n";
+  }
+
   // If any extra config was provided, append it now.
   for (const QString& key : extra.keys()) {
     out << key << " = " << extra[key] << "\n";

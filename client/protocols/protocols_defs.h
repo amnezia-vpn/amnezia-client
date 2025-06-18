@@ -76,6 +76,15 @@ namespace amnezia
         constexpr char responsePacketMagicHeader[] = "H2";
         constexpr char underloadPacketMagicHeader[] = "H3";
         constexpr char transportPacketMagicHeader[] = "H4";
+        constexpr char specialJunk1[] = "I1";
+        constexpr char specialJunk2[] = "I2";
+        constexpr char specialJunk3[] = "I3";
+        constexpr char specialJunk4[] = "I4";
+        constexpr char specialJunk5[] = "I5";
+        constexpr char controlledJunk1[] = "J1";
+        constexpr char controlledJunk2[] = "J2";
+        constexpr char controlledJunk3[] = "J3";
+        constexpr char specialHandshakeTimeout[] = "Itime";
 
         constexpr char openvpn[] = "openvpn";
         constexpr char wireguard[] = "wireguard";
@@ -218,6 +227,15 @@ namespace amnezia
             constexpr char defaultResponsePacketMagicHeader[] = "3288052141";
             constexpr char defaultTransportPacketMagicHeader[] = "2528465083";
             constexpr char defaultUnderloadPacketMagicHeader[] = "1766607858";
+            constexpr char defaultSpecialJunk1[] = "";
+            constexpr char defaultSpecialJunk2[] = "";
+            constexpr char defaultSpecialJunk3[] = "";
+            constexpr char defaultSpecialJunk4[] = "";
+            constexpr char defaultSpecialJunk5[] = "";
+            constexpr char defaultControlledJunk1[] = "";
+            constexpr char defaultControlledJunk2[] = "";
+            constexpr char defaultControlledJunk3[] = "";
+            constexpr char defaultSpecialHandshakeTimeout[] = "0";
         }
 
         namespace socks5Proxy

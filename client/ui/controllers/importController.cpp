@@ -285,6 +285,15 @@ void ImportController::processNativeWireGuardConfig()
         clientProtocolConfig[config_key::responsePacketMagicHeader] = "2";
         clientProtocolConfig[config_key::underloadPacketMagicHeader] = "3";
         clientProtocolConfig[config_key::transportPacketMagicHeader] = "4";
+        clientProtocolConfig[config_key::specialJunk1] = "";
+        clientProtocolConfig[config_key::specialJunk2] = "";
+        clientProtocolConfig[config_key::specialJunk3] = "";
+        clientProtocolConfig[config_key::specialJunk4] = "";
+        clientProtocolConfig[config_key::specialJunk5] = "";
+        clientProtocolConfig[config_key::controlledJunk1] = "";
+        clientProtocolConfig[config_key::controlledJunk2] = "";
+        clientProtocolConfig[config_key::controlledJunk3] = "";
+        clientProtocolConfig[config_key::specialHandshakeTimeout] = "0";
 
         clientProtocolConfig[config_key::isObfuscationEnabled] = true;
 
@@ -443,7 +452,16 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         && !configMap.value(config_key::responsePacketJunkSize).isEmpty() && !configMap.value(config_key::initPacketMagicHeader).isEmpty()
         && !configMap.value(config_key::responsePacketMagicHeader).isEmpty()
         && !configMap.value(config_key::underloadPacketMagicHeader).isEmpty()
-        && !configMap.value(config_key::transportPacketMagicHeader).isEmpty()) {
+        && !configMap.value(config_key::transportPacketMagicHeader).isEmpty()
+        && !configMap.value(config_key::specialJunk1).isEmpty()
+        && !configMap.value(config_key::specialJunk2).isEmpty()
+        && !configMap.value(config_key::specialJunk3).isEmpty()
+        && !configMap.value(config_key::specialJunk4).isEmpty()
+        && !configMap.value(config_key::specialJunk5).isEmpty()
+        && !configMap.value(config_key::controlledJunk1).isEmpty()
+        && !configMap.value(config_key::controlledJunk2).isEmpty()
+        && !configMap.value(config_key::controlledJunk3).isEmpty()
+        && !configMap.value(config_key::specialHandshakeTimeout).isEmpty()) {
         lastConfig[config_key::junkPacketCount] = configMap.value(config_key::junkPacketCount);
         lastConfig[config_key::junkPacketMinSize] = configMap.value(config_key::junkPacketMinSize);
         lastConfig[config_key::junkPacketMaxSize] = configMap.value(config_key::junkPacketMaxSize);
@@ -453,6 +471,15 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         lastConfig[config_key::responsePacketMagicHeader] = configMap.value(config_key::responsePacketMagicHeader);
         lastConfig[config_key::underloadPacketMagicHeader] = configMap.value(config_key::underloadPacketMagicHeader);
         lastConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
+        lastConfig[config_key::specialJunk1] = configMap.value(config_key::specialJunk1);
+        lastConfig[config_key::specialJunk2] = configMap.value(config_key::specialJunk2);
+        lastConfig[config_key::specialJunk3] = configMap.value(config_key::specialJunk3);
+        lastConfig[config_key::specialJunk4] = configMap.value(config_key::specialJunk4);
+        lastConfig[config_key::specialJunk5] = configMap.value(config_key::specialJunk5);
+        lastConfig[config_key::controlledJunk1] = configMap.value(config_key::controlledJunk1);
+        lastConfig[config_key::controlledJunk2] = configMap.value(config_key::controlledJunk2);
+        lastConfig[config_key::controlledJunk3] = configMap.value(config_key::controlledJunk3);
+        lastConfig[config_key::specialHandshakeTimeout] = configMap.value(config_key::specialHandshakeTimeout);
         protocolName = "awg";
         m_configType = ConfigTypes::Awg;
     }
