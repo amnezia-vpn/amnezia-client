@@ -162,13 +162,26 @@ PageType {
                             clickedFunc: function() {
                                 forceActiveFocus()
 
-                                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                                    return
-                                }
+                                var headerText = qsTr("Save settings?")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
 
-                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.updateContainer(ShadowSocksConfigModel.getConfig())
+                                var yesButtonFunction = function() {
+                                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                        PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                        return
+                                    }
+
+                                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                                    InstallController.updateContainer(ShadowSocksConfigModel.getConfig())
+                                }
+                                var noButtonFunction = function() {
+                                    if (!GC.isMobile()) {
+                                        saveRestartButton.forceActiveFocus()
+                                    }
+                                }
+                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
                         }
                     }

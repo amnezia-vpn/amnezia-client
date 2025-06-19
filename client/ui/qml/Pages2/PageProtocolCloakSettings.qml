@@ -62,6 +62,14 @@ PageType {
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
 
+                    property var focusItemId: trafficFromField.neabled ?
+                                                  trafficFromField :
+                                                  portTextField.enabled ?
+                                                    portTextField :
+                                                    cipherDropDown.enabled ?
+                                                        cipherDropDown :
+                                                        saveRestartButton
+
                     property alias trafficFromField: trafficFromField
 
                     ColumnLayout {
@@ -88,6 +96,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 32
 
+                            enabled: isTrafficEditable
+
                             headerText: qsTr("Disguised as traffic from")
                             textField.text: site
 
@@ -112,6 +122,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
+                            enabled: isPortEditable
+
                             headerText: qsTr("Port")
                             textField.text: port
                             textField.maximumLength: 5
@@ -128,6 +140,8 @@ PageType {
                             id: cipherDropDown
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+
+                            enabled: isCipherEditable
 
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")
@@ -172,18 +186,35 @@ PageType {
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
+                            enabled: isPortEditable | isTrafficEditable |isCipherEditable
+
                             text: qsTr("Save")
 
                             clickedFunc: function() {
                                 forceActiveFocus()
 
-                                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                                    return
+                                var headerText = qsTr("Save settings?")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
+
+                                var yesButtonFunction = function() {
+                                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                        PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                        return
+                                    }
+
+                                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                                    InstallController.updateContainer(CloakConfigModel.getConfig())
                                 }
 
-                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.updateContainer(CloakConfigModel.getConfig())
+                                var noButtonFunction = function() {
+                                    if (!GC.isMobile()) {
+                                        saveButton.forceActiveFocus()
+                                    }
+                                }
+
+                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
                         }
                     }
