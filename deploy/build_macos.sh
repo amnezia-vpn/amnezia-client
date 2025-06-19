@@ -35,7 +35,7 @@ DEPLOY_DATA_DIR=$PROJECT_DIR/deploy/data/macos
 
 # Search Qt
 if [ -z "${QT_VERSION+x}" ]; then
-QT_VERSION=6.4.3;
+QT_VERSION=6.8.3;
 QT_BIN_DIR=$HOME/Qt/$QT_VERSION/macos/bin
 fi
 
@@ -71,14 +71,16 @@ rsync -av --exclude="$PLIST_NAME" --exclude=post_install.sh --exclude=post_unins
 
 if [ "${MAC_CERT_PW+x}" ]; then
 
+# Path to the p12 that contains the Developer ID *Application* certificate
   CERTIFICATE_P12=$DEPLOY_DIR/PrivacyTechAppleCertDeveloperId.p12
-mkdir -p "$PKG_DIR" "$SCRIPTS_DIR" "$RESOURCES_DIR" "$UNINSTALL_SCRIPTS_DIR"
 
-# Ensure launchd plist is present in the app bundle root
-cp "$DEPLOY_DATA_DIR/$PLIST_NAME" "$BUNDLE_DIR/$PLIST_NAME"
-pkgbuild --component "$BUNDLE_DIR" \
-         --install-location "/Applications" \
-  security find-identity -p codesigning
+# Ensure launchd plist is bundled, but place it inside Resources so that
+# the bundle keeps a valid structure (nothing but `Contents` at the root).
+mkdir -p "$BUNDLE_DIR/Contents/Resources"
+cp "$DEPLOY_DATA_DIR/$PLIST_NAME" "$BUNDLE_DIR/Contents/Resources/$PLIST_NAME"
+
+# Show available signing identities (useful for debugging)
+security find-identity -p codesigning || true
 
   echo "Signing App bundle..."
   /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "$MAC_SIGNER_ID" "$BUNDLE_DIR"
@@ -133,11 +135,35 @@ cp "$PROJECT_DIR/LICENSE" "$RESOURCES_DIR/LICENSE"
 
 APP_VERSION=$(grep -m1 -E 'project\(' "$PROJECT_DIR/CMakeLists.txt" | sed -E 's/.*VERSION ([0-9.]+).*/\1/')
 echo "Building component package $INSTALL_PKG ..."
+
+# Disable bundle relocation so the app always ends up in /Applications even if
+# another copy is lying around somewhere. We do this by letting pkgbuild
+# analyse the contents, flipping the BundleIsRelocatable flag to false for every
+# bundle it discovers and then feeding that plist back to pkgbuild.
+
+COMPONENT_PLIST="$PKG_DIR/component.plist"
+# Create the component description plist first
+pkgbuild --analyze --root "$PKG_ROOT" "$COMPONENT_PLIST"
+
+# Turn all `BundleIsRelocatable` keys to false (PlistBuddy is available on all
+# macOS systems). We first convert to xml1 to ensure predictable formatting.
+
+# Turn relocation off for every bundle entry in the plist. PlistBuddy cannot
+# address keys that contain slashes without quoting, so we iterate through the
+# top-level keys it prints.
+plutil -convert xml1 "$COMPONENT_PLIST"
+for bundle_key in $(/usr/libexec/PlistBuddy -c "Print" "$COMPONENT_PLIST" | awk '/^[ \t]*[A-Za-z0-9].*\.app/ {print $1}'); do
+  /usr/libexec/PlistBuddy -c "Set :'${bundle_key}':BundleIsRelocatable false" "$COMPONENT_PLIST" || true
+done
+
+# Now build the real payload package with the edited plist so that the final
+# PackageInfo contains relocatable="false".
 pkgbuild --root "$PKG_ROOT" \
          --identifier "$APP_DOMAIN" \
          --version "$APP_VERSION" \
          --install-location "/" \
          --scripts "$SCRIPTS_DIR" \
+         --component-plist "$COMPONENT_PLIST" \
          ${MAC_INSTALLER_SIGNER_ID:+--sign "$MAC_INSTALLER_SIGNER_ID"} \
          "$INSTALL_PKG"
 

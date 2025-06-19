@@ -32,3 +32,40 @@ sudo rm -rf "$LOG_FOLDER"
 
 # Remove any caches left behind
 rm -rf "$CACHES_FOLDER"
+
+# Remove PF data directory created by firewall helper, if present
+sudo rm -rf "/Library/Application Support/${APP_NAME}/pf"
+
+# ---------------- PF firewall cleanup ----------------------
+# Rules are loaded under the anchor "amn" (see macosfirewall.cpp)
+# Flush only that anchor to avoid destroying user/system rules.
+
+PF_ANCHOR="amn"
+
+### Flush all PF rules, NATs, and tables under our anchor and sub-anchors ###
+anchors=$(sudo pfctl -s Anchors 2>/dev/null | awk '/^'"${PF_ANCHOR}"'/ {sub(/\*$/, "", $1); print $1}')
+for anc in $anchors; do
+    echo "Flushing PF anchor $anc"
+    sudo pfctl -a "$anc" -F all 2>/dev/null || true
+    # flush tables under this anchor
+    tables=$(sudo pfctl -s Tables 2>/dev/null | awk '/^'"$anc"'/ {print}')
+    for tbl in $tables; do
+        echo "Killing PF table $tbl"
+        sudo pfctl -t "$tbl" -T kill 2>/dev/null || true
+    done
+done
+
+### Reload default PF config to restore system rules ###
+if [ -f /etc/pf.conf ]; then
+    echo "Restoring system PF config"
+    sudo pfctl -f /etc/pf.conf 2>/dev/null || true
+fi
+
+### Disable PF if no rules remain ###
+if sudo pfctl -s info 2>/dev/null | grep -q '^Status: Enabled' && \
+   ! sudo pfctl -sr 2>/dev/null | grep -q .; then
+    echo "Disabling PF"
+    sudo pfctl -d 2>/dev/null || true
+fi
+
+# -----------------------------------------------------------
