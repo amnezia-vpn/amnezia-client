@@ -462,7 +462,6 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         return ErrorCode::ServerCgroupMountpoint;
     if (stdOut.contains("have reached") && stdOut.contains("pull rate limit"))
         return ErrorCode::DockerPullRateLimit;
-    
 
     return error;
 }
