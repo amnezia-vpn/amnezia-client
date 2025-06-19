@@ -86,6 +86,21 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                id: news
+                Layout.fillWidth: true
+
+                text: qsTr("News & Notifications")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: NewsModel.hasUnread ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
+
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsNewsNotifications)
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
                 id: backup
                 Layout.fillWidth: true
 

@@ -2,6 +2,7 @@
 
 #include <QDirIterator>
 #include <QTranslator>
+#include <QCoreApplication>
 
 #if defined(Q_OS_ANDROID)
     #include "core/installedAppsImageProvider.h"
@@ -100,6 +101,11 @@ void CoreController::initModels()
 
     m_apiDevicesModel.reset(new ApiDevicesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ApiDevicesModel", m_apiDevicesModel.get());
+
+    m_newsModel.reset(new NewsModel(this));
+    m_engine->rootContext()->setContextProperty("NewsModel", m_newsModel.get());
+    QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
+                     m_newsModel.get(), &NewsModel::saveLocalNews);
 }
 
 void CoreController::initControllers()
@@ -151,6 +157,10 @@ void CoreController::initControllers()
 
     m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversModel, m_settings, this));
     m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
+
+    m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings));
+    m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
+    m_apiNewsController->fetchNews();
 }
 
 void CoreController::initAndroidController()

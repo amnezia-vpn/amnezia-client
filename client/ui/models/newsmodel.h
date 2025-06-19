@@ -1,0 +1,58 @@
+#ifndef NEWSMODEL_H
+#define NEWSMODEL_H
+
+#include <QAbstractListModel>
+#include <QDateTime>
+#include <QVector>
+#include <QString>
+#include <QJsonArray>
+#include <QSet>
+
+struct NewsItem {
+    QString id;
+    QString title;
+    QString content;
+    QDateTime timestamp;
+    bool read;
+};
+
+class NewsModel : public QAbstractListModel
+{
+    Q_OBJECT
+public:
+    enum Roles {
+        IdRole = Qt::UserRole + 1,
+        TitleRole,
+        ContentRole,
+        TimestampRole,
+        IsReadRole,
+        IsProcessedRole
+    };
+    explicit NewsModel(QObject *parent = nullptr);
+    Q_INVOKABLE void markAsRead(int index);
+    Q_INVOKABLE void saveLocalNews() const;
+    
+    Q_PROPERTY(int processedIndex READ processedIndex WRITE setProcessedIndex NOTIFY processedIndexChanged)
+    Q_PROPERTY(bool hasUnread READ hasUnread NOTIFY hasUnreadChanged)
+    int processedIndex() const;
+    void setProcessedIndex(int index);
+
+    void updateModel(const QJsonArray &items);
+    bool hasUnread() const;
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+signals:
+    void processedIndexChanged(int index);
+    void hasUnreadChanged();
+
+private:
+    QVector<NewsItem> m_items;
+    int m_processedIndex = -1;
+    void loadLocalNews();
+    QString localFilePath() const;
+};
+
+#endif // NEWSMODEL_H 

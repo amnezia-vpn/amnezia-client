@@ -367,7 +367,13 @@ PageType {
             objectName: "settingsTabButton"
 
             isSelected: tabBar.currentIndex === 2
-            image: "qrc:/images/controls/settings.svg"
+            image: NewsModel.hasUnread ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
+            Binding {
+                target: settingsTabButton
+                property: "defaultColor"
+                value: "transparent"
+                when: NewsModel.hasUnread
+            }
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
                 tabBar.currentIndex = 2

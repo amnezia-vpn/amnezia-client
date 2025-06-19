@@ -35,6 +35,9 @@
         <file>images/controls/mail.svg</file>
         <file>images/controls/map-pin.svg</file>
         <file>images/controls/more-vertical.svg</file>
+        <file>images/controls/news.svg</file>
+        <file>images/controls/news-unread.svg</file>
+        <file>images/controls/unread-dot.svg</file>
         <file>images/controls/plus.svg</file>
         <file>images/controls/qr-code.svg</file>
         <file>images/controls/radio-button-inner-circle-pressed.png</file>
@@ -49,6 +52,7 @@
         <file>images/controls/server.svg</file>
         <file>images/controls/settings-2.svg</file>
         <file>images/controls/settings.svg</file>
+        <file>images/controls/settings-news.svg</file>
         <file>images/controls/share-2.svg</file>
         <file>images/controls/split-tunneling.svg</file>
         <file>images/controls/tag.svg</file>
@@ -212,6 +216,8 @@
         <file>ui/qml/Pages2/PageSettingsServerServices.qml</file>
         <file>ui/qml/Pages2/PageSettingsServersList.qml</file>
         <file>ui/qml/Pages2/PageSettingsSplitTunneling.qml</file>
+        <file>ui/qml/Pages2/PageSettingsNewsNotifications.qml</file>
+        <file>ui/qml/Pages2/PageSettingsNewsDetail.qml</file>
         <file>ui/qml/Pages2/PageProtocolAwgClientSettings.qml</file>
         <file>ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml</file>
         <file>ui/qml/Pages2/PageSetupWizardApiServiceInfo.qml</file>
