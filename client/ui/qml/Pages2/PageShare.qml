@@ -458,6 +458,11 @@ PageType {
                         } else if (index === ContainerProps.containerFromString("amnezia-xray")) {
                             root.connectionTypesModel.push(xrayConnectionFormat)
                         }
+
+                        if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
+                            exportTypeSelector.currentIndex = 0
+                            exportTypeSelector.text = root.connectionTypesModel[0].name
+                        }
                     }
                 }
             }
