@@ -35,6 +35,9 @@ public slots:
 
     bool isConfigValid();
 
+    void setCurrentProtocol(const QString &protocolName);
+    bool isVlessProtocol();
+
 signals:
     void errorOccurred(ErrorCode errorCode);
 

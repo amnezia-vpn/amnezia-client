@@ -18,7 +18,7 @@ namespace
     {
         constexpr char cloak[] = "cloak";
         constexpr char awg[] = "awg";
-        constexpr char xray[] = "xray";
+        constexpr char vless[] = "vless";
 
         constexpr char apiEndpoint[] = "api_endpoint";
         constexpr char accessToken[] = "api_key";
@@ -109,7 +109,7 @@ namespace
             auto connData = WireguardConfigurator::genClientKeys();
             protocolData.wireGuardClientPubKey = connData.clientPubKey;
             protocolData.wireGuardClientPrivKey = connData.clientPrivKey;
-        } else if (protocol == configKey::xray) {
+        } else if (protocol == configKey::vless) {
             protocolData.xrayUuid = QUuid::createUuid().toString(QUuid::WithoutBraces);
         }
 
@@ -122,6 +122,8 @@ namespace
             apiPayload[configKey::certificate] = protocolData.certRequest.request;
         } else if (protocol == configKey::awg) {
             apiPayload[configKey::publicKey] = protocolData.wireGuardClientPubKey;
+        } else if (protocol == configKey::vless) {
+            apiPayload[configKey::publicKey] = protocolData.xrayUuid;
         }
     }
 
@@ -200,6 +202,8 @@ namespace
         }
 
         serverConfig[configKey::apiConfig] = apiConfig;
+
+        qDebug() << serverConfig;
 
         return ErrorCode::NoError;
     }
@@ -561,6 +565,31 @@ bool ApiConfigsController::isConfigValid()
         }
     }
     return true;
+}
+
+void ApiConfigsController::setCurrentProtocol(const QString &protocolName)
+{
+    auto serverIndex = m_serversModel->getProcessedServerIndex();
+    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+
+    apiConfigObject[configKey::serviceProtocol] = protocolName;
+
+    serverConfigObject.insert(configKey::apiConfig, apiConfigObject);
+
+    m_serversModel->editServer(serverConfigObject, serverIndex);
+}
+
+bool ApiConfigsController::isVlessProtocol()
+{
+    auto serverIndex = m_serversModel->getProcessedServerIndex();
+    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+
+    if (apiConfigObject[configKey::serviceProtocol].toString() == "vless") {
+        return true;
+    }
+    return false;
 }
 
 QList<QString> ApiConfigsController::getQrCodes()
