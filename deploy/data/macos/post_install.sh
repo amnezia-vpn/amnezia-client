@@ -21,11 +21,14 @@ mkdir -p $LOG_FOLDER
 
 echo "`date` Script started" > $LOG_FILE
 
-killall -9 $APP_NAME-service 2>> $LOG_FILE
+echo "Requesting ${APP_NAME} to quit gracefully" >> "$LOG_FILE"
+osascript -e 'tell application "AmneziaVPN" to quit'
 
 mv -f "$APP_PATH/$PLIST_NAME" "$LAUNCH_DAEMONS_PLIST_NAME" 2>> $LOG_FILE
 chown root:wheel "$LAUNCH_DAEMONS_PLIST_NAME"
 launchctl load "$LAUNCH_DAEMONS_PLIST_NAME"
+echo "`date` Launching ${APP_NAME} application" >> $LOG_FILE
+open -a "$APP_PATH" 2>> $LOG_FILE || true
 
 echo "`date` Service status: $?" >> $LOG_FILE
 echo "`date` Script finished" >> $LOG_FILE
