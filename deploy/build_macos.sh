@@ -17,7 +17,7 @@ DEPLOY_DIR=$PROJECT_DIR/deploy
 mkdir -p "$DEPLOY_DIR/build"
 BUILD_DIR="$DEPLOY_DIR/build"
 
-echo "Project dir: ${PROJECT_DIR}" 
+echo "Project dir: ${PROJECT_DIR}"
 echo "Build dir: ${BUILD_DIR}"
 
 APP_NAME=AmneziaVPN
@@ -83,7 +83,7 @@ cp "$DEPLOY_DATA_DIR/$PLIST_NAME" "$BUNDLE_DIR/Contents/Resources/$PLIST_NAME"
 security find-identity -p codesigning || true
 
   echo "Signing App bundle..."
-  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --sign "$MAC_SIGNER_ID" "$BUNDLE_DIR"
+  /usr/bin/codesign --deep --force --verbose --timestamp -o runtime --keychain "$KEYCHAIN_PATH" --sign "$MAC_SIGNER_ID" "$BUNDLE_DIR"
   /usr/bin/codesign --verify -vvvv "$BUNDLE_DIR" || true
   spctl -a -vvvv "$BUNDLE_DIR" || true
 
@@ -212,5 +212,14 @@ if [ "${MAC_CERT_PW+x}" ]; then
   /usr/bin/codesign --verify -vvvv "$FINAL_PKG" || true
   spctl -a -vvvv "$FINAL_PKG" || true
 fi
+
+# Sign app bundle
+/usr/bin/codesign --deep --force --verbose --timestamp -o runtime --keychain "$KEYCHAIN_PATH" --sign "$MAC_SIGNER_ID" "$BUNDLE_DIR"
+spctl -a -vvvv "$BUNDLE_DIR" || true
+
+# Add login keychain back to list and set as default
+KEYCHAIN="$HOME/Library/Keychains/login.keychain-db"
+security list-keychains -d user -s "$KEYCHAIN" "$KEYCHAIN_PATH" "$(security list-keychains -d user | tr '\n' ' ')"
+security list-keychains -d user -s "$KEYCHAIN"
 
 echo "Finished, artifact is $FINAL_PKG"
