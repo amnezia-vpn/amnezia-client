@@ -196,7 +196,8 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
     m_serverProtocolConfig[config_key::controlledJunk3] =
             serverProtocolConfig.value(config_key::controlledJunk3).toString(protocols::awg::defaultControlledJunk3);
     m_serverProtocolConfig[config_key::specialHandshakeTimeout] =
-            serverProtocolConfig.value(config_key::specialHandshakeTimeout).toString(protocols::awg::defaultSpecialHandshakeTimeout);
+            serverProtocolConfig.value(config_key::specialHandshakeTimeout)
+                    .toString(protocols::awg::defaultSpecialHandshakeTimeout);
 
     auto lastConfig = m_serverProtocolConfig.value(config_key::last_config).toString();
     QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
@@ -275,15 +276,15 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ServerUnderloadPacketMagicHeaderRole] = "serverUnderloadPacketMagicHeader";
     roles[ServerTransportPacketMagicHeaderRole] = "serverTransportPacketMagicHeader";
 
-    roles[ServerSpecialJunk1Role] = "specialJunk1";
-    roles[ServerSpecialJunk2Role] = "specialJunk2";
-    roles[ServerSpecialJunk3Role] = "specialJunk3";
-    roles[ServerSpecialJunk4Role] = "specialJunk4";
-    roles[ServerSpecialJunk5Role] = "specialJunk5";
-    roles[ServerControlledJunk1Role] = "controlledJunk1";
-    roles[ServerControlledJunk2Role] = "controlledJunk2";
-    roles[ServerControlledJunk3Role] = "controlledJunk3";
-    roles[ServerSpecialHandshakeTimeoutRole] = "specialHandshakeTimeout";
+    roles[ServerSpecialJunk1Role] = "serverSpecialJunk1";
+    roles[ServerSpecialJunk2Role] = "serverSpecialJunk2";
+    roles[ServerSpecialJunk3Role] = "serverSpecialJunk3";
+    roles[ServerSpecialJunk4Role] = "serverSpecialJunk4";
+    roles[ServerSpecialJunk5Role] = "serverSpecialJunk5";
+    roles[ServerControlledJunk1Role] = "serverControlledJunk1";
+    roles[ServerControlledJunk2Role] = "serverControlledJunk2";
+    roles[ServerControlledJunk3Role] = "serverControlledJunk3";
+    roles[ServerSpecialHandshakeTimeoutRole] = "serverSpecialHandshakeTimeout";
 
     return roles;
 }
@@ -321,21 +322,21 @@ AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig)
                                                .toString(protocols::awg::defaultUnderloadPacketMagicHeader);
     serverTransportPacketMagicHeader = serverProtocolConfig.value(config_key::transportPacketMagicHeader)
                                                .toString(protocols::awg::defaultTransportPacketMagicHeader);
-    serverSpecialJunk[config_key::specialJunk1] =
+    serverSpecialJunk1 =
             serverProtocolConfig.value(config_key::specialJunk1).toString(protocols::awg::defaultSpecialJunk1);
-    serverSpecialJunk[config_key::specialJunk2] =
+    serverSpecialJunk2 =
             serverProtocolConfig.value(config_key::specialJunk2).toString(protocols::awg::defaultSpecialJunk2);
-    serverSpecialJunk[config_key::specialJunk3] =
+    serverSpecialJunk3 =
             serverProtocolConfig.value(config_key::specialJunk3).toString(protocols::awg::defaultSpecialJunk3);
-    serverSpecialJunk[config_key::specialJunk4] =
+    serverSpecialJunk4 =
             serverProtocolConfig.value(config_key::specialJunk4).toString(protocols::awg::defaultSpecialJunk4);
-    serverSpecialJunk[config_key::specialJunk5] =
+    serverSpecialJunk5 =
             serverProtocolConfig.value(config_key::specialJunk5).toString(protocols::awg::defaultSpecialJunk5);
-    serverControlledJunk[config_key::controlledJunk1] =
+    serverControlledJunk1 =
             serverProtocolConfig.value(config_key::controlledJunk1).toString(protocols::awg::defaultControlledJunk1);
-    serverControlledJunk[config_key::controlledJunk2] =
+    serverControlledJunk2 =
             serverProtocolConfig.value(config_key::controlledJunk2).toString(protocols::awg::defaultControlledJunk2);
-    serverControlledJunk[config_key::controlledJunk3] =
+    serverControlledJunk3 =
             serverProtocolConfig.value(config_key::controlledJunk3).toString(protocols::awg::defaultControlledJunk3);
     serverSpecialHandshakeTimeout = serverProtocolConfig.value(config_key::specialHandshakeTimeout)
                                             .toString(protocols::awg::defaultSpecialHandshakeTimeout);
@@ -352,7 +353,10 @@ bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
         || serverResponsePacketMagicHeader != other.serverResponsePacketMagicHeader
         || serverUnderloadPacketMagicHeader != other.serverUnderloadPacketMagicHeader
         || serverTransportPacketMagicHeader != other.serverTransportPacketMagicHeader
-        || serverSpecialJunk != other.serverSpecialJunk || serverControlledJunk != other.serverControlledJunk
+        || serverSpecialJunk1 != other.serverSpecialJunk1 || serverSpecialJunk2 != other.serverSpecialJunk2
+        || serverSpecialJunk3 != other.serverSpecialJunk3 || serverSpecialJunk4 != other.serverSpecialJunk4
+        || serverSpecialJunk5 != other.serverSpecialJunk5 || serverControlledJunk1 != other.serverControlledJunk1
+        || serverControlledJunk2 != other.serverControlledJunk2 || serverControlledJunk3 != other.serverControlledJunk3
         || serverSpecialHandshakeTimeout != other.serverSpecialHandshakeTimeout) {
         return false;
     }

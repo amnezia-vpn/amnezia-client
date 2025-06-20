@@ -797,149 +797,84 @@ Thank you for staying with us!</source>
 <context>
     <name>PageProtocolAwgSettings</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="97"/>
         <source>AmneziaWG settings</source>
-        <translation>اعدادات AmneziaWG</translation>
+        <translation type="vanished">اعدادات AmneziaWG</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="127"/>
         <source>Port</source>
-        <translation>منفذ</translation>
+        <translation type="vanished">منفذ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="511"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>جميع المستخدمين الذين شاركت معهم اتصال لن يكونو قادرين علي الاتصال مرة اخري.</translation>
+        <translation type="vanished">جميع المستخدمين الذين شاركت معهم اتصال لن يكونو قادرين علي الاتصال مرة اخري.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="483"/>
         <source>Save</source>
-        <translation>احفظ</translation>
+        <translation type="vanished">احفظ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="108"/>
         <source>VPN address subnet</source>
-        <translation type="unfinished">الشبكة الفرعية لعنوان VPN</translation>
+        <translation type="obsolete">الشبكة الفرعية لعنوان VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="146"/>
         <source>Jc - Junk packet count</source>
-        <translation>Jc - عدد الحزم غير المرغوب فيها</translation>
+        <translation type="vanished">Jc - عدد الحزم غير المرغوب فيها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="168"/>
         <source>Jmin - Junk packet minimum size</source>
-        <translation>Jmin - الحجم الادني للحزم الغير مرغوب فيها</translation>
+        <translation type="vanished">Jmin - الحجم الادني للحزم الغير مرغوب فيها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="186"/>
         <source>Jmax - Junk packet maximum size</source>
-        <translation>Jmax - الحجم الاقصي للحزم الغير مرغوب فيها</translation>
+        <translation type="vanished">Jmax - الحجم الاقصي للحزم الغير مرغوب فيها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="204"/>
         <source>S1 - Init packet junk size</source>
-        <translation>S1 - حجم حزمة البيانات العشوائية الأولية</translation>
+        <translation type="vanished">S1 - حجم حزمة البيانات العشوائية الأولية</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="228"/>
         <source>S2 - Response packet junk size</source>
-        <translation>S2 - حجم حزمة الاستجابة غير المرغوب فيها</translation>
+        <translation type="vanished">S2 - حجم حزمة الاستجابة غير المرغوب فيها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="252"/>
         <source>H1 - Init packet magic header</source>
-        <translation>H1 - حزمة رأس سحرية مبدئية</translation>
+        <translation type="vanished">H1 - حزمة رأس سحرية مبدئية</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="270"/>
         <source>H2 - Response packet magic header</source>
-        <translation>H2 - رأس حزمة الاستجابة السحرية</translation>
+        <translation type="vanished">H2 - رأس حزمة الاستجابة السحرية</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="306"/>
         <source>H4 - Transport packet magic header</source>
-        <translation>H4 - رأس حزمة النقل السحرية</translation>
+        <translation type="vanished">H4 - رأس حزمة النقل السحرية</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="288"/>
         <source>H3 - Underload packet magic header</source>
-        <translation>H3 - رأس حزمة السحر غير المحمل</translation>
+        <translation type="vanished">H3 - رأس حزمة السحر غير المحمل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="324"/>
-        <source>I1 - First special junk packet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="339"/>
-        <source>I2 - Second special junk packet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="354"/>
-        <source>I3 - Third special junk packet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="369"/>
-        <source>I4 - Fourth special junk packet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="384"/>
-        <source>I5 - Fifth special junk packet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="399"/>
-        <source>J1 - First controlled junk packet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="414"/>
-        <source>J2 - Second controlled junk packet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="429"/>
-        <source>J3 - Third controlled junk packet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="444"/>
-        <source>Itime - Special handshake timeout</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="499"/>
         <source>The values of the H1-H4 fields must be unique</source>
-        <translation>يجب أن تكون قيم الحقول H1-H4 فريدة</translation>
+        <translation type="vanished">يجب أن تكون قيم الحقول H1-H4 فريدة</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="505"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)</source>
-        <translation>يجب ألا تساوي قيمة الحقل S1 + حجم بدء الرسالة (148) S2 + حجم استجابة الرسالة (92)</translation>
+        <translation type="vanished">يجب ألا تساوي قيمة الحقل S1 + حجم بدء الرسالة (148) S2 + حجم استجابة الرسالة (92)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="510"/>
         <source>Save settings?</source>
-        <translation>احفظ الإعدادات؟</translation>
+        <translation type="vanished">احفظ الإعدادات؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="512"/>
         <source>Continue</source>
-        <translation>واصل</translation>
+        <translation type="vanished">واصل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="513"/>
         <source>Cancel</source>
-        <translation>إلغاء</translation>
+        <translation type="vanished">إلغاء</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="517"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>لا يمكن تغيير الإعدادات أثناء وجود اتصال نشط</translation>
+        <translation type="vanished">لا يمكن تغيير الإعدادات أثناء وجود اتصال نشط</translation>
     </message>
 </context>
 <context>

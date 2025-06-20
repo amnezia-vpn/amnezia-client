@@ -33,13 +33,18 @@ struct AwgConfig
     QString serverUnderloadPacketMagicHeader;
     QString serverTransportPacketMagicHeader;
 
-    QMap<QString, QString> serverSpecialJunk;
-    QMap<QString, QString> serverControlledJunk;
+    QString serverSpecialJunk1;
+    QString serverSpecialJunk2;
+    QString serverSpecialJunk3;
+    QString serverSpecialJunk4;
+    QString serverSpecialJunk5;
+    QString serverControlledJunk1;
+    QString serverControlledJunk2;
+    QString serverControlledJunk3;
     QString serverSpecialHandshakeTimeout;
 
     bool hasEqualServerSettings(const AwgConfig &other) const;
     bool hasEqualClientSettings(const AwgConfig &other) const;
-
 };
 
 class AwgConfigModel : public QAbstractListModel
@@ -65,6 +70,7 @@ public:
         ServerResponsePacketMagicHeaderRole,
         ServerUnderloadPacketMagicHeaderRole,
         ServerTransportPacketMagicHeaderRole,
+
         ServerSpecialJunk1Role,
         ServerSpecialJunk2Role,
         ServerSpecialJunk3Role,

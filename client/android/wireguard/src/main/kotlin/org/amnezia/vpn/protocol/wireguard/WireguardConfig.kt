@@ -121,6 +121,15 @@ open class WireguardConfig protected constructor(
         internal var h2: Long? = null
         internal var h3: Long? = null
         internal var h4: Long? = null
+        internal var i1: String? = null
+        internal var i2: String? = null
+        internal var i3: String? = null
+        internal var i4: String? = null
+        internal var i5: String? = null
+        internal var j1: String? = null
+        internal var j2: String? = null
+        internal var j3: String? = null
+        internal var itime: Int? = null
 
         fun setEndpoint(endpoint: InetEndpoint) = apply { this.endpoint = endpoint }
 
@@ -143,6 +152,15 @@ open class WireguardConfig protected constructor(
         fun setH2(h2: Long) = apply { this.h2 = h2 }
         fun setH3(h3: Long) = apply { this.h3 = h3 }
         fun setH4(h4: Long) = apply { this.h4 = h4 }
+        fun setI1(i1: String) = apply { this.i1 = i1 }
+        fun setI2(i2: String) = apply { this.i2 = i2 }
+        fun setI3(i3: String) = apply { this.i3 = i3 }
+        fun setI4(i4: String) = apply { this.i4 = i4 }
+        fun setI5(i5: String) = apply { this.i5 = i5 }
+        fun setJ1(j1: String) = apply { this.j1 = j1 }
+        fun setJ2(j2: String) = apply { this.j2 = j2 }
+        fun setJ3(j3: String) = apply { this.j3 = j3 }
+        fun setItime(itime: Int) = apply { this.itime = itime }
 
         override fun build(): WireguardConfig = configBuild().run { WireguardConfig(this@Builder) }
     }
