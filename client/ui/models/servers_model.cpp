@@ -2,6 +2,9 @@
 
 #include "core/api/apiDefs.h"
 #include "core/controllers/serverController.h"
+#include "core/models/servers/apiV1ServerConfig.h"
+#include "core/models/servers/apiV2ServerConfig.h"
+#include "core/models/servers/selfHostedServerConfig.h"
 #include "core/networkUtilities.h"
 
 #ifdef Q_OS_IOS
@@ -24,6 +27,9 @@ namespace
         constexpr char publicKeyInfo[] = "public_key";
         constexpr char expiresAt[] = "expires_at";
     }
+
+    using ServerConfigVariant =
+            std::variant<QSharedPointer<SelfHostedServerConfig>, QSharedPointer<ApiV1ServerConfig>, QSharedPointer<ApiV2ServerConfig> >;
 }
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
@@ -91,29 +97,26 @@ bool ServersModel::setData(const int index, const QVariant &value, int role)
 
 QVariant ServersModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= static_cast<int>(m_servers.size())) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= static_cast<int>(m_servers1.size())) {
         return QVariant();
     }
 
-    const QJsonObject server = m_servers.at(index.row()).toObject();
-    const auto apiConfig = server.value(configKey::apiConfig).toObject();
-    const auto configVersion = server.value(config_key::configVersion).toInt();
+    QSharedPointer<ServerConfig> serverConfig = m_servers1.at(index.row());
+    ServerConfigVariant variant;
+    switch (serverConfig->type) {
+    case amnezia::ServerConfigType::SelfHosted: variant = qSharedPointerCast<SelfHostedServerConfig>(serverConfig); break;
+    case amnezia::ServerConfigType::ApiV1: variant = qSharedPointerCast<ApiV1ServerConfig>(serverConfig); break;
+    case amnezia::ServerConfigType::ApiV2: variant = qSharedPointerCast<ApiV2ServerConfig>(serverConfig); break;
+    }
+
     switch (role) {
     case NameRole: {
-        if (configVersion) {
-            return server.value(config_key::name).toString();
-        }
-        auto name = server.value(config_key::description).toString();
-        if (name.isEmpty()) {
-            return server.value(config_key::hostName).toString();
-        }
-        return name;
+        return std::visit([](const auto &ptr) -> QString { return ptr->name; }, variant);
     }
     case ServerDescriptionRole: {
-        auto description = getServerDescription(server, index.row());
-        return configVersion ? description : description + server.value(config_key::hostName).toString();
+        return getServerDescription(index.row());
     }
-    case HostNameRole: return server.value(config_key::hostName).toString();
+    case HostNameRole: return serverConfig->hostName;
     case CredentialsRole: return QVariant::fromValue(serverCredentials(index.row()));
     case CredentialsLoginRole: return serverCredentials(index.row()).userName;
     case IsDefaultRole: return index.row() == m_defaultServerIndex;
@@ -123,36 +126,28 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty());
     }
     case ContainsAmneziaDnsRole: {
-        QString primaryDns = server.value(config_key::dns1).toString();
-        return primaryDns == protocols::dns::amneziaDnsIp;
+        return serverConfig->dns1 == protocols::dns::amneziaDnsIp;
     }
     case DefaultContainerRole: {
-        return ContainerProps::containerFromString(server.value(config_key::defaultContainer).toString());
+        return ContainerProps::containerFromString(serverConfig->defaultContainer);
     }
     case HasInstalledContainers: {
         return serverHasInstalledContainers(index.row());
     }
     case IsServerFromTelegramApiRole: {
-        return server.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::Telegram;
+        return serverConfig->type == amnezia::ServerConfigType::ApiV1;
     }
     case IsServerFromGatewayApiRole: {
-        return server.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway;
-    }
-    case ApiConfigRole: {
-        return apiConfig;
+        return serverConfig->type == amnezia::ServerConfigType::ApiV2;
     }
     case IsCountrySelectionAvailableRole: {
-        return !apiConfig.value(configKey::availableCountries).toArray().isEmpty();
+        return !qSharedPointerCast<ApiV2ServerConfig>(serverConfig)->apiConfig.availableCountries.isEmpty();
     }
     case ApiAvailableCountriesRole: {
-        return apiConfig.value(configKey::availableCountries).toArray();
+        return QVariant::fromValue(qSharedPointerCast<ApiV2ServerConfig>(serverConfig)->apiConfig.availableCountries);
     }
     case ApiServerCountryCodeRole: {
-        return apiConfig.value(configKey::serverCountryCode).toString();
-    }
-    case HasAmneziaDns: {
-        QString primaryDns = server.value(config_key::dns1).toString();
-        return primaryDns == protocols::dns::amneziaDnsIp;
+        return qSharedPointerCast<ApiV2ServerConfig>(serverConfig)->apiConfig.serverCountryCode;
     }
     }
 
@@ -171,6 +166,25 @@ void ServersModel::resetModel()
     m_servers = m_settings->serversArray();
     m_defaultServerIndex = m_settings->defaultServerIndex();
     m_processedServerIndex = m_defaultServerIndex;
+
+    for (auto server : m_servers) {
+        auto serverConfig = ServerConfig::createServerConfig(server.toObject());
+        m_servers1.push_back(serverConfig);
+        qDebug() << "333";
+        qDebug() << server.toObject();
+        qDebug() << "333";
+
+        ServerConfigVariant variant;
+        switch (serverConfig->type) {
+        case amnezia::ServerConfigType::SelfHosted: variant = qSharedPointerCast<SelfHostedServerConfig>(serverConfig); break;
+        case amnezia::ServerConfigType::ApiV1: variant = qSharedPointerCast<ApiV1ServerConfig>(serverConfig); break;
+        case amnezia::ServerConfigType::ApiV2: variant = qSharedPointerCast<ApiV2ServerConfig>(serverConfig); break;
+        }
+        qDebug() << "123";
+        qDebug() << std::visit([](const auto &ptr) -> QJsonObject { return ptr->toJson(); }, variant);
+        qDebug() << "123";
+    }
+
     endResetModel();
     emit defaultServerIndexChanged(m_defaultServerIndex);
 }
@@ -192,34 +206,40 @@ const QString ServersModel::getDefaultServerName()
     return qvariant_cast<QString>(data(m_defaultServerIndex, NameRole));
 }
 
-QString ServersModel::getServerDescription(const QJsonObject &server, const int index) const
+QString ServersModel::getServerDescription(const int index) const
 {
-    const auto configVersion = server.value(config_key::configVersion).toInt();
-    const auto apiConfig = server.value(configKey::apiConfig).toObject();
-
-    QString description;
-
-    if (configVersion && !apiConfig.value(configKey::serverCountryCode).toString().isEmpty()) {
-        return apiConfig.value(configKey::serverCountryName).toString();
-    } else if (configVersion) {
-        return server.value(config_key::description).toString();
-    } else if (data(index, HasWriteAccessRole).toBool()) {
-        if (m_isAmneziaDnsEnabled && isAmneziaDnsContainerInstalled(index)) {
-            description += "Amnezia DNS | ";
-        }
-    } else {
-        if (data(index, HasAmneziaDns).toBool()) {
-            description += "Amnezia DNS | ";
+    auto serverConfig = m_servers1.at(index);
+    switch (serverConfig->type) {
+    case amnezia::ServerConfigType::ApiV1: return qSharedPointerCast<ApiV1ServerConfig>(serverConfig)->description;
+    case amnezia::ServerConfigType::ApiV2: {
+        auto apiV2ServerConfig = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
+        if (apiV2ServerConfig->apiConfig.serverCountryCode.isEmpty()) {
+            return apiV2ServerConfig->description;
+        } else {
+            return apiV2ServerConfig->apiConfig.serverCountryName;
         }
     }
-    return description;
+    case amnezia::ServerConfigType::SelfHosted: {
+        QString description;
+        if (data(index, HasWriteAccessRole).toBool()) {
+            if (m_isAmneziaDnsEnabled && isAmneziaDnsContainerInstalled(index)) {
+                description += "Amnezia DNS | " + serverConfig->hostName;
+            }
+        } else {
+            if (data(index, ContainsAmneziaDnsRole).toBool()) {
+                description += "Amnezia DNS | " + serverConfig->hostName;
+            }
+        }
+        return description;
+    }
+    }
 }
 
 const QString ServersModel::getDefaultServerDescriptionCollapsed()
 {
     const QJsonObject server = m_servers.at(m_defaultServerIndex).toObject();
     const auto configVersion = server.value(config_key::configVersion).toInt();
-    auto description = getServerDescription(server, m_defaultServerIndex);
+    auto description = getServerDescription(m_defaultServerIndex);
     if (configVersion) {
         return description;
     }
@@ -233,7 +253,7 @@ const QString ServersModel::getDefaultServerDescriptionExpanded()
 {
     const QJsonObject server = m_servers.at(m_defaultServerIndex).toObject();
     const auto configVersion = server.value(config_key::configVersion).toInt();
-    auto description = getServerDescription(server, m_defaultServerIndex);
+    auto description = getServerDescription(m_defaultServerIndex);
     if (configVersion) {
         return description;
     }
@@ -395,7 +415,6 @@ QHash<int, QByteArray> ServersModel::roleNames() const
 
     roles[IsServerFromTelegramApiRole] = "isServerFromTelegramApi";
     roles[IsServerFromGatewayApiRole] = "isServerFromGatewayApi";
-    roles[ApiConfigRole] = "apiConfig";
     roles[IsCountrySelectionAvailableRole] = "isCountrySelectionAvailable";
     roles[ApiAvailableCountriesRole] = "apiAvailableCountries";
     roles[ApiServerCountryCodeRole] = "apiServerCountryCode";
@@ -404,15 +423,8 @@ QHash<int, QByteArray> ServersModel::roleNames() const
 
 ServerCredentials ServersModel::serverCredentials(int index) const
 {
-    const QJsonObject &s = m_servers.at(index).toObject();
-
-    ServerCredentials credentials;
-    credentials.hostName = s.value(config_key::hostName).toString();
-    credentials.userName = s.value(config_key::userName).toString();
-    credentials.secretData = s.value(config_key::password).toString();
-    credentials.port = s.value(config_key::port).toInt();
-
-    return credentials;
+    const auto serverConfig = m_servers1.at(index);
+    return qSharedPointerCast<SelfHostedServerConfig>(serverConfig)->serverCredentials;
 }
 
 void ServersModel::updateContainersModel()
@@ -670,14 +682,14 @@ bool ServersModel::isServerFromApiAlreadyExists(const QString &userCountryCode, 
 
 bool ServersModel::serverHasInstalledContainers(const int serverIndex) const
 {
-    QJsonObject server = m_servers.at(serverIndex).toObject();
-    const auto containers = server.value(config_key::containers).toArray();
-    for (auto it = containers.begin(); it != containers.end(); it++) {
-        auto container = ContainerProps::containerFromString(it->toObject().value(config_key::container).toString());
-        if (ContainerProps::containerService(container) == ServiceType::Vpn) {
+    auto server = m_servers1.at(serverIndex);
+    const auto containers = server->containerConfigs;
+    for (const auto &container : containers) {
+        auto dockerContainer = ContainerProps::containerFromString(container.containerName);
+        if (ContainerProps::containerService(dockerContainer) == ServiceType::Vpn) {
             return true;
         }
-        if (container == DockerContainer::SSXray) {
+        if (dockerContainer == DockerContainer::SSXray) {
             return true;
         }
     }

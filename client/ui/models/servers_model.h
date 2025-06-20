@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 
 #include "core/controllers/serverController.h"
+#include "core/models/servers/serverConfig.h"
 #include "settings.h"
 
 class ServersModel : public QAbstractListModel
@@ -36,9 +37,7 @@ public:
         ApiConfigRole,
         IsCountrySelectionAvailableRole,
         ApiAvailableCountriesRole,
-        ApiServerCountryCodeRole,
-
-        HasAmneziaDns
+        ApiServerCountryCodeRole
     };
 
     ServersModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
@@ -150,13 +149,14 @@ private:
     void updateContainersModel();
     void updateDefaultServerContainersModel();
 
-    QString getServerDescription(const QJsonObject &server, const int index) const;
+    QString getServerDescription(const int index) const;
 
     bool isAmneziaDnsContainerInstalled(const int serverIndex) const;
 
     bool serverHasInstalledContainers(const int serverIndex) const;
 
     QJsonArray m_servers;
+    QVector<QSharedPointer<ServerConfig>> m_servers1;
 
     std::shared_ptr<Settings> m_settings;
 

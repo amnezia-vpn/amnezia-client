@@ -14,11 +14,6 @@ namespace apiDefs
         ExternalPremium
     };
 
-    enum ConfigSource {
-        Telegram = 1,
-        AmneziaGateway
-    };
-
     namespace key
     {
         constexpr QLatin1String configVersion("config_version");

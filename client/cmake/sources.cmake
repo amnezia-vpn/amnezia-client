@@ -116,6 +116,7 @@ file(GLOB UI_MODELS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/models/services/*.h
     ${CLIENT_ROOT_DIR}/ui/models/api/*.h
 )
+
 file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/models/*.cpp
     ${CLIENT_ROOT_DIR}/ui/models/protocols/*.cpp
@@ -127,9 +128,24 @@ file(GLOB UI_CONTROLLERS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.h
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.h
 )
+
 file(GLOB UI_CONTROLLERS_CPP CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.cpp
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.cpp
+)
+
+file(GLOB CORE_MODELS_H CONFIGURE_DEPENDS
+    ${CLIENT_ROOT_DIR}/core/models/*.h
+    ${CLIENT_ROOT_DIR}/core/models/containers/*.h
+    ${CLIENT_ROOT_DIR}/core/models/protocols/*.h
+    ${CLIENT_ROOT_DIR}/core/models/servers/*.h
+)
+
+file(GLOB CORE_MODELS_CPP CONFIGURE_DEPENDS
+    ${CLIENT_ROOT_DIR}/core/models/*.cpp
+    ${CLIENT_ROOT_DIR}/core/models/containers/*.cpp
+    ${CLIENT_ROOT_DIR}/core/models/protocols/*.cpp
+    ${CLIENT_ROOT_DIR}/core/models/servers/*.cpp
 )
 
 set(HEADERS ${HEADERS}
@@ -138,6 +154,7 @@ set(HEADERS ${HEADERS}
     ${CONFIGURATORS_H}
     ${UI_MODELS_H}
     ${UI_CONTROLLERS_H}
+    ${CORE_MODELS_H}
 )
 set(SOURCES ${SOURCES}
     ${COMMON_FILES_CPP}
@@ -145,6 +162,7 @@ set(SOURCES ${SOURCES}
     ${CONFIGURATORS_CPP}
     ${UI_MODELS_CPP}
     ${UI_CONTROLLERS_CPP}
+    ${CORE_MODELS_CPP}
 )
 
 if(WIN32)

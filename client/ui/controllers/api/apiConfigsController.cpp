@@ -398,16 +398,16 @@ bool ApiConfigsController::isConfigValid()
     QJsonObject serverConfigObject = m_serversModel->getServerConfig(serverIndex);
     auto configSource = apiUtils::getConfigSource(serverConfigObject);
 
-    if (configSource == apiDefs::ConfigSource::Telegram
+    if (configSource == amnezia::ServerConfigType::ApiV1
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         m_serversModel->removeApiConfig(serverIndex);
         return updateServiceFromTelegram(serverIndex);
-    } else if (configSource == apiDefs::ConfigSource::AmneziaGateway
+    } else if (configSource == amnezia::ServerConfigType::ApiV2
                && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         return updateServiceFromGateway(serverIndex, "", "");
     } else if (configSource && m_serversModel->isApiKeyExpired(serverIndex)) {
         qDebug() << "attempt to update api config by expires_at event";
-        if (configSource == apiDefs::ConfigSource::AmneziaGateway) {
+        if (configSource == amnezia::ServerConfigType::ApiV2) {
             return updateServiceFromGateway(serverIndex, "", "");
         } else {
             m_serversModel->removeApiConfig(serverIndex);
@@ -499,7 +499,7 @@ void ApiConfigsController::fillServerConfig(const QString &protocol, const ApiPa
     serverConfig[config_key::containers] = newServerConfig.value(config_key::containers);
     serverConfig[config_key::hostName] = newServerConfig.value(config_key::hostName);
 
-    if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+    if (newServerConfig.value(config_key::configVersion).toInt() == amnezia::ServerConfigType::ApiV2) {
         serverConfig[config_key::configVersion] = newServerConfig.value(config_key::configVersion);
         serverConfig[config_key::description] = newServerConfig.value(config_key::description);
         serverConfig[config_key::name] = newServerConfig.value(config_key::name);
@@ -512,7 +512,7 @@ void ApiConfigsController::fillServerConfig(const QString &protocol, const ApiPa
     map.insert(newServerConfig.value(configKey::apiConfig).toObject().toVariantMap());
     auto apiConfig = QJsonObject::fromVariantMap(map);
 
-    if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+    if (newServerConfig.value(config_key::configVersion).toInt() == amnezia::ServerConfigType::ApiV2) {
         apiConfig.insert(configKey::serviceInfo, QJsonDocument::fromJson(apiResponseBody).object().value(configKey::serviceInfo).toObject());
     }
 
