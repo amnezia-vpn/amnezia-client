@@ -534,70 +534,70 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="175"/>
+        <location filename="../ui/controllers/installController.cpp" line="168"/>
         <source>%1 installed successfully. </source>
         <translation>%1 встановлено. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="177"/>
+        <location filename="../ui/controllers/installController.cpp" line="170"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 вже встановлено на сервері. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="197"/>
+        <location filename="../ui/controllers/installController.cpp" line="190"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>Додані сервіси і протоколи, які були раніше встановлені на сервері</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="277"/>
+        <location filename="../ui/controllers/installController.cpp" line="270"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 На сервері знайдені сервіси та протоколи, всі вони додані в застосунок</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="611"/>
+        <location filename="../ui/controllers/installController.cpp" line="604"/>
         <source>Settings updated successfully</source>
         <translation>Налаштування оновлено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="628"/>
+        <location filename="../ui/controllers/installController.cpp" line="621"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>Сервер &apos;%1&apos; перезавантажено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="640"/>
+        <location filename="../ui/controllers/installController.cpp" line="633"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>Сервер &apos;%1&apos; був видалений</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="651"/>
+        <location filename="../ui/controllers/installController.cpp" line="644"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>Всі сервіси та протоколи були видалені з сервера &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="669"/>
+        <location filename="../ui/controllers/installController.cpp" line="662"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 був видалений з сервера &apos;%2&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="678"/>
+        <location filename="../ui/controllers/installController.cpp" line="671"/>
         <source>Api config removed</source>
         <translation>Конфігурацію API видалено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="700"/>
+        <location filename="../ui/controllers/installController.cpp" line="693"/>
         <source>%1 cached profile cleared</source>
         <translation>Кешований профіль %1 очищено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="839"/>
+        <location filename="../ui/controllers/installController.cpp" line="832"/>
         <source>Please login as the user</source>
         <translation>Буль-ласка, увійдіть в систему від імені користувача</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="867"/>
+        <location filename="../ui/controllers/installController.cpp" line="860"/>
         <source>Server added successfully</source>
         <translation>Сервер додано</translation>
     </message>
@@ -827,40 +827,139 @@ Thank you for staying with us!</source>
 <context>
     <name>PageProtocolAwgSettings</name>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="97"/>
         <source>AmneziaWG settings</source>
-        <translation type="vanished">налаштування AmneziaWG</translation>
+        <translation>налаштування AmneziaWG</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="108"/>
         <source>VPN address subnet</source>
-        <translation type="obsolete">VPN address subnet</translation>
+        <translation type="unfinished">VPN address subnet</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="127"/>
         <source>Port</source>
-        <translation type="vanished">Порт</translation>
+        <translation>Порт</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="146"/>
+        <source>Jc - Junk packet count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="168"/>
+        <source>Jmin - Junk packet minimum size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="186"/>
+        <source>Jmax - Junk packet maximum size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="204"/>
+        <source>S1 - Init packet junk size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="228"/>
+        <source>S2 - Response packet junk size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="252"/>
+        <source>H1 - Init packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="270"/>
+        <source>H2 - Response packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="288"/>
+        <source>H3 - Underload packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="306"/>
+        <source>H4 - Transport packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="324"/>
+        <source>I1 - First special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="339"/>
+        <source>I2 - Second special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="354"/>
+        <source>I3 - Third special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="369"/>
+        <source>I4 - Fourth special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="384"/>
+        <source>I5 - Fifth special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="399"/>
+        <source>J1 - First controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="414"/>
+        <source>J2 - Second controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="429"/>
+        <source>J3 - Third controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="444"/>
+        <source>Itime - Special handshake timeout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="483"/>
         <source>Save</source>
-        <translation type="vanished">Зберегти</translation>
+        <translation>Зберегти</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="499"/>
         <source>The values of the H1-H4 fields must be unique</source>
-        <translation type="vanished">Значення полів H1-H4 мають бути унікальними</translation>
+        <translation>Значення полів H1-H4 мають бути унікальними</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="505"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)</source>
-        <translation type="vanished">Значення поля S1 + розмір повідомлення ініціалізації (148) не має бути рівним значенню S2 + розмір повідомлення відповіді (92)</translation>
+        <translation>Значення поля S1 + розмір повідомлення ініціалізації (148) не має бути рівним значенню S2 + розмір повідомлення відповіді (92)</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="510"/>
         <source>Save settings?</source>
-        <translation type="vanished">Зберегти налаштування?</translation>
+        <translation>Зберегти налаштування?</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="511"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="vanished">Усі користувачі, з якими ви поділилися підключенням, більше не зможуть підключитися до нього.</translation>
+        <translation>Усі користувачі, з якими ви поділилися підключенням, більше не зможуть підключитися до нього.</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="517"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation type="vanished">Неможливо змінити налаштування, поки є активне підключення</translation>
+        <translation>Неможливо змінити налаштування, поки є активне підключення</translation>
     </message>
     <message>
         <source>Remove AmneziaWG</source>
@@ -879,12 +978,14 @@ Thank you for staying with us!</source>
         <translation type="vanished">Користувачі, з якими ви поділились цим протоколм, більше не зможуть до нього підключитись.</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="512"/>
         <source>Continue</source>
-        <translation type="vanished">Продовжити</translation>
+        <translation>Продовжити</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="513"/>
         <source>Cancel</source>
-        <translation type="vanished">Відмінити</translation>
+        <translation>Відмінити</translation>
     </message>
     <message>
         <source>Save and Restart Amnezia</source>

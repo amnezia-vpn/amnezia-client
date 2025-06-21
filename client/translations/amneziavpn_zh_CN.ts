@@ -482,60 +482,60 @@ Can&apos;t be disabled for current server</source>
         <translation type="obsolete"> 已安装在服务器上</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="175"/>
+        <location filename="../ui/controllers/installController.cpp" line="168"/>
         <source>%1 installed successfully. </source>
         <translation>%1 安装成功。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="177"/>
+        <location filename="../ui/controllers/installController.cpp" line="170"/>
         <source>%1 is already installed on the server. </source>
         <translation>服务器上已经安装 %1。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="197"/>
+        <location filename="../ui/controllers/installController.cpp" line="190"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>添加已安装在服务器上的容器</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="277"/>
+        <location filename="../ui/controllers/installController.cpp" line="270"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 在服务上发现已经安装协议并添加至应用</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="611"/>
+        <location filename="../ui/controllers/installController.cpp" line="604"/>
         <source>Settings updated successfully</source>
         <translation>配置更新成功</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="628"/>
+        <location filename="../ui/controllers/installController.cpp" line="621"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>服务器 &apos;%1&apos; 已重新启动</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="640"/>
+        <location filename="../ui/controllers/installController.cpp" line="633"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>已移除服务器 &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="651"/>
+        <location filename="../ui/controllers/installController.cpp" line="644"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>服务器 &apos;%1&apos; 的所有容器已移除</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="669"/>
+        <location filename="../ui/controllers/installController.cpp" line="662"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 已从服务器 &apos;%2&apos; 上移除</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="678"/>
+        <location filename="../ui/controllers/installController.cpp" line="671"/>
         <source>Api config removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="700"/>
+        <location filename="../ui/controllers/installController.cpp" line="693"/>
         <source>%1 cached profile cleared</source>
         <translation type="unfinished"></translation>
     </message>
@@ -556,12 +556,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="obsolete"> 协议已从</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="839"/>
+        <location filename="../ui/controllers/installController.cpp" line="832"/>
         <source>Please login as the user</source>
         <translation>请以用户身份登录</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="867"/>
+        <location filename="../ui/controllers/installController.cpp" line="860"/>
         <source>Server added successfully</source>
         <translation>增加服务器成功</translation>
     </message>
@@ -779,12 +779,14 @@ Thank you for staying with us!</source>
 <context>
     <name>PageProtocolAwgSettings</name>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="97"/>
         <source>AmneziaWG settings</source>
-        <translation type="vanished">AmneziaWG 配置</translation>
+        <translation>AmneziaWG 配置</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="127"/>
         <source>Port</source>
-        <translation type="vanished">端口</translation>
+        <translation>端口</translation>
     </message>
     <message>
         <source>Remove AmneziaWG</source>
@@ -795,28 +797,139 @@ Thank you for staying with us!</source>
         <translation type="vanished">从服务上移除AmneziaWG？</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="511"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="vanished">与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="483"/>
         <source>Save</source>
-        <translation type="vanished">保存</translation>
+        <translation>保存</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="108"/>
         <source>VPN address subnet</source>
-        <translation type="obsolete">VPN 地址子网</translation>
+        <translation type="unfinished">VPN 地址子网</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="146"/>
+        <source>Jc - Junk packet count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="168"/>
+        <source>Jmin - Junk packet minimum size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="186"/>
+        <source>Jmax - Junk packet maximum size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="204"/>
+        <source>S1 - Init packet junk size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="228"/>
+        <source>S2 - Response packet junk size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="252"/>
+        <source>H1 - Init packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="270"/>
+        <source>H2 - Response packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="288"/>
+        <source>H3 - Underload packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="306"/>
+        <source>H4 - Transport packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="324"/>
+        <source>I1 - First special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="339"/>
+        <source>I2 - Second special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="354"/>
+        <source>I3 - Third special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="369"/>
+        <source>I4 - Fourth special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="384"/>
+        <source>I5 - Fifth special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="399"/>
+        <source>J1 - First controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="414"/>
+        <source>J2 - Second controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="429"/>
+        <source>J3 - Third controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="444"/>
+        <source>Itime - Special handshake timeout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="499"/>
+        <source>The values of the H1-H4 fields must be unique</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="505"/>
+        <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="510"/>
         <source>Save settings?</source>
-        <translation type="vanished">保存设置？</translation>
+        <translation>保存设置？</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="512"/>
         <source>Continue</source>
-        <translation type="vanished">继续</translation>
+        <translation>继续</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="513"/>
         <source>Cancel</source>
-        <translation type="vanished">取消</translation>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="517"/>
+        <source>Unable change settings while there is an active connection</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

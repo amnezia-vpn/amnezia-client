@@ -503,71 +503,71 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="175"/>
+        <location filename="../ui/controllers/installController.cpp" line="168"/>
         <source>%1 installed successfully. </source>
         <translation>%1 ကို အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="177"/>
+        <location filename="../ui/controllers/installController.cpp" line="170"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 ကို ဆာဗာတွင် ထည့်သွင်းပြီးဖြစ်သည်. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="197"/>
+        <location filename="../ui/controllers/installController.cpp" line="190"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 ဆာဗာတွင် ထည့်သွင်းပြီးသား ကွန်တိန်နာများကို ပေါင်းထည့်ပြီးပါပြီ။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="277"/>
+        <location filename="../ui/controllers/installController.cpp" line="270"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 ထည့်သွင်းပြီးသား ကွန်တိန်နာများကို ဆာဗာပေါ်တွင် တွေ့ရှိခဲ့သည်။ ထည့်သွင်းထားသည့် ကွန်တိန်နာအားလုံးကို အပလီကေးရှင်းထဲသို့ ပေါင်းထည့်ပြီးပါပြီ။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="611"/>
+        <location filename="../ui/controllers/installController.cpp" line="604"/>
         <source>Settings updated successfully</source>
         <translation>ဆက်တင်များကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ပြီးပါပြီ။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="628"/>
+        <location filename="../ui/controllers/installController.cpp" line="621"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>ဆာဗာ &apos;%1&apos; ကို ပြန်လည်စတင်ခဲ့သည်။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="640"/>
+        <location filename="../ui/controllers/installController.cpp" line="633"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>ဆာဗာ &apos;%1&apos; ကို ဖယ်ရှားခဲ့သည်။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="651"/>
+        <location filename="../ui/controllers/installController.cpp" line="644"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>ဆာဗာ &apos;%1&apos; မှ ကွန်တိန်နာအားလုံးကို ဖယ်ရှားလိုက်ပါပြီ။</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="669"/>
+        <location filename="../ui/controllers/installController.cpp" line="662"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 ကို ဆာဗာ &apos;%2&apos; မှ ဖယ်ရှားလိုက်ပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="678"/>
+        <location filename="../ui/controllers/installController.cpp" line="671"/>
         <source>Api config removed</source>
         <translation>Api config ကိုဖယ်ရှားလိုက်သည်</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="700"/>
+        <location filename="../ui/controllers/installController.cpp" line="693"/>
         <source>%1 cached profile cleared</source>
         <translation>ကက်ရှ်လုပ်ထားတဲ့ ပရိုဖိုင် %1 ခုကို ရှင်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="839"/>
+        <location filename="../ui/controllers/installController.cpp" line="832"/>
         <source>Please login as the user</source>
         <translation>အသုံးပြုသူအဖြစ် log in ဝင်ရောက်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="867"/>
+        <location filename="../ui/controllers/installController.cpp" line="860"/>
         <source>Server added successfully</source>
         <translation>ဆာဗာကို အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ</translation>
     </message>
@@ -797,88 +797,153 @@ Thank you for staying with us!</source>
 <context>
     <name>PageProtocolAwgSettings</name>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="97"/>
         <source>AmneziaWG settings</source>
-        <translation type="vanished">AmneziaWG ဆက်တင်များ</translation>
+        <translation>AmneziaWG ဆက်တင်များ</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="127"/>
         <source>Port</source>
-        <translation type="vanished">Port</translation>
+        <translation>Port</translation>
     </message>
     <message>
         <source>MTU</source>
         <translation type="vanished">MTU</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="511"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="vanished">သင်နှင့်အတူချိတ်ဆက်မှုတစ်ခုကို မျှဝေထားသည့် အသုံးပြုသူအားလုံး ချိတ်ဆက်နိုင်တော့မည်မဟုတ်ပါ.</translation>
+        <translation>သင်နှင့်အတူချိတ်ဆက်မှုတစ်ခုကို မျှဝေထားသည့် အသုံးပြုသူအားလုံး ချိတ်ဆက်နိုင်တော့မည်မဟုတ်ပါ.</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="483"/>
         <source>Save</source>
-        <translation type="vanished">သိမ်းဆည်းမည်</translation>
+        <translation>သိမ်းဆည်းမည်</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="108"/>
         <source>VPN address subnet</source>
-        <translation type="obsolete">VPN လိပ်စာ ကွန်ရက်ခွဲ</translation>
+        <translation type="unfinished">VPN လိပ်စာ ကွန်ရက်ခွဲ</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="146"/>
         <source>Jc - Junk packet count</source>
-        <translation type="vanished">Jc - Junk packet အရေအတွက်</translation>
+        <translation>Jc - Junk packet အရေအတွက်</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="168"/>
         <source>Jmin - Junk packet minimum size</source>
-        <translation type="vanished">Jmin - Junk packet အသေးငယ်ဆုံးလက်ခံနိုင်မှုအရွယ်အစား</translation>
+        <translation>Jmin - Junk packet အသေးငယ်ဆုံးလက်ခံနိုင်မှုအရွယ်အစား</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="186"/>
         <source>Jmax - Junk packet maximum size</source>
-        <translation type="vanished">Jmax - Junk packet အကြီးဆုံးလက်ခံနိုင်မှုအရွယ်အစား</translation>
+        <translation>Jmax - Junk packet အကြီးဆုံးလက်ခံနိုင်မှုအရွယ်အစား</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="204"/>
         <source>S1 - Init packet junk size</source>
-        <translation type="vanished">S1 - Init packet junk အရွယ်အစား</translation>
+        <translation>S1 - Init packet junk အရွယ်အစား</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="228"/>
         <source>S2 - Response packet junk size</source>
-        <translation type="vanished">S2 - Response packet junk အရွယ်အစား</translation>
+        <translation>S2 - Response packet junk အရွယ်အစား</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="252"/>
         <source>H1 - Init packet magic header</source>
-        <translation type="vanished">H1 - Init packet magic header</translation>
+        <translation>H1 - Init packet magic header</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="270"/>
         <source>H2 - Response packet magic header</source>
-        <translation type="vanished">H2 - Response packet magic header</translation>
+        <translation>H2 - Response packet magic header</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="306"/>
         <source>H4 - Transport packet magic header</source>
-        <translation type="vanished">H4 - Transport packet magic header</translation>
+        <translation>H4 - Transport packet magic header</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="288"/>
         <source>H3 - Underload packet magic header</source>
-        <translation type="vanished">H3 - Underload packet magic header</translation>
+        <translation>H3 - Underload packet magic header</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="324"/>
+        <source>I1 - First special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="339"/>
+        <source>I2 - Second special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="354"/>
+        <source>I3 - Third special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="369"/>
+        <source>I4 - Fourth special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="384"/>
+        <source>I5 - Fifth special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="399"/>
+        <source>J1 - First controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="414"/>
+        <source>J2 - Second controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="429"/>
+        <source>J3 - Third controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="444"/>
+        <source>Itime - Special handshake timeout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="499"/>
         <source>The values of the H1-H4 fields must be unique</source>
-        <translation type="vanished">H1-H4 အကွက်များ၏ တန်ဖိုးများသည် အခြားတန်ဖိုးများနှင့်မတူ တမူထူးခြားနေရပါမည်</translation>
+        <translation>H1-H4 အကွက်များ၏ တန်ဖိုးများသည် အခြားတန်ဖိုးများနှင့်မတူ တမူထူးခြားနေရပါမည်</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="505"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)</source>
-        <translation type="vanished">အကွက် S1 + မက်ဆေ့ချ် စတင်ခြင်း အရွယ်အစား (148) ၏ တန်ဖိုးသည် S2 + မက်ဆေ့ချ် တုံ့ပြန်မှု အရွယ်အစား (92) နှင့် မညီမျှရပါ</translation>
+        <translation>အကွက် S1 + မက်ဆေ့ချ် စတင်ခြင်း အရွယ်အစား (148) ၏ တန်ဖိုးသည် S2 + မက်ဆေ့ချ် တုံ့ပြန်မှု အရွယ်အစား (92) နှင့် မညီမျှရပါ</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="510"/>
         <source>Save settings?</source>
-        <translation type="vanished">ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
+        <translation>ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="512"/>
         <source>Continue</source>
-        <translation type="vanished">ဆက်လက်လုပ်ဆောင်မည်</translation>
+        <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="513"/>
         <source>Cancel</source>
-        <translation type="vanished">ပယ်ဖျက်မည်</translation>
+        <translation>ပယ်ဖျက်မည်</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="517"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation type="vanished">လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
+        <translation>လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
 </context>
 <context>

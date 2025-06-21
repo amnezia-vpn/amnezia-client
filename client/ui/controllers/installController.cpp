@@ -99,16 +99,6 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 QString underloadPacketMagicHeader = headersValueList.at(2);
                 QString transportPacketMagicHeader = headersValueList.at(3);
 
-                const QString specialJunk1 = headersValueList.at(4);
-                const QString specialJunk2 = headersValueList.at(5);
-                const QString specialJunk3 = headersValueList.at(6);
-                const QString specialJunk4 = headersValueList.at(7);
-                const QString specialJunk5 = headersValueList.at(8);
-                const QString controlledJunk1 = headersValueList.at(9);
-                const QString controlledJunk2 = headersValueList.at(10);
-                const QString controlledJunk3 = headersValueList.at(11);
-                const QString specialHandshakeTimeout = headersValueList.at(12);
-
                 containerConfig[config_key::junkPacketCount] = junkPacketCount;
                 containerConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
                 containerConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
@@ -118,15 +108,18 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 containerConfig[config_key::responsePacketMagicHeader] = responsePacketMagicHeader;
                 containerConfig[config_key::underloadPacketMagicHeader] = underloadPacketMagicHeader;
                 containerConfig[config_key::transportPacketMagicHeader] = transportPacketMagicHeader;
-                containerConfig[config_key::specialJunk1] = specialJunk1;
-                containerConfig[config_key::specialJunk2] = specialJunk2;
-                containerConfig[config_key::specialJunk3] = specialJunk3;
-                containerConfig[config_key::specialJunk4] = specialJunk4;
-                containerConfig[config_key::specialJunk5] = specialJunk5;
-                containerConfig[config_key::controlledJunk1] = controlledJunk1;
-                containerConfig[config_key::controlledJunk2] = controlledJunk2;
-                containerConfig[config_key::controlledJunk3] = controlledJunk3;
-                containerConfig[config_key::specialHandshakeTimeout] = specialHandshakeTimeout;
+
+                // TODO:
+                // containerConfig[config_key::specialJunk1] = specialJunk1;
+                // containerConfig[config_key::specialJunk2] = specialJunk2;
+                // containerConfig[config_key::specialJunk3] = specialJunk3;
+                // containerConfig[config_key::specialJunk4] = specialJunk4;
+                // containerConfig[config_key::specialJunk5] = specialJunk5;
+                // containerConfig[config_key::controlledJunk1] = controlledJunk1;
+                // containerConfig[config_key::controlledJunk2] = controlledJunk2;
+                // containerConfig[config_key::controlledJunk3] = controlledJunk3;
+                // containerConfig[config_key::specialHandshakeTimeout] = specialHandshakeTimeout;
+
             } else if (container == DockerContainer::Sftp) {
                 containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
                 containerConfig.insert(config_key::password, Utils::getRandomString(16));

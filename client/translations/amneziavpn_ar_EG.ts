@@ -502,24 +502,24 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="175"/>
+        <location filename="../ui/controllers/installController.cpp" line="168"/>
         <source>%1 installed successfully. </source>
         <translation>%1 تم التثبيت بنجاح. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="177"/>
+        <location filename="../ui/controllers/installController.cpp" line="170"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 بالفعل  مٌثبت علي الخادم. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="197"/>
+        <location filename="../ui/controllers/installController.cpp" line="190"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 تمت إضافة الحاويات التي كانت مٌثبتة بالفعل علي الخادم</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="277"/>
+        <location filename="../ui/controllers/installController.cpp" line="270"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
@@ -527,47 +527,47 @@ Already installed containers were found on the server. All installed containers 
 تمت إضافة جميع الحاويات المٌثبتة إلي التطبيق</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="611"/>
+        <location filename="../ui/controllers/installController.cpp" line="604"/>
         <source>Settings updated successfully</source>
         <translation>تم تحديث الاعدادات بنجاح</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="628"/>
+        <location filename="../ui/controllers/installController.cpp" line="621"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>تمت إعادة تشغيل الخادم%1</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="640"/>
+        <location filename="../ui/controllers/installController.cpp" line="633"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>تمت إزالة الخادم &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="651"/>
+        <location filename="../ui/controllers/installController.cpp" line="644"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>قد تم حذفها &apos;%1&apos; جميع الحاويات من الخادم</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="669"/>
+        <location filename="../ui/controllers/installController.cpp" line="662"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 تم حدف &apos;%2&apos; اسم الخادم</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="678"/>
+        <location filename="../ui/controllers/installController.cpp" line="671"/>
         <source>Api config removed</source>
         <translation>تم حذف تكوين Api</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="700"/>
+        <location filename="../ui/controllers/installController.cpp" line="693"/>
         <source>%1 cached profile cleared</source>
         <translation>تم مسح ملف تعريف %1 المخزن مؤقتًا</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="839"/>
+        <location filename="../ui/controllers/installController.cpp" line="832"/>
         <source>Please login as the user</source>
         <translation>من فضلك قم بتسجيل الدخول كمستخدم</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="867"/>
+        <location filename="../ui/controllers/installController.cpp" line="860"/>
         <source>Server added successfully</source>
         <translation>تمت إضافة الخادم بنجاح</translation>
     </message>
@@ -797,84 +797,149 @@ Thank you for staying with us!</source>
 <context>
     <name>PageProtocolAwgSettings</name>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="97"/>
         <source>AmneziaWG settings</source>
-        <translation type="vanished">اعدادات AmneziaWG</translation>
+        <translation>اعدادات AmneziaWG</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="127"/>
         <source>Port</source>
-        <translation type="vanished">منفذ</translation>
+        <translation>منفذ</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="511"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="vanished">جميع المستخدمين الذين شاركت معهم اتصال لن يكونو قادرين علي الاتصال مرة اخري.</translation>
+        <translation>جميع المستخدمين الذين شاركت معهم اتصال لن يكونو قادرين علي الاتصال مرة اخري.</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="483"/>
         <source>Save</source>
-        <translation type="vanished">احفظ</translation>
+        <translation>احفظ</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="108"/>
         <source>VPN address subnet</source>
-        <translation type="obsolete">الشبكة الفرعية لعنوان VPN</translation>
+        <translation type="unfinished">الشبكة الفرعية لعنوان VPN</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="146"/>
         <source>Jc - Junk packet count</source>
-        <translation type="vanished">Jc - عدد الحزم غير المرغوب فيها</translation>
+        <translation>Jc - عدد الحزم غير المرغوب فيها</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="168"/>
         <source>Jmin - Junk packet minimum size</source>
-        <translation type="vanished">Jmin - الحجم الادني للحزم الغير مرغوب فيها</translation>
+        <translation>Jmin - الحجم الادني للحزم الغير مرغوب فيها</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="186"/>
         <source>Jmax - Junk packet maximum size</source>
-        <translation type="vanished">Jmax - الحجم الاقصي للحزم الغير مرغوب فيها</translation>
+        <translation>Jmax - الحجم الاقصي للحزم الغير مرغوب فيها</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="204"/>
         <source>S1 - Init packet junk size</source>
-        <translation type="vanished">S1 - حجم حزمة البيانات العشوائية الأولية</translation>
+        <translation>S1 - حجم حزمة البيانات العشوائية الأولية</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="228"/>
         <source>S2 - Response packet junk size</source>
-        <translation type="vanished">S2 - حجم حزمة الاستجابة غير المرغوب فيها</translation>
+        <translation>S2 - حجم حزمة الاستجابة غير المرغوب فيها</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="252"/>
         <source>H1 - Init packet magic header</source>
-        <translation type="vanished">H1 - حزمة رأس سحرية مبدئية</translation>
+        <translation>H1 - حزمة رأس سحرية مبدئية</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="270"/>
         <source>H2 - Response packet magic header</source>
-        <translation type="vanished">H2 - رأس حزمة الاستجابة السحرية</translation>
+        <translation>H2 - رأس حزمة الاستجابة السحرية</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="306"/>
         <source>H4 - Transport packet magic header</source>
-        <translation type="vanished">H4 - رأس حزمة النقل السحرية</translation>
+        <translation>H4 - رأس حزمة النقل السحرية</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="288"/>
         <source>H3 - Underload packet magic header</source>
-        <translation type="vanished">H3 - رأس حزمة السحر غير المحمل</translation>
+        <translation>H3 - رأس حزمة السحر غير المحمل</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="324"/>
+        <source>I1 - First special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="339"/>
+        <source>I2 - Second special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="354"/>
+        <source>I3 - Third special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="369"/>
+        <source>I4 - Fourth special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="384"/>
+        <source>I5 - Fifth special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="399"/>
+        <source>J1 - First controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="414"/>
+        <source>J2 - Second controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="429"/>
+        <source>J3 - Third controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="444"/>
+        <source>Itime - Special handshake timeout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="499"/>
         <source>The values of the H1-H4 fields must be unique</source>
-        <translation type="vanished">يجب أن تكون قيم الحقول H1-H4 فريدة</translation>
+        <translation>يجب أن تكون قيم الحقول H1-H4 فريدة</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="505"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)</source>
-        <translation type="vanished">يجب ألا تساوي قيمة الحقل S1 + حجم بدء الرسالة (148) S2 + حجم استجابة الرسالة (92)</translation>
+        <translation>يجب ألا تساوي قيمة الحقل S1 + حجم بدء الرسالة (148) S2 + حجم استجابة الرسالة (92)</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="510"/>
         <source>Save settings?</source>
-        <translation type="vanished">احفظ الإعدادات؟</translation>
+        <translation>احفظ الإعدادات؟</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="512"/>
         <source>Continue</source>
-        <translation type="vanished">واصل</translation>
+        <translation>واصل</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="513"/>
         <source>Cancel</source>
-        <translation type="vanished">إلغاء</translation>
+        <translation>إلغاء</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="517"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation type="vanished">لا يمكن تغيير الإعدادات أثناء وجود اتصال نشط</translation>
+        <translation>لا يمكن تغيير الإعدادات أثناء وجود اتصال نشط</translation>
     </message>
 </context>
 <context>

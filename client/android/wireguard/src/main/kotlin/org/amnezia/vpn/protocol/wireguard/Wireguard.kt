@@ -132,7 +132,7 @@ open class Wireguard : Protocol() {
         configData.optStringOrNull("J1")?.let { setJ1(it.toString()) }
         configData.optStringOrNull("J2")?.let { setJ2(it.toString()) }
         configData.optStringOrNull("J3")?.let { setJ3(it.toString()) }
-        configData.optStringOrNull("Itime")?.let { setItime(it.Int()) }
+        configData.optStringOrNull("Itime")?.let { setItime(it.toInt()) }
     }
 
     private fun start(config: WireguardConfig, vpnBuilder: Builder, protect: (Int) -> Boolean) {

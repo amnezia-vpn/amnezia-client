@@ -483,71 +483,71 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="175"/>
+        <location filename="../ui/controllers/installController.cpp" line="168"/>
         <source>%1 installed successfully. </source>
         <translation>%1 सफलतापूर्वक स्थापित हुआ. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="177"/>
+        <location filename="../ui/controllers/installController.cpp" line="170"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 पहले से ही सर्वर पर स्थापित है. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="197"/>
+        <location filename="../ui/controllers/installController.cpp" line="190"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 सर्वर पर पहले से स्थापित कंटेनर जोड़े गए</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="277"/>
+        <location filename="../ui/controllers/installController.cpp" line="270"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 सर्वर पर पहले से स्थापित कंटेनर पाए गए। सभी स्थापित कंटेनरों को एप्लिकेशन में जोड़ दिया गया है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="611"/>
+        <location filename="../ui/controllers/installController.cpp" line="604"/>
         <source>Settings updated successfully</source>
         <translation>सेटिंग्स सफलतापूर्वक अपडेट हो गईं</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="628"/>
+        <location filename="../ui/controllers/installController.cpp" line="621"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>सर्वर &apos;%1&apos; रीबूट किया गया था</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="640"/>
+        <location filename="../ui/controllers/installController.cpp" line="633"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>सर्वर &apos;%1&apos; रीबूट किया गया था</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="651"/>
+        <location filename="../ui/controllers/installController.cpp" line="644"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>सर्वर &apos;%1&apos; से सभी कंटेनर हटा दिए गए हैं</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="669"/>
+        <location filename="../ui/controllers/installController.cpp" line="662"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 को सर्वर &apos;%2&apos; से हटा दिया गया है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="678"/>
+        <location filename="../ui/controllers/installController.cpp" line="671"/>
         <source>Api config removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="700"/>
+        <location filename="../ui/controllers/installController.cpp" line="693"/>
         <source>%1 cached profile cleared</source>
         <translation>%1 कैश्ड प्रोफ़ाइल साफ़ की गई</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="839"/>
+        <location filename="../ui/controllers/installController.cpp" line="832"/>
         <source>Please login as the user</source>
         <translation>कृपया उपयोगकर्ता के रूप में लॉगिन करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="867"/>
+        <location filename="../ui/controllers/installController.cpp" line="860"/>
         <source>Server added successfully</source>
         <translation>सर्वर सफलतापूर्वक जोड़ा गया</translation>
     </message>
@@ -765,52 +765,153 @@ Thank you for staying with us!</source>
 <context>
     <name>PageProtocolAwgSettings</name>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="97"/>
         <source>AmneziaWG settings</source>
-        <translation type="vanished">Amneziaडब्ल्यूजी सेटिंग्स</translation>
+        <translation>Amneziaडब्ल्यूजी सेटिंग्स</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="108"/>
         <source>VPN address subnet</source>
-        <translation type="obsolete">VPN एड्रेस सबनेट</translation>
+        <translation type="unfinished">VPN एड्रेस सबनेट</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="127"/>
         <source>Port</source>
-        <translation type="vanished">पोर्ट</translation>
+        <translation>पोर्ट</translation>
     </message>
     <message>
         <source>MTU</source>
         <translation type="vanished">एमटीयू</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="483"/>
         <source>Save</source>
-        <translation type="vanished">सहेजें</translation>
+        <translation>सहेजें</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="499"/>
         <source>The values of the H1-H4 fields must be unique</source>
-        <translation type="vanished">H1-H4 फ़ील्ड का मान अद्वितीय होना चाहिए</translation>
+        <translation>H1-H4 फ़ील्ड का मान अद्वितीय होना चाहिए</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="505"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)</source>
-        <translation type="vanished">फ़ील्ड S1 + संदेश आरंभ आकार (148) का मान S2 + संदेश प्रतिक्रिया आकार (92) के बराबर नहीं होना चाहिए</translation>
+        <translation>फ़ील्ड S1 + संदेश आरंभ आकार (148) का मान S2 + संदेश प्रतिक्रिया आकार (92) के बराबर नहीं होना चाहिए</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="510"/>
         <source>Save settings?</source>
-        <translation type="vanished">सेटिंग्स सेव करें?</translation>
+        <translation>सेटिंग्स सेव करें?</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="511"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="vanished">वे सभी उपयोगकर्ता जिनके साथ आपने कनेक्शन साझा किया था, वे अब इससे कनेक्ट नहीं हो पाएंगे.</translation>
+        <translation>वे सभी उपयोगकर्ता जिनके साथ आपने कनेक्शन साझा किया था, वे अब इससे कनेक्ट नहीं हो पाएंगे.</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="517"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation type="vanished">सक्रिय कनेक्शन होने पर सेटिंग बदलने में असमर्थ</translation>
+        <translation>सक्रिय कनेक्शन होने पर सेटिंग बदलने में असमर्थ</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="512"/>
         <source>Continue</source>
-        <translation type="vanished">जारी रखना</translation>
+        <translation>जारी रखना</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="146"/>
+        <source>Jc - Junk packet count</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="168"/>
+        <source>Jmin - Junk packet minimum size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="186"/>
+        <source>Jmax - Junk packet maximum size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="204"/>
+        <source>S1 - Init packet junk size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="228"/>
+        <source>S2 - Response packet junk size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="252"/>
+        <source>H1 - Init packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="270"/>
+        <source>H2 - Response packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="288"/>
+        <source>H3 - Underload packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="306"/>
+        <source>H4 - Transport packet magic header</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="324"/>
+        <source>I1 - First special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="339"/>
+        <source>I2 - Second special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="354"/>
+        <source>I3 - Third special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="369"/>
+        <source>I4 - Fourth special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="384"/>
+        <source>I5 - Fifth special junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="399"/>
+        <source>J1 - First controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="414"/>
+        <source>J2 - Second controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="429"/>
+        <source>J3 - Third controlled junk packet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="444"/>
+        <source>Itime - Special handshake timeout</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="513"/>
         <source>Cancel</source>
-        <translation type="vanished">रद्द करना</translation>
+        <translation>रद्द करना</translation>
     </message>
 </context>
 <context>
