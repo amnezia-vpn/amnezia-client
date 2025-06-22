@@ -44,3 +44,4 @@ RUN echo -e " \n\
 
 ENTRYPOINT [ "dumb-init", "/opt/amnezia/start.sh" ]
 CMD [ "" ]
+
