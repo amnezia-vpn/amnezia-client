@@ -141,7 +141,7 @@ PageType {
 
                                     for (var i = 0; i < cipherListView.model.count; i++) {
                                         if (cipherListView.model.get(i).name === cipherDropDown.text) {
-                                            currentIndex = i
+                                            cipherListView.selectedIndex = i
                                         }
                                     }
                                 }
