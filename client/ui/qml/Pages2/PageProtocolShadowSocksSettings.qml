@@ -57,14 +57,12 @@ PageType {
                 model: ShadowSocksConfigModel
 
                 delegate: Item {
+                    id: delegateItem
+
+                    property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
+
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
-
-                    property var focusItemId: portTextField.enabled ?
-                                                    portTextField :
-                                                    cipherDropDown.enabled ?
-                                                        cipherDropDown :
-                                                        saveRestartButton
 
                     ColumnLayout {
                         id: col
@@ -80,7 +78,6 @@ PageType {
 
                         BaseHeaderType {
                             Layout.fillWidth: true
-
                             headerText: qsTr("Shadowsocks settings")
                         }
 
@@ -90,7 +87,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 40
 
-                            enabled: isPortEditable
+                            enabled: delegateItem.isEnabled
 
                             headerText: qsTr("Port")
                             textField.text: port
@@ -102,6 +99,8 @@ PageType {
                                     port = textField.text
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         DropDownType {
@@ -109,7 +108,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 20
 
-                            enabled: isCipherEditable
+                            enabled: delegateItem.isEnabled
 
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")
@@ -149,13 +148,13 @@ PageType {
                         }
 
                         BasicButtonType {
-                            id: saveRestartButton
+                            id: saveButton
 
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
-                            enabled: isPortEditable | isCipherEditable
+                            enabled: portTextField.errorText === ""
 
                             text: qsTr("Save")
 
@@ -178,11 +177,14 @@ PageType {
                                 }
                                 var noButtonFunction = function() {
                                     if (!GC.isMobile()) {
-                                        saveRestartButton.forceActiveFocus()
+                                        saveButton.forceActiveFocus()
                                     }
                                 }
                                 showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
+
+                            Keys.onEnterPressed: saveButton.clicked()
+                            Keys.onReturnPressed: saveButton.clicked()
                         }
                     }
                 }

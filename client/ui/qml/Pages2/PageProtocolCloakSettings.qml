@@ -59,18 +59,13 @@ PageType {
                 model: CloakConfigModel
 
                 delegate: Item {
-                    implicitWidth: listview.width
-                    implicitHeight: col.implicitHeight
-
-                    property var focusItemId: trafficFromField.neabled ?
-                                                  trafficFromField :
-                                                  portTextField.enabled ?
-                                                    portTextField :
-                                                    cipherDropDown.enabled ?
-                                                        cipherDropDown :
-                                                        saveRestartButton
+                    id: delegateItem
 
                     property alias trafficFromField: trafficFromField
+                    property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
+
+                    implicitWidth: listview.width
+                    implicitHeight: col.implicitHeight
 
                     ColumnLayout {
                         id: col
@@ -86,7 +81,6 @@ PageType {
 
                         BaseHeaderType {
                             Layout.fillWidth: true
-
                             headerText: qsTr("Cloak settings")
                         }
 
@@ -96,7 +90,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 32
 
-                            enabled: isTrafficEditable
+                            enabled: delegateItem.isEnabled
 
                             headerText: qsTr("Disguised as traffic from")
                             textField.text: site
@@ -114,6 +108,8 @@ PageType {
                                     }
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
@@ -122,7 +118,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            enabled: isPortEditable
+                            enabled: delegateItem.isEnabled
 
                             headerText: qsTr("Port")
                             textField.text: port
@@ -134,6 +130,8 @@ PageType {
                                     port = textField.text
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         DropDownType {
@@ -141,7 +139,7 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 16
 
-                            enabled: isCipherEditable
+                            enabled: delegateItem.isEnabled
 
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")
@@ -180,13 +178,14 @@ PageType {
                         }
 
                         BasicButtonType {
-                            id: saveRestartButton
+                            id: saveButton
 
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
-                            enabled: isPortEditable | isTrafficEditable |isCipherEditable
+                            enabled: trafficFromField.errorText === "" &&
+                                     portTextField.errorText === ""
 
                             text: qsTr("Save")
 
@@ -216,6 +215,9 @@ PageType {
 
                                 showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
+
+                            Keys.onEnterPressed: saveButton.clicked()
+                            Keys.onReturnPressed: saveButton.clicked()
                         }
                     }
                 }
