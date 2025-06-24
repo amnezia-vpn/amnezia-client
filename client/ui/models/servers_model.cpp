@@ -66,6 +66,7 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
         } else {
             server.insert(config_key::description, value.toString());
         }
+        server.insert(config_key::nameOverriddenByUser, true);
         m_settings->editServer(index.row(), server);
         m_servers.replace(index.row(), server);
         if (index.row() == m_defaultServerIndex) {
@@ -338,6 +339,25 @@ void ServersModel::removeServer()
     if (m_settings->defaultServerIndex() == m_processedServerIndex) {
         setDefaultServerIndex(0);
     } else if (m_settings->defaultServerIndex() > m_processedServerIndex) {
+        setDefaultServerIndex(m_settings->defaultServerIndex() - 1);
+    }
+
+    if (m_settings->serversCount() == 0) {
+        setDefaultServerIndex(-1);
+    }
+    setProcessedServerIndex(m_defaultServerIndex);
+    endResetModel();
+}
+
+void ServersModel::removeServer(const int serverIndex)
+{
+    beginResetModel();
+    m_settings->removeServer(serverIndex);
+    m_servers = m_settings->serversArray();
+
+    if (m_settings->defaultServerIndex() == serverIndex) {
+        setDefaultServerIndex(0);
+    } else if (m_settings->defaultServerIndex() > serverIndex) {
         setDefaultServerIndex(m_settings->defaultServerIndex() - 1);
     }
 

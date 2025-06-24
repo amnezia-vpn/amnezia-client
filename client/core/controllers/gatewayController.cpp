@@ -14,8 +14,8 @@
 
 #include "amnezia_application.h"
 #include "core/api/apiUtils.h"
-#include "utilities.h"
 #include "core/networkUtilities.h"
+#include "utilities.h"
 
 #ifdef AMNEZIA_DESKTOP
     #include "core/ipcclient.h"
@@ -36,10 +36,17 @@ namespace
     constexpr QLatin1String errorResponsePattern1("No active configuration found for");
     constexpr QLatin1String errorResponsePattern2("No non-revoked public key found for");
     constexpr QLatin1String errorResponsePattern3("Account not found.");
+
+    constexpr QLatin1String updateRequestResponsePattern("client version update is required");
 }
 
-GatewayController::GatewayController(const QString &gatewayEndpoint, bool isDevEnvironment, int requestTimeoutMsecs, QObject *parent)
-    : QObject(parent), m_gatewayEndpoint(gatewayEndpoint), m_isDevEnvironment(isDevEnvironment), m_requestTimeoutMsecs(requestTimeoutMsecs)
+GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
+                                     const bool isStrictKillSwitchEnabled, QObject *parent)
+    : QObject(parent),
+      m_gatewayEndpoint(gatewayEndpoint),
+      m_isDevEnvironment(isDevEnvironment),
+      m_requestTimeoutMsecs(requestTimeoutMsecs),
+      m_isStrictKillSwitchEnabled(isStrictKillSwitchEnabled)
 {
 }
 
@@ -58,11 +65,11 @@ ErrorCode GatewayController::get(const QString &endpoint, QByteArray &responseBo
 
     // bypass killSwitch exceptions for API-gateway
 #ifdef AMNEZIA_DESKTOP
-    {
+    if (m_isStrictKillSwitchEnabled) {
         QString host = QUrl(request.url()).host();
         QString ip = NetworkUtilities::getIPAddress(host);
         if (!ip.isEmpty()) {
-            IpcClient::Interface()->addKillSwitchAllowedRange(QStringList{ip});
+            IpcClient::Interface()->addKillSwitchAllowedRange(QStringList { ip });
         }
     }
 #endif
@@ -120,11 +127,11 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
 
     // bypass killSwitch exceptions for API-gateway
 #ifdef AMNEZIA_DESKTOP
-    {
+    if (m_isStrictKillSwitchEnabled) {
         QString host = QUrl(request.url()).host();
         QString ip = NetworkUtilities::getIPAddress(host);
         if (!ip.isEmpty()) {
-            IpcClient::Interface()->addKillSwitchAllowedRange(QStringList{ip});
+            IpcClient::Interface()->addKillSwitchAllowedRange(QStringList { ip });
         }
     }
 #endif
@@ -301,6 +308,13 @@ bool GatewayController::shouldBypassProxy(QNetworkReply *reply, const QByteArray
     } else if (reply->error() == QNetworkReply::NetworkError::ContentNotFoundError) {
         if (responseBody.contains(errorResponsePattern1) || responseBody.contains(errorResponsePattern2)
             || responseBody.contains(errorResponsePattern3)) {
+            return false;
+        } else {
+            qDebug() << reply->error();
+            return true;
+        }
+    } else if (reply->error() == QNetworkReply::NetworkError::OperationNotImplementedError) {
+        if (responseBody.contains(updateRequestResponsePattern)) {
             return false;
         } else {
             qDebug() << reply->error();

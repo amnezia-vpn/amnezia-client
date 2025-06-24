@@ -363,7 +363,8 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
             QJsonObject config;
             Proto mainProto = ContainerProps::defaultProtocol(container);
-            for (auto protocol : ContainerProps::protocolsForContainer(container)) {
+            const auto &protocols = ContainerProps::protocolsForContainer(container);
+            for (const auto &protocol : protocols) {
                 QJsonObject containerConfig;
                 if (protocol == mainProto) {
                     containerConfig.insert(config_key::port, port);
@@ -387,6 +388,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                             }
                         }
 
+                        containerConfig[config_key::subnet_address] = serverConfigMap.value("Address").remove("/24");
                         containerConfig[config_key::junkPacketCount] = serverConfigMap.value(config_key::junkPacketCount);
                         containerConfig[config_key::junkPacketMinSize] = serverConfigMap.value(config_key::junkPacketMinSize);
                         containerConfig[config_key::junkPacketMaxSize] = serverConfigMap.value(config_key::junkPacketMaxSize);
@@ -398,6 +400,25 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                                 serverConfigMap.value(config_key::underloadPacketMagicHeader);
                         containerConfig[config_key::transportPacketMagicHeader] =
                                 serverConfigMap.value(config_key::transportPacketMagicHeader);
+
+                    } else if (protocol == Proto::WireGuard) {
+                        QString serverConfig = serverController->getTextFileFromContainer(container, credentials,
+                                                                                          protocols::wireguard::serverConfigPath, errorCode);
+
+                        QMap<QString, QString> serverConfigMap;
+                        auto serverConfigLines = serverConfig.split("\n");
+                        for (auto &line : serverConfigLines) {
+                            auto trimmedLine = line.trimmed();
+                            if (trimmedLine.startsWith("[") && trimmedLine.endsWith("]")) {
+                                continue;
+                            } else {
+                                QStringList parts = trimmedLine.split(" = ");
+                                if (parts.count() == 2) {
+                                    serverConfigMap.insert(parts[0].trimmed(), parts[1].trimmed());
+                                }
+                            }
+                        }
+                        containerConfig[config_key::subnet_address] = serverConfigMap.value("Address").remove("/24");
                     } else if (protocol == Proto::Sftp) {
                         stdOut.clear();
                         script = QString("sudo docker inspect --format '{{.Config.Cmd}}' %1").arg(name);
@@ -432,6 +453,51 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                             containerConfig.insert(config_key::userName, userName);
                             containerConfig.insert(config_key::password, password);
                         }
+                    } else if (protocol == Proto::Xray) {
+                        QString currentConfig = serverController->getTextFileFromContainer(
+                                container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
+
+                        QJsonDocument doc = QJsonDocument::fromJson(currentConfig.toUtf8());
+                        qDebug() << doc;
+                        if (doc.isNull() || !doc.isObject()) {
+                            logger.error() << "Failed to parse server config JSON";
+                            errorCode = ErrorCode::InternalError;
+                            return errorCode;
+                        }
+                        QJsonObject serverConfig = doc.object();
+
+                        if (!serverConfig.contains("inbounds")) {
+                            logger.error() << "Server config missing 'inbounds' field";
+                            errorCode = ErrorCode::InternalError;
+                            return errorCode;
+                        }
+
+                        QJsonArray inbounds = serverConfig["inbounds"].toArray();
+                        if (inbounds.isEmpty()) {
+                            logger.error() << "Server config has empty 'inbounds' array";
+                            errorCode = ErrorCode::InternalError;
+                            return errorCode;
+                        }
+
+                        QJsonObject inbound = inbounds[0].toObject();
+                        if (!inbound.contains("streamSettings")) {
+                            logger.error() << "Inbound missing 'streamSettings' field";
+                            errorCode = ErrorCode::InternalError;
+                            return errorCode;
+                        }
+
+                        QJsonObject streamSettings = inbound["streamSettings"].toObject();
+                        QJsonObject realitySettings = streamSettings["realitySettings"].toObject();
+                        if (!realitySettings.contains("serverNames")) {
+                            logger.error() << "Settings missing 'clients' field";
+                            errorCode = ErrorCode::InternalError;
+                            return errorCode;
+                        }
+
+                        QString siteName = realitySettings["serverNames"][0].toString();
+                        qDebug() << siteName;
+
+                        containerConfig.insert(config_key::site, siteName);
                     }
 
                     config.insert(config_key::container, ContainerProps::containerToString(container));

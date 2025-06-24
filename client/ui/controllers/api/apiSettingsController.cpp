@@ -5,6 +5,7 @@
 
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "version.h"
 
 namespace
 {
@@ -48,7 +49,8 @@ bool ApiSettingsController::getAccountInfo(bool reload)
         wait.exec();
     }
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), requestTimeoutMsecs);
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
 
     auto processedIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfig = m_serversModel->getServerConfig(processedIndex);
@@ -59,15 +61,14 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     apiPayload[configKey::userCountryCode] = apiConfig.value(configKey::userCountryCode).toString();
     apiPayload[configKey::serviceType] = apiConfig.value(configKey::serviceType).toString();
     apiPayload[configKey::authData] = authData;
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
 
     QByteArray responseBody;
 
-    if (apiUtils::isPremiumServer(serverConfig)) {
-        ErrorCode errorCode = gatewayController.post(QString("%1v1/account_info"), apiPayload, responseBody);
-        if (errorCode != ErrorCode::NoError) {
-            emit errorOccurred(errorCode);
-            return false;
-        }
+    ErrorCode errorCode = gatewayController.post(QString("%1v1/account_info"), apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return false;
     }
 
     QJsonObject accountInfo = QJsonDocument::fromJson(responseBody).object();

@@ -256,7 +256,7 @@ bool WindowsFirewall::allowTrafficRange(const QStringList& ranges) {
 
   for (const QString& addr : ranges) {
     logger.debug() << "Allow killswitch exclude: " << addr;
-    if (!allowTrafficTo(QHostAddress(addr), LOW_WEIGHT + 1, "Allow killswitch bypass traffic")) {
+    if (!allowTrafficTo(QHostAddress(addr), HIGH_WEIGHT, "Allow killswitch bypass traffic")) {
       return false;
     }
   }

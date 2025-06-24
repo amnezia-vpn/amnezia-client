@@ -49,7 +49,7 @@ PageType {
                     if (!ConnectionController.isConnected) {
                         SettingsController.isKillSwitchEnabled = checked
                     } else {
-                        PageController.showNotificationMessage(qsTr("Cannot change killSwitch settings during active connection"))
+                        PageController.showNotificationMessage(qsTr("KillSwitch settings cannot be changed during an active connection"))
                         switcher.checked = SettingsController.isKillSwitchEnabled
                     }
                 }
@@ -66,7 +66,7 @@ PageType {
                 checked: !SettingsController.strictKillSwitchEnabled
 
                 text: qsTr("Soft KillSwitch")
-                descriptionText: qsTr("Internet connection is blocked if VPN connection drops accidentally")
+                descriptionText: qsTr("Internet access is blocked if the VPN disconnects unexpectedly")
 
                 onClicked: function() {
                     SettingsController.strictKillSwitchEnabled = false
@@ -85,11 +85,11 @@ PageType {
                 checked: SettingsController.strictKillSwitchEnabled
 
                 text: qsTr("Strict KillSwitch")
-                descriptionText: qsTr("Internet connection is blocked even if VPN was turned off manually or not started")
+                descriptionText: qsTr("Internet connection is blocked even when VPN is turned off manually or hasn't started")
 
                 onClicked: function() {
                     var headerText = qsTr("Just a little heads-up")
-                    var descriptionText = qsTr("If you disconnect from VPN or the VPN connection drops while the Strict Kill Switch is turned on, your internet access will be disabled. To restore it, connect to VPN, change the Kill Switch mode or turn the Kill Switch off.")
+                    var descriptionText = qsTr("If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 
@@ -111,7 +111,7 @@ PageType {
 
                 enabled: true
                 text: qsTr("DNS Exceptions")
-                descriptionText: qsTr("DNS servers from the list will remain accessible when Kill Switch is triggered")
+                descriptionText: qsTr("DNS servers listed here will remain accessible when KillSwitch is active.")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

@@ -171,7 +171,7 @@ ErrorCode OpenVpnProtocol::start()
         return lastError();
     }
 
-#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+#ifdef AMNEZIA_DESKTOP
     IpcClient::Interface()->addKillSwitchAllowedRange(QStringList(NetworkUtilities::getIPAddress(
             m_configData.value(amnezia::config_key::hostName).toString())));
 #endif
@@ -343,7 +343,7 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                         // killSwitch toggle
                         if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
                             if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
-                                IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
+                                IpcClient::Interface()->enableKillSwitch(m_configData, netInterfaces.at(i).index());
                             }
                             m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
                             m_configData.insert("vpnGateway", m_vpnGateway);

@@ -122,7 +122,7 @@ bool IPUtilsMacos::addIP4AddressToDevice(const InterfaceConfig& config) {
   // Set ifr to interface
   int ret = ioctl(sockfd, SIOCAIFADDR, &ifr);
   if (ret) {
-    logger.error() << "Failed to set IPv4: " << logger.sensitive(deviceAddr)
+    logger.error() << "Failed to set IPv4: " << deviceAddr
                    << "error:" << strerror(errno);
     return false;
   }
@@ -162,7 +162,7 @@ bool IPUtilsMacos::addIP6AddressToDevice(const InterfaceConfig& config) {
   // Set ifr to interface
   int ret = ioctl(sockfd, SIOCAIFADDR_IN6, &ifr6);
   if (ret) {
-    logger.error() << "Failed to set IPv6: " << logger.sensitive(deviceAddr)
+    logger.error() << "Failed to set IPv6: " << deviceAddr
                    << "error:" << strerror(errno);
     return false;
   }
