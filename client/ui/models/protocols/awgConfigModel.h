@@ -22,6 +22,15 @@ struct AwgConfig
     QString clientJunkPacketCount;
     QString clientJunkPacketMinSize;
     QString clientJunkPacketMaxSize;
+    QString clientSpecialJunk1;
+    QString clientSpecialJunk2;
+    QString clientSpecialJunk3;
+    QString clientSpecialJunk4;
+    QString clientSpecialJunk5;
+    QString clientControlledJunk1;
+    QString clientControlledJunk2;
+    QString clientControlledJunk3;
+    QString clientSpecialHandshakeTimeout;
 
     QString serverJunkPacketCount;
     QString serverJunkPacketMinSize;
@@ -32,16 +41,6 @@ struct AwgConfig
     QString serverResponsePacketMagicHeader;
     QString serverUnderloadPacketMagicHeader;
     QString serverTransportPacketMagicHeader;
-
-    QString serverSpecialJunk1;
-    QString serverSpecialJunk2;
-    QString serverSpecialJunk3;
-    QString serverSpecialJunk4;
-    QString serverSpecialJunk5;
-    QString serverControlledJunk1;
-    QString serverControlledJunk2;
-    QString serverControlledJunk3;
-    QString serverSpecialHandshakeTimeout;
 
     bool hasEqualServerSettings(const AwgConfig &other) const;
     bool hasEqualClientSettings(const AwgConfig &other) const;
@@ -60,6 +59,15 @@ public:
         ClientJunkPacketCountRole,
         ClientJunkPacketMinSizeRole,
         ClientJunkPacketMaxSizeRole,
+        ClientSpecialJunk1Role,
+        ClientSpecialJunk2Role,
+        ClientSpecialJunk3Role,
+        ClientSpecialJunk4Role,
+        ClientSpecialJunk5Role,
+        ClientControlledJunk1Role,
+        ClientControlledJunk2Role,
+        ClientControlledJunk3Role,
+        ClientSpecialHandshakeTimeoutRole,
 
         ServerJunkPacketCountRole,
         ServerJunkPacketMinSizeRole,
@@ -70,16 +78,6 @@ public:
         ServerResponsePacketMagicHeaderRole,
         ServerUnderloadPacketMagicHeaderRole,
         ServerTransportPacketMagicHeaderRole,
-
-        ServerSpecialJunk1Role,
-        ServerSpecialJunk2Role,
-        ServerSpecialJunk3Role,
-        ServerSpecialJunk4Role,
-        ServerSpecialJunk5Role,
-        ServerControlledJunk1Role,
-        ServerControlledJunk2Role,
-        ServerControlledJunk3Role,
-        ServerSpecialHandshakeTimeoutRole,
     };
 
     explicit AwgConfigModel(QObject *parent = nullptr);

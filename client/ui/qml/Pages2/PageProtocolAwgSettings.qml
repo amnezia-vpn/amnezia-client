@@ -316,141 +316,6 @@ PageType {
                     checkEmptyText: true
                 }
 
-                TextFieldWithHeaderType {
-                    id: specialJunk1TextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
-                    headerText: qsTr("I1 - First special junk packet")
-                    textField.text: serverSpecialJunk1
-
-                    textField.onEditingFinished: {
-                        if (textField.text !== serverSpecialJunk1) {
-                            serverSpecialJunk1 = textField.text
-                        }
-                    }
-                }
-
-                TextFieldWithHeaderType {
-                    id: specialJunk2TextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
-                    headerText: qsTr("I2 - Second special junk packet")
-                    textField.text: serverSpecialJunk2
-
-                    textField.onEditingFinished: {
-                        if (textField.text !== serverSpecialJunk2) {
-                            serverSpecialJunk2 = textField.text
-                        }
-                    }
-                }
-
-                TextFieldWithHeaderType {
-                    id: specialJunk3TextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
-                    headerText: qsTr("I3 - Third special junk packet")
-                    textField.text: serverSpecialJunk3
-
-                    textField.onEditingFinished: {
-                        if (textField.text !== serverSpecialJunk3) {
-                            serverSpecialJunk3 = textField.text
-                        }
-                    }
-                }
-
-                TextFieldWithHeaderType {
-                    id: specialJunk4TextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
-                    headerText: qsTr("I4 - Fourth special junk packet")
-                    textField.text: serverSpecialJunk4
-
-                    textField.onEditingFinished: {
-                        if (textField.text !== serverSpecialJunk4) {
-                            serverSpecialJunk4 = textField.text
-                        }
-                    }
-                }
-
-                TextFieldWithHeaderType {
-                    id: specialJunk5TextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
-                    headerText: qsTr("I5 - Fifth special junk packet")
-                    textField.text: serverSpecialJunk5
-
-                    textField.onEditingFinished: {
-                        if (textField.text !== serverSpecialJunk5 ) {
-                            serverSpecialJunk5 = textField.text
-                        }
-                    }
-                }
-
-                TextFieldWithHeaderType {
-                    id: controlledJunk1TextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
-                    headerText: qsTr("J1 - First controlled junk packet")
-                    textField.text: serverControlledJunk1
-
-                    textField.onEditingFinished: {
-                        if (textField.text !== serverControlledJunk1) {
-                            serverControlledJunk1 = textField.text
-                        }
-                    }
-                }
-
-                TextFieldWithHeaderType {
-                    id: controlledJunk2TextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
-                    headerText: qsTr("J2 - Second controlled junk packet")
-                    textField.text: serverControlledJunk2
-
-                    textField.onEditingFinished: {
-                        if (textField.text !== serverControlledJunk2) {
-                            serverControlledJunk2 = textField.text
-                        }
-                    }
-                }
-
-                TextFieldWithHeaderType {
-                    id: controlledJunk3TextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
-                    headerText: qsTr("J3 - Third controlled junk packet")
-                    textField.text: serverControlledJunk3
-
-                    textField.onEditingFinished: {
-                        if (textField.text !== serverControlledJunk3) {
-                            serverControlledJunk3 = textField.text
-                        }
-                    }
-                }
-
-                TextFieldWithHeaderType {
-                    id: iTimeTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
-                    headerText: qsTr("Itime - Special handshake timeout")
-                    textField.text: serverSpecialHandshakeTimeout
-                    textField.validator: IntValidator { bottom: 0 }
-
-                    textField.onEditingFinished: {
-                        if (textField.text !== serverSpecialHandshakeTimeout) {
-                            serverSpecialHandshakeTimeout = textField.text
-                        }
-                    }
-                }
 
                 BasicButtonType {
                     id: saveRestartButton
@@ -468,15 +333,15 @@ PageType {
                              junkPacketMaxSizeTextField.errorText === "" &&
                              junkPacketMinSizeTextField.errorText === "" &&
                              junkPacketCountTextField.errorText === "" &&
-                             specialJunk1TextField.errorText === "" &&
-                             specialJunk2TextField.errorText === "" &&
-                             specialJunk3TextField.errorText === "" &&
-                             specialJunk4TextField.errorText === "" &&
-                             specialJunk5TextField.errorText === "" &&
-                             controlledJunk1TextField.errorText === "" &&
-                             controlledJunk2TextField.errorText === "" &&
-                             controlledJunk3TextField.errorText === "" &&
-                             iTimeTextField.errorText === "" &&
+                             // specialJunk1TextField.errorText === "" &&
+                             // specialJunk2TextField.errorText === "" &&
+                             // specialJunk3TextField.errorText === "" &&
+                             // specialJunk4TextField.errorText === "" &&
+                             // specialJunk5TextField.errorText === "" &&
+                             // controlledJunk1TextField.errorText === "" &&
+                             // controlledJunk2TextField.errorText === "" &&
+                             // controlledJunk3TextField.errorText === "" &&
+                             // iTimeTextField.errorText === "" &&
                              portTextField.errorText === "" &&
                              vpnAddressSubnetTextField.errorText === ""
 

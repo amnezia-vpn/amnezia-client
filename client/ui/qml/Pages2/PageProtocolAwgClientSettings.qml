@@ -173,6 +173,142 @@ PageType {
                     checkEmptyText: true
                 }
 
+                TextFieldWithHeaderType {
+                    id: specialJunk1TextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("I1 - First special junk packet")
+                    textField.text: clientSpecialJunk1
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialJunk1) {
+                            clientSpecialJunk1 = textField.text
+                        }
+                    }
+                }
+
+                TextFieldWithHeaderType {
+                    id: specialJunk2TextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("I2 - Second special junk packet")
+                    textField.text: clientSpecialJunk2
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialJunk2) {
+                            clientSpecialJunk2 = textField.text
+                        }
+                    }
+                }
+
+                TextFieldWithHeaderType {
+                    id: specialJunk3TextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("I3 - Third special junk packet")
+                    textField.text: clientSpecialJunk3
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialJunk3) {
+                            clientSpecialJunk3 = textField.text
+                        }
+                    }
+                }
+
+                TextFieldWithHeaderType {
+                    id: specialJunk4TextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("I4 - Fourth special junk packet")
+                    textField.text: clientSpecialJunk4
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialJunk4) {
+                            clientSpecialJunk4 = textField.text
+                        }
+                    }
+                }
+
+                TextFieldWithHeaderType {
+                    id: specialJunk5TextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("I5 - Fifth special junk packet")
+                    textField.text: clientSpecialJunk5
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialJunk5 ) {
+                            clientSpecialJunk5 = textField.text
+                        }
+                    }
+                }
+
+                TextFieldWithHeaderType {
+                    id: controlledJunk1TextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("J1 - First controlled junk packet")
+                    textField.text: clientControlledJunk1
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientControlledJunk1) {
+                            clientControlledJunk1 = textField.text
+                        }
+                    }
+                }
+
+                TextFieldWithHeaderType {
+                    id: controlledJunk2TextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("J2 - Second controlled junk packet")
+                    textField.text: clientControlledJunk2
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientControlledJunk2) {
+                            clientControlledJunk2 = textField.text
+                        }
+                    }
+                }
+
+                TextFieldWithHeaderType {
+                    id: controlledJunk3TextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("J3 - Third controlled junk packet")
+                    textField.text: clientControlledJunk3
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientControlledJunk3) {
+                            clientControlledJunk3 = textField.text
+                        }
+                    }
+                }
+
+                TextFieldWithHeaderType {
+                    id: iTimeTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("Itime - Special handshake timeout")
+                    textField.text: clientSpecialHandshakeTimeout
+                    textField.validator: IntValidator { bottom: 0 }
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialHandshakeTimeout) {
+                            clientSpecialHandshakeTimeout = textField.text
+                        }
+                    }
+                }
+
                 Header2TextType {
                     Layout.fillWidth: true
                     Layout.topMargin: 16
@@ -256,6 +392,7 @@ PageType {
                     headerText: "H4 - Transport packet magic header"
                     textField.text: serverTransportPacketMagicHeader
                 }
+
             }
         }
     }
