@@ -69,7 +69,6 @@ PageType {
 
     FlickableType {
         id: fl
-        Component.onCompleted: console.log("[Debug] labelWithButton6.visible:", visible)
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         contentHeight: content.height
@@ -263,7 +262,6 @@ PageType {
                 id: labelWithButton6
                 visible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersModel.processedServerIsPremium
                 Layout.fillWidth: true
-                onVisibleChanged: console.log("[Debug] labelWithButton6.visible:", visible)
 
                 text: qsTr("Switch to the new Amnezia Premium subscription")
                 textColor: AmneziaStyle.color.vibrantRed
