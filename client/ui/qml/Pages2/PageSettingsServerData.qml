@@ -255,13 +255,14 @@ PageType {
             }
 
             DividerType {
-                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersModel.getProcessedServerData("apiConfig")["service_type"] === "amnezia-premium"
             }
 
             LabelWithButtonType {
                 id: labelWithButton6
-                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersModel.getProcessedServerData("apiConfig")["service_type"] === "amnezia-premium"
                 Layout.fillWidth: true
+                onVisibleChanged: console.log("[Debug] labelWithButton6.visible:", visible, "service_type:", ServersModel.getProcessedServerData("apiConfig")["service_type"])
 
                 text: qsTr("Switch to the new Amnezia Premium subscription")
                 textColor: AmneziaStyle.color.vibrantRed
@@ -273,7 +274,7 @@ PageType {
             }
 
             DividerType {
-                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersModel.getProcessedServerData("apiConfig")["service_type"] === "amnezia-premium"
             }
         }
     }
