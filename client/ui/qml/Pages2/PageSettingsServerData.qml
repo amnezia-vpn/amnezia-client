@@ -69,6 +69,7 @@ PageType {
 
     FlickableType {
         id: fl
+        Component.onCompleted: console.log("[Debug] isServerFromTelegramApi:", ServersModel.getProcessedServerData("isServerFromTelegramApi"), "service_type:", ServersModel.getProcessedServerData("apiConfig")["service_type"])
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         contentHeight: content.height
