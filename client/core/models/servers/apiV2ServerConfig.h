@@ -20,11 +20,18 @@ namespace apiv2
         QString end_date;
     };
 
+    struct AuthData
+    {
+        QString apiKey;
+    };
+
     struct ApiConfig {
         QVector<Country> availableCountries;
 
         Subscription subscription;
         PublicKey publicKey;
+
+        AuthData authData;
 
         QString serverCountryCode;
         QString serverCountryName;

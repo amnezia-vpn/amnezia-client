@@ -27,6 +27,9 @@ ServerConfig::ServerConfig(const QJsonObject &serverConfigObject)
 
     defaultContainer = serverConfigObject.value(config_key::defaultContainer).toString();
 
+    crc = serverConfigObject.value(config_key::crc).toInt(0);
+    nameOverriddenByUser = serverConfigObject.value(config_key::nameOverriddenByUser).toBool(false);
+
     auto containers = serverConfigObject.value(config_key::containers).toArray();
     for (const auto &container : std::as_const(containers)) {
         auto containerObject = container.toObject();
@@ -98,6 +101,17 @@ QSharedPointer<ServerConfig> ServerConfig::createServerConfig(const QJsonObject 
     }
 }
 
+ServerConfigVariant ServerConfig::getServerConfigVariant(const QSharedPointer<ServerConfig> &serverConfig)
+{
+    ServerConfigVariant variant;
+    switch (serverConfig->type) {
+    case amnezia::ServerConfigType::SelfHosted: variant = qSharedPointerCast<SelfHostedServerConfig>(serverConfig); break;
+    case amnezia::ServerConfigType::ApiV1: variant = qSharedPointerCast<ApiV1ServerConfig>(serverConfig); break;
+    case amnezia::ServerConfigType::ApiV2: variant = qSharedPointerCast<ApiV2ServerConfig>(serverConfig); break;
+    }
+    return variant;
+}
+
 QJsonObject ServerConfig::toJson() const
 {
     QJsonObject json;
@@ -142,4 +156,12 @@ QJsonObject ServerConfig::toJson() const
     }
 
     return json;
+}
+
+void ServerConfig::updateProtocolConfig(const QString &containerName, const QMap<QString, QSharedPointer<ProtocolConfig>> &protocolConfigs)
+{
+    if (containerConfigs.contains(containerName)) {
+        ContainerConfig &containerConfig = containerConfigs[containerName];
+        containerConfig.protocolConfigs = protocolConfigs;
+    }
 }

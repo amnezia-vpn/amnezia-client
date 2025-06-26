@@ -2,15 +2,30 @@
 #define PROTOCOLCONFIG_H
 
 #include <QJsonObject>
+#include <QSharedPointer>
+#include <variant>
+
+class OpenVpnProtocolConfig;
+class WireGuardProtocolConfig;
+class ShadowsocksProtocolConfig;
+class CloakProtocolConfig;
+class XrayProtocolConfig;
+class AwgProtocolConfig;
+
+using ProtocolConfigVariant =
+        std::variant<QSharedPointer<OpenVpnProtocolConfig>, QSharedPointer<WireGuardProtocolConfig>, QSharedPointer<ShadowsocksProtocolConfig>,
+                     QSharedPointer<CloakProtocolConfig>, QSharedPointer<XrayProtocolConfig>, QSharedPointer<AwgProtocolConfig> >;
 
 class ProtocolConfig
 {
 public:
     ProtocolConfig(const QString &protocolName);
+    virtual QJsonObject toJson() const;
+
+    static ProtocolConfigVariant getProtocolConfigVariant(const QSharedPointer<ProtocolConfig> &protocolConfig);
+    bool isServerSettingsEqual(const QSharedPointer<ProtocolConfig> &protocolConfig);
 
     QString protocolName;
-    
-    virtual QJsonObject toJson() const;
 };
 
 #endif // PROTOCOLCONFIG_H

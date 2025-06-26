@@ -28,7 +28,7 @@ public slots:
 
     void scanServerForInstalledContainers();
 
-    void updateContainer(QJsonObject config);
+    void updateContainer();
 
     void removeProcessedServer();
     void rebootProcessedServer();
@@ -94,7 +94,9 @@ private:
 
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController,
                                             QMap<DockerContainer, QJsonObject> &installedContainers);
-    bool isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
+    bool isUpdateDockerContainerRequired(const DockerContainer container,
+                                         const QMap<QString, QSharedPointer<ProtocolConfig>> &oldProtocolConfigs,
+                                         const QMap<QString, QSharedPointer<ProtocolConfig>> &newProtocolConfigs);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;

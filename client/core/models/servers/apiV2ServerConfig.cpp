@@ -38,14 +38,15 @@ ApiV2ServerConfig::ApiV2ServerConfig(const QJsonObject &serverConfigObject) : Se
     apiConfig.userCountryCode = apiConfigObject.value("user_country_code").toString();
 
     apiConfig.vpnKey = apiConfigObject.value("vpn_key").toString();
+
+    auto authDataObject = serverConfigObject.value("auth_data").toObject();
+    apiConfig.authData.apiKey = authDataObject.value("api_key").toString();
 }
 
 QJsonObject ApiV2ServerConfig::toJson() const
 {
-    // Сначала вызываем родительскую функцию для сериализации базовых полей
     QJsonObject json = ServerConfig::toJson();
     
-    // Добавляем свои поля только если они не пустые
     if (!name.isEmpty()) {
         json[config_key::name] = name;
     }
@@ -53,10 +54,8 @@ QJsonObject ApiV2ServerConfig::toJson() const
         json[config_key::description] = description;
     }
     
-    // Сериализация API конфигурации
     QJsonObject apiConfigJson;
     
-    // Сериализация доступных стран только если массив не пустой
     if (!apiConfig.availableCountries.isEmpty()) {
         QJsonArray availableCountriesArray;
         for (const auto &country : apiConfig.availableCountries) {
@@ -76,21 +75,18 @@ QJsonObject ApiV2ServerConfig::toJson() const
         }
     }
     
-    // Сериализация подписки только если есть данные
     if (!apiConfig.subscription.end_date.isEmpty()) {
         QJsonObject subscriptionObject;
         subscriptionObject["end_date"] = apiConfig.subscription.end_date;
         apiConfigJson["subscription"] = subscriptionObject;
     }
     
-    // Сериализация публичного ключа только если есть данные
     if (!apiConfig.publicKey.expiresAt.isEmpty()) {
         QJsonObject publicKeyObject;
         publicKeyObject["expires_at"] = apiConfig.publicKey.expiresAt;
         apiConfigJson["public_key"] = publicKeyObject;
     }
     
-    // Сериализация информации о сервере только если не пустая
     if (!apiConfig.serverCountryCode.isEmpty()) {
         apiConfigJson["server_country_code"] = apiConfig.serverCountryCode;
     }
@@ -98,7 +94,6 @@ QJsonObject ApiV2ServerConfig::toJson() const
         apiConfigJson["server_country_name"] = apiConfig.serverCountryName;
     }
     
-    // Сериализация информации о сервисе только если не пустая
     if (!apiConfig.serviceProtocol.isEmpty()) {
         apiConfigJson["service_protocol"] = apiConfig.serviceProtocol;
     }
@@ -106,17 +101,22 @@ QJsonObject ApiV2ServerConfig::toJson() const
         apiConfigJson["service_type"] = apiConfig.serviceType;
     }
     
-    // Сериализация информации о пользователе только если не пустая
     if (!apiConfig.userCountryCode.isEmpty()) {
         apiConfigJson["user_country_code"] = apiConfig.userCountryCode;
     }
     
-    // Сериализация VPN ключа только если не пустой
     if (!apiConfig.vpnKey.isEmpty()) {
         apiConfigJson["vpn_key"] = apiConfig.vpnKey;
     }
-    
-    // Добавляем API конфигурацию в основной JSON только если есть данные
+
+    QJsonObject authDataJson;
+    if (!apiConfig.authData.apiKey.isEmpty()) {
+        authDataJson["api_key"] = apiConfig.authData.apiKey;
+    }
+    if (!authDataJson.isEmpty()) {
+        apiConfigJson["auth_data"] = authDataJson;
+    }
+
     if (!apiConfigJson.isEmpty()) {
         json["api_config"] = apiConfigJson;
     }

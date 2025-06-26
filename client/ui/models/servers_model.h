@@ -86,16 +86,12 @@ public slots:
     const ServerCredentials getProcessedServerCredentials();
     const ServerCredentials getServerCredentials(const int index);
 
-    void addServer(const QJsonObject &server);
-    void editServer(const QJsonObject &server, const int serverIndex);
-    void removeServer();
+    void addServer(const QSharedPointer<ServerConfig> &serverConfig);
+    void editServer(const QSharedPointer<ServerConfig> &serverConfig, const int serverIndex);
+    void removeProcessedServer();
     void removeServer(const int serverIndex);
 
-    QJsonObject getServerConfig(const int serverIndex);
-
-    void reloadDefaultServerContainerConfig();
-    void updateContainerConfig(const int containerIndex, const QJsonObject config);
-    void addContainerConfig(const int containerIndex, const QJsonObject config);
+    QSharedPointer<const ServerConfig> getServerConfig(const int serverIndex);
 
     void clearCachedProfile(const DockerContainer container);
 
@@ -136,8 +132,8 @@ signals:
     void defaultServerNameChanged();
     void defaultServerDescriptionChanged();
 
-    void containersUpdated(const QJsonArray &containers);
-    void defaultServerContainersUpdated(const QJsonArray &containers);
+    void containersUpdated(const QMap<QString, ContainerConfig> &containerConfigs);
+    void defaultServerContainersUpdated(const QMap<QString, ContainerConfig> &containerConfigs);
     void defaultServerDefaultContainerChanged(const int containerIndex);
 
     void updateApiCountryModel();
@@ -155,7 +151,6 @@ private:
 
     bool serverHasInstalledContainers(const int serverIndex) const;
 
-    QJsonArray m_servers;
     QVector<QSharedPointer<ServerConfig>> m_servers1;
 
     std::shared_ptr<Settings> m_settings;

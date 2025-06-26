@@ -15,10 +15,8 @@ ApiV1ServerConfig::ApiV1ServerConfig(const QJsonObject &serverConfigObject) : Se
 
 QJsonObject ApiV1ServerConfig::toJson() const
 {
-    // Сначала вызываем родительскую функцию для сериализации базовых полей
     QJsonObject json = ServerConfig::toJson();
     
-    // Добавляем свои поля только если они не пустые
     if (!name.isEmpty()) {
         json[config_key::name] = name;
     }

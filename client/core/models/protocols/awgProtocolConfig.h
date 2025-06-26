@@ -49,14 +49,23 @@ namespace awg
 
         QString nativeConfig;
     };
+
+    const int messageInitiationSize = 148;
+    const int messageResponseSize = 92;
 }
 
 class AwgProtocolConfig : public ProtocolConfig
 {
 public:
+    AwgProtocolConfig(const QString &protocolName);
     AwgProtocolConfig(const QJsonObject &protocolConfigObject, const QString &protocolName);
+    AwgProtocolConfig(const AwgProtocolConfig &other);
 
     QJsonObject toJson() const override;
+
+    bool hasEqualServerSettings(const AwgProtocolConfig &other) const;
+    bool hasEqualClientSettings(const AwgProtocolConfig &other) const;
+    void clearClientSettings();
 
     awg::ServerProtocolConfig serverProtocolConfig;
     awg::ClientProtocolConfig clientProtocolConfig;

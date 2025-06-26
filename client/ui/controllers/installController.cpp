@@ -8,14 +8,15 @@
 #include <QStandardPaths>
 #include <QtConcurrent>
 
+#include "core/api/apiUtils.h"
 #include "core/controllers/serverController.h"
 #include "core/controllers/vpnConfigurationController.h"
+#include "core/models/servers/selfHostedServerConfig.h"
 #include "core/networkUtilities.h"
 #include "logger.h"
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "utilities.h"
-#include "core/api/apiUtils.h"
 
 namespace
 {
@@ -552,28 +553,34 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
     return ErrorCode::NoError;
 }
 
-void InstallController::updateContainer(QJsonObject config)
+void InstallController::updateContainer()
 {
     int serverIndex = m_serversModel->getProcessedServerIndex();
-    ServerCredentials serverCredentials =
-            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    auto oldServerConfig = m_serversModel->getServerConfig(serverIndex);
+    auto newServerConfig = QSharedPointer<SelfHostedServerConfig>::create(oldServerConfig);
 
-    const DockerContainer container = ContainerProps::containerFromString(config.value(config_key::container).toString());
-    QJsonObject oldContainerConfig = m_containersModel->getContainerConfig(container);
+    const DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());
+    const QString containerName = m_containersModel->getProcessedContainerName();
+    auto protocolConfigs = m_protocolModel->getProtocolConfigs();
+    newServerConfig->updateProtocolConfig(containerName, protocolConfigs);
+
+    auto oldProtocolConfigs = oldServerConfig->containerConfigs[containerName].protocolConfigs;
+    auto newProtocolConfigs = newServerConfig->containerConfigs[containerName].protocolConfigs;
+
     ErrorCode errorCode = ErrorCode::NoError;
 
-    if (isUpdateDockerContainerRequired(container, oldContainerConfig, config)) {
+    if (isUpdateDockerContainerRequired(container, oldProtocolConfigs, newProtocolConfigs)) {
         QSharedPointer<ServerController> serverController(new ServerController(m_settings));
         connect(serverController.get(), &ServerController::serverIsBusy, this, &InstallController::serverIsBusy);
         connect(this, &InstallController::cancelInstallation, serverController.get(), &ServerController::cancelInstallation);
 
-        errorCode = serverController->updateContainer(serverCredentials, container, oldContainerConfig, config);
+        errorCode = serverController->updateContainer(newServerConfig->serverCredentials, container, oldContainerConfig, config);
         clearCachedProfile(serverController);
     }
 
     if (errorCode == ErrorCode::NoError) {
-        m_serversModel->updateContainerConfig(container, config);
-        m_protocolModel->updateModel(config);
+        m_serversModel->editServer(newServerConfig, serverIndex);
+        m_protocolModel->updateModel(protocolConfigs);
 
         auto defaultContainer = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
         if ((serverIndex == m_serversModel->getDefaultServerIndex()) && (container == defaultContainer)) {
@@ -607,7 +614,7 @@ void InstallController::removeProcessedServer()
     int serverIndex = m_serversModel->getProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
-    m_serversModel->removeServer();
+    m_serversModel->removeProcessedServer();
     emit removeProcessedServerFinished(tr("Server '%1' was removed").arg(serverName));
 }
 
@@ -913,29 +920,21 @@ bool InstallController::isConfigValid()
     return true;
 }
 
-bool InstallController::isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig,
-                                                        const QJsonObject &newConfig)
+bool InstallController::isUpdateDockerContainerRequired(const DockerContainer container,
+                                                        const QMap<QString, QSharedPointer<ProtocolConfig>> &oldProtocolConfigs,
+                                                        const QMap<QString, QSharedPointer<ProtocolConfig>> &newProtocolConfigs)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
 
-    const QJsonObject &oldProtoConfig = oldConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
-    const QJsonObject &newProtoConfig = newConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+    const auto oldProtoConfig = oldProtocolConfigs.value(ProtocolProps::protoToString(mainProto));
+    const auto newProtoConfig = newProtocolConfigs.value(ProtocolProps::protoToString(mainProto));
 
-    if (container == DockerContainer::Awg) {
-        const AwgConfig oldConfig(oldProtoConfig);
-        const AwgConfig newConfig(newProtoConfig);
-
-        if (oldConfig.hasEqualServerSettings(newConfig)) {
-            return false;
-        }
-    } else if (container == DockerContainer::WireGuard) {
-        const WgConfig oldConfig(oldProtoConfig);
-        const WgConfig newConfig(newProtoConfig);
-
-        if (oldConfig.hasEqualServerSettings(newConfig)) {
-            return false;
-        }
+    switch (mainProto) {
+    case Proto::Awg: {
+        auto newConfig = qSharedPointerCast<AwgProtocolConfig>(oldProtoConfig);
+        auto oldConfig = qSharedPointerCast<AwgProtocolConfig>(newProtoConfig);
+        return !newConfig->hasEqualServerSettings(*oldConfig.data());
     }
-
-    return true;
+    default: return true;
+    }
 }

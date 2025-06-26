@@ -5,38 +5,7 @@
 #include <QJsonObject>
 
 #include "containers/containers_defs.h"
-
-namespace AwgConstant {
-    const int messageInitiationSize = 148;
-    const int messageResponseSize = 92;
-}
-
-struct AwgConfig
-{
-    AwgConfig(const QJsonObject &jsonConfig);
-
-    QString subnetAddress;
-    QString port;
-
-    QString clientMtu;
-    QString clientJunkPacketCount;
-    QString clientJunkPacketMinSize;
-    QString clientJunkPacketMaxSize;
-
-    QString serverJunkPacketCount;
-    QString serverJunkPacketMinSize;
-    QString serverJunkPacketMaxSize;
-    QString serverInitPacketJunkSize;
-    QString serverResponsePacketJunkSize;
-    QString serverInitPacketMagicHeader;
-    QString serverResponsePacketMagicHeader;
-    QString serverUnderloadPacketMagicHeader;
-    QString serverTransportPacketMagicHeader;
-
-    bool hasEqualServerSettings(const AwgConfig &other) const;
-    bool hasEqualClientSettings(const AwgConfig &other) const;
-
-};
+#include "core/models/protocols/awgProtocolConfig.h"
 
 class AwgConfigModel : public QAbstractListModel
 {
@@ -71,8 +40,8 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void updateModel(const QJsonObject &config);
-    QJsonObject getConfig();
+    void updateModel(const AwgProtocolConfig awgProtocolConfig);
+    QSharedPointer<ProtocolConfig> getConfig();
 
     bool isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4);
     bool isPacketSizeEqual(const int s1, const int s2);
@@ -83,10 +52,8 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    DockerContainer m_container;
-    QJsonObject m_serverProtocolConfig;
-    QJsonObject m_clientProtocolConfig;
-    QJsonObject m_fullConfig;
+    AwgProtocolConfig m_newAwgProtocolConfig;
+    AwgProtocolConfig m_oldAwgProtocolConfig;
 };
 
 #endif // AWGCONFIGMODEL_H

@@ -7,6 +7,10 @@
 
 using namespace amnezia;
 
+AwgProtocolConfig::AwgProtocolConfig(const QString &protocolName) : ProtocolConfig(protocolName)
+{
+}
+
 AwgProtocolConfig::AwgProtocolConfig(const QJsonObject &protocolConfigObject, const QString &protocolName) : ProtocolConfig(protocolName)
 {
     serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString();
@@ -66,6 +70,12 @@ AwgProtocolConfig::AwgProtocolConfig(const QJsonObject &protocolConfigObject, co
             }
         }
     }
+}
+
+AwgProtocolConfig::AwgProtocolConfig(const AwgProtocolConfig &other) : ProtocolConfig(other.protocolName)
+{
+    serverProtocolConfig = other.serverProtocolConfig;
+    clientProtocolConfig = other.clientProtocolConfig;
 }
 
 QJsonObject AwgProtocolConfig::toJson() const
@@ -195,4 +205,38 @@ QJsonObject AwgProtocolConfig::toJson() const
     }
 
     return json;
+}
+
+bool AwgProtocolConfig::hasEqualServerSettings(const AwgProtocolConfig &other) const
+{
+    if (serverProtocolConfig.subnetAddress != other.serverProtocolConfig.subnetAddress
+        || serverProtocolConfig.port != other.serverProtocolConfig.port
+        || serverProtocolConfig.awgData.junkPacketCount != other.serverProtocolConfig.awgData.junkPacketCount
+        || serverProtocolConfig.awgData.junkPacketMinSize != other.serverProtocolConfig.awgData.junkPacketMinSize
+        || serverProtocolConfig.awgData.junkPacketMaxSize != other.serverProtocolConfig.awgData.junkPacketMaxSize
+        || serverProtocolConfig.awgData.initPacketJunkSize != other.serverProtocolConfig.awgData.initPacketJunkSize
+        || serverProtocolConfig.awgData.responsePacketJunkSize != other.serverProtocolConfig.awgData.responsePacketJunkSize
+        || serverProtocolConfig.awgData.initPacketMagicHeader != other.serverProtocolConfig.awgData.initPacketMagicHeader
+        || serverProtocolConfig.awgData.responsePacketMagicHeader != other.serverProtocolConfig.awgData.responsePacketMagicHeader
+        || serverProtocolConfig.awgData.underloadPacketMagicHeader != other.serverProtocolConfig.awgData.underloadPacketMagicHeader
+        || serverProtocolConfig.awgData.transportPacketMagicHeader != other.serverProtocolConfig.awgData.transportPacketMagicHeader) {
+        return false;
+    }
+    return true;
+}
+
+bool AwgProtocolConfig::hasEqualClientSettings(const AwgProtocolConfig &other) const
+{
+    if (clientProtocolConfig.wireGuardData.mtu != other.clientProtocolConfig.wireGuardData.mtu
+        || clientProtocolConfig.awgData.junkPacketCount != other.clientProtocolConfig.awgData.junkPacketCount
+        || clientProtocolConfig.awgData.junkPacketMinSize != other.clientProtocolConfig.awgData.junkPacketMinSize
+        || clientProtocolConfig.awgData.junkPacketMaxSize != other.clientProtocolConfig.awgData.junkPacketMaxSize) {
+        return false;
+    }
+    return true;
+}
+
+void AwgProtocolConfig::clearClientSettings()
+{
+    clientProtocolConfig = awg::ClientProtocolConfig();
 }
