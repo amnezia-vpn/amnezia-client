@@ -9,6 +9,19 @@ SYSTEM_APP_SUPPORT="/Library/Application Support/$APP_NAME"
 LOG_FOLDER="/var/log/$APP_NAME"
 CACHES_FOLDER="$HOME/Library/Caches/$APP_NAME"
 
+# Attempt to quit the GUI application if it's currently running
+if pgrep -x "$APP_NAME" > /dev/null; then
+    echo "Quitting $APP_NAME..."
+    osascript -e 'tell application "'"$APP_NAME"'" to quit' || true
+    # Wait up to 10 seconds for the app to terminate gracefully
+    for i in {1..10}; do
+        if ! pgrep -x "$APP_NAME" > /dev/null; then
+            break
+        fi
+        sleep 1
+    done
+fi
+
 # Stop the running service if it exists
 if pgrep -x "${APP_NAME}-service" > /dev/null; then
     sudo killall -9 "${APP_NAME}-service"
