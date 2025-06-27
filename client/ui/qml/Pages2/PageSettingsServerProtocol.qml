@@ -24,6 +24,13 @@ PageType {
     ColumnLayout {
         id: header
 
+        Connections {
+            target: InstallController
+            function onCachedProfileCleared(message) {
+                ProtocolsModel.updateModel(ProtocolsModel.getConfig())
+            }
+        }
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
