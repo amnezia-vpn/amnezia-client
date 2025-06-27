@@ -7,6 +7,14 @@ LOG_FOLDER=/var/log/$APP_NAME
 LOG_FILE="$LOG_FOLDER/post-install.log"
 APP_PATH=/Applications/$APP_NAME.app
 
+# Handle new installations unpacked into localized folder
+if [ -d "/Applications/${APP_NAME}.localized" ]; then
+  echo "`date` Detected ${APP_NAME}.localized, migrating to standard path" >> $LOG_FILE
+  sudo rm -rf "$APP_PATH"
+  sudo mv "/Applications/${APP_NAME}.localized/${APP_NAME}.app" "$APP_PATH"
+  sudo rm -rf "/Applications/${APP_NAME}.localized"
+fi
+
 if launchctl list "$APP_NAME-service" &> /dev/null; then
     launchctl unload "$LAUNCH_DAEMONS_PLIST_NAME"
     rm -f "$LAUNCH_DAEMONS_PLIST_NAME"
