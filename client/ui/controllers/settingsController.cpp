@@ -35,6 +35,23 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
 #endif
 }
 
+QString getPlatformName()
+{
+#if defined(Q_OS_WINDOWS)
+    return "Windows";
+#elif defined(Q_OS_ANDROID)
+    return "Android";
+#elif defined(Q_OS_LINUX)
+    return "Linux";
+#elif defined(Q_OS_MACX)
+    return "MacOS";
+#elif defined(Q_OS_IOS)
+    return "iOS";
+#else
+    return "Unknown";
+#endif
+}
+
 void SettingsController::toggleAmneziaDns(bool enable)
 {
     m_settings->setUseAmneziaDns(enable);
@@ -130,6 +147,7 @@ void SettingsController::backupAppConfig(const QString &fileName)
     QJsonDocument doc = QJsonDocument::fromJson(data);
     QJsonObject config = doc.object();
 
+    config["AppPlatform"] = getPlatformName();
     config["Conf/autoStart"] = Autostart::isAutostart();
     config["Conf/killSwitchEnabled"] = isKillSwitchEnabled();
     config["Conf/strictKillSwitchEnabled"] = isStrictKillSwitchEnabled();
@@ -164,15 +182,24 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_ANDROID)
         int appSplitTunnelingRouteMode = newConfigData.value("Conf/appsRouteMode").toInt();
-        bool appSplittunnelingEnabled = newConfigData.value("Conf/appsSplitTunnelingEnabled").toBool();
+        bool appSplittunnelingEnabled = newConfigData.value("Conf/appsSplitTunnelingEnabled").toString().toLower() == "true";
         m_appSplitTunnelingModel->setRouteMode(appSplitTunnelingRouteMode);
-        m_appSplitTunnelingModel->toggleSplitTunneling(appSplittunnelingEnabled);
+
         #if defined(Q_OS_WINDOWS)
             m_appSplitTunnelingModel->setRouteMode(static_cast<int>(Settings::AppsRouteMode::VpnAllExceptApps));
         #endif
+
+        if (newConfigData.contains("AppPlatform")) { //if backup is from a new version
+                if (newConfigData.value("AppPlatform").toString() != getPlatformName()) {
+                    m_appSplitTunnelingModel->clearAppsList();
+                }
+        }
+
+        m_appSplitTunnelingModel->toggleSplitTunneling(appSplittunnelingEnabled);
 #endif
+
         int siteSplitTunnelingRouteMode = newConfigData.value("Conf/routeMode").toInt();
-        bool siteSplittunnelingEnabled = newConfigData.value("Conf/sitesSplitTunnelingEnabled").toBool();
+        bool siteSplittunnelingEnabled = newConfigData.value("Conf/sitesSplitTunnelingEnabled").toString().toLower() == "true";
         m_sitesModel->setRouteMode(siteSplitTunnelingRouteMode);
         m_sitesModel->toggleSplitTunneling(siteSplittunnelingEnabled);
 
