@@ -32,7 +32,13 @@ echo "`date` Script started" > $LOG_FILE
 echo "Requesting ${APP_NAME} to quit gracefully" >> "$LOG_FILE"
 osascript -e 'tell application "AmneziaVPN" to quit'
 
-mv -f "$APP_PATH/$PLIST_NAME" "$LAUNCH_DAEMONS_PLIST_NAME" 2>> $LOG_FILE
+PLIST_SOURCE="$APP_PATH/Contents/Resources/$PLIST_NAME"
+if [ -f "$PLIST_SOURCE" ]; then
+  mv -f "$PLIST_SOURCE" "$LAUNCH_DAEMONS_PLIST_NAME" 2>> $LOG_FILE
+else
+  echo "`date` ERROR: service plist not found at $PLIST_SOURCE" >> $LOG_FILE
+fi
+
 chown root:wheel "$LAUNCH_DAEMONS_PLIST_NAME"
 launchctl load "$LAUNCH_DAEMONS_PLIST_NAME"
 echo "`date` Launching ${APP_NAME} application" >> $LOG_FILE
