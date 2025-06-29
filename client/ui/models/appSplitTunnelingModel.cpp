@@ -26,8 +26,11 @@ QVariant AppSplitTunnelingModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     switch (role) {
-    case AppPathRole: {
+    case AppNameRole: {
         return m_apps.at(index.row()).appName;
+    }
+    case AppPathRole: {
+        return m_apps.at(index.row()).appPath;
     }
     default: {
         return true;
@@ -89,6 +92,7 @@ void AppSplitTunnelingModel::toggleSplitTunneling(bool enabled)
 QHash<int, QByteArray> AppSplitTunnelingModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
+    roles[AppNameRole] = "appName";
     roles[AppPathRole] = "appPath";
     return roles;
 }

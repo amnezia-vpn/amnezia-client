@@ -168,11 +168,12 @@ PageType {
                     id: proxyAppSplitTunnelingModel
                     sourceModel: AppSplitTunnelingModel
                     filters: RegExpFilter {
-                        roleName: "appPath"
+                        roleName: "appName"
                         pattern: ".*" + searchField.textField.text + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
                     sorters: [
+                        RoleSorter { roleName: "appName"; sortOrder: Qt.AscendingOrder },
                         RoleSorter { roleName: "appPath"; sortOrder: Qt.AscendingOrder }
                     ]
                 }
@@ -194,12 +195,13 @@ PageType {
                         LabelWithButtonType {
                             Layout.fillWidth: true
 
-                            text: appPath
+                            text: appName
+                            descriptionText: appPath
                             rightImageSource: "qrc:/images/controls/trash.svg"
                             rightImageColor: AmneziaStyle.color.paleGray
 
                             clickedFunction: function() {
-                                var headerText = qsTr("Remove ") + appPath + "?"
+                                var headerText = qsTr("Remove ") + appName + "?"
                                 var yesButtonText = qsTr("Continue")
                                 var noButtonText = qsTr("Cancel")
 

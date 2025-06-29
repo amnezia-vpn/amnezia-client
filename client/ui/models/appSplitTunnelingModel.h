@@ -12,7 +12,8 @@ class AppSplitTunnelingModel: public QAbstractListModel
 
 public:
     enum Roles {
-        AppPathRole = Qt::UserRole + 1,
+        AppNameRole = Qt::UserRole + 1,
+        AppPathRole,
         PackageAppNameRole,
         PackageAppIconRole
     };
