@@ -35,6 +35,7 @@ namespace
         constexpr char serviceType[] = "service_type";
         constexpr char serviceInfo[] = "service_info";
         constexpr char serviceProtocol[] = "service_protocol";
+        constexpr char supportedProtocols[] = "supported_protocols";
 
         constexpr char apiPayload[] = "api_payload";
         constexpr char keyPayload[] = "key_payload";
@@ -197,8 +198,8 @@ namespace
         auto apiConfig = QJsonObject::fromVariantMap(map);
 
         if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
-            apiConfig.insert(configKey::serviceInfo,
-                             QJsonDocument::fromJson(apiResponseBody).object().value(configKey::serviceInfo).toObject());
+            apiConfig.insert(configKey::supportedProtocols,
+                             QJsonDocument::fromJson(apiResponseBody).object().value(configKey::supportedProtocols).toArray());
         }
 
         serverConfig[configKey::apiConfig] = apiConfig;
@@ -590,6 +591,18 @@ bool ApiConfigsController::isVlessProtocol()
         return true;
     }
     return false;
+}
+
+bool ApiConfigsController::isProtocolSelectionSupported()
+{
+    auto serverIndex = m_serversModel->getProcessedServerIndex();
+    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+
+    if (apiConfigObject[configKey::supportedProtocols].toArray().isEmpty()) {
+        return false;
+    }
+    return true;
 }
 
 QList<QString> ApiConfigsController::getQrCodes()

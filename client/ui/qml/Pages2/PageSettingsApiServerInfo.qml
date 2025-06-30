@@ -168,6 +168,8 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
+                visible: ApiConfigsController.isProtocolSelectionSupported()
+
                 text: qsTr("Use VLESS protocol")
                 checked: switcher.isVlessProtocol
                 onToggled: function() {
