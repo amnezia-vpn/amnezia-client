@@ -24,12 +24,19 @@ PageType {
     ColumnLayout {
         id: header
 
-        Connections {
+        /*Connections {
             target: InstallController
             function onCachedProfileCleared(message) {
-                ProtocolsModel.updateModel(ProtocolsModel.getConfig())
+                console.log("СИГНАЛ cachedProfileCleared СРАБОТАЛ:", message)
+                //ProtocolsModel.updateModel(ProtocolsModel.getConfig())
+                ProtocolsModel.clear()
+                console.log("isClientProtocolExists =", ProtocolsModel.get(0).isClientProtocolExists)
+                /*PageController.goToPage(PageEnum.PageMainSettings)
+                Qt.callLater(function() {
+                    PageController.goToPage(PageEnum.PageSettingsServerProtocol)
+                })
             }
-        }
+        }*/
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -193,6 +200,7 @@ PageType {
 
                             PageController.showBusyIndicator(true)
                             InstallController.clearCachedProfile()
+                            ProtocolsModel.reload()
                             PageController.showBusyIndicator(false)
                         }
                         var noButtonFunction = function() {

@@ -68,6 +68,13 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+void ProtocolsModel::reload()
+{
+    beginResetModel();
+    endResetModel();
+}
+
+
 void ProtocolsModel::updateModel(const QJsonObject &content)
 {
     m_container = ContainerProps::containerFromString(content.value(config_key::container).toString());
