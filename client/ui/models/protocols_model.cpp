@@ -71,9 +71,23 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
 void ProtocolsModel::reload()
 {
     beginResetModel();
+
+    QJsonObject config = getConfig();
+
+    QStringList keys = m_content.keys();
+    if (keys.size() == 1) {
+        QString protocolKey = keys.first();
+
+        if (config.contains(protocolKey)) {
+            QJsonObject protocolConfig = config.value(protocolKey).toObject();
+            protocolConfig.remove(config_key::last_config);
+            config[protocolKey] = protocolConfig;
+        }
+    }
+
+    updateModel(config);
     endResetModel();
 }
-
 
 void ProtocolsModel::updateModel(const QJsonObject &content)
 {
