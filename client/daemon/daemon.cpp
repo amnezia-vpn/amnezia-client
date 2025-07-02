@@ -169,11 +169,14 @@ bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
   if ((config.m_hopType == InterfaceConfig::MultiHopExit) ||
       (config.m_hopType == InterfaceConfig::SingleHop)) {
     QList<QHostAddress> resolvers;
-    resolvers.append(QHostAddress(config.m_dnsServer));
+    resolvers.append(QHostAddress(config.m_primaryDnsServer));
+    if (!config.m_secondaryDnsServer.isEmpty()) {
+        resolvers.append(QHostAddress(config.m_secondaryDnsServer));
+    }
 
     // If the DNS is not the Gateway, it's a user defined DNS
     // thus, not add any other :)
-    if (config.m_dnsServer == config.m_serverIpv4Gateway) {
+    if (config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
       resolvers.append(QHostAddress(config.m_serverIpv6Gateway));
     }
 
@@ -279,15 +282,26 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   config.m_serverIpv4Gateway = obj.value("serverIpv4Gateway").toString();
   config.m_serverIpv6Gateway = obj.value("serverIpv6Gateway").toString();
 
-  if (!obj.contains("dnsServer")) {
-    config.m_dnsServer = QString();
+  if (!obj.contains("primaryDnsServer")) {
+    config.m_primaryDnsServer = QString();
   } else {
-    QJsonValue value = obj.value("dnsServer");
+    QJsonValue value = obj.value("primaryDnsServer");
     if (!value.isString()) {
       logger.error() << "dnsServer is not a string";
       return false;
     }
-    config.m_dnsServer = value.toString();
+    config.m_primaryDnsServer = value.toString();
+  }
+
+  if (!obj.contains("secondaryDnsServer")) {
+    config.m_secondaryDnsServer = QString();
+  } else {
+    QJsonValue value = obj.value("secondaryDnsServer");
+    if (!value.isString()) {
+      logger.error() << "dnsServer is not a string";
+      return false;
+    }
+    config.m_secondaryDnsServer = value.toString();
   }
 
   if (!obj.contains("hopType")) {

@@ -460,6 +460,8 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         return ErrorCode::ServerDockerOnCgroupsV2;
     if (stdOut.contains("cgroup mountpoint does not exist"))
         return ErrorCode::ServerCgroupMountpoint;
+    if (stdOut.contains("have reached") && stdOut.contains("pull rate limit"))
+        return ErrorCode::DockerPullRateLimit;
 
     return error;
 }
@@ -825,7 +827,7 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
 
             if (stdOut.contains("Packet manager not found"))
                 return ErrorCode::ServerPacketManagerError;
-            if (stdOut.contains("fuser not installed"))
+            if (stdOut.contains("fuser not installed") || stdOut.contains("cat not installed"))
                 return ErrorCode::NoError;
 
             if (stdOut.isEmpty()) {

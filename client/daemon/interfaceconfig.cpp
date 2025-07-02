@@ -28,7 +28,8 @@ QJsonObject InterfaceConfig::toJson() const {
       (m_hopType == InterfaceConfig::SingleHop)) {
     json.insert("serverIpv4Gateway", QJsonValue(m_serverIpv4Gateway));
     json.insert("serverIpv6Gateway", QJsonValue(m_serverIpv6Gateway));
-    json.insert("dnsServer", QJsonValue(m_dnsServer));
+    json.insert("primaryDnsServer", QJsonValue(m_primaryDnsServer));
+    json.insert("secondaryDnsServer", QJsonValue(m_secondaryDnsServer));
   }
 
   QJsonArray allowedIPAddesses;
@@ -100,11 +101,15 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
     out << "MTU = " << m_deviceMTU << "\n";
   }
 
-  if (!m_dnsServer.isNull()) {
-    QStringList dnsServers(m_dnsServer);
+  if (!m_primaryDnsServer.isNull()) {
+    QStringList dnsServers;
+    dnsServers.append(m_primaryDnsServer);
+    if (!m_secondaryDnsServer.isNull()) {
+        dnsServers.append(m_secondaryDnsServer);
+    }
     // If the DNS is not the Gateway, it's a user defined DNS
     // thus, not add any other :)
-    if (m_dnsServer == m_serverIpv4Gateway) {
+    if (m_primaryDnsServer == m_serverIpv4Gateway) {
       dnsServers.append(m_serverIpv6Gateway);
     }
     out << "DNS = " << dnsServers.join(", ") << "\n";

@@ -140,7 +140,10 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     } else {
         if (config.m_killSwitchEnabled) {
             FirewallParams params { };
-            params.dnsServers.append(config.m_dnsServer);
+            params.dnsServers.append(config.m_primaryDnsServer);
+            if (!config.m_secondaryDnsServer.isEmpty()) {
+                params.dnsServers.append(config.m_secondaryDnsServer);
+            }
             if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
                 params.blockAll = true;
                 if (config.m_excludedAddresses.size()) {

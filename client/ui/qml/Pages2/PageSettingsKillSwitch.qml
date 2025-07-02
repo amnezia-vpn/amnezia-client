@@ -81,8 +81,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: false
-                enabled: false //SettingsController.isKillSwitchEnabled && !ConnectionController.isConnected
+                enabled: SettingsController.isKillSwitchEnabled && !ConnectionController.isConnected
                 checked: SettingsController.strictKillSwitchEnabled
 
                 text: qsTr("Strict KillSwitch")
@@ -104,9 +103,7 @@ PageType {
                 }
             }
 
-            DividerType {
-                visible: false
-            }
+            DividerType {}
             
             LabelWithButtonType {
                 Layout.topMargin: 32

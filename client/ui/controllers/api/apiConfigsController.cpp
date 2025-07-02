@@ -265,6 +265,10 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
         newServerConfig.insert(configKey::apiConfig, newApiConfig);
         newServerConfig.insert(configKey::authData, authData);
 
+        if (serverConfig.value(config_key::nameOverriddenByUser).toBool()) {
+            newServerConfig.insert(config_key::name, serverConfig.value(config_key::name));
+            newServerConfig.insert(config_key::nameOverriddenByUser, true);
+        }
         m_serversModel->editServer(newServerConfig, serverIndex);
         if (reloadServiceConfig) {
             emit reloadServerFromApiFinished(tr("API config reloaded"));

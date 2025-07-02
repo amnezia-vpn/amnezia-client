@@ -8,6 +8,8 @@
     #include <DefaultVPN-Swift.h>
 #endif
 
+#include "core/api/apiUtils.h"
+
 namespace
 {
     namespace configKey
@@ -66,6 +68,7 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
         } else {
             server.insert(config_key::description, value.toString());
         }
+        server.insert(config_key::nameOverriddenByUser, true);
         m_settings->editServer(index.row(), server);
         m_servers.replace(index.row(), server);
         if (index.row() == m_defaultServerIndex) {
@@ -426,7 +429,7 @@ void ServersModel::updateDefaultServerContainersModel()
     emit defaultServerContainersUpdated(containers);
 }
 
-QJsonObject ServersModel::getServerConfig(const int serverIndex)
+QJsonObject ServersModel::getServerConfig(const int serverIndex) const
 {
     return m_servers.at(serverIndex).toObject();
 }
@@ -812,4 +815,9 @@ const QString ServersModel::getDefaultServerImagePathCollapsed()
         return "";
     }
     return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(countryCode.toUpper());
+}
+
+bool ServersModel::processedServerIsPremium() const
+{
+    return apiUtils::isPremiumServer(getServerConfig(m_processedServerIndex));
 }

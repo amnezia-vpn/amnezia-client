@@ -60,6 +60,7 @@ namespace amnezia
         ServerUserPasswordRequired = 210,
         ServerDockerOnCgroupsV2 = 211,
         ServerCgroupMountpoint = 212,
+        DockerPullRateLimit = 213,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,

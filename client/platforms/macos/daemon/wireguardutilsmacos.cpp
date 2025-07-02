@@ -136,26 +136,29 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   if (err != 0) {
     logger.error() << "Interface configuration failed:" << strerror(err);
   } else {
-      if (config.m_killSwitchEnabled) {
-        FirewallParams params { };
-        params.dnsServers.append(config.m_dnsServer);
+    if (config.m_killSwitchEnabled) {
+      FirewallParams params { };
+      params.dnsServers.append(config.m_primaryDnsServer);
+      if (!config.m_secondaryDnsServer.isEmpty()) {
+          params.dnsServers.append(config.m_secondaryDnsServer);
+      }
 
-        if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
+      if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
           params.blockAll = true;
           if (config.m_excludedAddresses.size()) {
-            params.allowNets = true;
-            foreach (auto net, config.m_excludedAddresses) {
-              params.allowAddrs.append(net.toUtf8());
-            }
+              params.allowNets = true;
+              foreach (auto net, config.m_excludedAddresses) {
+                  params.allowAddrs.append(net.toUtf8());
+              }
           }
-        } else {
+      } else {
           params.blockNets = true;
           foreach (auto net, config.m_allowedIPAddressRanges) {
-            params.blockAddrs.append(net.toString());
+              params.blockAddrs.append(net.toString());
           }
-        }
-        applyFirewallRules(params);
       }
+      applyFirewallRules(params);
+    }
   }
   return (err == 0);
 }
