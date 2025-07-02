@@ -35,7 +35,7 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
     m_menu.addSeparator();
 
     m_trayActionVisitWebSite = m_menu.addAction(QIcon(":/images/tray/link.png"), tr("Visit Website"), [&](){
-        QDesktopServices::openUrl(QUrl("https://amnezia.org"));
+        QDesktopServices::openUrl(QUrl(websiteUrl));
     });
 
     m_trayActionQuit = m_menu.addAction(QIcon(":/images/tray/cancel.png"), tr("Quit") + " " + APPLICATION_NAME, this, [&](){
@@ -62,6 +62,11 @@ void SystemTrayNotificationHandler::onTranslationsUpdated()
     m_trayActionDisconnect->setText(tr("Disconnect"));
     m_trayActionVisitWebSite->setText(tr("Visit Website"));
     m_trayActionQuit->setText(tr("Quit")+ " " + APPLICATION_NAME);
+}
+
+void SystemTrayNotificationHandler::updateWebsiteUrl(const QString &newWebsiteUrl) {
+    qDebug() << "Updated website URL:" << newWebsiteUrl;
+    websiteUrl = newWebsiteUrl;
 }
 
 void SystemTrayNotificationHandler::setTrayIcon(const QString &iconPath)

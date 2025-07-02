@@ -243,6 +243,9 @@ void CoreController::initNotificationHandler()
             &ConnectionController::closeConnection);
     connect(this, &CoreController::translationsUpdated, m_notificationHandler.get(), &NotificationHandler::onTranslationsUpdated);
 #endif
+
+    auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_notificationHandler.get());
+    connect(this, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
 }
 
 void CoreController::updateTranslator(const QLocale &locale)
@@ -279,6 +282,7 @@ void CoreController::updateTranslator(const QLocale &locale)
     m_engine->retranslate();
 
     emit translationsUpdated();
+    emit websiteUrlChanged(m_languageModel->getCurrentSiteUrl());
 }
 
 void CoreController::initErrorMessagesHandler()
@@ -335,6 +339,8 @@ void CoreController::initTranslationsUpdatedHandler()
     connect(m_languageModel.get(), &LanguageModel::updateTranslations, this, &CoreController::updateTranslator);
     connect(this, &CoreController::translationsUpdated, m_languageModel.get(), &LanguageModel::translationsUpdated);
     connect(this, &CoreController::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
+    //auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_notificationHandler.get());
+    //connect(this, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
 }
 
 void CoreController::initAutoConnectHandler()
