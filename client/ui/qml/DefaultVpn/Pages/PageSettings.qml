@@ -58,10 +58,35 @@ Page {
                 buttonText: qsTr("About")
                 onButtonClicked: PageController.goToPage(PageEnum.PageAbout)
             }
+
+            SettingsButtonNoBorder {
+                buttonText: qsTr("Reset settings and remove all data from the application")
+                buttonTextColor: Style.color.error
+                showArrow: false
+                onButtonClicked: function() {
+                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        PageController.showNotificationMessage(qsTr("Cannot reset settings during active connection"))
+                    } else {
+                        resetConfirmationDialog.open()
+                    }
+                }
+            }
         }
 
         Item {
             Layout.fillHeight: true
+        }
+    }
+
+    ConfirmationDialog {
+        id: resetConfirmationDialog
+        title: qsTr("Reset settings and remove all data from the application?")
+        description: qsTr("All settings will be reset to default. All installed DefaultVPN services will still remain on the server.")
+        confirmButtonText: qsTr("Continue")
+        cancelButtonText: qsTr("Cancel")
+        onConfirm: function() {
+            SettingsController.clearSettings()
+            PageController.goToStartPage()
         }
     }
 }

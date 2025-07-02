@@ -14,6 +14,8 @@ Button {
     id: settingsButton
     Layout.fillWidth: true
 
+    property color buttonTextColor: Style.color.black
+    property bool showArrow: true
     property alias buttonText: headerText.text
     signal buttonClicked()
 
@@ -46,12 +48,13 @@ Button {
                 Layout.bottomMargin: 19
                 horizontalAlignment: Text.AlignLeft
                 text: buttonText
-                color: Style.color.black
+                color: settingsButton.buttonTextColor
             }
 
             Item { Layout.fillWidth: true }
 
             Image {
+                visible: settingsButton.showArrow
                 Layout.rightMargin: 8
                 source: "qrc:/images/controls/chevron-right.svg"
                 layer {
