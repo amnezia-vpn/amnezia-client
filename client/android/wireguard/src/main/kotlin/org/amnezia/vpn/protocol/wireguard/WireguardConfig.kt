@@ -194,8 +194,8 @@ open class WireguardConfig protected constructor(
         fun setJmax(jmax: Int) = apply { this.jmax = jmax }
         fun setS1(s1: Int) = apply { this.s1 = s1 }
         fun setS2(s2: Int) = apply { this.s2 = s2 }
-        fun setS1(s3: Int) = apply { this.s3 = s3 }
-        fun setS2(s4: Int) = apply { this.s4 = s4 }
+        fun setS3(s3: Int) = apply { this.s3 = s3 }
+        fun setS4(s4: Int) = apply { this.s4 = s4 }
         fun setH1(h1: Long) = apply { this.h1 = h1 }
         fun setH2(h2: Long) = apply { this.h2 = h2 }
         fun setH3(h3: Long) = apply { this.h3 = h3 }
