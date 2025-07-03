@@ -120,6 +120,8 @@ open class Wireguard : Protocol() {
         configData.optStringOrNull("Jmax")?.let { setJmax(it.toInt()) }
         configData.optStringOrNull("S1")?.let { setS1(it.toInt()) }
         configData.optStringOrNull("S2")?.let { setS2(it.toInt()) }
+        configData.optStringOrNull("S3")?.let { setS3(it.toInt()) }
+        configData.optStringOrNull("S4")?.let { setS4(it.toInt()) }
         configData.optStringOrNull("H1")?.let { setH1(it.toLong()) }
         configData.optStringOrNull("H2")?.let { setH2(it.toLong()) }
         configData.optStringOrNull("H3")?.let { setH3(it.toLong()) }

@@ -125,6 +125,12 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   if (!m_responsePacketJunkSize.isNull()) {
     out << "S2 = " << m_responsePacketJunkSize << "\n";
   }
+  if (!m_cookieReplyPacketJunkSize.isNull()) {
+    out << "S3 = " << m_cookieReplyPacketJunkSize << "\n";
+  }
+  if (!m_transportPacketJunkSize.isNull()) {
+    out << "S4 = " <<  m_transportPacketJunkSize << "\n";
+  }
   if (!m_initPacketMagicHeader.isNull()) {
     out << "H1 = " << m_initPacketMagicHeader << "\n";
   }

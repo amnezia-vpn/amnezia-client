@@ -245,6 +245,54 @@ PageType {
                 }
 
                 TextFieldWithHeaderType {
+                    id: cookieReplyPacketJunkSizeTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("S3 - Cookie reply packet junk size")
+                    textField.text: serverCookieReplyPacketJunkSize
+                    textField.validator: IntValidator { bottom: 0 }
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== serverCookieReplyPacketJunkSize) {
+                            serverCookieReplyPacketJunkSize = textField.text
+                        }
+                    }
+
+                    checkEmptyText: true
+
+                    onActiveFocusChanged: {
+                        if(activeFocus) {
+                            listview.positionViewAtEnd()
+                        }
+                    }
+                }
+
+                TextFieldWithHeaderType {
+                    id: transportPacketJunkSizeTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    headerText: qsTr("S4 - Transport packet junk size")
+                    textField.text: serverTransportPacketJunkSize
+                    textField.validator: IntValidator { bottom: 0 }
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== serverTransportPacketJunkSize) {
+                            serverTransportPacketJunkSize = textField.text
+                        }
+                    }
+
+                    checkEmptyText: true
+
+                    onActiveFocusChanged: {
+                        if(activeFocus) {
+                            listview.positionViewAtEnd()
+                        }
+                    }
+                }
+
+                TextFieldWithHeaderType {
                     id: initPacketMagicHeaderTextField
                     Layout.fillWidth: true
                     Layout.topMargin: 16
@@ -329,6 +377,8 @@ PageType {
                              responsePacketMagicHeaderTextField.errorText === "" &&
                              initPacketMagicHeaderTextField.errorText === "" &&
                              responsePacketJunkSizeTextField.errorText === "" &&
+                             cookieReplyHeaderJunkTextField.errorText === "" &&
+	                         transportHeaderJunkTextField.errorText === "" &&
                              initPacketJunkSizeTextField.errorText === "" &&
                              junkPacketMaxSizeTextField.errorText === "" &&
                              junkPacketMinSizeTextField.errorText === "" &&

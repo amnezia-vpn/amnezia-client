@@ -4,7 +4,7 @@ struct WGConfig: Decodable {
   let initPacketMagicHeader, responsePacketMagicHeader: String?
   let underloadPacketMagicHeader, transportPacketMagicHeader: String?
   let junkPacketCount, junkPacketMinSize, junkPacketMaxSize: String?
-  let initPacketJunkSize, responsePacketJunkSize: String?
+  let initPacketJunkSize, responsePacketJunkSize, cookieReplyPacketJunkSize, transportPacketJunkSize: String?
   let specialJunk1, specialJunk2, specialJunk3, specialJunk4, specialJunk5: String?
   let controlledJunk1, controlledJunk2, controlledJunk3: String?
   let specialHandshakeTimeout: String?
@@ -26,7 +26,7 @@ struct WGConfig: Decodable {
     case initPacketMagicHeader = "H1", responsePacketMagicHeader = "H2"
     case underloadPacketMagicHeader = "H3", transportPacketMagicHeader = "H4"
     case junkPacketCount = "Jc", junkPacketMinSize = "Jmin", junkPacketMaxSize = "Jmax"
-    case initPacketJunkSize = "S1", responsePacketJunkSize = "S2"
+    case initPacketJunkSize = "S1", responsePacketJunkSize = "S2", cookieReplyPacketJunkSize = "S3", transportPacketJunkSize = "S4"
     case specialJunk1 = "I1", specialJunk2 = "I2", specialJunk3 = "I3", specialJunk4 = "I4", specialJunk5 = "I5"
     case controlledJunk1 = "J1", controlledJunk2 = "J2", controlledJunk3 = "J3"
     case specialHandshakeTimeout = "Itime"
@@ -53,6 +53,8 @@ struct WGConfig: Decodable {
     Jmax = \(junkPacketMaxSize!)
     S1 = \(initPacketJunkSize!)
     S2 = \(responsePacketJunkSize!)
+    S3 = \(cookieReplyPacketJunkSize!)
+    S4 = \(transportPacketJunkSize!)
     H1 = \(initPacketMagicHeader!)
     H2 = \(responsePacketMagicHeader!)
     H3 = \(underloadPacketMagicHeader!)

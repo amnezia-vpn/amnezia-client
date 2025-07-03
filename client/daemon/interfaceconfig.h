@@ -49,6 +49,8 @@ class InterfaceConfig {
   QString m_junkPacketMaxSize;
   QString m_initPacketJunkSize;
   QString m_responsePacketJunkSize;
+  QString m_cookieReplyPacketJunkSize;
+  QString m_transportPacketJunkSize;
   QString m_initPacketMagicHeader;
   QString m_responsePacketMagicHeader;
   QString m_underloadPacketMagicHeader;

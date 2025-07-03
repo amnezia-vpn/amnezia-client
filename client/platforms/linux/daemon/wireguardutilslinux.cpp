@@ -121,6 +121,12 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     if (!config.m_responsePacketJunkSize.isEmpty()) {
         out << "s2=" << config.m_responsePacketJunkSize << "\n";
     }
+    if (!config.m_cookieReplyPacketJunkSize.isEmpty()) {
+        out << "s3=" << config.m_cookieReplyPacketJunkSize << "\n";
+    }
+    if (!config.m_transportPacketJunkSize.isEmpty()) {
+        out << "s4=" << config.m_transportPacketJunkSize << "\n";
+    }
     if (!config.m_initPacketMagicHeader.isEmpty()) {
         out << "h1=" << config.m_initPacketMagicHeader << "\n";
     }

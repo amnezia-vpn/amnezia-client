@@ -391,6 +391,13 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!obj.value("S2").isNull()) {
     config.m_responsePacketJunkSize = obj.value("S2").toString();
   }
+  if (!obj.value("S3").isNull()) {
+    config.m_cookieReplyPacketJunkSize = obj.value("S3").toString();
+  }
+  if (!obj.value("S4").isNull()) {
+    config.m_transportPacketJunkSize = obj.value("S4").toString();
+  }
+
   if (!obj.value("H1").isNull()) {
     config.m_initPacketMagicHeader = obj.value("H1").toString();
   }
@@ -405,31 +412,31 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   }
 
   if (!obj.value("I1").isNull()) {
-    config.m_specialJunk["I1"] = obj.value("I1").toString();  
+    config.m_specialJunk["I1"] = obj.value("I1").toString();
   }
   if (!obj.value("I2").isNull()) {
-    config.m_specialJunk["I2"] = obj.value("I2").toString();  
+    config.m_specialJunk["I2"] = obj.value("I2").toString();
   }
   if (!obj.value("I3").isNull()) {
-    config.m_specialJunk["I3"] = obj.value("I3").toString();  
+    config.m_specialJunk["I3"] = obj.value("I3").toString();
   }
   if (!obj.value("I4").isNull()) {
-    config.m_specialJunk["I4"] = obj.value("I4").toString();  
+    config.m_specialJunk["I4"] = obj.value("I4").toString();
   }
   if (!obj.value("I5").isNull()) {
-    config.m_specialJunk["I5"] = obj.value("I5").toString();  
+    config.m_specialJunk["I5"] = obj.value("I5").toString();
   }
   if (!obj.value("J1").isNull()) {
-    config.m_controlledJunk["J1"] = obj.value("J1").toString();  
+    config.m_controlledJunk["J1"] = obj.value("J1").toString();
   }
   if (!obj.value("J2").isNull()) {
-    config.m_controlledJunk["J2"] = obj.value("J2").toString();  
+    config.m_controlledJunk["J2"] = obj.value("J2").toString();
   }
   if (!obj.value("J3").isNull()) {
-    config.m_controlledJunk["J3"] = obj.value("J3").toString();  
+    config.m_controlledJunk["J3"] = obj.value("J3").toString();
   }
   if (!obj.value("Itime").isNull()) {
-    config.m_specialHandshakeTimeout = obj.value("Itime").toString();  
+    config.m_specialHandshakeTimeout = obj.value("Itime").toString();
   }
 
   return true;
@@ -474,7 +481,7 @@ bool Daemon::deactivate(bool emitSignals) {
 
   m_connections.clear();
   // Delete the interface
-  return wgutils()->deleteInterface();  
+  return wgutils()->deleteInterface();
 }
 
 QString Daemon::logs() {

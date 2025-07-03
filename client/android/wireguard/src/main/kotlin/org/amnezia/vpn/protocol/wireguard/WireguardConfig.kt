@@ -20,10 +20,21 @@ open class WireguardConfig protected constructor(
     val jmax: Int?,
     val s1: Int?,
     val s2: Int?,
+    val s3: Int?,
+    val s4: Int?,
     val h1: Long?,
     val h2: Long?,
     val h3: Long?,
-    val h4: Long?
+    val h4: Long?,
+    var i1: String?,
+    var i2: String?,
+    var i3: String?,
+    var i4: String?,
+    var i5: String?,
+    var j1: String?,
+    var j2: String?,
+    var j3: String?,
+    var itime: Int?
 ) : ProtocolConfig(protocolConfigBuilder) {
 
     protected constructor(builder: Builder) : this(
@@ -39,10 +50,21 @@ open class WireguardConfig protected constructor(
         builder.jmax,
         builder.s1,
         builder.s2,
+        builder.s3,
+        builder.s4,
         builder.h1,
         builder.h2,
         builder.h3,
-        builder.h4
+        builder.h4,
+        builder.i1,
+        builder.i2,
+        builder.i3,
+        builder.i4,
+        builder.i5,
+        builder.j1,
+        builder.j2,
+        builder.j3,
+        builder.itime
     )
 
     fun toWgUserspaceString(): String = with(StringBuilder()) {
@@ -61,10 +83,21 @@ open class WireguardConfig protected constructor(
             appendLine("jmax=$jmax")
             appendLine("s1=$s1")
             appendLine("s2=$s2")
+            appendLine("s3=$s3")
+            appendLine("s4=$s4")
             appendLine("h1=$h1")
             appendLine("h2=$h2")
             appendLine("h3=$h3")
             appendLine("h4=$h4")
+            appendLine("i1=$i1")
+            appendLine("i2=$i2")
+            appendLine("i3=$i3")
+            appendLine("i4=$i4")
+            appendLine("i5=$i5")
+            appendLine("j1=$j1")
+            appendLine("j2=$j2")
+            appendLine("j3=$j3")
+            appendLine("itime=$itime")
         }
     }
 
@@ -74,10 +107,21 @@ open class WireguardConfig protected constructor(
         if (jmax == null) throw BadConfigException("Parameter jmax is undefined")
         if (s1 == null) throw BadConfigException("Parameter s1 is undefined")
         if (s2 == null) throw BadConfigException("Parameter s2 is undefined")
+        if (s3 == null) throw BadConfigException("Parameter s3 is undefined")
+        if (s4 == null) throw BadConfigException("Parameter s4 is undefined")
         if (h1 == null) throw BadConfigException("Parameter h1 is undefined")
         if (h2 == null) throw BadConfigException("Parameter h2 is undefined")
         if (h3 == null) throw BadConfigException("Parameter h3 is undefined")
         if (h4 == null) throw BadConfigException("Parameter h4 is undefined")
+        if (i1 == null) throw BadConfigException("Parameter i1 is undefined")
+        if (i2 == null) throw BadConfigException("Parameter i2 is undefined")
+        if (i3 == null) throw BadConfigException("Parameter i3 is undefined")
+        if (i4 == null) throw BadConfigException("Parameter i4 is undefined")
+        if (i5 == null) throw BadConfigException("Parameter i5 is undefined")
+        if (j1 == null) throw BadConfigException("Parameter j1 is undefined")
+        if (j2 == null) throw BadConfigException("Parameter j2 is undefined")
+        if (j3 == null) throw BadConfigException("Parameter j3 is undefined")
+        if (itime == null) throw BadConfigException("Parameter itime is undefined")
     }
 
     open fun appendPeerLine(sb: StringBuilder) = with(sb) {
@@ -117,6 +161,8 @@ open class WireguardConfig protected constructor(
         internal var jmax: Int? = null
         internal var s1: Int? = null
         internal var s2: Int? = null
+        internal var s3: Int? = null
+        internal var s4: Int? = null
         internal var h1: Long? = null
         internal var h2: Long? = null
         internal var h3: Long? = null
@@ -148,6 +194,8 @@ open class WireguardConfig protected constructor(
         fun setJmax(jmax: Int) = apply { this.jmax = jmax }
         fun setS1(s1: Int) = apply { this.s1 = s1 }
         fun setS2(s2: Int) = apply { this.s2 = s2 }
+        fun setS1(s3: Int) = apply { this.s3 = s3 }
+        fun setS2(s4: Int) = apply { this.s4 = s4 }
         fun setH1(h1: Long) = apply { this.h1 = h1 }
         fun setH2(h2: Long) = apply { this.h2 = h2 }
         fun setH3(h3: Long) = apply { this.h3 = h3 }

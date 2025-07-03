@@ -289,6 +289,9 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ServerJunkPacketMaxSizeRole] = "serverJunkPacketMaxSize";
     roles[ServerInitPacketJunkSizeRole] = "serverInitPacketJunkSize";
     roles[ServerResponsePacketJunkSizeRole] = "serverResponsePacketJunkSize";
+    roles[ServerCookieReplyPacketJunkSizeRole] = "serverCookieReplyPacketJunkSize";
+    roles[ServerTransportPacketJunkSizeRole] = "serverTransportPacketJunkSize";
+
     roles[ServerInitPacketMagicHeaderRole] = "serverInitPacketMagicHeader";
     roles[ServerResponsePacketMagicHeaderRole] = "serverResponsePacketMagicHeader";
     roles[ServerUnderloadPacketMagicHeaderRole] = "serverUnderloadPacketMagicHeader";
@@ -340,6 +343,10 @@ AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig)
             serverProtocolConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize);
     serverResponsePacketJunkSize = serverProtocolConfig.value(config_key::responsePacketJunkSize)
                                            .toString(protocols::awg::defaultResponsePacketJunkSize);
+    serverCookieReplyPacketJunkSize = serverProtocolConfig.value(config_key::responsePacketJunkSize)
+                                              .toString(protocols::awg::defaultCookieReplyPacketJunkSize);
+    serverTransportPacketJunkSize = serverProtocolConfig.value(config_key::responsePacketJunkSize)
+                                            .toString(protocols::awg::defaultTransportPacketJunkSize);
     serverInitPacketMagicHeader = serverProtocolConfig.value(config_key::initPacketMagicHeader)
                                           .toString(protocols::awg::defaultInitPacketMagicHeader);
     serverResponsePacketMagicHeader = serverProtocolConfig.value(config_key::responsePacketMagicHeader)
@@ -357,6 +364,8 @@ bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
         || serverJunkPacketMaxSize != other.serverJunkPacketMaxSize
         || serverInitPacketJunkSize != other.serverInitPacketJunkSize
         || serverResponsePacketJunkSize != other.serverResponsePacketJunkSize
+        || serverCookieReplyPacketJunkSize != other.serverCookieReplyPacketJunkSize
+        || serverTransportPacketJunkSize != other.serverTransportPacketJunkSize
         || serverInitPacketMagicHeader != other.serverInitPacketMagicHeader
         || serverResponsePacketMagicHeader != other.serverResponsePacketMagicHeader
         || serverUnderloadPacketMagicHeader != other.serverUnderloadPacketMagicHeader

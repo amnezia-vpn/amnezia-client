@@ -6,7 +6,8 @@
 
 #include "containers/containers_defs.h"
 
-namespace AwgConstant {
+namespace AwgConstant
+{
     const int messageInitiationSize = 148;
     const int messageResponseSize = 92;
 }
@@ -37,6 +38,8 @@ struct AwgConfig
     QString serverJunkPacketMaxSize;
     QString serverInitPacketJunkSize;
     QString serverResponsePacketJunkSize;
+    QString serverCookieReplyPacketJunkSize;
+    QString serverTransportPacketJunkSize;
     QString serverInitPacketMagicHeader;
     QString serverResponsePacketMagicHeader;
     QString serverUnderloadPacketMagicHeader;
@@ -74,6 +77,9 @@ public:
         ServerJunkPacketMaxSizeRole,
         ServerInitPacketJunkSizeRole,
         ServerResponsePacketJunkSizeRole,
+        ServerCookieReplyPacketJunkSizeRole,
+        ServerTransportPacketJunkSizeRole,
+
         ServerInitPacketMagicHeaderRole,
         ServerResponsePacketMagicHeaderRole,
         ServerUnderloadPacketMagicHeaderRole,

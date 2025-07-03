@@ -72,6 +72,8 @@ namespace amnezia
         constexpr char junkPacketMaxSize[] = "Jmax";
         constexpr char initPacketJunkSize[] = "S1";
         constexpr char responsePacketJunkSize[] = "S2";
+        constexpr char cookieReplyPacketJunkSize[] = "S3";
+        constexpr char transportPacketJunkSize[] = "S4";
         constexpr char initPacketMagicHeader[] = "H1";
         constexpr char responsePacketMagicHeader[] = "H2";
         constexpr char underloadPacketMagicHeader[] = "H3";
@@ -223,6 +225,9 @@ namespace amnezia
             constexpr char defaultJunkPacketMaxSize[] = "30";
             constexpr char defaultInitPacketJunkSize[] = "15";
             constexpr char defaultResponsePacketJunkSize[] = "18";
+            constexpr char defaultCookieReplyPacketJunkSize[] = "20";
+            constexpr char defaultTransportPacketJunkSize[] = "23";
+
             constexpr char defaultInitPacketMagicHeader[] = "1020325451";
             constexpr char defaultResponsePacketMagicHeader[] = "3288052141";
             constexpr char defaultTransportPacketMagicHeader[] = "2528465083";
