@@ -18,7 +18,6 @@ public:
         DescriptionRole,
         DetailedDescriptionRole,
         ServiceTypeRole,
-        ConfigRole,
         DockerContainerRole,
 
         IsEasySetupContainerRole,
@@ -47,8 +46,6 @@ public slots:
     int getProcessedContainerIndex();
 
     QString getProcessedContainerName();
-
-    QJsonObject getContainerConfig(const int containerIndex);
 
     bool isSupportedByCurrentPlatform(const int containerIndex);
     bool isServiceContainer(const int containerIndex);

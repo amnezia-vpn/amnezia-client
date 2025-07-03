@@ -5,6 +5,7 @@
 #include "core/models/protocols/openvpnProtocolConfig.h"
 #include "core/models/protocols/protocolConfig.h"
 #include "core/models/protocols/shadowsocksProtocolConfig.h"
+#include "core/models/protocols/wireguardProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
 #include "protocols/protocols_defs.h"
 
@@ -38,27 +39,27 @@ bool ProtocolConfig::isServerSettingsEqual(const QSharedPointer<ProtocolConfig> 
     case Proto::OpenVpn: {
         auto thisConfig = qSharedPointerCast<OpenVpnProtocolConfig>(QSharedPointer<ProtocolConfig>(this));
         auto otherConfig = qSharedPointerCast<OpenVpnProtocolConfig>(other);
-        return false;
+        return thisConfig->hasEqualServerSettings(*otherConfig.data());
     }
     case Proto::WireGuard: {
         auto thisConfig = qSharedPointerCast<WireGuardProtocolConfig>(QSharedPointer<ProtocolConfig>(this));
         auto otherConfig = qSharedPointerCast<WireGuardProtocolConfig>(other);
-        return false;
+        return thisConfig->hasEqualServerSettings(*otherConfig.data());
     }
     case Proto::ShadowSocks: {
         auto thisConfig = qSharedPointerCast<ShadowsocksProtocolConfig>(QSharedPointer<ProtocolConfig>(this));
         auto otherConfig = qSharedPointerCast<ShadowsocksProtocolConfig>(other);
-        return false;
+        return thisConfig->hasEqualServerSettings(*otherConfig.data());
     }
     case Proto::Cloak: {
         auto thisConfig = qSharedPointerCast<CloakProtocolConfig>(QSharedPointer<ProtocolConfig>(this));
         auto otherConfig = qSharedPointerCast<CloakProtocolConfig>(other);
-        return false;
+        return thisConfig->hasEqualServerSettings(*otherConfig.data());
     }
     case Proto::Xray: {
         auto thisConfig = qSharedPointerCast<XrayProtocolConfig>(QSharedPointer<ProtocolConfig>(this));
         auto otherConfig = qSharedPointerCast<XrayProtocolConfig>(other);
-        return false;
+        return thisConfig->hasEqualServerSettings(*otherConfig.data());
     }
     case Proto::Awg: {
         auto thisConfig = qSharedPointerCast<AwgProtocolConfig>(QSharedPointer<ProtocolConfig>(this));

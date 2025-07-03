@@ -13,11 +13,11 @@ namespace openvpn
         QString subnetAddress;
         QString transportProto;
         QString port;
-        QString ncpDisable;
+        bool ncpDisable;
         QString hash;
         QString cipher;
-        QString tlsAuth;
-        QString blockOutsideDns;
+        bool tlsAuth;
+        bool blockOutsideDns;
         QString additionalClientConfig;
         QString additionalServerConfig;
     };
@@ -38,6 +38,9 @@ public:
     OpenVpnProtocolConfig(const QJsonObject &protocolConfigObject, const QString &protocolName);
 
     QJsonObject toJson() const override;
+
+    bool hasEqualServerSettings(const OpenVpnProtocolConfig &other) const;
+    void clearClientSettings();
 
     openvpn::ServerProtocolConfig serverProtocolConfig;
     openvpn::ClientProtocolConfig clientProtocolConfig;

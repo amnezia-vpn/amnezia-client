@@ -27,6 +27,9 @@ public:
 
     QJsonObject toJson() const override;
 
+    bool hasEqualServerSettings(const ShadowsocksProtocolConfig &other) const;
+    void clearClientSettings();
+
     shadowsocks::ServerProtocolConfig serverProtocolConfig;
     shadowsocks::ClientProtocolConfig clientProtocolConfig;
 };

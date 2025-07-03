@@ -28,6 +28,9 @@ public:
 
     QJsonObject toJson() const override;
 
+    bool hasEqualServerSettings(const XrayProtocolConfig &other) const;
+    void clearClientSettings();
+
     xray::ServerProtocolConfig serverProtocolConfig;
     xray::ClientProtocolConfig clientProtocolConfig;
 };

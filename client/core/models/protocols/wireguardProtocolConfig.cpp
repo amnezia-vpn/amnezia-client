@@ -118,3 +118,17 @@ QJsonObject WireGuardProtocolConfig::toJson() const
 
     return json;
 }
+
+bool WireGuardProtocolConfig::hasEqualServerSettings(const WireGuardProtocolConfig &other) const
+{
+    if (serverProtocolConfig.subnetAddress != other.serverProtocolConfig.subnetAddress || 
+        serverProtocolConfig.port != other.serverProtocolConfig.port) {
+        return false;
+    }
+    return true;
+}
+
+void WireGuardProtocolConfig::clearClientSettings()
+{
+    clientProtocolConfig = wireguard::ClientProtocolConfig();
+}

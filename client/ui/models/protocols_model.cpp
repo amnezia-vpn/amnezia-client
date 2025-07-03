@@ -16,7 +16,9 @@ ProtocolsModel::ProtocolsModel(const QSharedPointer<OpenVpnConfigModel> &openVpn
                                const QSharedPointer<CloakConfigModel> &cloakConfigModel,
                                const QSharedPointer<WireGuardConfigModel> &wireGuardConfigModel,
                                const QSharedPointer<AwgConfigModel> &awgConfigModel, const QSharedPointer<XrayConfigModel> &xrayConfigModel,
+#ifdef Q_OS_WINDOWS
                                const QSharedPointer<Ikev2ConfigModel> &ikev2ConfigModel,
+#endif
                                const QSharedPointer<SftpConfigModel> &sftpConfigModel,
                                const QSharedPointer<Socks5ProxyConfigModel> &socks5ProxyConfigModel, QObject *parent)
     : QAbstractListModel(parent),
@@ -26,7 +28,9 @@ ProtocolsModel::ProtocolsModel(const QSharedPointer<OpenVpnConfigModel> &openVpn
       m_wireGuardConfigModel(wireGuardConfigModel),
       m_awgConfigModel(awgConfigModel),
       m_xrayConfigModel(xrayConfigModel),
+#ifdef Q_OS_WINDOWS
       m_ikev2ConfigModel(ikev2ConfigModel),
+#endif
       m_sftpConfigModel(sftpConfigModel),
       m_socks5ProxyConfigModel(socks5ProxyConfigModel)
 {
@@ -111,18 +115,18 @@ void ProtocolsModel::updateProtocolModel(amnezia::Proto protocol)
     }
 
     switch (protocol) {
-    case Proto::OpenVpn: m_openVpnConfigModel->updateModel(config); break;
-    case Proto::ShadowSocks: m_shadowSocksConfigModel->updateModel(config); break;
-    case Proto::Cloak: m_cloakConfigModel->updateModel(config); break;
-    case Proto::WireGuard: m_wireGuardConfigModel->updateModel(config); break;
-    case Proto::Awg: m_awgConfigModel->updateModel(config); break;
-    case Proto::Xray: m_xrayConfigModel->updateModel(config); break;
+    case Proto::OpenVpn: m_openVpnConfigModel->updateModel(*qSharedPointerCast<OpenVpnProtocolConfig>(protocolConfig).data()); break;
+    case Proto::ShadowSocks: m_shadowSocksConfigModel->updateModel(*qSharedPointerCast<ShadowsocksProtocolConfig>(protocolConfig).data()); break;
+    case Proto::Cloak: m_cloakConfigModel->updateModel(*qSharedPointerCast<CloakProtocolConfig>(protocolConfig).data()); break;
+    case Proto::WireGuard: m_wireGuardConfigModel->updateModel(*qSharedPointerCast<WireGuardProtocolConfig>(protocolConfig).data()); break;
+    case Proto::Awg: m_awgConfigModel->updateModel(*qSharedPointerCast<AwgProtocolConfig>(protocolConfig).data()); break;
+    case Proto::Xray: m_xrayConfigModel->updateModel(*qSharedPointerCast<XrayProtocolConfig>(protocolConfig).data()); break;
 #ifdef Q_OS_WINDOWS
     case Proto::Ikev2:
-    case Proto::L2tp: m_ikev2ConfigModel->updateModel(config); break;
+    case Proto::L2tp: m_ikev2ConfigModel->updateModel(*qSharedPointerCast<AwgProtocolConfig>(protocolConfig).data()); break;
 #endif
-    case Proto::Sftp: m_sftpConfigModel->updateModel(config); break;
-    case Proto::Socks5Proxy: m_socks5ProxyConfigModel->updateModel(config); break;
+    // case Proto::Sftp: m_sftpConfigModel->updateModel(*qSharedPointerCast<SftpConfigModel>(protocolConfig).data()); break;
+    // case Proto::Socks5Proxy: m_socks5ProxyConfigModel->updateModel(*qSharedPointerCast<Socks>(protocolConfig).data()); break;
     default: break;
     }
 }
@@ -134,17 +138,17 @@ QMap<QString, QSharedPointer<ProtocolConfig>> ProtocolsModel::getProtocolConfigs
     for (const auto &config : m_protocolConfigs) {
         switch (ProtocolProps::protoFromString(config->protocolName)) {
         case Proto::OpenVpn: protocolConfigs.insert(config->protocolName, m_openVpnConfigModel->getConfig()); break;
-        case Proto::ShadowSocks: m_shadowSocksConfigModel->updateModel(config); break;
-        case Proto::Cloak: m_cloakConfigModel->updateModel(config); break;
-        case Proto::WireGuard: m_wireGuardConfigModel->updateModel(config); break;
+        case Proto::ShadowSocks: protocolConfigs.insert(config->protocolName, m_shadowSocksConfigModel->getConfig()); break;
+        case Proto::Cloak: protocolConfigs.insert(config->protocolName, m_cloakConfigModel->getConfig()); break;
+        case Proto::WireGuard: protocolConfigs.insert(config->protocolName, m_wireGuardConfigModel->getConfig()); break;
         case Proto::Awg: protocolConfigs.insert(config->protocolName, m_awgConfigModel->getConfig()); break;
-        case Proto::Xray: m_xrayConfigModel->updateModel(config); break;
+        case Proto::Xray: protocolConfigs.insert(config->protocolName, m_xrayConfigModel->getConfig()); break;
 #ifdef Q_OS_WINDOWS
         case Proto::Ikev2:
-        case Proto::L2tp: m_ikev2ConfigModel->updateModel(config); break;
+        case Proto::L2tp: protocolConfigs.insert(config->protocolName, m_awgConfigModel->getConfig()); break;
 #endif
-        case Proto::Sftp: m_sftpConfigModel->updateModel(config); break;
-        case Proto::Socks5Proxy: m_socks5ProxyConfigModel->updateModel(config); break;
+        // case Proto::Sftp: protocolConfigs.insert(config->protocolName, m_awgConfigModel->getConfig()); break;
+        // case Proto::Socks5Proxy: protocolConfigs.insert(config->protocolName, m_awgConfigModel->getConfig()); break;
         default: break;
         }
     }

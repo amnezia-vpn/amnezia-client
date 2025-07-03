@@ -40,4 +40,19 @@ QJsonObject XrayProtocolConfig::toJson() const
     }
 
     return json;
+}
+
+bool XrayProtocolConfig::hasEqualServerSettings(const XrayProtocolConfig &other) const
+{
+    if (serverProtocolConfig.site != other.serverProtocolConfig.site || 
+        serverProtocolConfig.port != other.serverProtocolConfig.port ||
+        serverProtocolConfig.transportProto != other.serverProtocolConfig.transportProto) {
+        return false;
+    }
+    return true;
+}
+
+void XrayProtocolConfig::clearClientSettings()
+{
+    clientProtocolConfig = xray::ClientProtocolConfig();
 } 

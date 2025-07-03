@@ -40,4 +40,19 @@ QJsonObject CloakProtocolConfig::toJson() const
     }
 
     return json;
+}
+
+bool CloakProtocolConfig::hasEqualServerSettings(const CloakProtocolConfig &other) const
+{
+    if (serverProtocolConfig.port != other.serverProtocolConfig.port || 
+        serverProtocolConfig.cipher != other.serverProtocolConfig.cipher ||
+        serverProtocolConfig.site != other.serverProtocolConfig.site) {
+        return false;
+    }
+    return true;
+}
+
+void CloakProtocolConfig::clearClientSettings()
+{
+    clientProtocolConfig = cloak::ClientProtocolConfig();
 } 

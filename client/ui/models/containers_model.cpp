@@ -24,12 +24,6 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case NameRole: return ContainerProps::containerHumanNames().value(container);
     case DescriptionRole: return ContainerProps::containerDescriptions().value(container);
     case DetailedDescriptionRole: return ContainerProps::containerDetailedDescriptions().value(container);
-    case ConfigRole: {
-        if (container == DockerContainer::None) {
-            return QJsonObject();
-        }
-        return m_containers.value(container);
-    }
     case ServiceTypeRole: return ContainerProps::containerService(container);
     case DockerContainerRole: return container;
     case IsEasySetupContainerRole: return ContainerProps::isEasySetupContainer(container);
@@ -74,11 +68,6 @@ QString ContainersModel::getProcessedContainerName()
     return ContainerProps::containerHumanNames().value(static_cast<DockerContainer>(m_processedContainerIndex));
 }
 
-QJsonObject ContainersModel::getContainerConfig(const int containerIndex)
-{
-    return qvariant_cast<QJsonObject>(data(index(containerIndex), ConfigRole));
-}
-
 bool ContainersModel::isSupportedByCurrentPlatform(const int containerIndex)
 {
     return qvariant_cast<bool>(data(index(containerIndex), IsSupportedRole));
@@ -117,7 +106,6 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[DetailedDescriptionRole] = "detailedDescription";
     roles[ServiceTypeRole] = "serviceType";
     roles[DockerContainerRole] = "dockerContainer";
-    roles[ConfigRole] = "config";
 
     roles[IsEasySetupContainerRole] = "isEasySetupContainer";
     roles[EasySetupHeaderRole] = "easySetupHeader";

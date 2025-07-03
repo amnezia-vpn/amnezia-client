@@ -28,6 +28,9 @@ public:
 
     QJsonObject toJson() const override;
 
+    bool hasEqualServerSettings(const CloakProtocolConfig &other) const;
+    void clearClientSettings();
+
     cloak::ServerProtocolConfig serverProtocolConfig;
     cloak::ClientProtocolConfig clientProtocolConfig;
 };

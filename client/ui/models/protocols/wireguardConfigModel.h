@@ -5,19 +5,7 @@
 #include <QJsonObject>
 
 #include "containers/containers_defs.h"
-
-struct WgConfig
-{
-    WgConfig(const QJsonObject &jsonConfig);
-
-    QString subnetAddress;
-    QString port;
-    QString clientMtu;
-
-    bool hasEqualServerSettings(const WgConfig &other) const;
-    bool hasEqualClientSettings(const WgConfig &other) const;
-
-};
+#include "core/models/protocols/wireguardProtocolConfig.h"
 
 class WireGuardConfigModel : public QAbstractListModel
 {
@@ -38,8 +26,8 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void updateModel(const QJsonObject &config);
-    QJsonObject getConfig();
+    void updateModel(const WireGuardProtocolConfig wireGuardProtocolConfig);
+    QSharedPointer<ProtocolConfig> getConfig();
 
     bool isServerSettingsEqual();
 
@@ -47,10 +35,8 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    DockerContainer m_container;
-    QJsonObject m_serverProtocolConfig;
-    QJsonObject m_clientProtocolConfig;
-    QJsonObject m_fullConfig;
+    WireGuardProtocolConfig m_newWireGuardProtocolConfig;
+    WireGuardProtocolConfig m_oldWireGuardProtocolConfig;
 };
 
 #endif // WIREGUARDCONFIGMODEL_H

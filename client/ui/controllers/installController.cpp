@@ -80,7 +80,7 @@ void InstallController::install(DockerContainer container, int port, TransportPr
 
                 int s1 = QRandomGenerator::global()->bounded(15, 150);
                 int s2 = QRandomGenerator::global()->bounded(15, 150);
-                while (s1 + AwgConstant::messageInitiationSize == s2 + AwgConstant::messageResponseSize) {
+                while (s1 + awg::messageInitiationSize == s2 + awg::messageResponseSize) {
                     s2 = QRandomGenerator::global()->bounded(15, 150);
                 }
 
@@ -933,6 +933,11 @@ bool InstallController::isUpdateDockerContainerRequired(const DockerContainer co
     case Proto::Awg: {
         auto newConfig = qSharedPointerCast<AwgProtocolConfig>(oldProtoConfig);
         auto oldConfig = qSharedPointerCast<AwgProtocolConfig>(newProtoConfig);
+        return !newConfig->hasEqualServerSettings(*oldConfig.data());
+    }
+    case Proto::WireGuard: {
+        auto newConfig = qSharedPointerCast<WireGuardProtocolConfig>(oldProtoConfig);
+        auto oldConfig = qSharedPointerCast<WireGuardProtocolConfig>(newProtoConfig);
         return !newConfig->hasEqualServerSettings(*oldConfig.data());
     }
     default: return true;

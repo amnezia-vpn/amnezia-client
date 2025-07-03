@@ -36,4 +36,18 @@ QJsonObject ShadowsocksProtocolConfig::toJson() const
     }
 
     return json;
+}
+
+bool ShadowsocksProtocolConfig::hasEqualServerSettings(const ShadowsocksProtocolConfig &other) const
+{
+    if (serverProtocolConfig.port != other.serverProtocolConfig.port || 
+        serverProtocolConfig.cipher != other.serverProtocolConfig.cipher) {
+        return false;
+    }
+    return true;
+}
+
+void ShadowsocksProtocolConfig::clearClientSettings()
+{
+    clientProtocolConfig = shadowsocks::ClientProtocolConfig();
 } 

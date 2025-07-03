@@ -2,7 +2,10 @@
 
 #include "protocols/protocols_defs.h"
 
-CloakConfigModel::CloakConfigModel(QObject *parent) : QAbstractListModel(parent)
+CloakConfigModel::CloakConfigModel(QObject *parent)
+    : QAbstractListModel(parent),
+      m_newCloakProtocolConfig(QJsonObject(), ProtocolProps::protoToString(Proto::Cloak)),
+      m_oldCloakProtocolConfig(QJsonObject(), ProtocolProps::protoToString(Proto::Cloak))
 {
 }
 
@@ -19,9 +22,9 @@ bool CloakConfigModel::setData(const QModelIndex &index, const QVariant &value, 
     }
 
     switch (role) {
-    case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
-    case Roles::CipherRole: m_protocolConfig.insert(config_key::cipher, value.toString()); break;
-    case Roles::SiteRole: m_protocolConfig.insert(config_key::site, value.toString()); break;
+    case Roles::PortRole: m_newCloakProtocolConfig.serverProtocolConfig.port = value.toString(); break;
+    case Roles::CipherRole: m_newCloakProtocolConfig.serverProtocolConfig.cipher = value.toString(); break;
+    case Roles::SiteRole: m_newCloakProtocolConfig.serverProtocolConfig.site = value.toString(); break;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -35,35 +38,33 @@ QVariant CloakConfigModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
-    case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::cloak::defaultPort);
-    case Roles::CipherRole: return m_protocolConfig.value(config_key::cipher).toString(protocols::cloak::defaultCipher);
-    case Roles::SiteRole: return m_protocolConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite);
+    case Roles::PortRole: return m_newCloakProtocolConfig.serverProtocolConfig.port;
+    case Roles::CipherRole: return m_newCloakProtocolConfig.serverProtocolConfig.cipher;
+    case Roles::SiteRole: return m_newCloakProtocolConfig.serverProtocolConfig.site;
     }
 
     return QVariant();
 }
 
-void CloakConfigModel::updateModel(const QJsonObject &config)
+void CloakConfigModel::updateModel(const CloakProtocolConfig cloakProtocolConfig)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
-
-    m_fullConfig = config;
-    QJsonObject protocolConfig = config.value(config_key::cloak).toObject();
-
-    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Cloak), Proto::Cloak);
-    m_protocolConfig.insert(config_key::transport_proto, protocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
-    m_protocolConfig.insert(config_key::cipher, protocolConfig.value(config_key::cipher).toString(protocols::cloak::defaultCipher));
-    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(protocols::cloak::defaultPort));
-    m_protocolConfig.insert(config_key::site, protocolConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite));
-
+    m_newCloakProtocolConfig = cloakProtocolConfig;
+    m_oldCloakProtocolConfig = cloakProtocolConfig;
     endResetModel();
 }
 
-QJsonObject CloakConfigModel::getConfig()
+QSharedPointer<ProtocolConfig> CloakConfigModel::getConfig()
 {
-    m_fullConfig.insert(config_key::cloak, m_protocolConfig);
-    return m_fullConfig;
+    if (m_oldCloakProtocolConfig.hasEqualServerSettings(m_newCloakProtocolConfig)) {
+        m_newCloakProtocolConfig.clearClientSettings();
+    }
+    return QSharedPointer<CloakProtocolConfig>::create(m_newCloakProtocolConfig);
+}
+
+bool CloakConfigModel::isServerSettingsEqual()
+{
+    return m_oldCloakProtocolConfig.hasEqualServerSettings(m_newCloakProtocolConfig);
 }
 
 QHash<int, QByteArray> CloakConfigModel::roleNames() const
@@ -76,3 +77,4 @@ QHash<int, QByteArray> CloakConfigModel::roleNames() const
 
     return roles;
 }
+

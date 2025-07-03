@@ -51,6 +51,9 @@ public:
 
     QJsonObject toJson() const override;
 
+    bool hasEqualServerSettings(const WireGuardProtocolConfig &other) const;
+    void clearClientSettings();
+
     wireguard::ServerProtocolConfig serverProtocolConfig;
     wireguard::ClientProtocolConfig clientProtocolConfig;
 };

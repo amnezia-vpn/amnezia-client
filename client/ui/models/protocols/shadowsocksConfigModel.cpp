@@ -2,7 +2,10 @@
 
 #include "protocols/protocols_defs.h"
 
-ShadowSocksConfigModel::ShadowSocksConfigModel(QObject *parent) : QAbstractListModel(parent)
+ShadowSocksConfigModel::ShadowSocksConfigModel(QObject *parent)
+    : QAbstractListModel(parent),
+      m_newShadowsocksProtocolConfig(QJsonObject(), ProtocolProps::protoToString(Proto::ShadowSocks)),
+      m_oldShadowsocksProtocolConfig(QJsonObject(), ProtocolProps::protoToString(Proto::ShadowSocks))
 {
 }
 
@@ -19,8 +22,8 @@ bool ShadowSocksConfigModel::setData(const QModelIndex &index, const QVariant &v
     }
 
     switch (role) {
-    case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
-    case Roles::CipherRole: m_protocolConfig.insert(config_key::cipher, value.toString()); break;
+    case Roles::PortRole: m_newShadowsocksProtocolConfig.serverProtocolConfig.port = value.toString(); break;
+    case Roles::CipherRole: m_newShadowsocksProtocolConfig.serverProtocolConfig.cipher = value.toString(); break;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -34,36 +37,34 @@ QVariant ShadowSocksConfigModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
-    case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort);
-    case Roles::CipherRole: return m_protocolConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher);
-    case Roles::IsPortEditableRole: return m_container == DockerContainer::ShadowSocks ? true : false;
-    case Roles::IsCipherEditableRole: return m_container == DockerContainer::ShadowSocks ? true : false;
+    case Roles::PortRole: return m_newShadowsocksProtocolConfig.serverProtocolConfig.port;
+    case Roles::CipherRole: return m_newShadowsocksProtocolConfig.serverProtocolConfig.cipher;
+    case Roles::IsPortEditableRole: return true; // TODO: implement container check if needed
+    case Roles::IsCipherEditableRole: return true; // TODO: implement container check if needed
     }
 
     return QVariant();
 }
 
-void ShadowSocksConfigModel::updateModel(const QJsonObject &config)
+void ShadowSocksConfigModel::updateModel(const ShadowsocksProtocolConfig shadowsocksProtocolConfig)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
-
-    m_fullConfig = config;
-    QJsonObject protocolConfig = config.value(config_key::shadowsocks).toObject();
-
-    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::ShadowSocks), Proto::ShadowSocks);
-    m_protocolConfig.insert(config_key::transport_proto,
-                            protocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
-    m_protocolConfig.insert(config_key::cipher, protocolConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher));
-    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort));
-
+    m_newShadowsocksProtocolConfig = shadowsocksProtocolConfig;
+    m_oldShadowsocksProtocolConfig = shadowsocksProtocolConfig;
     endResetModel();
 }
 
-QJsonObject ShadowSocksConfigModel::getConfig()
+QSharedPointer<ProtocolConfig> ShadowSocksConfigModel::getConfig()
 {
-    m_fullConfig.insert(config_key::shadowsocks, m_protocolConfig);
-    return m_fullConfig;
+    if (m_oldShadowsocksProtocolConfig.hasEqualServerSettings(m_newShadowsocksProtocolConfig)) {
+        m_newShadowsocksProtocolConfig.clearClientSettings();
+    }
+    return QSharedPointer<ShadowsocksProtocolConfig>::create(m_newShadowsocksProtocolConfig);
+}
+
+bool ShadowSocksConfigModel::isServerSettingsEqual()
+{
+    return m_oldShadowsocksProtocolConfig.hasEqualServerSettings(m_newShadowsocksProtocolConfig);
 }
 
 QHash<int, QByteArray> ShadowSocksConfigModel::roleNames() const
@@ -77,3 +78,4 @@ QHash<int, QByteArray> ShadowSocksConfigModel::roleNames() const
 
     return roles;
 }
+
