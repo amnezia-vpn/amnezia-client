@@ -168,7 +168,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                visible: ApiConfigsController.isProtocolSelectionSupported()
+                visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
 
                 text: qsTr("Use VLESS protocol")
                 checked: switcher.isVlessProtocol
