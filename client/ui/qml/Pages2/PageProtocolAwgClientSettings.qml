@@ -350,6 +350,28 @@ PageType {
                 }
 
                 TextFieldWithHeaderType {
+                    id: cookieReplyPacketJunkSizeTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    enabled: false
+
+                    headerText: "S3 - Cookie Reply packet junk size"
+                    textField.text: serverCookieReplyPacketJunkSize
+                }
+
+                TextFieldWithHeaderType {
+                    id: transportPacketJunkSizeTextField
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+
+                    enabled: false
+
+                    headerText: "S4 - Transport packet junk size"
+                    textField.text: serverTransportPacketJunkSize
+                }
+
+                TextFieldWithHeaderType {
                     id: initPacketMagicHeaderTextField
                     Layout.fillWidth: true
                     Layout.topMargin: 16

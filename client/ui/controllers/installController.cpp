@@ -406,6 +406,10 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         containerConfig[config_key::junkPacketMaxSize] = serverConfigMap.value(config_key::junkPacketMaxSize);
                         containerConfig[config_key::initPacketJunkSize] = serverConfigMap.value(config_key::initPacketJunkSize);
                         containerConfig[config_key::responsePacketJunkSize] = serverConfigMap.value(config_key::responsePacketJunkSize);
+                        containerConfig[config_key::cookieReplyPacketJunkSize] =
+                                serverConfigMap.value(config_key::cookieReplyPacketJunkSize);
+                        containerConfig[config_key::transportPacketJunkSize] =
+                                serverConfigMap.value(config_key::transportPacketJunkSize);
                         containerConfig[config_key::initPacketMagicHeader] = serverConfigMap.value(config_key::initPacketMagicHeader);
                         containerConfig[config_key::responsePacketMagicHeader] = serverConfigMap.value(config_key::responsePacketMagicHeader);
                         containerConfig[config_key::underloadPacketMagicHeader] =

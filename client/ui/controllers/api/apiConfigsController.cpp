@@ -479,6 +479,8 @@ void ApiConfigsController::fillServerConfig(const QString &protocol, const ApiPa
         containerConfig[config_key::junkPacketMaxSize] = protocolConfig.value(config_key::junkPacketMaxSize);
         containerConfig[config_key::initPacketJunkSize] = protocolConfig.value(config_key::initPacketJunkSize);
         containerConfig[config_key::responsePacketJunkSize] = protocolConfig.value(config_key::responsePacketJunkSize);
+        containerConfig[config_key::cookieReplyPacketJunkSize] = protocolConfig.value(config_key::cookieReplyPacketJunkSize);
+        containerConfig[config_key::transportPacketJunkSize] = protocolConfig.value(config_key::transportPacketJunkSize);
         containerConfig[config_key::initPacketMagicHeader] = protocolConfig.value(config_key::initPacketMagicHeader);
         containerConfig[config_key::responsePacketMagicHeader] = protocolConfig.value(config_key::responsePacketMagicHeader);
         containerConfig[config_key::underloadPacketMagicHeader] = protocolConfig.value(config_key::underloadPacketMagicHeader);

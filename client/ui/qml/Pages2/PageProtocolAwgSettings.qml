@@ -378,7 +378,7 @@ PageType {
                              initPacketMagicHeaderTextField.errorText === "" &&
                              responsePacketJunkSizeTextField.errorText === "" &&
                              cookieReplyHeaderJunkTextField.errorText === "" &&
-	                         transportHeaderJunkTextField.errorText === "" &&
+                             transportHeaderJunkTextField.errorText === "" &&
                              initPacketJunkSizeTextField.errorText === "" &&
                              junkPacketMaxSizeTextField.errorText === "" &&
                              junkPacketMinSizeTextField.errorText === "" &&

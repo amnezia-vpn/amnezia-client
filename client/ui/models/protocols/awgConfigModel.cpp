@@ -77,6 +77,12 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     case Roles::ServerResponsePacketJunkSizeRole:
         m_serverProtocolConfig.insert(config_key::responsePacketJunkSize, value.toString());
         break;
+    case Roles::ServerCookieReplyPacketJunkSizeRole:
+        m_serverProtocolConfig.insert(config_key::cookieReplyPacketJunkSize, value.toString());
+        break;
+    case Roles::ServerTransportPacketJunkSizeRole:
+        m_serverProtocolConfig.insert(config_key::transportPacketJunkSize, value.toString());
+        break;
     case Roles::ServerInitPacketMagicHeaderRole:
         m_serverProtocolConfig.insert(config_key::initPacketMagicHeader, value.toString());
         break;
@@ -126,6 +132,10 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ServerInitPacketJunkSizeRole: return m_serverProtocolConfig.value(config_key::initPacketJunkSize);
     case Roles::ServerResponsePacketJunkSizeRole:
         return m_serverProtocolConfig.value(config_key::responsePacketJunkSize);
+    case Roles::ServerCookieReplyPacketJunkSizeRole:
+        return m_serverProtocolConfig.value(config_key::cookieReplyPacketJunkSize);
+    case Roles::ServerTransportPacketJunkSizeRole:
+        return m_serverProtocolConfig.value(config_key::transportPacketJunkSize);
     case Roles::ServerInitPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::initPacketMagicHeader);
     case Roles::ServerResponsePacketMagicHeaderRole:
         return m_serverProtocolConfig.value(config_key::responsePacketMagicHeader);
@@ -167,6 +177,12 @@ void AwgConfigModel::updateModel(const QJsonObject &config)
     m_serverProtocolConfig[config_key::responsePacketJunkSize] =
             serverProtocolConfig.value(config_key::responsePacketJunkSize)
                     .toString(protocols::awg::defaultResponsePacketJunkSize);
+    m_serverProtocolConfig[config_key::cookieReplyPacketJunkSize] =
+            serverProtocolConfig.value(config_key::cookieReplyPacketJunkSize)
+                    .toString(protocols::awg::defaultCookieReplyPacketJunkSize);
+    m_serverProtocolConfig[config_key::transportPacketJunkSize] =
+            serverProtocolConfig.value(config_key::transportPacketJunkSize)
+                    .toString(protocols::awg::defaultTransportPacketJunkSize);
     m_serverProtocolConfig[config_key::initPacketMagicHeader] =
             serverProtocolConfig.value(config_key::initPacketMagicHeader)
                     .toString(protocols::awg::defaultInitPacketMagicHeader);

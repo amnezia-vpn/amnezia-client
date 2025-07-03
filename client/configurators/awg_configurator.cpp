@@ -1,4 +1,5 @@
 #include "awg_configurator.h"
+#include "protocols/protocols_defs.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -35,6 +36,8 @@ QString AwgConfigurator::createConfig(const ServerCredentials &credentials, Dock
     jsonConfig[config_key::junkPacketMaxSize] = configMap.value(config_key::junkPacketMaxSize);
     jsonConfig[config_key::initPacketJunkSize] = configMap.value(config_key::initPacketJunkSize);
     jsonConfig[config_key::responsePacketJunkSize] = configMap.value(config_key::responsePacketJunkSize);
+    jsonConfig[config_key::cookieReplyPacketJunkSize] = configMap.value(config_key::cookieReplyPacketJunkSize);
+    jsonConfig[config_key::transportPacketJunkSize] = configMap.value(config_key::transportPacketJunkSize);
     jsonConfig[config_key::initPacketMagicHeader] = configMap.value(config_key::initPacketMagicHeader);
     jsonConfig[config_key::responsePacketMagicHeader] = configMap.value(config_key::responsePacketMagicHeader);
     jsonConfig[config_key::underloadPacketMagicHeader] = configMap.value(config_key::underloadPacketMagicHeader);
