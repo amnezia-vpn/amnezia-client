@@ -68,27 +68,6 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void ProtocolsModel::reload()
-{
-    beginResetModel();
-
-    QJsonObject config = getConfig();
-
-    QStringList keys = m_content.keys();
-    if (keys.size() == 1) {
-        QString protocolKey = keys.first();
-
-        if (config.contains(protocolKey)) {
-            QJsonObject protocolConfig = config.value(protocolKey).toObject();
-            protocolConfig.remove(config_key::last_config);
-            config[protocolKey] = protocolConfig;
-        }
-    }
-
-    updateModel(config);
-    endResetModel();
-}
-
 void ProtocolsModel::updateModel(const QJsonObject &content)
 {
     m_container = ContainerProps::containerFromString(content.value(config_key::container).toString());

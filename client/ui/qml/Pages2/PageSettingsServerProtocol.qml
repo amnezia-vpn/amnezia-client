@@ -186,7 +186,6 @@ PageType {
 
                             PageController.showBusyIndicator(true)
                             InstallController.clearCachedProfile()
-                            ProtocolsModel.reload()
                             PageController.showBusyIndicator(false)
                         }
                         var noButtonFunction = function() {

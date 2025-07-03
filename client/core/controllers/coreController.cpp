@@ -120,6 +120,9 @@ void CoreController::initControllers()
     connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
             &ConnectionController::onCurrentContainerUpdated); // TODO remove this
 
+    connect(m_installController.get(), &InstallController::profileCleared,
+            m_protocolsModel.get(), &ProtocolsModel::updateModel);
+
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 

@@ -669,6 +669,8 @@ void InstallController::clearCachedProfile(QSharedPointer<ServerController> serv
     m_clientManagementModel->revokeClient(containerConfig, container, serverCredentials, serverIndex, serverController);
 
     emit cachedProfileCleared(tr("%1 cached profile cleared").arg(ContainerProps::containerHumanNames().value(container)));
+    QJsonObject updatedConfig = m_settings->containerConfig(serverIndex, container);
+    emit profileCleared(updatedConfig);
 }
 
 QRegularExpression InstallController::ipAddressPortRegExp()

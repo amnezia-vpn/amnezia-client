@@ -83,6 +83,8 @@ signals:
 
     void noInstalledContainers();
 
+    void profileCleared(const QJsonObject &config);
+
 private:
     void installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
                        const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
