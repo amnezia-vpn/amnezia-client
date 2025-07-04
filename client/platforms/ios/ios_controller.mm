@@ -607,6 +607,8 @@ bool IosController::setupAwg()
 
     wgConfig.insert(config_key::initPacketJunkSize, config[config_key::initPacketJunkSize]);
     wgConfig.insert(config_key::responsePacketJunkSize, config[config_key::responsePacketJunkSize]);
+    wgConfig.insert(config_key::cookieReplyPacketJunkSize, config[config_key::cookieReplyPacketJunkSize]);
+    wgConfig.insert(config_key::transportPacketJunkSize, config[config_key::transportPacketJunkSize]);
 
     wgConfig.insert(config_key::junkPacketCount, config[config_key::junkPacketCount]);
     wgConfig.insert(config_key::junkPacketMinSize, config[config_key::junkPacketMinSize]);
