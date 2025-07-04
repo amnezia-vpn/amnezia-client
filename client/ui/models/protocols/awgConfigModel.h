@@ -10,6 +10,8 @@ namespace AwgConstant
 {
     const int messageInitiationSize = 148;
     const int messageResponseSize = 92;
+    const int messageCookieReplySize = 64;
+    const int messageTransportSize = 32;
 }
 
 struct AwgConfig
@@ -98,7 +100,7 @@ public slots:
     QJsonObject getConfig();
 
     bool isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4);
-    bool isPacketSizeEqual(const int s1, const int s2);
+    bool isPacketSizeEqual(const int s1, const int s2, const int s3, const int s4);
 
     bool isServerSettingsEqual();
 
