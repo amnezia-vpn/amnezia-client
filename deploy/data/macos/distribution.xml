@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<installer-gui-script minSpecVersion="1">
+    <title>AmneziaVPN Installer</title>
+    <license file="LICENSE"/>
+    <choices-outline>
+        <line choice="install"/>
+        <line choice="uninstall"/>
+    </choices-outline>
+    <choice id="install" title="Install AmneziaVPN" start_selected="true">
+        <pkg-ref id="org.amneziavpn.package"/>
+    </choice>
+    <choice id="uninstall" title="Uninstall AmneziaVPN" start_selected="false">
+        <pkg-ref id="org.amneziavpn.uninstall"/>
+    </choice>
+    <pkg-ref id="org.amneziavpn.package" auth="Root" install-check="scripts/check_install.sh">AmneziaVPN_install.pkg</pkg-ref>
+    <pkg-ref id="org.amneziavpn.uninstall" auth="Root" install-check="scripts/check_uninstall.sh">AmneziaVPN_uninstall_component.pkg</pkg-ref>
+</installer-gui-script>
