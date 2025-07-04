@@ -126,14 +126,14 @@ open class Wireguard : Protocol() {
         configData.optStringOrNull("H2")?.let { setH2(it.toLong()) }
         configData.optStringOrNull("H3")?.let { setH3(it.toLong()) }
         configData.optStringOrNull("H4")?.let { setH4(it.toLong()) }
-        configData.optStringOrNull("I1")?.let { setI1(it.toString()) }
-        configData.optStringOrNull("I2")?.let { setI2(it.toString()) }
-        configData.optStringOrNull("I3")?.let { setI3(it.toString()) }
-        configData.optStringOrNull("I4")?.let { setI4(it.toString()) }
-        configData.optStringOrNull("I5")?.let { setI5(it.toString()) }
-        configData.optStringOrNull("J1")?.let { setJ1(it.toString()) }
-        configData.optStringOrNull("J2")?.let { setJ2(it.toString()) }
-        configData.optStringOrNull("J3")?.let { setJ3(it.toString()) }
+        configData.optStringOrNull("I1")?.let { setI1(it) }
+        configData.optStringOrNull("I2")?.let { setI2(it) }
+        configData.optStringOrNull("I3")?.let { setI3(it) }
+        configData.optStringOrNull("I4")?.let { setI4(it) }
+        configData.optStringOrNull("I5")?.let { setI5(it) }
+        configData.optStringOrNull("J1")?.let { setJ1(it) }
+        configData.optStringOrNull("J2")?.let { setJ2(it) }
+        configData.optStringOrNull("J3")?.let { setJ3(it) }
         configData.optStringOrNull("Itime")?.let { setItime(it.toInt()) }
     }
 
