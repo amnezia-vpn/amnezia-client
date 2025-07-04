@@ -722,87 +722,87 @@ Thank you for staying with us!</source>
         <translation type="unfinished">ام ٹی یو</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="327"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="316"/>
         <source>Server settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="337"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="326"/>
         <source>Port</source>
         <translation type="unfinished">پورٹ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="192"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="181"/>
         <source>I1 - First special junk packet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="207"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="196"/>
         <source>I2 - Second special junk packet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="211"/>
         <source>I3 - Third special junk packet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="237"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="226"/>
         <source>I4 - Fourth special junk packet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="241"/>
         <source>I5 - Fifth special junk packet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="267"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="256"/>
         <source>J1 - First controlled junk packet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="282"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="271"/>
         <source>J2 - Second controlled junk packet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="297"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="286"/>
         <source>J3 - Third controlled junk packet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="312"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="301"/>
         <source>Itime - Special handshake timeout</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="413"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="414"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="423"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="424"/>
         <source>Save settings?</source>
         <translation type="unfinished">ترتیبات محفوظ کریں?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="424"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="425"/>
         <source>Only the settings for this device will be changed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="425"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="426"/>
         <source>Continue</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="426"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="427"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="430"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="431"/>
         <source>Unable change settings while there is an active connection</source>
         <translation type="unfinished">جب ایک فعال کنکشن موجود ہو تو ترتیبات کو تبدیل نہیں کیا جا سکتا</translation>
     </message>
