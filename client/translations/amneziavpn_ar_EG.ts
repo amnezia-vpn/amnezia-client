@@ -502,24 +502,24 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="168"/>
+        <location filename="../ui/controllers/installController.cpp" line="198"/>
         <source>%1 installed successfully. </source>
         <translation>%1 تم التثبيت بنجاح. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="170"/>
+        <location filename="../ui/controllers/installController.cpp" line="201"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 بالفعل  مٌثبت علي الخادم. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="190"/>
+        <location filename="../ui/controllers/installController.cpp" line="222"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 تمت إضافة الحاويات التي كانت مٌثبتة بالفعل علي الخادم</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="270"/>
+        <location filename="../ui/controllers/installController.cpp" line="305"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
@@ -527,47 +527,47 @@ Already installed containers were found on the server. All installed containers 
 تمت إضافة جميع الحاويات المٌثبتة إلي التطبيق</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="608"/>
+        <location filename="../ui/controllers/installController.cpp" line="654"/>
         <source>Settings updated successfully</source>
         <translation>تم تحديث الاعدادات بنجاح</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="625"/>
+        <location filename="../ui/controllers/installController.cpp" line="671"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>تمت إعادة تشغيل الخادم%1</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="637"/>
+        <location filename="../ui/controllers/installController.cpp" line="683"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>تمت إزالة الخادم &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="648"/>
+        <location filename="../ui/controllers/installController.cpp" line="694"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>قد تم حذفها &apos;%1&apos; جميع الحاويات من الخادم</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="666"/>
+        <location filename="../ui/controllers/installController.cpp" line="713"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 تم حدف &apos;%2&apos; اسم الخادم</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="675"/>
+        <location filename="../ui/controllers/installController.cpp" line="722"/>
         <source>Api config removed</source>
         <translation>تم حذف تكوين Api</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="697"/>
+        <location filename="../ui/controllers/installController.cpp" line="744"/>
         <source>%1 cached profile cleared</source>
         <translation>تم مسح ملف تعريف %1 المخزن مؤقتًا</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="836"/>
+        <location filename="../ui/controllers/installController.cpp" line="887"/>
         <source>Please login as the user</source>
         <translation>من فضلك قم بتسجيل الدخول كمستخدم</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="864"/>
+        <location filename="../ui/controllers/installController.cpp" line="915"/>
         <source>Server added successfully</source>
         <translation>تمت إضافة الخادم بنجاح</translation>
     </message>
@@ -852,7 +852,12 @@ Thank you for staying with us!</source>
         <translation>منفذ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="426"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="422"/>
+        <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="428"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
         <translation>جميع المستخدمين الذين شاركت معهم اتصال لن يكونو قادرين علي الاتصال مرة اخري.</translation>
     </message>
@@ -927,27 +932,26 @@ Thank you for staying with us!</source>
         <translation>يجب أن تكون قيم الحقول H1-H4 فريدة</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="420"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)</source>
-        <translation>يجب ألا تساوي قيمة الحقل S1 + حجم بدء الرسالة (148) S2 + حجم استجابة الرسالة (92)</translation>
+        <translation type="vanished">يجب ألا تساوي قيمة الحقل S1 + حجم بدء الرسالة (148) S2 + حجم استجابة الرسالة (92)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="425"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="427"/>
         <source>Save settings?</source>
         <translation>احفظ الإعدادات؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="427"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="429"/>
         <source>Continue</source>
         <translation>واصل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="428"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="430"/>
         <source>Cancel</source>
         <translation>إلغاء</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="432"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="434"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>لا يمكن تغيير الإعدادات أثناء وجود اتصال نشط</translation>
     </message>

@@ -416,8 +416,10 @@ PageType {
                             }
 
                             if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
-                                                                 parseInt(responsePacketJunkSizeTextField.textField.text))) {
-                                PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)"))
+                                                                parseInt(responsePacketJunkSizeTextField.textField.text),
+                                                                parseInt(cookieReplyPacketJunkSizeTextField.textField.text),
+                                                                parseInt(transportPacketJunkSizeTextField.textField.text))) {
+                                PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)"))
                                 return
                             }
                         }

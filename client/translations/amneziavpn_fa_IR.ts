@@ -507,71 +507,71 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallController</name>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="168"/>
+        <location filename="../ui/controllers/installController.cpp" line="198"/>
         <source>%1 installed successfully. </source>
         <translation>%1 با موفقیت نصب شد. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="170"/>
+        <location filename="../ui/controllers/installController.cpp" line="201"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 در حال حاضر بر روی سرور نصب شده است. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="190"/>
+        <location filename="../ui/controllers/installController.cpp" line="222"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 کانتینرهایی که بر روی سرور موجود بودند اضافه شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="270"/>
+        <location filename="../ui/controllers/installController.cpp" line="305"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 کانتینرهای نصب شده بر روی سرور شناسایی شدند. تمام کانتینترهای نصب شده به نرم افزار اضافه شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="608"/>
+        <location filename="../ui/controllers/installController.cpp" line="654"/>
         <source>Settings updated successfully</source>
         <translation>تنظیمات با موفقیت به‎روز‎رسانی شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="625"/>
+        <location filename="../ui/controllers/installController.cpp" line="671"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>سرور %1 راه اندازی مجدد شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="637"/>
+        <location filename="../ui/controllers/installController.cpp" line="683"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>سرور %1 حذف شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="648"/>
+        <location filename="../ui/controllers/installController.cpp" line="694"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>تمام کانتینترها از سرور %1 حذف شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="666"/>
+        <location filename="../ui/controllers/installController.cpp" line="713"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 از سرور %2 حذف شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="675"/>
+        <location filename="../ui/controllers/installController.cpp" line="722"/>
         <source>Api config removed</source>
         <translation>پیکربندی API حذف شد.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="697"/>
+        <location filename="../ui/controllers/installController.cpp" line="744"/>
         <source>%1 cached profile cleared</source>
         <translation>%1 پروفایل ذخیره شده پاک شد.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="836"/>
+        <location filename="../ui/controllers/installController.cpp" line="887"/>
         <source>Please login as the user</source>
         <translation>لطفا به عنوان کاربر وارد شوید</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="864"/>
+        <location filename="../ui/controllers/installController.cpp" line="915"/>
         <source>Server added successfully</source>
         <translation>سرور با موفقیت اضافه شد</translation>
     </message>
@@ -864,7 +864,7 @@ Thank you for staying with us!</source>
         <translation type="vanished">آیا میخواهید AmneziaWG از سرور حذف شود؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="426"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="428"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
         <translation>همه کاربرانی که با آن‌ها ارتباطی به اشتراک گذاشته‌اید دیگر قادر به اتصال به آن نخواهند بود.</translation>
     </message>
@@ -939,27 +939,27 @@ Thank you for staying with us!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="420"/>
-        <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92)</source>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="422"/>
+        <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="425"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="427"/>
         <source>Save settings?</source>
         <translation>تنظیمات را ذخیره کن?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="427"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="429"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="428"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="430"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="432"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="434"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>نمی‌توان تنظیمات را تغییر داد در حالی که اتصال فعال است.</translation>
     </message>

@@ -8,6 +8,7 @@
 #include <QStandardPaths>
 #include <QtConcurrent>
 
+#include "core/api/apiUtils.h"
 #include "core/controllers/serverController.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/networkUtilities.h"
@@ -15,7 +16,6 @@
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "utilities.h"
-#include "core/api/apiUtils.h"
 
 namespace
 {
@@ -37,7 +37,8 @@ namespace
     }
 }
 
-InstallController::InstallController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+InstallController::InstallController(const QSharedPointer<ServersModel> &serversModel,
+                                     const QSharedPointer<ContainersModel> &containersModel,
                                      const QSharedPointer<ProtocolsModel> &protocolsModel,
                                      const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                      const std::shared_ptr<Settings> &settings, QObject *parent)
@@ -70,7 +71,8 @@ void InstallController::install(DockerContainer container, int port, TransportPr
 
         if (protocol == mainProto) {
             containerConfig.insert(config_key::port, QString::number(port));
-            containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, protocol));
+            containerConfig.insert(config_key::transport_proto,
+                                   ProtocolProps::transportProtoToString(transportProto, protocol));
 
             if (container == DockerContainer::Awg) {
                 QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
@@ -79,12 +81,37 @@ void InstallController::install(DockerContainer container, int port, TransportPr
 
                 int s1 = QRandomGenerator::global()->bounded(15, 150);
                 int s2 = QRandomGenerator::global()->bounded(15, 150);
-                while (s1 + AwgConstant::messageInitiationSize == s2 + AwgConstant::messageResponseSize) {
+                int s3 = QRandomGenerator::global()->bounded(15, 150);
+                int s4 = QRandomGenerator::global()->bounded(15, 150);
+
+                // Ensure all values are unique and don't create equal packet sizes
+                QSet<int> usedValues;
+                usedValues.insert(s1);
+
+                while (usedValues.contains(s2)
+                       || s1 + AwgConstant::messageInitiationSize == s2 + AwgConstant::messageResponseSize) {
                     s2 = QRandomGenerator::global()->bounded(15, 150);
+                }
+                usedValues.insert(s2);
+
+                while (usedValues.contains(s3)
+                       || s1 + AwgConstant::messageInitiationSize == s3 + AwgConstant::messageCookieReplySize
+                       || s2 + AwgConstant::messageResponseSize == s3 + AwgConstant::messageCookieReplySize) {
+                    s3 = QRandomGenerator::global()->bounded(15, 150);
+                }
+                usedValues.insert(s3);
+
+                while (usedValues.contains(s4)
+                       || s1 + AwgConstant::messageInitiationSize == s4 + AwgConstant::messageTransportSize
+                       || s2 + AwgConstant::messageResponseSize == s4 + AwgConstant::messageTransportSize
+                       || s3 + AwgConstant::messageCookieReplySize == s4 + AwgConstant::messageTransportSize) {
+                    s4 = QRandomGenerator::global()->bounded(15, 150);
                 }
 
                 QString initPacketJunkSize = QString::number(s1);
                 QString responsePacketJunkSize = QString::number(s2);
+                QString cookieReplyPacketJunkSize = QString::number(s3);
+                QString transportPacketJunkSize = QString::number(s4);
 
                 QSet<QString> headersValue;
                 while (headersValue.size() != 4) {
@@ -104,6 +131,8 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 containerConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
                 containerConfig[config_key::initPacketJunkSize] = initPacketJunkSize;
                 containerConfig[config_key::responsePacketJunkSize] = responsePacketJunkSize;
+                containerConfig[config_key::cookieReplyPacketJunkSize] = cookieReplyPacketJunkSize;
+                containerConfig[config_key::transportPacketJunkSize] = transportPacketJunkSize;
                 containerConfig[config_key::initPacketMagicHeader] = initPacketMagicHeader;
                 containerConfig[config_key::responsePacketMagicHeader] = responsePacketMagicHeader;
                 containerConfig[config_key::underloadPacketMagicHeader] = underloadPacketMagicHeader;
@@ -141,7 +170,8 @@ void InstallController::install(DockerContainer container, int port, TransportPr
         serverCredentials = m_processedServerCredentials;
     } else {
         int serverIndex = m_serversModel->getProcessedServerIndex();
-        serverCredentials = qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+        serverCredentials =
+                qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
     }
 
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
@@ -167,7 +197,8 @@ void InstallController::install(DockerContainer container, int port, TransportPr
         installedContainers.insert(container, config);
         finishMessage = tr("%1 installed successfully. ").arg(ContainerProps::containerHumanNames().value(container));
     } else {
-        finishMessage = tr("%1 is already installed on the server. ").arg(ContainerProps::containerHumanNames().value(container));
+        finishMessage =
+                tr("%1 is already installed on the server. ").arg(ContainerProps::containerHumanNames().value(container));
     }
 
     if (errorCode) {
@@ -182,9 +213,10 @@ void InstallController::install(DockerContainer container, int port, TransportPr
     }
 }
 
-void InstallController::installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
-                                      const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
-                                      QString &finishMessage)
+void InstallController::installServer(const DockerContainer container,
+                                      const QMap<DockerContainer, QJsonObject> &installedContainers,
+                                      const ServerCredentials &serverCredentials,
+                                      const QSharedPointer<ServerController> &serverController, QString &finishMessage)
 {
     if (installedContainers.size() > 1) {
         finishMessage += tr("\nAdded containers that were already installed on the server");
@@ -203,8 +235,8 @@ void InstallController::installServer(const DockerContainer container, const QMa
         auto containerConfig = iterator.value();
 
         if (ContainerProps::isSupportedByCurrentPlatform(container)) {
-            auto errorCode = vpnConfigurationController.createProtocolConfigForContainer(m_processedServerCredentials, iterator.key(),
-                                                                                         containerConfig);
+            auto errorCode = vpnConfigurationController.createProtocolConfigForContainer(
+                    m_processedServerCredentials, iterator.key(), containerConfig);
             if (errorCode) {
                 emit installationErrorOccurred(errorCode);
                 return;
@@ -212,7 +244,8 @@ void InstallController::installServer(const DockerContainer container, const QMa
             containerConfigs.append(containerConfig);
 
             errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
-                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
+                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()),
+                                                              serverController);
             if (errorCode) {
                 emit installationErrorOccurred(errorCode);
                 return;
@@ -230,7 +263,8 @@ void InstallController::installServer(const DockerContainer container, const QMa
     emit installServerFinished(finishMessage);
 }
 
-void InstallController::installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
+void InstallController::installContainer(const DockerContainer container,
+                                         const QMap<DockerContainer, QJsonObject> &installedContainers,
                                          const ServerCredentials &serverCredentials,
                                          const QSharedPointer<ServerController> &serverController, QString &finishMessage)
 {
@@ -243,16 +277,17 @@ void InstallController::installContainer(const DockerContainer container, const 
             containerConfig = iterator.value();
 
             if (ContainerProps::isSupportedByCurrentPlatform(container)) {
-                auto errorCode =
-                        vpnConfigurationController.createProtocolConfigForContainer(serverCredentials, iterator.key(), containerConfig);
+                auto errorCode = vpnConfigurationController.createProtocolConfigForContainer(
+                        serverCredentials, iterator.key(), containerConfig);
                 if (errorCode) {
                     emit installationErrorOccurred(errorCode);
                     return;
                 }
                 m_serversModel->addContainerConfig(iterator.key(), containerConfig);
 
-                errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
-                                                                  QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
+                errorCode = m_clientManagementModel->appendClient(
+                        iterator.key(), serverCredentials, containerConfig,
+                        QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
                 if (errorCode) {
                     emit installationErrorOccurred(errorCode);
                     return;
@@ -280,7 +315,8 @@ bool InstallController::isServerAlreadyExists()
         auto modelIndex = m_serversModel->index(i);
         const ServerCredentials credentials =
                 qvariant_cast<ServerCredentials>(m_serversModel->data(modelIndex, ServersModel::Roles::CredentialsRole));
-        if (m_processedServerCredentials.hostName == credentials.hostName && m_processedServerCredentials.port == credentials.port) {
+        if (m_processedServerCredentials.hostName == credentials.hostName
+            && m_processedServerCredentials.port == credentials.port) {
             emit serverAlreadyExists(i);
             return true;
         }
@@ -309,17 +345,17 @@ void InstallController::scanServerForInstalledContainers()
                 containerConfig = iterator.value();
 
                 if (ContainerProps::isSupportedByCurrentPlatform(container)) {
-                    auto errorCode =
-                            vpnConfigurationController.createProtocolConfigForContainer(serverCredentials, container, containerConfig);
+                    auto errorCode = vpnConfigurationController.createProtocolConfigForContainer(
+                            serverCredentials, container, containerConfig);
                     if (errorCode) {
                         emit installationErrorOccurred(errorCode);
                         return;
                     }
                     m_serversModel->addContainerConfig(container, containerConfig);
 
-                    errorCode = m_clientManagementModel->appendClient(container, serverCredentials, containerConfig,
-                                                                      QString("Admin [%1]").arg(QSysInfo::prettyProductName()),
-                                                                      serverController);
+                    errorCode = m_clientManagementModel->appendClient(
+                            container, serverCredentials, containerConfig,
+                            QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
                     if (errorCode) {
                         emit installationErrorOccurred(errorCode);
                         return;
@@ -383,8 +419,8 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                     containerConfig.insert(config_key::transport_proto, transportProto);
 
                     if (protocol == Proto::Awg) {
-                        QString serverConfig = serverController->getTextFileFromContainer(container, credentials,
-                                                                                          protocols::awg::serverConfigPath, errorCode);
+                        QString serverConfig = serverController->getTextFileFromContainer(
+                                container, credentials, protocols::awg::serverConfigPath, errorCode);
 
                         QMap<QString, QString> serverConfigMap;
                         auto serverConfigLines = serverConfig.split("\n");
@@ -402,16 +438,22 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
                         containerConfig[config_key::subnet_address] = serverConfigMap.value("Address").remove("/24");
                         containerConfig[config_key::junkPacketCount] = serverConfigMap.value(config_key::junkPacketCount);
-                        containerConfig[config_key::junkPacketMinSize] = serverConfigMap.value(config_key::junkPacketMinSize);
-                        containerConfig[config_key::junkPacketMaxSize] = serverConfigMap.value(config_key::junkPacketMaxSize);
-                        containerConfig[config_key::initPacketJunkSize] = serverConfigMap.value(config_key::initPacketJunkSize);
-                        containerConfig[config_key::responsePacketJunkSize] = serverConfigMap.value(config_key::responsePacketJunkSize);
+                        containerConfig[config_key::junkPacketMinSize] =
+                                serverConfigMap.value(config_key::junkPacketMinSize);
+                        containerConfig[config_key::junkPacketMaxSize] =
+                                serverConfigMap.value(config_key::junkPacketMaxSize);
+                        containerConfig[config_key::initPacketJunkSize] =
+                                serverConfigMap.value(config_key::initPacketJunkSize);
+                        containerConfig[config_key::responsePacketJunkSize] =
+                                serverConfigMap.value(config_key::responsePacketJunkSize);
                         containerConfig[config_key::cookieReplyPacketJunkSize] =
                                 serverConfigMap.value(config_key::cookieReplyPacketJunkSize);
                         containerConfig[config_key::transportPacketJunkSize] =
                                 serverConfigMap.value(config_key::transportPacketJunkSize);
-                        containerConfig[config_key::initPacketMagicHeader] = serverConfigMap.value(config_key::initPacketMagicHeader);
-                        containerConfig[config_key::responsePacketMagicHeader] = serverConfigMap.value(config_key::responsePacketMagicHeader);
+                        containerConfig[config_key::initPacketMagicHeader] =
+                                serverConfigMap.value(config_key::initPacketMagicHeader);
+                        containerConfig[config_key::responsePacketMagicHeader] =
+                                serverConfigMap.value(config_key::responsePacketMagicHeader);
                         containerConfig[config_key::underloadPacketMagicHeader] =
                                 serverConfigMap.value(config_key::underloadPacketMagicHeader);
                         containerConfig[config_key::transportPacketMagicHeader] =
@@ -424,12 +466,12 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         containerConfig[config_key::controlledJunk1] = serverConfigMap.value(config_key::controlledJunk1);
                         containerConfig[config_key::controlledJunk2] = serverConfigMap.value(config_key::controlledJunk2);
                         containerConfig[config_key::controlledJunk3] = serverConfigMap.value(config_key::controlledJunk3);
-                        containerConfig[config_key::specialHandshakeTimeout] = serverConfigMap.value(config_key::specialHandshakeTimeout);
-
+                        containerConfig[config_key::specialHandshakeTimeout] =
+                                serverConfigMap.value(config_key::specialHandshakeTimeout);
 
                     } else if (protocol == Proto::WireGuard) {
-                        QString serverConfig = serverController->getTextFileFromContainer(container, credentials,
-                                                                                          protocols::wireguard::serverConfigPath, errorCode);
+                        QString serverConfig = serverController->getTextFileFromContainer(
+                                container, credentials, protocols::wireguard::serverConfigPath, errorCode);
 
                         QMap<QString, QString> serverConfigMap;
                         auto serverConfigLines = serverConfig.split("\n");
@@ -449,7 +491,8 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         stdOut.clear();
                         script = QString("sudo docker inspect --format '{{.Config.Cmd}}' %1").arg(name);
 
-                        ErrorCode errorCode = serverController->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
+                        ErrorCode errorCode =
+                                serverController->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
                         if (errorCode != ErrorCode::NoError) {
                             return errorCode;
                         }
@@ -466,8 +509,8 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         containerConfig.insert(config_key::userName, userName);
                         containerConfig.insert(config_key::password, password);
                     } else if (protocol == Proto::Socks5Proxy) {
-                        QString proxyConfig = serverController->getTextFileFromContainer(container, credentials,
-                                                                                         protocols::socks5Proxy::proxyConfigPath, errorCode);
+                        QString proxyConfig = serverController->getTextFileFromContainer(
+                                container, credentials, protocols::socks5Proxy::proxyConfigPath, errorCode);
 
                         const static QRegularExpression usernameAndPasswordRegExp("users (\\w+):CL:(\\w+)");
                         QRegularExpressionMatch usernameAndPasswordMatch = usernameAndPasswordRegExp.match(proxyConfig);
@@ -552,7 +595,8 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         stdOut.clear();
                         script = QString("sudo docker exec -i %1 sh -c 'cat /var/lib/tor/hidden_service/hostname'").arg(name);
 
-                        ErrorCode errorCode = serverController->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
+                        ErrorCode errorCode =
+                                serverController->runScript(credentials, script, cbReadStdOut, cbReadStdErr);
                         if (errorCode != ErrorCode::NoError) {
                             return errorCode;
                         }
@@ -591,7 +635,8 @@ void InstallController::updateContainer(QJsonObject config)
     if (isUpdateDockerContainerRequired(container, oldContainerConfig, config)) {
         QSharedPointer<ServerController> serverController(new ServerController(m_settings));
         connect(serverController.get(), &ServerController::serverIsBusy, this, &InstallController::serverIsBusy);
-        connect(this, &InstallController::cancelInstallation, serverController.get(), &ServerController::cancelInstallation);
+        connect(this, &InstallController::cancelInstallation, serverController.get(),
+                &ServerController::cancelInstallation);
 
         errorCode = serverController->updateContainer(serverCredentials, container, oldContainerConfig, config);
         clearCachedProfile(serverController);
@@ -601,7 +646,8 @@ void InstallController::updateContainer(QJsonObject config)
         m_serversModel->updateContainerConfig(container, config);
         m_protocolModel->updateModel(config);
 
-        auto defaultContainer = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
+        auto defaultContainer = qvariant_cast<DockerContainer>(
+                m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
         if ((serverIndex == m_serversModel->getDefaultServerIndex()) && (container == defaultContainer)) {
             emit currentContainerUpdated();
         } else {
@@ -663,7 +709,8 @@ void InstallController::removeProcessedContainer()
     ErrorCode errorCode = m_serversModel->removeContainer(serverController, container);
     if (errorCode == ErrorCode::NoError) {
 
-        emit removeProcessedContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
+        emit removeProcessedContainerFinished(
+                tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
         return;
     }
     emit installationErrorOccurred(errorCode);
@@ -707,7 +754,8 @@ QRegularExpression InstallController::ipAddressRegExp()
     return NetworkUtilities::ipAddressRegExp();
 }
 
-void InstallController::setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData)
+void InstallController::setProcessedServerCredentials(const QString &hostName, const QString &userName,
+                                                      const QString &secretData)
 {
     m_processedServerCredentials.hostName = hostName;
     if (m_processedServerCredentials.hostName.contains(":")) {
@@ -742,7 +790,8 @@ void InstallController::mountSftpDrive(const QString &port, const QString &passw
 
     cmd = "C:\\Program Files\\SSHFS-Win\\bin\\sshfs.exe";
 #elif defined AMNEZIA_DESKTOP
-    mountPath = QString("%1/sftp:%2:%3").arg(QStandardPaths::writableLocation(QStandardPaths::HomeLocation), hostname, port);
+    mountPath =
+            QString("%1/sftp:%2:%3").arg(QStandardPaths::writableLocation(QStandardPaths::HomeLocation), hostname, port);
     QDir dir(mountPath);
     if (!dir.exists()) {
         dir.mkpath(mountPath);
@@ -806,7 +855,8 @@ bool InstallController::checkSshConnection(QSharedPointer<ServerController> serv
     ErrorCode errorCode = ErrorCode::NoError;
     m_privateKeyPassphrase = "";
 
-    if (m_processedServerCredentials.secretData.contains("BEGIN") && m_processedServerCredentials.secretData.contains("PRIVATE KEY")) {
+    if (m_processedServerCredentials.secretData.contains("BEGIN")
+        && m_processedServerCredentials.secretData.contains("PRIVATE KEY")) {
         auto passphraseCallback = [this]() {
             emit passphraseRequestStarted();
             QEventLoop loop;
@@ -817,7 +867,8 @@ bool InstallController::checkSshConnection(QSharedPointer<ServerController> serv
         };
 
         QString decryptedPrivateKey;
-        errorCode = serverController->getDecryptedPrivateKey(m_processedServerCredentials, decryptedPrivateKey, passphraseCallback);
+        errorCode = serverController->getDecryptedPrivateKey(m_processedServerCredentials, decryptedPrivateKey,
+                                                             passphraseCallback);
         if (errorCode == ErrorCode::NoError) {
             m_processedServerCredentials.secretData = decryptedPrivateKey;
         } else {
@@ -878,7 +929,8 @@ bool InstallController::isConfigValid()
         return false;
     }
 
-    DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
+    DockerContainer container =
+            qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
 
     if (container == DockerContainer::None) {
         emit installationErrorOccurred(ErrorCode::NoInstalledContainersError);
@@ -898,8 +950,10 @@ bool InstallController::isConfigValid()
 
         auto isProtocolConfigExists = [](const QJsonObject &containerConfig, const DockerContainer container) {
             for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
-                QString protocolConfig =
-                        containerConfig.value(ProtocolProps::protoToString(protocol)).toObject().value(config_key::last_config).toString();
+                QString protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol))
+                                                 .toObject()
+                                                 .value(config_key::last_config)
+                                                 .toString();
 
                 if (protocolConfig.isEmpty()) {
                     return false;
@@ -910,14 +964,16 @@ bool InstallController::isConfigValid()
 
         if (!isProtocolConfigExists(containerConfig, container)) {
             VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
-            errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig);
+            errorCode =
+                    vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
             }
             m_serversModel->updateContainerConfig(container, containerConfig);
 
             errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig,
-                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
+                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()),
+                                                              serverController);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
             }
