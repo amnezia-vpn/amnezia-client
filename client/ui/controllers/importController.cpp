@@ -458,43 +458,38 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
 
     QString protocolName = "wireguard";
-    if (!configMap.value(config_key::junkPacketCount).isEmpty()
-        && !configMap.value(config_key::junkPacketMinSize).isEmpty()
-        && !configMap.value(config_key::junkPacketMaxSize).isEmpty()
-        && !configMap.value(config_key::initPacketJunkSize).isEmpty()
-        && !configMap.value(config_key::responsePacketJunkSize).isEmpty()
-        && !configMap.value(config_key::cookieReplyPacketJunkSize).isEmpty()
-        && !configMap.value(config_key::transportPacketJunkSize).isEmpty()
-        && !configMap.value(config_key::initPacketMagicHeader).isEmpty()
-        && !configMap.value(config_key::responsePacketMagicHeader).isEmpty()
-        && !configMap.value(config_key::underloadPacketMagicHeader).isEmpty()
-        && !configMap.value(config_key::transportPacketMagicHeader).isEmpty()
-        && !configMap.value(config_key::specialJunk1).isEmpty() && !configMap.value(config_key::specialJunk2).isEmpty()
-        && !configMap.value(config_key::specialJunk3).isEmpty() && !configMap.value(config_key::specialJunk4).isEmpty()
-        && !configMap.value(config_key::specialJunk5).isEmpty() && !configMap.value(config_key::controlledJunk1).isEmpty()
-        && !configMap.value(config_key::controlledJunk2).isEmpty()
-        && !configMap.value(config_key::controlledJunk3).isEmpty()
-        && !configMap.value(config_key::specialHandshakeTimeout).isEmpty()) {
-        lastConfig[config_key::junkPacketCount] = configMap.value(config_key::junkPacketCount);
-        lastConfig[config_key::junkPacketMinSize] = configMap.value(config_key::junkPacketMinSize);
-        lastConfig[config_key::junkPacketMaxSize] = configMap.value(config_key::junkPacketMaxSize);
-        lastConfig[config_key::initPacketJunkSize] = configMap.value(config_key::initPacketJunkSize);
-        lastConfig[config_key::responsePacketJunkSize] = configMap.value(config_key::responsePacketJunkSize);
-        lastConfig[config_key::cookieReplyPacketJunkSize] = configMap.value(config_key::cookieReplyPacketJunkSize);
-        lastConfig[config_key::transportPacketJunkSize] = configMap.value(config_key::transportPacketJunkSize);
-        lastConfig[config_key::initPacketMagicHeader] = configMap.value(config_key::initPacketMagicHeader);
-        lastConfig[config_key::responsePacketMagicHeader] = configMap.value(config_key::responsePacketMagicHeader);
-        lastConfig[config_key::underloadPacketMagicHeader] = configMap.value(config_key::underloadPacketMagicHeader);
-        lastConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
-        lastConfig[config_key::specialJunk1] = configMap.value(config_key::specialJunk1);
-        lastConfig[config_key::specialJunk2] = configMap.value(config_key::specialJunk2);
-        lastConfig[config_key::specialJunk3] = configMap.value(config_key::specialJunk3);
-        lastConfig[config_key::specialJunk4] = configMap.value(config_key::specialJunk4);
-        lastConfig[config_key::specialJunk5] = configMap.value(config_key::specialJunk5);
-        lastConfig[config_key::controlledJunk1] = configMap.value(config_key::controlledJunk1);
-        lastConfig[config_key::controlledJunk2] = configMap.value(config_key::controlledJunk2);
-        lastConfig[config_key::controlledJunk3] = configMap.value(config_key::controlledJunk3);
-        lastConfig[config_key::specialHandshakeTimeout] = configMap.value(config_key::specialHandshakeTimeout);
+
+    const QStringList requiredJunkFields = { config_key::junkPacketCount,           config_key::junkPacketMinSize,
+                                             config_key::junkPacketMaxSize,         config_key::initPacketJunkSize,
+                                             config_key::responsePacketJunkSize,    config_key::initPacketMagicHeader,
+                                             config_key::responsePacketMagicHeader, config_key::underloadPacketMagicHeader,
+                                             config_key::transportPacketMagicHeader };
+
+    const QStringList optionalJunkFields = { config_key::cookieReplyPacketJunkSize,
+                                             config_key::transportPacketJunkSize,
+                                             config_key::specialJunk1,
+                                             config_key::specialJunk2,
+                                             config_key::specialJunk3,
+                                             config_key::specialJunk4,
+                                             config_key::specialJunk5,
+                                             config_key::controlledJunk1,
+                                             config_key::controlledJunk2,
+                                             config_key::controlledJunk3,
+                                             config_key::specialHandshakeTimeout };
+
+    bool hasAllRequiredFields = std::all_of(requiredJunkFields.begin(), requiredJunkFields.end(),
+                                            [&configMap](const QString &field) { return !configMap.value(field).isEmpty(); });
+    if (hasAllRequiredFields) {
+        for (const QString &field : requiredJunkFields) {
+            lastConfig[field] = configMap.value(field);
+        }
+
+        for (const QString &field : optionalJunkFields) {
+            if (!configMap.value(field).isEmpty()) {
+                lastConfig[field] = configMap.value(field);
+            }
+        }
+
         protocolName = "awg";
         m_configType = ConfigTypes::Awg;
     }
