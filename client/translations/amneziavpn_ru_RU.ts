@@ -745,32 +745,32 @@ Thank you for staying with us!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="414"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="436"/>
         <source>Save</source>
         <translation>Сохранить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="424"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="446"/>
         <source>Save settings?</source>
         <translation>Сохранить настройки?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="425"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="447"/>
         <source>Only the settings for this device will be changed</source>
         <translation>Будут изменены настройки только для этого устройства</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="426"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="448"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="427"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="449"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="431"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="453"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>Невозможно изменить настройки во время активного соединения</translation>
     </message>

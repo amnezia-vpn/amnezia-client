@@ -258,7 +258,7 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="111"/>
         <source></source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="113"/>
@@ -809,32 +809,32 @@ Thank you for staying with us!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="414"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="436"/>
         <source>Save</source>
         <translation type="unfinished">သိမ်းဆည်းမည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="424"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="446"/>
         <source>Save settings?</source>
         <translation type="unfinished">ဆက်တင်များကို သိမ်းဆည်းမည်လား?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="425"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="447"/>
         <source>Only the settings for this device will be changed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="426"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="448"/>
         <source>Continue</source>
         <translation type="unfinished">ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="427"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="449"/>
         <source>Cancel</source>
         <translation type="unfinished">ပယ်ဖျက်မည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="431"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="453"/>
         <source>Unable change settings while there is an active connection</source>
         <translation type="unfinished">လက်ရှိချိတ်ဆက်မှုတစ်ခုရှိနေချိန်တွင် ဆက်တင်များကို ပြောင်းလဲ၍မရပါ</translation>
     </message>
@@ -4575,7 +4575,7 @@ IKEv2 သည် လုံခြုံရေး၊ တည်ငြိမ်မှ
     <message>
         <location filename="../containers/containers_defs.cpp" line="136"/>
         <source></source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="143"/>

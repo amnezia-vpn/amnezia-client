@@ -258,7 +258,7 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="111"/>
         <source></source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="113"/>
@@ -809,32 +809,32 @@ Thank you for staying with us!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="414"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="436"/>
         <source>Save</source>
         <translation type="unfinished">احفظ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="424"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="446"/>
         <source>Save settings?</source>
         <translation type="unfinished">احفظ الإعدادات؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="425"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="447"/>
         <source>Only the settings for this device will be changed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="426"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="448"/>
         <source>Continue</source>
         <translation type="unfinished">واصل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="427"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="449"/>
         <source>Cancel</source>
         <translation type="unfinished">إلغاء</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="431"/>
+        <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="453"/>
         <source>Unable change settings while there is an active connection</source>
         <translation type="unfinished">لا يمكن تغيير الإعدادات أثناء وجود اتصال نشط</translation>
     </message>
@@ -4459,7 +4459,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../containers/containers_defs.cpp" line="136"/>
         <source></source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="143"/>
