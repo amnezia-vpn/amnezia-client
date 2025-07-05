@@ -149,7 +149,14 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("serverPort", wgConfig.value(amnezia::config_key::port).toInt());
   json.insert("serverIpv4Gateway", wgConfig.value(amnezia::config_key::hostName));
   //  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
-  json.insert("dnsServer", rawConfig.value(amnezia::config_key::dns1));
+
+  json.insert("primaryDnsServer", rawConfig.value(amnezia::config_key::dns1));
+
+  // We don't use secondary DNS if primary DNS is AmneziaDNS
+  if (!rawConfig.value(amnezia::config_key::dns1).toString().
+    contains(amnezia::protocols::dns::amneziaDnsIp)) {
+    json.insert("secondaryDnsServer", rawConfig.value(amnezia::config_key::dns2));
+  }
 
   QJsonArray jsAllowedIPAddesses;
 

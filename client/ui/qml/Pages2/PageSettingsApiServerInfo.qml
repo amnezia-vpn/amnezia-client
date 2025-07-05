@@ -158,6 +158,32 @@ PageType {
 
             readonly property bool isVisibleForAmneziaFree: ApiAccountInfoModel.data("isComponentVisible")
 
+            SwitcherType {
+                id: switcher
+
+                readonly property bool isVlessProtocol: ApiConfigsController.isVlessProtocol()
+
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
+
+                text: qsTr("Use VLESS protocol")
+                checked: switcher.isVlessProtocol
+                onToggled: function() {
+                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
+                    } else {
+                        PageController.showBusyIndicator(true)
+                        ApiConfigsController.setCurrentProtocol(switcher.isVlessProtocol ? "awg" : "vless")
+                        ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
+                        PageController.showBusyIndicator(false)
+                    }
+                }
+            }
+
             WarningType {
                 id: warning
 

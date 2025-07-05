@@ -75,6 +75,12 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         }
         return false;
     }
+    case IsProtocolSelectionSupportedRole: {
+        if (m_accountInfoData.supportedProtocols.size() > 1) {
+            return true;
+        }
+        return false;
+    }
     }
 
     return QVariant();
@@ -94,6 +100,10 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
     accountInfoData.subscriptionEndDate = accountInfoObject.value(apiDefs::key::subscriptionEndDate).toString();
 
     accountInfoData.configType = apiUtils::getConfigType(serverConfig);
+
+    for (const auto &protocol : accountInfoObject.value(apiDefs::key::supportedProtocols).toArray()) {
+        accountInfoData.supportedProtocols.push_back(protocol.toString());
+    }
 
     m_accountInfoData = accountInfoData;
 
@@ -159,6 +169,7 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[ServiceDescriptionRole] = "serviceDescription";
     roles[IsComponentVisibleRole] = "isComponentVisible";
     roles[HasExpiredWorkerRole] = "hasExpiredWorker";
+    roles[IsProtocolSelectionSupportedRole] = "isProtocolSelectionSupported";
 
     return roles;
 }
