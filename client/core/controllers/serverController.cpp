@@ -349,7 +349,7 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
         if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
              != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
             || (oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
-             != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
+                != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
             || (oldProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount)
                 != newProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount))
             || (oldProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize)
@@ -360,10 +360,6 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
                 != newProtoConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize))
             || (oldProtoConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize)
                 != newProtoConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize))
-            || (oldProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize)
-                != newProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize))
-            || (oldProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize)
-                != newProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize))
             || (oldProtoConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader)
                 != newProtoConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader))
             || (oldProtoConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader)
@@ -371,25 +367,11 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
             || (oldProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader)
                 != newProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader))
             || (oldProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader))
-                != newProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader))
-            // || (oldProtoConfig.value(config_key::specialJunk1).toString(protocols::awg::defaultSpecialJunk1))
-            //     != newProtoConfig.value(config_key::specialJunk1).toString(protocols::awg::defaultSpecialJunk1)
-            // || (oldProtoConfig.value(config_key::specialJunk2).toString(protocols::awg::defaultSpecialJunk2))
-            //     != newProtoConfig.value(config_key::specialJunk2).toString(protocols::awg::defaultSpecialJunk2)
-            // || (oldProtoConfig.value(config_key::specialJunk3).toString(protocols::awg::defaultSpecialJunk3))
-            //     != newProtoConfig.value(config_key::specialJunk3).toString(protocols::awg::defaultSpecialJunk3)
-            // || (oldProtoConfig.value(config_key::specialJunk4).toString(protocols::awg::defaultSpecialJunk4))
-            //     != newProtoConfig.value(config_key::specialJunk4).toString(protocols::awg::defaultSpecialJunk4)
-            // || (oldProtoConfig.value(config_key::specialJunk5).toString(protocols::awg::defaultSpecialJunk5))
-            //     != newProtoConfig.value(config_key::specialJunk5).toString(protocols::awg::defaultSpecialJunk5)
-            // || (oldProtoConfig.value(config_key::controlledJunk1).toString(protocols::awg::defaultControlledJunk1))
-            //     != newProtoConfig.value(config_key::controlledJunk1).toString(protocols::awg::defaultControlledJunk1)
-            // || (oldProtoConfig.value(config_key::controlledJunk2).toString(protocols::awg::defaultControlledJunk2))
-            //     != newProtoConfig.value(config_key::controlledJunk2).toString(protocols::awg::defaultControlledJunk2)
-            // || (oldProtoConfig.value(config_key::controlledJunk3).toString(protocols::awg::defaultControlledJunk3))
-            //     != newProtoConfig.value(config_key::controlledJunk3).toString(protocols::awg::defaultControlledJunk3)
-            // || (oldProtoConfig.value(config_key::specialHandshakeTimeout).toString(protocols::awg::defaultSpecialHandshakeTimeout))
-            //     != newProtoConfig.value(config_key::specialHandshakeTimeout).toString(protocols::awg::defaultSpecialHandshakeTimeout))
+                    != newProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader))
+            // || (oldProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize)
+            //     != newProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize))
+            // || (oldProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize)
+            //     != newProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize))
 
             return true;
     }
@@ -398,7 +380,7 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
         if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
              != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
             || (oldProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)))
+                != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)))
             return true;
     }
 
@@ -659,21 +641,13 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$JUNK_PACKET_MAX_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMaxSize).toString() } });
     vars.append({ { "$INIT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::initPacketJunkSize).toString() } });
     vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::responsePacketJunkSize).toString() } });
-    vars.append({ { "$COOKIE_REPLY_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::cookieReplyPacketJunkSize).toString() } });
-    vars.append({ { "$TRANSPORT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::transportPacketJunkSize).toString() } });
     vars.append({ { "$INIT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::initPacketMagicHeader).toString() } });
     vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::responsePacketMagicHeader).toString() } });
     vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
     vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
-    // vars.append({ { "$SPECIAL_JUNK_1", amneziaWireguarConfig.value(config_key::specialJunk1).toString() } });
-    // vars.append({ { "$SPECIAL_JUNK_2", amneziaWireguarConfig.value(config_key::specialJunk2).toString() } });
-    // vars.append({ { "$SPECIAL_JUNK_3", amneziaWireguarConfig.value(config_key::specialJunk3).toString() } });
-    // vars.append({ { "$SPECIAL_JUNK_4", amneziaWireguarConfig.value(config_key::specialJunk4).toString() } });
-    // vars.append({ { "$SPECIAL_JUNK_5", amneziaWireguarConfig.value(config_key::specialJunk5).toString() } });
-    // vars.append({ { "$CONTROLLED_JUNK_1", amneziaWireguarConfig.value(config_key::controlledJunk1).toString() } });
-    // vars.append({ { "$CONTROLLED_JUNK_2", amneziaWireguarConfig.value(config_key::controlledJunk2).toString() } });
-    // vars.append({ { "$CONTROLLED_JUNK_3", amneziaWireguarConfig.value(config_key::controlledJunk3).toString() } });
-    // vars.append({ { "$SPECIAL_HANDSHAKE_TIMEOUT", amneziaWireguarConfig.value(config_key::specialHandshakeTimeout).toString() } });
+
+    vars.append({ { "$COOKIE_REPLY_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::cookieReplyPacketJunkSize).toString() } });
+    vars.append({ { "$TRANSPORT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::transportPacketJunkSize).toString() } });
 
     // Socks5 proxy vars
     vars.append({ { "$SOCKS5_PROXY_PORT", socks5ProxyConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort) } });

@@ -242,7 +242,7 @@ namespace amnezia
             constexpr char defaultControlledJunk1[] = "";
             constexpr char defaultControlledJunk2[] = "";
             constexpr char defaultControlledJunk3[] = "";
-            constexpr char defaultSpecialHandshakeTimeout[] = "0";
+            constexpr char defaultSpecialHandshakeTimeout[] = "";
         }
 
         namespace socks5Proxy

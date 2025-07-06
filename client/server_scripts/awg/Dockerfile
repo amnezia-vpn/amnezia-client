@@ -1,4 +1,4 @@
-FROM marko1777/awg:latest
+FROM amneziavpn/amnezia-wg:latest
 
 LABEL maintainer="AmneziaVPN"
 
