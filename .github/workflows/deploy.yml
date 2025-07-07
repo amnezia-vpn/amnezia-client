@@ -255,7 +255,6 @@ jobs:
     env:
       # Keep compat with MacOS 10.15 aka Catalina by Qt 6.4
       QT_VERSION: 6.4.3
-      QIF_VERSION: 4.6
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
@@ -283,11 +282,6 @@ jobs:
         set-env: 'true'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install Qt Installer Framework ${{ env.QIF_VERSION }}'
-      run: |
-        mkdir -pv ${{ runner.temp }}/Qt/Tools/QtInstallerFramework
-        wget https://qt.amzsvc.com/tools/ifw/${{ env.QIF_VERSION }}.zip
-        unzip ${{ env.QIF_VERSION }}.zip -d ${{ runner.temp }}/Qt/Tools/QtInstallerFramework/
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -301,14 +295,13 @@ jobs:
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
         bash deploy/build_macos.sh
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN_MacOS_old_installer
-        path: AmneziaVPN.dmg
+        path: deploy/build/pkg/AmneziaVPN.pkg
         retention-days: 7
 
     - name: 'Upload unpacked artifact'
@@ -325,7 +318,6 @@ jobs:
 
     env:
       QT_VERSION: 6.8.0
-      QIF_VERSION: 4.8.1
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
@@ -353,11 +345,6 @@ jobs:
         set-env: 'true'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
-    - name: 'Install Qt Installer Framework ${{ env.QIF_VERSION }}'
-      run: |
-        mkdir -pv ${{ runner.temp }}/Qt/Tools/QtInstallerFramework
-        wget https://qt.amzsvc.com/tools/ifw/${{ env.QIF_VERSION }}.zip
-        unzip ${{ env.QIF_VERSION }}.zip -d ${{ runner.temp }}/Qt/Tools/QtInstallerFramework/
 
     - name: 'Get sources'
       uses: actions/checkout@v4
@@ -371,14 +358,13 @@ jobs:
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        export QIF_BIN_DIR="${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
         bash deploy/build_macos.sh
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN_MacOS_installer
-        path: AmneziaVPN.dmg
+        path: deploy/build/pkg/AmneziaVPN.pkg
         retention-days: 7
 
     - name: 'Upload unpacked artifact'

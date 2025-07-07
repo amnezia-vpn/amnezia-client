@@ -18,7 +18,8 @@ public:
         ServiceDescriptionRole,
         EndDateRole,
         IsComponentVisibleRole,
-        HasExpiredWorkerRole
+        HasExpiredWorkerRole,
+        IsProtocolSelectionSupportedRole
     };
 
     explicit ApiAccountInfoModel(QObject *parent = nullptr);
@@ -51,6 +52,8 @@ private:
         int maxDeviceCount;
 
         apiDefs::ConfigType configType;
+
+        QStringList supportedProtocols;
     };
 
     AccountInfoData m_accountInfoData;

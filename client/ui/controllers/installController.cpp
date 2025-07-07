@@ -8,6 +8,7 @@
 #include <QStandardPaths>
 #include <QtConcurrent>
 
+#include "core/api/apiUtils.h"
 #include "core/controllers/serverController.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/networkUtilities.h"
@@ -15,7 +16,6 @@
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "utilities.h"
-#include "core/api/apiUtils.h"
 
 namespace
 {
@@ -79,12 +79,36 @@ void InstallController::install(DockerContainer container, int port, TransportPr
 
                 int s1 = QRandomGenerator::global()->bounded(15, 150);
                 int s2 = QRandomGenerator::global()->bounded(15, 150);
-                while (s1 + AwgConstant::messageInitiationSize == s2 + AwgConstant::messageResponseSize) {
+                // int s3 = QRandomGenerator::global()->bounded(15, 150);
+                // int s4 = QRandomGenerator::global()->bounded(15, 150);
+
+                // Ensure all values are unique and don't create equal packet sizes
+                QSet<int> usedValues;
+                usedValues.insert(s1);
+
+                while (usedValues.contains(s2) || s1 + AwgConstant::messageInitiationSize == s2 + AwgConstant::messageResponseSize) {
                     s2 = QRandomGenerator::global()->bounded(15, 150);
                 }
+                usedValues.insert(s2);
+
+                // while (usedValues.contains(s3)
+                //        || s1 + AwgConstant::messageInitiationSize == s3 + AwgConstant::messageCookieReplySize
+                //        || s2 + AwgConstant::messageResponseSize == s3 + AwgConstant::messageCookieReplySize) {
+                //     s3 = QRandomGenerator::global()->bounded(15, 150);
+                // }
+                // usedValues.insert(s3);
+
+                // while (usedValues.contains(s4)
+                //        || s1 + AwgConstant::messageInitiationSize == s4 + AwgConstant::messageTransportSize
+                //        || s2 + AwgConstant::messageResponseSize == s4 + AwgConstant::messageTransportSize
+                //        || s3 + AwgConstant::messageCookieReplySize == s4 + AwgConstant::messageTransportSize) {
+                //     s4 = QRandomGenerator::global()->bounded(15, 150);
+                // }
 
                 QString initPacketJunkSize = QString::number(s1);
                 QString responsePacketJunkSize = QString::number(s2);
+                // QString cookieReplyPacketJunkSize = QString::number(s3);
+                // QString transportPacketJunkSize = QString::number(s4);
 
                 QSet<QString> headersValue;
                 while (headersValue.size() != 4) {
@@ -108,6 +132,21 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 containerConfig[config_key::responsePacketMagicHeader] = responsePacketMagicHeader;
                 containerConfig[config_key::underloadPacketMagicHeader] = underloadPacketMagicHeader;
                 containerConfig[config_key::transportPacketMagicHeader] = transportPacketMagicHeader;
+
+                // TODO:
+                // containerConfig[config_key::cookieReplyPacketJunkSize] = cookieReplyPacketJunkSize;
+                // containerConfig[config_key::transportPacketJunkSize] = transportPacketJunkSize;
+
+                // containerConfig[config_key::specialJunk1] = specialJunk1;
+                // containerConfig[config_key::specialJunk2] = specialJunk2;
+                // containerConfig[config_key::specialJunk3] = specialJunk3;
+                // containerConfig[config_key::specialJunk4] = specialJunk4;
+                // containerConfig[config_key::specialJunk5] = specialJunk5;
+                // containerConfig[config_key::controlledJunk1] = controlledJunk1;
+                // containerConfig[config_key::controlledJunk2] = controlledJunk2;
+                // containerConfig[config_key::controlledJunk3] = controlledJunk3;
+                // containerConfig[config_key::specialHandshakeTimeout] = specialHandshakeTimeout;
+
             } else if (container == DockerContainer::Sftp) {
                 containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
                 containerConfig.insert(config_key::password, Utils::getRandomString(16));
@@ -400,6 +439,19 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                                 serverConfigMap.value(config_key::underloadPacketMagicHeader);
                         containerConfig[config_key::transportPacketMagicHeader] =
                                 serverConfigMap.value(config_key::transportPacketMagicHeader);
+
+                        // containerConfig[config_key::cookieReplyPacketJunkSize] = serverConfigMap.value(config_key::cookieReplyPacketJunkSize);
+                        // containerConfig[config_key::transportPacketJunkSize] = serverConfigMap.value(config_key::transportPacketJunkSize);
+
+                        // containerConfig[config_key::specialJunk1] = serverConfigMap.value(config_key::specialJunk1);
+                        // containerConfig[config_key::specialJunk2] = serverConfigMap.value(config_key::specialJunk2);
+                        // containerConfig[config_key::specialJunk3] = serverConfigMap.value(config_key::specialJunk3);
+                        // containerConfig[config_key::specialJunk4] = serverConfigMap.value(config_key::specialJunk4);
+                        // containerConfig[config_key::specialJunk5] = serverConfigMap.value(config_key::specialJunk5);
+                        // containerConfig[config_key::controlledJunk1] = serverConfigMap.value(config_key::controlledJunk1);
+                        // containerConfig[config_key::controlledJunk2] = serverConfigMap.value(config_key::controlledJunk2);
+                        // containerConfig[config_key::controlledJunk3] = serverConfigMap.value(config_key::controlledJunk3);
+                        // containerConfig[config_key::specialHandshakeTimeout] = serverConfigMap.value(config_key::specialHandshakeTimeout);
 
                     } else if (protocol == Proto::WireGuard) {
                         QString serverConfig = serverController->getTextFileFromContainer(container, credentials,

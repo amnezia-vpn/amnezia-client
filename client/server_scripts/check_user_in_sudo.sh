@@ -1,6 +1,7 @@
 if which apt-get > /dev/null 2>&1; then pm=$(which apt-get); opt="--version";\
 elif which dnf > /dev/null 2>&1; then pm=$(which dnf); opt="--version";\
 elif which yum > /dev/null 2>&1; then pm=$(which yum); opt="--version";\
+elif which zypper > /dev/null 2>&1; then pm=$(which zypper); opt="--version";\
 elif which pacman > /dev/null 2>&1; then pm=$(which pacman); opt="--version";\
 else pm="uname"; opt="-a";\
 fi;\
