@@ -309,7 +309,7 @@ jobs:
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos.sh
+        bash deploy/build_macos.sh -n
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
@@ -386,7 +386,7 @@ jobs:
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos.sh
+        bash deploy/build_macos.sh -n
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
