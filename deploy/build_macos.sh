@@ -99,13 +99,19 @@ security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
 # the artefacts without releasing them).
 
 if [ -n "${MAC_APP_CERT_PW-}" ]; then
-  echo "$MAC_APP_CERT_CERT" | base64 -d > "$DEPLOY_DIR/DeveloperIdApplicationCertificate.p12"
+  # If the certificate is provided via environment variable, decode it.
+  if [ -n "${MAC_APP_CERT_CERT-}" ]; then
+    echo "$MAC_APP_CERT_CERT" | base64 -d > "$DEPLOY_DIR/DeveloperIdApplicationCertificate.p12"
+  fi
   security import "$DEPLOY_DIR/DeveloperIdApplicationCertificate.p12" \
           -k "$KEYCHAIN_PATH" -P "$MAC_APP_CERT_PW" -A
 fi
 
 if [ -n "${MAC_INSTALL_CERT_PW-}" ]; then
-  echo "$MAC_INSTALLER_SIGNER_CERT" | base64 -d > "$DEPLOY_DIR/DeveloperIdInstallerCertificate.p12"
+  # Same logic for the installer certificate.
+  if [ -n "${MAC_INSTALLER_SIGNER_CERT-}" ]; then
+    echo "$MAC_INSTALLER_SIGNER_CERT" | base64 -d > "$DEPLOY_DIR/DeveloperIdInstallerCertificate.p12"
+  fi
   security import "$DEPLOY_DIR/DeveloperIdInstallerCertificate.p12" \
           -k "$KEYCHAIN_PATH" -P "$MAC_INSTALL_CERT_PW" -A
 fi
