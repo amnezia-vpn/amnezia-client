@@ -28,6 +28,18 @@ Switch {
     property string hoveredIndicatorBackgroundColor: Style.color.fivePercentBlack
     property string defaultIndicatorBackgroundColor: Style.color.transparent
 
+    contentItem: RowLayout {
+        anchors.left: parent.left
+
+        MediumTextType {
+            id: labelText
+            text: root.text
+            visible: root.text !== ""
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
+        }
+    }
+
     indicator: Rectangle {
         id: switcher
 
@@ -79,32 +91,6 @@ Switch {
             }
         }
     }
-
-    // contentItem: ColumnLayout {
-    //     id: content
-
-    //     anchors.verticalCenter: parent.verticalCenter
-    //     anchors.left: parent.left
-
-    //     ListItemTitleType {
-    //         Layout.fillWidth: true
-    //         rightPadding: indicator.width
-
-    //         text: root.text
-    //         color: root.enabled ? root.textColor : root.textDisabledColor
-    //     }
-
-    //     CaptionTextType {
-    //         id: description
-
-    //         Layout.fillWidth: true
-    //         rightPadding: indicator.width
-
-    //         color: root.enabled ? root.descriptionTextColor : root.descriptionTextDisabledColor
-
-    //         visible: text !== ""
-    //     }
-    // }
 
     MouseArea {
         anchors.fill: parent

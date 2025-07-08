@@ -67,9 +67,9 @@ namespace
         QString serviceType;
         QString serviceProtocol;
 
-        QString appName;
-
         QJsonObject authData;
+
+        QString appName;
 
         QJsonObject toJsonObject() const
         {
@@ -99,7 +99,7 @@ namespace
                 obj[configKey::authData] = authData;
             }
             if (!appName.isEmpty()) {
-                obj[apiDefs::key::cliName] = appName
+                obj[apiDefs::key::cliName] = appName;
             }
             return obj;
         }
@@ -273,7 +273,8 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
                                             serverCountryCode,
                                             apiConfigObject.value(configKey::serviceType).toString(),
                                             m_apiServicesModel->getSelectedServiceProtocol(),
-                                            serverConfigObject.value(configKey::authData).toObject() };
+                                            serverConfigObject.value(configKey::authData).toObject(),
+                                            QString(APPLICATION_NAME) };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
 
@@ -339,7 +340,8 @@ bool ApiConfigsController::importServiceFromGateway()
                                             "",
                                             m_apiServicesModel->getSelectedServiceType(),
                                             m_apiServicesModel->getSelectedServiceProtocol(),
-                                            QJsonObject() };
+                                            QJsonObject(),
+                                            QString(APPLICATION_NAME) };
 
     if (m_serversModel->isServerFromApiAlreadyExists(gatewayRequestData.userCountryCode, gatewayRequestData.serviceType,
                                                      gatewayRequestData.serviceProtocol)) {
@@ -392,7 +394,8 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
                                             newCountryCode,
                                             apiConfig.value(configKey::serviceType).toString(),
                                             apiConfig.value(configKey::serviceProtocol).toString(),
-                                            serverConfig.value(configKey::authData).toObject() };
+                                            serverConfig.value(configKey::authData).toObject(),
+                                            QString(APPLICATION_NAME) };
 
     ProtocolData protocolData = generateProtocolData(gatewayRequestData.serviceProtocol);
 
@@ -498,7 +501,8 @@ bool ApiConfigsController::deactivateDevice()
                                             apiConfigObject.value(configKey::serverCountryCode).toString(),
                                             apiConfigObject.value(configKey::serviceType).toString(),
                                             "",
-                                            serverConfigObject.value(configKey::authData).toObject() };
+                                            serverConfigObject.value(configKey::authData).toObject(),
+                                            QString(APPLICATION_NAME) };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
 
