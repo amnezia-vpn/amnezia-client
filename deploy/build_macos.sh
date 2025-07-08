@@ -99,11 +99,13 @@ security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
 # the artefacts without releasing them).
 
 if [ -n "${MAC_APP_CERT_PW-}" ]; then
+  echo "$MAC_APP_CERT_CERT" | base64 -d > "$DEPLOY_DIR/DeveloperIdApplicationCertificate.p12"
   security import "$DEPLOY_DIR/DeveloperIdApplicationCertificate.p12" \
           -k "$KEYCHAIN_PATH" -P "$MAC_APP_CERT_PW" -A
 fi
 
 if [ -n "${MAC_INSTALL_CERT_PW-}" ]; then
+  echo "$MAC_INSTALLER_SIGNER_CERT" | base64 -d > "$DEPLOY_DIR/DeveloperIdInstallerCertificate.p12"
   security import "$DEPLOY_DIR/DeveloperIdInstallerCertificate.p12" \
           -k "$KEYCHAIN_PATH" -P "$MAC_INSTALL_CERT_PW" -A
 fi
