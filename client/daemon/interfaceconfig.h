@@ -50,10 +50,15 @@ class InterfaceConfig {
   QString m_junkPacketMaxSize;
   QString m_initPacketJunkSize;
   QString m_responsePacketJunkSize;
+  QString m_cookieReplyPacketJunkSize;
+  QString m_transportPacketJunkSize;
   QString m_initPacketMagicHeader;
   QString m_responsePacketMagicHeader;
   QString m_underloadPacketMagicHeader;
   QString m_transportPacketMagicHeader;
+  QMap<QString, QString> m_specialJunk;
+  QMap<QString, QString> m_controlledJunk;
+  QString m_specialHandshakeTimeout;
 
   QJsonObject toJson() const;
   QString toWgConf(

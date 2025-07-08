@@ -130,6 +130,12 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   if (!m_responsePacketJunkSize.isNull()) {
     out << "S2 = " << m_responsePacketJunkSize << "\n";
   }
+  if (!m_cookieReplyPacketJunkSize.isNull()) {
+    out << "S3 = " << m_cookieReplyPacketJunkSize << "\n";
+  }
+  if (!m_transportPacketJunkSize.isNull()) {
+    out << "S4 = " << m_transportPacketJunkSize << "\n";
+  }
   if (!m_initPacketMagicHeader.isNull()) {
     out << "H1 = " << m_initPacketMagicHeader << "\n";
   }
@@ -141,6 +147,16 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   }
   if (!m_transportPacketMagicHeader.isNull()) {
     out << "H4 = " << m_transportPacketMagicHeader << "\n";
+  }
+
+  for (const QString& key : m_specialJunk.keys()) {
+    out << key << " = " << m_specialJunk[key] << "\n";
+  }
+  for (const QString& key : m_controlledJunk.keys()) {
+    out << key << " = " << m_controlledJunk[key] << "\n";
+  }
+  if (!m_specialHandshakeTimeout.isNull()) {
+    out << "Itime = " << m_specialHandshakeTimeout << "\n";
   }
 
   // If any extra config was provided, append it now.

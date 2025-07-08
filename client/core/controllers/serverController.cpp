@@ -349,7 +349,7 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
         if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
              != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
             || (oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
-             != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
+                != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
             || (oldProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount)
                 != newProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount))
             || (oldProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize)
@@ -366,8 +366,13 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
                 != newProtoConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader))
             || (oldProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader)
                 != newProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader))
-            || (oldProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader)
-                != newProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader)))
+            || (oldProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader))
+                    != newProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader))
+            // || (oldProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize)
+            //     != newProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize))
+            // || (oldProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize)
+            //     != newProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize))
+
             return true;
     }
 
@@ -375,7 +380,7 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
         if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
              != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
             || (oldProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)))
+                != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)))
             return true;
     }
 
@@ -455,7 +460,7 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
             runScript(credentials,
                       replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
                       cbReadStdOut, cbReadStdErr);
-    
+
     if (stdOut.contains("doesn't work on cgroups v2"))
         return ErrorCode::ServerDockerOnCgroupsV2;
     if (stdOut.contains("cgroup mountpoint does not exist"))
@@ -640,6 +645,9 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::responsePacketMagicHeader).toString() } });
     vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
     vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
+
+    vars.append({ { "$COOKIE_REPLY_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::cookieReplyPacketJunkSize).toString() } });
+    vars.append({ { "$TRANSPORT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::transportPacketJunkSize).toString() } });
 
     // Socks5 proxy vars
     vars.append({ { "$SOCKS5_PROXY_PORT", socks5ProxyConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort) } });

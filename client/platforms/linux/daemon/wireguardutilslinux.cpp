@@ -121,6 +121,12 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     if (!config.m_responsePacketJunkSize.isEmpty()) {
         out << "s2=" << config.m_responsePacketJunkSize << "\n";
     }
+    if (!config.m_cookieReplyPacketJunkSize.isEmpty()) {
+        out << "s3=" << config.m_cookieReplyPacketJunkSize << "\n";
+    }
+    if (!config.m_transportPacketJunkSize.isEmpty()) {
+        out << "s4=" << config.m_transportPacketJunkSize << "\n";
+    }
     if (!config.m_initPacketMagicHeader.isEmpty()) {
         out << "h1=" << config.m_initPacketMagicHeader << "\n";
     }
@@ -132,6 +138,16 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     }
     if (!config.m_transportPacketMagicHeader.isEmpty()) {
         out << "h4=" << config.m_transportPacketMagicHeader << "\n";
+    }
+
+    for (const QString& key : config.m_specialJunk.keys()) {
+        out << key.toLower() << "=" << config.m_specialJunk.value(key) << "\n";
+    }
+    for (const QString& key : config.m_controlledJunk.keys()) {
+        out << key.toLower() << "=" << config.m_controlledJunk.value(key) << "\n";
+    }
+    if (!config.m_specialHandshakeTimeout.isEmpty()) {
+        out << "itime=" << config.m_specialHandshakeTimeout << "\n";
     }
 
     int err = uapiErrno(uapiCommand(message));
