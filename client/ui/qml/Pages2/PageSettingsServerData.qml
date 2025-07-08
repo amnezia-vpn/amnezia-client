@@ -260,7 +260,7 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButton6
-                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersModel.processedServerIsPremium
                 Layout.fillWidth: true
 
                 text: qsTr("Switch to the new Amnezia Premium subscription")
@@ -273,7 +273,7 @@ PageType {
             }
 
             DividerType {
-                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersModel.processedServerIsPremium
             }
         }
     }

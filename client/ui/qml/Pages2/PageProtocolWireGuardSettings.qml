@@ -152,7 +152,7 @@ PageType {
                                 }
                                 var noButtonFunction = function() {
                                     if (!GC.isMobile()) {
-                                        saveRestartButton.forceActiveFocus()
+                                        saveButton.forceActiveFocus()
                                     }
                                 }
                                 showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

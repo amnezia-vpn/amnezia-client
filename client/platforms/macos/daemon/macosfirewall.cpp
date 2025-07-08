@@ -43,8 +43,16 @@ namespace {
 
 #include "macosfirewall.h"
 
-#define ResourceDir qApp->applicationDirPath() + "/pf"
-#define DaemonDataDir qApp->applicationDirPath() + "/pf"
+#include <QDir>
+#include <QStandardPaths>
+
+// Read-only rules bundled with the application.
+#define ResourceDir (qApp->applicationDirPath() + "/pf")
+
+// Writable location that does NOT live inside the signed bundle.  Using a
+// constant path under /Library/Application Support keeps the signature intact
+// and is accessible to the root helper.
+#define DaemonDataDir QStringLiteral("/Library/Application Support/AmneziaVPN/pf")
 
 #include <QProcess>
 
@@ -121,6 +129,8 @@ void MacOSFirewall::install()
     logger.info() << "Installing PF root anchor";
 
     installRootAnchors();
+    // Ensure writable directory exists, then store the token there.
+    QDir().mkpath(DaemonDataDir);
     execute(QStringLiteral("pfctl -E 2>&1 | grep -F 'Token : ' | cut -c9- > '%1/pf.token'").arg(DaemonDataDir));
 }
 

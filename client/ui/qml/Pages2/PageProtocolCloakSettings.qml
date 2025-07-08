@@ -59,10 +59,13 @@ PageType {
                 model: CloakConfigModel
 
                 delegate: Item {
-                    implicitWidth: listview.width
-                    implicitHeight: col.implicitHeight
+                    id: delegateItem
 
                     property alias trafficFromField: trafficFromField
+                    property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
+
+                    implicitWidth: listview.width
+                    implicitHeight: col.implicitHeight
 
                     ColumnLayout {
                         id: col
@@ -78,7 +81,6 @@ PageType {
 
                         BaseHeaderType {
                             Layout.fillWidth: true
-
                             headerText: qsTr("Cloak settings")
                         }
 
@@ -87,6 +89,8 @@ PageType {
 
                             Layout.fillWidth: true
                             Layout.topMargin: 32
+
+                            enabled: delegateItem.isEnabled
 
                             headerText: qsTr("Disguised as traffic from")
                             textField.text: site
@@ -104,6 +108,8 @@ PageType {
                                     }
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
@@ -111,6 +117,8 @@ PageType {
 
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+
+                            enabled: delegateItem.isEnabled
 
                             headerText: qsTr("Port")
                             textField.text: port
@@ -122,12 +130,16 @@ PageType {
                                     port = textField.text
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         DropDownType {
                             id: cipherDropDown
                             Layout.fillWidth: true
                             Layout.topMargin: 16
+
+                            enabled: delegateItem.isEnabled
 
                             descriptionText: qsTr("Cipher")
                             headerText: qsTr("Cipher")
@@ -166,25 +178,46 @@ PageType {
                         }
 
                         BasicButtonType {
-                            id: saveRestartButton
+                            id: saveButton
 
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
+
+                            enabled: trafficFromField.errorText === "" &&
+                                     portTextField.errorText === ""
 
                             text: qsTr("Save")
 
                             clickedFunc: function() {
                                 forceActiveFocus()
 
-                                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                                    return
+                                var headerText = qsTr("Save settings?")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
+
+                                var yesButtonFunction = function() {
+                                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                        PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                        return
+                                    }
+
+                                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                                    InstallController.updateContainer(CloakConfigModel.getConfig())
                                 }
 
-                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.updateContainer(CloakConfigModel.getConfig())
+                                var noButtonFunction = function() {
+                                    if (!GC.isMobile()) {
+                                        saveButton.forceActiveFocus()
+                                    }
+                                }
+
+                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
+
+                            Keys.onEnterPressed: saveButton.clicked()
+                            Keys.onReturnPressed: saveButton.clicked()
                         }
                     }
                 }

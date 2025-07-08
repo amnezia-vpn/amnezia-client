@@ -88,23 +88,11 @@ Rectangle {
 
                 wrapMode: Text.Wrap
 
-                MouseArea {
-                    id: textAreaMouse
-                    anchors.fill: parent
-                    acceptedButtons: Qt.RightButton
-                    hoverEnabled: true
-                    onClicked: {
-                        fl.interactive = true
-                        contextMenu.open()
-                    }
-                }
-
                 onFocusChanged: {
                     root.border.color = getBorderColor(borderNormalColor)
                 }
 
-                ContextMenuType {
-                    id: contextMenu
+                ContextMenu.menu: ContextMenuType {
                     textObj: textArea
                 }
             }

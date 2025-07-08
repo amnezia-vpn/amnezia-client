@@ -69,8 +69,30 @@ Page {
                 color: Style.color.black
             }
 
+            SwitcherType {
+                readonly property bool isVlessProtocol: ApiConfigsController.isVlessProtocol()
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+
+                visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
+
+                text: qsTr("Use VLESS protocol")
+                checked: switcher.isVlessProtocol
+                onToggled: function() {
+                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
+                    } else {
+                        PageController.showBusyIndicator(true)
+                        ApiConfigsController.setCurrentProtocol(switcher.isVlessProtocol ? "awg" : "vless")
+                        ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
+                        PageController.showBusyIndicator(false)
+                    }
+                }
+            }
+
             WhiteButtonWithBorder {
-                Layout.topMargin: 24
+                Layout.topMargin: 16
                 Layout.fillWidth: true
                 
                 text: qsTr("Reload API configuration")

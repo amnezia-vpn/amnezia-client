@@ -18,6 +18,7 @@ namespace
     {
         constexpr char cloak[] = "cloak";
         constexpr char awg[] = "awg";
+        constexpr char vless[] = "vless";
 
         constexpr char apiEndpoint[] = "api_endpoint";
         constexpr char accessToken[] = "api_key";
@@ -35,10 +36,6 @@ namespace
         constexpr char serviceInfo[] = "service_info";
         constexpr char serviceProtocol[] = "service_protocol";
 
-        constexpr char aesKey[] = "aes_key";
-        constexpr char aesIv[] = "aes_iv";
-        constexpr char aesSalt[] = "aes_salt";
-
         constexpr char apiPayload[] = "api_payload";
         constexpr char keyPayload[] = "key_payload";
 
@@ -46,6 +43,190 @@ namespace
         constexpr char authData[] = "auth_data";
 
         constexpr char config[] = "config";
+    }
+
+    struct ProtocolData
+    {
+        OpenVpnConfigurator::ConnectionData certRequest;
+
+        QString wireGuardClientPrivKey;
+        QString wireGuardClientPubKey;
+
+        QString xrayUuid;
+    };
+
+    struct GatewayRequestData
+    {
+        QString osVersion;
+        QString appVersion;
+
+        QString installationUuid;
+
+        QString userCountryCode;
+        QString serverCountryCode;
+        QString serviceType;
+        QString serviceProtocol;
+
+        QJsonObject authData;
+
+        QString appName;
+
+        QJsonObject toJsonObject() const
+        {
+            QJsonObject obj;
+            if (!osVersion.isEmpty()) {
+                obj[configKey::osVersion] = osVersion;
+            }
+            if (!appVersion.isEmpty()) {
+                obj[configKey::appVersion] = appVersion;
+            }
+            if (!installationUuid.isEmpty()) {
+                obj[configKey::uuid] = installationUuid;
+            }
+            if (!userCountryCode.isEmpty()) {
+                obj[configKey::userCountryCode] = userCountryCode;
+            }
+            if (!serverCountryCode.isEmpty()) {
+                obj[configKey::serverCountryCode] = serverCountryCode;
+            }
+            if (!serviceType.isEmpty()) {
+                obj[configKey::serviceType] = serviceType;
+            }
+            if (!serviceProtocol.isEmpty()) {
+                obj[configKey::serviceProtocol] = serviceProtocol;
+            }
+            if (!authData.isEmpty()) {
+                obj[configKey::authData] = authData;
+            }
+            if (!appName.isEmpty()) {
+                obj[apiDefs::key::cliName] = appName;
+            }
+            return obj;
+        }
+    };
+
+    ProtocolData generateProtocolData(const QString &protocol)
+    {
+        ProtocolData protocolData;
+        if (protocol == configKey::cloak) {
+            protocolData.certRequest = OpenVpnConfigurator::createCertRequest();
+        } else if (protocol == configKey::awg) {
+            auto connData = WireguardConfigurator::genClientKeys();
+            protocolData.wireGuardClientPubKey = connData.clientPubKey;
+            protocolData.wireGuardClientPrivKey = connData.clientPrivKey;
+        } else if (protocol == configKey::vless) {
+            protocolData.xrayUuid = QUuid::createUuid().toString(QUuid::WithoutBraces);
+        }
+
+        return protocolData;
+    }
+
+    void appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload)
+    {
+        if (protocol == configKey::cloak) {
+            apiPayload[configKey::certificate] = protocolData.certRequest.request;
+        } else if (protocol == configKey::awg) {
+            apiPayload[configKey::publicKey] = protocolData.wireGuardClientPubKey;
+        } else if (protocol == configKey::vless) {
+            apiPayload[configKey::publicKey] = protocolData.xrayUuid;
+        }
+    }
+
+    ErrorCode fillServerConfig(const QString &protocol, const ProtocolData &apiPayloadData, const QByteArray &apiResponseBody,
+                               QJsonObject &serverConfig)
+    {
+        QString data = QJsonDocument::fromJson(apiResponseBody).object().value(config_key::config).toString();
+
+        data.replace("vpn://", "");
+        QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+
+        if (ba.isEmpty()) {
+            qDebug() << "empty vpn key";
+            return ErrorCode::ApiConfigEmptyError;
+        }
+
+        QByteArray ba_uncompressed = qUncompress(ba);
+        if (!ba_uncompressed.isEmpty()) {
+            ba = ba_uncompressed;
+        }
+
+        QString configStr = ba;
+        if (protocol == configKey::cloak) {
+            configStr.replace("<key>", "<key>\n");
+            configStr.replace("$OPENVPN_PRIV_KEY", apiPayloadData.certRequest.privKey);
+        } else if (protocol == configKey::awg) {
+            configStr.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", apiPayloadData.wireGuardClientPrivKey);
+            auto newServerConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
+            auto containers = newServerConfig.value(config_key::containers).toArray();
+            if (containers.isEmpty()) {
+                qDebug() << "missing containers field";
+                return ErrorCode::ApiConfigEmptyError;
+            }
+            auto container = containers.at(0).toObject();
+            QString containerName = ContainerProps::containerTypeToString(DockerContainer::Awg);
+            auto serverProtocolConfig = container.value(containerName).toObject();
+            auto clientProtocolConfig =
+                    QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
+
+            //TODO looks like this block can be removed after v1 configs EOL
+
+            serverProtocolConfig[config_key::junkPacketCount] = clientProtocolConfig.value(config_key::junkPacketCount);
+            serverProtocolConfig[config_key::junkPacketMinSize] = clientProtocolConfig.value(config_key::junkPacketMinSize);
+            serverProtocolConfig[config_key::junkPacketMaxSize] = clientProtocolConfig.value(config_key::junkPacketMaxSize);
+            serverProtocolConfig[config_key::initPacketJunkSize] = clientProtocolConfig.value(config_key::initPacketJunkSize);
+            serverProtocolConfig[config_key::responsePacketJunkSize] = clientProtocolConfig.value(config_key::responsePacketJunkSize);
+            serverProtocolConfig[config_key::initPacketMagicHeader] = clientProtocolConfig.value(config_key::initPacketMagicHeader);
+            serverProtocolConfig[config_key::responsePacketMagicHeader] = clientProtocolConfig.value(config_key::responsePacketMagicHeader);
+            serverProtocolConfig[config_key::underloadPacketMagicHeader] = clientProtocolConfig.value(config_key::underloadPacketMagicHeader);
+            serverProtocolConfig[config_key::transportPacketMagicHeader] = clientProtocolConfig.value(config_key::transportPacketMagicHeader);
+
+            serverProtocolConfig[config_key::cookieReplyPacketJunkSize] = clientProtocolConfig.value(config_key::cookieReplyPacketJunkSize);
+            serverProtocolConfig[config_key::transportPacketJunkSize] = clientProtocolConfig.value(config_key::transportPacketJunkSize);
+            serverProtocolConfig[config_key::specialJunk1] = clientProtocolConfig.value(config_key::specialJunk1);
+            serverProtocolConfig[config_key::specialJunk2] = clientProtocolConfig.value(config_key::specialJunk2);
+            serverProtocolConfig[config_key::specialJunk3] = clientProtocolConfig.value(config_key::specialJunk3);
+            serverProtocolConfig[config_key::specialJunk4] = clientProtocolConfig.value(config_key::specialJunk4);
+            serverProtocolConfig[config_key::specialJunk5] = clientProtocolConfig.value(config_key::specialJunk5);
+            serverProtocolConfig[config_key::controlledJunk1] = clientProtocolConfig.value(config_key::controlledJunk1);
+            serverProtocolConfig[config_key::controlledJunk2] = clientProtocolConfig.value(config_key::controlledJunk2);
+            serverProtocolConfig[config_key::controlledJunk3] = clientProtocolConfig.value(config_key::controlledJunk3);
+            serverProtocolConfig[config_key::specialHandshakeTimeout] = clientProtocolConfig.value(config_key::specialHandshakeTimeout);
+
+            //
+
+            container[containerName] = serverProtocolConfig;
+            containers.replace(0, container);
+            newServerConfig[config_key::containers] = containers;
+            configStr = QString(QJsonDocument(newServerConfig).toJson());
+        }
+
+        QJsonObject newServerConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
+        serverConfig[config_key::dns1] = newServerConfig.value(config_key::dns1);
+        serverConfig[config_key::dns2] = newServerConfig.value(config_key::dns2);
+        serverConfig[config_key::containers] = newServerConfig.value(config_key::containers);
+        serverConfig[config_key::hostName] = newServerConfig.value(config_key::hostName);
+
+        if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+            serverConfig[config_key::configVersion] = newServerConfig.value(config_key::configVersion);
+            serverConfig[config_key::description] = newServerConfig.value(config_key::description);
+            serverConfig[config_key::name] = newServerConfig.value(config_key::name);
+        }
+
+        auto defaultContainer = newServerConfig.value(config_key::defaultContainer).toString();
+        serverConfig[config_key::defaultContainer] = defaultContainer;
+
+        QVariantMap map = serverConfig.value(configKey::apiConfig).toObject().toVariantMap();
+        map.insert(newServerConfig.value(configKey::apiConfig).toObject().toVariantMap());
+        auto apiConfig = QJsonObject::fromVariantMap(map);
+
+        if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+            apiConfig.insert(apiDefs::key::supportedProtocols,
+                             QJsonDocument::fromJson(apiResponseBody).object().value(apiDefs::key::supportedProtocols).toArray());
+        }
+
+        serverConfig[configKey::apiConfig] = apiConfig;
+
+        return ErrorCode::NoError;
     }
 }
 
@@ -63,25 +244,26 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
         return false;
     }
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
-
     auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
-    QString protocol = apiConfigObject.value(configKey::serviceProtocol).toString();
-    ApiPayloadData apiPayloadData = generateApiPayloadData(protocol);
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_settings->getInstallationUuid(true),
+                                            apiConfigObject.value(configKey::userCountryCode).toString(),
+                                            serverCountryCode,
+                                            apiConfigObject.value(configKey::serviceType).toString(),
+                                            m_apiServicesModel->getSelectedServiceProtocol(),
+                                            serverConfigObject.value(configKey::authData).toObject() };
 
-    QJsonObject apiPayload = fillApiPayload(protocol, apiPayloadData);
-    apiPayload[configKey::userCountryCode] = apiConfigObject.value(configKey::userCountryCode);
-    apiPayload[configKey::serverCountryCode] = serverCountryCode;
-    apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
-    apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
-    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
+    QString protocol = apiConfigObject.value(configKey::serviceProtocol).toString();
+    ProtocolData protocolData = generateProtocolData(protocol);
+
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
 
     QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/native_config"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/native_config"), apiPayload, responseBody);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
@@ -89,7 +271,7 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
 
     QJsonObject jsonConfig = QJsonDocument::fromJson(responseBody).object();
     QString nativeConfig = jsonConfig.value(configKey::config).toString();
-    nativeConfig.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", apiPayloadData.wireGuardClientPrivKey);
+    nativeConfig.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", protocolData.wireGuardClientPrivKey);
 
     SystemController::saveFile(fileName, nativeConfig);
     return true;
@@ -97,25 +279,23 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
 
 bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
-
     auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
-    QString protocol = apiConfigObject.value(configKey::serviceProtocol).toString();
-    ApiPayloadData apiPayloadData = generateApiPayloadData(protocol);
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_settings->getInstallationUuid(true),
+                                            apiConfigObject.value(configKey::userCountryCode).toString(),
+                                            serverCountryCode,
+                                            apiConfigObject.value(configKey::serviceType).toString(),
+                                            m_apiServicesModel->getSelectedServiceProtocol(),
+                                            serverConfigObject.value(configKey::authData).toObject(),
+                                            QString(APPLICATION_NAME) };
 
-    QJsonObject apiPayload = fillApiPayload(protocol, apiPayloadData);
-    apiPayload[configKey::userCountryCode] = apiConfigObject.value(configKey::userCountryCode);
-    apiPayload[configKey::serverCountryCode] = serverCountryCode;
-    apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
-    apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
-    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
 
     QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/revoke_native_config"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_native_config"), apiPayload, responseBody);
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         emit errorOccurred(errorCode);
         return false;
@@ -146,14 +326,11 @@ void ApiConfigsController::copyVpnKeyToClipboard()
 
 bool ApiConfigsController::fillAvailableServices()
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
-
     QJsonObject apiPayload;
     apiPayload[configKey::osVersion] = QSysInfo::productType();
 
     QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/services"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);
     if (errorCode == ErrorCode::NoError) {
         if (!responseBody.contains("services")) {
             errorCode = ErrorCode::ApiServicesMissingError;
@@ -172,35 +349,37 @@ bool ApiConfigsController::fillAvailableServices()
 
 bool ApiConfigsController::importServiceFromGateway()
 {
-    if (m_serversModel->isServerFromApiAlreadyExists(m_apiServicesModel->getCountryCode(), m_apiServicesModel->getSelectedServiceType(),
-                                                     m_apiServicesModel->getSelectedServiceProtocol())) {
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_settings->getInstallationUuid(true),
+                                            m_apiServicesModel->getCountryCode(),
+                                            "",
+                                            m_apiServicesModel->getSelectedServiceType(),
+                                            m_apiServicesModel->getSelectedServiceProtocol(),
+                                            QJsonObject(),
+                                            QString(APPLICATION_NAME) };
+
+    if (m_serversModel->isServerFromApiAlreadyExists(gatewayRequestData.userCountryCode, gatewayRequestData.serviceType,
+                                                     gatewayRequestData.serviceProtocol)) {
         emit errorOccurred(ErrorCode::ApiConfigAlreadyAdded);
         return false;
     }
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+    ProtocolData protocolData = generateProtocolData(gatewayRequestData.serviceProtocol);
 
-    auto installationUuid = m_settings->getInstallationUuid(true);
-    auto userCountryCode = m_apiServicesModel->getCountryCode();
-    auto serviceType = m_apiServicesModel->getSelectedServiceType();
-    auto serviceProtocol = m_apiServicesModel->getSelectedServiceProtocol();
-
-    ApiPayloadData apiPayloadData = generateApiPayloadData(serviceProtocol);
-
-    QJsonObject apiPayload = fillApiPayload(serviceProtocol, apiPayloadData);
-    apiPayload[configKey::userCountryCode] = userCountryCode;
-    apiPayload[configKey::serviceType] = serviceType;
-    apiPayload[configKey::uuid] = installationUuid;
-    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
 
     QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/config"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
 
     QJsonObject serverConfig;
     if (errorCode == ErrorCode::NoError) {
-        fillServerConfig(serviceProtocol, apiPayloadData, responseBody, serverConfig);
+        errorCode = fillServerConfig(gatewayRequestData.serviceProtocol, protocolData, responseBody, serverConfig);
+        if (errorCode != ErrorCode::NoError) {
+            emit errorOccurred(errorCode);
+            return false;
+        }
 
         QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
         apiConfig.insert(configKey::userCountryCode, m_apiServicesModel->getCountryCode());
@@ -221,40 +400,34 @@ bool ApiConfigsController::importServiceFromGateway()
 bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                                     bool reloadServiceConfig)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
-
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
-    auto authData = serverConfig.value(configKey::authData).toObject();
 
-    auto installationUuid = m_settings->getInstallationUuid(true);
-    auto userCountryCode = apiConfig.value(configKey::userCountryCode).toString();
-    auto serviceType = apiConfig.value(configKey::serviceType).toString();
-    auto serviceProtocol = apiConfig.value(configKey::serviceProtocol).toString();
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_settings->getInstallationUuid(true),
+                                            apiConfig.value(configKey::userCountryCode).toString(),
+                                            newCountryCode,
+                                            apiConfig.value(configKey::serviceType).toString(),
+                                            apiConfig.value(configKey::serviceProtocol).toString(),
+                                            serverConfig.value(configKey::authData).toObject(),
+                                            QString(APPLICATION_NAME) };
 
-    ApiPayloadData apiPayloadData = generateApiPayloadData(serviceProtocol);
+    ProtocolData protocolData = generateProtocolData(gatewayRequestData.serviceProtocol);
 
-    QJsonObject apiPayload = fillApiPayload(serviceProtocol, apiPayloadData);
-    apiPayload[configKey::userCountryCode] = userCountryCode;
-    apiPayload[configKey::serviceType] = serviceType;
-    apiPayload[configKey::uuid] = installationUuid;
-    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
-
-    if (!newCountryCode.isEmpty()) {
-        apiPayload[configKey::serverCountryCode] = newCountryCode;
-    }
-    if (!authData.isEmpty()) {
-        apiPayload[configKey::authData] = authData;
-    }
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
 
     QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/config"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
 
     QJsonObject newServerConfig;
     if (errorCode == ErrorCode::NoError) {
-        fillServerConfig(serviceProtocol, apiPayloadData, responseBody, newServerConfig);
+        errorCode = fillServerConfig(gatewayRequestData.serviceProtocol, protocolData, responseBody, newServerConfig);
+        if (errorCode != ErrorCode::NoError) {
+            emit errorOccurred(errorCode);
+            return false;
+        }
 
         QJsonObject newApiConfig = newServerConfig.value(configKey::apiConfig).toObject();
         newApiConfig.insert(configKey::userCountryCode, apiConfig.value(configKey::userCountryCode));
@@ -263,8 +436,12 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
         newApiConfig.insert(apiDefs::key::vpnKey, apiConfig.value(apiDefs::key::vpnKey));
 
         newServerConfig.insert(configKey::apiConfig, newApiConfig);
-        newServerConfig.insert(configKey::authData, authData);
+        newServerConfig.insert(configKey::authData, gatewayRequestData.authData);
 
+        if (serverConfig.value(config_key::nameOverriddenByUser).toBool()) {
+            newServerConfig.insert(config_key::name, serverConfig.value(config_key::name));
+            newServerConfig.insert(config_key::nameOverriddenByUser, true);
+        }
         m_serversModel->editServer(newServerConfig, serverIndex);
         if (reloadServiceConfig) {
             emit reloadServerFromApiFinished(tr("API config reloaded"));
@@ -294,10 +471,13 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     auto installationUuid = m_settings->getInstallationUuid(true);
 
     QString serviceProtocol = serverConfig.value(configKey::protocol).toString();
-    ApiPayloadData apiPayloadData = generateApiPayloadData(serviceProtocol);
+    ProtocolData protocolData = generateProtocolData(serviceProtocol);
 
-    QJsonObject apiPayload = fillApiPayload(serviceProtocol, apiPayloadData);
+    QJsonObject apiPayload;
+    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
     apiPayload[configKey::uuid] = installationUuid;
+    apiPayload[configKey::osVersion] = QSysInfo::productType();
+    apiPayload[configKey::appVersion] = QString(APP_VERSION);
     apiPayload[configKey::accessToken] = serverConfig.value(configKey::accessToken).toString();
     apiPayload[configKey::apiEndpoint] = serverConfig.value(configKey::apiEndpoint).toString();
 
@@ -305,7 +485,11 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     ErrorCode errorCode = gatewayController.post(QString("%1v1/proxy_config"), apiPayload, responseBody);
 
     if (errorCode == ErrorCode::NoError) {
-        fillServerConfig(serviceProtocol, apiPayloadData, responseBody, serverConfig);
+        errorCode = fillServerConfig(serviceProtocol, protocolData, responseBody, serverConfig);
+        if (errorCode != ErrorCode::NoError) {
+            emit errorOccurred(errorCode);
+            return false;
+        }
 
         m_serversModel->editServer(serverConfig, serverIndex);
         emit updateServerFromApiFinished();
@@ -318,9 +502,6 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
 
 bool ApiConfigsController::deactivateDevice()
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
-
     auto serverIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
@@ -329,20 +510,20 @@ bool ApiConfigsController::deactivateDevice()
         return true;
     }
 
-    QString protocol = apiConfigObject.value(configKey::serviceProtocol).toString();
-    ApiPayloadData apiPayloadData = generateApiPayloadData(protocol);
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_settings->getInstallationUuid(true),
+                                            apiConfigObject.value(configKey::userCountryCode).toString(),
+                                            apiConfigObject.value(configKey::serverCountryCode).toString(),
+                                            apiConfigObject.value(configKey::serviceType).toString(),
+                                            "",
+                                            serverConfigObject.value(configKey::authData).toObject(),
+                                            QString(APPLICATION_NAME) };
 
-    QJsonObject apiPayload = fillApiPayload(protocol, apiPayloadData);
-    apiPayload[configKey::userCountryCode] = apiConfigObject.value(configKey::userCountryCode);
-    apiPayload[configKey::serverCountryCode] = apiConfigObject.value(configKey::serverCountryCode);
-    apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
-    apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
-    apiPayload[configKey::uuid] = m_settings->getInstallationUuid(true);
-    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
 
     QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/revoke_config"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_config"), apiPayload, responseBody);
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         emit errorOccurred(errorCode);
         return false;
@@ -356,9 +537,6 @@ bool ApiConfigsController::deactivateDevice()
 
 bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
-
     auto serverIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
@@ -367,20 +545,20 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
         return true;
     }
 
-    QString protocol = apiConfigObject.value(configKey::serviceProtocol).toString();
-    ApiPayloadData apiPayloadData = generateApiPayloadData(protocol);
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            uuid,
+                                            apiConfigObject.value(configKey::userCountryCode).toString(),
+                                            serverCountryCode,
+                                            apiConfigObject.value(configKey::serviceType).toString(),
+                                            "",
+                                            serverConfigObject.value(configKey::authData).toObject(),
+                                            QString(APPLICATION_NAME) };
 
-    QJsonObject apiPayload = fillApiPayload(protocol, apiPayloadData);
-    apiPayload[configKey::userCountryCode] = apiConfigObject.value(configKey::userCountryCode);
-    apiPayload[configKey::serverCountryCode] = serverCountryCode;
-    apiPayload[configKey::serviceType] = apiConfigObject.value(configKey::serviceType);
-    apiPayload[configKey::authData] = serverConfigObject.value(configKey::authData);
-    apiPayload[configKey::uuid] = uuid;
-    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
 
     QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.post(QString("%1v1/revoke_config"), apiPayload, responseBody);
+    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_config"), apiPayload, responseBody);
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         emit errorOccurred(errorCode);
         return false;
@@ -419,108 +597,29 @@ bool ApiConfigsController::isConfigValid()
     return true;
 }
 
-ApiConfigsController::ApiPayloadData ApiConfigsController::generateApiPayloadData(const QString &protocol)
+void ApiConfigsController::setCurrentProtocol(const QString &protocolName)
 {
-    ApiConfigsController::ApiPayloadData apiPayload;
-    if (protocol == configKey::cloak) {
-        apiPayload.certRequest = OpenVpnConfigurator::createCertRequest();
-    } else if (protocol == configKey::awg) {
-        auto connData = WireguardConfigurator::genClientKeys();
-        apiPayload.wireGuardClientPubKey = connData.clientPubKey;
-        apiPayload.wireGuardClientPrivKey = connData.clientPrivKey;
-    }
-    return apiPayload;
+    auto serverIndex = m_serversModel->getProcessedServerIndex();
+    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+
+    apiConfigObject[configKey::serviceProtocol] = protocolName;
+
+    serverConfigObject.insert(configKey::apiConfig, apiConfigObject);
+
+    m_serversModel->editServer(serverConfigObject, serverIndex);
 }
 
-QJsonObject ApiConfigsController::fillApiPayload(const QString &protocol, const ApiPayloadData &apiPayloadData)
+bool ApiConfigsController::isVlessProtocol()
 {
-    QJsonObject obj;
-    if (protocol == configKey::cloak) {
-        obj[configKey::certificate] = apiPayloadData.certRequest.request;
-    } else if (protocol == configKey::awg) {
-        obj[configKey::publicKey] = apiPayloadData.wireGuardClientPubKey;
+    auto serverIndex = m_serversModel->getProcessedServerIndex();
+    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+
+    if (apiConfigObject[configKey::serviceProtocol].toString() == "vless") {
+        return true;
     }
-
-    obj[configKey::osVersion] = QSysInfo::productType();
-    obj[configKey::appVersion] = QString(APP_VERSION);
-
-    return obj;
-}
-
-void ApiConfigsController::fillServerConfig(const QString &protocol, const ApiPayloadData &apiPayloadData,
-                                            const QByteArray &apiResponseBody, QJsonObject &serverConfig)
-{
-    QString data = QJsonDocument::fromJson(apiResponseBody).object().value(config_key::config).toString();
-
-    data.replace("vpn://", "");
-    QByteArray ba = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-
-    if (ba.isEmpty()) {
-        emit errorOccurred(ErrorCode::ApiConfigEmptyError);
-        return;
-    }
-
-    QByteArray ba_uncompressed = qUncompress(ba);
-    if (!ba_uncompressed.isEmpty()) {
-        ba = ba_uncompressed;
-    }
-
-    QString configStr = ba;
-    if (protocol == configKey::cloak) {
-        configStr.replace("<key>", "<key>\n");
-        configStr.replace("$OPENVPN_PRIV_KEY", apiPayloadData.certRequest.privKey);
-    } else if (protocol == configKey::awg) {
-        configStr.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", apiPayloadData.wireGuardClientPrivKey);
-        auto newServerConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
-        auto containers = newServerConfig.value(config_key::containers).toArray();
-        if (containers.isEmpty()) {
-            return; // todo process error
-        }
-        auto container = containers.at(0).toObject();
-        QString containerName = ContainerProps::containerTypeToString(DockerContainer::Awg);
-        auto containerConfig = container.value(containerName).toObject();
-        auto protocolConfig = QJsonDocument::fromJson(containerConfig.value(config_key::last_config).toString().toUtf8()).object();
-        containerConfig[config_key::junkPacketCount] = protocolConfig.value(config_key::junkPacketCount);
-        containerConfig[config_key::junkPacketMinSize] = protocolConfig.value(config_key::junkPacketMinSize);
-        containerConfig[config_key::junkPacketMaxSize] = protocolConfig.value(config_key::junkPacketMaxSize);
-        containerConfig[config_key::initPacketJunkSize] = protocolConfig.value(config_key::initPacketJunkSize);
-        containerConfig[config_key::responsePacketJunkSize] = protocolConfig.value(config_key::responsePacketJunkSize);
-        containerConfig[config_key::initPacketMagicHeader] = protocolConfig.value(config_key::initPacketMagicHeader);
-        containerConfig[config_key::responsePacketMagicHeader] = protocolConfig.value(config_key::responsePacketMagicHeader);
-        containerConfig[config_key::underloadPacketMagicHeader] = protocolConfig.value(config_key::underloadPacketMagicHeader);
-        containerConfig[config_key::transportPacketMagicHeader] = protocolConfig.value(config_key::transportPacketMagicHeader);
-        container[containerName] = containerConfig;
-        containers.replace(0, container);
-        newServerConfig[config_key::containers] = containers;
-        configStr = QString(QJsonDocument(newServerConfig).toJson());
-    }
-
-    QJsonObject newServerConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
-    serverConfig[config_key::dns1] = newServerConfig.value(config_key::dns1);
-    serverConfig[config_key::dns2] = newServerConfig.value(config_key::dns2);
-    serverConfig[config_key::containers] = newServerConfig.value(config_key::containers);
-    serverConfig[config_key::hostName] = newServerConfig.value(config_key::hostName);
-
-    if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
-        serverConfig[config_key::configVersion] = newServerConfig.value(config_key::configVersion);
-        serverConfig[config_key::description] = newServerConfig.value(config_key::description);
-        serverConfig[config_key::name] = newServerConfig.value(config_key::name);
-    }
-
-    auto defaultContainer = newServerConfig.value(config_key::defaultContainer).toString();
-    serverConfig[config_key::defaultContainer] = defaultContainer;
-
-    QVariantMap map = serverConfig.value(configKey::apiConfig).toObject().toVariantMap();
-    map.insert(newServerConfig.value(configKey::apiConfig).toObject().toVariantMap());
-    auto apiConfig = QJsonObject::fromVariantMap(map);
-
-    if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
-        apiConfig.insert(configKey::serviceInfo, QJsonDocument::fromJson(apiResponseBody).object().value(configKey::serviceInfo).toObject());
-    }
-
-    serverConfig[configKey::apiConfig] = apiConfig;
-
-    return;
+    return false;
 }
 
 QList<QString> ApiConfigsController::getQrCodes()
@@ -536,4 +635,11 @@ int ApiConfigsController::getQrCodesCount()
 QString ApiConfigsController::getVpnKey()
 {
     return m_vpnKey;
+}
+
+ErrorCode ApiConfigsController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody)
+{
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
+    return gatewayController.post(endpoint, apiPayload, responseBody);
 }

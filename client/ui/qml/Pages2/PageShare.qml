@@ -429,6 +429,11 @@ PageType {
 
                         fillConnectionTypeModel()
 
+                        if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
+                            exportTypeSelector.currentIndex = 0
+                            exportTypeSelector.text = root.connectionTypesModel[0].name
+                        }
+
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
