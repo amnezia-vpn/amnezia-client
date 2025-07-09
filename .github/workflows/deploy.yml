@@ -238,14 +238,13 @@ jobs:
         IOS_APP_PROVISIONING_PROFILE: ${{ secrets.IOS_APP_PROVISIONING_PROFILE }}
         IOS_NE_PROVISIONING_PROFILE: ${{ secrets.IOS_NE_PROVISIONING_PROFILE }}
 
-#    - name: 'Upload appstore .ipa and dSYMs to artifacts'
-#      uses: actions/upload-artifact@v4
-#      with:
-#        name: app-store ipa & dsyms
-#        path: |
-#          ${{ github.workspace }}/AmneziaVPN-iOS.ipa
-#          ${{ github.workspace }}/*.app.dSYM.zip
-#        retention-days: 7
+   - name: 'Upload unsigned .ipa to artifacts'
+     uses: actions/upload-artifact@v4
+     with:
+       name: AmneziaVPN-unsigned-ipa
+       path: |
+         ${{ github.workspace }}/build-ios/AmneziaVPN_unsigned.ipa
+       retention-days: 7
 
 # ------------------------------------------------------
 
