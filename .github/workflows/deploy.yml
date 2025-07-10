@@ -331,7 +331,7 @@ jobs:
     runs-on: macos-latest
 
     env:
-      QT_VERSION: 6.9.1
+      QT_VERSION: 6.8.0
 
       MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
 
