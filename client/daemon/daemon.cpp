@@ -12,6 +12,8 @@
 #include <QMetaEnum>
 #include <QTimer>
 
+#include "core/privileged_process.h"
+
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -454,6 +456,46 @@ QString Daemon::logs() {
 }
 
 void Daemon::cleanLogs() { }
+
+QString Daemon::runScript(const QString &scriptPath, const QStringList &arguments, const QString &workingDirectory)
+{
+    logger.debug() << "Running script:" << scriptPath << "with arguments:" << arguments << "in directory:" << workingDirectory;
+
+    QProcess process;
+    process.setProgram(scriptPath);
+    process.setArguments(arguments);
+    process.setWorkingDirectory(workingDirectory);
+
+    QSharedPointer<QEventLoop> loop(new QEventLoop);
+    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), [&loop](int exitCode, QProcess::ExitStatus exitStatus) {
+        Q_UNUSED(exitStatus);
+        if (exitCode != 0) {
+            logger.error() << "Script exited with error code:" << exitCode;
+        }
+        loop->quit();
+    });
+
+    QObject::connect(&process, &QProcess::errorOccurred, [&loop](QProcess::ProcessError error) {
+        logger.error() << "Script process error:" << error;
+        loop->quit();
+    });
+
+    process.start();
+    if (!process.waitForStarted()) {
+        logger.error() << "Failed to start script process.";
+        return QString();
+    }
+    loop->exec(); // Wait for the process to finish
+
+    QString output = QString::fromUtf8(process.readAllStandardOutput());
+    QString errorOutput = QString::fromUtf8(process.readAllStandardError());
+
+    if (!errorOutput.isEmpty()) {
+        logger.warning() << "Script stderr:" << errorOutput;
+    }
+
+    return output.trimmed();
+}
 
 bool Daemon::supportServerSwitching(const InterfaceConfig& config) const {
   if (!m_connections.contains(config.m_hopType)) {

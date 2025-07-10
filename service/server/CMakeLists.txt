@@ -305,12 +305,15 @@ include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc
     ${CMAKE_CURRENT_LIST_DIR}/../../common/logger
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_BINARY_DIR}/client
+    ${CMAKE_BINARY_DIR}/client/AmneziaVPN_autogen/include
 )
 
 
 add_executable(${PROJECT} ${SOURCES} ${HEADERS})
 target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat Qt6::DBus ${LIBS})
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
+add_dependencies(${PROJECT} AmneziaVPN)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
@@ -346,6 +349,7 @@ endif()
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_interface.rep)
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_interface.rep)
 qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_tun2socks.rep)
+qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_interface.rep)
 
 # copy deploy artifacts required to run the application to the debug build folder
 if(WIN32)

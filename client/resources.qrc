@@ -193,6 +193,7 @@
         <file>ui/qml/Pages2/PageServiceSftpSettings.qml</file>
         <file>ui/qml/Pages2/PageServiceSocksProxySettings.qml</file>
         <file>ui/qml/Pages2/PageServiceTorWebsiteSettings.qml</file>
+        <file>ui/qml/Pages2/PageCryptPad.qml</file>
         <file>ui/qml/Pages2/PageSettings.qml</file>
         <file>ui/qml/Pages2/PageSettingsAbout.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiAvailableCountries.qml</file>

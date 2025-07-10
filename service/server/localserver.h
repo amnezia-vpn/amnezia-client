@@ -9,6 +9,7 @@
 #include <QVector>
 
 #include "ipcserver.h"
+#include "../../ipc/ipcserverprocess.h"
 
 #include "../../client/daemon/daemonlocalserver.h"
 
@@ -37,7 +38,7 @@ public:
     explicit LocalServer(QObject* parent = nullptr);
     ~LocalServer();
     QSharedPointer<QLocalServer> m_server;
-    IpcServer m_ipcServer;
+    IpcServerProcess m_ipcServer;
     IpcProcessTun2Socks m_tun2socks;
     QRemoteObjectHost m_serverNode;
     bool m_isRemotingEnabled = false;

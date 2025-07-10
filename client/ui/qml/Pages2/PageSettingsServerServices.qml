@@ -57,4 +57,21 @@ PageType {
             updateContainersModelFilters()
         }
     }
+
+    // Добавляю CryptPad в список сервисов
+    Item {
+        width: parent.width
+        ColumnLayout {
+            width: parent.width
+            LabelWithButtonType {
+                text: qsTr("CryptPad")
+                descriptionText: qsTr("Collaborative documents (CryptPad)")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageCryptPad)
+                }
+            }
+            DividerType {}
+        }
+    }
 }

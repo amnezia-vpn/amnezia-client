@@ -72,7 +72,8 @@ namespace PageLoader
 
         PageShareFullAccess,
 
-        PageDevMenu
+        PageDevMenu,
+        PageCryptPad
     };
     Q_ENUM_NS(PageEnum)
 

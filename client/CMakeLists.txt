@@ -215,6 +215,10 @@ if(NOT IOS AND NOT ANDROID)
         COMMAND_EXPAND_LISTS
     )
 
+    # --- CryptPad related post-build steps ---
+    # (Удалено: никаких действий по копированию или запуску CryptPad)
+    # --- End CryptPad related ---
+
 endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})

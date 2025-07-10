@@ -7,9 +7,19 @@
 
 #include <QDateTime>
 #include <QTimer>
+#include <QProcess>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QMetaEnum>
+#include <QCoreApplication>
+#include <QObject>
+#include <QDebug>
+#include <QHostAddress>
+#include <QList>
 
 #include "daemon/daemonerrors.h"
-#include "daemonerrors.h"
 #include "dnsutils.h"
 #include "interfaceconfig.h"
 #include "iputils.h"
@@ -44,6 +54,9 @@ class Daemon : public QObject {
 
   QString logs();
   void cleanLogs();
+
+ public slots:
+  QString runScript(const QString &scriptPath, const QStringList &arguments, const QString &workingDirectory);
 
  signals:
   void connected(const QString& pubkey);

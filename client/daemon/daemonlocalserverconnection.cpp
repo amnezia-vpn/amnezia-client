@@ -4,6 +4,8 @@
 
 #include "daemonlocalserverconnection.h"
 
+#include <QJsonArray>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -140,6 +142,26 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
 
   if (type == "cleanlogs") {
     Daemon::instance()->cleanLogs();
+    return;
+  }
+
+  if (type == "runScript") {
+    QString scriptPath = obj.value("scriptPath").toString();
+    QStringList arguments;
+    if (obj.value("arguments").isArray()) {
+        QJsonArray argsArray = obj.value("arguments").toArray();
+        for (const QJsonValue &val : argsArray) {
+            arguments.append(val.toString());
+        }
+    }
+    QString workingDirectory = obj.value("workingDirectory").toString();
+
+    QString output = Daemon::instance()->runScript(scriptPath, arguments, workingDirectory);
+
+    QJsonObject responseObj;
+    responseObj.insert("type", "runScriptResult");
+    responseObj.insert("output", output);
+    write(responseObj);
     return;
   }
 
