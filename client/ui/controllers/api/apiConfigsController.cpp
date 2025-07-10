@@ -221,8 +221,6 @@ namespace
 
         serverConfig[configKey::apiConfig] = apiConfig;
 
-        qDebug() << serverConfig;
-
         return ErrorCode::NoError;
     }
 }

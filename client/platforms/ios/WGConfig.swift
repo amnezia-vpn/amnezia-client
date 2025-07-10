@@ -46,29 +46,59 @@ struct WGConfig: Decodable {
   }
 
   var settings: String {
-    junkPacketCount == nil ? "" :
-    """
-    Jc = \(junkPacketCount!)
-    Jmin = \(junkPacketMinSize!)
-    Jmax = \(junkPacketMaxSize!)
-    S1 = \(initPacketJunkSize!)
-    S2 = \(responsePacketJunkSize!)
-    S3 = \(cookieReplyPacketJunkSize!)
-    S4 = \(transportPacketJunkSize!)
-    H1 = \(initPacketMagicHeader!)
-    H2 = \(responsePacketMagicHeader!)
-    H3 = \(underloadPacketMagicHeader!)
-    H4 = \(transportPacketMagicHeader!)
-    I1 = \(specialJunk1!)
-    I2 = \(specialJunk2!)
-    I3 = \(specialJunk3!)
-    I4 = \(specialJunk4!)
-    I5 = \(specialJunk5!)
-    J1 = \(controlledJunk1!)
-    J2 = \(controlledJunk2!)
-    J3 = \(controlledJunk3!)
-    Itime = \(specialHandshakeTimeout!)
-    """
+    guard junkPacketCount != nil else { return "" }
+    
+    var settingsLines: [String] = []
+    
+    // Required parameters when junkPacketCount is present
+    settingsLines.append("Jc = \(junkPacketCount!)")
+    settingsLines.append("Jmin = \(junkPacketMinSize!)")
+    settingsLines.append("Jmax = \(junkPacketMaxSize!)")
+    settingsLines.append("S1 = \(initPacketJunkSize!)")
+    settingsLines.append("S2 = \(responsePacketJunkSize!)")
+    
+    settingsLines.append("H1 = \(initPacketMagicHeader!)")
+    settingsLines.append("H2 = \(responsePacketMagicHeader!)")
+    settingsLines.append("H3 = \(underloadPacketMagicHeader!)")
+    settingsLines.append("H4 = \(transportPacketMagicHeader!)")
+
+    // Optional parameters - only add if not nil and not empty
+    if let s3 = cookieReplyPacketJunkSize, !s3.isEmpty {
+      settingsLines.append("S3 = \(s3)")
+    }
+    if let s4 = transportPacketJunkSize, !s4.isEmpty {
+      settingsLines.append("S4 = \(s4)")
+    }
+    
+    if let i1 = specialJunk1, !i1.isEmpty {
+      settingsLines.append("I1 = \(i1)")
+    }
+    if let i2 = specialJunk2, !i2.isEmpty {
+      settingsLines.append("I2 = \(i2)")
+    }
+    if let i3 = specialJunk3, !i3.isEmpty {
+      settingsLines.append("I3 = \(i3)")
+    }
+    if let i4 = specialJunk4, !i4.isEmpty {
+      settingsLines.append("I4 = \(i4)")
+    }
+    if let i5 = specialJunk5, !i5.isEmpty {
+      settingsLines.append("I5 = \(i5)")
+    }
+    if let j1 = controlledJunk1, !j1.isEmpty {
+      settingsLines.append("J1 = \(j1)")
+    }
+    if let j2 = controlledJunk2, !j2.isEmpty {
+      settingsLines.append("J2 = \(j2)")
+    }
+    if let j3 = controlledJunk3, !j3.isEmpty {
+      settingsLines.append("J3 = \(j3)")
+    }
+    if let itime = specialHandshakeTimeout, !itime.isEmpty {
+      settingsLines.append("Itime = \(itime)")
+    }
+    
+    return settingsLines.joined(separator: "\n")
   }
 
   var str: String {

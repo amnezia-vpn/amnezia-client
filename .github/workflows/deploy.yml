@@ -255,6 +255,20 @@ jobs:
     env:
       # Keep compat with MacOS 10.15 aka Catalina by Qt 6.4
       QT_VERSION: 6.4.3
+
+      MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
+
+      MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
+      MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
+      MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
+
+      MAC_INSTALLER_SIGNER_CERT: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
+      MAC_INSTALLER_SIGNER_ID: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
+      MAC_INSTALL_CERT_PW: ${{ secrets.MAC_INSTALL_CERT_PW }}
+
+      APPLE_DEV_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
+      APPLE_DEV_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
+
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
@@ -295,7 +309,7 @@ jobs:
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos.sh
+        bash deploy/build_macos.sh -n
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4
@@ -318,6 +332,20 @@ jobs:
 
     env:
       QT_VERSION: 6.8.0
+
+      MAC_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
+
+      MAC_APP_CERT_CERT: ${{ secrets.MAC_APP_CERT_CERT }}
+      MAC_SIGNER_ID: ${{ secrets.MAC_SIGNER_ID }}
+      MAC_APP_CERT_PW: ${{ secrets.MAC_APP_CERT_PW }}
+
+      MAC_INSTALLER_SIGNER_CERT: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
+      MAC_INSTALLER_SIGNER_ID: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
+      MAC_INSTALL_CERT_PW: ${{ secrets.MAC_INSTALL_CERT_PW }}
+
+      APPLE_DEV_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
+      APPLE_DEV_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
+
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
@@ -358,7 +386,7 @@ jobs:
     - name: 'Build project'
       run: |
         export QT_BIN_DIR="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos/bin"
-        bash deploy/build_macos.sh
+        bash deploy/build_macos.sh -n
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v4

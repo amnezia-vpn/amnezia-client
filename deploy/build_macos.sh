@@ -71,11 +71,54 @@ cmake --build . --config release --target all
 KEYCHAIN_PATH="$PROJECT_DIR/mac_sign.keychain"
 trap 'echo "Cleaning up mac_sign.keychain..."; security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true; rm -f "$KEYCHAIN_PATH" 2>/dev/null || true' EXIT
 KEYCHAIN=$(security default-keychain -d user | tr -d '"[:space:]"')
-security list-keychains -d user -s "$KEYCHAIN_PATH" "$KEYCHAIN" "$(security list-keychains -d user | tr '\n' ' ')"
-security create-keychain -p "" "$KEYCHAIN_PATH"
-security import "$DEPLOY_DIR/DeveloperIdApplicationCertificate.p12" -k "$KEYCHAIN_PATH" -P "$MAC_APP_CERT_PW" -T /usr/bin/codesign
-security import "$DEPLOY_DIR/DeveloperIdInstallerCertificate.p12" -k "$KEYCHAIN_PATH" -P "$MAC_INSTALL_CERT_PW" -T /usr/bin/codesign
+
+# Build a clean list of the *existing* user key-chains. The raw output of
+#   security list-keychains -d user
+# looks roughly like:
+#     "    \"/Users/foo/Library/Keychains/login.keychain-db\"\n    \"/Library/Keychains/System.keychain\""
+# Every entry is surrounded by quotes and indented with a few blanks. Feeding
+# that verbatim back to `security list-keychains -s` inside a single quoted
+# argument leads to one long, invalid path on some systems. We therefore strip
+# the quotes and rely on the shell to split the string on whitespace so that
+# each path becomes its own argument.
+
+read -ra EXISTING_KEYCHAINS <<< "$(security list-keychains -d user | tr -d '"')"
+
+security list-keychains -d user -s "$KEYCHAIN_PATH" "$KEYCHAIN" "${EXISTING_KEYCHAINS[@]}"
+KEYCHAIN_PWD=""  # Empty password keeps things simple for CI jobs
+# Create, unlock and configure the temporary key-chain so that `codesign` can
+# access the imported identities without triggering interactive prompts.
+security create-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
+# Keep the key-chain unlocked for the duration of the job (6 hours is plenty).
+security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+security unlock-keychain -p "$KEYCHAIN_PWD" "$KEYCHAIN_PATH"
+
+# Import the signing certificates only when the corresponding passwords are
+# available in the environment.  This allows the script to run in environments
+# where code-signing is intentionally turned off (e.g. CI jobs that just build
+# the artefacts without releasing them).
+
+if [ -n "${MAC_APP_CERT_PW-}" ]; then
+  # If the certificate is provided via environment variable, decode it.
+  if [ -n "${MAC_APP_CERT_CERT-}" ]; then
+    echo "$MAC_APP_CERT_CERT" | base64 -d > "$DEPLOY_DIR/DeveloperIdApplicationCertificate.p12"
+  fi
+  security import "$DEPLOY_DIR/DeveloperIdApplicationCertificate.p12" \
+          -k "$KEYCHAIN_PATH" -P "$MAC_APP_CERT_PW" -A
+fi
+
+if [ -n "${MAC_INSTALL_CERT_PW-}" ]; then
+  # Same logic for the installer certificate.
+  if [ -n "${MAC_INSTALLER_SIGNER_CERT-}" ]; then
+    echo "$MAC_INSTALLER_SIGNER_CERT" | base64 -d > "$DEPLOY_DIR/DeveloperIdInstallerCertificate.p12"
+  fi
+  security import "$DEPLOY_DIR/DeveloperIdInstallerCertificate.p12" \
+          -k "$KEYCHAIN_PATH" -P "$MAC_INSTALL_CERT_PW" -A
+fi
+
+# This certificate has no password.
 security import "$DEPLOY_DIR/DeveloperIDG2CA.cer" -k "$KEYCHAIN_PATH" -T /usr/bin/codesign
+
 security list-keychains -d user -s "$KEYCHAIN_PATH"
 
 echo "____________________________________"
