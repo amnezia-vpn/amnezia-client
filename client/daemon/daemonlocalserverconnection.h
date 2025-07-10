@@ -6,6 +6,19 @@
 #define DAEMONLOCALSERVERCONNECTION_H
 
 #include <QObject>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QLocalSocket>
+#include <QDateTime>
+#include <QTimer>
+#include <QProcess>
+#include <QMetaEnum>
+#include <QCoreApplication>
+#include <QDebug>
+#include <QHostAddress>
+#include <QList>
 
 #include "daemonerrors.h"
 

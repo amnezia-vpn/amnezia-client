@@ -10,6 +10,54 @@
     </message>
 </context>
 <context>
+    <name>AllowedDnsController</name>
+    <message>
+        <location filename="../ui/controllers/allowedDnsController.cpp" line="27"/>
+        <source>The address does not look like a valid IP address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/allowedDnsController.cpp" line="32"/>
+        <source>New DNS server added: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/allowedDnsController.cpp" line="34"/>
+        <source>DNS server already exists: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/allowedDnsController.cpp" line="44"/>
+        <source>DNS server removed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/allowedDnsController.cpp" line="51"/>
+        <source>Can&apos;t open file: %1</source>
+        <translation type="unfinished">फ़ाइल नहीं खुल सकती: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/allowedDnsController.cpp" line="57"/>
+        <source>Failed to parse JSON data from file: %1</source>
+        <translation type="unfinished">फ़ाइल से JSON डेटा पार्स करने में विफल:%1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/allowedDnsController.cpp" line="62"/>
+        <source>The JSON data is not an array in file: %1</source>
+        <translation type="unfinished">JSON डेटा फ़ाइल में कोई सरणी नहीं है: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/allowedDnsController.cpp" line="82"/>
+        <source>Import completed</source>
+        <translation type="unfinished">आयात पूरा हुआ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/allowedDnsController.cpp" line="100"/>
+        <source>Export completed</source>
+        <translation type="unfinished">निर्यात पूरा हुआ</translation>
+    </message>
+</context>
+<context>
     <name>ApiAccountInfoModel</name>
     <message>
         <location filename="../ui/models/api/apiAccountInfoModel.cpp" line="31"/>
@@ -33,36 +81,128 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/models/api/apiAccountInfoModel.cpp" line="54"/>
+        <location filename="../ui/models/api/apiAccountInfoModel.cpp" line="55"/>
         <source>Free unlimited access to a basic set of websites such as Facebook, Instagram, Twitter (X), Discord, Telegram and more. YouTube is not included in the free plan.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/models/api/apiAccountInfoModel.cpp" line="125"/>
-        <source>amnezia_free_support_bot</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/models/api/apiAccountInfoModel.cpp" line="127"/>
-        <source>amnezia_premium_support_bot</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ApiConfigsController</name>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="203"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="210"/>
         <source>%1 installed successfully.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="257"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="270"/>
         <source>API config reloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="261"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="274"/>
         <source>Successfully changed the country of connection to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ApiPremV1MigrationDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="53"/>
+        <source>Switch to the new Amnezia Premium subscription</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="73"/>
+        <source>We&apos;ll preserve all remaining days of your current subscription and give you an extra month as a thank you. </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="74"/>
+        <source>This new subscription type will be actively developed with more locations and features added regularly. Currently available:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="76"/>
+        <source>&lt;li&gt;13 locations (with more coming soon)&lt;/li&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="77"/>
+        <source>&lt;li&gt;Easier switching between countries in the app&lt;/li&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="78"/>
+        <source>&lt;li&gt;Personal dashboard to manage your subscription&lt;/li&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="80"/>
+        <source>Old keys will be deactivated after switching.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="91"/>
+        <source>Email</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="92"/>
+        <source>mail@example.com</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="103"/>
+        <source>No old format subscriptions for a given email</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="114"/>
+        <source>Enter the email you used for your current subscription</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="136"/>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="178"/>
+        <source>Continue</source>
+        <translation type="unfinished">जारी रखना</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="156"/>
+        <source>Remind me later</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="174"/>
+        <source>Don&apos;t remind me again</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="177"/>
+        <source>No more reminders? You can always switch to the new format in the server settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="179"/>
+        <source>Cancel</source>
+        <translation type="unfinished">रद्द करना</translation>
+    </message>
+</context>
+<context>
+    <name>ApiPremV1SubListDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1SubListDrawer.qml" line="55"/>
+        <source>Choose Subscription</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1SubListDrawer.qml" line="74"/>
+        <source>Order ID: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ApiPremV1SubListDrawer.qml" line="76"/>
+        <source>Purchase Date: </source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -81,7 +221,7 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="72"/>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="85"/>
-        <source>AmneziaFree provides free unlimited access to a basic set of web sites, such as Facebook, Instagram, Twitter (X), Discord, Telegram, and others. YouTube is not included in the free plan.</source>
+        <source>Amnezia Free provides unlimited, free access to a basic set of websites and apps, including Facebook, Instagram, Twitter (X), Discord, Telegram, and more. YouTube is not included in the free plan.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -97,6 +237,11 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="104"/>
         <source>%1 days</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/models/api/apiServicesModel.cpp" line="111"/>
+        <source></source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -257,7 +402,7 @@
 <context>
     <name>HomeContainersListView</name>
     <message>
-        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="63"/>
+        <location filename="../ui/qml/Components/HomeContainersListView.qml" line="64"/>
         <source>Unable change protocol while there is an active connection</source>
         <translation>सक्रिय कनेक्शन होने पर प्रोटोकॉल बदलने में असमर्थ</translation>
     </message>
@@ -362,47 +507,47 @@ Already installed containers were found on the server. All installed containers 
 सर्वर पर पहले से स्थापित कंटेनर पाए गए। सभी स्थापित कंटेनरों को एप्लिकेशन में जोड़ दिया गया है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="516"/>
+        <location filename="../ui/controllers/installController.cpp" line="582"/>
         <source>Settings updated successfully</source>
         <translation>सेटिंग्स सफलतापूर्वक अपडेट हो गईं</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="533"/>
+        <location filename="../ui/controllers/installController.cpp" line="599"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>सर्वर &apos;%1&apos; रीबूट किया गया था</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="545"/>
+        <location filename="../ui/controllers/installController.cpp" line="611"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>सर्वर &apos;%1&apos; रीबूट किया गया था</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="556"/>
+        <location filename="../ui/controllers/installController.cpp" line="622"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>सर्वर &apos;%1&apos; से सभी कंटेनर हटा दिए गए हैं</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="574"/>
+        <location filename="../ui/controllers/installController.cpp" line="640"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 को सर्वर &apos;%2&apos; से हटा दिया गया है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="583"/>
+        <location filename="../ui/controllers/installController.cpp" line="649"/>
         <source>Api config removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="605"/>
+        <location filename="../ui/controllers/installController.cpp" line="671"/>
         <source>%1 cached profile cleared</source>
         <translation>%1 कैश्ड प्रोफ़ाइल साफ़ की गई</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="744"/>
+        <location filename="../ui/controllers/installController.cpp" line="810"/>
         <source>Please login as the user</source>
         <translation>कृपया उपयोगकर्ता के रूप में लॉगिन करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/installController.cpp" line="772"/>
+        <location filename="../ui/controllers/installController.cpp" line="838"/>
         <source>Server added successfully</source>
         <translation>सर्वर सफलतापूर्वक जोड़ा गया</translation>
     </message>
@@ -473,6 +618,32 @@ Already installed containers were found on the server. All installed containers 
     </message>
 </context>
 <context>
+    <name>OtpCodeDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/OtpCodeDrawer.qml" line="44"/>
+        <source>OTP code was sent to your email</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/OtpCodeDrawer.qml" line="55"/>
+        <source>OTP Code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/OtpCodeDrawer.qml" line="66"/>
+        <source>Continue</source>
+        <translation type="unfinished">जारी रखना</translation>
+    </message>
+</context>
+<context>
+    <name>PageCryptPad</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageCryptPad.qml" line="7"/>
+        <source>CryptPad</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>PageDeinstalling</name>
     <message>
         <location filename="../ui/qml/Pages2/PageDeinstalling.qml" line="63"/>
@@ -501,27 +672,43 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>PageHome</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="77"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="43"/>
+        <source>You&apos;ve successfully switched to the new Amnezia Premium subscription!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="44"/>
+        <source>Old keys will no longer work. Please use your new subscription key to connect. 
+Thank you for staying with us!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="45"/>
+        <source>Continue</source>
+        <translation type="unfinished">जारी रखना</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="102"/>
         <source>Logging enabled</source>
         <translation>लॉगिंग सक्षम</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="144"/>
         <source>Split tunneling enabled</source>
         <translation>स्प्लिट टनलिंग सक्षम</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="144"/>
         <source>Split tunneling disabled</source>
         <translation>स्प्लिट टनलिंग अक्षम</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="353"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="378"/>
         <source>VPN protocol</source>
         <translation>VPN प्रोटोकॉल</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageHome.qml" line="406"/>
+        <location filename="../ui/qml/Pages2/PageHome.qml" line="431"/>
         <source>Servers</source>
         <translation>सर्वर</translation>
     </message>
@@ -1090,12 +1277,17 @@ Already installed containers were found on the server. All installed containers 
         <translation>से यातायात के रूप में प्रच्छन्न</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="112"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="113"/>
+        <source>Port</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="133"/>
         <source>Save</source>
         <translation>सहेजें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="118"/>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="139"/>
         <source>Unable change settings while there is an active connection</source>
         <translation>सक्रिय कनेक्शन होने पर सेटिंग बदलने में असमर्थ</translation>
     </message>
@@ -1544,7 +1736,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="80"/>
-        <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;Connect.</source>
+        <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1841,7 +2033,7 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="336"/>
-        <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;Connect.</source>
+        <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1878,29 +2070,14 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="31"/>
-        <source>support@amnezia.org</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="38"/>
         <source>Email Billing &amp; Orders</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="39"/>
-        <source>help@vpnpay.io</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="46"/>
         <source>Website</source>
         <translation type="unfinished">वेबसाइट</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="47"/>
-        <source>amnezia.org</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="81"/>
@@ -1913,12 +2090,12 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="109"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="110"/>
         <source>Support tag</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="120"/>
         <source>Copied</source>
         <translation type="unfinished">कॉपी किया गया</translation>
     </message>
@@ -1954,37 +2131,37 @@ Already installed containers were found on the server. All installed containers 
         <translation>ऐप स्प्लिट टनलिंग</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="112"/>
         <source>Mode</source>
         <translation>तरीका</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="209"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="202"/>
         <source>Remove </source>
         <translation>निकालना </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="210"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="203"/>
         <source>Continue</source>
         <translation>जारी रखना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="211"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="204"/>
         <source>Cancel</source>
         <translation>रद्द करना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="255"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="248"/>
         <source>application name</source>
         <translation>आवेदन का नाम</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="265"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="258"/>
         <source>Open executable file</source>
         <translation>निष्पादन योग्य फ़ाइल खोलें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="266"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="259"/>
         <source>Executable files (*.*)</source>
         <translation>निष्पादनीय फाइल (*.*)</translation>
     </message>
@@ -2184,7 +2361,7 @@ Already installed containers were found on the server. All installed containers 
         <translation>जब AmneziaDNS का उपयोग या स्थापित नहीं किया जाता है</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="108"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="106"/>
         <source>Allows you to use the VPN only for certain Apps</source>
         <translation>आपको केवल कुछ ऐप्स के लिए वीपीएन का उपयोग करने की अनुमति देता है</translation>
     </message>
@@ -2214,24 +2391,23 @@ Already installed containers were found on the server. All installed containers 
         <translation>आपको यह चुनने की अनुमति देता है कि आप वीपीएन के माध्यम से किन साइटों तक पहुंचना चाहते हैं</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="107"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="105"/>
         <source>App-based split tunneling</source>
         <translation>ऐप-आधारित स्प्लिट टनलिंग</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="129"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="126"/>
         <source>KillSwitch</source>
         <translation>स्विच बन्द कर दो</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="130"/>
-        <source>Disables your internet if your encrypted VPN connection drops out for any reason.</source>
-        <translation>यदि आपका एन्क्रिप्टेड वीपीएन कनेक्शन किसी भी कारण से बंद हो जाता है तो आपका इंटरनेट अक्षम कर देता है.</translation>
+        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="127"/>
+        <source>Blocks network connections without VPN</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="143"/>
-        <source>Cannot change KillSwitch settings during active connection</source>
-        <translation type="unfinished"></translation>
+        <source>Disables your internet if your encrypted VPN connection drops out for any reason.</source>
+        <translation type="vanished">यदि आपका एन्क्रिप्टेड वीपीएन कनेक्शन किसी भी कारण से बंद हो जाता है तो आपका इंटरनेट अक्षम कर देता है.</translation>
     </message>
     <message>
         <source>Cannot change killSwitch settings during active connection</source>
@@ -2299,6 +2475,155 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="134"/>
         <source>Settings saved</source>
         <translation>सेटिंग्स को सहेजा गया</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsKillSwitch</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="40"/>
+        <source>KillSwitch</source>
+        <translation type="unfinished">स्विच बन्द कर दो</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="41"/>
+        <source>Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental exposure of your IP and DNS queries if the connection drops</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="52"/>
+        <source>KillSwitch settings cannot be changed during an active connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="68"/>
+        <source>Soft KillSwitch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
+        <source>Internet access is blocked if the VPN disconnects unexpectedly</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="87"/>
+        <source>Strict KillSwitch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="88"/>
+        <source>Internet connection is blocked even when VPN is turned off manually or hasn&apos;t started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="91"/>
+        <source>Just a little heads-up</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
+        <source>If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
+        <source>Continue</source>
+        <translation type="unfinished">जारी रखना</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="94"/>
+        <source>Cancel</source>
+        <translation type="unfinished">रद्द करना</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="113"/>
+        <source>DNS Exceptions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="114"/>
+        <source>DNS servers listed here will remain accessible when KillSwitch is active.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsKillSwitchExceptions</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="45"/>
+        <source>DNS Exceptions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="46"/>
+        <source>DNS servers listed here will remain accessible when KillSwitch is active</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="106"/>
+        <source>Delete </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="107"/>
+        <source>Continue</source>
+        <translation type="unfinished">जारी रखना</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="108"/>
+        <source>Cancel</source>
+        <translation type="unfinished">रद्द करना</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="138"/>
+        <source>IPv4 address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="168"/>
+        <source>Import / Export addresses</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="175"/>
+        <source>Import</source>
+        <translation type="unfinished">आयात</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="188"/>
+        <source>Save address list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="195"/>
+        <source>Save addresses</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="196"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="266"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="282"/>
+        <source>Address files (*.json)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="255"/>
+        <source>Import address list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="262"/>
+        <source>Replace address list</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="265"/>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="281"/>
+        <source>Open address file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="278"/>
+        <source>Add imported addresses to existing ones</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2431,11 +2756,6 @@ Already installed containers were found on the server. All installed containers 
         <translation>क्या आप एमनेज़िया सॉफ़्टवेयर से सर्वर साफ़ करना चाहते हैं?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="92"/>
-        <source></source>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="115"/>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="154"/>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="192"/>
@@ -2517,6 +2837,11 @@ Already installed containers were found on the server. All installed containers 
         <translation>सक्रिय कनेक्शन के दौरान एपीआई कॉन्फिगरेशन को रीसेट नहीं किया जा सकता</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="266"/>
+        <source>Switch to the new Amnezia Premium subscription</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="153"/>
         <source>All installed AmneziaVPN services will still remain on the server.</source>
         <translation>सभी स्थापित AmneziaVPN सेवाएँ अभी भी सर्वर पर रहेंगी.</translation>
@@ -2568,11 +2893,6 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="175"/>
         <source>Clear %1 profile?</source>
         <translation>%1 प्रोफ़ाइल साफ़ करें?</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="134"/>
-        <source></source>
-        <translation></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="182"/>
@@ -2638,6 +2958,19 @@ Already installed containers were found on the server. All installed containers 
     </message>
 </context>
 <context>
+    <name>PageSettingsServerServices</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerServices.qml" line="67"/>
+        <source>CryptPad</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerServices.qml" line="68"/>
+        <source>Collaborative documents (CryptPad)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>PageSettingsServersList</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="39"/>
@@ -2658,27 +2991,27 @@ Already installed containers were found on the server. All installed containers 
         <translation>सूची के पतों को वीपीएन के माध्यम से एक्सेस नहीं किया जाना चाहिए</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="104"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="102"/>
         <source>Split tunneling</source>
         <translation>विभाजित सुरंग</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="140"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="129"/>
         <source>Mode</source>
         <translation>तरीका</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="226"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="215"/>
         <source>Remove </source>
         <translation>निकालना </translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="227"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="216"/>
         <source>Continue</source>
         <translation>जारी रखना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="228"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="217"/>
         <source>Cancel</source>
         <translation>रद्द करना</translation>
     </message>
@@ -2693,55 +3026,55 @@ Already installed containers were found on the server. All installed containers 
         <translation>सक्रिय कनेक्शन के दौरान स्प्लिट टनलिंग सेटिंग्स को नहीं बदला जा सकता</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="277"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="266"/>
         <source>website or IP</source>
         <translation>वेबसाइट या आईपी</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="322"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="311"/>
         <source>Import / Export Sites</source>
         <translation>आयात/निर्यात साइटें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="329"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="318"/>
         <source>Import</source>
         <translation>आयात</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="342"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="331"/>
         <source>Save site list</source>
         <translation>साइट सूची सहेजें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="349"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="338"/>
         <source>Save sites</source>
         <translation>साइटें सहेजें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="350"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="420"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="436"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="339"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="409"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="425"/>
         <source>Sites files (*.json)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="409"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="398"/>
         <source>Import a list of sites</source>
         <translation>साइटों की सूची आयात करें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="416"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="405"/>
         <source>Replace site list</source>
         <translation>साइट सूची बदलें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="419"/>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="435"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="408"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="424"/>
         <source>Open sites file</source>
         <translation>साइट फ़ाइल खोलें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="432"/>
+        <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="421"/>
         <source>Add imported sites to existing ones</source>
         <translation>आयातित साइटों को मौजूदा साइटों में जोड़ें</translation>
     </message>
@@ -2811,117 +3144,140 @@ Already installed containers were found on the server. All installed containers 
         <translation type="vanished">कनेक्शन सेटिंग्स वाली फ़ाइल</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="56"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="58"/>
         <source>Connection</source>
         <translation type="unfinished">कनेक्शन</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="83"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="85"/>
         <source>Settings</source>
         <translation type="unfinished">समायोजन</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="93"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="95"/>
         <source>Enable logs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="109"/>
+        <source>Export client logs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="119"/>
+        <source>Save</source>
+        <translation type="unfinished">सहेजें</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="120"/>
+        <source>Logs files (*.log)</source>
+        <translation type="unfinished">लॉग फ़ाइलें (*.log)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="129"/>
+        <source>Logs file saved</source>
+        <translation type="unfinished">लॉग फ़ाइल सहेजी गई</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="139"/>
         <source>Support tag</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="120"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="150"/>
         <source>Copied</source>
         <translation type="unfinished">कॉपी किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="139"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="169"/>
         <source>Insert the key, add a configuration file or scan the QR-code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="179"/>
         <source>Insert key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="150"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="180"/>
         <source>Insert</source>
         <translation type="unfinished">डालना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="168"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="198"/>
         <source>Continue</source>
         <translation type="unfinished">जारी रखना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="185"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="215"/>
         <source>Other connection options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="228"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="258"/>
         <source>Site Amnezia</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="251"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="281"/>
         <source>VPN by Amnezia</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="252"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="282"/>
         <source>Connect to classic paid and free VPN services from Amnezia</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="268"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="298"/>
         <source>Self-hosted VPN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="269"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="299"/>
         <source>Configure Amnezia VPN on your own server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="280"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="310"/>
         <source>Restore from backup</source>
         <translation type="unfinished">बैकअप से बहाल करना</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="279"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="311"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="329"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="348"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="363"/>
         <source></source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="285"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="315"/>
         <source>Open backup file</source>
         <translation type="unfinished">बैकअप फ़ाइल खोलें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="286"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="316"/>
         <source>Backup files (*.backup)</source>
         <translation type="unfinished">बैकअप फ़ाइलें (*.backup)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="298"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="328"/>
         <source>File with connection settings</source>
         <translation>कनेक्शन सेटिंग्स वाली फ़ाइल</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="305"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="335"/>
         <source>Open config file</source>
         <translation>कॉन्फ़िग फ़ाइल खोलें</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="317"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="347"/>
         <source>QR code</source>
         <translation>क्यू आर संहिता</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="332"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="362"/>
         <source>I have nothing</source>
         <translation type="unfinished">मेरे पास कुछ नहीं है</translation>
     </message>
@@ -3764,8 +4120,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../protocols/protocols_defs.cpp" line="81"/>
-        <location filename="../containers/containers_defs.cpp" line="104"/>
-        <location filename="../containers/containers_defs.cpp" line="243"/>
+        <location filename="../containers/containers_defs.cpp" line="105"/>
+        <location filename="../containers/containers_defs.cpp" line="232"/>
         <source>SOCKS5 proxy server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3851,313 +4207,379 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="31"/>
+        <location filename="../core/errorstrings.cpp" line="29"/>
+        <source>Docker error: runc doesn&apos;t work on cgroups v2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="30"/>
+        <source>Server error: cgroup mountpoint does not exist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="33"/>
         <source>SSH request was denied</source>
         <translation>SSH अनुरोध अस्वीकार कर दिया गया</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="32"/>
+        <location filename="../core/errorstrings.cpp" line="34"/>
         <source>SSH request was interrupted</source>
         <translation>SSH अनुरोध बाधित हो गया था</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="33"/>
+        <location filename="../core/errorstrings.cpp" line="35"/>
         <source>SSH internal error</source>
         <translation>SSH आंतरिक त्रुटि</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="34"/>
+        <location filename="../core/errorstrings.cpp" line="36"/>
         <source>Invalid private key or invalid passphrase entered</source>
         <translation>अमान्य निजी कुंजी या अमान्य पासफ़्रेज़ दर्ज किया गया</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="35"/>
+        <location filename="../core/errorstrings.cpp" line="37"/>
         <source>The selected private key format is not supported, use openssh ED25519 key types or PEM key types</source>
         <translation>चयनित निजी कुंजी प्रारूप समर्थित नहीं है, ओपनश ED25519 कुंजी प्रकार या PEM कुंजी प्रकार का उपयोग करें</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="36"/>
+        <location filename="../core/errorstrings.cpp" line="38"/>
         <source>Timeout connecting to server</source>
         <translation>सर्वर से कनेक्ट होने का समय समाप्त</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="58"/>
+        <location filename="../core/errorstrings.cpp" line="60"/>
         <source>Unable to open config file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="59"/>
+        <location filename="../core/errorstrings.cpp" line="61"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation type="unfinished">पीएन प्रोटोकॉल स्थापित नहीं है.
 कृपया पहले वीपीएन कंटेनर स्थापित करें</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="62"/>
+        <location filename="../core/errorstrings.cpp" line="64"/>
         <source>VPN connection error</source>
         <translation>VPN कनेक्शन त्रुटि</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="65"/>
-        <location filename="../core/errorstrings.cpp" line="74"/>
+        <location filename="../core/errorstrings.cpp" line="67"/>
+        <location filename="../core/errorstrings.cpp" line="76"/>
         <source>Error when retrieving configuration from API</source>
         <translation>एपीआई से कॉन्फ़िगरेशन पुनर्प्राप्त करते समय त्रुटि</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="66"/>
+        <location filename="../core/errorstrings.cpp" line="68"/>
         <source>This config has already been added to the application</source>
         <translation>यह कॉन्फ़िगरेशन पहले ही एप्लिकेशन में जोड़ा जा चुका है</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="67"/>
+        <location filename="../core/errorstrings.cpp" line="69"/>
         <source>In the response from the server, an empty config was received</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="68"/>
+        <location filename="../core/errorstrings.cpp" line="70"/>
         <source>SSL error occurred</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="69"/>
+        <location filename="../core/errorstrings.cpp" line="71"/>
         <source>Server response timeout on api request</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="70"/>
+        <location filename="../core/errorstrings.cpp" line="72"/>
         <source>Missing AGW public key</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="71"/>
+        <location filename="../core/errorstrings.cpp" line="73"/>
         <source>Failed to decrypt response payload</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="72"/>
+        <location filename="../core/errorstrings.cpp" line="74"/>
         <source>Missing list of available services</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="73"/>
+        <location filename="../core/errorstrings.cpp" line="75"/>
         <source>The limit of allowed configurations per subscription has been exceeded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="89"/>
+        <location filename="../core/errorstrings.cpp" line="77"/>
+        <source>A migration error has occurred. Please contact our technical support</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="78"/>
+        <source>Please update the application to use this feature</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../core/errorstrings.cpp" line="93"/>
         <source>ErrorCode: %1. </source>
         <translation>ErrorCode: %1. </translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="42"/>
+        <location filename="../core/errorstrings.cpp" line="44"/>
         <source>OpenVPN config missing</source>
         <translation>OpenVPN प्रबंधन सर्वर त्रुटि</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="39"/>
+        <location filename="../core/errorstrings.cpp" line="41"/>
         <source>SCP error: Generic failure</source>
         <translation>एससीपी त्रुटि: सामान्य विफलता</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="43"/>
+        <location filename="../core/errorstrings.cpp" line="45"/>
         <source>OpenVPN management server error</source>
         <translation>OpenVPN प्रबंधन सर्वर त्रुटि</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="46"/>
+        <location filename="../core/errorstrings.cpp" line="48"/>
         <source>OpenVPN executable missing</source>
         <translation>OpenVPN निष्पादन योग्य गायब है</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="47"/>
+        <location filename="../core/errorstrings.cpp" line="49"/>
         <source>Shadowsocks (ss-local) executable missing</source>
         <translation>शैडोसॉक्स (एसएस-स्थानीय) निष्पादन योग्य गायब है</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="48"/>
+        <location filename="../core/errorstrings.cpp" line="50"/>
         <source>Cloak (ck-client) executable missing</source>
         <translation>क्लोक (सीके-क्लाइंट) निष्पादन योग्य गायब है</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="49"/>
+        <location filename="../core/errorstrings.cpp" line="51"/>
         <source>Amnezia helper service error</source>
         <translation>Amnezia भूलने की बीमारी सहायक सेवा त्रुटि</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="50"/>
+        <location filename="../core/errorstrings.cpp" line="52"/>
         <source>OpenSSL failed</source>
         <translation>ओपनएसएसएल विफल रहा</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="53"/>
+        <location filename="../core/errorstrings.cpp" line="55"/>
         <source>Can&apos;t connect: another VPN connection is active</source>
         <translation>कनेक्ट नहीं हो सकता: कोई अन्य वीपीएन कनेक्शन सक्रिय है</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="54"/>
+        <location filename="../core/errorstrings.cpp" line="56"/>
         <source>Can&apos;t setup OpenVPN TAP network adapter</source>
         <translation>OpenVPN TAP नेटवर्क एडाप्टर सेटअप नहीं कर सकता</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="55"/>
+        <location filename="../core/errorstrings.cpp" line="57"/>
         <source>VPN pool error: no available addresses</source>
         <translation>VPN pool error: لا يوجد عنواين مٌتاحة</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="57"/>
+        <location filename="../core/errorstrings.cpp" line="59"/>
         <source>The config does not contain any containers and credentials for connecting to the server</source>
         <translation>कॉन्फ़िगरेशन में सर्वर से कनेक्ट करने के लिए कोई कंटेनर और क्रेडेंशियल नहीं है</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="77"/>
+        <location filename="../core/errorstrings.cpp" line="81"/>
         <source>QFile error: The file could not be opened</source>
         <translation>Qफ़ाइल त्रुटि: फ़ाइल खोली नहीं जा सकी</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="78"/>
+        <location filename="../core/errorstrings.cpp" line="82"/>
         <source>QFile error: An error occurred when reading from the file</source>
         <translation>Qफ़ाइल त्रुटि: फ़ाइल से पढ़ते समय एक त्रुटि उत्पन्न हुई</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="79"/>
+        <location filename="../core/errorstrings.cpp" line="83"/>
         <source>QFile error: The file could not be accessed</source>
         <translation>Qफ़ाइल त्रुटि: फ़ाइल तक नहीं पहुंचा जा सका</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="80"/>
+        <location filename="../core/errorstrings.cpp" line="84"/>
         <source>QFile error: An unspecified error occurred</source>
         <translation>Qफ़ाइल त्रुटि: एक अनिर्दिष्ट त्रुटि उत्पन्न हुई</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="81"/>
+        <location filename="../core/errorstrings.cpp" line="85"/>
         <source>QFile error: A fatal error occurred</source>
         <translation>Qफ़ाइल त्रुटि: एक घातक त्रुटि उत्पन्न हुई</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="82"/>
+        <location filename="../core/errorstrings.cpp" line="86"/>
         <source>QFile error: The operation was aborted</source>
         <translation>Qफ़ाइल त्रुटि: ऑपरेशन निरस्त कर दिया गया था</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="86"/>
+        <location filename="../core/errorstrings.cpp" line="90"/>
         <source>Internal error</source>
         <translation>आंतरिक त्रुटि</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="98"/>
+        <location filename="../containers/containers_defs.cpp" line="99"/>
         <source>IPsec</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="101"/>
-        <location filename="../containers/containers_defs.cpp" line="236"/>
+        <location filename="../containers/containers_defs.cpp" line="102"/>
+        <location filename="../containers/containers_defs.cpp" line="225"/>
         <source>Website in Tor network</source>
         <translation>टोर नेटवर्क में वेबसाइट</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="102"/>
+        <location filename="../containers/containers_defs.cpp" line="103"/>
         <source>AmneziaDNS</source>
         <translation>AmneziaDNS</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="103"/>
+        <location filename="../containers/containers_defs.cpp" line="104"/>
         <source>SFTP file sharing service</source>
         <translation>SFTP फ़ाइल साझाकरण सेवा</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="110"/>
+        <location filename="../containers/containers_defs.cpp" line="106"/>
+        <source>CryptPad collaborative editor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="112"/>
         <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
         <translation>लचीले कॉन्फ़िगरेशन विकल्पों के साथ ओपनवीपीएन सबसे लोकप्रिय वीपीएन प्रोटोकॉल है। यह कुंजी विनिमय के लिए एसएसएल/टीएलएस के साथ अपने स्वयं के सुरक्षा प्रोटोकॉल का उपयोग करता है.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="113"/>
+        <location filename="../containers/containers_defs.cpp" line="115"/>
         <source>Shadowsocks masks VPN traffic, making it resemble normal web traffic, but it may still be detected by certain analysis systems.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="115"/>
+        <location filename="../containers/containers_defs.cpp" line="117"/>
         <source>OpenVPN over Cloak - OpenVPN with VPN masquerading as web traffic and protection against active-probing detection. It is very resistant to detection, but offers low speed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="118"/>
+        <location filename="../containers/containers_defs.cpp" line="120"/>
         <source>WireGuard - popular VPN protocol with high performance, high speed and low power consumption.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="121"/>
+        <location filename="../containers/containers_defs.cpp" line="123"/>
         <source>AmneziaWG is a special protocol from Amnezia based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="124"/>
+        <location filename="../containers/containers_defs.cpp" line="126"/>
         <source>XRay with REALITY masks VPN traffic as web traffic and protects against active probing. It is highly resistant to detection and offers high speed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="143"/>
-        <source>OpenVPN stands as one of the most popular and time-tested VPN protocols available.
-It employs its unique security protocol, leveraging the strength of SSL/TLS for encryption and key exchange. Furthermore, OpenVPN&apos;s support for a multitude of authentication methods makes it versatile and adaptable, catering to a wide range of devices and operating systems. Due to its open-source nature, OpenVPN benefits from extensive scrutiny by the global community, which continually reinforces its security. With a strong balance of performance, security, and compatibility, OpenVPN remains a top choice for privacy-conscious individuals and businesses alike.
-
-* Available in the AmneziaVPN across all platforms
-* Normal power consumption on mobile devices
-* Flexible customisation to suit user needs to work with different operating systems and devices
-* Recognised by DPI systems and therefore susceptible to blocking
-* Can operate over both TCP and UDP network protocols.</source>
+        <location filename="../containers/containers_defs.cpp" line="138"/>
+        <source></source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="168"/>
-        <source>This is a combination of the OpenVPN protocol and the Cloak plugin designed specifically for protecting against detection.
+        <location filename="../containers/containers_defs.cpp" line="140"/>
+        <source>CryptPad is a collaborative editor that allows you to create and edit documents, spreadsheets, and presentations securely and privately.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="147"/>
+        <source>OpenVPN is one of the most popular and reliable VPN protocols. It uses SSL/TLS encryption, supports a wide variety of devices and operating systems, and is continuously improved by the community due to its open-source nature. It provides a good balance between speed and security but is easily recognized by DPI systems, making it susceptible to blocking.
 
-OpenVPN provides a secure VPN connection by encrypting all internet traffic between the client and the server.
+Features:
+* Available on all AmneziaVPN platforms
+* Normal battery consumption on mobile devices
+* Flexible customization for various devices and OS
+* Operates over both TCP and UDP protocols</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="158"/>
+        <source>Shadowsocks is based on the SOCKS5 protocol and encrypts connections using AEAD cipher. Although designed to be discreet, it doesn&apos;t mimic a standard HTTPS connection and can be detected by some DPI systems. Due to limited support in Amnezia, we recommend using the AmneziaWG protocol.
 
-Cloak protects OpenVPN from detection. 
-
-Cloak can modify packet metadata so that it completely masks VPN traffic as normal web traffic, and also protects the VPN from detection by Active Probing. This makes it very resistant to being detected
-
-Immediately after receiving the first data packet, Cloak authenticates the incoming connection. If authentication fails, the plugin masks the server as a fake website and your VPN becomes invisible to analysis systems.
-
-* Available in the AmneziaVPN across all platforms
-* High power consumption on mobile devices
-* Flexible settings
-* Not recognised by detection systems
-* Works over TCP network protocol, 443 port.
+Features:
+* Available in AmneziaVPN only on desktop platforms
+* Customizable encryption protocol
+* Detectable by some DPI systems
+* Operates over TCP protocol
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="185"/>
-        <source>A relatively new popular VPN protocol with a simplified architecture.
-WireGuard provides stable VPN connection and high performance on all devices. It uses hard-coded encryption settings. WireGuard compared to OpenVPN has lower latency and better data transfer throughput.
-WireGuard is very susceptible to detection and blocking due to its distinct packet signatures. Unlike some other VPN protocols that employ obfuscation techniques, the consistent signature patterns of WireGuard packets can be more easily identified and thus blocked by advanced Deep Packet Inspection (DPI) systems and other network monitoring tools.
+        <location filename="../containers/containers_defs.cpp" line="167"/>
+        <source>This combination includes the OpenVPN protocol and the Cloak plugin, specifically designed to protect against blocking.
 
-* Available in the AmneziaVPN across all platforms
-* Low power consumption
-* Minimum number of settings
-* Easily recognised by DPI analysis systems, susceptible to blocking
-* Works over UDP network protocol.</source>
+OpenVPN securely encrypts all internet traffic between your device and the server.
+
+The Cloak plugin further protects the connection from DPI detection. It modifies traffic metadata to disguise VPN traffic as regular web traffic and prevents detection through active probing. If an incoming connection fails authentication, Cloak serves a fake website, making your VPN invisible to traffic analysis systems.
+
+In regions with heavy internet censorship, we strongly recommend using OpenVPN with Cloak from your first connection.
+
+Features:
+* Available on all AmneziaVPN platforms
+* High power consumption on mobile devices
+* Flexible configuration options
+* Undetectable by DPI systems
+* Operates over TCP protocol on port 443</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="198"/>
-        <source>A modern iteration of the popular VPN protocol, AmneziaWG builds upon the foundation set by WireGuard, retaining its simplified architecture and high-performance capabilities across devices.
-While WireGuard is known for its efficiency, it had issues with being easily detected due to its distinct packet signatures. AmneziaWG solves this problem by using better obfuscation methods, making its traffic blend in with regular internet traffic.
-This means that AmneziaWG keeps the fast performance of the original while adding an extra layer of stealth, making it a great choice for those wanting a fast and discreet VPN connection.
+        <location filename="../containers/containers_defs.cpp" line="180"/>
+        <source>WireGuard is a modern, streamlined VPN protocol offering stable connectivity and excellent performance across all devices. It uses fixed encryption settings, delivering lower latency and higher data transfer speeds compared to OpenVPN. However, WireGuard is easily identifiable by DPI systems due to its distinctive packet signatures, making it susceptible to blocking.
 
-* Available in the AmneziaVPN across all platforms
-* Low power consumption
-* Minimum number of settings
-* Not recognised by traffic analysis systems
-* Works over UDP network protocol.</source>
+Features:
+* Available on all AmneziaVPN platforms
+* Low power consumption on mobile devices
+* Minimal configuration required
+* Easily detected by DPI systems (susceptible to blocking)
+* Operates over UDP protocol</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="214"/>
-        <source>The REALITY protocol, a pioneering development by the creators of XRay, is designed to provide the highest level of protection against detection through its innovative approach to security and privacy.
-It uniquely identifies attackers during the TLS handshake phase, seamlessly operating as a proxy for legitimate clients while diverting attackers to genuine websites, thus presenting an authentic TLS certificate and data. 
-This advanced capability differentiates REALITY from similar technologies by its ability to disguise web traffic as coming from random, legitimate sites without the need for specific configurations. 
-Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REALITY&apos;s innovative &quot;friend or foe&quot; recognition at the TLS handshake enhances security. This makes REALITY a robust solution for maintaining internet freedom.</source>
+        <location filename="../containers/containers_defs.cpp" line="190"/>
+        <source>AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
+
+AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
+
+Features:
+* Available on all AmneziaVPN platforms
+* Low battery consumption on mobile devices
+* Minimal settings required
+* Undetectable by traffic analysis systems (DPI)
+* Operates over UDP protocol</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="202"/>
+        <source>REALITY is an innovative protocol developed by the creators of XRay, designed specifically to combat high levels of internet censorship. REALITY identifies censorship systems during the TLS handshake, redirecting suspicious traffic seamlessly to legitimate websites like google.com while providing genuine TLS certificates. This allows VPN traffic to blend indistinguishably with regular web traffic without special configuration.
+Unlike older protocols such as VMess, VLESS, and XTLS-Vision, REALITY incorporates an advanced built-in &quot;friend-or-foe&quot; detection mechanism, effectively protecting against DPI and other traffic analysis methods.
+
+Features:
+* Resistant to active probing and DPI detection
+* No special configuration required to disguise traffic
+* Highly effective in heavily censored regions
+* Minimal battery consumption on devices
+* Operates over TCP protocol</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="215"/>
+        <source>IKEv2, combined with IPSec encryption, is a modern and reliable VPN protocol. It reconnects quickly when switching networks or devices, making it ideal for dynamic network environments. While it provides good security and speed, it&apos;s easily recognized by DPI systems and susceptible to blocking.
+
+Features:
+* Available in AmneziaVPN only on Windows
+* Low battery consumption on mobile devices
+* Minimal configuration required
+* Detectable by DPI analysis systems(easily blocked)
+* Operates over UDP protocol(ports 500 and 4500)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="234"/>
+        <source>CryptPad is a collaborative editor that allows you to create and edit documents, spreadsheets, and presentations securely and privately. It is designed to be end-to-end encrypted and open-source.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4173,12 +4595,12 @@ Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REAL
         <translation type="vanished">वास्तविकता के साथ एक्सरे - उच्चतम स्तर की इंटरनेट सेंसरशिप वाले देशों के लिए उपयुक्त। टीएलएस स्तर पर ट्रैफ़िक को वेब ट्रैफ़िक के रूप में छिपाया जाता है, और सक्रिय जांच विधियों द्वारा पता लगाने से सुरक्षा प्रदान की जाती है.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="127"/>
+        <location filename="../containers/containers_defs.cpp" line="129"/>
         <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="134"/>
+        <location filename="../containers/containers_defs.cpp" line="136"/>
         <source>Create a file vault on your server to securely store and transfer files.</source>
         <translation>फ़ाइलों को सुरक्षित रूप से संग्रहीत और स्थानांतरित करने के लिए अपने सर्वर पर एक फ़ाइल वॉल्ट बनाएं.</translation>
     </message>
@@ -4241,7 +4663,7 @@ WireGuard is very susceptible to blocking due to its distinct packet signatures.
 * यूडीपी नेटवर्क प्रोटोकॉल पर काम करता है।.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="239"/>
+        <location filename="../containers/containers_defs.cpp" line="228"/>
         <source>After installation, Amnezia will create a
 
  file storage on your server. You will be able to access it using
@@ -4272,12 +4694,12 @@ For more detailed information, you can
         <translation type="vanished">IKEv2/IPsec - आधुनिक स्थिर प्रोटोकॉल, दूसरों की तुलना में थोड़ा तेज़, सिग्नल हानि के बाद कनेक्शन पुनर्स्थापित करता है।</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="130"/>
+        <location filename="../containers/containers_defs.cpp" line="132"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
         <translation>दो क्लिक में टोर नेटवर्क पर एक वर्डप्रेस साइट तैनात करें।.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="132"/>
+        <location filename="../containers/containers_defs.cpp" line="134"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
         <translation>वर्तमान DNS सर्वर को अपने स्वयं के DNS सर्वर से बदलें। इससे आपकी गोपनीयता का स्तर बढ़ जाएगा.</translation>
     </message>
@@ -4300,14 +4722,13 @@ It employs its unique security protocol, leveraging the strength of SSL/TLS for 
 * टीसीपी और यूडीपी दोनों नेटवर्क प्रोटोकॉल पर काम कर सकता है।.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="159"/>
         <source>Shadowsocks, inspired by the SOCKS5 protocol, safeguards the connection using the AEAD cipher. Although Shadowsocks is designed to be discreet and challenging to identify, it isn&apos;t identical to a standard HTTPS connection.However, certain traffic analysis systems might still detect a Shadowsocks connection. Due to limited support in Amnezia, it&apos;s recommended to use AmneziaWG protocol.
 
 * Available in the AmneziaVPN only on desktop platforms
 * Configurable encryption protocol
 * Detectable by some DPI systems
 * Works over TCP network protocol.</source>
-        <translation>शैडोसॉक्स, SOCKS5 प्रोटोकॉल से प्रेरित होकर, AEAD सिफर का उपयोग करके कनेक्शन की सुरक्षा करता है। हालाँकि शैडोसॉक्स को विवेकपूर्ण और पहचानने में चुनौतीपूर्ण बनाया गया है, यह एक मानक HTTPS कनेक्शन के समान नहीं है। हालाँकि, कुछ ट्रैफ़िक विश्लेषण प्रणालियाँ अभी भी शैडोसॉक्स कनेक्शन का पता लगा सकती हैं। Amnezia में सीमित समर्थन के कारण, AmneziaWG प्रोटोकॉल का उपयोग करने की अनुशंसा की जाती है।
+        <translation type="vanished">शैडोसॉक्स, SOCKS5 प्रोटोकॉल से प्रेरित होकर, AEAD सिफर का उपयोग करके कनेक्शन की सुरक्षा करता है। हालाँकि शैडोसॉक्स को विवेकपूर्ण और पहचानने में चुनौतीपूर्ण बनाया गया है, यह एक मानक HTTPS कनेक्शन के समान नहीं है। हालाँकि, कुछ ट्रैफ़िक विश्लेषण प्रणालियाँ अभी भी शैडोसॉक्स कनेक्शन का पता लगा सकती हैं। Amnezia में सीमित समर्थन के कारण, AmneziaWG प्रोटोकॉल का उपयोग करने की अनुशंसा की जाती है।
 
 * AmneziaVPN केवल डेस्कटॉप प्लेटफ़ॉर्म पर उपलब्ध है
 * कॉन्फ़िगर करने योग्य एन्क्रिप्शन प्रोटोकॉल
@@ -4345,7 +4766,6 @@ Unlike older protocols such as VMess, VLESS, and the XTLS-Vision transport, REAL
 VMess, VLESS और XTLS-Vision ट्रांसपोर्ट जैसे पुराने प्रोटोकॉल के विपरीत, TLS हैंडशेक पर REALITY की अभिनव &quot;दोस्त या दुश्मन&quot; पहचान सुरक्षा को बढ़ाती है और सक्रिय जांच तकनीकों को नियोजित करने वाले परिष्कृत DPI सिस्टम द्वारा पहचान को रोकती है। यह REALITY को कठोर सेंसरशिप वाले वातावरण में इंटरनेट की स्वतंत्रता बनाए रखने के लिए एक मजबूत समाधान बनाता है.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="225"/>
         <source>IKEv2, paired with the IPSec encryption layer, stands as a modern and stable VPN protocol.
 One of its distinguishing features is its ability to swiftly switch between networks and devices, making it particularly adaptive in dynamic network environments. 
 While it offers a blend of security, stability, and speed, it&apos;s essential to note that IKEv2 can be easily detected and is susceptible to blocking.
@@ -4355,7 +4775,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * Minimal configuration
 * Recognised by DPI analysis systems
 * Works over UDP network protocol, ports 500 and 4500.</source>
-        <translation>IKEv2, IPSec एन्क्रिप्शन परत के साथ मिलकर, एक आधुनिक और स्थिर वीपीएन प्रोटोकॉल के रूप में खड़ा है।
+        <translation type="vanished">IKEv2, IPSec एन्क्रिप्शन परत के साथ मिलकर, एक आधुनिक और स्थिर वीपीएन प्रोटोकॉल के रूप में खड़ा है।
 इसकी विशिष्ट विशेषताओं में से एक नेटवर्क और उपकरणों के बीच तेजी से स्विच करने की क्षमता है, जो इसे गतिशील नेटवर्क वातावरण में विशेष रूप से अनुकूली बनाती है।
 हालाँकि यह सुरक्षा, स्थिरता और गति का मिश्रण प्रदान करता है, यह ध्यान रखना आवश्यक है कि IKEv2 को आसानी से पहचाना जा सकता है और अवरुद्ध होने की संभावना है।
 
@@ -4366,7 +4786,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 * यूडीपी नेटवर्क प्रोटोकॉल, पोर्ट 500 और 4500 पर काम करता है.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="237"/>
+        <location filename="../containers/containers_defs.cpp" line="226"/>
         <source>DNS Service</source>
         <translation>DNS सेवाएँ</translation>
     </message>
@@ -4603,12 +5023,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>SettingsController</name>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="148"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="175"/>
         <source>Backup file is corrupted</source>
         <translation>बैकअप फ़ाइल दूषित है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/settingsController.cpp" line="170"/>
+        <location filename="../ui/controllers/settingsController.cpp" line="199"/>
         <source>All settings have been reset to default values</source>
         <translation>सभी सेटिंग्स को डिफ़ॉल्ट मानों पर रीसेट कर दिया गया है</translation>
     </message>
@@ -4740,7 +5160,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnconnection.cpp" line="421"/>
+        <location filename="../vpnconnection.cpp" line="482"/>
         <source>Mbps</source>
         <translation></translation>
     </message>
@@ -4815,12 +5235,12 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <translation type="vanished">अधिकांश वीपीएन प्रोटोकॉल अवरुद्ध हैं। यदि अन्य विकल्प काम नहीं कर रहे हों तो अनुशंसित.</translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="338"/>
+        <location filename="../containers/containers_defs.cpp" line="332"/>
         <source>Automatic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../containers/containers_defs.cpp" line="346"/>
+        <location filename="../containers/containers_defs.cpp" line="340"/>
         <source>AmneziaWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation type="unfinished"></translation>
     </message>

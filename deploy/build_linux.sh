@@ -57,34 +57,54 @@ gcc -v
 
 # Build App
 echo "Building App..."
-cd $BUILD_DIR
 
-$QT_BIN_DIR/qt-cmake -S $PROJECT_DIR
-cmake --build . -j --config release
+# Clean up Docker environment before building
+echo "Cleaning up Docker environment..."
+sudo docker system prune -a -f --volumes || true
+sudo docker rmi amneziavpn/cryptpad || true
+
+# Debugging: List contents of cryptpad build context before CMake build
+echo "Contents of client/server_scripts/cryptpad/ before build:"
+ls -R "$PROJECT_DIR"/client/server_scripts/cryptpad/
+
+# Copy CryptPad source to Docker build context
+echo "Copying CryptPad source to Docker build context"
+mkdir -p "$PROJECT_DIR"/client/server_scripts/cryptpad/cryptpad_source/
+rsync -a --exclude='.git' "$PROJECT_DIR"/../cryptpad/. "$PROJECT_DIR"/client/server_scripts/cryptpad/cryptpad_source/
+
+echo "Contents of cryptpad_source after copy:"
+ls -R "$PROJECT_DIR"/client/server_scripts/cryptpad/cryptpad_source/
+
+cd "$BUILD_DIR"
+
+$QT_BIN_DIR/qt-cmake -S "$PROJECT_DIR"
+cmake --build . -j1 --config release
 
 # Build and run tests here
 
 #echo "............Deploy.................."
 
-cp -r $DEPLOY_DATA_DIR/* $APP_DIR
-cp -r $PREBUILT_DEPLOY_DATA_DIR $APP_DIR/client
+cp -r "$DEPLOY_DATA_DIR"/* "$APP_DIR"
+cp -r "$PREBUILT_DEPLOY_DATA_DIR" "$APP_DIR"/client
 
-if [ ! -f $CQTDEPLOYER_DIR/cqtdeployer.sh ]; then
-  wget -O $TOOLS_DIR/CQtDeployer.zip https://github.com/QuasarApp/CQtDeployer/releases/download/v1.5.4.17/CQtDeployer_1.5.4.17_Linux_x86_64.zip
-  unzip -o $TOOLS_DIR/CQtDeployer.zip -d $CQTDEPLOYER_DIR/
-  chmod +x -R $CQTDEPLOYER_DIR
+if [ ! -f "$CQTDEPLOYER_DIR"/cqtdeployer.sh ]; then
+  mkdir -p "$TOOLS_DIR" # Ensure TOOLS_DIR exists right before download/move
+  curl -L -o /tmp/CQtDeployer.zip https://github.com/QuasarApp/CQtDeployer/releases/download/v1.5.4.17/CQtDeployer_1.5.4.17_Linux_x86_64.zip
+  mv /tmp/CQtDeployer.zip "$TOOLS_DIR/CQtDeployer.zip"
+  unzip -o "$TOOLS_DIR/CQtDeployer.zip" -d "$CQTDEPLOYER_DIR"
+  chmod +x -R "$CQTDEPLOYER_DIR"
 fi
 
 
-$CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/client/AmneziaVPN -qmake $QT_BIN_DIR/qmake -qmlDir $PROJECT_DIR/client/ui/qml/ -targetDir $APP_DIR/client/
-$CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/service/server/AmneziaVPN-service -qmake $QT_BIN_DIR/qmake -targetDir $APP_DIR/service/
+"$CQTDEPLOYER_DIR"/cqtdeployer.sh -bin "$BUILD_DIR"/client/AmneziaVPN -qmake "$QT_BIN_DIR"/qmake -qmlDir "$PROJECT_DIR"/client/ui/qml/ -targetDir "$APP_DIR"/client/
+"$CQTDEPLOYER_DIR"/cqtdeployer.sh -bin "$BUILD_DIR"/service/server/AmneziaVPN-service -qmake "$QT_BIN_DIR"/qmake -targetDir "$APP_DIR"/service/
 
-rm -f $INSTALLER_DATA_DIR/data.7z
+rm -f "$INSTALLER_DATA_DIR"/data.7z
 
-7z a $INSTALLER_DATA_DIR/data.7z $APP_DIR/*
+7z a "$INSTALLER_DATA_DIR"/data.7z "$APP_DIR"/*
 
-ldd $CQTDEPLOYER_DIR/bin/binarycreator
+ldd "$CQTDEPLOYER_DIR"/bin/binarycreator
 
-cp -r $PROJECT_DIR/deploy/installer $BUILD_DIR
+cp -r "$PROJECT_DIR"/deploy/installer "$BUILD_DIR"
 
-$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer.bin
+"$CQTDEPLOYER_DIR"/binarycreator.sh --offline-only -v -c "$BUILD_DIR"/installer/config/linux.xml -p "$BUILD_DIR"/installer/packages -f "$PROJECT_DIR"/deploy/AmneziaVPN_Linux_Installer.bin

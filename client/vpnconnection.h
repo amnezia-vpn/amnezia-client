@@ -63,6 +63,7 @@ signals:
     void vpnProtocolError(amnezia::ErrorCode error);
 
     void serviceIsNotReady();
+    void cryptPadOnionAddressChanged(const QString &address);
 
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
@@ -76,6 +77,8 @@ private:
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;
+    DockerContainer m_currentContainer = DockerContainer::None;
+    QString m_cryptPadOnionAddress; // New member to store CryptPad onion address
 
     // Only for iOS for now, check counters
     QTimer m_checkTimer;

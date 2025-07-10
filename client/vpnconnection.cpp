@@ -16,6 +16,7 @@
     #include "core/ipcclient.h"
     #include "ipc.h"
     #include <protocols/wireguardprotocol.h>
+    #include <QRemoteObjectReplica> // Added for QRemoteObjectReplica::NoError
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -259,6 +260,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     emit connectionStateChanged(Vpn::ConnectionState::Connecting);
 
     m_vpnConfiguration = vpnConfiguration;
+    m_currentContainer = container; // Set the current container
 
 #ifdef AMNEZIA_DESKTOP
     if (m_vpnProtocol) {
@@ -272,6 +274,41 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     appendSplitTunnelingConfig();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    if (container == DockerContainer::CryptPad) {
+        qDebug() << "Starting CryptPad container...";
+
+        QString scriptPath = "/home/gafir/Рабочий стол/task/amnezia-client/client/server_scripts/cryptpad/run_container.sh";
+        QStringList arguments; // No specific arguments needed for run_container.sh itself
+        QString workingDirectory = "/home/gafir/Рабочий стол/task/amnezia-client/client/server_scripts/cryptpad/";
+
+        // Execute the script and get the output (which should contain the .onion address)
+        QRemoteObjectPendingReply<QString> reply = IpcClient::Interface()->runScript(scriptPath, arguments, workingDirectory);
+        reply.waitForFinished(); // Wait for the script to finish
+
+        if (reply.error() != QRemoteObjectPendingReply<QString>::NoError) {
+            qWarning() << "Error running CryptPad container script. Error code:" << reply.error();
+            emit connectionStateChanged(Vpn::ConnectionState::Error);
+            return;
+        }
+
+        QString scriptOutput = reply.returnValue();
+        qDebug() << "CryptPad run_container.sh output:" << scriptOutput;
+
+        // Parse the output to find the .onion address
+        // The docker-entrypoint.sh prints "Generated Tor Hidden Service Address: <address>"
+        QRegExp rx("Generated Tor Hidden Service Address: (.*)");
+        if (rx.indexIn(scriptOutput) != -1) {
+            QString onionAddress = rx.cap(1).trimmed();
+            qDebug() << "Extracted CryptPad .onion address:" << onionAddress;
+            m_cryptPadOnionAddress = onionAddress; // Store the onion address
+            emit cryptPadOnionAddressChanged(onionAddress); // Emit signal for UI
+            emit connectionStateChanged(Vpn::ConnectionState::Connected);
+        } else {
+            qWarning() << "Could not find .onion address in script output.";
+            emit connectionStateChanged(Vpn::ConnectionState::Error);
+        }
+        return;
+    }
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
     if (!m_vpnProtocol) {
         emit connectionStateChanged(Vpn::ConnectionState::Error);
@@ -440,6 +477,25 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 void VpnConnection::disconnectFromVpn()
 {
 #ifdef AMNEZIA_DESKTOP
+    if (m_currentContainer == DockerContainer::CryptPad) {
+        qDebug() << "Stopping CryptPad container...";
+        QString scriptPath = "/home/gafir/Рабочий стол/task/amnezia-client/client/server_scripts/cryptpad/stop_container.sh";
+        QStringList arguments;
+        QString workingDirectory = "/home/gafir/Рабочий стол/task/amnezia-client/client/server_scripts/cryptpad/";
+
+        QRemoteObjectPendingReply<QString> reply = IpcClient::Interface()->runScript(scriptPath, arguments, workingDirectory);
+        reply.waitForFinished();
+
+        if (reply.error() != QRemoteObjectPendingReply<QString>::NoError) {
+            qWarning() << "Error stopping CryptPad container script. Error code:" << reply.error();
+        } else {
+            qDebug() << "CryptPad stop_container.sh output:" << reply.returnValue();
+        }
+        m_currentContainer = DockerContainer::None; // Reset current container
+        emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
+        return;
+    }
+
     QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
     if (IpcClient::Interface()) {
         IpcClient::Interface()->flushDns();
