@@ -192,7 +192,14 @@ bool KillSwitch::addAllowedRange(const QStringList &ranges) {
 bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
 #ifdef Q_OS_WIN
     InterfaceConfig config;
-    config.m_dnsServer = configStr.value(amnezia::config_key::dns1).toString();
+
+    config.m_primaryDnsServer = configStr.value(amnezia::config_key::dns1).toString();
+
+    // We don't use secondary DNS if primary DNS is AmneziaDNS
+    if (!config.m_primaryDnsServer.contains(amnezia::protocols::dns::amneziaDnsIp)) {
+        config.m_secondaryDnsServer = configStr.value(amnezia::config_key::dns2).toString();
+    }
+
     config.m_serverPublicKey = "openvpn";
     config.m_serverIpv4Gateway = configStr.value("vpnGateway").toString();
     config.m_serverIpv4AddrIn = configStr.value("vpnServer").toString();
@@ -307,8 +314,14 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
     QStringList dnsServers;
+
     dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
-    dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+
+    // We don't use secondary DNS if primary DNS is AmneziaDNS
+    if (!configStr.value(amnezia::config_key::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
+        dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+    }
+
     dnsServers.append("127.0.0.1");
     dnsServers.append("127.0.0.53");
     
@@ -345,7 +358,11 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
 
     QStringList dnsServers;
     dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
-    dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+
+    // We don't use secondary DNS if primary DNS is AmneziaDNS
+    if (!configStr.value(amnezia::config_key::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
+        dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+    }
     
     for (auto dns : configStr.value(amnezia::config_key::allowedDnsServers).toArray()) {
         if (!dns.isString()) {

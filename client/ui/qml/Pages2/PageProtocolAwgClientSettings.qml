@@ -115,14 +115,10 @@ PageType {
                     KeyNavigation.tab: junkPacketCountTextField.textField
                 }
 
-                TextFieldWithHeaderType {
+                AwgTextField {
                     id: junkPacketCountTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
                     headerText: "Jc - Junk packet count"
                     textField.text: clientJunkPacketCount
-                    textField.validator: IntValidator { bottom: 0 }
 
                     textField.onEditingFinished: {
                         if (textField.text !== clientJunkPacketCount) {
@@ -130,19 +126,13 @@ PageType {
                         }
                     }
 
-                    checkEmptyText: true
-
                     KeyNavigation.tab: junkPacketMinSizeTextField.textField
                 }
 
-                TextFieldWithHeaderType {
+                AwgTextField {
                     id: junkPacketMinSizeTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
                     headerText: "Jmin - Junk packet minimum size"
                     textField.text: clientJunkPacketMinSize
-                    textField.validator: IntValidator { bottom: 0 }
 
                     textField.onEditingFinished: {
                         if (textField.text !== clientJunkPacketMinSize) {
@@ -150,28 +140,144 @@ PageType {
                         }
                     }
 
-                    checkEmptyText: true
-
                     KeyNavigation.tab: junkPacketMaxSizeTextField.textField
                 }
 
-                TextFieldWithHeaderType {
+                AwgTextField {
                     id: junkPacketMaxSizeTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
                     headerText: "Jmax - Junk packet maximum size"
                     textField.text: clientJunkPacketMaxSize
-                    textField.validator: IntValidator { bottom: 0 }
 
                     textField.onEditingFinished: {
                         if (textField.text !== clientJunkPacketMaxSize) {
                             clientJunkPacketMaxSize = textField.text
                         }
                     }
+                }
 
-                    checkEmptyText: true
+                AwgTextField {
+                    id: specialJunk1TextField
+                    headerText: qsTr("I1 - First special junk packet")
+                    textField.text: clientSpecialJunk1
+                    textField.validator: null
+                    checkEmptyText: false
 
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialJunk1) {
+                            clientSpecialJunk1 = textField.text
+                        }
+                    }
+                }
+
+                AwgTextField {
+                    id: specialJunk2TextField
+                    headerText: qsTr("I2 - Second special junk packet")
+                    textField.text: clientSpecialJunk2
+                    textField.validator: null
+                    checkEmptyText: false
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialJunk2) {
+                            clientSpecialJunk2 = textField.text
+                        }
+                    }
+                }
+
+                AwgTextField {
+                    id: specialJunk3TextField
+                    headerText: qsTr("I3 - Third special junk packet")
+                    textField.text: clientSpecialJunk3
+                    textField.validator: null
+                    checkEmptyText: false
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialJunk3) {
+                            clientSpecialJunk3 = textField.text
+                        }
+                    }
+                }
+
+                AwgTextField {
+                    id: specialJunk4TextField
+                    headerText: qsTr("I4 - Fourth special junk packet")
+                    textField.text: clientSpecialJunk4
+                    textField.validator: null
+                    checkEmptyText: false
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialJunk4) {
+                            clientSpecialJunk4 = textField.text
+                        }
+                    }
+                }
+
+                AwgTextField {
+                    id: specialJunk5TextField
+                    headerText: qsTr("I5 - Fifth special junk packet")
+                    textField.text: clientSpecialJunk5
+                    textField.validator: null
+                    checkEmptyText: false
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialJunk5 ) {
+                            clientSpecialJunk5 = textField.text
+                        }
+                    }
+                }
+
+                AwgTextField {
+                    id: controlledJunk1TextField
+                    headerText: qsTr("J1 - First controlled junk packet")
+                    textField.text: clientControlledJunk1
+                    textField.validator: null
+                    checkEmptyText: false
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientControlledJunk1) {
+                            clientControlledJunk1 = textField.text
+                        }
+                    }
+                }
+
+                AwgTextField {
+                    id: controlledJunk2TextField
+                    headerText: qsTr("J2 - Second controlled junk packet")
+                    textField.text: clientControlledJunk2
+                    textField.validator: null
+                    checkEmptyText: false
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientControlledJunk2) {
+                            clientControlledJunk2 = textField.text
+                        }
+                    }
+                }
+
+                AwgTextField {
+                    id: controlledJunk3TextField
+                    headerText: qsTr("J3 - Third controlled junk packet")
+                    textField.text: clientControlledJunk3
+                    textField.validator: null
+                    checkEmptyText: false
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientControlledJunk3) {
+                            clientControlledJunk3 = textField.text
+                        }
+                    }
+                }
+
+                AwgTextField {
+                    id: iTimeTextField
+                    headerText: qsTr("Itime - Special handshake timeout")
+                    textField.text: clientSpecialHandshakeTimeout
+                    checkEmptyText: false
+
+                    textField.onEditingFinished: {
+                        if (textField.text !== clientSpecialHandshakeTimeout) {
+                            clientSpecialHandshakeTimeout = textField.text
+                        }
+                    }
                 }
 
                 Header2TextType {
@@ -181,82 +287,78 @@ PageType {
                     text: qsTr("Server settings")
                 }
 
-                TextFieldWithHeaderType {
+                AwgTextField {
                     id: portTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 8
-
                     enabled: false
 
                     headerText: qsTr("Port")
                     textField.text: port
                 }
 
-                TextFieldWithHeaderType {
+                AwgTextField {
                     id: initPacketJunkSizeTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
                     enabled: false
 
                     headerText: "S1 - Init packet junk size"
                     textField.text: serverInitPacketJunkSize
                 }
 
-                TextFieldWithHeaderType {
+                AwgTextField {
                     id: responsePacketJunkSizeTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
                     enabled: false
 
                     headerText: "S2 - Response packet junk size"
                     textField.text: serverResponsePacketJunkSize
                 }
 
-                TextFieldWithHeaderType {
-                    id: initPacketMagicHeaderTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
+                // AwgTextField {
+                //     id: cookieReplyPacketJunkSizeTextField
+                //     enabled: false
 
+                //     headerText: "S3 - Cookie Reply packet junk size"
+                //     textField.text: serverCookieReplyPacketJunkSize
+                // }
+
+                // AwgTextField {
+                //     id: transportPacketJunkSizeTextField
+                //     enabled: false
+
+                //     headerText: "S4 - Transport packet junk size"
+                //     textField.text: serverTransportPacketJunkSize
+                // }
+
+                AwgTextField {
+                    id: initPacketMagicHeaderTextField
                     enabled: false
 
                     headerText: "H1 - Init packet magic header"
                     textField.text: serverInitPacketMagicHeader
                 }
 
-                TextFieldWithHeaderType {
+                AwgTextField {
                     id: responsePacketMagicHeaderTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
                     enabled: false
 
                     headerText: "H2 - Response packet magic header"
                     textField.text: serverResponsePacketMagicHeader
                 }
 
-                TextFieldWithHeaderType {
+                AwgTextField {
                     id: underloadPacketMagicHeaderTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
                     enabled: false
 
                     headerText: "H3 - Underload packet magic header"
                     textField.text: serverUnderloadPacketMagicHeader
                 }
 
-                TextFieldWithHeaderType {
+                AwgTextField {
                     id: transportPacketMagicHeaderTextField
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-
                     enabled: false
 
                     headerText: "H4 - Transport packet magic header"
                     textField.text: serverTransportPacketMagicHeader
                 }
+
             }
         }
     }

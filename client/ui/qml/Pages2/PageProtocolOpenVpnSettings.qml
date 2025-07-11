@@ -58,10 +58,13 @@ PageType {
                 model: OpenVpnConfigModel             
 
                 delegate: Item {
-                    implicitWidth: listview.width
-                    implicitHeight: col.implicitHeight
+                    id: delegateItem
 
                     property alias vpnAddressSubnetTextField: vpnAddressSubnetTextField
+                    property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
+
+                    implicitWidth: listview.width
+                    implicitHeight: col.implicitHeight
 
                     ColumnLayout {
                         id: col
@@ -77,7 +80,6 @@ PageType {
 
                         BaseHeaderType {
                             Layout.fillWidth: true
-
                             headerText: qsTr("OpenVPN settings")
                         }
 
@@ -86,6 +88,8 @@ PageType {
 
                             Layout.fillWidth: true
                             Layout.topMargin: 32
+
+                            enabled: delegateItem.isEnabled
 
                             headerText: qsTr("VPN address subnet")
                             textField.text: subnetAddress
@@ -97,6 +101,8 @@ PageType {
                                     subnetAddress = textField.text
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         ParagraphTextType {
@@ -134,7 +140,7 @@ PageType {
                             Layout.topMargin: 40
                             parentFlickable: fl
 
-                            enabled: isPortEditable
+                            enabled: delegateItem.isEnabled
 
                             headerText: qsTr("Port")
                             textField.text: port
@@ -146,6 +152,8 @@ PageType {
                                     port = textField.text
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         SwitcherType {
@@ -388,26 +396,45 @@ PageType {
                         }
 
                         BasicButtonType {
-                            id: saveRestartButton
+                            id: saveButton
 
                             Layout.fillWidth: true
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
+                            enabled: vpnAddressSubnetTextField.errorText === "" &&
+                                     portTextField.errorText === ""
+
                             text: qsTr("Save")
                             parentFlickable: fl
 
-                            clickedFunc: function() {
+                            onClicked: function() {
                                 forceActiveFocus()
 
-                                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                                    return
-                                }
+                                var headerText = qsTr("Save settings?")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
 
-                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.updateContainer(OpenVpnConfigModel.getConfig())
+                                var yesButtonFunction = function() {
+                                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                        PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                        return
+                                    }
+
+                                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                                    InstallController.updateContainer(OpenVpnConfigModel.getConfig())
+                                }
+                                var noButtonFunction = function() {
+                                    if (!GC.isMobile()) {
+                                        saveButton.forceActiveFocus()
+                                    }
+                                }
+                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
+
+                            Keys.onEnterPressed: saveButton.clicked()
+                            Keys.onReturnPressed: saveButton.clicked()
                         }
                     }
                 }

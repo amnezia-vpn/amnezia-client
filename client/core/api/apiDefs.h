@@ -32,6 +32,7 @@ namespace apiDefs
         constexpr QLatin1String stackType("stack_type");
         constexpr QLatin1String serviceType("service_type");
         constexpr QLatin1String cliVersion("cli_version");
+        constexpr QLatin1String supportedProtocols("supported_protocols");
 
         constexpr QLatin1String vpnKey("vpn_key");
         constexpr QLatin1String config("config");
