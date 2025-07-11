@@ -31,8 +31,14 @@ Item {
         value: true
     }
 
+    ExpressionFilter {
+        id: awgLegacyFilter
+        // 2 - DockerContainer.AwgLegacy
+        expression: model.dockerContainer !== 2 || model.isInstalled
+    }
+
     function getWriteAccessProtocolsListFilters() {
-        return [vpnTypeFilter]
+        return [vpnTypeFilter, awgLegacyFilter]
     }
     function getReadAccessProtocolsListFilters() {
         return [vpnTypeFilter, installedFilter]
