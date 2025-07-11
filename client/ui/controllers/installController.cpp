@@ -371,8 +371,12 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                     containerConfig.insert(config_key::transport_proto, transportProto);
 
                     if (protocol == Proto::Awg) {
+                        QString configPath = amnezia::protocols::awg::serverConfigPath;
+                        if (container == DockerContainer::AwgLegacy) {
+                            configPath = amnezia::protocols::awg::serverLegacyConfigPath;
+                        }
                         QString serverConfig = serverController->getTextFileFromContainer(container, credentials,
-                                                                                          protocols::awg::serverConfigPath, errorCode);
+                                                          configPath, errorCode);
 
                         QMap<QString, QString> serverConfigMap;
                         auto serverConfigLines = serverConfig.split("\n");

@@ -17,6 +17,7 @@ namespace amnezia
         enum DockerContainer {
             None = 0,
             Awg,
+            AwgLegacy,
             WireGuard,
             OpenVpn,
             Cloak,

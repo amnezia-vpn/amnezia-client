@@ -701,7 +701,7 @@ void ImportController::processAmneziaConfig(QJsonObject &config)
     for (auto i = 0; i < containers.size(); i++) {
         auto container = containers.at(i).toObject();
         auto dockerContainer = ContainerProps::containerFromString(container.value(config_key::container).toString());
-        if (dockerContainer == DockerContainer::Awg || dockerContainer == DockerContainer::WireGuard) {
+        if (dockerContainer == DockerContainer::Awg || dockerContainer == DockerContainer::AwgLegacy || dockerContainer == DockerContainer::WireGuard) {
             auto containerConfig = container.value(ContainerProps::containerTypeToString(dockerContainer)).toObject();
             auto protocolConfig = containerConfig.value(config_key::last_config).toString();
             if (protocolConfig.isEmpty()) {
@@ -710,7 +710,7 @@ void ImportController::processAmneziaConfig(QJsonObject &config)
 
             QJsonObject jsonConfig = QJsonDocument::fromJson(protocolConfig.toUtf8()).object();
             jsonConfig[config_key::mtu] =
-                    dockerContainer == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+                    (dockerContainer == DockerContainer::Awg || dockerContainer == DockerContainer::AwgLegacy) ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
 
             containerConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
 

@@ -239,6 +239,11 @@
         <file>ui/qml/Components/ApiPremV1MigrationDrawer.qml</file>
         <file>ui/qml/Components/ApiPremV1SubListDrawer.qml</file>
         <file>ui/qml/Components/OtpCodeDrawer.qml</file>
+        <file>server_scripts/awg_legacy/configure_container.sh</file>
+        <file>server_scripts/awg_legacy/Dockerfile</file>
+        <file>server_scripts/awg_legacy/run_container.sh</file>
+        <file>server_scripts/awg_legacy/start.sh</file>
+        <file>server_scripts/awg_legacy/template.conf</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>
