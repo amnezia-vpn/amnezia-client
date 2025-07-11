@@ -1506,7 +1506,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="123"/>
         <source>Dev console</source>
-        <translation>Dev console</translation>
+        <translation>Консоль разработчика</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="142"/>
@@ -1942,7 +1942,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="304"/>
         <source>Cannot reload API config during active connection</source>
-        <translation>Невозможно перзагрузить API конфигурацию при активном соединении</translation>
+        <translation>Невозможно перезагрузить API конфигурацию при активном соединении</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="332"/>
@@ -2404,7 +2404,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="68"/>
         <source>Soft KillSwitch</source>
-        <translation>Soft KillSwitch</translation>
+        <translation>Мягкий KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
@@ -2414,7 +2414,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="88"/>
         <source>Strict KillSwitch</source>
-        <translation>Strict KillSwitch</translation>
+        <translation>Строгий KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="89"/>
@@ -3102,7 +3102,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="298"/>
         <source>Self-hosted VPN</source>
-        <translation>Self-hosted VPN</translation>
+        <translation>Собственный VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="299"/>
@@ -4184,7 +4184,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="73"/>
         <source>Failed to decrypt response payload</source>
-        <translation></translation>
+        <translation>Не удалось расшифровать данные ответа</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="74"/>
