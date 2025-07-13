@@ -27,6 +27,7 @@ public:
         EasySetupDescriptionRole,
         EasySetupOrderRole,
 
+        IsInstallationAllowedRole,
         IsInstalledRole,
         IsCurrentlyProcessedRole,
         IsDefaultRole,
@@ -56,6 +57,8 @@ public slots:
 
     bool hasInstalledServices();
     bool hasInstalledProtocols();
+
+    static bool isInstallationAllowed(DockerContainer container);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

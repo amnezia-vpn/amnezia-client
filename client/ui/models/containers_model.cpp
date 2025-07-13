@@ -37,6 +37,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case EasySetupHeaderRole: return ContainerProps::easySetupHeader(container);
     case EasySetupDescriptionRole: return ContainerProps::easySetupDescription(container);
     case EasySetupOrderRole: return ContainerProps::easySetupOrder(container);
+    case IsInstallationAllowedRole: return ContainersModel::isInstallationAllowed(container);
     case IsInstalledRole: return m_containers.contains(container);
     case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_processedContainerIndex);
     case IsSupportedRole: return ContainerProps::isSupportedByCurrentPlatform(container);
@@ -114,6 +115,11 @@ bool ContainersModel::hasInstalledProtocols()
     return false;
 }
 
+bool ContainersModel::isInstallationAllowed(DockerContainer container)
+{
+    return container != DockerContainer::AwgLegacy;
+}
+
 QHash<int, QByteArray> ContainersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -133,7 +139,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
     roles[IsSupportedRole] = "isSupported";
     roles[IsShareableRole] = "isShareable";
-
+    roles[IsInstallationAllowedRole] = "isInstallationAllowed";
     roles[InstallPageOrderRole] = "installPageOrder";
     return roles;
 }
