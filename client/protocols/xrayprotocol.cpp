@@ -98,8 +98,13 @@ ErrorCode XrayProtocol::startTun2Sock()
         if (vpnState == Vpn::ConnectionState::Connected) {
             setConnectionState(Vpn::ConnectionState::Connecting);
             QList<QHostAddress> dnsAddr;
+
             dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns1).toString()));
-            dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns2).toString()));
+            // We don't use secondary DNS if primary DNS is AmneziaDNS
+            if (!m_configData.value(amnezia::config_key::dns1).toString().
+                 contains(amnezia::protocols::dns::amneziaDnsIp)) {
+                dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns2).toString()));
+            }
 #ifdef Q_OS_WIN
             QThread::msleep(8000);
 #endif
@@ -134,7 +139,7 @@ ErrorCode XrayProtocol::startTun2Sock()
                     // killSwitch toggle
                     if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
                         if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
-                            IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
+                            IpcClient::Interface()->enableKillSwitch(m_configData, netInterfaces.at(i).index());
                         }
                         m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
                         m_configData.insert("vpnGateway", m_vpnGateway);

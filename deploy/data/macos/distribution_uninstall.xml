@@ -1,0 +1,13 @@
+<installer-gui-script minSpecVersion="1">
+    <title>Uninstall AmneziaVPN</title>
+    <options customize-install-button="always"/>
+    <welcome file="uninstall_welcome.html"/>
+    <conclusion file="uninstall_conclusion.html"/>
+    <choices-outline>
+        <line choice="uninstall"/>
+    </choices-outline>
+    <choice id="uninstall" title="Uninstall AmneziaVPN" start_selected="true">
+        <pkg-ref id="org.amneziavpn.uninstall"/>
+    </choice>
+    <pkg-ref id="org.amneziavpn.uninstall" auth="Root">AmneziaVPN_uninstall_component.pkg</pkg-ref>
+</installer-gui-script>
