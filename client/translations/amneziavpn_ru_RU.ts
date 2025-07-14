@@ -2460,14 +2460,6 @@ Thank you for staying with us!</source>
         <translation>Исключения для DNS</translation>
     </message>
     <message>
-        <source>DNS servers listed here will be excluded from KillSwitch restrictions and remain accessible when KillSwitch is active.</source>
-        <translation type="vanished">Перечисленные DNS-серверы будут исключены из ограничений KillSwitch и останутся доступными при активном KillSwitch.</translation>
-    </message>
-    <message>
-        <source>DNS servers from the list will remain accessible when KillSwitch is triggered</source>
-        <translation type="vanished">DNS-серверы из этого списка будут исключены из ограничений KillSwitch и останутся доступными при активном KillSwitch.</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="46"/>
         <source>DNS servers listed here will remain accessible when KillSwitch is active</source>
         <translation>DNS-серверы из этого списка останутся доступными при активном KillSwitch</translation>
@@ -2768,10 +2760,6 @@ Thank you for staying with us!</source>
         <source>Management</source>
         <translation>Управление</translation>
     </message>
-    <message>
-        <source>Data</source>
-        <translation type="vanished">Данные</translation>
-    </message>
 </context>
 <context>
     <name>PageSettingsServerProtocol</name>
@@ -2862,10 +2850,6 @@ Thank you for staying with us!</source>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="33"/>
         <source>Default server does not support split tunneling function</source>
         <translation>Сервер по умолчанию не поддерживает раздельное туннелирование</translation>
-    </message>
-    <message>
-        <source>Only the sites listed here will be accessed via VPN</source>
-        <translation type="vanished">Только адреса из списка должны открываться через VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="71"/>
@@ -4184,7 +4168,7 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../core/errorstrings.cpp" line="73"/>
         <source>Failed to decrypt response payload</source>
-        <translation></translation>
+        <translation>Не удалось расшифровать ответ полезной нагрузки</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="74"/>
@@ -4195,10 +4179,6 @@ Thank you for staying with us!</source>
         <location filename="../core/errorstrings.cpp" line="75"/>
         <source>The limit of allowed configurations per subscription has been exceeded</source>
         <translation>Превышен лимит разрешенных конфигураций для одной подписки</translation>
-    </message>
-    <message>
-        <source>A migration has error occurred. Please contact our technical support</source>
-        <translation type="vanished">Произошла ошибка миграции. Обратитесь в нашу техническую поддержку</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="81"/>
