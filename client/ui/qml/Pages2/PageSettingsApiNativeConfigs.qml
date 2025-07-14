@@ -38,6 +38,29 @@ PageType {
                 id: backButton
             }
 
+            WarningType {
+                id: warning
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 16
+
+                backGroundColor: AmneziaStyle.color.translucentRichBrown
+
+                textString: qsTr("Configurations have been updated for some countries. Download and install the updated configuration files")
+
+                iconPath: "qrc:/images/controls/alert-circle.svg"
+
+                visible: {
+                    for (let i = 0; i < ApiCountryModel.count; ++i) {
+                        if (ApiCountryModel.get(i).isWorkerExpired)
+                            return true;
+                    }
+                    return false;
+                }
+            }
+
             BaseHeaderType {
                 id: header
 
@@ -58,8 +81,9 @@ PageType {
                 Layout.topMargin: 6
 
                 text: countryName
-                descriptionText: isWorkerExpired ? qsTr("The configuration needs to be reissued") : ""
-                descriptionColor: AmneziaStyle.color.vibrantRed
+                descriptionText: isWorkerExpired ? qsTr("Download the update") : ""
+                hideDescription: false
+                descriptionColor: AmneziaStyle.color.mutedGray
 
                 leftImageSource: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
                 rightImageSource: isIssued ? "qrc:/images/controls/more-vertical.svg" : "qrc:/images/controls/download.svg"
