@@ -20,6 +20,7 @@ import "../Components"
 DrawerType2 {
     id: root
 
+    property bool showVpnKeyDialog: false
     property string headerText
     property string configContentHeaderText
     property string shareButtonText: qsTr("Share")
@@ -121,6 +122,81 @@ DrawerType2 {
 
                     Keys.onReturnPressed: { copyConfigTextButton.clicked() }
                     Keys.onEnterPressed: { copyConfigTextButton.clicked() }
+                }
+
+                Item { Layout.preferredHeight: 8 }
+
+                BasicButtonType {
+                    id: showVpnKeyButton
+                    Layout.fillWidth: true
+                    Layout.topMargin: 8
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+
+                    defaultColor: AmneziaStyle.color.transparent
+                    hoveredColor: AmneziaStyle.color.translucentWhite
+                    pressedColor: AmneziaStyle.color.sheerWhite
+                    disabledColor: AmneziaStyle.color.mutedGray
+                    textColor: AmneziaStyle.color.paleGray
+                    borderWidth: 1
+
+                    text: qsTr("Show VPN key text")
+                    leftImageSource: "qrc:/images/controls/eye.svg"
+                    onClicked: {
+                        PageController.showBusyIndicator(true)
+                        ApiConfigsController.prepareVpnKeyExport()
+                        PageController.showBusyIndicator(false)
+                        vpnKeyDialog.openTriggered()
+                    }
+                }
+
+                DrawerType2 {
+                    id: vpnKeyDialog
+                    parent: root.parent
+                    anchors.fill: parent
+                    expandedHeight: parent.height * 0.9
+
+                    onClosed: root.showVpnKeyDialog = false
+
+                    expandedStateContent: Item {
+                        implicitHeight: vpnKeyDialog.expandedHeight
+
+                        BackButtonType {
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.topMargin: 16
+                            backButtonFunction: function() { vpnKeyDialog.closeTriggered() }
+                        }
+
+                        ColumnLayout {
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.topMargin: 56
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 16
+
+                            Header2Type {
+                                Layout.fillWidth: true
+                                headerText: qsTr("Amnezia Premium Subscription key")
+                            }
+
+                            TextArea {
+                                Layout.fillWidth: true
+                                Layout.topMargin: 16
+                                readOnly: true
+                                color: AmneziaStyle.color.paleGray
+                                selectionColor: AmneziaStyle.color.richBrown
+                                selectedTextColor: AmneziaStyle.color.paleGray
+                                font.pixelSize: 16
+                                font.weight: Font.Medium
+                                font.family: "PT Root UI VF"
+                                text: ApiConfigsController.vpnKey
+                                wrapMode: Text.Wrap
+                                background: Rectangle { color: AmneziaStyle.color.transparent }
+                            }
+                        }
+                    }
                 }
 
                 BasicButtonType {

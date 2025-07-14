@@ -207,7 +207,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: warning.visible ? 16 : 32
 
-                visible: false //footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForAmneziaFree
 
                 text: qsTr("Subscription Key")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
@@ -230,12 +230,11 @@ PageType {
             }
 
             DividerType {
-                visible: false //footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForAmneziaFree
             }
 
             LabelWithButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: warning.visible ? 16 : 32
 
                 visible: footer.isVisibleForAmneziaFree
 
