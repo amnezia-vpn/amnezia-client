@@ -38,29 +38,6 @@ PageType {
                 id: backButton
             }
 
-            WarningType {
-                id: warning
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 16
-
-                backGroundColor: AmneziaStyle.color.translucentRichBrown
-
-                textString: qsTr("Configurations have been updated for some countries. Download and install the updated configuration files")
-
-                iconPath: "qrc:/images/controls/alert-circle.svg"
-
-                visible: {
-                    for (let i = 0; i < ApiCountryModel.count; ++i) {
-                        if (ApiCountryModel.get(i).isWorkerExpired)
-                            return true;
-                    }
-                    return false;
-                }
-            }
-
             BaseHeaderType {
                 id: header
 
