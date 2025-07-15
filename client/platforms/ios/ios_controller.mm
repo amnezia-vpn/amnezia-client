@@ -870,24 +870,17 @@ void IosController::purchaseProduct(const QString &productId,
                                                       const QString &errorString)> &&callback)
 {
     StoreKitController *controller = [StoreKitController sharedInstance];
+    __block auto cb = std::move(callback);
     [controller purchaseProduct:productId.toNSString() completion:^(BOOL s,
-                                                                   NSString * _Nullable transactionId,
-                                                                   NSString * _Nullable prodId,
-                                                                   NSError * _Nullable error) {
-        QString txId;
-        QString pId;
-        QString err;
-        if (transactionId) {
-            txId = QString::fromUtf8(transactionId.UTF8String);
-        }
-        if (prodId) {
-            pId = QString::fromUtf8(prodId.UTF8String);
-        }
-        if (error) {
-            err = QString::fromUtf8(error.localizedDescription.UTF8String);
-        }
-        if (callback) {
-            callback(s, txId, pId, err);
+                                                                    NSString * _Nullable transactionId,
+                                                                    NSString * _Nullable prodId,
+                                                                    NSError * _Nullable error) {
+        const QString txId = QString::fromUtf8((transactionId ?: @"").UTF8String);
+        const QString pId  = QString::fromUtf8((prodId        ?: @"").UTF8String);
+        const QString err  = QString::fromUtf8((error.localizedDescription ?: @"").UTF8String);
+
+        if (cb) {
+            cb(s, txId, pId, err);
         }
     }];
 }
