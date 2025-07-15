@@ -38,6 +38,7 @@ namespace PageLoader
         PageSettingsApiInstructions,
         PageSettingsApiNativeConfigs,
         PageSettingsApiDevices,
+        PageSettingsApiSubscriptionKey,
         PageSettingsKillSwitchExceptions,
         
         PageServiceSftpSettings,

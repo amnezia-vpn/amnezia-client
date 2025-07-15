@@ -115,9 +115,7 @@ PageType {
             RenameServerDrawer {
                 id: serverNameEditDrawer
 
-                parent: root
-
-                anchors.fill: parent
+                anchors.fill: root
                 expandedHeight: root.height * 0.35
 
                 serverNameText: root.processedServer.name
@@ -213,19 +211,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    shareConnectionDrawer.headerText = qsTr("Amnezia Premium subscription key")
-
-                    shareConnectionDrawer.openTriggered()
-                    shareConnectionDrawer.isSelfHostedConfig = false;
-                    shareConnectionDrawer.shareButtonText = qsTr("Save VPN key as a file")
-                    shareConnectionDrawer.copyButtonText = qsTr("Copy VPN key")
-
-
-                    PageController.showBusyIndicator(true)
-
-                    ApiConfigsController.prepareVpnKeyExport()
-
-                    PageController.showBusyIndicator(false)
+                    PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
                 }
             }
 
@@ -417,11 +403,5 @@ PageType {
                 }
             }
         }
-    }
-
-    ShareConnectionDrawer {
-        id: shareConnectionDrawer
-
-        anchors.fill: parent
     }
 }
