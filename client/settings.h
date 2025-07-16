@@ -236,6 +236,9 @@ public:
     QStringList allowedDnsServers() const;
     void setAllowedDnsServers(const QStringList &servers);
 
+    QStringList readNewsIds() const;
+    void setReadNewsIds(const QStringList &ids);
+
 signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);

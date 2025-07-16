@@ -9,10 +9,11 @@
 #include <QJsonDocument>
 #include <algorithm>
 
-NewsModel::NewsModel(QObject *parent)
+NewsModel::NewsModel(const std::shared_ptr<Settings> &settings, QObject *parent)
     : QAbstractListModel(parent)
+    , m_settings(settings)
 {
-    loadLocalNews();
+    loadReadIds();
 }
 
 int NewsModel::rowCount(const QModelIndex &parent) const
@@ -63,6 +64,8 @@ void NewsModel::markAsRead(int index)
         return;
     if (!m_items[index].read) {
         m_items[index].read = true;
+        m_readIds.insert(m_items[index].id);
+        saveReadIds();
         QModelIndex idx = createIndex(index, 0);
         emit dataChanged(idx, idx, {IsReadRole});
         emit hasUnreadChanged();
@@ -101,7 +104,7 @@ void NewsModel::updateModel(const QJsonArray &serverItems)
             item.title = obj.value("title").toString();
             item.content = obj.value("content").toString();
             item.timestamp = QDateTime::fromString(obj.value("timestamp").toString(), Qt::ISODate);
-            item.read = false; // New news is always unread
+            item.read = m_readIds.contains(id);
             newItems.append(item);
             existingIds.insert(id);
         }
@@ -128,68 +131,13 @@ bool NewsModel::hasUnread() const
     return false;
 }
 
-QString NewsModel::localFilePath() const
+void NewsModel::loadReadIds()
 {
-    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir dir(path);
-    if (!dir.exists()) {
-        dir.mkpath(".");
-    }
-    return path + "/news.json";
+    QStringList ids = m_settings->readNewsIds();
+    m_readIds = QSet<QString>(ids.begin(), ids.end());
 }
 
-void NewsModel::loadLocalNews()
+void NewsModel::saveReadIds() const
 {
-    QFile file(localFilePath());
-    if (!file.exists() || !file.open(QIODevice::ReadOnly)) {
-        return;
-    }
-
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    file.close();
-
-    if (!doc.isArray()) {
-        return;
-    }
-
-    beginResetModel();
-    m_items.clear();
-
-    QJsonArray newsArray = doc.array();
-    for (const QJsonValue &value : newsArray) {
-        if (!value.isObject())
-            continue;
-        const QJsonObject obj = value.toObject();
-        NewsItem item;
-        item.id = obj.value("id").toString();
-        item.title = obj.value("title").toString();
-        item.content = obj.value("content").toString();
-        item.timestamp = QDateTime::fromString(obj.value("timestamp").toString(), Qt::ISODate);
-        item.read = obj.value("read").toBool();
-        m_items.append(item);
-    }
-    endResetModel();
-}
-
-void NewsModel::saveLocalNews() const
-{
-    QJsonArray newsArray;
-    for (const auto &item : m_items) {
-        QJsonObject obj;
-        obj["id"] = item.id;
-        obj["title"] = item.title;
-        obj["content"] = item.content;
-        obj["timestamp"] = item.timestamp.toString(Qt::ISODate);
-        obj["read"] = item.read;
-        newsArray.append(obj);
-    }
-
-    QJsonDocument doc(newsArray);
-    QFile file(localFilePath());
-    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        file.write(doc.toJson());
-        file.close();
-    } else {
-        qWarning() << "Could not save news to" << localFilePath();
-    }
+    m_settings->setReadNewsIds(QStringList(m_readIds.begin(), m_readIds.end()));
 }

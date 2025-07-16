@@ -102,10 +102,8 @@ void CoreController::initModels()
     m_apiDevicesModel.reset(new ApiDevicesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ApiDevicesModel", m_apiDevicesModel.get());
 
-    m_newsModel.reset(new NewsModel(this));
+    m_newsModel.reset(new NewsModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("NewsModel", m_newsModel.get());
-    QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
-                     m_newsModel.get(), &NewsModel::saveLocalNews);
 }
 
 void CoreController::initControllers()

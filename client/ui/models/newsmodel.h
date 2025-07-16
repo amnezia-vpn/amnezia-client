@@ -7,6 +7,8 @@
 #include <QString>
 #include <QJsonArray>
 #include <QSet>
+#include <memory>
+#include "settings.h"
 
 struct NewsItem {
     QString id;
@@ -28,9 +30,8 @@ public:
         IsReadRole,
         IsProcessedRole
     };
-    explicit NewsModel(QObject *parent = nullptr);
+    explicit NewsModel(const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
     Q_INVOKABLE void markAsRead(int index);
-    Q_INVOKABLE void saveLocalNews() const;
     
     Q_PROPERTY(int processedIndex READ processedIndex WRITE setProcessedIndex NOTIFY processedIndexChanged)
     Q_PROPERTY(bool hasUnread READ hasUnread NOTIFY hasUnreadChanged)
@@ -51,8 +52,10 @@ signals:
 private:
     QVector<NewsItem> m_items;
     int m_processedIndex = -1;
-    void loadLocalNews();
-    QString localFilePath() const;
+    std::shared_ptr<Settings> m_settings;
+    QSet<QString> m_readIds;
+    void loadReadIds();
+    void saveReadIds() const;
 };
 
 #endif // NEWSMODEL_H 
