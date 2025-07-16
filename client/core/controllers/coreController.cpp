@@ -299,13 +299,10 @@ void CoreController::setQmlRoot()
 
 void CoreController::initApiCountryModelUpdateHandler()
 {
-    // TODO
     connect(m_serversModel.get(), &ServersModel::updateApiCountryModel, this, [this]() {
         m_apiCountryModel->updateModel(m_serversModel->getProcessedServerData("apiAvailableCountries").toJsonArray(),
                                        m_serversModel->getProcessedServerData("apiServerCountryCode").toString());
     });
-    connect(m_serversModel.get(), &ServersModel::updateApiServicesModel, this,
-            [this]() { m_apiServicesModel->updateModel(m_serversModel->getProcessedServerData("apiConfig").toJsonObject()); });
 }
 
 void CoreController::initContainerModelUpdateHandler()
