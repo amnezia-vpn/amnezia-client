@@ -98,7 +98,7 @@ void NewsModel::updateModel(const QJsonArray &serverItems)
         if (!existingIds.contains(id)) {
             NewsItem item;
             item.id = id;
-            item.title = obj.value("header").toString();
+            item.title = obj.value("title").toString();
             item.content = obj.value("content").toString();
             item.timestamp = QDateTime::fromString(obj.value("timestamp").toString(), Qt::ISODate);
             item.read = false; // New news is always unread
@@ -162,7 +162,7 @@ void NewsModel::loadLocalNews()
         const QJsonObject obj = value.toObject();
         NewsItem item;
         item.id = obj.value("id").toString();
-        item.title = obj.value("header").toString();
+        item.title = obj.value("title").toString();
         item.content = obj.value("content").toString();
         item.timestamp = QDateTime::fromString(obj.value("timestamp").toString(), Qt::ISODate);
         item.read = obj.value("read").toBool();
@@ -177,7 +177,7 @@ void NewsModel::saveLocalNews() const
     for (const auto &item : m_items) {
         QJsonObject obj;
         obj["id"] = item.id;
-        obj["header"] = item.title;
+        obj["title"] = item.title;
         obj["content"] = item.content;
         obj["timestamp"] = item.timestamp.toString(Qt::ISODate);
         obj["read"] = item.read;

@@ -15,7 +15,10 @@ void ApiNewsController::fetchNews()
     GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),
                                         apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
     QByteArray responseBody;
-    ErrorCode errorCode = gatewayController.get(QString("%1v1/news"), responseBody);
+    QJsonObject payload;
+    payload.insert("locale", m_settings->getAppLanguage().name().split("_").first());
+
+    ErrorCode errorCode = gatewayController.post(QString("%1v1/news"), payload, responseBody);
     qDebug() << "fetchNews" << errorCode;
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
