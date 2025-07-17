@@ -94,6 +94,7 @@ PageType {
                 leftImageSource: NewsModel.hasUnread ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
 
                 clickedFunction: function() {
+                    ApiNewsController.fetchNews();
                     PageController.goToPage(PageEnum.PageSettingsNewsNotifications)
                 }
             }
