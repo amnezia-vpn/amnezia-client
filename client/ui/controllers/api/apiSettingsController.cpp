@@ -5,6 +5,7 @@
 
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "version.h"
 
 namespace
 {
@@ -60,6 +61,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     apiPayload[configKey::userCountryCode] = apiConfig.value(configKey::userCountryCode).toString();
     apiPayload[configKey::serviceType] = apiConfig.value(configKey::serviceType).toString();
     apiPayload[configKey::authData] = authData;
+    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
 
     QByteArray responseBody;
 

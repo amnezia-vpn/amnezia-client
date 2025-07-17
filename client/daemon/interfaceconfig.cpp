@@ -28,7 +28,8 @@ QJsonObject InterfaceConfig::toJson() const {
       (m_hopType == InterfaceConfig::SingleHop)) {
     json.insert("serverIpv4Gateway", QJsonValue(m_serverIpv4Gateway));
     json.insert("serverIpv6Gateway", QJsonValue(m_serverIpv6Gateway));
-    json.insert("dnsServer", QJsonValue(m_dnsServer));
+    json.insert("primaryDnsServer", QJsonValue(m_primaryDnsServer));
+    json.insert("secondaryDnsServer", QJsonValue(m_secondaryDnsServer));
   }
 
   QJsonArray allowedIPAddesses;
@@ -100,11 +101,15 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
     out << "MTU = " << m_deviceMTU << "\n";
   }
 
-  if (!m_dnsServer.isNull()) {
-    QStringList dnsServers(m_dnsServer);
+  if (!m_primaryDnsServer.isNull()) {
+    QStringList dnsServers;
+    dnsServers.append(m_primaryDnsServer);
+    if (!m_secondaryDnsServer.isNull()) {
+        dnsServers.append(m_secondaryDnsServer);
+    }
     // If the DNS is not the Gateway, it's a user defined DNS
     // thus, not add any other :)
-    if (m_dnsServer == m_serverIpv4Gateway) {
+    if (m_primaryDnsServer == m_serverIpv4Gateway) {
       dnsServers.append(m_serverIpv6Gateway);
     }
     out << "DNS = " << dnsServers.join(", ") << "\n";
@@ -125,6 +130,12 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   if (!m_responsePacketJunkSize.isNull()) {
     out << "S2 = " << m_responsePacketJunkSize << "\n";
   }
+  if (!m_cookieReplyPacketJunkSize.isNull()) {
+    out << "S3 = " << m_cookieReplyPacketJunkSize << "\n";
+  }
+  if (!m_transportPacketJunkSize.isNull()) {
+    out << "S4 = " << m_transportPacketJunkSize << "\n";
+  }
   if (!m_initPacketMagicHeader.isNull()) {
     out << "H1 = " << m_initPacketMagicHeader << "\n";
   }
@@ -136,6 +147,16 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   }
   if (!m_transportPacketMagicHeader.isNull()) {
     out << "H4 = " << m_transportPacketMagicHeader << "\n";
+  }
+
+  for (const QString& key : m_specialJunk.keys()) {
+    out << key << " = " << m_specialJunk[key] << "\n";
+  }
+  for (const QString& key : m_controlledJunk.keys()) {
+    out << key << " = " << m_controlledJunk[key] << "\n";
+  }
+  if (!m_specialHandshakeTimeout.isNull()) {
+    out << "Itime = " << m_specialHandshakeTimeout << "\n";
   }
 
   // If any extra config was provided, append it now.

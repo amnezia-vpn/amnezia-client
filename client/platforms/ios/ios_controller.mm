@@ -522,6 +522,8 @@ bool IosController::setupWireGuard()
 
         wgConfig.insert(config_key::initPacketJunkSize, config[config_key::initPacketJunkSize]);
         wgConfig.insert(config_key::responsePacketJunkSize, config[config_key::responsePacketJunkSize]);
+        wgConfig.insert(config_key::cookieReplyPacketJunkSize, config[config_key::cookieReplyPacketJunkSize]);
+        wgConfig.insert(config_key::transportPacketJunkSize, config[config_key::transportPacketJunkSize]);
 
         wgConfig.insert(config_key::junkPacketCount, config[config_key::junkPacketCount]);
         wgConfig.insert(config_key::junkPacketMinSize, config[config_key::junkPacketMinSize]);
@@ -620,10 +622,22 @@ bool IosController::setupAwg()
 
     wgConfig.insert(config_key::initPacketJunkSize, config[config_key::initPacketJunkSize]);
     wgConfig.insert(config_key::responsePacketJunkSize, config[config_key::responsePacketJunkSize]);
+    wgConfig.insert(config_key::cookieReplyPacketJunkSize, config[config_key::cookieReplyPacketJunkSize]);
+    wgConfig.insert(config_key::transportPacketJunkSize, config[config_key::transportPacketJunkSize]);
 
     wgConfig.insert(config_key::junkPacketCount, config[config_key::junkPacketCount]);
     wgConfig.insert(config_key::junkPacketMinSize, config[config_key::junkPacketMinSize]);
     wgConfig.insert(config_key::junkPacketMaxSize, config[config_key::junkPacketMaxSize]);
+
+    wgConfig.insert(config_key::specialJunk1, config[config_key::specialJunk1]);
+    wgConfig.insert(config_key::specialJunk2, config[config_key::specialJunk2]);
+    wgConfig.insert(config_key::specialJunk3, config[config_key::specialJunk3]);
+    wgConfig.insert(config_key::specialJunk4, config[config_key::specialJunk4]);
+    wgConfig.insert(config_key::specialJunk5, config[config_key::specialJunk5]);
+    wgConfig.insert(config_key::controlledJunk1, config[config_key::controlledJunk1]);
+    wgConfig.insert(config_key::controlledJunk2, config[config_key::controlledJunk2]);
+    wgConfig.insert(config_key::controlledJunk3, config[config_key::controlledJunk3]);
+    wgConfig.insert(config_key::specialHandshakeTimeout, config[config_key::specialHandshakeTimeout]);
 
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
@@ -823,11 +837,12 @@ bool IosController::shareText(const QStringList& filesToSend) {
         popController.sourceView = qtController.view;
         popController.sourceRect = CGRectMake(100, 100, 100, 100);
     }
+
 #endif
     QEventLoop wait;
     QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
     wait.exec();
-    
+
     return isAccepted;
 }
 
@@ -842,6 +857,7 @@ QString IosController::openFile() {
     if (!qtController) return;
 
     [qtController presentViewController:documentPicker animated:YES completion:nil];
+
 #endif
     __block QString filePath;
 #if !MACOS_NE
@@ -857,7 +873,7 @@ QString IosController::openFile() {
     QEventLoop wait;
     QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
     wait.exec();
-    
+
     return filePath;
 }
 

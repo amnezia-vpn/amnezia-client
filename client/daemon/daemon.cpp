@@ -149,8 +149,7 @@ bool Daemon::activate(const InterfaceConfig& config) {
   // set routing
   for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
     if (!wgutils()->updateRoutePrefix(ip)) {
-      logger.debug() << "Routing configuration failed for"
-                     << logger.sensitive(ip.toString());
+      logger.debug() << "Routing configuration failed for" << ip.toString();
       return false;
     }
   }
@@ -170,11 +169,14 @@ bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
   if ((config.m_hopType == InterfaceConfig::MultiHopExit) ||
       (config.m_hopType == InterfaceConfig::SingleHop)) {
     QList<QHostAddress> resolvers;
-    resolvers.append(QHostAddress(config.m_dnsServer));
+    resolvers.append(QHostAddress(config.m_primaryDnsServer));
+    if (!config.m_secondaryDnsServer.isEmpty()) {
+        resolvers.append(QHostAddress(config.m_secondaryDnsServer));
+    }
 
     // If the DNS is not the Gateway, it's a user defined DNS
     // thus, not add any other :)
-    if (config.m_dnsServer == config.m_serverIpv4Gateway) {
+    if (config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
       resolvers.append(QHostAddress(config.m_serverIpv6Gateway));
     }
 
@@ -280,15 +282,26 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   config.m_serverIpv4Gateway = obj.value("serverIpv4Gateway").toString();
   config.m_serverIpv6Gateway = obj.value("serverIpv6Gateway").toString();
 
-  if (!obj.contains("dnsServer")) {
-    config.m_dnsServer = QString();
+  if (!obj.contains("primaryDnsServer")) {
+    config.m_primaryDnsServer = QString();
   } else {
-    QJsonValue value = obj.value("dnsServer");
+    QJsonValue value = obj.value("primaryDnsServer");
     if (!value.isString()) {
       logger.error() << "dnsServer is not a string";
       return false;
     }
-    config.m_dnsServer = value.toString();
+    config.m_primaryDnsServer = value.toString();
+  }
+
+  if (!obj.contains("secondaryDnsServer")) {
+    config.m_secondaryDnsServer = QString();
+  } else {
+    QJsonValue value = obj.value("secondaryDnsServer");
+    if (!value.isString()) {
+      logger.error() << "dnsServer is not a string";
+      return false;
+    }
+    config.m_secondaryDnsServer = value.toString();
   }
 
   if (!obj.contains("hopType")) {
@@ -392,6 +405,13 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!obj.value("S2").isNull()) {
     config.m_responsePacketJunkSize = obj.value("S2").toString();
   }
+  if (!obj.value("S3").isNull()) {
+    config.m_cookieReplyPacketJunkSize = obj.value("S3").toString();
+  }
+  if (!obj.value("S4").isNull()) {
+    config.m_transportPacketJunkSize = obj.value("S4").toString();
+  }
+
   if (!obj.value("H1").isNull()) {
     config.m_initPacketMagicHeader = obj.value("H1").toString();
   }
@@ -403,6 +423,34 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   }
   if (!obj.value("H4").isNull()) {
     config.m_transportPacketMagicHeader = obj.value("H4").toString();
+  }
+
+  if (!obj.value("I1").isNull()) {
+    config.m_specialJunk["I1"] = obj.value("I1").toString();
+  }
+  if (!obj.value("I2").isNull()) {
+    config.m_specialJunk["I2"] = obj.value("I2").toString();
+  }
+  if (!obj.value("I3").isNull()) {
+    config.m_specialJunk["I3"] = obj.value("I3").toString();
+  }
+  if (!obj.value("I4").isNull()) {
+    config.m_specialJunk["I4"] = obj.value("I4").toString();
+  }
+  if (!obj.value("I5").isNull()) {
+    config.m_specialJunk["I5"] = obj.value("I5").toString();
+  }
+  if (!obj.value("J1").isNull()) {
+    config.m_controlledJunk["J1"] = obj.value("J1").toString();
+  }
+  if (!obj.value("J2").isNull()) {
+    config.m_controlledJunk["J2"] = obj.value("J2").toString();
+  }
+  if (!obj.value("J3").isNull()) {
+    config.m_controlledJunk["J3"] = obj.value("J3").toString();
+  }
+  if (!obj.value("Itime").isNull()) {
+    config.m_specialHandshakeTimeout = obj.value("Itime").toString();
   }
 
   return true;
@@ -447,7 +495,7 @@ bool Daemon::deactivate(bool emitSignals) {
 
   m_connections.clear();
   // Delete the interface
-  return wgutils()->deleteInterface();  
+  return wgutils()->deleteInterface();
 }
 
 QString Daemon::logs() {
