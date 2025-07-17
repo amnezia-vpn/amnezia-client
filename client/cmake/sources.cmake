@@ -100,10 +100,12 @@ if(APPLE AND NOT IOS)
     list(APPEND HEADERS
         ${CLIENT_ROOT_DIR}/platforms/macos/macosutils.h
         ${CLIENT_ROOT_DIR}/platforms/macos/macosstatusicon.h
+        ${CLIENT_ROOT_DIR}/ui/macos_util.h
     )
     list(APPEND SOURCES
         ${CLIENT_ROOT_DIR}/platforms/macos/macosutils.mm
         ${CLIENT_ROOT_DIR}/platforms/macos/macosstatusicon.mm
+        ${CLIENT_ROOT_DIR}/ui/macos_util.mm
     )
 endif()
 

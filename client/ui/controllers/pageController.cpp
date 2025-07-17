@@ -14,7 +14,7 @@
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
-#if defined Q_OS_MAC && !defined(MACOS_NE)
+#if defined Q_OS_MAC
     #include "ui/macos_util.h"
 #endif
 
@@ -27,9 +27,13 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
     AndroidController::instance()->setNavigationBarColor(initialPageNavigationBarColor);
 #endif
 
-#if defined Q_OS_MACX and !defined MACOS_NE
-    connect(this, &PageController::raiseMainWindow, []() { setDockIconVisible(true); });
-    connect(this, &PageController::hideMainWindow, []() { setDockIconVisible(false); });
+#if defined Q_OS_MACX
+    connect(this, &PageController::raiseMainWindow, []() {
+        setDockIconVisible(true);
+    });
+    connect(this, &PageController::hideMainWindow, []() {
+        setDockIconVisible(false);
+    });
 #endif
 
     connect(this, qOverload<ErrorCode>(&PageController::showErrorMessage), this, &PageController::onShowErrorMessage);
@@ -114,7 +118,7 @@ void PageController::showOnStartup()
     } else {
 #if defined(Q_OS_WIN) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
         emit hideMainWindow();
-#elif defined(Q_OS_MACX) && !defined(MACOS_NE)
+#elif defined(Q_OS_MACX)
         setDockIconVisible(false);
 #endif
     }

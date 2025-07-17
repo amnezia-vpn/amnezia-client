@@ -22,9 +22,6 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
     m_systemTrayIcon(parent)
 
 {
-#ifdef MACOS_NE
-    MacOSUtils::hideDockIcon();
-#endif
     m_systemTrayIcon.show();
     connect(&m_systemTrayIcon, &QSystemTrayIcon::activated, this, &SystemTrayNotificationHandler::onTrayActivated);
 
