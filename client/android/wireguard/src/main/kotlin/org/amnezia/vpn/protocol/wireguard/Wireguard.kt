@@ -120,10 +120,21 @@ open class Wireguard : Protocol() {
         configData.optStringOrNull("Jmax")?.let { setJmax(it.toInt()) }
         configData.optStringOrNull("S1")?.let { setS1(it.toInt()) }
         configData.optStringOrNull("S2")?.let { setS2(it.toInt()) }
+        configData.optStringOrNull("S3")?.let { setS3(it.toInt()) }
+        configData.optStringOrNull("S4")?.let { setS4(it.toInt()) }
         configData.optStringOrNull("H1")?.let { setH1(it.toLong()) }
         configData.optStringOrNull("H2")?.let { setH2(it.toLong()) }
         configData.optStringOrNull("H3")?.let { setH3(it.toLong()) }
         configData.optStringOrNull("H4")?.let { setH4(it.toLong()) }
+        configData.optStringOrNull("I1")?.let { setI1(it) }
+        configData.optStringOrNull("I2")?.let { setI2(it) }
+        configData.optStringOrNull("I3")?.let { setI3(it) }
+        configData.optStringOrNull("I4")?.let { setI4(it) }
+        configData.optStringOrNull("I5")?.let { setI5(it) }
+        configData.optStringOrNull("J1")?.let { setJ1(it) }
+        configData.optStringOrNull("J2")?.let { setJ2(it) }
+        configData.optStringOrNull("J3")?.let { setJ3(it) }
+        configData.optStringOrNull("Itime")?.let { setItime(it.toInt()) }
     }
 
     private fun start(config: WireguardConfig, vpnBuilder: Builder, protect: (Int) -> Boolean) {

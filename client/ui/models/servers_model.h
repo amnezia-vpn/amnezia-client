@@ -63,6 +63,9 @@ public:
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
 
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
+    Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerChanged)
+
+    bool processedServerIsPremium() const;
 
 public slots:
     void setDefaultServerIndex(const int index);
@@ -92,7 +95,7 @@ public slots:
     void removeServer();
     void removeServer(const int serverIndex);
 
-    QJsonObject getServerConfig(const int serverIndex);
+    QJsonObject getServerConfig(const int serverIndex) const;
 
     void reloadDefaultServerContainerConfig();
     void updateContainerConfig(const int containerIndex, const QJsonObject config);
