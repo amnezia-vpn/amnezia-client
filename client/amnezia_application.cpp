@@ -91,6 +91,12 @@ void AmneziaApplication::init()
 
     m_engine->rootContext()->setContextProperty("Debug", &Logger::Instance());
 
+#ifdef MACOS_NE
+    m_engine->rootContext()->setContextProperty("IsMacOsNeBuild", true);
+#else
+    m_engine->rootContext()->setContextProperty("IsMacOsNeBuild", false);
+#endif
+
     m_vpnConnection.reset(new VpnConnection(m_settings));
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
