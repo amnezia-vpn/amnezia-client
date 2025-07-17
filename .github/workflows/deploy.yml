@@ -358,7 +358,7 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '15.4.0'
+        xcode-version: '16.2.0'
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
