@@ -19,7 +19,6 @@ void ApiNewsController::fetchNews()
     payload.insert("locale", m_settings->getAppLanguage().name().split("_").first());
 
     ErrorCode errorCode = gatewayController.post(QString("%1v1/news"), payload, responseBody);
-    qDebug() << "fetchNews" << errorCode;
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return;
