@@ -110,16 +110,13 @@ void NewsModel::updateModel(const QJsonArray &serverItems)
         }
     }
 
-    if (!newItems.isEmpty()) {
-        beginResetModel();
-        m_items.append(newItems);
-        // Sort descending by timestamp (newest first)
-        std::sort(m_items.begin(), m_items.end(), [](const NewsItem &a, const NewsItem &b) {
-            return a.timestamp > b.timestamp;
-        });
-        endResetModel();
-        emit hasUnreadChanged();
-    }
+    beginResetModel();
+    m_items.append(newItems);
+    std::sort(m_items.begin(), m_items.end(), [](const NewsItem &a, const NewsItem &b) {
+        return a.timestamp > b.timestamp;
+    });
+    endResetModel();
+    emit hasUnreadChanged();
 }
 
 bool NewsModel::hasUnread() const
