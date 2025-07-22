@@ -14,6 +14,8 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Components"
 import "../Config"
+//import "./PageShareConnection.qml"
+
 
 PageType {
     id: root
@@ -100,8 +102,8 @@ PageType {
                             serverSelector.currentIndex = serverSelectorListView.currentIndex
                         }
 
-                        shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
-                        shareConnectionDrawer.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
+                        shareConnectionPage.headerText = qsTr("Accessing ") + serverSelector.text
+                        shareConnectionPage.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
                         serverSelector.closeTriggered()
                     }
 
@@ -137,20 +139,14 @@ PageType {
                         ExportController.generateFullAccessConfig()
                     }
 
-                    shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
-                    shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
-
-                    shareConnectionDrawer.openTriggered()
-
                     PageController.showBusyIndicator(false)
+                    
+                    // Navigate to PageShareConnection page
+                    PageController.goToPage(PageEnum.PageShareConnection)
                 }
             }
         }
     }
 
-    ShareConnectionDrawer {
-        id: shareConnectionDrawer
-
-        anchors.fill: parent
-    }
 }
+

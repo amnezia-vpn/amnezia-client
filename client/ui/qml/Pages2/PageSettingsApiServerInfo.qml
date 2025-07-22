@@ -212,6 +212,14 @@ PageType {
 
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
+                    PageController.showBusyIndicator(true)
+
+                    ApiConfigsController.prepareVpnKeyExport()
+
+                    PageController.showBusyIndicator(false)
+                    
+                    // Navigate to PageShareConnection page
+                    //PageController.goToPage(PageEnum.PageShareConnection)
                 }
             }
 

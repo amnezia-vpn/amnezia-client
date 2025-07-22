@@ -72,6 +72,7 @@ namespace PageLoader
         PageProtocolAwgClientSettings,
 
         PageShareFullAccess,
+        PageShareConnection,
 
         PageDevMenu
     };

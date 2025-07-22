@@ -14,6 +14,8 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Components"
 import "../Config"
+//import "./PageShareConnection.qml"
+
 
 PageType {
     id: root
@@ -42,10 +44,6 @@ PageType {
         target: ExportController
 
         function onGenerateConfig(type) {
-            shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
-            shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
-
-            shareConnectionDrawer.openTriggered()
             PageController.showBusyIndicator(true)
 
             switch (type) {
@@ -55,54 +53,37 @@ PageType {
             }
             case PageShare.ConfigType.OpenVpn: {
                 ExportController.generateOpenVpnConfig(clientNameTextField.textField.text)
-                shareConnectionDrawer.configCaption = qsTr("Save OpenVPN config")
-                shareConnectionDrawer.configExtension = ".ovpn"
-                shareConnectionDrawer.configFileName = "amnezia_for_openvpn"
                 break
             }
             case PageShare.ConfigType.WireGuard: {
                 ExportController.generateWireGuardConfig(clientNameTextField.textField.text)
-                shareConnectionDrawer.configCaption = qsTr("Save WireGuard config")
-                shareConnectionDrawer.configExtension = ".conf"
-                shareConnectionDrawer.configFileName = "amnezia_for_wireguard"
                 break
             }
             case PageShare.ConfigType.Awg: {
                 ExportController.generateAwgConfig(clientNameTextField.textField.text)
-                shareConnectionDrawer.configCaption = qsTr("Save AmneziaWG config")
-                shareConnectionDrawer.configExtension = ".conf"
-                shareConnectionDrawer.configFileName = "amnezia_for_awg"
                 break
             }
             case PageShare.ConfigType.ShadowSocks: {
                 ExportController.generateShadowSocksConfig()
-                shareConnectionDrawer.configCaption = qsTr("Save Shadowsocks config")
-                shareConnectionDrawer.configExtension = ".json"
-                shareConnectionDrawer.configFileName = "amnezia_for_shadowsocks"
                 break
             }
             case PageShare.ConfigType.Cloak: {
                 ExportController.generateCloakConfig()
-                shareConnectionDrawer.configCaption = qsTr("Save Cloak config")
-                shareConnectionDrawer.configExtension = ".json"
-                shareConnectionDrawer.configFileName = "amnezia_for_cloak"
                 break
             }
             case PageShare.ConfigType.Xray: {
                 ExportController.generateXrayConfig(clientNameTextField.textField.text)
-                shareConnectionDrawer.configCaption = qsTr("Save XRay config")
-                shareConnectionDrawer.configExtension = ".json"
-                shareConnectionDrawer.configFileName = "amnezia_for_xray"
                 break
             }
             }
 
             PageController.showBusyIndicator(false)
+            
+            // Navigate to PageShareConnection page
+            PageController.goToPage(PageEnum.PageShareConnection)
         }
 
         function onExportErrorOccurred(error) {
-            shareConnectionDrawer.closeTriggered()
-
             PageController.showErrorMessage(error)
         }
     }
@@ -842,9 +823,4 @@ PageType {
         }
     }
 
-    ShareConnectionDrawer {
-        id: shareConnectionDrawer
-
-        anchors.fill: parent
-    }
 }
