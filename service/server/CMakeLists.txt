@@ -15,7 +15,7 @@ configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/vers
 set(QSIMPLECRYPTO_DIR ${CMAKE_CURRENT_LIST_DIR}/../../client/3rd/QSimpleCrypto/src)
 
 
-set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../client/3rd-prebuilt/3rd-prebuilt/openssl/")
+set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../client/3rd-prebuilt/3rd-prebuilt/openssl")
 set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
 
 set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/windows/include")
