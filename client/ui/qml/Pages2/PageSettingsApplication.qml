@@ -117,7 +117,7 @@ PageType {
 
             SwitcherType {
                 id: switcherAutoConnect
-                visible: !GC.isMobile()
+                visible: !GC.isMobile() && !IsMacOsNeBuild
 
                 Layout.fillWidth: true
                 Layout.margins: 16
@@ -136,7 +136,7 @@ PageType {
             }
 
             DividerType {
-                visible: !GC.isMobile()
+                visible: !GC.isMobile() && !IsMacOsNeBuild
             }
 
             SwitcherType {
