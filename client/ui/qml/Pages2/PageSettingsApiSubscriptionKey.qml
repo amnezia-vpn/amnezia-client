@@ -140,7 +140,7 @@ PageType {
                 Image {
                     anchors.fill: parent
                     smooth: false
-                    source: ApiConfigsController.qrCodesCount > 0 ? ApiConfigsController.qrCodes[0] : ""
+                    source: ApiConfigsController.qrCodesCount > 0 && ApiConfigsController.qrCodes[0] ? ApiConfigsController.qrCodes[0] : ""
                 }
             }
 
@@ -194,7 +194,7 @@ PageType {
                     font.pixelSize: 16
                     font.weight: Font.Medium
                     font.family: "PT Root UI VF"
-                    text: ApiConfigsController.vpnKey
+                    text: ApiConfigsController.vpnKey //|| ""
                     wrapMode: Text.Wrap
                     background: Rectangle { color: AmneziaStyle.color.transparent }
                 }

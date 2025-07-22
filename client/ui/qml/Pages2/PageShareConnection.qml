@@ -30,12 +30,20 @@ PageType {
     property string configCaption: qsTr("Save AmneziaVPN config")
     property string configFileName: "amnezia_config"
 
-    Header2Type {
-        id: header
+    BackButtonType {
+        id: backButton
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+    }
+
+    Header2Type {
+        id: header
+        anchors.top: backButton.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 

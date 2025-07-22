@@ -111,15 +111,6 @@ PageType {
                     serverNameEditDrawer.openTriggered()
                 }
             }
-
-            RenameServerDrawer {
-                id: serverNameEditDrawer
-
-                anchors.fill: root
-                expandedHeight: root.height * 0.35
-
-                serverNameText: root.processedServer.name
-            }
         }
 
         delegate: ColumnLayout {
@@ -411,5 +402,14 @@ PageType {
                 }
             }
         }
+    }
+
+    RenameServerDrawer {
+        id: serverNameEditDrawer
+
+        anchors.fill: parent
+        expandedHeight: parent.height * 0.35
+
+        serverNameText: root.processedServer.name
     }
 }
