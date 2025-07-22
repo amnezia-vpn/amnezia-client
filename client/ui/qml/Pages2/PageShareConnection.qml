@@ -21,6 +21,12 @@ PageType {
     id: pageShareConnection
 
     property string headerText
+
+    Component.onCompleted: {
+        var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
+        headerText = qsTr("Connection to ") + serverName
+        configContentHeaderText = qsTr("File with connection settings to ") + serverName
+    }
     property string configContentHeaderText
     property string shareButtonText: qsTr("Share")
     property string copyButtonText: qsTr("Copy")
@@ -30,30 +36,49 @@ PageType {
     property string configCaption: qsTr("Save AmneziaVPN config")
     property string configFileName: "amnezia_config"
 
+    onVisibleChanged: {
+        configExtension = ".vpn"
+        configCaption = qsTr("Save AmneziaVPN config")
+        configFileName = "amnezia_config"
+        
+        // Set header text when page becomes visible
+        if (visible) {
+            var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
+            headerText = qsTr("Connection to ") + serverName
+            configContentHeaderText = qsTr("File with connection settings to ") + serverName
+        }
+    }
+
     BackButtonType {
         id: backButton
-
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
     }
 
-    Header2Type {
-        id: header
+    Text {
+        id: shareHeader
         anchors.top: backButton.bottom
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.topMargin: 20
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 
-        headerText: pageShareConnection.headerText
+        text: pageShareConnection.headerText
+        color: AmneziaStyle.color.paleGray
+        font.pixelSize: 32
+        font.weight: 700
+        font.family: "PT Root UI VF"
+        wrapMode: Text.WordWrap
     }
 
     ListView {
         id: listView
 
-        anchors.top: header.bottom
+        anchors.top: shareHeader.bottom
+        anchors.topMargin: 16
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -76,23 +101,22 @@ PageType {
                 Layout.rightMargin: 16
                 text: pageShareConnection.shareButtonText
                 leftImageSource: "qrc:/images/controls/share-2.svg"
-                clickedFunc: {
-                    // Temporarily disabled to prevent auto-triggering
-                    console.log("Share button clicked")
-                    /*
-                    var fileName = GC.isMobile()
-                        ? configFileName + configExtension
-                        : SystemController.getFileName(configCaption,
-                            qsTr("Config files (*" + configExtension + ")"),
-                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + configFileName,
-                            true,
-                            configExtension)
+                clickedFunc: function() {
+                    var fileName = ""
+                    if (GC.isMobile()) {
+                        fileName = configFileName + configExtension
+                    } else {
+                        fileName = SystemController.getFileName(configCaption,
+                                                                qsTr("Config files (*" + configExtension + ")"),
+                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + configFileName,
+                                                                true,
+                                                                configExtension)
+                    }
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         ExportController.exportConfig(fileName)
                         PageController.showBusyIndicator(false)
                     }
-                    */
                 }
             }
 
@@ -149,14 +173,16 @@ PageType {
                 textColor: AmneziaStyle.color.paleGray
                 borderWidth: 1
                 text: qsTr("Show connection settings")
-                clickedFunc: configContentDrawer.openTriggered()
+                clickedFunc: function() {
+                    configContentDrawer.openTriggered()
+                }
             }
 
             DrawerType2 {
                 id: configContentDrawer
                 parent: pageShareConnection.parent
                 anchors.fill: parent
-                expandedHeight: parent.height * 0.9
+                //expandedHeight: parent.height * 0.9
                 expandedStateContent: Item {
                     id: configContentContainer
                     implicitHeight: configContentDrawer.expandedHeight
@@ -183,16 +209,16 @@ PageType {
                     }
 
                     BackButtonType {
-                        id: backButton
+                        id: configBackButton
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.topMargin: 16
-                        backButtonFunction: configContentDrawer.closeTriggered()
+                        backButtonFunction: function() { configContentDrawer.closeTriggered() }
                     }
 
                     FlickableType {
-                        anchors.top: backButton.bottom
+                        anchors.top: configBackButton.bottom
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
@@ -302,4 +328,3 @@ PageType {
         }
     }
 }
-
