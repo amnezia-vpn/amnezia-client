@@ -185,8 +185,7 @@ void SettingsController::clearSettings()
 {
     m_settings->clearSettings();
     m_serversModel->resetModel();
-    m_languageModel->changeLanguage(
-            static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
+    m_languageModel->changeLanguage(m_languageModel->getSystemLanguageEnum());
 
     m_sitesModel->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
     m_sitesModel->toggleSplitTunneling(false);

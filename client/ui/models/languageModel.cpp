@@ -101,6 +101,23 @@ QString LanguageModel::getCurrentLanguageName()
     return m_availableLanguages[getCurrentLanguageIndex()].name;
 }
 
+LanguageSettings::AvailableLanguageEnum LanguageModel::getSystemLanguageEnum()
+{
+    QLocale locale = QLocale::system();
+    switch (locale.language()) {
+    case QLocale::Russian: return LanguageSettings::AvailableLanguageEnum::Russian;
+    case QLocale::Chinese: return LanguageSettings::AvailableLanguageEnum::China_cn;
+    case QLocale::Ukrainian: return LanguageSettings::AvailableLanguageEnum::Ukrainian;
+    case QLocale::Persian: return LanguageSettings::AvailableLanguageEnum::Persian;
+    case QLocale::Arabic: return LanguageSettings::AvailableLanguageEnum::Arabic;
+    case QLocale::Burmese: return LanguageSettings::AvailableLanguageEnum::Burmese;
+    case QLocale::Urdu: return LanguageSettings::AvailableLanguageEnum::Urdu;
+    case QLocale::Hindi: return LanguageSettings::AvailableLanguageEnum::Hindi;
+    case QLocale::English: return LanguageSettings::AvailableLanguageEnum::English;
+    default: return LanguageSettings::AvailableLanguageEnum::English;
+    }
+}
+
 QString LanguageModel::getCurrentSiteUrl(const QString &path)
 {
     auto language = static_cast<LanguageSettings::AvailableLanguageEnum>(getCurrentLanguageIndex());

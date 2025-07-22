@@ -46,6 +46,7 @@ public:
     };
 
     LanguageModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    LanguageSettings::AvailableLanguageEnum getSystemLanguageEnum();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
