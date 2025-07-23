@@ -182,7 +182,7 @@ PageType {
                 id: configContentDrawer
                 parent: pageShareConnection.parent
                 anchors.fill: parent
-                //expandedHeight: parent.height * 0.9
+                expandedHeight: parent.height * 0.9
                 expandedStateContent: Item {
                     id: configContentContainer
                     implicitHeight: configContentDrawer.expandedHeight
