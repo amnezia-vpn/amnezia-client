@@ -83,13 +83,13 @@ Page {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.fillWidth: true
-            Layout.preferredHeight: 308
+            Layout.preferredHeight: 240
 
             placeholderText: qsTr("VPN://")
         }
 
         WhiteButtonWithBorder {
-            Layout.topMargin: 24
+            Layout.topMargin: 12
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.fillWidth: true
@@ -103,7 +103,7 @@ Page {
         }
 
         BlueButtonNoBorder {
-            Layout.topMargin: 24
+            Layout.topMargin: 12
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.fillWidth: true
@@ -115,6 +115,28 @@ Page {
                     ImportController.importConfig()
                 } else {
                     PageController.showErrorMessage(qsTr("Unsupported config file"))
+                }
+            }
+        }
+
+        BlackButtonWithBorder {
+            id: importConfigButton
+            
+            Layout.topMargin: 12
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.fillWidth: true
+
+            text: qsTr("Import config from file")
+
+            onClicked: function() {
+                var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
+                                                               "Config files (*.vpn *.ovpn *.conf *.json)"
+                var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
+                if (fileName !== "") {
+                    if (ImportController.extractConfigFromFile(fileName)) {
+                        ImportController.importConfig()
+                    }
                 }
             }
         }
