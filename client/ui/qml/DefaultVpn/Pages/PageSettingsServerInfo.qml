@@ -58,7 +58,7 @@ Page {
             Layout.bottomMargin: 24
             Layout.fillWidth: true
 
-            text: qsTr("Server settings")
+            text: ServersModel.getProcessedServerData("name") + " " + qsTr("Server settings")
 
             horizontalAlignment: Qt.AlignLeft
             verticalAlignment: Qt.AlignVCenter
@@ -91,6 +91,20 @@ Page {
             Layout.topMargin: 24
             Layout.fillWidth: true
 
+            text: qsTr("Rename server")
+            defaultTextColor: Style.color.black
+            hoveredTextColor: Style.color.black
+            pressedTextColor: Style.color.black
+
+            onClicked: renameServerPopup.open()
+        }
+
+        WhiteButtonWithBorder {
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.topMargin: 12
+            Layout.fillWidth: true
+
             text: qsTr("Delete server")
             defaultTextColor: Style.color.error
             hoveredTextColor: Style.color.error
@@ -101,6 +115,84 @@ Page {
 
         Item {
             Layout.fillHeight: true
+        }
+    }
+
+    Popup {
+        id: renameServerPopup
+
+        property string serverName: ServersModel.getProcessedServerData("name")
+
+        modal: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        anchors.centerIn: parent
+        width: parent.width - 30
+        padding: 24
+
+        background: Rectangle {
+            color: Style.color.white
+            radius: 20
+            border.width: 1
+            border.color: Style.color.gray2
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 24
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 16
+
+                Header3TextType {
+                    Layout.fillWidth: true
+                    text: qsTr("Server name")
+                    horizontalAlignment: Text.AlignVCenter
+                }
+
+                InputType {
+                    id: serverNameInput
+                    Layout.fillWidth: true
+                    text: renameServerPopup.serverName
+                    placeholderText: qsTr("Enter server name")
+                    onAccepted: {
+                        if (serverNameInput.text.trim() !== "") {
+                            ServersModel.setProcessedServerData("name", serverNameInput.text.trim())
+                            PageController.showNotificationMessage(qsTr("Server renamed successfully"))
+                            header.text = serverNameInput.text.trim() + " " + qsTr("Server settings")
+                        }
+                        renameServerPopup.close()
+                    }
+                }
+            }
+
+            BlueButtonNoBorder {
+                Layout.fillWidth: true
+                text: qsTr("Save")
+                onClicked: {
+                    if (serverNameInput.text.trim() !== "") {
+                        ServersModel.setProcessedServerData("name", serverNameInput.text.trim())
+                        PageController.showNotificationMessage(qsTr("Server renamed successfully"))
+                        header.text = serverNameInput.text.trim() + " " + qsTr("Server settings")
+                    }
+                    renameServerPopup.close()
+                }
+            }
+        }
+
+        Overlay.modal: Item {
+            anchors.fill: parent
+
+            ShaderEffectSource {
+                id: blurSource
+                anchors.fill: parent
+                sourceItem: renameServerPopup.parent
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                color: Style.color.transparentWhite
+            }
         }
     }
 
