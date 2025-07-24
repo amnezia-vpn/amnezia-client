@@ -885,11 +885,11 @@ void InstallController::mountSftpDrive(const QString &port, const QString &passw
                            "-o password_stdin")
                            .arg(username, hostname, mountPath, port);
 
-           //    args.replace("\n", " ");
-           //    args.replace("\r", " ");
-           // #ifndef Q_OS_WIN
-           //    args.replace("reconnect-orellinks", "");
-           // #endif
+    //    args.replace("\n", " ");
+    //    args.replace("\r", " ");
+    // #ifndef Q_OS_WIN
+    //    args.replace("reconnect-orellinks", "");
+    // #endif
     process->setArguments(args.split(" ", Qt::SkipEmptyParts));
     process->start();
     process->waitForStarted(50);
