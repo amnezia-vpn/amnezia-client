@@ -147,7 +147,10 @@ PageType {
                 Layout.margins: 16
 
                 text: qsTr("Start minimized")
-                descriptionText: qsTr("Launch application minimized")
+                descriptionText: qsTr("Launch application minimized (works with autostart option turned on)")
+
+                enabled: switcherAutoStart.checked
+                opacity: enabled ? 1.0 : 0.5
 
                 parentFlickable: fl
 
