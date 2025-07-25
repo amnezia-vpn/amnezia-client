@@ -26,6 +26,10 @@ PageType {
             ValueFilter {
                 roleName: "isSupported"
                 value: true
+            },
+            ValueFilter {
+                roleName: "isInstallationAllowed"
+                value: true
             }
         ]
         sorters: RoleSorter {
