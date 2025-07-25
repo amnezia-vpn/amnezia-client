@@ -31,6 +31,12 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
         }
         return m_containers.value(container);
     }
+    case IsThirdPartyConfigRole: {
+        QJsonObject c = m_containers.value(container);
+        auto p = ContainerProps::defaultProtocol(container);
+        QString key = ProtocolProps::protoToString(p);
+        return c.value(key).toObject().value(config_key::isThirdPartyConfig).toBool();
+    }
     case ServiceTypeRole: return ContainerProps::containerService(container);
     case DockerContainerRole: return container;
     case IsEasySetupContainerRole: return ContainerProps::isEasySetupContainer(container);
@@ -129,6 +135,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[ServiceTypeRole] = "serviceType";
     roles[DockerContainerRole] = "dockerContainer";
     roles[ConfigRole] = "config";
+    roles[IsThirdPartyConfigRole] = "isThirdPartyConfig";
 
     roles[IsEasySetupContainerRole] = "isEasySetupContainer";
     roles[EasySetupHeaderRole] = "easySetupHeader";

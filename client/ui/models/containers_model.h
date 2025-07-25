@@ -20,6 +20,7 @@ public:
         DetailedDescriptionRole,
         ServiceTypeRole,
         ConfigRole,
+        IsThirdPartyConfigRole,
         DockerContainerRole,
 
         IsEasySetupContainerRole,
