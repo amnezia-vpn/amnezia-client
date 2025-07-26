@@ -26,27 +26,29 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    FlickableType {
+    ListViewType {
+        id: listView
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        ColumnLayout {
-            id: content
-
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
-
-            spacing: 0
+        header: ColumnLayout {
+            width: listView.width
 
             BaseHeaderType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 Layout.topMargin: 24
 
                 headerText: qsTr("Full access to the server and VPN")
@@ -54,6 +56,8 @@ PageType {
 
             ParagraphTextType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 Layout.topMargin: 24
                 Layout.bottomMargin: 24
 
@@ -64,11 +68,14 @@ PageType {
 
             DropDownType {
                 id: serverSelector
+                objectName: "serverSelector"
 
                 signal severSelectorIndexChanged
                 property int currentIndex: 0
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
@@ -118,11 +125,20 @@ PageType {
                     }
                 }
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+        spacing: 0
+
+        delegate: ColumnLayout {
+            width: listView.width
 
             BasicButtonType {
                 id: shareButton
                 Layout.fillWidth: true
-                Layout.topMargin: 40
+                Layout.topMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: qsTr("Share")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
@@ -146,5 +162,9 @@ PageType {
         }
     }
 
-}
+    ShareConnectionDrawer {
+        id: shareConnectionDrawer
 
+        anchors.fill: parent
+    }
+}
