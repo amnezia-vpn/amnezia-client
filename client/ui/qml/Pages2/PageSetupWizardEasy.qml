@@ -20,6 +20,7 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyContainersModel
+        
         sourceModel: ContainersModel
         filters: [
             ValueFilter {
@@ -40,107 +41,98 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        onActiveFocusChanged: {
+            if(backButton.enabled && backButton.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    FlickableType {
-        id: fl
+    ButtonGroup {
+        id: buttonGroup
+    }
+
+    ListViewType {
+        id: listView
+
+        property int dockerContainer
+        property int containerDefaultPort
+        property int containerDefaultTransportProto
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight + setupLaterButton.anchors.bottomMargin
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        Column {
-            id: content
+        spacing: 16
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
+        header: ColumnLayout {
+            width: listView.width
 
             spacing: 16
 
             BaseHeaderType {
                 id: header
 
-                implicitWidth: parent.width
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 16
+
                 headerTextMaximumLineCount: 10
 
                 headerText: qsTr("Choose Installation Type")
             }
+        }
 
-            ButtonGroup {
-                id: buttonGroup
-            }
+        model: proxyContainersModel
+        currentIndex: 0
 
-            ListView {
-                id: containers
-                width: parent.width
-                height: containers.contentItem.height
-                spacing: 16
+        delegate: ColumnLayout {
+            width: listView.width
 
-                currentIndex: 0
-                clip: true
-                interactive: false
-                model: proxyContainersModel
+            CardType {
+                id: card
 
-                property int dockerContainer
-                property int containerDefaultPort
-                property int containerDefaultTransportProto
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 16
 
-                property bool isFocusable: true
+                headerText: easySetupHeader
+                bodyText: easySetupDescription
 
-                delegate: Item {
-                    implicitWidth: containers.width
-                    implicitHeight: delegateContent.implicitHeight
+                ButtonGroup.group: buttonGroup
 
-                    ColumnLayout {
-                        id: delegateContent
+                onClicked: function() {
+                    isEasySetup = true
+                    var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
 
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-
-                        CardType {
-                            id: card
-
-                            Layout.fillWidth: true
-
-                            headerText: easySetupHeader
-                            bodyText: easySetupDescription
-
-                            ButtonGroup.group: buttonGroup
-
-                            onClicked: function() {
-                                isEasySetup = true
-                                var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
-
-                                containers.dockerContainer = dockerContainer
-                                containers.containerDefaultPort = ProtocolProps.getPortForInstall(defaultContainerProto)
-                                containers.containerDefaultTransportProto = ProtocolProps.defaultTransportProto(defaultContainerProto)
-                            }
-
-                            Keys.onEnterPressed: this.clicked()
-                            Keys.onReturnPressed: this.clicked()
-                        }
-                    }
+                    listView.dockerContainer = dockerContainer
+                    listView.containerDefaultPort = ProtocolProps.getPortForInstall(defaultContainerProto)
+                    listView.containerDefaultTransportProto = ProtocolProps.defaultTransportProto(defaultContainerProto)
                 }
 
-                Component.onCompleted: {
-                    var item = containers.itemAtIndex(containers.currentIndex)
-                    if (item !== null) {
-                        var button = item.children[0].children[0]
-                        button.checked = true
-                        button.clicked()
-                    }
-                }
+                Keys.onReturnPressed: this.clicked()
+                Keys.onEnterPressed: this.clicked()
             }
+        }
+
+        footer: ColumnLayout {
+            width: listView.width
+            spacing: 16
 
             DividerType {
-                implicitWidth: parent.width
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
             }
 
             CardType {
-                implicitWidth: parent.width
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 headerText: qsTr("Manual")
                 bodyText: qsTr("Choose a VPN protocol")
@@ -149,6 +141,7 @@ PageType {
 
                 onClicked: function() {
                     isEasySetup = false
+                    checked = true
                 }
 
                 Keys.onEnterPressed: this.clicked()
@@ -158,19 +151,19 @@ PageType {
             BasicButtonType {
                 id: continueButton
 
-                implicitWidth: parent.width
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: qsTr("Continue")
-                
-                parentFlickable: fl
 
                 clickedFunc: function() {
                     if (root.isEasySetup) {
-                        ContainersModel.setProcessedContainerIndex(containers.dockerContainer)
+                        ContainersModel.setProcessedContainerIndex(listView.dockerContainer)
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                        InstallController.install(containers.dockerContainer,
-                                                  containers.containerDefaultPort,
-                                                  containers.containerDefaultTransportProto)
+                        InstallController.install(listView.dockerContainer,
+                                                  listView.containerDefaultPort,
+                                                  listView.containerDefaultTransportProto)
                     } else {
                         PageController.goToPage(PageEnum.PageSetupWizardProtocols)
                     }
@@ -180,9 +173,11 @@ PageType {
             BasicButtonType {
                 id: setupLaterButton
 
-                implicitWidth: parent.width
-                anchors.topMargin: 8
-                anchors.bottomMargin: 24
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.bottomMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 defaultColor: AmneziaStyle.color.transparent
                 hoveredColor: AmneziaStyle.color.translucentWhite
@@ -190,9 +185,6 @@ PageType {
                 disabledColor: AmneziaStyle.color.mutedGray
                 textColor: AmneziaStyle.color.paleGray
                 borderWidth: 1
-
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
-                parentFlickable: fl
 
                 visible: {
                     if (PageController.isTriggeredByConnectButton()) {
@@ -211,5 +203,15 @@ PageType {
                 }
             }
         }
+
+        Component.onCompleted: {
+            var item = listView.itemAtIndex(listView.currentIndex)
+            if (item !== null) {
+                var button = item.children[0]
+                button.checked = true
+                button.clicked()
+            }
+        }
     }
 }
+
