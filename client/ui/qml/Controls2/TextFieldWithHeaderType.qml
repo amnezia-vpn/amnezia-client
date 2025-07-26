@@ -37,19 +37,6 @@ Item {
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
-    property FlickableType parentFlickable
-
-    Connections {
-        target: textField
-        function onFocusChanged() {
-            if (textField.activeFocus) {
-                if (root.parentFlickable) {
-                    root.parentFlickable.ensureVisible(root)
-                }
-            }
-        }
-    }
-
     ColumnLayout {
         id: content
         anchors.fill: parent
