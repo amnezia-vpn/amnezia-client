@@ -50,6 +50,7 @@ PageType {
         readonly property string name: qsTr("Only the apps from the list should have access via VPN")
         readonly property int type: routeMode.onlyForwardApps
     }
+
     QtObject {
         id: allExceptApps
         
@@ -111,7 +112,7 @@ PageType {
 
             headerText: qsTr("Mode")
 
-            enabled: Qt.platform.os === "android" && root.pageEnabled
+            enabled: (Qt.platform.os === "android") && root.pageEnabled
 
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
@@ -146,77 +147,56 @@ PageType {
         }
     }
 
-    FlickableType {
+    ListViewType {
+        id: listView
+
         anchors.top: header.bottom
-        anchors.topMargin: 16
-        contentHeight: col.implicitHeight + addAppButton.implicitHeight + addAppButton.anchors.bottomMargin + addAppButton.anchors.topMargin
+        anchors.bottom: addAppButton.top
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        enabled: root.pageEnabled
+        model: SortFilterProxyModel {
+            id: proxyAppSplitTunnelingModel
+            sourceModel: AppSplitTunnelingModel
+            filters: RegExpFilter {
+                roleName: "appPath"
+                pattern: ".*" + searchField.textField.text + ".*"
+                caseSensitivity: Qt.CaseInsensitive
+            }
+            sorters: [
+                RoleSorter { roleName: "appPath"; sortOrder: Qt.AscendingOrder }
+            ]
+        }
 
-        Column {
-            id: col
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        delegate: ColumnLayout {
+            width: listView.width
 
-            ListView {
-                id: apps
-                width: parent.width
-                height: apps.contentItem.height
+            LabelWithButtonType {
+                Layout.fillWidth: true
 
-                model: SortFilterProxyModel {
-                    id: proxyAppSplitTunnelingModel
-                    sourceModel: AppSplitTunnelingModel
-                    filters: RegExpFilter {
-                        roleName: "appPath"
-                        pattern: ".*" + searchField.textField.text + ".*"
-                        caseSensitivity: Qt.CaseInsensitive
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: appPath
+                rightImageSource: "qrc:/images/controls/trash.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
+
+                clickedFunction: function() {
+                    var headerText = qsTr("Remove ") + appPath + "?"
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        AppSplitTunnelingController.removeApp(proxyAppSplitTunnelingModel.mapToSource(index))
                     }
-                    sorters: [
-                        RoleSorter { roleName: "appPath"; sortOrder: Qt.AscendingOrder }
-                    ]
-                }
-
-                clip: true
-                interactive: false
-
-                delegate: Item {
-                    implicitWidth: apps.width
-                    implicitHeight: delegateContent.implicitHeight
-
-                    ColumnLayout {
-                        id: delegateContent
-
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-
-                        LabelWithButtonType {
-                            Layout.fillWidth: true
-
-                            text: appPath
-                            rightImageSource: "qrc:/images/controls/trash.svg"
-                            rightImageColor: AmneziaStyle.color.paleGray
-
-                            clickedFunction: function() {
-                                var headerText = qsTr("Remove ") + appPath + "?"
-                                var yesButtonText = qsTr("Continue")
-                                var noButtonText = qsTr("Cancel")
-
-                                var yesButtonFunction = function() {
-                                    AppSplitTunnelingController.removeApp(proxyAppSplitTunnelingModel.mapToSource(index))
-                                }
-                                var noButtonFunction = function() {
-                                }
-
-                                showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                            }
-                        }
-
-                        DividerType {}
+                    var noButtonFunction = function() {
                     }
+
+                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
+
+            DividerType {}
         }
     }
 
