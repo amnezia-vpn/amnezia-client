@@ -24,258 +24,215 @@ PageType {
         }
     }
 
-    ColumnLayout {
-        id: backButtonLayout
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
         anchors.topMargin: 20
 
-        BackButtonType {
-            id: backButton
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: backButtonLayout.bottom
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        Column {
-            id: content
+        enabled: ServersModel.isProcessedServerHasWriteAccess()
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        model: SftpConfigModel
 
-            enabled: ServersModel.isProcessedServerHasWriteAccess()
+        delegate: ColumnLayout {
+            width: listView.width
 
-            ListView {
-                id: listview
+            spacing: 0
 
-                width: parent.width
-                height: listview.contentItem.height
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                clip: true
-                interactive: false
+                headerText: qsTr("SFTP settings")
+            }
 
-                model: SftpConfigModel
+            LabelWithButtonType {
+                id: hostLabel
 
-                onFocusChanged: {
-                    if (focus) {
-                        listview.currentItem.listViewFocusItem.forceActiveFocus()
-                    }
+                Layout.fillWidth: true
+                Layout.topMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Host")
+                descriptionText: ServersModel.getProcessedServerData("hostName")
+
+                descriptionOnTop: true
+
+                rightImageSource: "qrc:/images/controls/copy.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
+
+                clickedFunction: function() {
+                    GC.copyToClipBoard(descriptionText)
+                    PageController.showNotificationMessage(qsTr("Copied"))
+                }
+            }
+
+            LabelWithButtonType {
+                id: portLabel
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Port")
+                descriptionText: port
+
+                descriptionOnTop: true
+
+                rightImageSource: "qrc:/images/controls/copy.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
+
+                clickedFunction: function() {
+                    GC.copyToClipBoard(descriptionText)
+                    PageController.showNotificationMessage(qsTr("Copied"))
+                }
+            }
+
+            LabelWithButtonType {
+                id: usernameLabel
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("User name")
+                descriptionText: username
+
+                descriptionOnTop: true
+
+                rightImageSource: "qrc:/images/controls/copy.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
+
+                clickedFunction: function() {
+                    GC.copyToClipBoard(descriptionText)
+                    PageController.showNotificationMessage(qsTr("Copied"))
+                }
+            }
+
+            LabelWithButtonType {
+                id: passwordLabel
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Password")
+                descriptionText: password
+
+                descriptionOnTop: true
+
+                rightImageSource: "qrc:/images/controls/copy.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
+
+                buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+
+                clickedFunction: function() {
+                    GC.copyToClipBoard(descriptionText)
+                    PageController.showNotificationMessage(qsTr("Copied"))
+                }
+            }
+
+            BasicButtonType {
+                id: mountButton
+
+                visible: !GC.isMobile()
+
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.bottomMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.paleGray
+                borderWidth: 1
+
+                text: qsTr("Mount folder on device")
+
+                clickedFunc: function() {
+                    PageController.showBusyIndicator(true)
+                    InstallController.mountSftpDrive(port, password, username)
+                    PageController.showBusyIndicator(false)
+                }
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                readonly property string windowsFirstLink: "<a href=\"https://github.com/billziss-gh/winfsp/releases/latest\" style=\"color: #FBB26A;\">WinFsp</a>"
+                readonly property string windowsSecondLink: "<a href=\"https://github.com/billziss-gh/sshfs-win/releases\" style=\"color: #FBB26A;\">SSHFS-Win</a>"
+
+                readonly property string macosFirstLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">macFUSE</a>"
+                readonly property string macosSecondLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">SSHFS</a>"
+
+                onLinkActivated: function(link) {
+                    Qt.openUrlExternally(link)
+                }
+                textFormat: Text.RichText
+                text: {
+                    var str = qsTr("In order to mount remote SFTP folder as local drive, perform following steps: <br>")
+                    if (Qt.platform.os === "windows") {
+                        str += qsTr("<br>1. Install the latest version of ") + windowsFirstLink + "\n"
+                        str += qsTr("<br>2. Install the latest version of ") + windowsSecondLink + "\n"
+                    } else if (Qt.platform.os === "osx") {
+                        str += qsTr("<br>1. Install the latest version of ") + macosFirstLink + "\n"
+                        str += qsTr("<br>2. Install the latest version of ") + macosSecondLink + "\n"
+                    } else if (Qt.platform.os === "linux") {
+                        return ""
+                    } else return ""
+
+                    return str
                 }
 
-                delegate: Item {
-                    implicitWidth: listview.width
-                    implicitHeight: col.implicitHeight
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
+            }
 
-                    property alias listViewFocusItem: hostLabel.rightButton
+            BasicButtonType {
+                id: detailedInstructionsButton
 
-                    ColumnLayout {
-                        id: col
+                Layout.topMargin: 16
+                Layout.bottomMargin: 16
+                Layout.leftMargin: 8
+                implicitHeight: 32
 
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.goldenApricot
 
-                        spacing: 0
+                text: qsTr("Detailed instructions")
 
-                        BaseHeaderType {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
-
-                            headerText: qsTr("SFTP settings")
-                        }
-
-                        LabelWithButtonType {
-                            id: hostLabel
-                            Layout.fillWidth: true
-                            Layout.topMargin: 32
-
-                            parentFlickable: fl
-
-                            text: qsTr("Host")
-                            descriptionText: ServersModel.getProcessedServerData("hostName")
-
-                            descriptionOnTop: true
-
-                            rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: AmneziaStyle.color.paleGray
-
-                            clickedFunction: function() {
-                                GC.copyToClipBoard(descriptionText)
-                                PageController.showNotificationMessage(qsTr("Copied"))
-                                if (!GC.isMobile()) {
-                                    this.rightButton.forceActiveFocus()
-                                }
-                            }
-                        }
-
-                        LabelWithButtonType {
-                            id: portLabel
-                            Layout.fillWidth: true
-
-                            text: qsTr("Port")
-                            descriptionText: port
-
-                            descriptionOnTop: true
-
-                            parentFlickable: fl
-
-                            rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: AmneziaStyle.color.paleGray
-
-                            clickedFunction: function() {
-                                GC.copyToClipBoard(descriptionText)
-                                PageController.showNotificationMessage(qsTr("Copied"))
-                                if (!GC.isMobile()) {
-                                    this.rightButton.forceActiveFocus()
-                                }
-                            }
-                        }
-
-                        LabelWithButtonType {
-                            id: usernameLabel
-                            Layout.fillWidth: true
-
-                            text: qsTr("User name")
-                            descriptionText: username
-
-                            descriptionOnTop: true
-
-                            parentFlickable: fl
-
-                            rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: AmneziaStyle.color.paleGray
-
-                            clickedFunction: function() {
-                                GC.copyToClipBoard(descriptionText)
-                                PageController.showNotificationMessage(qsTr("Copied"))
-                                if (!GC.isMobile()) {
-                                    this.rightButton.forceActiveFocus()
-                                }
-                            }
-                        }
-
-                        LabelWithButtonType {
-                            id: passwordLabel
-                            Layout.fillWidth: true
-
-                            text: qsTr("Password")
-                            descriptionText: password
-
-                            descriptionOnTop: true
-
-                            parentFlickable: fl
-
-                            rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: AmneziaStyle.color.paleGray
-
-                            buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
-
-                            clickedFunction: function() {
-                                GC.copyToClipBoard(descriptionText)
-                                PageController.showNotificationMessage(qsTr("Copied"))
-                                if (!GC.isMobile()) {
-                                    this.rightButton.forceActiveFocus()
-                                }
-                            }
-                        }
-
-                        BasicButtonType {
-                            id: mountButton
-                            visible: !GC.isMobile()
-
-                            Layout.fillWidth: true
-                            Layout.topMargin: 24
-                            Layout.bottomMargin: 24
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
-
-                            defaultColor: AmneziaStyle.color.transparent
-                            hoveredColor: AmneziaStyle.color.translucentWhite
-                            pressedColor: AmneziaStyle.color.sheerWhite
-                            disabledColor: AmneziaStyle.color.mutedGray
-                            textColor: AmneziaStyle.color.paleGray
-                            borderWidth: 1
-
-                            parentFlickable: fl
-
-                            text: qsTr("Mount folder on device")
-
-                            clickedFunc: function() {
-                                PageController.showBusyIndicator(true)
-                                InstallController.mountSftpDrive(port, password, username)
-                                PageController.showBusyIndicator(false)
-                            }
-                        }
-
-                        ParagraphTextType {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
-
-                            readonly property string windowsFirstLink: "<a href=\"https://github.com/billziss-gh/winfsp/releases/latest\" style=\"color: #FBB26A;\">WinFsp</a>"
-                            readonly property string windowsSecondLink: "<a href=\"https://github.com/billziss-gh/sshfs-win/releases\" style=\"color: #FBB26A;\">SSHFS-Win</a>"
-
-                            readonly property string macosFirstLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">macFUSE</a>"
-                            readonly property string macosSecondLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">SSHFS</a>"
-
-                            onLinkActivated: function(link) {
-                                Qt.openUrlExternally(link)
-                            }
-                            textFormat: Text.RichText
-                            text: {
-                                var str = qsTr("In order to mount remote SFTP folder as local drive, perform following steps: <br>")
-                                if (Qt.platform.os === "windows") {
-                                    str += qsTr("<br>1. Install the latest version of ") + windowsFirstLink + "\n"
-                                    str += qsTr("<br>2. Install the latest version of ") + windowsSecondLink + "\n"
-                                } else if (Qt.platform.os === "osx") {
-                                    str += qsTr("<br>1. Install the latest version of ") + macosFirstLink + "\n"
-                                    str += qsTr("<br>2. Install the latest version of ") + macosSecondLink + "\n"
-                                } else if (Qt.platform.os === "linux") {
-                                    return ""
-                                } else return ""
-
-                                return str
-                            }
-
-
-                            MouseArea {
-                                anchors.fill: parent
-                                acceptedButtons: Qt.NoButton
-                                cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            }
-                        }
-
-                        BasicButtonType {
-                            id: detailedInstructionsButton
-                            Layout.topMargin: 16
-                            Layout.bottomMargin: 16
-                            Layout.leftMargin: 8
-                            implicitHeight: 32
-
-                            defaultColor: AmneziaStyle.color.transparent
-                            hoveredColor: AmneziaStyle.color.translucentWhite
-                            pressedColor: AmneziaStyle.color.sheerWhite
-                            disabledColor: AmneziaStyle.color.mutedGray
-                            textColor: AmneziaStyle.color.goldenApricot
-
-                            text: qsTr("Detailed instructions")
-
-                            parentFlickable: fl
-
-                            clickedFunc: function() {
-//                                Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
-                            }
-                        }
-                    }
+                clickedFunc: function() {
+                    // Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
                 }
             }
         }
