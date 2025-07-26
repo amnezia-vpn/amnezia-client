@@ -510,9 +510,6 @@ PageType {
                 text: qsTr("Share")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
 
-
-                parentFlickable: a
-
                 clickedFunc: function(){
                     if (clientNameTextField.textField.text !== "") {
                         ExportController.generateConfig(root.connectionTypesModel[exportTypeSelector.currentIndex].type)
