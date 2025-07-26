@@ -16,75 +16,61 @@ import "../Controls2/TextTypes"
 ListViewType {
     id: root
 
-    width: parent.width
-    height: root.contentItem.height
+    anchors.fill: parent
 
-    clip: true
-    reuseItems: true
+    delegate: ColumnLayout {
+        width: root.width
 
-    property bool isFocusable: false
+        LabelWithButtonType {
+            Layout.fillWidth: true
 
-    delegate: Item {
-        implicitWidth: root.width
-        implicitHeight: delegateContent.implicitHeight
+            text: name
+            descriptionText: description
+            rightImageSource: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
 
-        ColumnLayout {
-            id: delegateContent
+            clickedFunction: function() {
+                if (isInstalled) {
+                    var containerIndex = root.model.mapToSource(index)
+                    ContainersModel.setProcessedContainerIndex(containerIndex)
 
-            anchors.fill: parent
-
-            LabelWithButtonType {
-                id: containerRadioButton
-                implicitWidth: parent.width
-
-                text: name
-                descriptionText: description
-                rightImageSource: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
-
-                clickedFunction: function() {
-                    if (isInstalled) {
-                        var containerIndex = root.model.mapToSource(index)
-                        ContainersModel.setProcessedContainerIndex(containerIndex)
-
-                        if (serviceType !== ProtocolEnum.Other) {
-                            if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
-                                ProtocolsModel.updateModel(config)
-                                PageController.goToPage(PageEnum.PageProtocolRaw)
-                                return
-                            }
-                        }
-
-                        switch (containerIndex) {
-                        case ContainerEnum.Ipsec: {
+                    if (serviceType !== ProtocolEnum.Other) {
+                        if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
                             ProtocolsModel.updateModel(config)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
-                            break
+                            return
                         }
-                        case ContainerEnum.Dns: {
-                            PageController.goToPage(PageEnum.PageServiceDnsSettings)
-                            break
-                        }
-                        default: {
-                            ProtocolsModel.updateModel(config)
-                            PageController.goToPage(PageEnum.PageSettingsServerProtocol)
-                        }
-                        }
-
-                    } else {
-                        ContainersModel.setProcessedContainerIndex(root.model.mapToSource(index))
-                        InstallController.setShouldCreateServer(false)
-                        PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                     }
-                }
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: false
+                    switch (containerIndex) {
+                    case ContainerEnum.Ipsec: {
+                        ProtocolsModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageProtocolRaw)
+                        break
+                    }
+                    case ContainerEnum.Dns: {
+                        PageController.goToPage(PageEnum.PageServiceDnsSettings)
+                        break
+                    }
+                    default: {
+                        ProtocolsModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageSettingsServerProtocol)
+                    }
+                    }
+
+                } else {
+                    ContainersModel.setProcessedContainerIndex(root.model.mapToSource(index))
+                    InstallController.setShouldCreateServer(false)
+                    PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 }
             }
 
-            DividerType {}
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                enabled: false
+            }
         }
+
+        DividerType {}
     }
 }
