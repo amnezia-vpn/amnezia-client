@@ -15,25 +15,31 @@ import "../Components"
 PageType {
     id: root
 
-    FlickableType {
-        id: fl
+    BackButtonType {
+        id: backButton
+
         anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        contentHeight: content.height + continueButton.implicitHeight + continueButton.anchors.bottomMargin + continueButton.anchors.topMargin
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.topMargin: 20
 
-        ColumnLayout {
-            id: content
-
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            spacing: 0
-
-            BackButtonType {
-                id: backButton
-                Layout.topMargin: 20
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
             }
+        }
+    }
+
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.left: parent.left
+
+        header: ColumnLayout {
+            width: listView.width
 
             BaseHeaderType {
                 Layout.fillWidth: true
@@ -45,53 +51,28 @@ PageType {
                 headerText: ApiServicesModel.getSelectedServiceData("name")
                 descriptionText: ApiServicesModel.getSelectedServiceData("serviceDescription")
             }
+        }
+
+        model: inputFields
+        spacing: 0
+
+        delegate: ColumnLayout {
+            width: listView.width
 
             LabelWithImageType {
                 Layout.fillWidth: true
                 Layout.margins: 16
 
-                imageSource: "qrc:/images/controls/map-pin.svg"
-                leftText: qsTr("For the region")
-                rightText: ApiServicesModel.getSelectedServiceData("region")
+                imageSource: imagePath
+                leftText: lText
+                rightText: rText
             }
+        }
 
-            LabelWithImageType {
-                Layout.fillWidth: true
-                Layout.margins: 16
+        footer: ColumnLayout {
+            width: listView.width
 
-                imageSource: "qrc:/images/controls/tag.svg"
-                leftText: qsTr("Price")
-                rightText: ApiServicesModel.getSelectedServiceData("price")
-            }
-
-            LabelWithImageType {
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                imageSource: "qrc:/images/controls/history.svg"
-                leftText: qsTr("Work period")
-                rightText: ApiServicesModel.getSelectedServiceData("timeLimit")
-
-                visible: rightText !== ""
-            }
-
-            LabelWithImageType {
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                imageSource: "qrc:/images/controls/gauge.svg"
-                leftText: qsTr("Speed")
-                rightText: ApiServicesModel.getSelectedServiceData("speed")
-            }
-
-            LabelWithImageType {
-                Layout.fillWidth: true
-                Layout.margins: 16
-
-                imageSource: "qrc:/images/controls/info.svg"
-                leftText: qsTr("Features")
-                rightText: ""
-            }
+            spacing: 0
 
             ParagraphTextType {
                 Layout.fillWidth: true
@@ -113,34 +94,84 @@ PageType {
                     cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
                 }
             }
+
+            BasicButtonType {
+                id: continueButton
+
+                Layout.fillWidth: true
+                Layout.topMargin: 32
+                Layout.bottomMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Connect")
+
+                clickedFunc: function() {
+                    var endpoint = ApiServicesModel.getStoreEndpoint()
+                    if (endpoint !== undefined && endpoint !== "") {
+                        Qt.openUrlExternally(endpoint)
+                        PageController.closePage()
+                        PageController.closePage()
+                    } else {
+                        PageController.showBusyIndicator(true)
+                        ApiConfigsController.importServiceFromGateway()
+                        PageController.showBusyIndicator(false)
+                    }
+                }
+            }
         }
     }
 
-    BasicButtonType {
-        id: continueButton
+    property list<QtObject> inputFields: [
+        region,
+        price,
+        timeLimit,
+        speed,
+        features
+    ]
 
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
+    QtObject {
+        id: region
 
-        anchors.topMargin: 32
-        anchors.rightMargin: 16
-        anchors.leftMargin: 16
-        anchors.bottomMargin: 32
+        readonly property string imagePath: "qrc:/images/controls/map-pin.svg"
+        readonly property string lText: qsTr("For the region")
+        readonly property string rText: ApiServicesModel.getSelectedServiceData("region")
+        property bool isVisible: true
+    }
 
-        text: qsTr("Connect")
+    QtObject {
+        id: price
 
-        clickedFunc: function() {
-            var endpoint = ApiServicesModel.getStoreEndpoint()
-            if (endpoint !== undefined && endpoint !== "") {
-                Qt.openUrlExternally(endpoint)
-                PageController.closePage()
-                PageController.closePage()
-            } else {
-                PageController.showBusyIndicator(true)
-                ApiConfigsController.importServiceFromGateway()
-                PageController.showBusyIndicator(false)
-            }
-        }
+        readonly property string imagePath: "qrc:/images/controls/tag.svg"
+        readonly property string lText: qsTr("Price")
+        readonly property string rText: ApiServicesModel.getSelectedServiceData("price")
+        property bool isVisible: true
+    }
+
+    QtObject {
+        id: timeLimit
+
+        readonly property string imagePath: "qrc:/images/controls/history.svg"
+        readonly property string lText: qsTr("Work period")
+        readonly property string rText: ApiServicesModel.getSelectedServiceData("timeLimit")
+        property bool isVisible: rText !== ""
+    }
+
+    QtObject {
+        id: speed
+
+        readonly property string imagePath: "qrc:/images/controls/gauge.svg"
+        readonly property string lText: qsTr("Speed")
+        readonly property string rText: ApiServicesModel.getSelectedServiceData("speed")
+        property bool isVisible: true
+    }
+
+    QtObject {
+        id: features
+
+        readonly property string imagePath: "qrc:/images/controls/info.svg"
+        readonly property string lText: qsTr("Features")
+        readonly property string rText: ""
+        property bool isVisible: true
     }
 }
