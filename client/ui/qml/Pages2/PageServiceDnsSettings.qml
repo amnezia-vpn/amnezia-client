@@ -16,50 +16,53 @@ import "../Components"
 PageType {
     id: root
 
-    ColumnLayout {
-        id: backButtonLayout
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
         anchors.topMargin: 20
-
-        BackButtonType {
-            id: backButton
+        
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: backButtonLayout.bottom
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        ColumnLayout {
-            id: content
-
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        header: ColumnLayout {
+            width: listView.width
 
             BaseHeaderType {
-                id: header
-
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.bottomMargin: 24
 
                 headerText: "AmneziaDNS"
                 descriptionText: qsTr("A DNS service is installed on your server, and it is only accessible via VPN.\n") +
                                  qsTr("The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.")
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+
+        delegate: ColumnLayout {
+            width: listView.width
 
             LabelWithButtonType {
-                id: removeButton
-
-                Layout.topMargin: 24
-                width: parent.width
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: AmneziaStyle.color.vibrantRed
@@ -71,19 +74,14 @@ PageType {
 
                     var yesButtonFunction = function() {
                         if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
-                        && SettingsController.isAmneziaDnsEnabled()) {
+                                && SettingsController.isAmneziaDnsEnabled()) {
                             PageController.showNotificationMessage(qsTr("Cannot remove AmneziaDNS from running server"))
-                        } else
-                        {
+                        } else {
                             PageController.goToPage(PageEnum.PageDeinstalling)
                             InstallController.removeProcessedContainer()
                         }
                     }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            removeButton.rightButton.forceActiveFocus()
-                        }
-                    }
+                    var noButtonFunction = function() {}
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
