@@ -28,40 +28,13 @@ PageType {
         }
     }
 
-    ListView {
+    ListViewType {
         id: listView
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         anchors.left: parent.left
-
-        property bool isFocusable: true
-
-        Keys.onTabPressed: {
-            FocusController.nextKeyTabItem()
-        }
-
-        Keys.onBacktabPressed: {
-            FocusController.previousKeyTabItem()
-        }
-
-        Keys.onUpPressed: {
-            FocusController.nextKeyUpItem()
-        }
-
-        Keys.onDownPressed: {
-            FocusController.nextKeyDownItem()
-        }
-
-        Keys.onLeftPressed: {
-            FocusController.nextKeyLeftItem()
-        }
-
-        Keys.onRightPressed: {
-            FocusController.nextKeyRightItem()
-        }
-
-        ScrollBar.vertical: ScrollBarType {}
 
         header: ColumnLayout {
             width: listView.width
@@ -78,8 +51,6 @@ PageType {
 
         model: inputFields
         spacing: 16
-        clip: true
-        reuseItems: true
 
         delegate: ColumnLayout {
             width: listView.width
