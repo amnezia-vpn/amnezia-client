@@ -2,72 +2,128 @@
 
 #include "protocols/protocols_defs.h"
 
-OpenVpnConfigModel::OpenVpnConfigModel(QObject *parent) : QAbstractListModel(parent)
+OpenVpnConfigModel::OpenVpnConfigModel(QObject *parent)
+    : QObject(parent)
 {
 }
 
-int OpenVpnConfigModel::rowCount(const QModelIndex &parent) const
+QString OpenVpnConfigModel::subnetAddress() const
 {
-    Q_UNUSED(parent);
-    return 1;
+    return m_protocolConfig.value(amnezia::config_key::subnet_address).toString(amnezia::protocols::openvpn::defaultSubnetAddress);
 }
 
-bool OpenVpnConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
+void OpenVpnConfigModel::setSubnetAddress(const QString &subnetAddress)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
-        return false;
-    }
-
-    switch (role) {
-    case Roles::SubnetAddressRole: m_protocolConfig.insert(amnezia::config_key::subnet_address, value.toString()); break;
-    case Roles::TransportProtoRole: m_protocolConfig.insert(config_key::transport_proto, value.toString()); break;
-    case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
-    case Roles::AutoNegotiateEncryprionRole: m_protocolConfig.insert(config_key::ncp_disable, !value.toBool()); break;
-    case Roles::HashRole: m_protocolConfig.insert(config_key::hash, value.toString()); break;
-    case Roles::CipherRole: m_protocolConfig.insert(config_key::cipher, value.toString()); break;
-    case Roles::TlsAuthRole: m_protocolConfig.insert(config_key::tls_auth, value.toBool()); break;
-    case Roles::BlockDnsRole: m_protocolConfig.insert(config_key::block_outside_dns, value.toBool()); break;
-    case Roles::AdditionalClientCommandsRole: m_protocolConfig.insert(config_key::additional_client_config, value.toString()); break;
-    case Roles::AdditionalServerCommandsRole: m_protocolConfig.insert(config_key::additional_server_config, value.toString()); break;
-    }
-
-    emit dataChanged(index, index, QList { role });
-    return true;
+    m_protocolConfig.insert(amnezia::config_key::subnet_address, subnetAddress);
 }
 
-QVariant OpenVpnConfigModel::data(const QModelIndex &index, int role) const
+QString OpenVpnConfigModel::transportProto() const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
-        return false;
-    }
+    return m_protocolConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto);
+}
 
-    switch (role) {
-    case Roles::SubnetAddressRole:
-        return m_protocolConfig.value(amnezia::config_key::subnet_address).toString(amnezia::protocols::openvpn::defaultSubnetAddress);
-    case Roles::TransportProtoRole:
-        return m_protocolConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto);
-    case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::openvpn::defaultPort);
-    case Roles::AutoNegotiateEncryprionRole:
-        return !m_protocolConfig.value(config_key::ncp_disable).toBool(protocols::openvpn::defaultNcpDisable);
-    case Roles::HashRole: return m_protocolConfig.value(config_key::hash).toString(protocols::openvpn::defaultHash);
-    case Roles::CipherRole: return m_protocolConfig.value(config_key::cipher).toString(protocols::openvpn::defaultCipher);
-    case Roles::TlsAuthRole: return m_protocolConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth);
-    case Roles::BlockDnsRole:
-        return m_protocolConfig.value(config_key::block_outside_dns).toBool(protocols::openvpn::defaultBlockOutsideDns);
-    case Roles::AdditionalClientCommandsRole:
-        return m_protocolConfig.value(config_key::additional_client_config).toString(protocols::openvpn::defaultAdditionalClientConfig);
-    case Roles::AdditionalServerCommandsRole:
-        return m_protocolConfig.value(config_key::additional_server_config).toString(protocols::openvpn::defaultAdditionalServerConfig);
-    case Roles::IsPortEditable: return m_container == DockerContainer::OpenVpn ? true : false;
-    case Roles::IsTransportProtoEditable: return m_container == DockerContainer::OpenVpn ? true : false;
-    case Roles::HasRemoveButton: return m_container == DockerContainer::OpenVpn ? true : false;
-    }
-    return QVariant();
+void OpenVpnConfigModel::setTransportProto(const QString &transportProto)
+{
+    m_protocolConfig.insert(config_key::transport_proto, transportProto);
+}
+
+QString OpenVpnConfigModel::port() const
+{
+    return m_protocolConfig.value(config_key::port).toString(protocols::openvpn::defaultPort);
+}
+
+void OpenVpnConfigModel::setPort(const QString &port)
+{
+    m_protocolConfig.insert(config_key::port, port);
+}
+
+bool OpenVpnConfigModel::autoNegotiateEncryption() const
+{
+    return !m_protocolConfig.value(config_key::ncp_disable).toBool(protocols::openvpn::defaultNcpDisable);
+}
+
+void OpenVpnConfigModel::setAutoNegotiateEncryption(bool enabled)
+{
+    m_protocolConfig.insert(config_key::ncp_disable, !enabled);
+}
+
+QString OpenVpnConfigModel::hash() const
+{
+    return m_protocolConfig.value(config_key::hash).toString(protocols::openvpn::defaultHash);
+}
+
+void OpenVpnConfigModel::setHash(const QString &hash)
+{
+    m_protocolConfig.insert(config_key::hash, hash);
+}
+
+QString OpenVpnConfigModel::cipher() const
+{
+    return m_protocolConfig.value(config_key::cipher).toString(protocols::openvpn::defaultCipher);
+}
+
+void OpenVpnConfigModel::setCipher(const QString &cipher)
+{
+    m_protocolConfig.insert(config_key::cipher, cipher);
+}
+
+bool OpenVpnConfigModel::tlsAuth() const
+{
+    return m_protocolConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth);
+}
+
+void OpenVpnConfigModel::setTlsAuth(bool enabled)
+{
+    m_protocolConfig.insert(config_key::tls_auth, enabled);
+}
+
+bool OpenVpnConfigModel::blockDns() const
+{
+    return m_protocolConfig.value(config_key::block_outside_dns).toBool(protocols::openvpn::defaultBlockOutsideDns);
+}
+
+void OpenVpnConfigModel::setBlockDns(bool enabled)
+{
+    m_protocolConfig.insert(config_key::block_outside_dns, enabled);
+}
+
+QString OpenVpnConfigModel::additionalClientCommands() const
+{
+    return m_protocolConfig.value(config_key::additional_client_config).toString(protocols::openvpn::defaultAdditionalClientConfig);
+}
+
+void OpenVpnConfigModel::setAdditionalClientCommands(const QString &commands)
+{
+    m_protocolConfig.insert(config_key::additional_client_config, commands);
+}
+
+QString OpenVpnConfigModel::additionalServerCommands() const
+{
+    return m_protocolConfig.value(config_key::additional_server_config).toString(protocols::openvpn::defaultAdditionalServerConfig);
+}
+
+void OpenVpnConfigModel::setAdditionalServerCommands(const QString &commands)
+{
+    m_protocolConfig.insert(config_key::additional_server_config, commands);
+}
+
+bool OpenVpnConfigModel::isPortEditable() const
+{
+    return m_container == DockerContainer::OpenVpn;
+}
+
+bool OpenVpnConfigModel::isTransportProtoEditable() const
+{
+    return m_container == DockerContainer::OpenVpn;
+}
+
+bool OpenVpnConfigModel::hasRemoveButton() const
+{
+    return m_container == DockerContainer::OpenVpn;
 }
 
 void OpenVpnConfigModel::updateModel(const QJsonObject &config)
 {
-    beginResetModel();
     m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
 
     m_fullConfig = config;
@@ -100,35 +156,10 @@ void OpenVpnConfigModel::updateModel(const QJsonObject &config)
     m_protocolConfig.insert(
             config_key::additional_server_config,
             protocolConfig.value(config_key::additional_server_config).toString(protocols::openvpn::defaultAdditionalServerConfig));
-
-    endResetModel();
 }
 
 QJsonObject OpenVpnConfigModel::getConfig()
 {
     m_fullConfig.insert(config_key::openvpn, m_protocolConfig);
     return m_fullConfig;
-}
-
-QHash<int, QByteArray> OpenVpnConfigModel::roleNames() const
-{
-    QHash<int, QByteArray> roles;
-
-    roles[SubnetAddressRole] = "subnetAddress";
-    roles[TransportProtoRole] = "transportProto";
-    roles[PortRole] = "port";
-    roles[AutoNegotiateEncryprionRole] = "autoNegotiateEncryprion";
-    roles[HashRole] = "hash";
-    roles[CipherRole] = "cipher";
-    roles[TlsAuthRole] = "tlsAuth";
-    roles[BlockDnsRole] = "blockDns";
-    roles[AdditionalClientCommandsRole] = "additionalClientCommands";
-    roles[AdditionalServerCommandsRole] = "additionalServerCommands";
-
-    roles[IsPortEditable] = "isPortEditable";
-    roles[IsTransportProtoEditable] = "isTransportProtoEditable";
-
-    roles[HasRemoveButton] = "hasRemoveButton";
-
-    return roles;
 }
