@@ -271,7 +271,7 @@ void ImportController::processNativeWireGuardConfig()
     auto containers = m_config.value(config_key::containers).toArray();
     if (!containers.isEmpty()) {
         auto container = containers.at(0).toObject();
-        auto serverProtocolConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::WireGuard)).toObject();
+        auto serverProtocolConfig = container.value(ContainerProps::containerTypeToProtocolString(DockerContainer::WireGuard)).toObject();
         auto clientProtocolConfig = QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
 
         QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
@@ -728,7 +728,7 @@ void ImportController::processAmneziaConfig(QJsonObject &config)
         auto container = containers.at(i).toObject();
         auto dockerContainer = ContainerProps::containerFromString(container.value(config_key::container).toString());
         if (dockerContainer == DockerContainer::Awg || dockerContainer == DockerContainer::AwgLegacy || dockerContainer == DockerContainer::WireGuard) {
-            auto containerConfig = container.value(ContainerProps::containerTypeToString(dockerContainer)).toObject();
+            auto containerConfig = container.value(ContainerProps::containerTypeToProtocolString(dockerContainer)).toObject();
             auto protocolConfig = containerConfig.value(config_key::last_config).toString();
             if (protocolConfig.isEmpty()) {
                 return;
@@ -740,7 +740,7 @@ void ImportController::processAmneziaConfig(QJsonObject &config)
 
             containerConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
 
-            container[ContainerProps::containerTypeToString(dockerContainer)] = containerConfig;
+            container[ContainerProps::containerTypeToProtocolString(dockerContainer)] = containerConfig;
             containers.replace(i, container);
             config.insert(config_key::containers, containers);
         }

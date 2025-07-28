@@ -32,10 +32,8 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
         return m_containers.value(container);
     }
     case IsThirdPartyConfigRole: {
-        QJsonObject c = m_containers.value(container);
-        auto p = ContainerProps::defaultProtocol(container);
-        QString key = ProtocolProps::protoToString(p);
-        return c.value(key).toObject().value(config_key::isThirdPartyConfig).toBool();
+        QString protocolKey = ContainerProps::containerTypeToProtocolString(container);
+        return m_containers.value(container).value(protocolKey).toObject().value(config_key::isThirdPartyConfig).toBool();
     }
     case ServiceTypeRole: return ContainerProps::containerService(container);
     case DockerContainerRole: return container;

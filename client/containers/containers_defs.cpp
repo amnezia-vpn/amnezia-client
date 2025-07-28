@@ -281,6 +281,15 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     }
 }
 
+QString ContainerProps::containerTypeToProtocolString(DockerContainer c)
+{
+    if (c == DockerContainer::None)
+        return "none";
+
+    Proto p = defaultProtocol(c);
+    return ProtocolProps::protoToString(p);
+}
+
 bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
 {
 #ifdef Q_OS_WINDOWS

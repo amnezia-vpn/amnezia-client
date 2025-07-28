@@ -46,6 +46,7 @@ namespace amnezia
         Q_INVOKABLE static amnezia::DockerContainer containerFromString(const QString &container);
         Q_INVOKABLE static QString containerToString(amnezia::DockerContainer container);
         Q_INVOKABLE static QString containerTypeToString(amnezia::DockerContainer c);
+        Q_INVOKABLE static QString containerTypeToProtocolString(amnezia::DockerContainer c);
 
         Q_INVOKABLE static QList<amnezia::DockerContainer> allContainers();
 
