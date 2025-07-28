@@ -10,6 +10,7 @@
 #include <QLoggingCategory>
 #include <QPointer>
 #include <QTemporaryFile>
+#include <QtGlobal>
 #include <QThread>
 #include <QTimer>
 #include <QtConcurrent>
@@ -197,9 +198,24 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
         return error;
     }
 
-    QTemporaryFile localFile;
-    localFile.open();
-    localFile.write(data);
+    // Create a unique temporary file for upload and write data to it
+#ifdef Q_OS_MAC
+    const QString tmpBase = QStringLiteral("/tmp");
+#else
+    const QString tmpBase = QDir::tempPath();
+#endif
+    const QString tmpTemplate = tmpBase + QDir::separator() + QStringLiteral("amnezia-upload-XXXXXX");
+    QTemporaryFile localFile(tmpTemplate);
+    if (!localFile.open()) {
+        qCritical() << "ServerController: failed to open temporary file for upload";
+        return ErrorCode::OpenError;
+    }
+    const qint64 bytesWritten = localFile.write(data);
+    if (bytesWritten != data.size()) {
+        qCritical() << "ServerController: failed to write data to temporary file, wrote" << bytesWritten << "of" << data.size();
+        return ErrorCode::UnspecifiedError;
+    }
+    localFile.flush();
     localFile.close();
 
     error = m_sshClient.scpFileCopy(overwriteMode, localFile.fileName(), remotePath, "non_desc");
