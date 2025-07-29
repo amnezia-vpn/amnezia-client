@@ -58,7 +58,10 @@ PageType {
                 model: XrayConfigModel
 
                 delegate: Item {
+                    id: delegateItem
+
                     property alias focusItemId: textFieldWithHeaderType.textField
+                    property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
 
                     implicitWidth: listview.width
                     implicitHeight: col.implicitHeight
@@ -85,6 +88,8 @@ PageType {
                             Layout.fillWidth: true
                             Layout.topMargin: 32
 
+                            enabled: delegateItem.isEnabled
+
                             headerText: qsTr("Disguised as traffic from")
                             textField.text: site
 
@@ -101,6 +106,8 @@ PageType {
                                     }
                                 }
                             }
+
+                            checkEmptyText: true
                         }
 
                         TextFieldWithHeaderType {
@@ -130,23 +137,38 @@ PageType {
                             Layout.topMargin: 24
                             Layout.bottomMargin: 24
 
+                            enabled: portTextField.errorText === ""
+
                             text: qsTr("Save")
 
-                            onClicked: {
+                            onClicked: function() {
                                 forceActiveFocus()
 
-                                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                                    return
-                                }
+                                var headerText = qsTr("Save settings?")
+                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                                var yesButtonText = qsTr("Continue")
+                                var noButtonText = qsTr("Cancel")
 
-                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.updateContainer(XrayConfigModel.getConfig())
-                                focusItem.forceActiveFocus()
+                                var yesButtonFunction = function() {
+                                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                                        PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                                        return
+                                    }
+
+                                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                                    InstallController.updateContainer(XrayConfigModel.getConfig())
+                                    //focusItem.forceActiveFocus()
+                                }
+                                var noButtonFunction = function() {
+                                    if (!GC.isMobile()) {
+                                        saveButton.forceActiveFocus()
+                                    }
+                                }
+                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                             }
 
-                            Keys.onEnterPressed: basicButton.clicked()
-                            Keys.onReturnPressed: basicButton.clicked()
+                            Keys.onEnterPressed: saveButton.clicked()
+                            Keys.onReturnPressed: saveButton.clicked()
                         }
                     }
                 }

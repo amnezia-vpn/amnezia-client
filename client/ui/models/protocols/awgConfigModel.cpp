@@ -35,6 +35,17 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     case Roles::ClientJunkPacketMaxSizeRole:
         m_newAwgProtocolConfig.clientProtocolConfig.awgData.junkPacketMaxSize = value.toString();
         break;
+    case Roles::ClientSpecialJunk1Role: m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialJunk1 = value.toString(); break;
+    case Roles::ClientSpecialJunk2Role: m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialJunk2 = value.toString(); break;
+    case Roles::ClientSpecialJunk3Role: m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialJunk3 = value.toString(); break;
+    case Roles::ClientSpecialJunk4Role: m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialJunk4 = value.toString(); break;
+    case Roles::ClientSpecialJunk5Role: m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialJunk5 = value.toString(); break;
+    case Roles::ClientControlledJunk1Role: m_newAwgProtocolConfig.clientProtocolConfig.awgData.controlledJunk1 = value.toString(); break;
+    case Roles::ClientControlledJunk2Role: m_newAwgProtocolConfig.clientProtocolConfig.awgData.controlledJunk2 = value.toString(); break;
+    case Roles::ClientControlledJunk3Role: m_newAwgProtocolConfig.clientProtocolConfig.awgData.controlledJunk3 = value.toString(); break;
+    case Roles::ClientSpecialHandshakeTimeoutRole:
+        m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialHandshakeTimeout = value.toString();
+        break;
 
     case Roles::ServerJunkPacketCountRole: m_newAwgProtocolConfig.serverProtocolConfig.awgData.junkPacketCount = value.toString(); break;
     case Roles::ServerJunkPacketMinSizeRole:
@@ -81,6 +92,15 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ClientJunkPacketCountRole: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.junkPacketCount;
     case Roles::ClientJunkPacketMinSizeRole: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.junkPacketMinSize;
     case Roles::ClientJunkPacketMaxSizeRole: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.junkPacketMaxSize;
+    case Roles::ClientSpecialJunk1Role: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialJunk1;
+    case Roles::ClientSpecialJunk2Role: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialJunk2;
+    case Roles::ClientSpecialJunk3Role: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialJunk3;
+    case Roles::ClientSpecialJunk4Role: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialJunk4;
+    case Roles::ClientSpecialJunk5Role: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialJunk5;
+    case Roles::ClientControlledJunk1Role: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.controlledJunk1;
+    case Roles::ClientControlledJunk2Role: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.controlledJunk2;
+    case Roles::ClientControlledJunk3Role: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.controlledJunk3;
+    case Roles::ClientSpecialHandshakeTimeoutRole: return m_newAwgProtocolConfig.clientProtocolConfig.awgData.specialHandshakeTimeout;
 
     case Roles::ServerJunkPacketCountRole: return m_newAwgProtocolConfig.serverProtocolConfig.awgData.junkPacketCount;
     case Roles::ServerJunkPacketMinSizeRole: return m_newAwgProtocolConfig.serverProtocolConfig.awgData.junkPacketMinSize;
@@ -122,6 +142,17 @@ bool AwgConfigModel::isPacketSizeEqual(const int s1, const int s2)
     return (awg::messageInitiationSize + s1 == awg::messageResponseSize + s2);
 }
 
+// bool AwgConfigModel::isPacketSizeEqual(const int s1, const int s2, const int s3, const int s4)
+// {
+//     int initSize = AwgConstant::messageInitiationSize + s1;
+//     int responseSize = AwgConstant::messageResponseSize + s2;
+//     int cookieSize = AwgConstant::messageCookieReplySize + s3;
+//     int transportSize = AwgConstant::messageTransportSize + s4;
+
+//     return (initSize == responseSize || initSize == cookieSize || initSize == transportSize || responseSize == cookieSize
+//             || responseSize == transportSize || cookieSize == transportSize);
+// }
+
 bool AwgConfigModel::isServerSettingsEqual()
 {
     return m_oldAwgProtocolConfig.hasEqualServerSettings(m_newAwgProtocolConfig);
@@ -138,12 +169,24 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ClientJunkPacketCountRole] = "clientJunkPacketCount";
     roles[ClientJunkPacketMinSizeRole] = "clientJunkPacketMinSize";
     roles[ClientJunkPacketMaxSizeRole] = "clientJunkPacketMaxSize";
+    roles[ClientSpecialJunk1Role] = "clientSpecialJunk1";
+    roles[ClientSpecialJunk2Role] = "clientSpecialJunk2";
+    roles[ClientSpecialJunk3Role] = "clientSpecialJunk3";
+    roles[ClientSpecialJunk4Role] = "clientSpecialJunk4";
+    roles[ClientSpecialJunk5Role] = "clientSpecialJunk5";
+    roles[ClientControlledJunk1Role] = "clientControlledJunk1";
+    roles[ClientControlledJunk2Role] = "clientControlledJunk2";
+    roles[ClientControlledJunk3Role] = "clientControlledJunk3";
+    roles[ClientSpecialHandshakeTimeoutRole] = "clientSpecialHandshakeTimeout";
 
     roles[ServerJunkPacketCountRole] = "serverJunkPacketCount";
     roles[ServerJunkPacketMinSizeRole] = "serverJunkPacketMinSize";
     roles[ServerJunkPacketMaxSizeRole] = "serverJunkPacketMaxSize";
     roles[ServerInitPacketJunkSizeRole] = "serverInitPacketJunkSize";
     roles[ServerResponsePacketJunkSizeRole] = "serverResponsePacketJunkSize";
+    roles[ServerCookieReplyPacketJunkSizeRole] = "serverCookieReplyPacketJunkSize";
+    roles[ServerTransportPacketJunkSizeRole] = "serverTransportPacketJunkSize";
+
     roles[ServerInitPacketMagicHeaderRole] = "serverInitPacketMagicHeader";
     roles[ServerResponsePacketMagicHeaderRole] = "serverResponsePacketMagicHeader";
     roles[ServerUnderloadPacketMagicHeaderRole] = "serverUnderloadPacketMagicHeader";

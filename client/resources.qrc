@@ -239,6 +239,7 @@
         <file>ui/qml/Components/ApiPremV1MigrationDrawer.qml</file>
         <file>ui/qml/Components/ApiPremV1SubListDrawer.qml</file>
         <file>ui/qml/Components/OtpCodeDrawer.qml</file>
+        <file>ui/qml/Components/AwgTextField.qml</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>

@@ -12,6 +12,8 @@
     #include <AmneziaVPN-Swift.h>
 #endif
 
+#include "core/api/apiUtils.h"
+
 namespace
 {
     namespace configKey
@@ -738,4 +740,9 @@ const QString ServersModel::getDefaultServerImagePathCollapsed()
     //     return "";
     // }
     // return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(countryCode.toUpper());
+}
+
+bool ServersModel::processedServerIsPremium() const
+{
+    return apiUtils::isPremiumServer(getServerConfig(m_processedServerIndex));
 }

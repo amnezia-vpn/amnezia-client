@@ -62,6 +62,9 @@ public:
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
 
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
+    Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerChanged)
+
+    bool processedServerIsPremium() const;
 
 public slots:
     void setDefaultServerIndex(const int index);
