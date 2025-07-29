@@ -14,27 +14,25 @@ import "../Config"
 PageType {
     id: root
 
-    ColumnLayout {
-        id: header
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+        Layout.topMargin: 20
 
-        spacing: 0
-
-        BackButtonType {
-            id: backButton
-            Layout.topMargin: 20
+        onActiveFocusChanged: {
+            if(backButton.enabled && backButton.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
-
-        
     }
 
     ListViewType {
-        id: servicesListView
+        id: listView
 
-        anchors.top: header.bottom
+        anchors.top: backButton.bottom
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
