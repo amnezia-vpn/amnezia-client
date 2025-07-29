@@ -60,6 +60,7 @@ public slots:
     int getLineHeightAppend();
     QString getCurrentLanguageName();
     QString getCurrentSiteUrl(const QString &path = "");
+    QString getCurrentDocsUrl(const QString &path = "");
 
 signals:
     void updateTranslations(const QLocale &locale);
