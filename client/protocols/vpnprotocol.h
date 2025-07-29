@@ -6,7 +6,7 @@
 #include <QJsonObject>
 
 #include "core/defs.h"
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 
 using namespace amnezia;
 

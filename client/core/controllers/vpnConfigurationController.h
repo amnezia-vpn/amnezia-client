@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "configurators/configurator_base.h"
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 #include "core/defs.h"
 #include "settings.h"
 

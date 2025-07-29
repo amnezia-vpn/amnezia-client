@@ -6,7 +6,7 @@
 #include "core/networkUtilities.h"
 #include "version.h"
 
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 #include "logger.h"
 
 namespace

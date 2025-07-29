@@ -4,6 +4,8 @@
 #include <QAbstractListModel>
 #include "settings.h"
 
+class DnsController;
+
 class AllowedDnsModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -13,7 +15,9 @@ public:
         IpRole = Qt::UserRole + 1
     };
 
-    explicit AllowedDnsModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit AllowedDnsModel(std::shared_ptr<Settings> settings, 
+                            QSharedPointer<DnsController> dnsController,
+                            QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -27,10 +31,16 @@ public slots:
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
+private slots:
+    void onDnsAdded(const QString &ip);
+    void onDnsListAdded(const QStringList &dnsServers);
+    void onDnsRemoved(const QString &ip);
+
 private:
-    void fillDnsServers();
+    void refreshData();
 
     std::shared_ptr<Settings> m_settings;
+    QSharedPointer<DnsController> m_dnsController;
     QStringList m_dnsServers;
 };
 

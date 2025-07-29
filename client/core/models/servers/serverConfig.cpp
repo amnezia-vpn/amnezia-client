@@ -4,7 +4,7 @@
 
 #include "apiV1ServerConfig.h"
 #include "apiV2ServerConfig.h"
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 #include "core/models/protocols/awgProtocolConfig.h"
 #include "core/models/protocols/cloakProtocolConfig.h"
 #include "core/models/protocols/openvpnProtocolConfig.h"

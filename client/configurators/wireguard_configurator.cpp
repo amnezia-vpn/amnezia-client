@@ -13,8 +13,8 @@
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 
-#include "containers/containers_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/models/containers/containers_defs.h"
+#include "core/controllers/selfhosted/serverController.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
 #include "settings.h"

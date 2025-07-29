@@ -9,7 +9,7 @@
 #include <QtConcurrent>
 
 #include "core/api/apiUtils.h"
-#include "core/controllers/serverController.h"
+#include "core/controllers/selfhosted/serverController.h"
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/models/servers/selfHostedServerConfig.h"
 #include "core/networkUtilities.h"

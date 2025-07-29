@@ -3,7 +3,7 @@
 
 #include <QLatin1String>
 #include "core/defs.h"
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 
 namespace amnezia {
 

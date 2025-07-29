@@ -14,8 +14,8 @@
 #endif
 
 #include "core/networkUtilities.h"
-#include "containers/containers_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/models/containers/containers_defs.h"
+#include "core/controllers/selfhosted/serverController.h"
 #include "core/scripts_registry.h"
 #include "settings.h"
 #include "utilities.h"

@@ -12,8 +12,13 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/api/apiDefs.h
     ${CLIENT_ROOT_DIR}/core/qrCodeUtils.h
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.h
-    ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.h
-    ${CLIENT_ROOT_DIR}/core/controllers/serverController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/api/gatewayController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverConfigController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installationController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/settingsConfigController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/protocolConfigController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/vpnConnectionController.h
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.h
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.h
     ${CLIENT_ROOT_DIR}/protocols/qml_register_protocols.h
@@ -60,8 +65,13 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/server_defs.cpp
     ${CLIENT_ROOT_DIR}/core/qrCodeUtils.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.cpp
-    ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.cpp
-    ${CLIENT_ROOT_DIR}/core/controllers/serverController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/api/gatewayController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverConfigController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installationController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/settingsConfigController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/protocolConfigController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/vpnConnectionController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.cpp
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.cpp
     ${CLIENT_ROOT_DIR}/ui/qautostart.cpp
@@ -115,6 +125,7 @@ file(GLOB UI_MODELS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/models/protocols/*.h
     ${CLIENT_ROOT_DIR}/ui/models/services/*.h
     ${CLIENT_ROOT_DIR}/ui/models/api/*.h
+    ${CLIENT_ROOT_DIR}/ui/models/selfhosted/*.h
 )
 
 file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS
@@ -122,16 +133,19 @@ file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/models/protocols/*.cpp
     ${CLIENT_ROOT_DIR}/ui/models/services/*.cpp
     ${CLIENT_ROOT_DIR}/ui/models/api/*.cpp
+    ${CLIENT_ROOT_DIR}/ui/models/selfhosted/*.cpp
 )
 
 file(GLOB UI_CONTROLLERS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.h
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.h
+    ${CLIENT_ROOT_DIR}/ui/controllers/selfhosted/*.h
 )
 
 file(GLOB UI_CONTROLLERS_CPP CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.cpp
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.cpp
+    ${CLIENT_ROOT_DIR}/ui/controllers/selfhosted/*.cpp
 )
 
 file(GLOB CORE_MODELS_H CONFIGURE_DEPENDS

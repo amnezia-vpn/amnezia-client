@@ -4,7 +4,7 @@
 #include <QAbstractListModel>
 #include <QJsonObject>
 
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 #include "core/models/protocols/awgProtocolConfig.h"
 
 namespace AwgConstant

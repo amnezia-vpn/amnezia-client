@@ -4,7 +4,7 @@
 #include <QAbstractListModel>
 #include <QJsonArray>
 
-#include "core/controllers/serverController.h"
+#include "core/controllers/selfhosted/serverController.h"
 #include "settings.h"
 
 class ClientManagementModel : public QAbstractListModel

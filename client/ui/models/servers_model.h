@@ -3,7 +3,10 @@
 
 #include <QAbstractListModel>
 
-#include "core/controllers/serverController.h"
+#include "core/controllers/selfhosted/serverController.h"
+#include "core/controllers/selfhosted/selfhostedConfigController.h"
+#include "core/controllers/selfhosted/installationController.h"
+#include "core/controllers/settingsConfigController.h"
 #include "core/models/servers/serverConfig.h"
 #include "settings.h"
 
@@ -157,11 +160,14 @@ private:
     QVector<QSharedPointer<ServerConfig>> m_servers1;
 
     std::shared_ptr<Settings> m_settings;
+    std::shared_ptr<SelfhostedConfigController> m_serverConfigController;
+    std::shared_ptr<InstallationController> m_installationController;
+    std::shared_ptr<SettingsConfigController> m_settingsConfigController;
 
     int m_defaultServerIndex;
     int m_processedServerIndex;
 
-    bool m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
+    bool m_isAmneziaDnsEnabled;
 };
 
 #endif // SERVERSMODEL_H

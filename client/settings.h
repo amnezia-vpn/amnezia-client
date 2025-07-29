@@ -9,7 +9,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 #include "core/defs.h"
 #include "secure_qsettings.h"
 

@@ -4,7 +4,7 @@
 #include <QJsonObject>
 #include <QObject>
 
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 #include "core/defs.h"
 #include "core/sshclient.h"
 

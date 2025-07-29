@@ -1,15 +1,25 @@
 #include "sites_model.h"
+#include "core/controllers/splitTunnelingController.h"
 
-SitesModel::SitesModel(std::shared_ptr<Settings> settings, QObject *parent)
-    : QAbstractListModel(parent), m_settings(settings)
+SitesModel::SitesModel(std::shared_ptr<Settings> settings, 
+                       QSharedPointer<SplitTunnelingController> splitTunnelingController,
+                       QObject *parent)
+    : QAbstractListModel(parent), 
+      m_settings(settings), 
+      m_splitTunnelingController(splitTunnelingController)
 {
-    m_isSplitTunnelingEnabled = m_settings->isSitesSplitTunnelingEnabled();
-    m_currentRouteMode = m_settings->routeMode();
-    if (m_currentRouteMode == Settings::VpnAllSites) { // for old split tunneling configs
-        m_settings->setRouteMode(static_cast<Settings::RouteMode>(Settings::VpnOnlyForwardSites));
-        m_currentRouteMode = Settings::VpnOnlyForwardSites;
-    }
-    fillSites();
+    // Connect to controller signals
+    connect(m_splitTunnelingController.data(), &SplitTunnelingController::siteAdded,
+            this, &SitesModel::onSiteAdded);
+    connect(m_splitTunnelingController.data(), &SplitTunnelingController::siteRemoved,
+            this, &SitesModel::onSiteRemoved);
+    connect(m_splitTunnelingController.data(), &SplitTunnelingController::sitesRouteModelChanged,
+            this, &SitesModel::onSitesRouteModelChanged);
+    connect(m_splitTunnelingController.data(), &SplitTunnelingController::sitesSplitTunnelingToggled,
+            this, &SitesModel::onSitesSplitTunnelingToggled);
+
+    // Initialize data
+    refreshData();
 }
 
 int SitesModel::rowCount(const QModelIndex &parent) const
@@ -42,72 +52,42 @@ QVariant SitesModel::data(const QModelIndex &index, int role) const
 
 bool SitesModel::addSite(const QString &hostname, const QString &ip)
 {
-    if (!m_settings->addVpnSite(m_currentRouteMode, hostname, ip)) {
-        return false;
-    }
-    for (int i = 0; i < m_sites.size(); i++) {
-        if (m_sites[i].first == hostname && (m_sites[i].second.isEmpty() && !ip.isEmpty())) {
-            m_sites[i].second = ip;
-            QModelIndex index = createIndex(i, i);
-            emit dataChanged(index, index);
-            return true;
-        } else if (m_sites[i].first == hostname && (m_sites[i].second == ip)) {
-            return false;
-        }
-    }
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_sites.append(qMakePair(hostname, ip));
-    endInsertRows();
-    return true;
+    return m_splitTunnelingController->addSite(hostname, ip);
 }
 
 void SitesModel::addSites(const QMap<QString, QString> &sites, bool replaceExisting)
 {
-    beginResetModel();
-
-    if (replaceExisting) {
-        m_settings->removeAllVpnSites(m_currentRouteMode);
-    }
-    m_settings->addVpnSites(m_currentRouteMode, sites);
-    fillSites();
-
-    endResetModel();
+    m_splitTunnelingController->addSites(sites, replaceExisting);
 }
 
 void SitesModel::removeSite(QModelIndex index)
 {
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_sites.size()) {
+        return;
+    }
+    
     auto hostname = m_sites.at(index.row()).first;
-    beginRemoveRows(QModelIndex(), index.row(), index.row());
-    m_settings->removeVpnSite(m_currentRouteMode, hostname);
-    m_sites.removeAt(index.row());
-    endRemoveRows();
+    m_splitTunnelingController->removeSite(hostname);
 }
 
 int SitesModel::getRouteMode()
 {
-    return m_currentRouteMode;
+    return static_cast<int>(m_splitTunnelingController->getSitesRouteMode());
 }
 
 void SitesModel::setRouteMode(int routeMode)
 {
-    beginResetModel();
-    m_settings->setRouteMode(static_cast<Settings::RouteMode>(routeMode));
-    m_currentRouteMode = m_settings->routeMode();
-    fillSites();
-    endResetModel();
-    emit routeModeChanged();
+    m_splitTunnelingController->setSitesRouteMode(static_cast<Settings::RouteMode>(routeMode));
 }
 
 bool SitesModel::isSplitTunnelingEnabled()
 {
-    return m_isSplitTunnelingEnabled;
+    return m_splitTunnelingController->isSitesSplitTunnelingEnabled();
 }
 
 void SitesModel::toggleSplitTunneling(bool enabled)
 {
-    m_settings->setSitesSplitTunnelingEnabled(enabled);
-    m_isSplitTunnelingEnabled = enabled;
-    emit splitTunnelingToggled();
+    m_splitTunnelingController->setSitesSplitTunnelingEnabled(enabled);
 }
 
 QVector<QPair<QString, QString> > SitesModel::getCurrentSites()
@@ -123,13 +103,37 @@ QHash<int, QByteArray> SitesModel::roleNames() const
     return roles;
 }
 
-void SitesModel::fillSites()
+void SitesModel::onSiteAdded(const QString &hostname, const QString &ip)
 {
-    m_sites.clear();
-    const QVariantMap &sites = m_settings->vpnSites(m_currentRouteMode);
-    auto i = sites.constBegin();
-    while (i != sites.constEnd()) {
-        m_sites.append(qMakePair(i.key(), i.value().toString()));
-        ++i;
-    }
+    Q_UNUSED(hostname)
+    Q_UNUSED(ip)
+    beginResetModel();
+    refreshData();
+    endResetModel();
+}
+
+void SitesModel::onSiteRemoved(const QString &hostname)
+{
+    Q_UNUSED(hostname)
+    beginResetModel();
+    refreshData();
+    endResetModel();
+}
+
+void SitesModel::onSitesRouteModelChanged()
+{
+    beginResetModel();
+    refreshData();
+    endResetModel();
+    emit routeModeChanged();
+}
+
+void SitesModel::onSitesSplitTunnelingToggled()
+{
+    emit splitTunnelingToggled();
+}
+
+void SitesModel::refreshData()
+{
+    m_sites = m_splitTunnelingController->getSites(m_splitTunnelingController->getSitesRouteMode());
 }

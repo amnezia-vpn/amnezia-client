@@ -4,7 +4,7 @@
 #include <QTimer>
 
 #include "core/api/apiUtils.h"
-#include "core/controllers/gatewayController.h"
+#include "core/controllers/api/gatewayController.h"
 #include "version.h"
 
 namespace

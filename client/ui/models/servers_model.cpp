@@ -1,7 +1,7 @@
 #include "servers_model.h"
 
 #include "core/api/apiDefs.h"
-#include "core/controllers/serverController.h"
+#include "core/controllers/selfhosted/serverController.h"
 #include "core/models/servers/apiV1ServerConfig.h"
 #include "core/models/servers/apiV2ServerConfig.h"
 #include "core/models/servers/selfHostedServerConfig.h"
@@ -34,7 +34,11 @@ namespace
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
-    m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
+    m_serverConfigController = std::make_shared<SelfhostedConfigController>(settings);
+    m_installationController = std::make_shared<InstallationController>(settings);
+    m_settingsConfigController = std::make_shared<SettingsConfigController>(settings);
+    
+    m_isAmneziaDnsEnabled = m_settingsConfigController->isAmneziaDnsEnabled();
 
     connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerNameChanged);
 
@@ -43,6 +47,13 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) 
         emit ServersModel::defaultServerDefaultContainerChanged(defaultContainer);
         emit ServersModel::defaultServerNameChanged();
         updateDefaultServerContainersModel();
+    });
+
+    // Subscribe to controller signals
+    connect(m_serverConfigController.get(), &SelfhostedConfigController::defaultServerChanged, 
+            this, [this](int serverIndex) {
+        m_defaultServerIndex = serverIndex;
+        emit defaultServerIndexChanged(m_defaultServerIndex);
     });
 
     connect(this, &ServersModel::processedServerIndexChanged, this, &ServersModel::processedServerChanged);
@@ -169,9 +180,7 @@ void ServersModel::resetModel()
 
 void ServersModel::setDefaultServerIndex(const int index)
 {
-    m_settings->setDefaultServer(index);
-    m_defaultServerIndex = m_settings->defaultServerIndex();
-    emit defaultServerIndexChanged(m_defaultServerIndex);
+    m_serverConfigController->setDefaultServer(index);
 }
 
 const int ServersModel::getDefaultServerIndex()
@@ -305,19 +314,21 @@ bool ServersModel::isDefaultServerHasWriteAccess()
 
 void ServersModel::addServer(const QSharedPointer<ServerConfig> &serverConfig)
 {
+    m_serverConfigController->addServer(serverConfig);
+    
     beginResetModel();
-    m_settings->addServer(serverConfig->toJson());
+    m_servers1.clear();
     auto servers = m_settings->serversArray();
     for (auto server : servers) {
-        auto serverConfig = ServerConfig::createServerConfig(server.toObject());
-        m_servers1.push_back(serverConfig);
+        auto config = ServerConfig::createServerConfig(server.toObject());
+        m_servers1.push_back(config);
     }
     endResetModel();
 }
 
 void ServersModel::editServer(const QSharedPointer<ServerConfig> &serverConfig, const int serverIndex)
 {
-    m_settings->editServer(serverIndex, serverConfig->toJson());
+    m_serverConfigController->editServer(serverConfig, serverIndex);
     m_servers1[serverIndex] = serverConfig;
     emit dataChanged(index(serverIndex, 0), index(serverIndex, 0));
 
@@ -339,12 +350,14 @@ void ServersModel::removeProcessedServer()
 
 void ServersModel::removeServer(const int serverIndex)
 {
+    m_serverConfigController->removeServer(serverIndex);
+    
     beginResetModel();
-    m_settings->removeServer(serverIndex);
+    m_servers1.clear();
     auto servers = m_settings->serversArray();
     for (auto server : servers) {
-        auto serverConfig = ServerConfig::createServerConfig(server.toObject());
-        m_servers1.push_back(serverConfig);
+        auto config = ServerConfig::createServerConfig(server.toObject());
+        m_servers1.push_back(config);
     }
 
     if (m_settings->defaultServerIndex() == serverIndex) {
@@ -432,10 +445,13 @@ const QString ServersModel::getDefaultServerDefaultContainerName()
 
 ErrorCode ServersModel::removeAllContainers(const QSharedPointer<ServerController> &serverController)
 {
-    ErrorCode errorCode = serverController->removeAllContainers(m_settings->serverCredentials(m_processedServerIndex));
-
+    Q_UNUSED(serverController)
+    
+    auto serverConfig = m_servers1.at(m_processedServerIndex);
+    auto future = m_installationController->removeAllContainers(serverConfig);
+    
+    ErrorCode errorCode = future.result();
     if (errorCode == ErrorCode::NoError) {
-        auto serverConfig = m_servers1.at(m_processedServerIndex);
         serverConfig->containerConfigs.clear();
         editServer(serverConfig, m_processedServerIndex);
     }
@@ -444,20 +460,24 @@ ErrorCode ServersModel::removeAllContainers(const QSharedPointer<ServerControlle
 
 ErrorCode ServersModel::rebootServer(const QSharedPointer<ServerController> &serverController)
 {
-    ErrorCode errorCode = serverController->rebootServer(m_settings->serverCredentials(m_processedServerIndex));
-    return errorCode;
+    Q_UNUSED(serverController)
+    
+    auto serverConfig = m_servers1.at(m_processedServerIndex);
+    auto future = m_installationController->rebootServer(serverConfig);
+    return future.result();
 }
 
 ErrorCode ServersModel::removeContainer(const QSharedPointer<ServerController> &serverController, const int containerIndex)
 {
-
-    auto credentials = m_settings->serverCredentials(m_processedServerIndex);
+    Q_UNUSED(serverController)
+    
+    auto serverConfig = m_servers1.at(m_processedServerIndex);
     auto dockerContainer = static_cast<DockerContainer>(containerIndex);
 
-    ErrorCode errorCode = serverController->removeContainer(credentials, dockerContainer);
+    auto future = m_installationController->removeContainer(serverConfig, dockerContainer);
+    ErrorCode errorCode = future.result();
 
     if (errorCode == ErrorCode::NoError) {
-        auto serverConfig = m_servers1.at(m_processedServerIndex);
         serverConfig->containerConfigs.remove(ContainerProps::containerToString(dockerContainer));
 
         auto defaultContainer = ContainerProps::containerFromString(serverConfig->defaultContainer);
@@ -550,30 +570,19 @@ QStringList ServersModel::getAllInstalledServicesName(const int serverIndex)
 
 void ServersModel::toggleAmneziaDns(bool enabled)
 {
+    m_settingsConfigController->toggleAmneziaDns(enabled);
     m_isAmneziaDnsEnabled = enabled;
     emit defaultServerDescriptionChanged();
 }
 
 bool ServersModel::isServerFromApiAlreadyExists(const quint16 crc)
 {
-    for (const auto &server : std::as_const(m_servers1)) {
-        if (static_cast<quint16>(server->crc) == crc) {
-            return true;
-        }
-    }
-    return false;
+    return m_serverConfigController->isServerFromApiAlreadyExists(crc);
 }
 
 bool ServersModel::isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol)
 {
-    for (const auto &serverConfig : std::as_const(m_servers1)) {
-        const auto apiV2ServerConfig = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
-        if (apiV2ServerConfig->apiConfig.userCountryCode == userCountryCode && apiV2ServerConfig->apiConfig.serviceType == serviceType
-            && apiV2ServerConfig->apiConfig.serviceProtocol == serviceProtocol) {
-            return true;
-        }
-    }
-    return false;
+    return m_serverConfigController->isServerFromApiAlreadyExists(userCountryCode, serviceType, serviceProtocol);
 }
 
 bool ServersModel::serverHasInstalledContainers(const int serverIndex) const

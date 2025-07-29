@@ -4,9 +4,9 @@
 #include <QObject>
 #include <QProcess>
 
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 #include "core/defs.h"
-#include "ui/models/clientManagementModel.h"
+#include "ui/models/selfhosted/clientManagementModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"

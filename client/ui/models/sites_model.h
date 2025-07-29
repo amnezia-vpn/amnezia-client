@@ -5,6 +5,8 @@
 
 #include "settings.h"
 
+class SplitTunnelingController;
+
 class SitesModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -15,13 +17,14 @@ public:
         IpRole
     };
 
-    explicit SitesModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit SitesModel(std::shared_ptr<Settings> settings, 
+                       QSharedPointer<SplitTunnelingController> splitTunnelingController,
+                       QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-    Q_PROPERTY(int routeMode READ getRouteMode WRITE setRouteMode NOTIFY routeModeChanged)
+    Q_PROPERTY(int routeMode READ getRouteMode NOTIFY routeModeChanged)
     Q_PROPERTY(bool isTunnelingEnabled READ isSplitTunnelingEnabled NOTIFY splitTunnelingToggled)
 
 public slots:
@@ -44,13 +47,17 @@ signals:
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
+private slots:
+    void onSiteAdded(const QString &hostname, const QString &ip);
+    void onSiteRemoved(const QString &hostname);
+    void onSitesRouteModelChanged();
+    void onSitesSplitTunnelingToggled();
+
 private:
-    void fillSites();
+    void refreshData();
 
     std::shared_ptr<Settings> m_settings;
-
-    bool m_isSplitTunnelingEnabled;
-    Settings::RouteMode m_currentRouteMode;
+    QSharedPointer<SplitTunnelingController> m_splitTunnelingController;
 
     QVector<QPair<QString, QString>> m_sites;
 };

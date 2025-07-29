@@ -3,7 +3,7 @@
 
 #include "QProcess"
 
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 #include "openvpnprotocol.h"
 #include "settings.h"
 

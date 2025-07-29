@@ -5,7 +5,7 @@
 
 #include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
-#include "core/controllers/gatewayController.h"
+#include "core/controllers/api/gatewayController.h"
 
 ApiPremV1MigrationController::ApiPremV1MigrationController(const QSharedPointer<ServersModel> &serversModel,
                                                            const std::shared_ptr<Settings> &settings, QObject *parent)

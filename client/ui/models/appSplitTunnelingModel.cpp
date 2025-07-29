@@ -1,17 +1,27 @@
 #include "appSplitTunnelingModel.h"
+#include "core/controllers/splitTunnelingController.h"
 
 #include <QFileInfo>
 
-AppSplitTunnelingModel::AppSplitTunnelingModel(std::shared_ptr<Settings> settings, QObject *parent)
-    : QAbstractListModel(parent), m_settings(settings)
+AppSplitTunnelingModel::AppSplitTunnelingModel(std::shared_ptr<Settings> settings, 
+                                               QSharedPointer<SplitTunnelingController> splitTunnelingController,
+                                               QObject *parent)
+    : QAbstractListModel(parent), 
+      m_settings(settings), 
+      m_splitTunnelingController(splitTunnelingController)
 {
-    m_isSplitTunnelingEnabled = m_settings->isAppsSplitTunnelingEnabled();
-    m_currentRouteMode = m_settings->getAppsRouteMode();
-    if (m_currentRouteMode == Settings::VpnAllApps) { // for old split tunneling configs
-        m_settings->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(Settings::VpnAllExceptApps));
-        m_currentRouteMode = Settings::VpnAllExceptApps;
-    }
-    m_apps = m_settings->getVpnApps(m_currentRouteMode);
+    // Connect to controller signals
+    connect(m_splitTunnelingController.data(), &SplitTunnelingController::appAdded,
+            this, &AppSplitTunnelingModel::onAppAdded);
+    connect(m_splitTunnelingController.data(), &SplitTunnelingController::appRemoved,
+            this, &AppSplitTunnelingModel::onAppRemoved);
+    connect(m_splitTunnelingController.data(), &SplitTunnelingController::appsRouteModelChanged,
+            this, &AppSplitTunnelingModel::onAppsRouteModelChanged);
+    connect(m_splitTunnelingController.data(), &SplitTunnelingController::appsSplitTunnelingToggled,
+            this, &AppSplitTunnelingModel::onAppsSplitTunnelingToggled);
+
+    // Initialize data
+    refreshData();
 }
 
 int AppSplitTunnelingModel::rowCount(const QModelIndex &parent) const
@@ -39,51 +49,37 @@ QVariant AppSplitTunnelingModel::data(const QModelIndex &index, int role) const
 
 bool AppSplitTunnelingModel::addApp(const InstalledAppInfo &appInfo)
 {
-    if (m_apps.contains(appInfo)) {
-        return false;
-    }
-
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_apps.append(appInfo);
-    m_settings->setVpnApps(m_currentRouteMode, m_apps);
-    endInsertRows();
-
-    return true;
+    return m_splitTunnelingController->addApp(appInfo);
 }
 
 void AppSplitTunnelingModel::removeApp(QModelIndex index)
 {
-    beginRemoveRows(QModelIndex(), index.row(), index.row());
-    m_apps.removeAt(index.row());
-    m_settings->setVpnApps(m_currentRouteMode, m_apps);
-    endRemoveRows();
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_apps.size()) {
+        return;
+    }
+    
+    const InstalledAppInfo &appInfo = m_apps.at(index.row());
+    m_splitTunnelingController->removeApp(appInfo);
 }
 
 int AppSplitTunnelingModel::getRouteMode()
 {
-    return m_currentRouteMode;
+    return static_cast<int>(m_splitTunnelingController->getAppsRouteMode());
 }
 
 void AppSplitTunnelingModel::setRouteMode(int routeMode)
 {
-    beginResetModel();
-    m_settings->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(routeMode));
-    m_currentRouteMode = m_settings->getAppsRouteMode();
-    m_apps = m_settings->getVpnApps(m_currentRouteMode);
-    endResetModel();
-    emit routeModeChanged();
+    m_splitTunnelingController->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(routeMode));
 }
 
 bool AppSplitTunnelingModel::isSplitTunnelingEnabled()
 {
-    return m_isSplitTunnelingEnabled;
+    return m_splitTunnelingController->isAppsSplitTunnelingEnabled();
 }
 
 void AppSplitTunnelingModel::toggleSplitTunneling(bool enabled)
 {
-    m_settings->setAppsSplitTunnelingEnabled(enabled);
-    m_isSplitTunnelingEnabled = enabled;
-    emit splitTunnelingToggled();
+    m_splitTunnelingController->setAppsSplitTunnelingEnabled(enabled);
 }
 
 QHash<int, QByteArray> AppSplitTunnelingModel::roleNames() const
@@ -91,4 +87,38 @@ QHash<int, QByteArray> AppSplitTunnelingModel::roleNames() const
     QHash<int, QByteArray> roles;
     roles[AppPathRole] = "appPath";
     return roles;
+}
+
+void AppSplitTunnelingModel::onAppAdded(const InstalledAppInfo &appInfo)
+{
+    Q_UNUSED(appInfo)
+    beginResetModel();
+    refreshData();
+    endResetModel();
+}
+
+void AppSplitTunnelingModel::onAppRemoved(const InstalledAppInfo &appInfo)
+{
+    Q_UNUSED(appInfo)
+    beginResetModel();
+    refreshData();
+    endResetModel();
+}
+
+void AppSplitTunnelingModel::onAppsRouteModelChanged()
+{
+    beginResetModel();
+    refreshData();
+    endResetModel();
+    emit routeModeChanged();
+}
+
+void AppSplitTunnelingModel::onAppsSplitTunnelingToggled()
+{
+    emit splitTunnelingToggled();
+}
+
+void AppSplitTunnelingModel::refreshData()
+{
+    m_apps = m_splitTunnelingController->getApps(m_splitTunnelingController->getAppsRouteMode());
 }

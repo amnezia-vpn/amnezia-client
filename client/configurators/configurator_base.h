@@ -3,9 +3,9 @@
 
 #include <QObject>
 
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 #include "core/defs.h"
-#include "core/controllers/serverController.h"
+#include "core/controllers/selfhosted/serverController.h"
 #include "settings.h"
 
 class ConfiguratorBase : public QObject

@@ -7,7 +7,7 @@
 #include "configurators/wireguard_configurator.h"
 #include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
-#include "core/controllers/gatewayController.h"
+#include "core/controllers/api/gatewayController.h"
 #include "core/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"
 #include "version.h"

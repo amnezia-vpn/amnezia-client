@@ -22,7 +22,7 @@
 #include <chrono>
 #include <thread>
 
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 #include "core/networkUtilities.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"

@@ -2,7 +2,7 @@
 
 #include "logger.h"
 #include "utilities.h"
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 
 #include <QCryptographicHash>
 #include <QJsonDocument>

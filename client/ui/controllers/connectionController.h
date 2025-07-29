@@ -2,7 +2,7 @@
 #define CONNECTIONCONTROLLER_H
 
 #include "protocols/vpnprotocol.h"
-#include "ui/models/clientManagementModel.h"
+#include "ui/models/selfhosted/clientManagementModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
 #include "vpnconnection.h"

@@ -6,6 +6,8 @@
 #include "settings.h"
 #include "core/defs.h"
 
+class SplitTunnelingController;
+
 class AppSplitTunnelingModel: public QAbstractListModel
 {
     Q_OBJECT
@@ -17,13 +19,14 @@ public:
         PackageAppIconRole
     };
 
-    explicit AppSplitTunnelingModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit AppSplitTunnelingModel(std::shared_ptr<Settings> settings, 
+                                   QSharedPointer<SplitTunnelingController> splitTunnelingController,
+                                   QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-    Q_PROPERTY(int routeMode READ getRouteMode WRITE setRouteMode NOTIFY routeModeChanged)
+    Q_PROPERTY(int routeMode READ getRouteMode NOTIFY routeModeChanged)
     Q_PROPERTY(bool isTunnelingEnabled READ isSplitTunnelingEnabled NOTIFY splitTunnelingToggled)
 
 public slots:
@@ -43,11 +46,17 @@ signals:
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
-private:
-    std::shared_ptr<Settings> m_settings;
+private slots:
+    void onAppAdded(const InstalledAppInfo &appInfo);
+    void onAppRemoved(const InstalledAppInfo &appInfo);
+    void onAppsRouteModelChanged();
+    void onAppsSplitTunnelingToggled();
 
-    bool m_isSplitTunnelingEnabled;
-    Settings::AppsRouteMode m_currentRouteMode;
+private:
+    void refreshData();
+
+    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<SplitTunnelingController> m_splitTunnelingController;
 
     QVector<InstalledAppInfo> m_apps;
 };

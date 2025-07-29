@@ -4,8 +4,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "containers/containers_defs.h"
-#include "core/controllers/serverController.h"
+#include "core/models/containers/containers_defs.h"
+#include "core/controllers/selfhosted/serverController.h"
 
 ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
                                                  QObject *parent)

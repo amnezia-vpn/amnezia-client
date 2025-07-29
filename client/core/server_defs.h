@@ -2,7 +2,7 @@
 #define SERVER_DEFS_H
 
 #include <QObject>
-#include "containers/containers_defs.h"
+#include "core/models/containers/containers_defs.h"
 
 namespace amnezia {
 namespace server {

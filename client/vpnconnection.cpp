@@ -6,7 +6,7 @@
 #include <QHostInfo>
 #include <QJsonObject>
 
-#include "core/controllers/serverController.h"
+#include "core/controllers/selfhosted/serverController.h"
 #include <configurators/cloak_configurator.h>
 #include <configurators/openvpn_configurator.h>
 #include <configurators/shadowsocks_configurator.h>
