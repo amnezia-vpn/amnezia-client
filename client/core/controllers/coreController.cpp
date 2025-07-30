@@ -91,7 +91,12 @@ void CoreController::initModels()
                                               m_sftpConfigModel, m_socks5ConfigModel, this));
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
 
-    m_clientManagementModel.reset(new ClientManagementModel(m_settings, this));
+    // Create ClientManagementController first
+    auto clientManagementController = QSharedPointer<ClientManagementController>::create(m_settings, this);
+    m_clientManagementModel.reset(new ClientManagementModel(m_settings, clientManagementController, this));
+    
+    // Create ClientManagementUIController
+    m_clientManagementUIController.reset(new ClientManagementUIController(clientManagementController, this));
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
 
     m_apiServicesModel.reset(new ApiServicesModel(this));
@@ -119,20 +124,25 @@ void CoreController::initControllers()
     m_focusController.reset(new FocusController(m_engine, this));
     m_engine->rootContext()->setContextProperty("FocusController", m_focusController.get());
 
-    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_settings));
-    m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
+    m_exportController = QSharedPointer<ExportController>::create(m_settings, this);
+    m_installController = QSharedPointer<InstallController>::create(m_settings, this);
 
-    connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
-            &ConnectionController::onCurrentContainerUpdated); // TODO remove this
+    auto clientManagementController = m_clientManagementUIController->getClientManagementController();
+    m_exportUIController.reset(new ExportUIController(m_serversModel, m_containersModel, m_clientManagementModel, m_exportController, clientManagementController));
+    m_engine->rootContext()->setContextProperty("ExportController", m_exportUIController.get());
+
+    m_installUIController.reset(new InstallUIController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_installController, clientManagementController));
+    m_engine->rootContext()->setContextProperty("InstallController", m_installUIController.get());
+
+    connect(m_installUIController.get(), &InstallUIController::currentContainerUpdated, m_connectionController.get(),
+            &ConnectionController::onCurrentContainerUpdated);
 
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_clientManagementModel, m_settings));
-    m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
-
+    m_settingsConfigController = QSharedPointer<SettingsConfigController>::create(m_settings, this);
     m_settingsController.reset(
-            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settings));
+            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settingsConfigController));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
@@ -156,6 +166,51 @@ void CoreController::initControllers()
 
     m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversModel, m_settings, this));
     m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
+    
+    setupControllerSignalConnections();
+}
+
+void CoreController::setupControllerSignalConnections()
+{
+    auto clientManagementController = m_clientManagementUIController->getClientManagementController();
+    
+    connect(m_exportController.data(), &ExportController::clientAppendRequested,
+            clientManagementController.data(), 
+            [clientManagementController](const DockerContainer container, const ServerCredentials &credentials, 
+                                       const QJsonObject &containerConfig, const QString &clientName, 
+                                       const QSharedPointer<ServerController> &serverController) {
+                QJsonArray clientsTable;
+                ErrorCode result = clientManagementController->appendClient(container, credentials, containerConfig, 
+                                                                           clientName, serverController, clientsTable);
+                emit clientManagementController->clientAppendCompleted(result);
+            });
+    
+    connect(m_exportController.data(), &ExportController::nativeConfigClientAppendRequested,
+            clientManagementController.data(),
+            [clientManagementController](const QJsonObject &jsonNativeConfig, const QString &clientName, 
+                                       const DockerContainer container, const ServerCredentials &credentials, 
+                                       const QSharedPointer<ServerController> &serverController) {
+                QJsonArray clientsTable;
+                ErrorCode result = clientManagementController->appendClient(jsonNativeConfig, clientName, container, 
+                                                                           credentials, serverController, clientsTable);
+                emit clientManagementController->nativeConfigClientAppendCompleted(result);
+            });
+    
+    connect(clientManagementController.data(), &ClientManagementController::clientAppendCompleted,
+            m_exportController.data(), &ExportController::onClientAppendCompleted);
+    
+    connect(clientManagementController.data(), &ClientManagementController::nativeConfigClientAppendCompleted,
+            m_exportController.data(), &ExportController::onNativeConfigClientAppendCompleted);
+            
+    connect(m_installController.data(), &InstallController::clientAppendRequested,
+            clientManagementController.data(),
+            [clientManagementController](const DockerContainer container, const ServerCredentials &credentials,
+                                       const QJsonObject &containerConfig, const QString &clientName,
+                                       const QSharedPointer<ServerController> &serverController) {
+                QJsonArray clientsTable;
+                clientManagementController->appendClient(container, credentials, containerConfig,
+                                                        clientName, serverController, clientsTable);
+            });
 }
 
 void CoreController::initAndroidController()

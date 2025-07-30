@@ -83,7 +83,7 @@ bool SelfhostedConfigController::isAmneziaDnsContainerInstalled(int serverIndex)
     return false;
 }
 
-// Protocol management methods (from ProtocolConfigController)
+
 QMap<QString, QSharedPointer<ProtocolConfig>> SelfhostedConfigController::getProtocolConfigs(const QVector<QSharedPointer<ProtocolConfig>> &protocols)
 {
     QMap<QString, QSharedPointer<ProtocolConfig>> protocolConfigs;

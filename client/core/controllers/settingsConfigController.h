@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QFuture>
+#include <QDateTime>
 
 #include "core/defs.h"
 
@@ -43,6 +44,28 @@ public:
     bool isAutoConnectEnabled() const;
     bool isStartMinimizedEnabled() const;
     bool isScreenshotsEnabled() const;
+
+    // Backup/restore functionality
+    QByteArray backupAppConfig() const;
+    bool restoreAppConfig(const QByteArray &data);
+
+    // Installation UUID
+    QString getInstallationUuid() const;
+
+    // Gateway endpoint functionality
+    void resetGatewayEndpoint();
+    void setGatewayEndpoint(const QString &endpoint);
+    QString getGatewayEndpoint() const;
+    bool isDevGatewayEnv() const;
+    void toggleDevGatewayEnv(bool enabled);
+    void setDevGatewayEndpoint();
+
+    // Home ad label
+    bool isHomeAdLabelVisible() const;
+    void disableHomeAdLabel();
+
+    // Log date
+    QDateTime getLogEnableDate() const;
 
 signals:
     void settingsReset();

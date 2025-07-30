@@ -9,8 +9,7 @@
 
 #include "settings.h"
 #include "core/defs.h"
-
-struct InstalledAppInfo; // Forward declaration
+#include "platforms/android/installedAppInfo.h"
 
 using namespace amnezia;
 

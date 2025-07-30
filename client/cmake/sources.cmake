@@ -4,7 +4,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/migrations.h
     ${CLIENT_ROOT_DIR}/../ipc/ipc.h
     ${CLIENT_ROOT_DIR}/amnezia_application.h
-    ${CLIENT_ROOT_DIR}/containers/containers_defs.h
+    ${CLIENT_ROOT_DIR}/core/models/containers/containers_defs.h
     ${CLIENT_ROOT_DIR}/core/defs.h
     ${CLIENT_ROOT_DIR}/core/errorstrings.h
     ${CLIENT_ROOT_DIR}/core/scripts_registry.h
@@ -14,10 +14,13 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/gatewayController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverController.h
-    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverConfigController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/selfhostedConfigController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installationController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/clientManagementController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/configController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/dnsController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/splitTunnelingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/settingsConfigController.h
-    ${CLIENT_ROOT_DIR}/core/controllers/protocolConfigController.h
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConnectionController.h
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.h
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.h
@@ -59,7 +62,7 @@ endif()
 set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/migrations.cpp
     ${CLIENT_ROOT_DIR}/amnezia_application.cpp
-    ${CLIENT_ROOT_DIR}/containers/containers_defs.cpp
+    ${CLIENT_ROOT_DIR}/core/models/containers/containers_defs.cpp
     ${CLIENT_ROOT_DIR}/core/errorstrings.cpp
     ${CLIENT_ROOT_DIR}/core/scripts_registry.cpp
     ${CLIENT_ROOT_DIR}/core/server_defs.cpp
@@ -67,10 +70,13 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/gatewayController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverController.cpp
-    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverConfigController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/selfhostedConfigController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installationController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/clientManagementController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/configController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/dnsController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/splitTunnelingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/settingsConfigController.cpp
-    ${CLIENT_ROOT_DIR}/core/controllers/protocolConfigController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConnectionController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.cpp
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.cpp

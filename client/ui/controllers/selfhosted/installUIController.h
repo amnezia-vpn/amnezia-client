@@ -1,5 +1,5 @@
-#ifndef INSTALLCONTROLLER_H
-#define INSTALLCONTROLLER_H
+#ifndef INSTALLUICONTROLLER_H
+#define INSTALLUICONTROLLER_H
 
 #include <QObject>
 #include <QProcess>
@@ -10,16 +10,20 @@
 #include "ui/models/containers_model.h"
 #include "ui/models/protocols_model.h"
 #include "ui/models/servers_model.h"
+#include "core/controllers/selfhosted/installController.h"
+#include "core/controllers/selfhosted/clientManagementController.h"
 
-class InstallController : public QObject
+class InstallUIController : public QObject
 {
     Q_OBJECT
 public:
-    explicit InstallController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
-                               const QSharedPointer<ProtocolsModel> &protocolsModel,
-                               const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                               const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
-    ~InstallController();
+    explicit InstallUIController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+                                 const QSharedPointer<ProtocolsModel> &protocolsModel,
+                                 const QSharedPointer<ClientManagementModel> &clientManagementModel,
+                                 QSharedPointer<InstallController> coreInstallController,
+                                 QSharedPointer<ClientManagementController> clientManagementController,
+                                 QObject *parent = nullptr);
+    ~InstallUIController();
 
 public slots:
     void install(DockerContainer container, int port, TransportProto transportProto);
@@ -37,14 +41,12 @@ public slots:
 
     void removeApiConfig(const int serverIndex);
 
-    void clearCachedProfile(QSharedPointer<ServerController> serverController = nullptr);
+    Q_INVOKABLE void clearCachedProfile();
+    Q_INVOKABLE void mountSftpDrive(const QString &port, const QString &password, const QString &username);
 
-    QRegularExpression ipAddressPortRegExp();
-    QRegularExpression ipAddressRegExp();
-
-    void mountSftpDrive(const QString &port, const QString &password, const QString &username);
-
-    bool checkSshConnection(QSharedPointer<ServerController> serverController = nullptr);
+    Q_INVOKABLE QRegularExpression ipAddressPortRegExp();
+    Q_INVOKABLE QRegularExpression ipAddressRegExp();
+    Q_INVOKABLE bool checkSshConnection();
 
     void setEncryptedPassphrase(QString passphrase);
 
@@ -84,26 +86,14 @@ signals:
     void noInstalledContainers();
 
 private:
-    void installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
-                       const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
-                       QString &finishMessage);
-    void installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
-                          const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
-                          QString &finishMessage);
     bool isServerAlreadyExists();
-
-    ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController,
-                                            QMap<DockerContainer, QJsonObject> &installedContainers);
-    bool isUpdateDockerContainerRequired(const DockerContainer container,
-                                         const QMap<QString, QSharedPointer<ProtocolConfig>> &oldProtocolConfigs,
-                                         const QMap<QString, QSharedPointer<ProtocolConfig>> &newProtocolConfigs);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ProtocolsModel> m_protocolModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
-
-    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<InstallController> m_coreInstallController;
+    QSharedPointer<ClientManagementController> m_clientManagementController;
 
     ServerCredentials m_processedServerCredentials;
 
@@ -116,4 +106,4 @@ private:
 #endif
 };
 
-#endif // INSTALLCONTROLLER_H
+#endif // INSTALLUICONTROLLER_H

@@ -9,6 +9,8 @@
 #include "ui/models/sites_model.h"
 #include "ui/models/appSplitTunnelingModel.h"
 
+#include "core/controllers/settingsConfigController.h"
+
 class SettingsController : public QObject
 {
     Q_OBJECT
@@ -18,7 +20,8 @@ public:
                                 const QSharedPointer<LanguageModel> &languageModel,
                                 const QSharedPointer<SitesModel> &sitesModel,
                                 const QSharedPointer<AppSplitTunnelingModel> &appSplitTunnelingModel,
-                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+                                QSharedPointer<SettingsConfigController> settingsConfigController,
+                                QObject *parent = nullptr);
 
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
     Q_PROPERTY(QString secondaryDns READ getSecondaryDns WRITE setSecondaryDns NOTIFY secondaryDnsChanged)
@@ -132,7 +135,7 @@ private:
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<SitesModel> m_sitesModel;
     QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
-    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<SettingsConfigController> m_settingsConfigController;
 
     QString m_appVersion;
 

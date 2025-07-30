@@ -8,17 +8,21 @@
 #include "ui/controllers/api/apiConfigsController.h"
 #include "ui/controllers/api/apiSettingsController.h"
 #include "ui/controllers/api/apiPremV1MigrationController.h"
+#include "core/controllers/selfhosted/clientManagementController.h"
 #include "ui/controllers/appSplitTunnelingController.h"
 #include "ui/controllers/allowedDnsController.h"
 #include "ui/controllers/connectionController.h"
-#include "ui/controllers/exportController.h"
+#include "core/controllers/selfhosted/exportController.h"
+#include "core/controllers/selfhosted/installController.h"
+#include "ui/controllers/selfhosted/exportUIController.h"
 #include "ui/controllers/focusController.h"
 #include "ui/controllers/importController.h"
-#include "ui/controllers/selfhosted/installController.h"
+#include "ui/controllers/selfhosted/installUIController.h"
 #include "ui/controllers/pageController.h"
 #include "ui/controllers/settingsController.h"
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
+#include "core/controllers/settingsConfigController.h"
 
 #include "ui/models/allowed_dns_model.h"
 #include "ui/models/containers_model.h"
@@ -33,6 +37,7 @@
 #include "ui/models/api/apiServicesModel.h"
 #include "ui/models/appSplitTunnelingModel.h"
 #include "ui/models/selfhosted/clientManagementModel.h"
+#include "ui/controllers/selfhosted/clientManagementUIController.h"
 #include "ui/models/protocols/awgConfigModel.h"
 #include "ui/models/protocols/openvpnConfigModel.h"
 #include "ui/models/protocols/shadowsocksConfigModel.h"
@@ -68,6 +73,7 @@ private:
     void initAndroidController();
     void initAppleController();
     void initSignalHandlers();
+    void setupControllerSignalConnections();
 
     void initNotificationHandler();
 
@@ -87,7 +93,7 @@ private:
     void initShowMigrationDrawerHandler();
     void initStrictKillSwitchHandler();
 
-    QQmlApplicationEngine *m_engine {}; // TODO use parent child system here?
+    QQmlApplicationEngine *m_engine {};
     std::shared_ptr<Settings> m_settings;
     QSharedPointer<VpnConnection> m_vpnConnection;
     QSharedPointer<QTranslator> m_translator;
@@ -100,10 +106,12 @@ private:
 
     QScopedPointer<ConnectionController> m_connectionController;
     QScopedPointer<FocusController> m_focusController;
-    QSharedPointer<PageController> m_pageController; // TODO
-    QScopedPointer<InstallController> m_installController;
+    QSharedPointer<PageController> m_pageController;
+    QSharedPointer<ExportController> m_exportController;
+    QSharedPointer<InstallController> m_installController;
+    QScopedPointer<ExportUIController> m_exportUIController;
+    QScopedPointer<InstallUIController> m_installUIController;
     QScopedPointer<ImportController> m_importController;
-    QScopedPointer<ExportController> m_exportController;
     QScopedPointer<SettingsController> m_settingsController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
@@ -114,6 +122,8 @@ private:
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
     QScopedPointer<ApiPremV1MigrationController> m_apiPremV1MigrationController;
 
+    QSharedPointer<SettingsConfigController> m_settingsConfigController;
+
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;
     QSharedPointer<ServersModel> m_serversModel;
@@ -123,6 +133,7 @@ private:
     QSharedPointer<AllowedDnsModel> m_allowedDnsModel;
     QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
+    QSharedPointer<ClientManagementUIController> m_clientManagementUIController;
 
     QSharedPointer<ApiServicesModel> m_apiServicesModel;
     QSharedPointer<ApiCountryModel> m_apiCountryModel;

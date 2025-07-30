@@ -1,19 +1,23 @@
-#ifndef EXPORTCONTROLLER_H
-#define EXPORTCONTROLLER_H
+#ifndef EXPORTUICONTROLLER_H
+#define EXPORTUICONTROLLER_H
 
 #include <QObject>
 
 #include "ui/models/selfhosted/clientManagementModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
+#include "core/controllers/selfhosted/exportController.h"
+#include "core/controllers/selfhosted/clientManagementController.h"
 
-class ExportController : public QObject
+class ExportUIController : public QObject
 {
     Q_OBJECT
 public:
-    explicit ExportController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
-                              const QSharedPointer<ClientManagementModel> &clientManagementModel, const std::shared_ptr<Settings> &settings,
-                              QObject *parent = nullptr);
+    explicit ExportUIController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+                                const QSharedPointer<ClientManagementModel> &clientManagementModel, 
+                                QSharedPointer<ExportController> coreExportController,
+                                QSharedPointer<ClientManagementController> clientManagementController,
+                                QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY exportConfigChanged)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY exportConfigChanged)
@@ -54,17 +58,15 @@ private:
 
     void clearPreviousConfig();
 
-    ErrorCode generateNativeConfig(const DockerContainer container, const QString &clientName, const Proto &protocol,
-                                   QJsonObject &jsonNativeConfig);
-
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
-    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<ExportController> m_coreExportController;
+    QSharedPointer<ClientManagementController> m_clientManagementController;
 
     QString m_config;
     QString m_nativeConfigString;
     QList<QString> m_qrCodes;
 };
 
-#endif // EXPORTCONTROLLER_H
+#endif // EXPORTUICONTROLLER_H

@@ -5,6 +5,9 @@
 #include "settings.h"
 #include "logger.h"
 #include "ui/qautostart.h"
+#ifdef Q_OS_ANDROID
+    #include "platforms/android/android_controller.h"
+#endif
 
 namespace
 {
@@ -59,8 +62,16 @@ void SettingsConfigController::checkLoggingExpiration()
 
 void SettingsConfigController::clearLogs()
 {
-    // TODO: Implement log clearing logic
-    logger.info() << "Clearing logs";
+    logger.info() << "Clearing application logs";
+    
+#ifdef Q_OS_ANDROID
+    AndroidController::instance()->clearLogs();
+#else
+    Logger::clearLogs(false);
+    Logger::clearServiceLogs();
+#endif
+    
+    logger.info() << "Logs cleared successfully";
 }
 
 void SettingsConfigController::configureKillSwitch(bool enable, bool strict)
@@ -107,7 +118,7 @@ QString SettingsConfigController::getSecondaryDns() const
 
 bool SettingsConfigController::isAmneziaDnsEnabled() const
 {
-    return m_settings->useAmneziaDns();
+    return m_settings->isUseAmneziaDns();
 }
 
 bool SettingsConfigController::isLoggingEnabled() const
@@ -127,7 +138,7 @@ bool SettingsConfigController::isStrictKillSwitchEnabled() const
 
 bool SettingsConfigController::isAutoStartEnabled() const
 {
-    return Autostart::isAutostart();
+    return m_settings->isAutoStart();
 }
 
 bool SettingsConfigController::isAutoConnectEnabled() const
@@ -143,4 +154,74 @@ bool SettingsConfigController::isStartMinimizedEnabled() const
 bool SettingsConfigController::isScreenshotsEnabled() const
 {
     return m_settings->isScreenshotsEnabled();
-} 
+}
+
+QByteArray SettingsConfigController::backupAppConfig() const
+{
+    return m_settings->backupAppConfig();
+}
+
+bool SettingsConfigController::restoreAppConfig(const QByteArray &data)
+{
+    return m_settings->restoreAppConfig(data);
+}
+
+QString SettingsConfigController::getInstallationUuid() const
+{
+    return m_settings->getInstallationUuid(false);
+}
+
+void SettingsConfigController::resetGatewayEndpoint()
+{
+    m_settings->resetGatewayEndpoint();
+}
+
+void SettingsConfigController::setGatewayEndpoint(const QString &endpoint)
+{
+    m_settings->setGatewayEndpoint(endpoint);
+}
+
+QString SettingsConfigController::getGatewayEndpoint() const
+{
+    if (m_settings->isDevGatewayEnv()) {
+        return "Dev endpoint";
+    }
+    return m_settings->getGatewayEndpoint();
+}
+
+bool SettingsConfigController::isDevGatewayEnv() const
+{
+    return m_settings->isDevGatewayEnv();
+}
+
+void SettingsConfigController::toggleDevGatewayEnv(bool enabled)
+{
+    m_settings->toggleDevGatewayEnv(enabled);
+    if (enabled) {
+        m_settings->setDevGatewayEndpoint();
+    } else {
+        m_settings->resetGatewayEndpoint();
+    }
+}
+
+void SettingsConfigController::setDevGatewayEndpoint()
+{
+    m_settings->setDevGatewayEndpoint();
+}
+
+bool SettingsConfigController::isHomeAdLabelVisible() const
+{
+    return m_settings->isHomeAdLabelVisible();
+}
+
+void SettingsConfigController::disableHomeAdLabel()
+{
+    m_settings->disableHomeAdLabel();
+}
+
+QDateTime SettingsConfigController::getLogEnableDate() const
+{
+    return m_settings->getLogEnableDate();
+}
+
+
