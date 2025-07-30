@@ -406,7 +406,16 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             
             for (const auto &protocol : protocols) {
                 QJsonObject containerConfig;
-                if (protocol == mainProto) {
+                
+                // for Multiprotocols (OpenVPN over SS, OpenVPN over Cloak)
+                bool shouldProcessProtocol = false;
+                if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+                    shouldProcessProtocol = true;
+                } else {
+                    shouldProcessProtocol = (protocol == mainProto);
+                }
+                
+                if (shouldProcessProtocol) {
                     containerConfig.insert(config_key::port, port);
                     containerConfig.insert(config_key::transport_proto, transportProto);
 
@@ -572,6 +581,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         }
 
                         QString serverValue = serverConfigMap.value("server");
+
                         if (!serverValue.isEmpty()) {
                             QStringList serverParts = serverValue.split(" ");
                             if (serverParts.count() >= 1) {
@@ -586,6 +596,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         containerConfig[config_key::tls_auth] = tlsAuth;
 
                         bool blockOutsideDns = serverConfig.contains("block-outside-dns");
+                        
                         containerConfig[config_key::block_outside_dns] = blockOutsideDns;
 
                         QString cipher = serverConfigMap.value("cipher");
@@ -633,7 +644,9 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
                     config.insert(config_key::container, ContainerProps::containerToString(container));
                 }
-                config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+                if (shouldProcessProtocol) {
+                    config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+                }
             }
             installedContainers.insert(container, config);
         }
