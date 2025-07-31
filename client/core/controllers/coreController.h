@@ -19,10 +19,10 @@
 #include "ui/controllers/importController.h"
 #include "ui/controllers/selfhosted/installUIController.h"
 #include "ui/controllers/pageController.h"
-#include "ui/controllers/settingsController.h"
+#include "ui/controllers/settingsUIController.h"
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
-#include "core/controllers/settingsConfigController.h"
+#include "core/controllers/settingsController.h"
 
 #include "ui/models/allowed_dns_model.h"
 #include "ui/models/containers_model.h"
@@ -112,7 +112,7 @@ private:
     QScopedPointer<ExportUIController> m_exportUIController;
     QScopedPointer<InstallUIController> m_installUIController;
     QScopedPointer<ImportController> m_importController;
-    QScopedPointer<SettingsController> m_settingsController;
+    QScopedPointer<SettingsUIController> m_settingsUIController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
@@ -122,7 +122,7 @@ private:
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
     QScopedPointer<ApiPremV1MigrationController> m_apiPremV1MigrationController;
 
-    QSharedPointer<SettingsConfigController> m_settingsConfigController;
+    QSharedPointer<SettingsController> m_settingsController;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;

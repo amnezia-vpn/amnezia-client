@@ -140,10 +140,10 @@ void CoreController::initControllers()
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_settingsConfigController = QSharedPointer<SettingsConfigController>::create(m_settings, this);
-    m_settingsController.reset(
-            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settingsConfigController));
-    m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
+    m_settingsController = QSharedPointer<SettingsController>::create(m_settings, this);
+    m_settingsUIController.reset(
+            new SettingsUIController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settingsController));
+    m_engine->rootContext()->setContextProperty("SettingsController", m_settingsUIController.get());
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
@@ -262,7 +262,7 @@ void CoreController::initAppleController()
     connect(IosController::Instance(), &IosController::importBackupFromOutside, this, [this](QString filePath) {
         emit m_pageController->goToPageHome();
         m_pageController->goToPageSettingsBackup();
-        emit m_settingsController->importBackupFromOutside(filePath);
+        emit m_settingsUIController->importBackupFromOutside(filePath);
     });
 
     QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled()); });
@@ -396,14 +396,14 @@ void CoreController::initTranslationsUpdatedHandler()
 
 void CoreController::initAutoConnectHandler()
 {
-    if (m_settingsController->isAutoConnectEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
+    if (m_settingsUIController->isAutoConnectEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
     }
 }
 
 void CoreController::initAmneziaDnsToggledHandler()
 {
-    connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled, m_serversModel.get(), &ServersModel::toggleAmneziaDns);
+    connect(m_settingsUIController.get(), &SettingsUIController::amneziaDnsToggled, m_serversModel.get(), &ServersModel::toggleAmneziaDns);
 }
 
 void CoreController::initPrepareConfigHandler()
@@ -446,7 +446,7 @@ void CoreController::initShowMigrationDrawerHandler()
 
 void CoreController::initStrictKillSwitchHandler()
 {
-    connect(m_settingsController.get(), &SettingsController::strictKillSwitchEnabledChanged, m_vpnConnection.get(),
+    connect(m_settingsUIController.get(), &SettingsUIController::strictKillSwitchEnabledChanged, m_vpnConnection.get(),
             &VpnConnection::onKillSwitchModeChanged);
 }
 

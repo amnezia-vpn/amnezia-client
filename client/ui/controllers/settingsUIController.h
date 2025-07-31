@@ -1,5 +1,5 @@
-#ifndef SETTINGSCONTROLLER_H
-#define SETTINGSCONTROLLER_H
+#ifndef SETTINGSUICONTROLLER_H
+#define SETTINGSUICONTROLLER_H
 
 #include <QObject>
 
@@ -9,18 +9,18 @@
 #include "ui/models/sites_model.h"
 #include "ui/models/appSplitTunnelingModel.h"
 
-#include "core/controllers/settingsConfigController.h"
+#include "core/controllers/settingsController.h"
 
-class SettingsController : public QObject
+class SettingsUIController : public QObject
 {
     Q_OBJECT
 public:
-    explicit SettingsController(const QSharedPointer<ServersModel> &serversModel,
+    explicit SettingsUIController(const QSharedPointer<ServersModel> &serversModel,
                                 const QSharedPointer<ContainersModel> &containersModel,
                                 const QSharedPointer<LanguageModel> &languageModel,
                                 const QSharedPointer<SitesModel> &sitesModel,
                                 const QSharedPointer<AppSplitTunnelingModel> &appSplitTunnelingModel,
-                                QSharedPointer<SettingsConfigController> settingsConfigController,
+                                QSharedPointer<SettingsController> settingsController,
                                 QObject *parent = nullptr);
 
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
@@ -135,7 +135,7 @@ private:
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<SitesModel> m_sitesModel;
     QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
-    QSharedPointer<SettingsConfigController> m_settingsConfigController;
+    QSharedPointer<SettingsController> m_settingsController;
 
     QString m_appVersion;
 
@@ -146,4 +146,4 @@ private:
     void checkIfNeedDisableLogs();
 };
 
-#endif // SETTINGSCONTROLLER_H
+#endif // SETTINGSUICONTROLLER_H

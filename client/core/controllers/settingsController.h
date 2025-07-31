@@ -1,5 +1,5 @@
-#ifndef SETTINGSCONFIGCONTROLLER_H
-#define SETTINGSCONFIGCONTROLLER_H
+#ifndef SETTINGSCONTROLLER_H
+#define SETTINGSCONTROLLER_H
 
 #include <QObject>
 #include <QFuture>
@@ -11,12 +11,12 @@ class Settings;
 
 using namespace amnezia;
 
-class SettingsConfigController : public QObject
+class SettingsController : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit SettingsConfigController(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit SettingsController(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
     void resetAllSettings();
     
@@ -79,4 +79,4 @@ private:
     std::shared_ptr<Settings> m_settings;
 };
 
-#endif // SETTINGSCONFIGCONTROLLER_H 
+#endif // SETTINGSCONTROLLER_H 

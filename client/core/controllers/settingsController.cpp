@@ -1,4 +1,4 @@
-#include "settingsConfigController.h"
+#include "settingsController.h"
 
 #include <QDateTime>
 
@@ -11,35 +11,35 @@
 
 namespace
 {
-    Logger logger("SettingsConfigController");
+    Logger logger("SettingsController");
 }
 
-SettingsConfigController::SettingsConfigController(std::shared_ptr<Settings> settings, QObject *parent)
+SettingsController::SettingsController(std::shared_ptr<Settings> settings, QObject *parent)
     : QObject(parent), m_settings(settings)
 {
 }
 
-void SettingsConfigController::resetAllSettings()
+void SettingsController::resetAllSettings()
 {
     logger.info() << "Resetting all settings to defaults";
     m_settings->clearSettings();
     emit settingsReset();
 }
 
-void SettingsConfigController::configureDns(const QString &primaryDns, const QString &secondaryDns)
+void SettingsController::configureDns(const QString &primaryDns, const QString &secondaryDns)
 {
     m_settings->setPrimaryDns(primaryDns);
     m_settings->setSecondaryDns(secondaryDns);
     emit dnsConfigChanged();
 }
 
-void SettingsConfigController::toggleAmneziaDns(bool enable)
+void SettingsController::toggleAmneziaDns(bool enable)
 {
     m_settings->setUseAmneziaDns(enable);
     emit dnsConfigChanged();
 }
 
-void SettingsConfigController::configureLogging(bool enable)
+void SettingsController::configureLogging(bool enable)
 {
     m_settings->setSaveLogs(enable);
     if (enable) {
@@ -48,7 +48,7 @@ void SettingsConfigController::configureLogging(bool enable)
     emit loggingConfigChanged();
 }
 
-void SettingsConfigController::checkLoggingExpiration()
+void SettingsController::checkLoggingExpiration()
 {
     if (m_settings->isSaveLogs()) {
         QDateTime loggingDisableDate = m_settings->getLogEnableDate().addDays(14);
@@ -60,7 +60,7 @@ void SettingsConfigController::checkLoggingExpiration()
     }
 }
 
-void SettingsConfigController::clearLogs()
+void SettingsController::clearLogs()
 {
     logger.info() << "Clearing application logs";
     
@@ -74,7 +74,7 @@ void SettingsConfigController::clearLogs()
     logger.info() << "Logs cleared successfully";
 }
 
-void SettingsConfigController::configureKillSwitch(bool enable, bool strict)
+void SettingsController::configureKillSwitch(bool enable, bool strict)
 {
     m_settings->setKillSwitchEnabled(enable);
     if (enable) {
@@ -85,103 +85,103 @@ void SettingsConfigController::configureKillSwitch(bool enable, bool strict)
     emit killSwitchConfigChanged();
 }
 
-void SettingsConfigController::configureAutoStart(bool enable)
+void SettingsController::configureAutoStart(bool enable)
 {
     Autostart::setAutostart(enable);
     emit autoStartConfigChanged();
 }
 
-void SettingsConfigController::configureAutoConnect(bool enable)
+void SettingsController::configureAutoConnect(bool enable)
 {
     m_settings->setAutoConnect(enable);
 }
 
-void SettingsConfigController::configureStartMinimized(bool enable)
+void SettingsController::configureStartMinimized(bool enable)
 {
     m_settings->setStartMinimized(enable);
 }
 
-void SettingsConfigController::configureScreenshots(bool enable)
+void SettingsController::configureScreenshots(bool enable)
 {
     m_settings->setScreenshotsEnabled(enable);
 }
 
-QString SettingsConfigController::getPrimaryDns() const
+QString SettingsController::getPrimaryDns() const
 {
     return m_settings->primaryDns();
 }
 
-QString SettingsConfigController::getSecondaryDns() const
+QString SettingsController::getSecondaryDns() const
 {
     return m_settings->secondaryDns();
 }
 
-bool SettingsConfigController::isAmneziaDnsEnabled() const
+bool SettingsController::isAmneziaDnsEnabled() const
 {
     return m_settings->isUseAmneziaDns();
 }
 
-bool SettingsConfigController::isLoggingEnabled() const
+bool SettingsController::isLoggingEnabled() const
 {
     return m_settings->isSaveLogs();
 }
 
-bool SettingsConfigController::isKillSwitchEnabled() const
+bool SettingsController::isKillSwitchEnabled() const
 {
     return m_settings->isKillSwitchEnabled();
 }
 
-bool SettingsConfigController::isStrictKillSwitchEnabled() const
+bool SettingsController::isStrictKillSwitchEnabled() const
 {
     return m_settings->isStrictKillSwitchEnabled();
 }
 
-bool SettingsConfigController::isAutoStartEnabled() const
+bool SettingsController::isAutoStartEnabled() const
 {
     return m_settings->isAutoStart();
 }
 
-bool SettingsConfigController::isAutoConnectEnabled() const
+bool SettingsController::isAutoConnectEnabled() const
 {
     return m_settings->isAutoConnect();
 }
 
-bool SettingsConfigController::isStartMinimizedEnabled() const
+bool SettingsController::isStartMinimizedEnabled() const
 {
     return m_settings->isStartMinimized();
 }
 
-bool SettingsConfigController::isScreenshotsEnabled() const
+bool SettingsController::isScreenshotsEnabled() const
 {
     return m_settings->isScreenshotsEnabled();
 }
 
-QByteArray SettingsConfigController::backupAppConfig() const
+QByteArray SettingsController::backupAppConfig() const
 {
     return m_settings->backupAppConfig();
 }
 
-bool SettingsConfigController::restoreAppConfig(const QByteArray &data)
+bool SettingsController::restoreAppConfig(const QByteArray &data)
 {
     return m_settings->restoreAppConfig(data);
 }
 
-QString SettingsConfigController::getInstallationUuid() const
+QString SettingsController::getInstallationUuid() const
 {
     return m_settings->getInstallationUuid(false);
 }
 
-void SettingsConfigController::resetGatewayEndpoint()
+void SettingsController::resetGatewayEndpoint()
 {
     m_settings->resetGatewayEndpoint();
 }
 
-void SettingsConfigController::setGatewayEndpoint(const QString &endpoint)
+void SettingsController::setGatewayEndpoint(const QString &endpoint)
 {
     m_settings->setGatewayEndpoint(endpoint);
 }
 
-QString SettingsConfigController::getGatewayEndpoint() const
+QString SettingsController::getGatewayEndpoint() const
 {
     if (m_settings->isDevGatewayEnv()) {
         return "Dev endpoint";
@@ -189,12 +189,12 @@ QString SettingsConfigController::getGatewayEndpoint() const
     return m_settings->getGatewayEndpoint();
 }
 
-bool SettingsConfigController::isDevGatewayEnv() const
+bool SettingsController::isDevGatewayEnv() const
 {
     return m_settings->isDevGatewayEnv();
 }
 
-void SettingsConfigController::toggleDevGatewayEnv(bool enabled)
+void SettingsController::toggleDevGatewayEnv(bool enabled)
 {
     m_settings->toggleDevGatewayEnv(enabled);
     if (enabled) {
@@ -204,22 +204,22 @@ void SettingsConfigController::toggleDevGatewayEnv(bool enabled)
     }
 }
 
-void SettingsConfigController::setDevGatewayEndpoint()
+void SettingsController::setDevGatewayEndpoint()
 {
     m_settings->setDevGatewayEndpoint();
 }
 
-bool SettingsConfigController::isHomeAdLabelVisible() const
+bool SettingsController::isHomeAdLabelVisible() const
 {
     return m_settings->isHomeAdLabelVisible();
 }
 
-void SettingsConfigController::disableHomeAdLabel()
+void SettingsController::disableHomeAdLabel()
 {
     m_settings->disableHomeAdLabel();
 }
 
-QDateTime SettingsConfigController::getLogEnableDate() const
+QDateTime SettingsController::getLogEnableDate() const
 {
     return m_settings->getLogEnableDate();
 }

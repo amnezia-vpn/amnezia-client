@@ -36,9 +36,9 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) 
 {
     m_serverConfigController = std::make_shared<SelfhostedConfigController>(settings);
     m_installationController = std::make_shared<InstallationController>(settings);
-    m_settingsConfigController = std::make_shared<SettingsConfigController>(settings);
+    m_settingsController = std::make_shared<SettingsController>(settings);
     
-    m_isAmneziaDnsEnabled = m_settingsConfigController->isAmneziaDnsEnabled();
+    m_isAmneziaDnsEnabled = m_settingsController->isAmneziaDnsEnabled();
 
     connect(this, &ServersModel::defaultServerIndexChanged, this, &ServersModel::defaultServerNameChanged);
 
@@ -570,7 +570,7 @@ QStringList ServersModel::getAllInstalledServicesName(const int serverIndex)
 
 void ServersModel::toggleAmneziaDns(bool enabled)
 {
-    m_settingsConfigController->toggleAmneziaDns(enabled);
+    m_settingsController->toggleAmneziaDns(enabled);
     m_isAmneziaDnsEnabled = enabled;
     emit defaultServerDescriptionChanged();
 }

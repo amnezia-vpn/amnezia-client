@@ -20,7 +20,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/configController.h
     ${CLIENT_ROOT_DIR}/core/controllers/dnsController.h
     ${CLIENT_ROOT_DIR}/core/controllers/splitTunnelingController.h
-    ${CLIENT_ROOT_DIR}/core/controllers/settingsConfigController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/settingsController.h
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConnectionController.h
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.h
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.h
@@ -76,7 +76,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/configController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/dnsController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/splitTunnelingController.cpp
-    ${CLIENT_ROOT_DIR}/core/controllers/settingsConfigController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/settingsController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConnectionController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.cpp
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.cpp
