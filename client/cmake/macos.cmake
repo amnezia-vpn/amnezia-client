@@ -14,7 +14,7 @@ set(LIBS ${LIBS}
     ${FW_SECURITY}
     ${FW_COREWLAN}
     ${FW_NETWORK}
-    ${FW_USERNOTIFICATIONS}
+    ${FW_USER_NOTIFICATIONS}
     ${FW_NETWORK_EXTENSION}
 )
 
@@ -54,5 +54,4 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 message("OSX_SDK_PATH is: ${OSX_SDK_PATH}")
-
 
