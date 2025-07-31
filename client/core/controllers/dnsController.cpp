@@ -1,4 +1,5 @@
 #include "dnsController.h"
+#include "core/networkUtilities.h"
 
 DnsController::DnsController(std::shared_ptr<Settings> settings, QObject *parent)
     : QObject(parent), m_settings(settings)
@@ -7,6 +8,10 @@ DnsController::DnsController(std::shared_ptr<Settings> settings, QObject *parent
 
 bool DnsController::addDns(const QString &ip)
 {
+    if (!NetworkUtilities::ipAddressRegExp().match(ip).hasMatch()) {
+        return false;
+    }
+    
     QStringList currentDnsServers = m_settings->allowedDnsServers();
     
     if (currentDnsServers.contains(ip)) {

@@ -39,13 +39,9 @@ void SettingsController::toggleAmneziaDns(bool enable)
     emit dnsConfigChanged();
 }
 
-void SettingsController::configureLogging(bool enable)
+void SettingsController::configureLogging(bool enabled)
 {
-    m_settings->setSaveLogs(enable);
-    if (enable) {
-        m_settings->setLogEnableDate(QDateTime::currentDateTime());
-    }
-    emit loggingConfigChanged();
+    m_settings->setIsLoggingEnabled(enabled);
 }
 
 void SettingsController::checkLoggingExpiration()
@@ -222,6 +218,16 @@ void SettingsController::disableHomeAdLabel()
 QDateTime SettingsController::getLogEnableDate() const
 {
     return m_settings->getLogEnableDate();
+}
+
+QLocale SettingsController::getAppLanguage() const
+{
+    return m_settings->getAppLanguage();
+}
+
+void SettingsController::setAppLanguage(const QLocale &locale)
+{
+    m_settings->setAppLanguage(locale);
 }
 
 

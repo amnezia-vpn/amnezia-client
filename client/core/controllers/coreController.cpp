@@ -17,8 +17,9 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
                                QQmlApplicationEngine *engine, QObject *parent)
     : QObject(parent), m_vpnConnection(vpnConnection), m_settings(settings), m_engine(engine)
 {
+    initCoreControllers();
     initModels();
-    initControllers();
+    initUIControllers();
     initSignalHandlers();
 
     initAndroidController();
@@ -41,18 +42,6 @@ void CoreController::initModels()
 
     m_serversModel.reset(new ServersModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
-
-    m_languageModel.reset(new LanguageModel(m_settings, this));
-    m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
-
-    m_sitesModel.reset(new SitesModel(m_settings, this));
-    m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
-
-    m_allowedDnsModel.reset(new AllowedDnsModel(m_settings, this));
-    m_engine->rootContext()->setContextProperty("AllowedDnsModel", m_allowedDnsModel.get());
-
-    m_appSplitTunnelingModel.reset(new AppSplitTunnelingModel(m_settings, this));
-    m_engine->rootContext()->setContextProperty("AppSplitTunnelingModel", m_appSplitTunnelingModel.get());
 
     m_openVpnConfigModel = QSharedPointer<OpenVpnConfigModel>::create(this);
     m_engine->rootContext()->setContextProperty("OpenVpnConfigModel", m_openVpnConfigModel.get());
@@ -91,11 +80,9 @@ void CoreController::initModels()
                                               m_sftpConfigModel, m_socks5ConfigModel, this));
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
 
-    // Create ClientManagementController first
     auto clientManagementController = QSharedPointer<ClientManagementController>::create(m_settings, this);
     m_clientManagementModel.reset(new ClientManagementModel(m_settings, clientManagementController, this));
-    
-    // Create ClientManagementUIController
+
     m_clientManagementUIController.reset(new ClientManagementUIController(clientManagementController, this));
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
 
@@ -110,9 +97,30 @@ void CoreController::initModels()
 
     m_apiDevicesModel.reset(new ApiDevicesModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ApiDevicesModel", m_apiDevicesModel.get());
+
+    m_sitesModel.reset(new SitesModel(m_splitTunnelingController, this));
+    m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
+
+    m_allowedDnsModel.reset(new AllowedDnsModel(m_dnsController, this));
+    m_engine->rootContext()->setContextProperty("AllowedDnsModel", m_allowedDnsModel.get());
+
+    m_appSplitTunnelingModel.reset(new AppSplitTunnelingModel(m_splitTunnelingController, this));
+    m_engine->rootContext()->setContextProperty("AppSplitTunnelingModel", m_appSplitTunnelingModel.get());
+
+    m_languageModel.reset(new LanguageModel(m_settingsController, this));
+    m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
 }
 
-void CoreController::initControllers()
+void CoreController::initCoreControllers()
+{
+    m_settingsController = QSharedPointer<SettingsController>::create(m_settings, this);
+    m_dnsController = QSharedPointer<DnsController>::create(m_settings, this);
+    m_splitTunnelingController = QSharedPointer<SplitTunnelingController>::create(m_settings, m_vpnConnection, this);
+    m_exportController = QSharedPointer<ExportController>::create(m_settings, this);
+    m_installController = QSharedPointer<InstallController>::create(m_settings, this);
+}
+
+void CoreController::initUIControllers()
 {
     m_connectionController.reset(
             new ConnectionController(m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_settings));
@@ -123,9 +131,6 @@ void CoreController::initControllers()
 
     m_focusController.reset(new FocusController(m_engine, this));
     m_engine->rootContext()->setContextProperty("FocusController", m_focusController.get());
-
-    m_exportController = QSharedPointer<ExportController>::create(m_settings, this);
-    m_installController = QSharedPointer<InstallController>::create(m_settings, this);
 
     auto clientManagementController = m_clientManagementUIController->getClientManagementController();
     m_exportUIController.reset(new ExportUIController(m_serversModel, m_containersModel, m_clientManagementModel, m_exportController, clientManagementController));
@@ -140,19 +145,18 @@ void CoreController::initControllers()
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_settingsController = QSharedPointer<SettingsController>::create(m_settings, this);
     m_settingsUIController.reset(
             new SettingsUIController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settingsController));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsUIController.get());
 
-    m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
-    m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
+    m_siteSplitUIController.reset(new SiteSplitUIController(m_splitTunnelingController, m_sitesModel));
+    m_engine->rootContext()->setContextProperty("SitesController", m_siteSplitUIController.get());
 
-    m_allowedDnsController.reset(new AllowedDnsController(m_settings, m_allowedDnsModel));
-    m_engine->rootContext()->setContextProperty("AllowedDnsController", m_allowedDnsController.get());
+    m_allowedDnsUIController.reset(new AllowedDnsUIController(m_dnsController, m_allowedDnsModel));
+    m_engine->rootContext()->setContextProperty("AllowedDnsController", m_allowedDnsUIController.get());
 
-    m_appSplitTunnelingController.reset(new AppSplitTunnelingController(m_settings, m_appSplitTunnelingModel));
-    m_engine->rootContext()->setContextProperty("AppSplitTunnelingController", m_appSplitTunnelingController.get());
+    m_appSplitUIController.reset(new AppSplitUIController(m_splitTunnelingController, m_appSplitTunnelingModel));
+    m_engine->rootContext()->setContextProperty("AppSplitTunnelingController", m_appSplitUIController.get());
 
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
@@ -317,7 +321,6 @@ void CoreController::updateTranslator(const QLocale &locale)
         availableTranslations << it.next();
     }
 
-    // This code allow to load translation for the language only, without country code
     const QString lang = locale.name().split("_").first();
     const QString translationFilePrefix = QString(":/translations/amneziavpn_") + lang;
     QString strFileName = QString(":/translations/amneziavpn_%1.qm").arg(locale.name());

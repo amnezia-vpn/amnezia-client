@@ -1,11 +1,9 @@
 #include "sites_model.h"
 #include "core/controllers/splitTunnelingController.h"
 
-SitesModel::SitesModel(std::shared_ptr<Settings> settings, 
-                       QSharedPointer<SplitTunnelingController> splitTunnelingController,
+SitesModel::SitesModel(QSharedPointer<SplitTunnelingController> splitTunnelingController,
                        QObject *parent)
     : QAbstractListModel(parent), 
-      m_settings(settings), 
       m_splitTunnelingController(splitTunnelingController)
 {
     // Connect to controller signals

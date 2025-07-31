@@ -3,8 +3,9 @@
 
 #include <QAbstractListModel>
 #include <QQmlEngine>
+#include <QLocale>
 
-#include "settings.h"
+#include "core/controllers/settingsController.h"
 
 namespace LanguageSettings
 {
@@ -45,7 +46,7 @@ public:
         IndexRole
     };
 
-    LanguageModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    LanguageModel(QSharedPointer<SettingsController> settingsController, QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -72,8 +73,7 @@ private:
     QString getLocalLanguageName(const LanguageSettings::AvailableLanguageEnum language);
 
     QVector<LanguageModelData> m_availableLanguages;
-
-    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<SettingsController> m_settingsController;
 };
 
 #endif // LANGUAGEMODEL_H

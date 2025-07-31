@@ -15,8 +15,7 @@ public:
         IpRole = Qt::UserRole + 1
     };
 
-    explicit AllowedDnsModel(std::shared_ptr<Settings> settings, 
-                            QSharedPointer<DnsController> dnsController,
+    explicit AllowedDnsModel(QSharedPointer<DnsController> dnsController,
                             QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -39,7 +38,6 @@ private slots:
 private:
     void refreshData();
 
-    std::shared_ptr<Settings> m_settings;
     QSharedPointer<DnsController> m_dnsController;
     QStringList m_dnsServers;
 };

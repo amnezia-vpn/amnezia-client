@@ -67,6 +67,9 @@ public:
     // Log date
     QDateTime getLogEnableDate() const;
 
+    QLocale getAppLanguage() const;
+    void setAppLanguage(const QLocale &locale);
+
 signals:
     void settingsReset();
     void dnsConfigChanged();

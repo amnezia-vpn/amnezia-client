@@ -3,11 +3,9 @@
 
 #include <QFileInfo>
 
-AppSplitTunnelingModel::AppSplitTunnelingModel(std::shared_ptr<Settings> settings, 
-                                               QSharedPointer<SplitTunnelingController> splitTunnelingController,
+AppSplitTunnelingModel::AppSplitTunnelingModel(QSharedPointer<SplitTunnelingController> splitTunnelingController,
                                                QObject *parent)
     : QAbstractListModel(parent), 
-      m_settings(settings), 
       m_splitTunnelingController(splitTunnelingController)
 {
     // Connect to controller signals

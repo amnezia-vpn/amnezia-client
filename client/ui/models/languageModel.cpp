@@ -1,6 +1,7 @@
 #include "languageModel.h"
 
-LanguageModel::LanguageModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
+LanguageModel::LanguageModel(QSharedPointer<SettingsController> settingsController, QObject *parent) 
+    : m_settingsController(settingsController), QAbstractListModel(parent)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<LanguageSettings::AvailableLanguageEnum>();
     for (int i = 0; i < metaEnum.keyCount(); i++) {
@@ -72,7 +73,7 @@ void LanguageModel::changeLanguage(const LanguageSettings::AvailableLanguageEnum
 
 int LanguageModel::getCurrentLanguageIndex()
 {
-    auto locale = m_settings->getAppLanguage();
+    auto locale = m_settingsController->getAppLanguage();
     switch (locale.language()) {
     case QLocale::English: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     case QLocale::Russian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Russian); break;

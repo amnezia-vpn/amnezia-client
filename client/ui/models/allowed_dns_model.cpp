@@ -1,11 +1,9 @@
 #include "allowed_dns_model.h"
 #include "core/controllers/dnsController.h"
 
-AllowedDnsModel::AllowedDnsModel(std::shared_ptr<Settings> settings, 
-                                 QSharedPointer<DnsController> dnsController,
+AllowedDnsModel::AllowedDnsModel(QSharedPointer<DnsController> dnsController,
                                  QObject *parent)
     : QAbstractListModel(parent), 
-      m_settings(settings), 
       m_dnsController(dnsController)
 {
     // Connect to controller signals

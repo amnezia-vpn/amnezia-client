@@ -1,18 +1,18 @@
-#ifndef ALLOWEDDNSCONTROLLER_H
-#define ALLOWEDDNSCONTROLLER_H
+#ifndef ALLOWEDDNSUICONTROLLER_H
+#define ALLOWEDDNSUICONTROLLER_H
 
 #include <QObject>
 
-#include "settings.h"
 #include "ui/models/allowed_dns_model.h"
+#include "core/controllers/dnsController.h"
 
-class AllowedDnsController : public QObject
+class AllowedDnsUIController : public QObject
 {
     Q_OBJECT
 public:
-    explicit AllowedDnsController(const std::shared_ptr<Settings> &settings,
-                                  const QSharedPointer<AllowedDnsModel> &allowedDnsModel,
-                                  QObject *parent = nullptr);
+    explicit AllowedDnsUIController(QSharedPointer<DnsController> dnsController,
+                                    const QSharedPointer<AllowedDnsModel> &allowedDnsModel,
+                                    QObject *parent = nullptr);
 
 public slots:
     void addDns(QString ip);
@@ -28,8 +28,8 @@ signals:
     void saveFile(const QString &fileName, const QString &data);
 
 private:
-    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<DnsController> m_dnsController;
     QSharedPointer<AllowedDnsModel> m_allowedDnsModel;
 };
 
-#endif // ALLOWEDDNSCONTROLLER_H 
+#endif // ALLOWEDDNSUICONTROLLER_H 

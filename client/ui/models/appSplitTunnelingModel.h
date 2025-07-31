@@ -3,7 +3,6 @@
 
 #include <QAbstractListModel>
 
-#include "settings.h"
 #include "core/defs.h"
 
 class SplitTunnelingController;
@@ -19,8 +18,7 @@ public:
         PackageAppIconRole
     };
 
-    explicit AppSplitTunnelingModel(std::shared_ptr<Settings> settings, 
-                                   QSharedPointer<SplitTunnelingController> splitTunnelingController,
+    explicit AppSplitTunnelingModel(QSharedPointer<SplitTunnelingController> splitTunnelingController,
                                    QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -55,9 +53,7 @@ private slots:
 private:
     void refreshData();
 
-    std::shared_ptr<Settings> m_settings;
     QSharedPointer<SplitTunnelingController> m_splitTunnelingController;
-
     QVector<InstalledAppInfo> m_apps;
 };
 

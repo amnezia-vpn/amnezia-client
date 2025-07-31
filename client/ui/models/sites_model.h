@@ -3,8 +3,6 @@
 
 #include <QAbstractListModel>
 
-#include "settings.h"
-
 class SplitTunnelingController;
 
 class SitesModel : public QAbstractListModel
@@ -17,8 +15,7 @@ public:
         IpRole
     };
 
-    explicit SitesModel(std::shared_ptr<Settings> settings, 
-                       QSharedPointer<SplitTunnelingController> splitTunnelingController,
+    explicit SitesModel(QSharedPointer<SplitTunnelingController> splitTunnelingController,
                        QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -56,7 +53,6 @@ private slots:
 private:
     void refreshData();
 
-    std::shared_ptr<Settings> m_settings;
     QSharedPointer<SplitTunnelingController> m_splitTunnelingController;
 
     QVector<QPair<QString, QString>> m_sites;

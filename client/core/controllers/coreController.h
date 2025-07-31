@@ -9,8 +9,8 @@
 #include "ui/controllers/api/apiSettingsController.h"
 #include "ui/controllers/api/apiPremV1MigrationController.h"
 #include "core/controllers/selfhosted/clientManagementController.h"
-#include "ui/controllers/appSplitTunnelingController.h"
-#include "ui/controllers/allowedDnsController.h"
+#include "ui/controllers/appSplitUIController.h"
+#include "ui/controllers/allowedDnsUIController.h"
 #include "ui/controllers/connectionController.h"
 #include "core/controllers/selfhosted/exportController.h"
 #include "core/controllers/selfhosted/installController.h"
@@ -20,9 +20,11 @@
 #include "ui/controllers/selfhosted/installUIController.h"
 #include "ui/controllers/pageController.h"
 #include "ui/controllers/settingsUIController.h"
-#include "ui/controllers/sitesController.h"
+#include "ui/controllers/siteSplitUIController.h"
 #include "ui/controllers/systemController.h"
 #include "core/controllers/settingsController.h"
+#include "core/controllers/dnsController.h"
+#include "core/controllers/splitTunnelingController.h"
 
 #include "ui/models/allowed_dns_model.h"
 #include "ui/models/containers_model.h"
@@ -69,10 +71,11 @@ signals:
 
 private:
     void initModels();
-    void initControllers();
+    void initCoreControllers();
+    void initUIControllers();
+    void initSignalHandlers();
     void initAndroidController();
     void initAppleController();
-    void initSignalHandlers();
     void setupControllerSignalConnections();
 
     void initNotificationHandler();
@@ -113,16 +116,18 @@ private:
     QScopedPointer<InstallUIController> m_installUIController;
     QScopedPointer<ImportController> m_importController;
     QScopedPointer<SettingsUIController> m_settingsUIController;
-    QScopedPointer<SitesController> m_sitesController;
+    QScopedPointer<SiteSplitUIController> m_siteSplitUIController;
     QScopedPointer<SystemController> m_systemController;
-    QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
-    QScopedPointer<AllowedDnsController> m_allowedDnsController;
+    QScopedPointer<AppSplitUIController> m_appSplitUIController;
+    QScopedPointer<AllowedDnsUIController> m_allowedDnsUIController;
 
     QScopedPointer<ApiSettingsController> m_apiSettingsController;
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
     QScopedPointer<ApiPremV1MigrationController> m_apiPremV1MigrationController;
 
     QSharedPointer<SettingsController> m_settingsController;
+    QSharedPointer<DnsController> m_dnsController;
+    QSharedPointer<SplitTunnelingController> m_splitTunnelingController;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;
