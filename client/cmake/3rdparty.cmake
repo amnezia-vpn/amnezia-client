@@ -10,6 +10,7 @@ include(${CLIENT_ROOT_DIR}/3rd/qrcodegen/qrcodegen.cmake)
 
 set(LIBSSH_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/")
 set(OPENSSL_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/")
+set(LIBXRAY_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/libxray")
 
 set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
 
@@ -27,6 +28,9 @@ if(WIN32)
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
     endif()
 elseif(APPLE AND NOT IOS)
+    set(LIBS ${LIBS} "resolv")
+    set(LIBXRAY_LIB_PATH "${LIBXRAY_ROOT_DIR}/macos/x86_64/libxray.a")
+    set(LIBXRAY_INCLUDE_DIR "${LIBXRAY_ROOT_DIR}/macos/x86_64")
     set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/macos/x86_64/libssh.a")
     set(ZLIB_LIB_PATH "${LIBSSH_ROOT_DIR}/macos/x86_64/libz.a")
     set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/macos/x86_64")
@@ -72,6 +76,8 @@ set(LIBS ${LIBS}
     ${OPENSSL_LIB_CRYPTO_PATH}
 )
 
+set(LIBS ${LIBS} ${LIBXRAY_LIB_PATH})
+
 add_compile_definitions(_WINSOCKAPI_)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
@@ -88,4 +94,5 @@ include_directories(
     ${CLIENT_ROOT_DIR}/3rd/qtkeychain/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/libssh/include
+    ${LIBXRAY_INCLUDE_DIR}
 )

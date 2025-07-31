@@ -3,9 +3,10 @@
 
 #include "QProcess"
 
-#include "containers/containers_defs.h"
-#include "openvpnprotocol.h"
+#include "protocols/vpnprotocol.h"
+#include "rep_ipc_process_tun2socks_replica.h"
 #include "settings.h"
+#include <cstdint>
 
 class XrayProtocol : public VpnProtocol
 {
@@ -24,10 +25,16 @@ protected:
     QJsonObject m_xrayConfig;
 
 private:
-    static QString xrayExecPath();
-    static QString tun2SocksExecPath();
+    static void ctxSockCallback(uintptr_t fd, void* ctx) {
+        reinterpret_cast<XrayProtocol*>(ctx)->sockCallback(fd);
+    }
+    static void ctxLogHandler(char* str, void* ctx) {
+        reinterpret_cast<XrayProtocol*>(ctx)->logHandler(str);
+    }
 
-private:
+    void sockCallback(uintptr_t fd);
+    void logHandler(char* str);
+
     int m_localPort;
     QString m_remoteHost;
     QString m_remoteAddress;

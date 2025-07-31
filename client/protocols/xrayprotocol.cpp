@@ -1,12 +1,28 @@
 #include "xrayprotocol.h"
 
+#include "core/defs.h"
+#include "core/networkUtilities.h"
 #include <QCryptographicHash>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkInterface>
+#include <QtCore/qcontainerfwd.h>
+#include <QtCore/qdebug.h>
+#include <QtCore/qlogging.h>
+#include <QtCore/qobject.h>
+#include <arpa/inet.h>
+#include <cerrno>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <sys/socket.h>
 
-#include "core/networkUtilities.h"
-#include "utilities.h"
+#include "core/ipcclient.h"
+#include "libxray.h"
 
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
@@ -15,6 +31,9 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
     m_t2sProcess = IpcClient::InterfaceTun2Socks();
+
+    amnezia_xray_setloghandler(&XrayProtocol::ctxLogHandler, this);
+    amnezia_xray_setsockcallback(&XrayProtocol::ctxSockCallback, this);
 }
 
 XrayProtocol::~XrayProtocol()
@@ -25,61 +44,20 @@ XrayProtocol::~XrayProtocol()
 
 ErrorCode XrayProtocol::start()
 {
-    qDebug().noquote() << "XrayProtocol xrayExecPath():" << xrayExecPath();
+    qDebug() << "XrayProtocol::start()";
 
-    if (!QFileInfo::exists(xrayExecPath())) {
-        setLastError(ErrorCode::XrayExecutableMissing);
-        return lastError();
+    auto cfg = QJsonDocument(m_xrayConfig).toJson().toStdString();
+    if (auto err = amnezia_xray_configure(cfg.data()); err != 0) {
+        return ErrorCode::InternalError;
     }
 
-#ifdef QT_DEBUG
-    m_xrayCfgFile.setAutoRemove(false);
-#endif
-    m_xrayCfgFile.open();
-    QString config = QJsonDocument(m_xrayConfig).toJson();
-    config.replace(m_remoteHost, m_remoteAddress);
-    m_xrayCfgFile.write(config.toUtf8());
-    m_xrayCfgFile.close();
-
-    QStringList args = QStringList() << "-c" << m_xrayCfgFile.fileName() << "-format=json";
-
-    qDebug().noquote() << "XrayProtocol::start()" << xrayExecPath() << args.join(" ");
-
-    m_xrayProcess.setProcessChannelMode(QProcess::MergedChannels);
-    m_xrayProcess.setProgram(xrayExecPath());
-
-    if (Utils::processIsRunning(Utils::executable("xray", false))) {
-        qDebug().noquote() << "kill previos xray";
-        Utils::killProcessByName(Utils::executable("xray", false));
+    if (auto err = amnezia_xray_start(); err != 0) {
+        return ErrorCode::NotImplementedError;
     }
 
-    m_xrayProcess.setArguments(args);
+    setConnectionState(Vpn::ConnectionState::Connecting);
 
-    connect(&m_xrayProcess, &QProcess::readyReadStandardOutput, this, [this]() {
-#ifdef QT_DEBUG
-        qDebug().noquote() << "xray:" << m_xrayProcess.readAllStandardOutput();
-#endif
-    });
-
-    connect(&m_xrayProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
-            [this](int exitCode, QProcess::ExitStatus exitStatus) {
-                qDebug().noquote() << "XrayProtocol finished, exitCode, exitStatus" << exitCode << exitStatus;
-                setConnectionState(Vpn::ConnectionState::Disconnected);
-                if ((exitStatus != QProcess::NormalExit) || (exitCode != 0)) {
-                    emit protocolError(amnezia::ErrorCode::XrayExecutableCrashed);
-                    emit setConnectionState(Vpn::ConnectionState::Error);
-                }
-            });
-
-    m_xrayProcess.start();
-    m_xrayProcess.waitForStarted();
-
-    if (m_xrayProcess.state() == QProcess::ProcessState::Running) {
-        setConnectionState(Vpn::ConnectionState::Connecting);
-        QThread::msleep(1000);
-        return startTun2Sock();
-    } else
-        return ErrorCode::XrayExecutableMissing;
+    return startTun2Sock();
 }
 
 ErrorCode XrayProtocol::startTun2Sock()
@@ -126,9 +104,7 @@ ErrorCode XrayProtocol::startTun2Sock()
             }
 #endif
             if (m_routeMode == Settings::RouteMode::VpnAllSites) {
-                IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
-                IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
-                IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
+                IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "1.0.0.0/8" << "2.0.0.0/7" << "4.0.0.0/6" << "8.0.0.0/5" << "16.0.0.0/4" << "32.0.0.0/3" << "64.0.0.0/2" << "128.0.0.0/1");
             }
             IpcClient::Interface()->StopRoutingIpv6();
 #ifdef Q_OS_WIN
@@ -171,23 +147,14 @@ void XrayProtocol::stop()
     IpcClient::Interface()->StartRoutingIpv6();
 #endif
     qDebug() << "XrayProtocol::stop()";
-    m_xrayProcess.disconnect();
-    m_xrayProcess.kill();
-    m_xrayProcess.waitForFinished(3000);
+
+    amnezia_xray_stop();
+
     if (m_t2sProcess) {
         m_t2sProcess->stop();
     }
 
     setConnectionState(Vpn::ConnectionState::Disconnected);
-}
-
-QString XrayProtocol::xrayExecPath()
-{
-#ifdef Q_OS_WIN
-    return Utils::executable(QString("xray/xray"), true);
-#else
-    return Utils::executable(QString("xray"), true);
-#endif
 }
 
 void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
@@ -204,4 +171,21 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
     m_routeMode = static_cast<Settings::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
     m_primaryDNS = configuration.value(amnezia::config_key::dns1).toString();
     m_secondaryDNS = configuration.value(amnezia::config_key::dns2).toString();
+}
+
+void XrayProtocol::sockCallback(uintptr_t fd)
+{
+// #ifdef Q_OS_DARWIN
+//     const int iface = if_nametoindex("en0");
+//     if (iface > 0)
+//     {
+//         setsockopt(fd, IPPROTO_IP, IP_BOUND_IF, &iface, sizeof(iface));
+//         setsockopt(fd, IPPROTO_IPV6, IPV6_BOUND_IF, &iface, sizeof(iface));
+//     }
+// #endif
+}
+
+void XrayProtocol::logHandler(char* str)
+{
+    
 }
