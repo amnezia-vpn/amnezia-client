@@ -41,7 +41,6 @@ PageType {
         configCaption = qsTr("Save AmneziaVPN config")
         configFileName = "amnezia_config"
         
-        // Set header text when page becomes visible
         if (visible) {
             var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
             headerText = qsTr("Connection to ") + serverName

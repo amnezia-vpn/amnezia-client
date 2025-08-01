@@ -14,7 +14,6 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Components"
 import "../Config"
-//import "./PageShareConnection.qml"
 
 
 PageType {
@@ -141,7 +140,6 @@ PageType {
 
                     PageController.showBusyIndicator(false)
                     
-                    // Navigate to PageShareConnection page
                     PageController.goToPage(PageEnum.PageShareConnection)
                 }
             }

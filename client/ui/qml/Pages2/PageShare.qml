@@ -807,9 +807,6 @@ PageType {
                                             root.revokeConfig(index)
                                         }
                                         var noButtonFunction = function() {
-                                            if (!GC.isMobile()) {
-                                                // focusItem1.forceActiveFocus()
-                                            }
                                         }
 
                                         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
