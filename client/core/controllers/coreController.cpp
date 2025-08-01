@@ -81,9 +81,10 @@ void CoreController::initModels()
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
 
     auto clientManagementController = QSharedPointer<ClientManagementController>::create(m_settings, this);
-    m_clientManagementModel.reset(new ClientManagementModel(m_settings, clientManagementController, this));
+    m_clientManagementModel.reset(new ClientManagementModel(clientManagementController, this));
 
     m_clientManagementUIController.reset(new ClientManagementUIController(clientManagementController, this));
+    m_engine->rootContext()->setContextProperty("ClientManagementUIController", m_clientManagementUIController.get());
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
 
     m_apiServicesModel.reset(new ApiServicesModel(this));

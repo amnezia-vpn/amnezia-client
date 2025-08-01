@@ -247,14 +247,6 @@ void ExportUIController::exportConfig(const QString &fileName)
     SystemController::saveFile(fileName, m_config);
 }
 
-void ExportUIController::updateClientManagementModel(const DockerContainer container, ServerCredentials credentials)
-{
-    ErrorCode errorCode = m_clientManagementController->updateClientsData(container, credentials);
-    if (errorCode != ErrorCode::NoError) {
-        emit exportErrorOccurred(errorCode);
-    }
-}
-
 void ExportUIController::revokeConfig(const int row, const DockerContainer container, ServerCredentials credentials)
 {
     ErrorCode errorCode = m_clientManagementController->revokeClient(row, container, credentials, 

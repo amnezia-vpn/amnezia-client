@@ -528,20 +528,6 @@ ErrorCode ClientManagementController::revokeClient(const int row, const DockerCo
     return revokeClient(row, container, credentials, serverIndex, serverController, clientsTable);
 }
 
-ErrorCode ClientManagementController::revokeClient(const int row, const DockerContainer container, const ServerCredentials &credentials,
-                                                   const int serverIndex)
-{
-    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    QJsonArray clientsTable;
-    ErrorCode errorCode = updateClientsData(container, credentials, serverController, clientsTable);
-    if (errorCode != ErrorCode::NoError) {
-        return errorCode;
-    }
-    return revokeClient(row, container, credentials, serverIndex, serverController, clientsTable);
-}
-
-
-
 
 ErrorCode ClientManagementController::revokeClient(const int row, const DockerContainer container, const ServerCredentials &credentials,
                                                    const int serverIndex, const QSharedPointer<ServerController> &serverController,

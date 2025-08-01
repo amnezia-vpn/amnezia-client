@@ -3,7 +3,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "core/controllers/selfhosted/serverController.h"
 #include "core/controllers/selfhosted/clientManagementController.h"
 #include "logger.h"
 
@@ -25,11 +24,9 @@ namespace
     }
 }
 
-ClientManagementModel::ClientManagementModel(std::shared_ptr<Settings> settings, 
-                                           QSharedPointer<ClientManagementController> clientManagementController,
+ClientManagementModel::ClientManagementModel(QSharedPointer<ClientManagementController> clientManagementController,
                                            QObject *parent)
     : QAbstractListModel(parent), 
-      m_settings(settings), 
       m_clientManagementController(clientManagementController)
 {
     connect(m_clientManagementController.data(), &ClientManagementController::clientsDataUpdated,
@@ -82,21 +79,7 @@ void ClientManagementModel::onClientRenamed(const int row, const QString &newNam
     }
 }
 
-void ClientManagementModel::migration(const QByteArray &clientsTableString)
-{
-    QJsonObject clientsTable = QJsonDocument::fromJson(clientsTableString).object();
 
-    for (auto &clientId : clientsTable.keys()) {
-        QJsonObject client;
-        client[configKey::clientId] = clientId;
-
-        QJsonObject userData;
-        userData[configKey::clientName] = clientsTable.value(clientId).toObject().value(configKey::clientName);
-        client[configKey::userData] = userData;
-
-        m_clientsTable.push_back(client);
-    }
-}
 
 QHash<int, QByteArray> ClientManagementModel::roleNames() const
 {

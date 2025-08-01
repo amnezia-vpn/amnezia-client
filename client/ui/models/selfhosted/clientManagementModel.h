@@ -4,9 +4,7 @@
 #include <QAbstractListModel>
 #include <QJsonArray>
 
-#include "core/controllers/selfhosted/serverController.h"
 #include "core/controllers/selfhosted/clientManagementController.h"
-#include "settings.h"
 
 class ClientManagementModel : public QAbstractListModel
 {
@@ -22,8 +20,7 @@ public:
         AllowedIpsRole
     };
 
-    explicit ClientManagementModel(std::shared_ptr<Settings> settings, 
-                                   QSharedPointer<ClientManagementController> clientManagementController,
+    explicit ClientManagementModel(QSharedPointer<ClientManagementController> clientManagementController,
                                    QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -41,7 +38,6 @@ private slots:
 
 private:
     QJsonArray m_clientsTable;
-    std::shared_ptr<Settings> m_settings;
     QSharedPointer<ClientManagementController> m_clientManagementController;
 };
 

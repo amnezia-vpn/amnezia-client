@@ -268,8 +268,8 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
-                                                                         ServersModel.getProcessedServerCredentials())
+                            ClientManagementUIController.updateModel(ContainersModel.getProcessedContainerIndex(),
+                                                                     ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -436,8 +436,8 @@ PageType {
 
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
-                                                                         ServersModel.getProcessedServerCredentials())
+                            ClientManagementUIController.updateModel(ContainersModel.getProcessedContainerIndex(),
+                                                                     ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
                     }
