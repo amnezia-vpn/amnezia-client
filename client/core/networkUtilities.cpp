@@ -475,3 +475,48 @@ QString NetworkUtilities::getGatewayAndIface()
     return gateway;
 #endif
 }
+
+unsigned long NetworkUtilities::getDefaultIfaceIndex()
+{
+#ifdef Q_OS_WIN
+    unsigned long res = 0;
+
+    ULONG size = 0;
+    if (ERROR_BUFFER_OVERFLOW != GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_GATEWAYS, nullptr, nullptr, &size)) {
+        return res;
+    }
+
+    auto* adapters = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(malloc(size));
+    if (adapters == nullptr) {
+        return res;
+    }
+
+    ULONG err = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_GATEWAYS, nullptr, adapters, &size);
+    if (err != NO_ERROR) {
+        free(adapters);
+        return res;
+    }
+
+    for (auto* adapter = adapters; adapter != nullptr; adapter = adapter->Next) {
+        if (adapter->OperStatus != IfOperStatusUp) {
+            continue;
+        }
+
+        auto* gw = adapter->FirstGatewayAddress;
+        if (gw && gw->Address.lpSockaddr->sa_family == AF_INET)
+        {
+            res = adapter->IfIndex;
+        }
+    }
+
+    free(adapters);
+    return res;
+#endif
+#ifdef Q_OS_MAC
+
+#endif
+#ifdef Q_OS_LINUX
+
+#endif
+    return 0;
+}

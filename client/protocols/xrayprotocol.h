@@ -6,6 +6,7 @@
 #include "containers/containers_defs.h"
 #include "openvpnprotocol.h"
 #include "settings.h"
+#include <cstdint>
 
 class XrayProtocol : public VpnProtocol
 {
@@ -24,10 +25,16 @@ protected:
     QJsonObject m_xrayConfig;
 
 private:
-    static QString xrayExecPath();
-    static QString tun2SocksExecPath();
+    static void ctxSockCallback(uintptr_t fd, void* ctx) {
+        reinterpret_cast<XrayProtocol*>(ctx)->sockCallback(fd);
+    }
+    static void ctxLogHandler(char* str, void* ctx) {
+        reinterpret_cast<XrayProtocol*>(ctx)->logHandler(str);
+    }
 
-private:
+    void sockCallback(uintptr_t fd);
+    void logHandler(char* str);
+
     int m_localPort;
     QString m_remoteHost;
     QString m_remoteAddress;
@@ -36,10 +43,10 @@ private:
     QString m_primaryDNS;
     QString m_secondaryDNS;
 #ifndef Q_OS_IOS
-    QProcess m_xrayProcess;
     QSharedPointer<IpcProcessTun2SocksReplica> m_t2sProcess;
 #endif
     QTemporaryFile m_xrayCfgFile;
+    unsigned long m_ifaceIndex = 0;
 };
 
 #endif // XRAYPROTOCOL_H
