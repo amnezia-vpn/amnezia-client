@@ -3,9 +3,11 @@
 
 #include "QProcess"
 
-#include "containers/containers_defs.h"
-#include "openvpnprotocol.h"
+#include "core/ipcclient.h"
+#include "vpnprotocol.h"
 #include "settings.h"
+
+#include <QtNetwork/qnetworkinterface.h>
 #include <cstdint>
 
 class XrayProtocol : public VpnProtocol
@@ -46,7 +48,7 @@ private:
     QSharedPointer<IpcProcessTun2SocksReplica> m_t2sProcess;
 #endif
     QTemporaryFile m_xrayCfgFile;
-    unsigned long m_ifaceIndex = 0;
+    QNetworkInterface m_defaultIface;
 };
 
 #endif // XRAYPROTOCOL_H

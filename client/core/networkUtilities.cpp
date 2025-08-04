@@ -1,11 +1,12 @@
 #include "networkUtilities.h"
+#include <QtNetwork/qnetworkinterface.h>
+#include <cstddef>
 
 #ifdef Q_OS_WIN
     #include <windows.h>
     #include <Ipexport.h>
     #include <Ws2tcpip.h>
     #include <ws2ipdef.h>
-    #include <stdint.h>
     #include <Iphlpapi.h>
     #include <Iptypes.h>
     #include <WinSock2.h>
@@ -30,6 +31,15 @@
     #include <netinet/in.h>
     #include <arpa/inet.h>
     #include <net/route.h>
+    #include <ifaddrs.h>
+    #include <net/if.h>
+    #include <net/if_dl.h>
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <arpa/inet.h>
+    #include <unistd.h>
+    #include <ifaddrs.h>
+    #include <net/if.h>
 #endif
 
 #include <QHostAddress>
@@ -476,25 +486,24 @@ QString NetworkUtilities::getGatewayAndIface()
 #endif
 }
 
-unsigned long NetworkUtilities::getDefaultIfaceIndex()
+QNetworkInterface NetworkUtilities::getDefaultIface()
 {
+    int index = -1;
 #ifdef Q_OS_WIN
-    unsigned long res = 0;
-
     ULONG size = 0;
     if (ERROR_BUFFER_OVERFLOW != GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_GATEWAYS, nullptr, nullptr, &size)) {
-        return res;
+        return {};
     }
 
     auto* adapters = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(malloc(size));
     if (adapters == nullptr) {
-        return res;
+        return {};
     }
 
     ULONG err = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_GATEWAYS, nullptr, adapters, &size);
     if (err != NO_ERROR) {
         free(adapters);
-        return res;
+        return {};
     }
 
     for (auto* adapter = adapters; adapter != nullptr; adapter = adapter->Next) {
@@ -505,18 +514,54 @@ unsigned long NetworkUtilities::getDefaultIfaceIndex()
         auto* gw = adapter->FirstGatewayAddress;
         if (gw && gw->Address.lpSockaddr->sa_family == AF_INET)
         {
-            res = adapter->IfIndex;
+            index = adapter->IfIndex;
         }
     }
 
     free(adapters);
-    return res;
 #endif
 #ifdef Q_OS_MAC
+    int sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) {
+        return {};
+    }
 
+    sockaddr_in addr = {};
+    addr.sin_family = AF_INET;
+    addr.sin_port = 0;
+    inet_pton(AF_INET, "1.1.1.1", &addr.sin_addr);
+
+    if (::connect(sock, (sockaddr*)&addr, sizeof(addr)) != 0) {
+        close(sock);
+        return {};
+    }
+
+    sockaddr_in local_addr = {};
+    socklen_t len = sizeof(local_addr);
+    if (0 != getsockname(sock, reinterpret_cast<sockaddr*>(&local_addr), &len)) {
+        close(sock);
+        return {};
+    }
+    close(sock);
+
+    ifaddrs* ifas;
+    if (0 != getifaddrs(&ifas)) {
+        return {};
+    }
+
+    for (auto* ifa = ifas; ifa != nullptr; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET) {
+            continue;
+        }
+
+        auto* sa = reinterpret_cast<sockaddr_in*>(ifa->ifa_addr);
+        if (sa->sin_addr.s_addr == local_addr.sin_addr.s_addr) {
+            index = if_nametoindex(ifa->ifa_name);
+        }
+    }
 #endif
 #ifdef Q_OS_LINUX
 
 #endif
-    return 0;
+    return QNetworkInterface::interfaceFromIndex(index);
 }

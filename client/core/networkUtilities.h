@@ -6,7 +6,7 @@
 #include <QString>
 #include <QHostAddress>
 #include <QNetworkReply>
-
+#include <QtNetwork/qnetworkinterface.h>
 
 class NetworkUtilities : public QObject
 {
@@ -32,7 +32,7 @@ public:
     static QString ipAddressFromIpWithSubnet(const QString ip);
     static QStringList summarizeRoutes(const QStringList &ips, const QString cidr);
 
-    static unsigned long getDefaultIfaceIndex();
+    static QNetworkInterface getDefaultIface();
 };
 
 #endif // NETWORKUTILITIES_H
