@@ -10,9 +10,10 @@ using namespace amnezia;
 WireGuardProtocolConfig::WireGuardProtocolConfig(const QJsonObject &protocolConfigObject, const QString &protocolName)
     : ProtocolConfig(protocolName)
 {
-    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString();
-    serverProtocolConfig.transportProto = protocolConfigObject.value(config_key::transport_proto).toString();
-    serverProtocolConfig.subnetAddress = protocolConfigObject.value(config_key::subnet_address).toString();
+    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString(protocols::wireguard::defaultPort);
+    serverProtocolConfig.transportProto = protocolConfigObject.value(config_key::transport_proto).toString("udp");
+    serverProtocolConfig.subnetAddress = protocolConfigObject.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
+    serverProtocolConfig.mtu = protocolConfigObject.value(config_key::mtu).toString(protocols::wireguard::defaultMtu);
 
     auto clientProtocolString = protocolConfigObject.value(config_key::last_config).toString();
     if (!clientProtocolString.isEmpty()) {
@@ -58,6 +59,9 @@ QJsonObject WireGuardProtocolConfig::toJson() const
     }
     if (!serverProtocolConfig.subnetAddress.isEmpty()) {
         json[config_key::subnet_address] = serverProtocolConfig.subnetAddress;
+    }
+    if (!serverProtocolConfig.mtu.isEmpty()) {
+        json[config_key::mtu] = serverProtocolConfig.mtu;
     }
 
     if (!clientProtocolConfig.isEmpty) {

@@ -440,7 +440,7 @@ ErrorCode ClientManagementController::wgShow(const DockerContainer container, co
 
     const QString command = QString("sudo docker exec -i $CONTAINER_NAME bash -c '%1'").arg("wg show all");
 
-    QString script = serverController->replaceVars(command, serverController->genVarsForScript(credentials, container));
+    QString script = serverController->replaceVars(command, serverController->generateVarsForContainer(credentials, container));
     error = serverController->runScript(credentials, script, cbReadStdOut);
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to execute wg show command";
@@ -668,7 +668,7 @@ ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerC
 
     const QString revokeClientScript = "sudo docker exec -i $CONTAINER_NAME bash -c './easyrsa --batch revoke %1'";
     QString script = serverController->replaceVars(revokeClientScript.arg(clientId), 
-                                                   serverController->genVarsForScript(credentials, container));
+                                                   serverController->generateVarsForContainer(credentials, container));
     error = serverController->runScript(credentials, script, cbReadStdOut);
     if (error != ErrorCode::NoError) {
         return error;

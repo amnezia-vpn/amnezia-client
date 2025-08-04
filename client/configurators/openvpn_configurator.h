@@ -6,6 +6,7 @@
 
 #include "configurator_base.h"
 #include "core/defs.h"
+#include "core/models/protocols/openvpnProtocolConfig.h"
 
 class OpenVpnConfigurator : public ConfiguratorBase
 {
@@ -24,13 +25,16 @@ public:
         QString host;       // host ip
     };
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode &errorCode);
+    QSharedPointer<ProtocolConfig> createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                                const QSharedPointer<ProtocolConfig> &protocolConfig, ErrorCode &errorCode) override;
 
     QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
                                            QString &protocolConfigString);
     QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
                                             QString &protocolConfigString);
+
+    Vars generateProtocolVars(const ServerCredentials &credentials, DockerContainer container,
+                             const QSharedPointer<ProtocolConfig> &protocolConfig) const override;
 
     static ConnectionData createCertRequest();
 

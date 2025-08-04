@@ -17,6 +17,15 @@ namespace shadowsocks
     struct ClientProtocolConfig
     {
         bool isEmpty = true;
+        
+        QString server;
+        QString serverPort;
+        QString localPort;
+        QString password;
+        int timeout = 60;
+        QString method;
+        
+        QString nativeConfig;
     };
 }
 

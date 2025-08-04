@@ -8,8 +8,8 @@ using namespace amnezia;
 
 ShadowsocksProtocolConfig::ShadowsocksProtocolConfig(const QJsonObject &protocolConfigObject, const QString &protocolName) : ProtocolConfig(protocolName)
 {
-    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString();
-    serverProtocolConfig.cipher = protocolConfigObject.value(config_key::cipher).toString();
+    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString(protocols::shadowsocks::defaultPort);
+    serverProtocolConfig.cipher = protocolConfigObject.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher);
 
     auto clientProtocolString = protocolConfigObject.value(config_key::last_config).toString();
     if (!clientProtocolString.isEmpty()) {

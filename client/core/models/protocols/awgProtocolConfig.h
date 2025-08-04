@@ -17,6 +17,8 @@ namespace awg
 
         QString initPacketJunkSize;
         QString responsePacketJunkSize;
+        QString cookieReplyPacketJunkSize;
+        QString transportPacketJunkSize;
 
         QString initPacketMagicHeader;
         QString responsePacketMagicHeader;
@@ -30,6 +32,7 @@ namespace awg
         QString transportProto;
 
         QString subnetAddress;
+        QString mtu;
 
         AwgData awgData;
     };

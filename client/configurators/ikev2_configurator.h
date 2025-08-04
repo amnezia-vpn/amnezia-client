@@ -5,6 +5,8 @@
 #include <QProcessEnvironment>
 
 #include "configurator_base.h"
+#include "core/models/protocols/protocolConfig.h"
+#include "core/models/protocols/ikev2ProtocolConfig.h"
 #include "core/defs.h"
 
 class Ikev2Configurator : public ConfiguratorBase
@@ -21,12 +23,15 @@ public:
         QString host; // host ip
     };
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode &errorCode);
+    QSharedPointer<ProtocolConfig> createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                                const QSharedPointer<ProtocolConfig> &protocolConfig, ErrorCode &errorCode) override;
 
     QString genIkev2Config(const ConnectionData &connData);
     QString genMobileConfig(const ConnectionData &connData);
     QString genStrongSwanConfig(const ConnectionData &connData);
+
+    Vars generateProtocolVars(const ServerCredentials &credentials, DockerContainer container,
+                             const QSharedPointer<ProtocolConfig> &protocolConfig) const override;
 
     ConnectionData prepareIkev2Config(const ServerCredentials &credentials,
         DockerContainer container, ErrorCode &errorCode);

@@ -8,17 +8,16 @@ using namespace amnezia;
 OpenVpnProtocolConfig::OpenVpnProtocolConfig(const QJsonObject &protocolConfigObject, const QString &protocolName)
     : ProtocolConfig(protocolName)
 {
-    serverProtocolConfig.subnetAddress = protocolConfigObject.value(config_key::subnet_address).toString();
-    serverProtocolConfig.transportProto = protocolConfigObject.value(config_key::transport_proto).toString();
-    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString();
+    serverProtocolConfig.subnetAddress = protocolConfigObject.value(config_key::subnet_address).toString(protocols::openvpn::defaultSubnetAddress);
+    serverProtocolConfig.transportProto = protocolConfigObject.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto);
+    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString(protocols::openvpn::defaultPort);
     serverProtocolConfig.ncpDisable = protocolConfigObject.value(config_key::ncp_disable).toBool(protocols::openvpn::defaultNcpDisable);
-    serverProtocolConfig.hash = protocolConfigObject.value(config_key::hash).toString();
-    serverProtocolConfig.cipher = protocolConfigObject.value(config_key::cipher).toString();
+    serverProtocolConfig.hash = protocolConfigObject.value(config_key::hash).toString(protocols::openvpn::defaultHash);
+    serverProtocolConfig.cipher = protocolConfigObject.value(config_key::cipher).toString(protocols::openvpn::defaultCipher);
     serverProtocolConfig.tlsAuth = protocolConfigObject.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth);
-    serverProtocolConfig.blockOutsideDns =
-            protocolConfigObject.value(config_key::block_outside_dns).toBool(protocols::openvpn::defaultBlockOutsideDns);
-    serverProtocolConfig.additionalClientConfig = protocolConfigObject.value(config_key::additional_client_config).toString();
-    serverProtocolConfig.additionalServerConfig = protocolConfigObject.value(config_key::additional_server_config).toString();
+    serverProtocolConfig.blockOutsideDns = protocolConfigObject.value(config_key::block_outside_dns).toBool(protocols::openvpn::defaultBlockOutsideDns);
+    serverProtocolConfig.additionalClientConfig = protocolConfigObject.value(config_key::additional_client_config).toString(protocols::openvpn::defaultAdditionalClientConfig);
+    serverProtocolConfig.additionalServerConfig = protocolConfigObject.value(config_key::additional_server_config).toString(protocols::openvpn::defaultAdditionalServerConfig);
 
     auto clientProtocolString = protocolConfigObject.value(config_key::last_config).toString();
     if (!clientProtocolString.isEmpty()) {

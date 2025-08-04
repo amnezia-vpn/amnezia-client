@@ -6,6 +6,8 @@
 
 #include "core/models/containers/containers_defs.h"
 #include "core/controllers/selfhosted/serverController.h"
+#include "core/models/protocols/shadowsocksProtocolConfig.h"
+#include "protocols/protocols_defs.h"
 
 ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
                                                  QObject *parent)
@@ -13,28 +15,59 @@ ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> setti
 {
 }
 
-QString ShadowSocksConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                              const QJsonObject &containerConfig, ErrorCode &errorCode)
+ConfiguratorBase::Vars ShadowSocksConfigurator::generateProtocolVars(const ServerCredentials &credentials, DockerContainer container,
+                                                                     const QSharedPointer<ProtocolConfig> &protocolConfig) const
 {
+    Vars vars = generateCommonVars(credentials, container);
+
+    auto shadowsocksConfig = qSharedPointerCast<ShadowsocksProtocolConfig>(protocolConfig);
+    if (!shadowsocksConfig) {
+        return vars;
+    }
+
+    vars.append({{"$SHADOWSOCKS_SERVER_PORT", shadowsocksConfig->serverProtocolConfig.port}});
+    vars.append({{"$SHADOWSOCKS_LOCAL_PORT", protocols::shadowsocks::defaultLocalProxyPort}});
+    vars.append({{"$SHADOWSOCKS_CIPHER", shadowsocksConfig->serverProtocolConfig.cipher}});
+
+    return vars;
+}
+
+QSharedPointer<ProtocolConfig> ShadowSocksConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                                                  const QSharedPointer<ProtocolConfig> &protocolConfig, ErrorCode &errorCode)
+{
+    auto shadowsocksConfig = qSharedPointerCast<ShadowsocksProtocolConfig>(protocolConfig);
+    if (!shadowsocksConfig) {
+        errorCode = ErrorCode::InternalError;
+        return nullptr;
+    }
+
     QString ssKey =
             m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::shadowsocks::ssKeyPath, errorCode);
     ssKey.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {
-        return "";
+        return nullptr;
     }
 
+    shadowsocksConfig->clientProtocolConfig.server = credentials.hostName;
+    shadowsocksConfig->clientProtocolConfig.serverPort = shadowsocksConfig->serverProtocolConfig.port;
+    shadowsocksConfig->clientProtocolConfig.localPort = protocols::shadowsocks::defaultLocalProxyPort;
+    shadowsocksConfig->clientProtocolConfig.password = ssKey;
+    shadowsocksConfig->clientProtocolConfig.timeout = 60;
+    shadowsocksConfig->clientProtocolConfig.method = shadowsocksConfig->serverProtocolConfig.cipher;
+
     QJsonObject config;
-    config.insert("server", credentials.hostName);
-    config.insert("server_port", "$SHADOWSOCKS_SERVER_PORT");
-    config.insert("local_port", "$SHADOWSOCKS_LOCAL_PORT");
-    config.insert("password", ssKey);
-    config.insert("timeout", 60);
-    config.insert("method", "$SHADOWSOCKS_CIPHER");
+    config.insert("server", shadowsocksConfig->clientProtocolConfig.server);
+    config.insert("server_port", shadowsocksConfig->clientProtocolConfig.serverPort);
+    config.insert("local_port", shadowsocksConfig->clientProtocolConfig.localPort);
+    config.insert("password", shadowsocksConfig->clientProtocolConfig.password);
+    config.insert("timeout", shadowsocksConfig->clientProtocolConfig.timeout);
+    config.insert("method", shadowsocksConfig->clientProtocolConfig.method);
 
-    QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(),
-                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));
+    QString textCfg = QJsonDocument(config).toJson();
 
-    // qDebug().noquote() << textCfg;
-    return textCfg;
+    shadowsocksConfig->clientProtocolConfig.isEmpty = false;
+    shadowsocksConfig->clientProtocolConfig.nativeConfig = textCfg;
+
+    return shadowsocksConfig;
 }

@@ -39,8 +39,8 @@ public:
                                         ErrorCode &errorCode);
 
     QString replaceVars(const QString &script, const Vars &vars);
-    Vars genVarsForScript(const ServerCredentials &credentials, DockerContainer container = DockerContainer::None,
-                          const QJsonObject &config = QJsonObject());
+    Vars generateVarsForContainer(const ServerCredentials &credentials, DockerContainer container,
+                                  const QJsonObject &config = QJsonObject());
 
     ErrorCode runScript(const ServerCredentials &credentials, QString script,
                         const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut = nullptr,

@@ -8,9 +8,9 @@ using namespace amnezia;
 
 CloakProtocolConfig::CloakProtocolConfig(const QJsonObject &protocolConfigObject, const QString &protocolName) : ProtocolConfig(protocolName)
 {
-    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString();
-    serverProtocolConfig.cipher = protocolConfigObject.value(config_key::cipher).toString();
-    serverProtocolConfig.site = protocolConfigObject.value(config_key::site).toString();
+    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString(protocols::cloak::defaultPort);
+    serverProtocolConfig.cipher = protocolConfigObject.value(config_key::cipher).toString(protocols::cloak::defaultCipher);
+    serverProtocolConfig.site = protocolConfigObject.value(config_key::site).toString(protocols::cloak::defaultRedirSite);
 
     auto clientProtocolString = protocolConfigObject.value(config_key::last_config).toString();
     if (!clientProtocolString.isEmpty()) {

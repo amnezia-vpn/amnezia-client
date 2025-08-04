@@ -29,7 +29,15 @@
 #include "logger.h"
 #include "settings.h"
 #include "utilities.h"
-#include "vpnConfigurationController.h"
+#include "configurators/awg_configurator.h"
+#include "configurators/cloak_configurator.h"
+#include "configurators/ikev2_configurator.h"
+#include "configurators/openvpn_configurator.h"
+#include "configurators/shadowsocks_configurator.h"
+#include "configurators/wireguard_configurator.h"
+#include "configurators/xray_configurator.h"
+#include "core/models/protocols/sftpProtocolConfig.h"
+#include "core/models/protocols/socks5ProtocolConfig.h"
 
 namespace
 {
@@ -106,10 +114,10 @@ ErrorCode ServerController::runContainerScript(const ServerCredentials &credenti
 
     QString runner =
             QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, (container == DockerContainer::Socks5Proxy ? "sh" : "bash"));
-    e = runScript(credentials, replaceVars(runner, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+            e = runScript(credentials, replaceVars(runner, generateVarsForContainer(credentials, container)), cbReadStdOut, cbReadStdErr);
 
     QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);
-    runScript(credentials, replaceVars(remover, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+    runScript(credentials, replaceVars(remover, generateVarsForContainer(credentials, container)), cbReadStdOut, cbReadStdErr);
 
     return e;
 }
@@ -132,14 +140,14 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     // mkdir
     QString mkdir = QString("sudo docker exec -i $CONTAINER_NAME mkdir -p  \"$(dirname %1)\"").arg(path);
 
-    e = runScript(credentials, replaceVars(mkdir, genVarsForScript(credentials, container)));
+    e = runScript(credentials, replaceVars(mkdir, generateVarsForContainer(credentials, container)));
     if (e)
         return e;
 
     if (overwriteMode == libssh::ScpOverwriteMode::ScpOverwriteExisting) {
         e = runScript(credentials,
                       replaceVars(QStringLiteral("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName, path),
-                                  genVarsForScript(credentials, container)),
+                                  generateVarsForContainer(credentials, container)),
                       cbReadStd, cbReadStd);
 
         if (e)
@@ -147,7 +155,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
     } else if (overwriteMode == libssh::ScpOverwriteMode::ScpAppendToExisting) {
         e = runScript(credentials,
                       replaceVars(QStringLiteral("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName, tmpFileName),
-                                  genVarsForScript(credentials, container)),
+                                  generateVarsForContainer(credentials, container)),
                       cbReadStd, cbReadStd);
 
         if (e)
@@ -155,7 +163,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 
         e = runScript(credentials,
                       replaceVars(QStringLiteral("sudo docker exec -i $CONTAINER_NAME sh -c \"cat %1 >> %2\"").arg(tmpFileName, path),
-                                  genVarsForScript(credentials, container)),
+                                  generateVarsForContainer(credentials, container)),
                       cbReadStd, cbReadStd);
 
         if (e)
@@ -167,7 +175,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
         return ErrorCode::ServerContainerMissingError;
     }
 
-    runScript(credentials, replaceVars(QString("sudo shred -u %1").arg(tmpFileName), genVarsForScript(credentials, container)));
+    runScript(credentials, replaceVars(QString("sudo shred -u %1").arg(tmpFileName), generateVarsForContainer(credentials, container)));
     return e;
 }
 
@@ -236,7 +244,7 @@ ErrorCode ServerController::removeAllContainers(const ServerCredentials &credent
 ErrorCode ServerController::removeContainer(const ServerCredentials &credentials, DockerContainer container)
 {
     return runScript(credentials,
-                     replaceVars(amnezia::scriptData(SharedScriptType::remove_container), genVarsForScript(credentials, container)));
+                     replaceVars(amnezia::scriptData(SharedScriptType::remove_container), generateVarsForContainer(credentials, container)));
 }
 
 ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config, bool isUpdate)
@@ -415,7 +423,7 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
     };
 
     ErrorCode error =
-            runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::install_docker), genVarsForScript(credentials)),
+            runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::install_docker), generateVarsForContainer(credentials, DockerContainer::None)),
                       cbReadStdOut, cbReadStdErr);
 
     qDebug().noquote() << "ServerController::installDockerWorker" << stdOut;
@@ -430,14 +438,14 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
 ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     // create folder on host
-    return runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::prepare_host), genVarsForScript(credentials, container)));
+    return runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::prepare_host), generateVarsForContainer(credentials, container)));
 }
 
 ErrorCode ServerController::buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
 {
     QString dockerFilePath = amnezia::server::getDockerfileFolder(container) + "/Dockerfile";
     QString scriptString = QString("sudo rm %1").arg(dockerFilePath);
-    ErrorCode errorCode = runScript(credentials, replaceVars(scriptString, genVarsForScript(credentials, container)));
+    ErrorCode errorCode = runScript(credentials, replaceVars(scriptString, generateVarsForContainer(credentials, container)));
     if (errorCode)
         return errorCode;
 
@@ -458,7 +466,7 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
 
     ErrorCode error =
             runScript(credentials,
-                      replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
+                      replaceVars(amnezia::scriptData(SharedScriptType::build_container), generateVarsForContainer(credentials, container, config)),
                       cbReadStdOut, cbReadStdErr);
 
     if (stdOut.contains("doesn't work on cgroups v2"))
@@ -481,7 +489,7 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
 
     ErrorCode e = runScript(credentials,
                             replaceVars(amnezia::scriptData(ProtocolScriptType::run_container, container),
-                                        genVarsForScript(credentials, container, config)),
+                                        generateVarsForContainer(credentials, container, config)),
                             cbReadStdOut);
 
     if (stdOut.contains("address already in use"))
@@ -508,7 +516,7 @@ ErrorCode ServerController::configureContainerWorker(const ServerCredentials &cr
 
     ErrorCode e = runContainerScript(credentials, container,
                                      replaceVars(amnezia::scriptData(ProtocolScriptType::configure_container, container),
-                                                 genVarsForScript(credentials, container, config)),
+                                                 generateVarsForContainer(credentials, container, config)),
                                      cbReadStdOut, cbReadStdErr);
 
     VpnConfigurationsController::updateContainerConfigAfterInstallation(container, config, stdOut);
@@ -524,7 +532,7 @@ ErrorCode ServerController::startupContainerWorker(const ServerCredentials &cred
         return ErrorCode::NoError;
     }
 
-    ErrorCode e = uploadTextFileToContainer(container, credentials, replaceVars(script, genVarsForScript(credentials, container, config)),
+    ErrorCode e = uploadTextFileToContainer(container, credentials, replaceVars(script, generateVarsForContainer(credentials, container, config)),
                                             "/opt/amnezia/start.sh");
     if (e)
         return e;
@@ -532,138 +540,99 @@ ErrorCode ServerController::startupContainerWorker(const ServerCredentials &cred
     return runScript(credentials,
                      replaceVars("sudo docker exec -d $CONTAINER_NAME sh -c \"chmod a+x /opt/amnezia/start.sh && "
                                  "/opt/amnezia/start.sh\"",
-                                 genVarsForScript(credentials, container, config)));
+                                 generateVarsForContainer(credentials, container, config)));
 }
 
-ServerController::Vars ServerController::genVarsForScript(const ServerCredentials &credentials, DockerContainer container,
-                                                          const QJsonObject &config)
+
+
+ServerController::Vars ServerController::generateVarsForContainer(const ServerCredentials &credentials, DockerContainer container,
+                                                                  const QJsonObject &config)
 {
-    const QJsonObject &openvpnConfig = config.value(ProtocolProps::protoToString(Proto::OpenVpn)).toObject();
-    const QJsonObject &cloakConfig = config.value(ProtocolProps::protoToString(Proto::Cloak)).toObject();
-    const QJsonObject &ssConfig = config.value(ProtocolProps::protoToString(Proto::ShadowSocks)).toObject();
-    const QJsonObject &wireguarConfig = config.value(ProtocolProps::protoToString(Proto::WireGuard)).toObject();
-    const QJsonObject &amneziaWireguarConfig = config.value(ProtocolProps::protoToString(Proto::Awg)).toObject();
-    const QJsonObject &xrayConfig = config.value(ProtocolProps::protoToString(Proto::Xray)).toObject();
-    const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
-    const QJsonObject &socks5ProxyConfig = config.value(ProtocolProps::protoToString(Proto::Socks5Proxy)).toObject();
-
-    Vars vars;
-
-    vars.append({ { "$REMOTE_HOST", credentials.hostName } });
-
-    // OpenVPN vars
-    vars.append({ { "$OPENVPN_SUBNET_IP",
-                    openvpnConfig.value(config_key::subnet_address).toString(protocols::openvpn::defaultSubnetAddress) } });
-    vars.append({ { "$OPENVPN_SUBNET_CIDR", openvpnConfig.value(config_key::subnet_cidr).toString(protocols::openvpn::defaultSubnetCidr) } });
-    vars.append({ { "$OPENVPN_SUBNET_MASK", openvpnConfig.value(config_key::subnet_mask).toString(protocols::openvpn::defaultSubnetMask) } });
-
-    vars.append({ { "$OPENVPN_PORT", openvpnConfig.value(config_key::port).toString(protocols::openvpn::defaultPort) } });
-    vars.append({ { "$OPENVPN_TRANSPORT_PROTO",
-                    openvpnConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto) } });
-
-    bool isNcpDisabled = openvpnConfig.value(config_key::ncp_disable).toBool(protocols::openvpn::defaultNcpDisable);
-    vars.append({ { "$OPENVPN_NCP_DISABLE", isNcpDisabled ? protocols::openvpn::ncpDisableString : "" } });
-
-    vars.append({ { "$OPENVPN_CIPHER", openvpnConfig.value(config_key::cipher).toString(protocols::openvpn::defaultCipher) } });
-    vars.append({ { "$OPENVPN_HASH", openvpnConfig.value(config_key::hash).toString(protocols::openvpn::defaultHash) } });
-
-    bool isTlsAuth = openvpnConfig.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth);
-    vars.append({ { "$OPENVPN_TLS_AUTH", isTlsAuth ? protocols::openvpn::tlsAuthString : "" } });
-    if (!isTlsAuth) {
-        // erase $OPENVPN_TA_KEY, so it will not set in OpenVpnConfigurator::genOpenVpnConfig
-        vars.append({ { "$OPENVPN_TA_KEY", "" } });
+    // For VPN containers, use configurator pattern
+    if (ContainerProps::containerService(container) != ServiceType::Other) {
+        for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
+            QScopedPointer<ConfiguratorBase> configurator;
+            
+            // Create the appropriate configurator for this protocol
+            switch (protocol) {
+            case Proto::OpenVpn:
+                configurator.reset(new OpenVpnConfigurator(m_settings, QSharedPointer<ServerController>(this, [](ServerController*){})));
+                break;
+            case Proto::ShadowSocks:
+                configurator.reset(new ShadowSocksConfigurator(m_settings, QSharedPointer<ServerController>(this, [](ServerController*){})));
+                break;
+            case Proto::Cloak:
+                configurator.reset(new CloakConfigurator(m_settings, QSharedPointer<ServerController>(this, [](ServerController*){})));
+                break;
+            case Proto::WireGuard:
+                configurator.reset(new WireguardConfigurator(m_settings, QSharedPointer<ServerController>(this, [](ServerController*){}), false));
+                break;
+            case Proto::Awg:
+                configurator.reset(new AwgConfigurator(m_settings, QSharedPointer<ServerController>(this, [](ServerController*){})));
+                break;
+            case Proto::Ikev2:
+                configurator.reset(new Ikev2Configurator(m_settings, QSharedPointer<ServerController>(this, [](ServerController*){})));
+                break;
+            case Proto::Xray:
+            case Proto::SSXray:
+                configurator.reset(new XrayConfigurator(m_settings, QSharedPointer<ServerController>(this, [](ServerController*){})));
+                break;
+            default:
+                continue;
+            }
+            
+            if (configurator) {
+                return configurator->generateProtocolVars(credentials, container, config);
+            }
+        }
     }
 
-    vars.append({ { "$OPENVPN_ADDITIONAL_CLIENT_CONFIG",
-                    openvpnConfig.value(config_key::additional_client_config).toString(protocols::openvpn::defaultAdditionalClientConfig) } });
-    vars.append({ { "$OPENVPN_ADDITIONAL_SERVER_CONFIG",
-                    openvpnConfig.value(config_key::additional_server_config).toString(protocols::openvpn::defaultAdditionalServerConfig) } });
-
-    // ShadowSocks vars
-    vars.append({ { "$SHADOWSOCKS_SERVER_PORT", ssConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort) } });
-    vars.append({ { "$SHADOWSOCKS_LOCAL_PORT",
-                    ssConfig.value(config_key::local_port).toString(protocols::shadowsocks::defaultLocalProxyPort) } });
-    vars.append({ { "$SHADOWSOCKS_CIPHER", ssConfig.value(config_key::cipher).toString(protocols::shadowsocks::defaultCipher) } });
-
-    vars.append({ { "$CONTAINER_NAME", ContainerProps::containerToString(container) } });
-    vars.append({ { "$DOCKERFILE_FOLDER", "/opt/amnezia/" + ContainerProps::containerToString(container) } });
-
-    // Cloak vars
-    vars.append({ { "$CLOAK_SERVER_PORT", cloakConfig.value(config_key::port).toString(protocols::cloak::defaultPort) } });
-    vars.append({ { "$FAKE_WEB_SITE_ADDRESS", cloakConfig.value(config_key::site).toString(protocols::cloak::defaultRedirSite) } });
-
-    // Xray vars
-    vars.append({ { "$XRAY_SITE_NAME", xrayConfig.value(config_key::site).toString(protocols::xray::defaultSite) } });
-    vars.append({ { "$XRAY_SERVER_PORT", xrayConfig.value(config_key::port).toString(protocols::xray::defaultPort) } });
-
-    // Wireguard vars
-    vars.append({ { "$WIREGUARD_SUBNET_IP",
-                    wireguarConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress) } });
-    vars.append({ { "$WIREGUARD_SUBNET_CIDR",
-                    wireguarConfig.value(config_key::subnet_cidr).toString(protocols::wireguard::defaultSubnetCidr) } });
-    vars.append({ { "$WIREGUARD_SUBNET_MASK",
-                    wireguarConfig.value(config_key::subnet_mask).toString(protocols::wireguard::defaultSubnetMask) } });
-
-    vars.append({ { "$WIREGUARD_SERVER_PORT", wireguarConfig.value(config_key::port).toString(protocols::wireguard::defaultPort) } });
-
-    // IPsec vars
-    vars.append({ { "$IPSEC_VPN_L2TP_NET", "192.168.42.0/24" } });
-    vars.append({ { "$IPSEC_VPN_L2TP_POOL", "192.168.42.10-192.168.42.250" } });
-    vars.append({ { "$IPSEC_VPN_L2TP_LOCAL", "192.168.42.1" } });
-
-    vars.append({ { "$IPSEC_VPN_XAUTH_NET", "192.168.43.0/24" } });
-    vars.append({ { "$IPSEC_VPN_XAUTH_POOL", "192.168.43.10-192.168.43.250" } });
-
-    vars.append({ { "$IPSEC_VPN_SHA2_TRUNCBUG", "yes" } });
-
-    vars.append({ { "$IPSEC_VPN_VPN_ANDROID_MTU_FIX", "yes" } });
-    vars.append({ { "$IPSEC_VPN_DISABLE_IKEV2", "no" } });
-    vars.append({ { "$IPSEC_VPN_DISABLE_L2TP", "no" } });
-    vars.append({ { "$IPSEC_VPN_DISABLE_XAUTH", "no" } });
-
-    vars.append({ { "$IPSEC_VPN_C2C_TRAFFIC", "no" } });
-
-    vars.append({ { "$PRIMARY_SERVER_DNS", m_settings->primaryDns() } });
-    vars.append({ { "$SECONDARY_SERVER_DNS", m_settings->secondaryDns() } });
-
-    // Sftp vars
-    vars.append({ { "$SFTP_PORT", sftpConfig.value(config_key::port).toString(QString::number(ProtocolProps::defaultPort(Proto::Sftp))) } });
-    vars.append({ { "$SFTP_USER", sftpConfig.value(config_key::userName).toString() } });
-    vars.append({ { "$SFTP_PASSWORD", sftpConfig.value(config_key::password).toString() } });
-
-    // Amnezia wireguard vars
-    vars.append({ { "$AWG_SUBNET_IP",
-                    amneziaWireguarConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress) } });
-    vars.append({ { "$AWG_SERVER_PORT", amneziaWireguarConfig.value(config_key::port).toString(protocols::awg::defaultPort) } });
-
-    vars.append({ { "$JUNK_PACKET_COUNT", amneziaWireguarConfig.value(config_key::junkPacketCount).toString() } });
-    vars.append({ { "$JUNK_PACKET_MIN_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMinSize).toString() } });
-    vars.append({ { "$JUNK_PACKET_MAX_SIZE", amneziaWireguarConfig.value(config_key::junkPacketMaxSize).toString() } });
-    vars.append({ { "$INIT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::initPacketJunkSize).toString() } });
-    vars.append({ { "$RESPONSE_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::responsePacketJunkSize).toString() } });
-    vars.append({ { "$INIT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::initPacketMagicHeader).toString() } });
-    vars.append({ { "$RESPONSE_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::responsePacketMagicHeader).toString() } });
-    vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
-    vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
-
-    vars.append({ { "$COOKIE_REPLY_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::cookieReplyPacketJunkSize).toString() } });
-    vars.append({ { "$TRANSPORT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::transportPacketJunkSize).toString() } });
-
-    // Socks5 proxy vars
-    vars.append({ { "$SOCKS5_PROXY_PORT", socks5ProxyConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort) } });
-    auto username = socks5ProxyConfig.value(config_key::userName).toString();
-    auto password = socks5ProxyConfig.value(config_key::password).toString();
-    QString socks5user = (!username.isEmpty() && !password.isEmpty()) ? QString("users %1:CL:%2").arg(username, password) : "";
-    vars.append({ { "$SOCKS5_USER", socks5user } });
-    vars.append({ { "$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong" } });
+    // Handle non-VPN services (SFTP, Socks5) with direct variable generation
+    Vars vars;
+    
+    // Common variables that apply to all containers
+    vars.append({{"$REMOTE_HOST", credentials.hostName}});
+    vars.append({{"$CONTAINER_NAME", ContainerProps::containerToString(container)}});
+    vars.append({{"$DOCKERFILE_FOLDER", "/opt/amnezia/" + ContainerProps::containerToString(container)}});
+    vars.append({{"$PRIMARY_SERVER_DNS", m_settings->primaryDns()}});
+    vars.append({{"$SECONDARY_SERVER_DNS", m_settings->secondaryDns()}});
 
     QString serverIp = (container != DockerContainer::Awg && container != DockerContainer::WireGuard && container != DockerContainer::Xray)
             ? NetworkUtilities::getIPAddress(credentials.hostName)
             : credentials.hostName;
     if (!serverIp.isEmpty()) {
-        vars.append({ { "$SERVER_IP_ADDRESS", serverIp } });
-    } else {
-        qWarning() << "ServerController::genVarsForScript unable to resolve address for credentials.hostName";
+        vars.append({{"$SERVER_IP_ADDRESS", serverIp}});
+    }
+
+    // Handle container-specific variables for non-VPN services
+    if (container == DockerContainer::Sftp) {
+        SftpProtocolConfig protocolConfig(config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject(),
+                                         ProtocolProps::protoToString(Proto::Sftp));
+        
+        QString port = protocolConfig.serverProtocolConfig.port;
+        if (port.isEmpty()) {
+            port = QString::number(ProtocolProps::defaultPort(Proto::Sftp));
+        }
+        
+        vars.append({{"$SFTP_PORT", port}});
+        vars.append({{"$SFTP_USER", protocolConfig.serverProtocolConfig.userName}});
+        vars.append({{"$SFTP_PASSWORD", protocolConfig.serverProtocolConfig.password}});
+    } else if (container == DockerContainer::Socks5Proxy) {
+        Socks5ProtocolConfig protocolConfig(config.value(ProtocolProps::protoToString(Proto::Socks5Proxy)).toObject(),
+                                           ProtocolProps::protoToString(Proto::Socks5Proxy));
+        
+        QString port = protocolConfig.serverProtocolConfig.port;
+        if (port.isEmpty()) {
+            port = protocols::socks5Proxy::defaultPort;
+        }
+        
+        vars.append({{"$SOCKS5_PROXY_PORT", port}});
+        
+        const QString &username = protocolConfig.serverProtocolConfig.userName;
+        const QString &password = protocolConfig.serverProtocolConfig.password;
+        QString socks5user = (!username.isEmpty() && !password.isEmpty()) ? QString("users %1:CL:%2").arg(username, password) : "";
+        vars.append({{"$SOCKS5_USER", socks5user}});
+        vars.append({{"$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong"}});
     }
 
     return vars;
@@ -693,7 +662,7 @@ void ServerController::cancelInstallation()
 
 ErrorCode ServerController::setupServerFirewall(const ServerCredentials &credentials)
 {
-    return runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::setup_host_firewall), genVarsForScript(credentials)));
+    return runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::setup_host_firewall), generateVarsForContainer(credentials, DockerContainer::None)));
 }
 
 QString ServerController::replaceVars(const QString &script, const Vars &vars)
@@ -746,12 +715,12 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         tcpProtoScript.append(" | grep LISTEN");
 
         ErrorCode errorCode =
-                runScript(credentials, replaceVars(tcpProtoScript, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+                runScript(credentials, replaceVars(tcpProtoScript, generateVarsForContainer(credentials, container)), cbReadStdOut, cbReadStdErr);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }
 
-        errorCode = runScript(credentials, replaceVars(udpProtoScript, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+        errorCode = runScript(credentials, replaceVars(udpProtoScript, generateVarsForContainer(credentials, container)), cbReadStdOut, cbReadStdErr);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }
@@ -768,7 +737,7 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
         script = script.append(" | grep LISTEN");
     }
 
-    ErrorCode errorCode = runScript(credentials, replaceVars(script, genVarsForScript(credentials, container)), cbReadStdOut, cbReadStdErr);
+    ErrorCode errorCode = runScript(credentials, replaceVars(script, generateVarsForContainer(credentials, container)), cbReadStdOut, cbReadStdErr);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -792,7 +761,7 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
     };
 
     const QString scriptData = amnezia::scriptData(SharedScriptType::check_user_in_sudo);
-    ErrorCode error = runScript(credentials, replaceVars(scriptData, genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
+    ErrorCode error = runScript(credentials, replaceVars(scriptData, generateVarsForContainer(credentials, DockerContainer::None)), cbReadStdOut, cbReadStdErr);
 
     if (credentials.userName != "root" && stdOut.contains("sudo:") && !stdOut.contains("uname:") && stdOut.contains("not found"))
         return ErrorCode::ServerSudoPackageIsNotPreinstalled;
@@ -830,7 +799,7 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
                 return ErrorCode::ServerCancelInstallation;
             }
             stdOut.clear();
-            runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy), genVarsForScript(credentials)),
+            runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy), generateVarsForContainer(credentials, DockerContainer::None)),
                       cbReadStdOut, cbReadStdErr);
 
             if (stdOut.contains("Packet manager not found"))

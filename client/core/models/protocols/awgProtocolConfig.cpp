@@ -13,19 +13,22 @@ AwgProtocolConfig::AwgProtocolConfig(const QString &protocolName) : ProtocolConf
 
 AwgProtocolConfig::AwgProtocolConfig(const QJsonObject &protocolConfigObject, const QString &protocolName) : ProtocolConfig(protocolName)
 {
-    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString();
-    serverProtocolConfig.transportProto = protocolConfigObject.value(config_key::transport_proto).toString();
-    serverProtocolConfig.subnetAddress = protocolConfigObject.value(config_key::subnet_address).toString();
+    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString(protocols::awg::defaultPort);
+    serverProtocolConfig.transportProto = protocolConfigObject.value(config_key::transport_proto).toString("udp");
+    serverProtocolConfig.subnetAddress = protocolConfigObject.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
+    serverProtocolConfig.mtu = protocolConfigObject.value(config_key::mtu).toString(protocols::awg::defaultMtu);
 
-    serverProtocolConfig.awgData.junkPacketCount = protocolConfigObject.value(config_key::junkPacketCount).toString();
-    serverProtocolConfig.awgData.junkPacketMinSize = protocolConfigObject.value(config_key::junkPacketMinSize).toString();
-    serverProtocolConfig.awgData.junkPacketMaxSize = protocolConfigObject.value(config_key::junkPacketMaxSize).toString();
-    serverProtocolConfig.awgData.initPacketJunkSize = protocolConfigObject.value(config_key::initPacketJunkSize).toString();
-    serverProtocolConfig.awgData.responsePacketJunkSize = protocolConfigObject.value(config_key::responsePacketJunkSize).toString();
-    serverProtocolConfig.awgData.initPacketMagicHeader = protocolConfigObject.value(config_key::initPacketMagicHeader).toString();
-    serverProtocolConfig.awgData.responsePacketMagicHeader = protocolConfigObject.value(config_key::responsePacketMagicHeader).toString();
-    serverProtocolConfig.awgData.underloadPacketMagicHeader = protocolConfigObject.value(config_key::underloadPacketMagicHeader).toString();
-    serverProtocolConfig.awgData.transportPacketMagicHeader = protocolConfigObject.value(config_key::transportPacketMagicHeader).toString();
+    serverProtocolConfig.awgData.junkPacketCount = protocolConfigObject.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount);
+    serverProtocolConfig.awgData.junkPacketMinSize = protocolConfigObject.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize);
+    serverProtocolConfig.awgData.junkPacketMaxSize = protocolConfigObject.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize);
+    serverProtocolConfig.awgData.initPacketJunkSize = protocolConfigObject.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize);
+    serverProtocolConfig.awgData.responsePacketJunkSize = protocolConfigObject.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize);
+    serverProtocolConfig.awgData.cookieReplyPacketJunkSize = protocolConfigObject.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize);
+    serverProtocolConfig.awgData.transportPacketJunkSize = protocolConfigObject.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize);
+    serverProtocolConfig.awgData.initPacketMagicHeader = protocolConfigObject.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader);
+    serverProtocolConfig.awgData.responsePacketMagicHeader = protocolConfigObject.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader);
+    serverProtocolConfig.awgData.underloadPacketMagicHeader = protocolConfigObject.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader);
+    serverProtocolConfig.awgData.transportPacketMagicHeader = protocolConfigObject.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader);
 
     auto clientProtocolString = protocolConfigObject.value(config_key::last_config).toString();
     if (!clientProtocolString.isEmpty()) {
@@ -38,6 +41,8 @@ AwgProtocolConfig::AwgProtocolConfig(const QJsonObject &protocolConfigObject, co
         clientProtocolConfig.awgData.junkPacketMaxSize = clientProtocolConfigObject.value(config_key::junkPacketMaxSize).toString();
         clientProtocolConfig.awgData.initPacketJunkSize = clientProtocolConfigObject.value(config_key::initPacketJunkSize).toString();
         clientProtocolConfig.awgData.responsePacketJunkSize = clientProtocolConfigObject.value(config_key::responsePacketJunkSize).toString();
+        clientProtocolConfig.awgData.cookieReplyPacketJunkSize = clientProtocolConfigObject.value(config_key::cookieReplyPacketJunkSize).toString();
+        clientProtocolConfig.awgData.transportPacketJunkSize = clientProtocolConfigObject.value(config_key::transportPacketJunkSize).toString();
         clientProtocolConfig.awgData.initPacketMagicHeader = clientProtocolConfigObject.value(config_key::initPacketMagicHeader).toString();
         clientProtocolConfig.awgData.responsePacketMagicHeader =
                 clientProtocolConfigObject.value(config_key::responsePacketMagicHeader).toString();
@@ -91,6 +96,9 @@ QJsonObject AwgProtocolConfig::toJson() const
     if (!serverProtocolConfig.subnetAddress.isEmpty()) {
         json[config_key::subnet_address] = serverProtocolConfig.subnetAddress;
     }
+    if (!serverProtocolConfig.mtu.isEmpty()) {
+        json[config_key::mtu] = serverProtocolConfig.mtu;
+    }
 
     if (!serverProtocolConfig.awgData.junkPacketCount.isEmpty()) {
         json[config_key::junkPacketCount] = serverProtocolConfig.awgData.junkPacketCount;
@@ -106,6 +114,12 @@ QJsonObject AwgProtocolConfig::toJson() const
     }
     if (!serverProtocolConfig.awgData.responsePacketJunkSize.isEmpty()) {
         json[config_key::responsePacketJunkSize] = serverProtocolConfig.awgData.responsePacketJunkSize;
+    }
+    if (!serverProtocolConfig.awgData.cookieReplyPacketJunkSize.isEmpty()) {
+        json[config_key::cookieReplyPacketJunkSize] = serverProtocolConfig.awgData.cookieReplyPacketJunkSize;
+    }
+    if (!serverProtocolConfig.awgData.transportPacketJunkSize.isEmpty()) {
+        json[config_key::transportPacketJunkSize] = serverProtocolConfig.awgData.transportPacketJunkSize;
     }
     if (!serverProtocolConfig.awgData.initPacketMagicHeader.isEmpty()) {
         json[config_key::initPacketMagicHeader] = serverProtocolConfig.awgData.initPacketMagicHeader;

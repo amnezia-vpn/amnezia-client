@@ -6,6 +6,7 @@
 #include "configurators/configurator_base.h"
 #include "core/models/containers/containers_defs.h"
 #include "core/defs.h"
+#include "core/models/protocols/protocolConfig.h"
 #include "settings.h"
 
 class VpnConfigurationsController : public QObject
@@ -29,6 +30,7 @@ signals:
 
 private:
     QScopedPointer<ConfiguratorBase> createConfigurator(const Proto protocol);
+    QSharedPointer<ProtocolConfig> createProtocolConfig(const Proto protocol, const QJsonObject &protocolConfigJson);
 
     std::shared_ptr<Settings> m_settings;
     QSharedPointer<ServerController> m_serverController;

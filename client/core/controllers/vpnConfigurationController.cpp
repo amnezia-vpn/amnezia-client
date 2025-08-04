@@ -7,6 +7,13 @@
 #include "configurators/shadowsocks_configurator.h"
 #include "configurators/wireguard_configurator.h"
 #include "configurators/xray_configurator.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/models/protocols/cloakProtocolConfig.h"
+#include "core/models/protocols/ikev2ProtocolConfig.h"
+#include "core/models/protocols/openvpnProtocolConfig.h"
+#include "core/models/protocols/shadowsocksProtocolConfig.h"
+#include "core/models/protocols/wireguardProtocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
 
 VpnConfigurationsController::VpnConfigurationsController(const std::shared_ptr<Settings> &settings,
                                                          QSharedPointer<ServerController> serverController, QObject *parent)
@@ -29,6 +36,29 @@ QScopedPointer<ConfiguratorBase> VpnConfigurationsController::createConfigurator
     }
 }
 
+QSharedPointer<ProtocolConfig> VpnConfigurationsController::createProtocolConfig(const Proto protocol, const QJsonObject &protocolConfigJson)
+{
+    switch (protocol) {
+    case Proto::OpenVpn: 
+        return QSharedPointer<OpenVpnProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+    case Proto::ShadowSocks: 
+        return QSharedPointer<ShadowsocksProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+    case Proto::Cloak: 
+        return QSharedPointer<CloakProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+    case Proto::WireGuard: 
+        return QSharedPointer<WireGuardProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+    case Proto::Awg: 
+        return QSharedPointer<AwgProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+    case Proto::Xray: 
+    case Proto::SSXray: 
+        return QSharedPointer<XrayProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+    case Proto::Ikev2: 
+        return QSharedPointer<Ikev2ProtocolConfig>::create(ProtocolProps::protoToString(protocol));
+    default: 
+        return nullptr;
+    }
+}
+
 ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const ServerCredentials &credentials,
                                                                         const DockerContainer container, QJsonObject &containerConfig)
 {
@@ -39,16 +69,41 @@ ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const Se
     }
 
     for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
-        QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
+        QJsonObject protocolConfigJson = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
 
-        auto configurator = createConfigurator(protocol);
-        QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
-        if (errorCode != ErrorCode::NoError) {
+        // Create ProtocolConfig from JSON
+        auto protocolConfig = createProtocolConfig(protocol, protocolConfigJson);
+        if (!protocolConfig) {
+            errorCode = ErrorCode::InternalError;
             return errorCode;
         }
 
-        protocolConfig.insert(config_key::last_config, protocolConfigString);
-        containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
+        auto configurator = createConfigurator(protocol);
+        auto result = configurator->createConfig(credentials, container, protocolConfig, errorCode);
+        if (errorCode != ErrorCode::NoError || !result) {
+            return errorCode;
+        }
+
+        // Extract nativeConfig and store back in JSON for backward compatibility
+        QString nativeConfig;
+        if (auto openVpnConfig = qSharedPointerCast<OpenVpnProtocolConfig>(result)) {
+            nativeConfig = openVpnConfig->clientProtocolConfig.nativeConfig;
+        } else if (auto wgConfig = qSharedPointerCast<WireGuardProtocolConfig>(result)) {
+            nativeConfig = wgConfig->clientProtocolConfig.nativeConfig;
+        } else if (auto awgConfig = qSharedPointerCast<AwgProtocolConfig>(result)) {
+            nativeConfig = awgConfig->clientProtocolConfig.nativeConfig;
+        } else if (auto cloakConfig = qSharedPointerCast<CloakProtocolConfig>(result)) {
+            nativeConfig = cloakConfig->clientProtocolConfig.nativeConfig;
+        } else if (auto xrayConfig = qSharedPointerCast<XrayProtocolConfig>(result)) {
+            nativeConfig = xrayConfig->clientProtocolConfig.nativeConfig;
+        } else if (auto shadowsocksConfig = qSharedPointerCast<ShadowsocksProtocolConfig>(result)) {
+            nativeConfig = shadowsocksConfig->clientProtocolConfig.nativeConfig;
+        } else if (auto ikev2Config = qSharedPointerCast<Ikev2ProtocolConfig>(result)) {
+            nativeConfig = ikev2Config->clientProtocolConfig.nativeConfig;
+        }
+
+        protocolConfigJson.insert(config_key::last_config, nativeConfig);
+        containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfigJson);
     }
 
     return errorCode;
@@ -65,13 +120,39 @@ ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isA
         return errorCode;
     }
 
-    auto configurator = createConfigurator(protocol);
-
-    protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
-    if (errorCode != ErrorCode::NoError) {
+    // Create ProtocolConfig from JSON
+    QJsonObject protocolConfigJson = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
+    auto protocolConfig = createProtocolConfig(protocol, protocolConfigJson);
+    if (!protocolConfig) {
+        errorCode = ErrorCode::InternalError;
         return errorCode;
     }
-    protocolConfigString = configurator->processConfigWithExportSettings(dns, isApiConfig, protocolConfigString);
+
+    auto configurator = createConfigurator(protocol);
+    auto result = configurator->createConfig(credentials, container, protocolConfig, errorCode);
+    if (errorCode != ErrorCode::NoError || !result) {
+        return errorCode;
+    }
+
+    // Extract nativeConfig
+    QString nativeConfig;
+    if (auto openVpnConfig = qSharedPointerCast<OpenVpnProtocolConfig>(result)) {
+        nativeConfig = openVpnConfig->clientProtocolConfig.nativeConfig;
+    } else if (auto wgConfig = qSharedPointerCast<WireGuardProtocolConfig>(result)) {
+        nativeConfig = wgConfig->clientProtocolConfig.nativeConfig;
+    } else if (auto awgConfig = qSharedPointerCast<AwgProtocolConfig>(result)) {
+        nativeConfig = awgConfig->clientProtocolConfig.nativeConfig;
+    } else if (auto cloakConfig = qSharedPointerCast<CloakProtocolConfig>(result)) {
+        nativeConfig = cloakConfig->clientProtocolConfig.nativeConfig;
+    } else if (auto xrayConfig = qSharedPointerCast<XrayProtocolConfig>(result)) {
+        nativeConfig = xrayConfig->clientProtocolConfig.nativeConfig;
+    } else if (auto shadowsocksConfig = qSharedPointerCast<ShadowsocksProtocolConfig>(result)) {
+        nativeConfig = shadowsocksConfig->clientProtocolConfig.nativeConfig;
+    } else if (auto ikev2Config = qSharedPointerCast<Ikev2ProtocolConfig>(result)) {
+        nativeConfig = ikev2Config->clientProtocolConfig.nativeConfig;
+    }
+
+    protocolConfigString = configurator->processConfigWithExportSettings(dns, isApiConfig, nativeConfig);
 
     return errorCode;
 }
@@ -143,3 +224,4 @@ void VpnConfigurationsController::updateContainerConfigAfterInstallation(const D
         containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
     }
 }
+

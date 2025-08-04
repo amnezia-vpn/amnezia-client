@@ -18,6 +18,20 @@ namespace cloak
     struct ClientProtocolConfig
     {
         bool isEmpty = true;
+        
+        QString transport = "direct";
+        QString proxyMethod = "openvpn";
+        QString encryptionMethod = "aes-gcm";
+        QString uid;
+        QString publicKey;
+        QString serverName;
+        int numConn = 1;
+        QString browserSig = "chrome";
+        int streamTimeout = 300;
+        QString remoteHost;
+        QString remotePort;
+        
+        QString nativeConfig;
     };
 }
 

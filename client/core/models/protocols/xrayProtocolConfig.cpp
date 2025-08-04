@@ -8,9 +8,9 @@ using namespace amnezia;
 
 XrayProtocolConfig::XrayProtocolConfig(const QJsonObject &protocolConfigObject, const QString &protocolName) : ProtocolConfig(protocolName)
 {
-    serverProtocolConfig.site = protocolConfigObject.value(config_key::site).toString();
-    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString();
-    serverProtocolConfig.transportProto = protocolConfigObject.value(config_key::transport_proto).toString();
+    serverProtocolConfig.site = protocolConfigObject.value(config_key::site).toString(protocols::xray::defaultSite);
+    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString(protocols::xray::defaultPort);
+    serverProtocolConfig.transportProto = protocolConfigObject.value(config_key::transport_proto).toString("tcp");
 
     auto clientProtocolString = protocolConfigObject.value(config_key::last_config).toString();
     if (!clientProtocolString.isEmpty()) {

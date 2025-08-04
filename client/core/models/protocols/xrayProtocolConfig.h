@@ -18,6 +18,9 @@ namespace xray
     struct ClientProtocolConfig
     {
         bool isEmpty = true;
+        
+        QString clientId;
+        QString nativeConfig;
     };
 }
 

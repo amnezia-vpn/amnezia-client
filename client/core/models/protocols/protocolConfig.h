@@ -11,10 +11,14 @@ class ShadowsocksProtocolConfig;
 class CloakProtocolConfig;
 class XrayProtocolConfig;
 class AwgProtocolConfig;
+class SftpProtocolConfig;
+class Socks5ProtocolConfig;
+class Ikev2ProtocolConfig;
 
 using ProtocolConfigVariant =
         std::variant<QSharedPointer<OpenVpnProtocolConfig>, QSharedPointer<WireGuardProtocolConfig>, QSharedPointer<ShadowsocksProtocolConfig>,
-                     QSharedPointer<CloakProtocolConfig>, QSharedPointer<XrayProtocolConfig>, QSharedPointer<AwgProtocolConfig> >;
+                     QSharedPointer<CloakProtocolConfig>, QSharedPointer<XrayProtocolConfig>, QSharedPointer<AwgProtocolConfig>,
+                     QSharedPointer<SftpProtocolConfig>, QSharedPointer<Socks5ProtocolConfig>, QSharedPointer<Ikev2ProtocolConfig> >;
 
 class ProtocolConfig
 {

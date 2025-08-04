@@ -11,8 +11,8 @@ class AwgConfigurator : public WireguardConfigurator
 public:
     AwgConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent = nullptr);
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode &errorCode);
+    QSharedPointer<ProtocolConfig> createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                                const QSharedPointer<ProtocolConfig> &protocolConfig, ErrorCode &errorCode) override;
 };
 
 #endif // AWGCONFIGURATOR_H

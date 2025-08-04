@@ -17,6 +17,8 @@
 #include "core/models/containers/containers_defs.h"
 #include "core/controllers/selfhosted/serverController.h"
 #include "core/scripts_registry.h"
+#include "core/models/protocols/openvpnProtocolConfig.h"
+#include "protocols/protocols_defs.h"
 #include "settings.h"
 #include "utilities.h"
 
@@ -29,6 +31,39 @@ OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings, con
                                          QObject *parent)
     : ConfiguratorBase(settings, serverController, parent)
 {
+}
+
+ConfiguratorBase::Vars OpenVpnConfigurator::generateProtocolVars(const ServerCredentials &credentials, DockerContainer container,
+                                                                 const QSharedPointer<ProtocolConfig> &protocolConfig) const
+{
+    Vars vars = generateCommonVars(credentials, container);
+
+    auto openVpnConfig = qSharedPointerCast<OpenVpnProtocolConfig>(protocolConfig);
+    if (!openVpnConfig) {
+        return vars;
+    }
+
+    vars.append({{"$OPENVPN_SUBNET_IP", openVpnConfig->serverProtocolConfig.subnetAddress}});
+    vars.append({{"$OPENVPN_SUBNET_CIDR", protocols::openvpn::defaultSubnetCidr}});
+    vars.append({{"$OPENVPN_SUBNET_MASK", protocols::openvpn::defaultSubnetMask}});
+
+    vars.append({{"$OPENVPN_PORT", openVpnConfig->serverProtocolConfig.port}});
+    vars.append({{"$OPENVPN_TRANSPORT_PROTO", openVpnConfig->serverProtocolConfig.transportProto}});
+
+    vars.append({{"$OPENVPN_NCP_DISABLE", openVpnConfig->serverProtocolConfig.ncpDisable ? protocols::openvpn::ncpDisableString : ""}});
+
+    vars.append({{"$OPENVPN_CIPHER", openVpnConfig->serverProtocolConfig.cipher}});
+    vars.append({{"$OPENVPN_HASH", openVpnConfig->serverProtocolConfig.hash}});
+
+    vars.append({{"$OPENVPN_TLS_AUTH", openVpnConfig->serverProtocolConfig.tlsAuth ? protocols::openvpn::tlsAuthString : ""}});
+    if (!openVpnConfig->serverProtocolConfig.tlsAuth) {
+        vars.append({{"$OPENVPN_TA_KEY", ""}});
+    }
+
+    vars.append({{"$OPENVPN_ADDITIONAL_CLIENT_CONFIG", openVpnConfig->serverProtocolConfig.additionalClientConfig}});
+    vars.append({{"$OPENVPN_ADDITIONAL_SERVER_CONFIG", openVpnConfig->serverProtocolConfig.additionalServerConfig}});
+
+    return vars;
 }
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
@@ -72,15 +107,21 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     return connData;
 }
 
-QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                          const QJsonObject &containerConfig, ErrorCode &errorCode)
+QSharedPointer<ProtocolConfig> OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
+                                                                const QSharedPointer<ProtocolConfig> &protocolConfig, ErrorCode &errorCode)
 {
+    auto openVpnConfig = qSharedPointerCast<OpenVpnProtocolConfig>(protocolConfig);
+    if (!openVpnConfig) {
+        errorCode = ErrorCode::InternalError;
+        return nullptr;
+    }
+
     QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::openvpn_template, container),
-                                                     m_serverController->genVarsForScript(credentials, container, containerConfig));
+                                                     generateProtocolVars(credentials, container, protocolConfig));
 
     ConnectionData connData = prepareOpenVpnConfig(credentials, container, errorCode);
     if (errorCode != ErrorCode::NoError) {
-        return "";
+        return nullptr;
     }
 
     config.replace("$OPENVPN_CA_CERT", connData.caCert);
@@ -98,12 +139,11 @@ QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, 
     config.replace("block-outside-dns", "");
 #endif
 
-    QJsonObject jConfig;
-    jConfig[config_key::config] = config;
+    openVpnConfig->clientProtocolConfig.isEmpty = false;
+    openVpnConfig->clientProtocolConfig.clientId = connData.clientId;
+    openVpnConfig->clientProtocolConfig.nativeConfig = config;
 
-    jConfig[config_key::clientId] = connData.clientId;
-
-    return QJsonDocument(jConfig).toJson();
+    return openVpnConfig;
 }
 
 QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
@@ -199,7 +239,7 @@ ErrorCode OpenVpnConfigurator::signCert(DockerContainer container, const ServerC
                                   .arg(clientId);
 
     QStringList scriptList { script_import, script_sign };
-    QString script = m_serverController->replaceVars(scriptList.join("\n"), m_serverController->genVarsForScript(credentials, container));
+    QString script = m_serverController->replaceVars(scriptList.join("\n"), generateProtocolVars(credentials, container));
 
     return m_serverController->runScript(credentials, script);
 }
