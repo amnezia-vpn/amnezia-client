@@ -201,7 +201,7 @@ void XrayProtocol::sockCallback(uintptr_t fd)
     if (DWORD idx = m_defaultIface.index(); idx > 0) {
         idx = htonl(idx); // IP_UNICAST_IF expects index in network byte order
         if (0 != setsockopt(fd, IPPROTO_IP, IP_UNICAST_IF, reinterpret_cast<char *>(&idx), sizeof(idx))) {
-            qDebug() << "setsockopt failed with code " << WSAGetLastError();
+            qDebug() << "setsockopt failed";
         }
     }
 #endif
