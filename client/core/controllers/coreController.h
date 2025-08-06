@@ -5,7 +5,9 @@
 #include <QQmlContext>
 #include <QThread>
 
-#include "ui/systemtray_notificationhandler.h"
+#ifndef Q_OS_ANDROID
+    #include "ui/systemtray_notificationhandler.h"
+#endif
 
 #include "ui/controllers/api/apiConfigsController.h"
 #include "ui/controllers/api/apiSettingsController.h"

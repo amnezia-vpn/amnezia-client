@@ -242,10 +242,10 @@ void CoreController::initNotificationHandler()
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
             &ConnectionController::closeConnection);
     connect(this, &CoreController::translationsUpdated, m_notificationHandler.get(), &NotificationHandler::onTranslationsUpdated);
-#endif
 
     auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_notificationHandler.get());
     connect(this, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
+#endif    
 }
 
 void CoreController::updateTranslator(const QLocale &locale)
