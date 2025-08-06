@@ -187,7 +187,13 @@ PageType {
 
                 iconPath: "qrc:/images/controls/alert-circle.svg"
 
-                visible: ApiAccountInfoModel.data("hasExpiredWorker")
+                visible: {
+                    for (let i = 0; i < ApiCountryModel.count; ++i) {
+                        if (ApiCountryModel.get(i).isWorkerExpired)
+                            return true;
+                    }
+                    return false;
+                }
             }
 
             LabelWithButtonType {
