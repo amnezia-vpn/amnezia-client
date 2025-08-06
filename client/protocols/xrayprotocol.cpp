@@ -98,8 +98,13 @@ ErrorCode XrayProtocol::startTun2Sock()
         if (vpnState == Vpn::ConnectionState::Connected) {
             setConnectionState(Vpn::ConnectionState::Connecting);
             QList<QHostAddress> dnsAddr;
+
             dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns1).toString()));
-            dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns2).toString()));
+            // We don't use secondary DNS if primary DNS is AmneziaDNS
+            if (!m_configData.value(amnezia::config_key::dns1).toString().
+                 contains(amnezia::protocols::dns::amneziaDnsIp)) {
+                dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns2).toString()));
+            }
 #ifdef Q_OS_WIN
             QThread::msleep(8000);
 #endif

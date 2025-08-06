@@ -20,49 +20,49 @@ PageType {
         id: windows
 
         readonly property string title: qsTr("Windows")
-        readonly property string link: qsTr("https://docs.amnezia.org/documentation/instructions/connect-amnezia-premium#windows")
+        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#windows")
     }
 
     QtObject {
         id: macos
 
         readonly property string title: qsTr("macOS")
-        readonly property string link: qsTr("https://docs.amnezia.org/documentation/instructions/connect-amnezia-premium#macos")
+        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#macos")
     }
 
     QtObject {
         id: android
 
         readonly property string title: qsTr("Android")
-        readonly property string link: qsTr("https://docs.amnezia.org/documentation/instructions/connect-amnezia-premium#android")
+        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#android")
     }
 
     QtObject {
         id: androidTv
 
         readonly property string title: qsTr("AndroidTV")
-        readonly property string link: qsTr("https://docs.amnezia.org/ru/documentation/instructions/android_tv_connect/")
+        readonly property string link: qsTr("documentation/instructions/android_tv_connect/")
     }
 
     QtObject {
         id: ios
 
         readonly property string title: qsTr("iOS")
-        readonly property string link: qsTr("https://docs.amnezia.org/documentation/instructions/connect-amnezia-premium#ios")
+        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#ios")
     }
 
     QtObject {
         id: linux
 
         readonly property string title: qsTr("Linux")
-        readonly property string link: qsTr("https://docs.amnezia.org/documentation/instructions/connect-amnezia-premium#linux")
+        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#linux")
     }
 
     QtObject {
         id: routers
 
         readonly property string title: qsTr("Routers")
-        readonly property string link: qsTr("https://docs.amnezia.org/documentation/instructions/connect-amnezia-premium#routers")
+        readonly property string link: qsTr("documentation/instructions/connect-amnezia-premium#routers")
     }
 
     property list<QtObject> instructionsModel: [
@@ -114,7 +114,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/external-link.svg"
 
                 clickedFunction: function() {
-                    Qt.openUrlExternally(link)
+                    Qt.openUrlExternally(LanguageModel.getCurrentDocsUrl(link))
                 }
             }
 

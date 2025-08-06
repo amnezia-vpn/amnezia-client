@@ -27,20 +27,10 @@ PageType {
         }
     }
 
-    ListView {
+    ListViewType {
         id: listView
 
         anchors.fill: parent
-
-        property bool isFocusable: true
-
-        ScrollBar.vertical: ScrollBarType {}
-
-        model: variants
-
-        clip: true
-
-        reuseItems: true
 
         header: ColumnLayout {
             width: listView.width
@@ -216,6 +206,8 @@ PageType {
             }
         }
 
+        model: variants
+
         delegate: ColumnLayout {
             width: listView.width
 
@@ -234,6 +226,9 @@ PageType {
                 leftImageSource: imageSource
 
                 onClicked: { handler() }
+
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
             }
         }
 

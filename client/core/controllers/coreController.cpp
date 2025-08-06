@@ -120,6 +120,9 @@ void CoreController::initControllers()
     connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
             &ConnectionController::onCurrentContainerUpdated); // TODO remove this
 
+    connect(m_installController.get(), &InstallController::profileCleared,
+            m_protocolsModel.get(), &ProtocolsModel::updateModel);
+
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
@@ -303,13 +306,10 @@ void CoreController::setQmlRoot()
 
 void CoreController::initApiCountryModelUpdateHandler()
 {
-    // TODO
     connect(m_serversModel.get(), &ServersModel::updateApiCountryModel, this, [this]() {
         m_apiCountryModel->updateModel(m_serversModel->getProcessedServerData("apiAvailableCountries").toJsonArray(),
                                        m_serversModel->getProcessedServerData("apiServerCountryCode").toString());
     });
-    connect(m_serversModel.get(), &ServersModel::updateApiServicesModel, this,
-            [this]() { m_apiServicesModel->updateModel(m_serversModel->getProcessedServerData("apiConfig").toJsonObject()); });
 }
 
 void CoreController::initContainerModelUpdateHandler()

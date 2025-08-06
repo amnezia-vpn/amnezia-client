@@ -6,7 +6,7 @@ import Style 1.0
 
 import "TextTypes"
 
-ListView {
+ListViewType {
     id: root
 
     property var rootWidth
@@ -24,13 +24,6 @@ ListView {
 
     width: rootWidth
     height: root.contentItem.height
-
-    clip: true
-    reuseItems: true
-
-    property bool isFocusable: true
-
-    ScrollBar.vertical: ScrollBarType {}
 
     ButtonGroup {
         id: buttonGroup
