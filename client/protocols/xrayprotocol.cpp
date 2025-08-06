@@ -44,25 +44,19 @@ XrayProtocol::~XrayProtocol()
 ErrorCode XrayProtocol::start()
 {
     qDebug() << "XrayProtocol::start()";
-
     if (0 != amnezia_xray_setsockcallback(&XrayProtocol::ctxSockCallback, this))
     {
         return ErrorCode::InternalError;
     }
-
     auto cfg = QJsonDocument(m_xrayConfig).toJson().toStdString();
     if (auto err = amnezia_xray_configure(cfg.data()); err != 0) {
         return ErrorCode::InternalError;
     }
-
     if (auto err = amnezia_xray_start(); err != 0) {
         return ErrorCode::InternalError;
     }
-
     amnezia_xray_setloghandler(&XrayProtocol::ctxLogHandler, this);
-
     setConnectionState(Vpn::ConnectionState::Connecting);
-
     return startTun2Sock();
 }
 
@@ -200,14 +194,11 @@ void XrayProtocol::sockCallback(uintptr_t fd)
 #ifdef Q_OS_WIN
     if (DWORD idx = m_defaultIface.index(); idx > 0) {
         idx = htonl(idx); // IP_UNICAST_IF expects index in network byte order
-        if (0 != setsockopt(fd, IPPROTO_IP, IP_UNICAST_IF, reinterpret_cast<char *>(&idx), sizeof(idx))) {
-            qDebug() << "setsockopt failed";
-        }
+        setsockopt(fd, IPPROTO_IP, IP_UNICAST_IF, reinterpret_cast<char *>(&idx), sizeof(idx));
     }
 #endif
 }
 
 void XrayProtocol::logHandler(char* str)
 {
-    qDebug() << "[xray]" << str;
 }
