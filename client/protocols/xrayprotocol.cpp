@@ -1,5 +1,6 @@
 #include "xrayprotocol.h"
 
+#include "amnezia_application.h"
 #include "amnezia_xray.h"
 #include "utilities.h"
 #include "core/networkUtilities.h"
@@ -55,7 +56,9 @@ ErrorCode XrayProtocol::start()
     if (auto err = amnezia_xray_start(); err != 0) {
         return ErrorCode::InternalError;
     }
+
     amnezia_xray_setloghandler(&XrayProtocol::ctxLogHandler, this);
+
     setConnectionState(Vpn::ConnectionState::Connecting);
     return startTun2Sock();
 }
@@ -185,10 +188,9 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
 void XrayProtocol::sockCallback(uintptr_t fd)
 {
 #ifdef Q_OS_DARWIN
-    if (int index = if_nametoindex("en0"); index > 0)
+    if (int idx = m_defaultIface.index(); idx > 0)
     {
-        setsockopt(fd, IPPROTO_IP, IP_BOUND_IF, &index, sizeof(index));
-        setsockopt(fd, IPPROTO_IPV6, IPV6_BOUND_IF, &index, sizeof(index));
+        setsockopt(fd, IPPROTO_IP, IP_BOUND_IF, &idx, sizeof(idx));
     }
 #endif
 #ifdef Q_OS_WIN
@@ -201,4 +203,7 @@ void XrayProtocol::sockCallback(uintptr_t fd)
 
 void XrayProtocol::logHandler(char* str)
 {
+    QMetaObject::invokeMethod(amnApp, [str = QString(str)] () {
+        qDebug() << str;
+    }, Qt::QueuedConnection);
 }
