@@ -161,10 +161,4 @@ PageType {
             }
         }
     }
-
-    ShareConnectionDrawer {
-        id: shareConnectionDrawer
-
-        anchors.fill: parent
-    }
 }

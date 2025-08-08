@@ -94,8 +94,6 @@ PageType {
                             headerText: qsTr("VPN address subnet")
                             textField.text: subnetAddress
 
-                            parentFlickable: fl
-
                             textField.onEditingFinished: {
                                 if (textField.text !== subnetAddress) {
                                     subnetAddress = textField.text
@@ -138,7 +136,6 @@ PageType {
 
                             Layout.fillWidth: true
                             Layout.topMargin: 40
-                            parentFlickable: fl
 
                             enabled: delegateItem.isEnabled
 
@@ -161,7 +158,6 @@ PageType {
 
                             Layout.fillWidth: true
                             Layout.topMargin: 24
-                            parentFlickable: fl
 
                             text: qsTr("Auto-negotiate encryption")
                             checked: autoNegotiateEncryprion
@@ -329,7 +325,6 @@ PageType {
                             id: additionalClientCommandsSwitcher
                             Layout.fillWidth: true
                             Layout.topMargin: 32
-                            parentFlickable: fl
 
                             checked: additionalClientCommands !== ""
 
@@ -349,8 +344,6 @@ PageType {
 
                             visible: additionalClientCommandsSwitcher.checked
 
-                            parentFlickable: fl
-
                             textAreaText: additionalClientCommands
                             placeholderText: qsTr("Commands:")
 
@@ -365,7 +358,6 @@ PageType {
                             id: additionalServerCommandsSwitcher
                             Layout.fillWidth: true
                             Layout.topMargin: 16
-                            parentFlickable: fl
 
                             checked: additionalServerCommands !== ""
 
@@ -387,7 +379,7 @@ PageType {
 
                             textAreaText: additionalServerCommands
                             placeholderText: qsTr("Commands:")
-                            parentFlickable: fl
+
                             textArea.onEditingFinished: {
                                 if (additionalServerCommands !== textAreaText) {
                                     additionalServerCommands = textAreaText
@@ -406,7 +398,6 @@ PageType {
                                      portTextField.errorText === ""
 
                             text: qsTr("Save")
-                            parentFlickable: fl
 
                             onClicked: function() {
                                 forceActiveFocus()

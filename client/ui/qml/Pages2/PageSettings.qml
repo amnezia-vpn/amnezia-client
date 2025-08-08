@@ -43,8 +43,6 @@ PageType {
 
             LabelWithButtonType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
                 visible: isVisible
 
@@ -68,8 +66,6 @@ PageType {
 
                 visible: GC.isDesktop()
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
                 text: qsTr("Close application")
                 leftImageSource: "qrc:/images/controls/x-circle.svg"
