@@ -152,6 +152,9 @@ void SettingsController::backupAppConfig(const QString &fileName)
     config["Conf/killSwitchEnabled"] = isKillSwitchEnabled();
     config["Conf/strictKillSwitchEnabled"] = isStrictKillSwitchEnabled();
 
+    // Line to beatify backup file a little:
+    // QByteArray backupReadyDoc = QJsonDocument(config).toJson().replace("\\n", "\n");
+
     SystemController::saveFile(fileName, QJsonDocument(config).toJson());
 }
 

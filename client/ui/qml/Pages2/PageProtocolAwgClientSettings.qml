@@ -34,7 +34,7 @@ PageType {
     ListViewType {
         id: listView
 
-        anchors.top: backButtonLayout.bottom
+        anchors.top: backButton.bottom
         anchors.bottom: saveButton.top
         anchors.right: parent.right
         anchors.left: parent.left
