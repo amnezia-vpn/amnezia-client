@@ -48,6 +48,11 @@
 #include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/sites_model.h"
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#include "core/local-proxy/proxyserver.h"
+#include "core/local-proxy/proxylogger.h"
+#endif
+
 #ifndef Q_OS_ANDROID
     #include "ui/notificationhandler.h"
 #endif
@@ -73,6 +78,7 @@ private:
     void initAndroidController();
     void initAppleController();
     void initSignalHandlers();
+    void initLocalProxy();
 
     void initNotificationHandler();
 
@@ -145,6 +151,10 @@ private:
 #endif
     QScopedPointer<SftpConfigModel> m_sftpConfigModel;
     QScopedPointer<Socks5ProxyConfigModel> m_socks5ConfigModel;
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    QScopedPointer<ProxyServer> m_proxyServer;
+#endif
 };
 
 #endif // CORECONTROLLER_H

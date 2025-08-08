@@ -2,6 +2,7 @@
 
 #include <QDirIterator>
 #include <QTranslator>
+#include <QStandardPaths>
 
 #if defined(Q_OS_ANDROID)
     #include "core/installedAppsImageProvider.h"
@@ -26,9 +27,24 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
 
     initNotificationHandler();
 
+    initLocalProxy();
+
     auto locale = m_settings->getAppLanguage();
     m_translator.reset(new QTranslator());
     updateTranslator(locale);
+}
+
+void CoreController::initLocalProxy()
+{
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    // Logger and proxy initialization
+    ProxyLogger::getInstance().init(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs/proxy.log");
+    ProxyLogger::getInstance().setLogLevel(ProxyLogger::LogLevel::INFO);
+
+    m_proxyServer.reset(new ProxyServer(this));
+    const quint16 proxyPort = 49490;
+    m_proxyServer->start(proxyPort);
+#endif
 }
 
 void CoreController::initModels()
