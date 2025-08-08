@@ -191,6 +191,7 @@ void XrayProtocol::sockCallback(uintptr_t fd)
     if (int idx = m_defaultIface.index(); idx > 0)
     {
         setsockopt(fd, IPPROTO_IP, IP_BOUND_IF, &idx, sizeof(idx));
+        setsockopt(fd, IPPROTO_IPV6, IPV6_BOUND_IF, &idx, sizeof(idx));
     }
 #endif
 #ifdef Q_OS_WIN
