@@ -5,10 +5,14 @@
 #include <QSharedPointer>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QList>
 #include <vector>
 
 #include "core/defs.h"
 #include "core/models/containers/containers_defs.h"
+#include "core/models/containers/containerConfig.h"
+#include "core/models/protocols/protocolConfig.h"
+#include "core/models/clientInfo.h"
 
 class ServerController;
 class Settings;
@@ -42,33 +46,33 @@ public:
     ErrorCode revokeClient(const int row, const DockerContainer container, const ServerCredentials &credentials, 
                           const int serverIndex);
 
-    // Internal methods (with clientsTable parameter for core operations)
+    // Core methods using ClientInfo model
     ErrorCode updateClientsData(const DockerContainer container, const ServerCredentials &credentials,
-                                const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable);
+                                const QSharedPointer<ServerController> &serverController, QList<ClientInfo> &clientsList);
     
     ErrorCode appendClient(const DockerContainer container, const ServerCredentials &credentials, 
-                          const QJsonObject &containerConfig, const QString &clientName, 
-                          const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable);
+                          const ContainerConfig &containerConfig, const QString &clientName, 
+                          const QSharedPointer<ServerController> &serverController, QList<ClientInfo> &clientsList);
     
-    ErrorCode appendClient(QJsonObject &protocolConfig, const QString &clientName, const DockerContainer container,
+    ErrorCode appendClient(QSharedPointer<ProtocolConfig> &protocolConfig, const QString &clientName, const DockerContainer container,
                           const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController, 
-                          QJsonArray &clientsTable);
+                          QList<ClientInfo> &clientsList);
     
     ErrorCode appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
                           const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController, 
-                          QJsonArray &clientsTable);
+                          QList<ClientInfo> &clientsList);
     
     ErrorCode renameClient(const int row, const QString &clientName, const DockerContainer container, 
                           const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController, 
-                          QJsonArray &clientsTable, bool addTimeStamp = false);
+                          QList<ClientInfo> &clientsList, bool addTimeStamp = false);
     
     ErrorCode revokeClient(const int row, const DockerContainer container, const ServerCredentials &credentials, 
                           const int serverIndex, const QSharedPointer<ServerController> &serverController, 
-                          QJsonArray &clientsTable);
+                          QList<ClientInfo> &clientsList);
     
-    ErrorCode revokeClient(const QJsonObject &containerConfig, const DockerContainer container, 
+    ErrorCode revokeClient(const ContainerConfig &containerConfig, const DockerContainer container, 
                           const ServerCredentials &credentials, const int serverIndex, 
-                          const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable);
+                          const QSharedPointer<ServerController> &serverController, QList<ClientInfo> &clientsList);
 
     // WireGuard specific operations
     ErrorCode wgShow(const DockerContainer container, const ServerCredentials &credentials,
@@ -76,7 +80,7 @@ public:
 
 signals:
     void adminConfigRevoked(const DockerContainer container);
-    void clientsDataUpdated(const QJsonArray &clientsTable);
+    void clientsDataUpdated(const QList<ClientInfo> &clientsList);
     void clientAdded(const QString &clientId, const QString &clientName);
     void clientRenamed(const int row, const QString &newName);
     void clientRevoked(const int row);
@@ -87,29 +91,33 @@ signals:
 private:
     // Protocol-specific client management
     ErrorCode getOpenVpnClients(const DockerContainer container, const ServerCredentials &credentials,
-                               const QSharedPointer<ServerController> &serverController, int &count, QJsonArray &clientsTable);
+                               const QSharedPointer<ServerController> &serverController, int &count, QList<ClientInfo> &clientsList);
     
     ErrorCode getWireGuardClients(const DockerContainer container, const ServerCredentials &credentials,
-                                 const QSharedPointer<ServerController> &serverController, int &count, QJsonArray &clientsTable);
+                                 const QSharedPointer<ServerController> &serverController, int &count, QList<ClientInfo> &clientsList);
     
     ErrorCode getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
-                            const QSharedPointer<ServerController> &serverController, int &count, QJsonArray &clientsTable);
+                            const QSharedPointer<ServerController> &serverController, int &count, QList<ClientInfo> &clientsList);
 
     // Protocol-specific client revocation
     ErrorCode revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials, 
                            const int serverIndex, const QSharedPointer<ServerController> &serverController, 
-                           QJsonArray &clientsTable);
+                           QList<ClientInfo> &clientsList);
     
     ErrorCode revokeWireGuard(const int row, const DockerContainer container, const ServerCredentials &credentials,
-                             const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable);
+                             const QSharedPointer<ServerController> &serverController, QList<ClientInfo> &clientsList);
     
     ErrorCode revokeXray(const int row, const DockerContainer container, const ServerCredentials &credentials,
-                        const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable);
+                        const QSharedPointer<ServerController> &serverController, QList<ClientInfo> &clientsList);
 
     // Helper methods
-    bool isClientExists(const QString &clientId, const QJsonArray &clientsTable);
-    void migration(const QByteArray &clientsTableString, QJsonArray &clientsTable);
+    bool isClientExists(const QString &clientId, const QList<ClientInfo> &clientsList);
+    void migration(const QByteArray &clientsTableString, QList<ClientInfo> &clientsList);
     QString getClientsTableFilePath(const DockerContainer container);
+    
+    // JSON serialization for persistence only
+    static QList<ClientInfo> clientsFromJsonArray(const QJsonArray &jsonArray);
+    static QJsonArray clientsToJsonArray(const QList<ClientInfo> &clientsList);
 
     std::shared_ptr<Settings> m_settings;
 };

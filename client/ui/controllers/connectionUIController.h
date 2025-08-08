@@ -1,13 +1,13 @@
-#ifndef CONNECTIONCONTROLLER_H
-#define CONNECTIONCONTROLLER_H
+#ifndef CONNECTIONUICONTROLLER_H
+#define CONNECTIONUICONTROLLER_H
 
 #include "protocols/vpnprotocol.h"
 #include "ui/models/selfhosted/clientManagementModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
-#include "vpnconnection.h"
+#include "core/controllers/connectionController.h"
 
-class ConnectionController : public QObject
+class ConnectionUIController : public QObject
 {
     Q_OBJECT
 
@@ -16,12 +16,12 @@ public:
     Q_PROPERTY(bool isConnectionInProgress READ isConnectionInProgress NOTIFY connectionStateChanged)
     Q_PROPERTY(QString connectionStateText READ connectionStateText NOTIFY connectionStateChanged)
 
-    explicit ConnectionController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
-                                  const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                  const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
-                                  QObject *parent = nullptr);
+    explicit ConnectionUIController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+                                    const QSharedPointer<ClientManagementModel> &clientManagementModel,
+                                    const QSharedPointer<ConnectionController> &connectionController, const std::shared_ptr<Settings> &settings,
+                                    QObject *parent = nullptr);
 
-    ~ConnectionController() = default;
+    ~ConnectionUIController() = default;
 
     bool isConnected() const;
     bool isConnectionInProgress() const;
@@ -41,8 +41,6 @@ public slots:
     void onTranslationsUpdated();
 
 signals:
-    void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
-    void disconnectFromVpn();
     void connectionStateChanged();
 
     void connectionErrorOccurred(ErrorCode errorCode);
@@ -61,7 +59,7 @@ private:
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
 
-    QSharedPointer<VpnConnection> m_vpnConnection;
+    QSharedPointer<ConnectionController> m_connectionController;
 
     std::shared_ptr<Settings> m_settings;
 
@@ -72,4 +70,4 @@ private:
     Vpn::ConnectionState m_state;
 };
 
-#endif // CONNECTIONCONTROLLER_H
+#endif // CONNECTIONUICONTROLLER_H

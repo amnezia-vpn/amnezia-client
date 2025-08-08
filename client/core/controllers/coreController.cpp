@@ -3,6 +3,8 @@
 #include <QDirIterator>
 #include <QTranslator>
 
+#include "core/models/clientInfo.h"
+
 #if defined(Q_OS_ANDROID)
     #include "core/installedAppsImageProvider.h"
     #include "platforms/android/android_controller.h"
@@ -123,8 +125,9 @@ void CoreController::initCoreControllers()
 
 void CoreController::initUIControllers()
 {
+    auto coreConnectionController = QSharedPointer<ConnectionController>::create(m_vpnConnection, m_settings, this);
     m_connectionController.reset(
-            new ConnectionController(m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_settings));
+            new ConnectionUIController(m_serversModel, m_containersModel, m_clientManagementModel, coreConnectionController, m_settings));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
     m_pageController.reset(new PageController(m_serversModel, m_settings));
@@ -141,7 +144,7 @@ void CoreController::initUIControllers()
     m_engine->rootContext()->setContextProperty("InstallController", m_installUIController.get());
 
     connect(m_installUIController.get(), &InstallUIController::currentContainerUpdated, m_connectionController.get(),
-            &ConnectionController::onCurrentContainerUpdated);
+            &ConnectionUIController::onCurrentContainerUpdated);
 
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
@@ -182,22 +185,22 @@ void CoreController::setupControllerSignalConnections()
     connect(m_exportController.data(), &ExportController::clientAppendRequested,
             clientManagementController.data(), 
             [clientManagementController](const DockerContainer container, const ServerCredentials &credentials, 
-                                       const QJsonObject &containerConfig, const QString &clientName, 
+                                       const ContainerConfig &containerConfig, const QString &clientName, 
                                        const QSharedPointer<ServerController> &serverController) {
-                QJsonArray clientsTable;
+                QList<ClientInfo> clientsList;
                 ErrorCode result = clientManagementController->appendClient(container, credentials, containerConfig, 
-                                                                           clientName, serverController, clientsTable);
+                                                                           clientName, serverController, clientsList);
                 emit clientManagementController->clientAppendCompleted(result);
             });
     
     connect(m_exportController.data(), &ExportController::nativeConfigClientAppendRequested,
             clientManagementController.data(),
-            [clientManagementController](const QJsonObject &jsonNativeConfig, const QString &clientName, 
+            [clientManagementController](const QSharedPointer<ProtocolConfig> &protocolConfig, const QString &clientName, 
                                        const DockerContainer container, const ServerCredentials &credentials, 
                                        const QSharedPointer<ServerController> &serverController) {
-                QJsonArray clientsTable;
-                ErrorCode result = clientManagementController->appendClient(jsonNativeConfig, clientName, container, 
-                                                                           credentials, serverController, clientsTable);
+                QList<ClientInfo> clientsList;
+                ErrorCode result = clientManagementController->appendClient(protocolConfig, clientName, container, 
+                                                                           credentials, serverController, clientsList);
                 emit clientManagementController->nativeConfigClientAppendCompleted(result);
             });
     
@@ -210,11 +213,11 @@ void CoreController::setupControllerSignalConnections()
     connect(m_installController.data(), &InstallController::clientAppendRequested,
             clientManagementController.data(),
             [clientManagementController](const DockerContainer container, const ServerCredentials &credentials,
-                                       const QJsonObject &containerConfig, const QString &clientName,
+                                       const ContainerConfig &containerConfig, const QString &clientName,
                                        const QSharedPointer<ServerController> &serverController) {
-                QJsonArray clientsTable;
+                QList<ClientInfo> clientsList;
                 clientManagementController->appendClient(container, credentials, containerConfig,
-                                                        clientName, serverController, clientsTable);
+                                                        clientName, serverController, clientsList);
             });
 }
 
@@ -303,9 +306,9 @@ void CoreController::initNotificationHandler()
 
     connect(m_notificationHandler.get(), &NotificationHandler::raiseRequested, m_pageController.get(), &PageController::raiseMainWindow);
     connect(m_notificationHandler.get(), &NotificationHandler::connectRequested, m_connectionController.get(),
-            static_cast<void (ConnectionController::*)()>(&ConnectionController::openConnection));
+            static_cast<void (ConnectionUIController::*)()>(&ConnectionUIController::openConnection));
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
-            &ConnectionController::closeConnection);
+            &ConnectionUIController::closeConnection);
     connect(this, &CoreController::translationsUpdated, m_notificationHandler.get(), &NotificationHandler::onTranslationsUpdated);
 #endif
 }
@@ -347,7 +350,7 @@ void CoreController::updateTranslator(const QLocale &locale)
 
 void CoreController::initErrorMessagesHandler()
 {
-    connect(m_connectionController.get(), &ConnectionController::connectionErrorOccurred, this, [this](ErrorCode errorCode) {
+    connect(m_connectionController.get(), &ConnectionUIController::connectionErrorOccurred, this, [this](ErrorCode errorCode) {
         emit m_pageController->showErrorMessage(errorCode);
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
     });
@@ -395,7 +398,7 @@ void CoreController::initTranslationsUpdatedHandler()
 {
     connect(m_languageModel.get(), &LanguageModel::updateTranslations, this, &CoreController::updateTranslator);
     connect(this, &CoreController::translationsUpdated, m_languageModel.get(), &LanguageModel::translationsUpdated);
-    connect(this, &CoreController::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
+    connect(this, &CoreController::translationsUpdated, m_connectionController.get(), &ConnectionUIController::onTranslationsUpdated);
 }
 
 void CoreController::initAutoConnectHandler()
@@ -412,7 +415,7 @@ void CoreController::initAmneziaDnsToggledHandler()
 
 void CoreController::initPrepareConfigHandler()
 {
-    connect(m_connectionController.get(), &ConnectionController::prepareConfig, this, [this]() {
+    connect(m_connectionController.get(), &ConnectionUIController::prepareConfig, this, [this]() {
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
         if (!m_apiConfigsController->isConfigValid()) {

@@ -204,26 +204,22 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
             object:m_currentTunnel.connection];
 
 
-    if (proto == amnezia::Proto::OpenVpn) {
+    switch (proto) {
+    case amnezia::Proto::OpenVpn:
         return setupOpenVPN();
-    }
-    if (proto == amnezia::Proto::Cloak) {
+    case amnezia::Proto::Cloak:
         return setupCloak();
-    }
-    if (proto == amnezia::Proto::WireGuard) {
+    case amnezia::Proto::WireGuard:
         return setupWireGuard();
-    }
-    if (proto == amnezia::Proto::Awg) {
+    case amnezia::Proto::Awg:
         return setupAwg();
-    }
-    if (proto == amnezia::Proto::Xray) {
+    case amnezia::Proto::Xray:
         return setupXray();
-    }
-    if (proto == amnezia::Proto::SSXray) {
+    case amnezia::Proto::SSXray:
         return setupSSXray();
+    default:
+        return false;
     }
-
-    return false;
 }
 
 void IosController::disconnectVpn()

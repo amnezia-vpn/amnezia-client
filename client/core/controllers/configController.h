@@ -40,11 +40,16 @@ public:
     QStringList getAllInstalledServicesName(int serverIndex) const;
     void clearCachedProfile(int serverIndex, DockerContainer container);
 
+    // Split tunneling detection
+    bool isDefaultServerDefaultContainerHasSplitTunneling() const;
+
 protected:
     std::shared_ptr<Settings> m_settings;
     
     // Protected helper methods for derived classes
     void updateServerInSettings(const QSharedPointer<ServerConfig> &serverConfig, int serverIndex);
+
+    bool checkSplitTunnelingInContainer(const ContainerConfig &containerConfig, const QString &defaultContainer) const;
 
 signals:
     // Common server management signals

@@ -4,6 +4,16 @@
 #include <QJsonObject>
 
 #include "core/controllers/selfhosted/serverController.h"
+#include "core/models/protocols/openvpnProtocolConfig.h"
+#include "core/models/protocols/wireguardProtocolConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/shadowsocksProtocolConfig.h"
+#include "core/models/protocols/cloakProtocolConfig.h"
+#include "core/models/protocols/ikev2ProtocolConfig.h"
+#include "core/models/protocols/protocolConfig.h"
+#include "core/models/clientInfo.h"
+#include <variant>
 #include "settings.h"
 #include "logger.h"
 #include "protocols/protocols_defs.h"
@@ -45,43 +55,27 @@ QString ClientManagementController::getClientsTableFilePath(const DockerContaine
     return clientsTableFile;
 }
 
-void ClientManagementController::migration(const QByteArray &clientsTableString, QJsonArray &clientsTable)
+void ClientManagementController::migration(const QByteArray &clientsTableString, QList<ClientInfo> &clientsList)
 {
     QJsonObject clientsTableObj = QJsonDocument::fromJson(clientsTableString).object();
 
     for (auto &clientId : clientsTableObj.keys()) {
-        QJsonObject client;
-        client[configKey::clientId] = clientId;
+        ClientInfo client;
+        client.clientId = clientId;
+        client.clientName = clientsTableObj.value(clientId).toObject().value(configKey::clientName).toString();
+        client.creationDate = QDateTime::currentDateTime();
 
-        QJsonObject userData;
-        userData[configKey::clientName] = clientsTableObj.value(clientId).toObject().value(configKey::clientName);
-        client[configKey::userData] = userData;
-
-        clientsTable.push_back(client);
+        clientsList.append(client);
     }
 }
 
-bool ClientManagementController::isClientExists(const QString &clientId, const QJsonArray &clientsTable)
-{
-    for (const auto &clientObject : clientsTable) {
-        if (clientObject.toObject().value(configKey::clientId).toString() == clientId) {
-            return true;
-        }
-    }
-    return false;
-}
+
+
 
 ErrorCode ClientManagementController::updateClientsData(const DockerContainer container, const ServerCredentials &credentials,
-                                                        const QSharedPointer<ServerController> &serverController)
+                                                        const QSharedPointer<ServerController> &serverController, QList<ClientInfo> &clientsList)
 {
-    QJsonArray clientsTable;
-    return updateClientsData(container, credentials, serverController, clientsTable);
-}
-
-ErrorCode ClientManagementController::updateClientsData(const DockerContainer container, const ServerCredentials &credentials,
-                                                        const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable)
-{
-    clientsTable = QJsonArray();
+    clientsList.clear();
     ErrorCode error = ErrorCode::NoError;
 
     QString clientsTableFile = getClientsTableFilePath(container);
@@ -91,26 +85,37 @@ ErrorCode ClientManagementController::updateClientsData(const DockerContainer co
         return error;
     }
 
-    clientsTable = QJsonDocument::fromJson(clientsTableString).array();
+    QJsonArray clientsTable = QJsonDocument::fromJson(clientsTableString).array();
 
     if (clientsTable.isEmpty()) {
-        migration(clientsTableString, clientsTable);
-        const QByteArray newClientsTableString = QJsonDocument(clientsTable).toJson();
+        migration(clientsTableString, clientsList);
+        const QByteArray newClientsTableString = QJsonDocument(clientsToJsonArray(clientsList)).toJson();
         error = serverController->uploadTextFileToContainer(container, credentials, newClientsTableString, clientsTableFile);
         if (error != ErrorCode::NoError) {
             logger.error() << "Failed to upload the clientsTable file to the server";
             return error;
         }
+    } else {
+        clientsList = clientsFromJsonArray(clientsTable);
     }
 
-
     int count = 0;
-    if (container == DockerContainer::OpenVpn || container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
-        error = getOpenVpnClients(container, credentials, serverController, count, clientsTable);
-    } else if (container == DockerContainer::WireGuard || container == DockerContainer::Awg) {
-        error = getWireGuardClients(container, credentials, serverController, count, clientsTable);
-    } else if (container == DockerContainer::Xray) {
-        error = getXrayClients(container, credentials, serverController, count, clientsTable);
+    switch (container) {
+    case DockerContainer::OpenVpn:
+    case DockerContainer::ShadowSocks:
+    case DockerContainer::Cloak:
+        error = getOpenVpnClients(container, credentials, serverController, count, clientsList);
+        break;
+    case DockerContainer::WireGuard:
+    case DockerContainer::Awg:
+        error = getWireGuardClients(container, credentials, serverController, count, clientsList);
+        break;
+    case DockerContainer::Xray:
+        error = getXrayClients(container, credentials, serverController, count, clientsList);
+        break;
+    default:
+        error = ErrorCode::NoError;
+        break;
     }
 
     if (error != ErrorCode::NoError) {
@@ -118,7 +123,7 @@ ErrorCode ClientManagementController::updateClientsData(const DockerContainer co
         return error;
     }
 
-    emit clientsDataUpdated(clientsTable);
+    emit clientsDataUpdated(clientsList);
     return ErrorCode::NoError;
 }
 
@@ -126,8 +131,8 @@ ErrorCode ClientManagementController::updateClientsData(const DockerContainer co
 ErrorCode ClientManagementController::updateClientsData(const DockerContainer container, const ServerCredentials &credentials)
 {
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    QJsonArray clientsTable;
-    return updateClientsData(container, credentials, serverController, clientsTable);
+    QList<ClientInfo> clientsList;
+    return updateClientsData(container, credentials, serverController, clientsList);
 }
 
 
@@ -135,8 +140,8 @@ ErrorCode ClientManagementController::updateClientsData(const DockerContainer co
 
 
 ErrorCode ClientManagementController::appendClient(const DockerContainer container, const ServerCredentials &credentials,
-                                                   const QJsonObject &containerConfig, const QString &clientName,
-                                                   const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable)
+                                                   const ContainerConfig &containerConfig, const QString &clientName,
+                                                   const QSharedPointer<ServerController> &serverController, QList<ClientInfo> &clientsList)
 {
     Proto protocol;
     switch (container) {
@@ -154,22 +159,27 @@ ErrorCode ClientManagementController::appendClient(const DockerContainer contain
             return ErrorCode::NoError;
     }
 
-    auto protocolConfig = ContainerProps::getProtocolConfigFromContainer(protocol, containerConfig);
-    return appendClient(protocolConfig, clientName, container, credentials, serverController, clientsTable);
+    QString protocolName = ProtocolProps::protoToString(protocol);
+    auto protocolConfig = containerConfig.protocolConfigs.value(protocolName);
+    return appendClient(protocolConfig, clientName, container, credentials, serverController, clientsList);
 }
 
 
 
-ErrorCode ClientManagementController::appendClient(QJsonObject &protocolConfig, const QString &clientName, const DockerContainer container,
+ErrorCode ClientManagementController::appendClient(QSharedPointer<ProtocolConfig> &protocolConfig, const QString &clientName, const DockerContainer container,
                                                    const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController,
-                                                   QJsonArray &clientsTable)
+                                                   QList<ClientInfo> &clientsList)
 {
     QString clientId;
     if (container == DockerContainer::Xray) {
-        if (!protocolConfig.contains("outbounds")) {
+        if (!protocolConfig) {
             return ErrorCode::InternalError;
         }
-        QJsonArray outbounds = protocolConfig.value("outbounds").toArray();
+        QJsonObject protocolConfigJson = protocolConfig->toJson();
+        if (!protocolConfigJson.contains("outbounds")) {
+            return ErrorCode::InternalError;
+        }
+        QJsonArray outbounds = protocolConfigJson.value("outbounds").toArray();
         if (outbounds.isEmpty()) {
             return ErrorCode::InternalError;
         }
@@ -199,45 +209,43 @@ ErrorCode ClientManagementController::appendClient(QJsonObject &protocolConfig, 
         }
         clientId = user["id"].toString();
     } else {
-        clientId = protocolConfig.value(config_key::clientId).toString();
+        if (!protocolConfig) {
+            return ErrorCode::InternalError;
+        }
+        ProtocolConfigVariant variant = ProtocolConfig::getProtocolConfigVariant(protocolConfig);
+        std::visit([&clientId](const auto &config) -> void {
+            clientId = config->clientProtocolConfig.clientId;
+        }, variant);
     }
     
-    return appendClient(clientId, clientName, container, credentials, serverController, clientsTable);
+    return appendClient(clientId, clientName, container, credentials, serverController, clientsList);
 }
 
 
 
 ErrorCode ClientManagementController::appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
                                                    const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController,
-                                                   QJsonArray &clientsTable)
+                                                   QList<ClientInfo> &clientsList)
 {
     ErrorCode error = ErrorCode::NoError;
 
-
-    error = updateClientsData(container, credentials, serverController, clientsTable);
+    QList<ClientInfo> currentClients;
+    error = updateClientsData(container, credentials, serverController, currentClients);
     if (error != ErrorCode::NoError) {
         return error;
     }
 
-
-    for (int i = 0; i < clientsTable.size(); i++) {
-        if (clientsTable.at(i).toObject().value(configKey::clientId) == clientId) {
-            return renameClient(i, clientName, container, credentials, serverController, clientsTable, true);
+    for (int i = 0; i < currentClients.size(); ++i) {
+        if (currentClients[i].clientId == clientId) {
+            return renameClient(i, clientName, container, credentials, serverController, currentClients, true);
         }
     }
 
+    ClientInfo newClient(clientId, clientName);
+    newClient.container = container;
+    currentClients.append(newClient);
 
-    QJsonObject client;
-    client[configKey::clientId] = clientId;
-
-    QJsonObject userData;
-    userData[configKey::clientName] = clientName;
-    userData[configKey::creationDate] = QDateTime::currentDateTime().toString();
-    client[configKey::userData] = userData;
-    clientsTable.push_back(client);
-
-
-    const QByteArray clientsTableString = QJsonDocument(clientsTable).toJson();
+    const QByteArray clientsTableString = QJsonDocument(clientsToJsonArray(currentClients)).toJson();
     QString clientsTableFile = getClientsTableFilePath(container);
 
     error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
@@ -246,6 +254,7 @@ ErrorCode ClientManagementController::appendClient(const QString &clientId, cons
         return error;
     }
 
+    clientsList = currentClients;
     emit clientAdded(clientId, clientName);
     return ErrorCode::NoError;
 }
@@ -254,33 +263,28 @@ ErrorCode ClientManagementController::renameClient(const int row, const QString 
                                                    const ServerCredentials &credentials, bool addTimeStamp)
 {
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    QJsonArray clientsTable;
-    ErrorCode errorCode = updateClientsData(container, credentials, serverController, clientsTable);
+    QList<ClientInfo> clientsList;
+    ErrorCode errorCode = updateClientsData(container, credentials, serverController, clientsList);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
-    return renameClient(row, clientName, container, credentials, serverController, clientsTable, addTimeStamp);
+    return renameClient(row, clientName, container, credentials, serverController, clientsList, addTimeStamp);
 }
 
 ErrorCode ClientManagementController::renameClient(const int row, const QString &clientName, const DockerContainer container,
                                                    const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController,
-                                                   QJsonArray &clientsTable, bool addTimeStamp)
+                                                   QList<ClientInfo> &clientsList, bool addTimeStamp)
 {
-    if (row < 0 || row >= clientsTable.size()) {
+    if (row < 0 || row >= clientsList.size()) {
         return ErrorCode::InternalError;
     }
 
-    auto client = clientsTable.at(row).toObject();
-    auto userData = client[configKey::userData].toObject();
-    userData[configKey::clientName] = clientName;
+    clientsList[row].clientName = clientName;
     if (addTimeStamp) {
-        userData[configKey::creationDate] = QDateTime::currentDateTime().toString();
+        clientsList[row].creationDate = QDateTime::currentDateTime();
     }
-    client[configKey::userData] = userData;
 
-    clientsTable.replace(row, client);
-
-    const QByteArray clientsTableString = QJsonDocument(clientsTable).toJson();
+    const QByteArray clientsTableString = QJsonDocument(clientsToJsonArray(clientsList)).toJson();
     QString clientsTableFile = getClientsTableFilePath(container);
 
     ErrorCode error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
@@ -293,39 +297,10 @@ ErrorCode ClientManagementController::renameClient(const int row, const QString 
     return ErrorCode::NoError;
 }
 
-ErrorCode ClientManagementController::renameClient(const int row, const QString &clientName, const DockerContainer container,
-                                                   const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController,
-                                                   QJsonArray &clientsTable, bool addTimeStamp)
-{
-    if (row < 0 || row >= clientsTable.size()) {
-        return ErrorCode::InternalError;
-    }
-
-    auto client = clientsTable.at(row).toObject();
-    auto userData = client[configKey::userData].toObject();
-    userData[configKey::clientName] = clientName;
-    if (addTimeStamp) {
-        userData[configKey::creationDate] = QDateTime::currentDateTime().toString();
-    }
-    client[configKey::userData] = userData;
-
-    clientsTable.replace(row, client);
-
-    const QByteArray clientsTableString = QJsonDocument(clientsTable).toJson();
-    QString clientsTableFile = getClientsTableFilePath(container);
-
-    ErrorCode error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
-    if (error != ErrorCode::NoError) {
-        logger.error() << "Failed to upload the clientsTable file to the server";
-        return error;
-    }
-
-    emit clientRenamed(row, clientName);
-    return ErrorCode::NoError;
-} 
+ 
  
 ErrorCode ClientManagementController::getWireGuardClients(const DockerContainer container, const ServerCredentials &credentials,
-                                                          const QSharedPointer<ServerController> &serverController, int &count, QJsonArray &clientsTable)
+                                                          const QSharedPointer<ServerController> &serverController, int &count, QList<ClientInfo> &clientsList)
 {
     ErrorCode error = ErrorCode::NoError;
 
@@ -346,15 +321,10 @@ ErrorCode ClientManagementController::getWireGuardClients(const DockerContainer 
     }
 
     for (auto &wireguardKey : wireguardKeys) {
-        if (!isClientExists(wireguardKey, clientsTable)) {
-            QJsonObject client;
-            client[configKey::clientId] = wireguardKey;
-
-            QJsonObject userData;
-            userData[configKey::clientName] = QString("Client %1").arg(count);
-            client[configKey::userData] = userData;
-
-            clientsTable.push_back(client);
+        if (!isClientExists(wireguardKey, clientsList)) {
+            ClientInfo client(wireguardKey, QString("Client %1").arg(count));
+            client.container = container;
+            clientsList.append(client);
             count++;
         }
     }
@@ -362,7 +332,7 @@ ErrorCode ClientManagementController::getWireGuardClients(const DockerContainer 
 }
 
 ErrorCode ClientManagementController::getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
-                                                     const QSharedPointer<ServerController> &serverController, int &count, QJsonArray &clientsTable)
+                                                     const QSharedPointer<ServerController> &serverController, int &count, QList<ClientInfo> &clientsList)
 {
     ErrorCode error = ErrorCode::NoError;
 
@@ -408,20 +378,25 @@ ErrorCode ClientManagementController::getXrayClients(const DockerContainer conta
         QString xrayDefaultUuid = serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::uuidPath, error);
         xrayDefaultUuid.replace("\n", "");
 
-        if (!isClientExists(clientId, clientsTable) && clientId != xrayDefaultUuid) {
-            QJsonObject client;
-            client[configKey::clientId] = clientId;
-
-            QJsonObject userData;
-            userData[configKey::clientName] = QString("Client %1").arg(count);
-            client[configKey::userData] = userData;
-
-            clientsTable.push_back(client);
+        if (!isClientExists(clientId, clientsList) && clientId != xrayDefaultUuid) {
+            ClientInfo client(clientId, QString("Client %1").arg(count));
+            client.container = container;
+            clientsList.append(client);
             count++;
         }
     }
     
     return error;
+}
+
+ErrorCode ClientManagementController::getOpenVpnClients(const DockerContainer container, const ServerCredentials &credentials,
+                                                       const QSharedPointer<ServerController> &serverController, int &count, QList<ClientInfo> &clientsList)
+{
+    Q_UNUSED(container);
+    Q_UNUSED(credentials);
+    Q_UNUSED(serverController);
+    count = clientsList.size();
+    return ErrorCode::NoError;
 }
 
 ErrorCode ClientManagementController::wgShow(const DockerContainer container, const ServerCredentials &credentials,
@@ -497,22 +472,34 @@ ErrorCode ClientManagementController::wgShow(const DockerContainer container, co
 ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials,
                                                    const int serverIndex, const QSharedPointer<ServerController> &serverController)
 {
-    QJsonArray clientsTable;
-    return revokeOpenVpn(row, container, credentials, serverIndex, serverController, clientsTable);
+    QList<ClientInfo> clientsList;
+    ErrorCode errorCode = updateClientsData(container, credentials, serverController, clientsList);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+    return revokeOpenVpn(row, container, credentials, serverIndex, serverController, clientsList);
 }
 
 ErrorCode ClientManagementController::revokeWireGuard(const int row, const DockerContainer container, const ServerCredentials &credentials,
                                                      const QSharedPointer<ServerController> &serverController)
 {
-    QJsonArray clientsTable;
-    return revokeWireGuard(row, container, credentials, serverController, clientsTable);
+    QList<ClientInfo> clientsList;
+    ErrorCode errorCode = updateClientsData(container, credentials, serverController, clientsList);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+    return revokeWireGuard(row, container, credentials, serverController, clientsList);
 }
 
 ErrorCode ClientManagementController::revokeXray(const int row, const DockerContainer container, const ServerCredentials &credentials,
                                                 const QSharedPointer<ServerController> &serverController)
 {
-    QJsonArray clientsTable;
-    return revokeXray(row, container, credentials, serverController, clientsTable);
+    QList<ClientInfo> clientsList;
+    ErrorCode errorCode = updateClientsData(container, credentials, serverController, clientsList);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+    return revokeXray(row, container, credentials, serverController, clientsList);
 } 
 
 
@@ -520,25 +507,24 @@ ErrorCode ClientManagementController::revokeClient(const int row, const DockerCo
                                                    const ServerCredentials &credentials, const int serverIndex)
 {
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    QJsonArray clientsTable;
-    ErrorCode errorCode = updateClientsData(container, credentials, serverController, clientsTable);
+    QList<ClientInfo> clientsList;
+    ErrorCode errorCode = updateClientsData(container, credentials, serverController, clientsList);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
-    return revokeClient(row, container, credentials, serverIndex, serverController, clientsTable);
+    return revokeClient(row, container, credentials, serverIndex, serverController, clientsList);
 }
 
 
 ErrorCode ClientManagementController::revokeClient(const int row, const DockerContainer container, const ServerCredentials &credentials,
                                                    const int serverIndex, const QSharedPointer<ServerController> &serverController,
-                                                   QJsonArray &clientsTable)
+                                                   QList<ClientInfo> &clientsList)
 {
-    if (row < 0 || row >= clientsTable.size()) {
+    if (row < 0 || row >= clientsList.size()) {
         return ErrorCode::InternalError;
     }
 
-    auto client = clientsTable.at(row).toObject();
-    QString clientId = client.value(configKey::clientId).toString();
+    QString clientId = clientsList[row].clientId;
     
     ErrorCode errorCode = ErrorCode::NoError;
 
@@ -546,16 +532,16 @@ ErrorCode ClientManagementController::revokeClient(const int row, const DockerCo
         case DockerContainer::OpenVpn:
         case DockerContainer::ShadowSocks:
         case DockerContainer::Cloak: {
-            errorCode = revokeOpenVpn(row, container, credentials, serverIndex, serverController, clientsTable);
+            errorCode = revokeOpenVpn(row, container, credentials, serverIndex, serverController, clientsList);
             break;
         }
         case DockerContainer::WireGuard:
         case DockerContainer::Awg: {
-            errorCode = revokeWireGuard(row, container, credentials, serverController, clientsTable);
+            errorCode = revokeWireGuard(row, container, credentials, serverController, clientsList);
             break;
         }
         case DockerContainer::Xray: {
-            errorCode = revokeXray(row, container, credentials, serverController, clientsTable);
+            errorCode = revokeXray(row, container, credentials, serverController, clientsList);
             break;
         }
         default: {
@@ -571,9 +557,9 @@ ErrorCode ClientManagementController::revokeClient(const int row, const DockerCo
     return errorCode;
 }
 
-ErrorCode ClientManagementController::revokeClient(const QJsonObject &containerConfig, const DockerContainer container,
+ErrorCode ClientManagementController::revokeClient(const ContainerConfig &containerConfig, const DockerContainer container,
                                                    const ServerCredentials &credentials, const int serverIndex,
-                                                   const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable)
+                                                   const QSharedPointer<ServerController> &serverController, QList<ClientInfo> &clientsList)
 {
 
     Proto protocol;
@@ -601,11 +587,14 @@ ErrorCode ClientManagementController::revokeClient(const QJsonObject &containerC
 
     QString clientId;
     if (container == DockerContainer::Xray) {
-    
-        if (!protocolConfig.contains("outbounds")) {
+        if (!protocolConfig) {
             return ErrorCode::InternalError;
         }
-        QJsonArray outbounds = protocolConfig.value("outbounds").toArray();
+        QJsonObject protocolConfigJson = protocolConfig->toJson();
+        if (!protocolConfigJson.contains("outbounds")) {
+            return ErrorCode::InternalError;
+        }
+        QJsonArray outbounds = protocolConfigJson.value("outbounds").toArray();
         if (outbounds.isEmpty()) {
             return ErrorCode::InternalError;
         }
@@ -635,14 +624,19 @@ ErrorCode ClientManagementController::revokeClient(const QJsonObject &containerC
         }
         clientId = user["id"].toString();
     } else {
-        clientId = protocolConfig.value(config_key::clientId).toString();
+        if (!protocolConfig) {
+            return ErrorCode::InternalError;
+        }
+        ProtocolConfigVariant variant = ProtocolConfig::getProtocolConfigVariant(protocolConfig);
+        std::visit([&clientId](const auto &config) -> void {
+            clientId = config->clientProtocolConfig.clientId;
+        }, variant);
     }
 
 
-    for (int i = 0; i < clientsTable.size(); i++) {
-        auto client = clientsTable.at(i).toObject();
-        if (client.value(configKey::clientId).toString() == clientId) {
-            return revokeClient(i, container, credentials, serverIndex, serverController, clientsTable);
+    for (int i = 0; i < clientsList.size(); i++) {
+        if (clientsList[i].clientId == clientId) {
+            return revokeClient(i, container, credentials, serverIndex, serverController, clientsList);
         }
     }
 
@@ -651,14 +645,12 @@ ErrorCode ClientManagementController::revokeClient(const QJsonObject &containerC
 
 ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials,
                                                    const int serverIndex, const QSharedPointer<ServerController> &serverController,
-                                                   QJsonArray &clientsTable)
+                                                   QList<ClientInfo> &clientsList)
 {
-    if (row < 0 || row >= clientsTable.size()) {
+    if (row < 0 || row >= clientsList.size()) {
         return ErrorCode::InternalError;
     }
-
-    auto client = clientsTable.at(row).toObject();
-    QString clientId = client.value(configKey::clientId).toString();
+    QString clientId = clientsList[row].clientId;
     
     ErrorCode error = ErrorCode::NoError;
     QString stdOut;
@@ -674,9 +666,8 @@ ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerC
         return error;
     }
 
-    clientsTable.removeAt(row);
-    
-    const QByteArray clientsTableString = QJsonDocument(clientsTable).toJson();
+    clientsList.removeAt(row);
+    const QByteArray clientsTableString = QJsonDocument(clientsToJsonArray(clientsList)).toJson();
     QString clientsTableFile = getClientsTableFilePath(container);
     
     error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
@@ -689,14 +680,12 @@ ErrorCode ClientManagementController::revokeOpenVpn(const int row, const DockerC
 }
 
 ErrorCode ClientManagementController::revokeWireGuard(const int row, const DockerContainer container, const ServerCredentials &credentials,
-                                                     const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable)
+                                                     const QSharedPointer<ServerController> &serverController, QList<ClientInfo> &clientsList)
 {
-    if (row < 0 || row >= clientsTable.size()) {
+    if (row < 0 || row >= clientsList.size()) {
         return ErrorCode::InternalError;
     }
-
-    auto client = clientsTable.at(row).toObject();
-    QString clientId = client.value(configKey::clientId).toString();
+    QString clientId = clientsList[row].clientId;
     
     ErrorCode error = ErrorCode::NoError;
     
@@ -729,9 +718,8 @@ ErrorCode ClientManagementController::revokeWireGuard(const int row, const Docke
         return error;
     }
 
-    clientsTable.removeAt(row);
-    
-    const QByteArray clientsTableString = QJsonDocument(clientsTable).toJson();
+    clientsList.removeAt(row);
+    const QByteArray clientsTableString = QJsonDocument(clientsToJsonArray(clientsList)).toJson();
     QString clientsTableFile = getClientsTableFilePath(container);
     
     error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
@@ -744,14 +732,12 @@ ErrorCode ClientManagementController::revokeWireGuard(const int row, const Docke
 }
 
 ErrorCode ClientManagementController::revokeXray(const int row, const DockerContainer container, const ServerCredentials &credentials,
-                                                const QSharedPointer<ServerController> &serverController, QJsonArray &clientsTable)
+                                                const QSharedPointer<ServerController> &serverController, QList<ClientInfo> &clientsList)
 {
-    if (row < 0 || row >= clientsTable.size()) {
+    if (row < 0 || row >= clientsList.size()) {
         return ErrorCode::InternalError;
     }
-
-    auto client = clientsTable.at(row).toObject();
-    QString clientId = client.value(configKey::clientId).toString();
+    QString clientId = clientsList[row].clientId;
     
     ErrorCode error = ErrorCode::NoError;
     
@@ -794,9 +780,8 @@ ErrorCode ClientManagementController::revokeXray(const int row, const DockerCont
         return error;
     }
 
-    clientsTable.removeAt(row);
-    
-    const QByteArray clientsTableString = QJsonDocument(clientsTable).toJson();
+    clientsList.removeAt(row);
+    const QByteArray clientsTableString = QJsonDocument(clientsToJsonArray(clientsList)).toJson();
     QString clientsTableFile = getClientsTableFilePath(container);
     
     error = serverController->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
@@ -806,5 +791,32 @@ ErrorCode ClientManagementController::revokeXray(const int row, const DockerCont
     }
 
     return ErrorCode::NoError;
+}
+
+QList<ClientInfo> ClientManagementController::clientsFromJsonArray(const QJsonArray &jsonArray)
+{
+    QList<ClientInfo> clientsList;
+    for (const auto &value : jsonArray) {
+        clientsList.append(ClientInfo(value.toObject()));
+    }
+    return clientsList;
+}
+
+QJsonArray ClientManagementController::clientsToJsonArray(const QList<ClientInfo> &clientsList)
+{
+    QJsonArray jsonArray;
+    for (const auto &client : clientsList) {
+        jsonArray.append(client.toJson());
+    }
+    return jsonArray;
+}
+
+bool ClientManagementController::isClientExists(const QString &clientId, const QList<ClientInfo> &clientsList)
+{
+    for (const auto &client : clientsList) {
+        if (client.clientId == clientId) {
+            return true;
+        }
+    }
+    return false;
 } 
- 

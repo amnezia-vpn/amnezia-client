@@ -23,16 +23,16 @@ public:
     virtual QSharedPointer<ProtocolConfig> createConfig(const ServerCredentials &credentials, DockerContainer container,
                                                         const QSharedPointer<ProtocolConfig> &protocolConfig, ErrorCode &errorCode) = 0;
 
-    virtual QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                                   QString &protocolConfigString);
-    virtual QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                                    QString &protocolConfigString);
+    virtual void processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                QSharedPointer<ProtocolConfig> &protocolConfig);
+    virtual void processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                 QSharedPointer<ProtocolConfig> &protocolConfig);
 
     virtual Vars generateProtocolVars(const ServerCredentials &credentials, DockerContainer container,
                                      const QSharedPointer<ProtocolConfig> &protocolConfig) const;
 
 protected:
-    void processConfigWithDnsSettings(const QPair<QString, QString> &dns, QString &protocolConfigString);
+    void processConfigWithDnsSettings(const QPair<QString, QString> &dns, QSharedPointer<ProtocolConfig> &protocolConfig);
 
     Vars generateCommonVars(const ServerCredentials &credentials, DockerContainer container) const;
 

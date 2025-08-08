@@ -40,41 +40,39 @@ ClientManagementModel::ClientManagementModel(QSharedPointer<ClientManagementCont
 int ClientManagementModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return static_cast<int>(m_clientsTable.size());
+    return static_cast<int>(m_clientsList.size());
 }
 
 QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= static_cast<int>(m_clientsTable.size())) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= static_cast<int>(m_clientsList.size())) {
         return QVariant();
     }
-
-    auto client = m_clientsTable.at(index.row()).toObject();
-    auto userData = client.value(configKey::userData).toObject();
+    const ClientInfo &client = m_clientsList.at(index.row());
 
     switch (role) {
-    case ClientNameRole: return userData.value(configKey::clientName).toString();
-    case CreationDateRole: return userData.value(configKey::creationDate).toString();
-    case LatestHandshakeRole: return userData.value(configKey::latestHandshake).toString();
-    case DataReceivedRole: return userData.value(configKey::dataReceived).toString();
-    case DataSentRole: return userData.value(configKey::dataSent).toString();
-    case AllowedIpsRole: return userData.value(configKey::allowedIps).toString();
+    case ClientNameRole: return client.clientName;
+    case CreationDateRole: return client.creationDate.toString();
+    case LatestHandshakeRole: return client.latestHandshake;
+    case DataReceivedRole: return client.dataReceived;
+    case DataSentRole: return client.dataSent;
+    case AllowedIpsRole: return client.allowedIps;
     }
 
     return QVariant();
 }
 
-void ClientManagementModel::onClientsDataUpdated(const QJsonArray &clientsTable)
+void ClientManagementModel::onClientsDataUpdated(const QList<ClientInfo> &clientsList)
 {
     beginResetModel();
-    m_clientsTable = clientsTable;
+    m_clientsList = clientsList;
     endResetModel();
 }
 
 void ClientManagementModel::onClientRenamed(const int row, const QString &newName)
 {
     Q_UNUSED(newName)
-    if (row >= 0 && row < m_clientsTable.size()) {
+    if (row >= 0 && row < m_clientsList.size()) {
         emit dataChanged(index(row, 0), index(row, 0));
     }
 }

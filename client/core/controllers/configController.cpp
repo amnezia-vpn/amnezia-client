@@ -7,6 +7,11 @@
 #include "core/networkUtilities.h"
 #include "protocols/protocols_defs.h"
 #include "settings.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/models/protocols/wireguardProtocolConfig.h"
+#include "core/models/protocols/openvpnProtocolConfig.h"
+#include "core/models/protocols/shadowsocksProtocolConfig.h"
+#include "core/models/protocols/cloakProtocolConfig.h"
 
 ConfigController::ConfigController(std::shared_ptr<Settings> settings, QObject *parent)
     : QObject(parent), m_settings(settings)
@@ -151,3 +156,69 @@ void ConfigController::updateServerInSettings(const QSharedPointer<ServerConfig>
 {
     m_settings->editServer(serverIndex, serverConfig->toJson());
 } 
+
+bool ConfigController::isDefaultServerDefaultContainerHasSplitTunneling() const
+{
+    int defaultServerIndex = m_settings->defaultServerIndex();
+    auto servers = m_settings->serversArray();
+    if (defaultServerIndex >= servers.size()) return false;
+
+    auto serverConfig = ServerConfig::createServerConfig(servers.at(defaultServerIndex).toObject());
+    if (!serverConfig->containerConfigs.contains(serverConfig->defaultContainer)) {
+        return false;
+    }
+
+    const auto &containerConfig = serverConfig->containerConfigs[serverConfig->defaultContainer];
+    return checkSplitTunnelingInContainer(containerConfig, serverConfig->defaultContainer);
+}
+
+bool ConfigController::checkSplitTunnelingInContainer(const ContainerConfig &containerConfig, const QString &defaultContainer) const
+{
+    const DockerContainer containerType = ContainerProps::containerFromString(defaultContainer);
+
+    auto isWireguardHasSplit = [](const QString &nativeConfig, const QStringList &allowedIps) -> bool {
+        if (nativeConfig.contains("AllowedIPs") && !nativeConfig.contains("AllowedIPs = 0.0.0.0/0, ::/0")) {
+            return true;
+        }
+        if (!allowedIps.isEmpty() && !allowedIps.contains("0.0.0.0/0")) {
+            return true;
+        }
+        return false;
+    };
+
+    if (containerType == DockerContainer::Awg || containerType == DockerContainer::WireGuard) {
+        const auto protocolConfig = containerConfig.protocolConfigs.value(defaultContainer);
+        if (!protocolConfig) return false;
+        auto variant = ProtocolConfig::getProtocolConfigVariant(protocolConfig);
+        return std::visit(
+            [&](const auto &ptr) -> bool {
+                using T = std::decay_t<decltype(ptr)>;
+                if constexpr (std::is_same_v<T, QSharedPointer<AwgProtocolConfig>> || std::is_same_v<T, QSharedPointer<WireGuardProtocolConfig>>) {
+                    return isWireguardHasSplit(ptr->clientProtocolConfig.nativeConfig,
+                                               ptr->clientProtocolConfig.wireGuardData.allowedIps);
+                }
+                return false;
+            },
+            variant);
+    }
+
+    if (containerType == DockerContainer::Cloak || containerType == DockerContainer::OpenVpn || containerType == DockerContainer::ShadowSocks) {
+        const auto &protocolConfig = containerConfig.protocolConfigs.value(ContainerProps::containerTypeToString(DockerContainer::OpenVpn));
+        if (!protocolConfig) return false;
+        auto variant = ProtocolConfig::getProtocolConfigVariant(protocolConfig);
+        return std::visit(
+            [&](const auto &ptr) -> bool {
+                using T = std::decay_t<decltype(ptr)>;
+                if constexpr (std::is_same_v<T, QSharedPointer<OpenVpnProtocolConfig>> ||
+                              std::is_same_v<T, QSharedPointer<ShadowsocksProtocolConfig>> ||
+                              std::is_same_v<T, QSharedPointer<CloakProtocolConfig>>) {
+                    const auto nativeConfig = ptr->clientProtocolConfig.nativeConfig;
+                    return (!nativeConfig.isEmpty() && !nativeConfig.contains("redirect-gateway"));
+                }
+                return false;
+            },
+            variant);
+    }
+
+    return false;
+}

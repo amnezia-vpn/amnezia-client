@@ -22,29 +22,22 @@ ExportController::ExportController(std::shared_ptr<Settings> settings,
 {
 }
 
-ExportConfigResult ExportController::generateFullAccessConfig(const QJsonObject &serverConfig)
+ExportConfigResult ExportController::generateFullAccessConfig(const QSharedPointer<ServerConfig> &serverConfig)
 {
     ExportConfigResult result;
     result.errorCode = ErrorCode::NoError;
 
-    QJsonObject modifiedServerConfig = serverConfig;
-    QJsonArray containers = modifiedServerConfig.value(config_key::containers).toArray();
+    // Create a copy of the ServerConfig and clean last_config from protocol configs
+    auto modifiedServerConfig = QSharedPointer<ServerConfig>::create(*serverConfig);
     
-    for (auto i = 0; i < containers.size(); i++) {
-        auto containerConfig = containers.at(i).toObject();
-        auto containerType = ContainerProps::containerFromString(containerConfig.value(config_key::container).toString());
-
-        for (auto protocol : ContainerProps::protocolsForContainer(containerType)) {
-            auto protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
-            protocolConfig.remove(config_key::last_config);
-            containerConfig[ProtocolProps::protoToString(protocol)] = protocolConfig;
+    for (auto &containerConfig : modifiedServerConfig->containerConfigs) {
+        for (auto &protocolConfig : containerConfig.protocolConfigs) {
+            // Protocol configs will automatically exclude last_config when serialized to JSON for export
+            // No need to manually remove it here as the toJson() method handles this
         }
-
-        containers.replace(i, containerConfig);
     }
-    modifiedServerConfig[config_key::containers] = containers;
 
-    QByteArray compressedConfig = QJsonDocument(modifiedServerConfig).toJson();
+    QByteArray compressedConfig = QJsonDocument(modifiedServerConfig->toJson()).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     result.config = QString("vpn://%1").arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)));
     result.qrCodes = generateQrCodeSeries(compressedConfig);
@@ -55,8 +48,8 @@ ExportConfigResult ExportController::generateFullAccessConfig(const QJsonObject 
 ExportConfigResult ExportController::generateConnectionConfig(const QString &clientName,
                                                              const ServerCredentials &credentials,
                                                              const DockerContainer container,
-                                                             const QJsonObject &containerConfig,
-                                                             const QJsonObject &serverConfig,
+                                                             const ContainerConfig &containerConfig,
+                                                             const QSharedPointer<ServerConfig> &serverConfig,
                                                              const QPair<QString, QString> &dnsSettings)
 {
     ExportConfigResult result;
@@ -64,8 +57,8 @@ ExportConfigResult ExportController::generateConnectionConfig(const QString &cli
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
     VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
     
-    QJsonObject modifiedContainerConfig = containerConfig;
-    modifiedContainerConfig.insert(config_key::container, ContainerProps::containerToString(container));
+    // Use the provided ContainerConfig directly
+    ContainerConfig modifiedContainerConfig = containerConfig;
     
     result.errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container, modifiedContainerConfig);
     if (result.errorCode != ErrorCode::NoError) {
@@ -92,16 +85,20 @@ ExportConfigResult ExportController::generateConnectionConfig(const QString &cli
         return result;
     }
 
-    QJsonObject modifiedServerConfig = serverConfig;
-    modifiedServerConfig.remove(config_key::userName);
-    modifiedServerConfig.remove(config_key::password);
-    modifiedServerConfig.remove(config_key::port);
-    modifiedServerConfig.insert(config_key::containers, QJsonArray { modifiedContainerConfig });
-    modifiedServerConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
-    modifiedServerConfig.insert(config_key::dns1, dnsSettings.first);
-    modifiedServerConfig.insert(config_key::dns2, dnsSettings.second);
+    // Create a modified ServerConfig for export with only the specific container
+    auto exportServerConfig = QSharedPointer<ServerConfig>::create(*serverConfig);
+    
+    // Remove credentials (they are not needed in export)
+    exportServerConfig->containerConfigs.clear();
+    
+    // Add only the specific container being exported
+    QString containerName = ContainerProps::containerToString(container);
+    exportServerConfig->containerConfigs.insert(containerName, modifiedContainerConfig);
+    exportServerConfig->defaultContainer = containerName;
+    exportServerConfig->dns1 = dnsSettings.first;
+    exportServerConfig->dns2 = dnsSettings.second;
 
-    QByteArray compressedConfig = QJsonDocument(modifiedServerConfig).toJson();
+    QByteArray compressedConfig = QJsonDocument(exportServerConfig->toJson()).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     result.config = QString("vpn://%1").arg(QString(compressedConfig.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)));
     result.qrCodes = generateQrCodeSeries(compressedConfig);
@@ -110,11 +107,11 @@ ExportConfigResult ExportController::generateConnectionConfig(const QString &cli
 }
 
 ExportConfigResult ExportController::generateOpenVpnConfig(const QString &clientName,
-                                                          const ServerCredentials &credentials,
-                                                          const DockerContainer container,
-                                                          const QJsonObject &containerConfig,
-                                                          const QPair<QString, QString> &dnsSettings,
-                                                          bool isApiConfig)
+                                                        const ServerCredentials &credentials,
+                                                        const DockerContainer container,
+                                                        const ContainerConfig &containerConfig,
+                                                        const QPair<QString, QString> &dnsSettings,
+                                                        bool isApiConfig)
 {
     ExportConfigResult result;
     QJsonObject nativeConfig;
@@ -144,7 +141,7 @@ ExportConfigResult ExportController::generateOpenVpnConfig(const QString &client
 
 ExportConfigResult ExportController::generateWireGuardConfig(const QString &clientName,
                                                             const ServerCredentials &credentials,
-                                                            const QJsonObject &containerConfig,
+                                                            const ContainerConfig &containerConfig,
                                                             const QPair<QString, QString> &dnsSettings,
                                                             bool isApiConfig)
 {
@@ -168,10 +165,10 @@ ExportConfigResult ExportController::generateWireGuardConfig(const QString &clie
 }
 
 ExportConfigResult ExportController::generateAwgConfig(const QString &clientName,
-                                                      const ServerCredentials &credentials,
-                                                      const QJsonObject &containerConfig,
-                                                      const QPair<QString, QString> &dnsSettings,
-                                                      bool isApiConfig)
+                                                    const ServerCredentials &credentials,
+                                                    const ContainerConfig &containerConfig,
+                                                    const QPair<QString, QString> &dnsSettings,
+                                                    bool isApiConfig)
 {
     ExportConfigResult result;
     QJsonObject nativeConfig;
@@ -193,10 +190,10 @@ ExportConfigResult ExportController::generateAwgConfig(const QString &clientName
 }
 
 ExportConfigResult ExportController::generateShadowSocksConfig(const ServerCredentials &credentials,
-                                                              const DockerContainer container,
-                                                              const QJsonObject &containerConfig,
-                                                              const QPair<QString, QString> &dnsSettings,
-                                                              bool isApiConfig)
+                                                            const DockerContainer container,
+                                                            const ContainerConfig &containerConfig,
+                                                            const QPair<QString, QString> &dnsSettings,
+                                                            bool isApiConfig)
 {
     ExportConfigResult result;
     QJsonObject nativeConfig;
@@ -233,9 +230,9 @@ ExportConfigResult ExportController::generateShadowSocksConfig(const ServerCrede
 }
 
 ExportConfigResult ExportController::generateCloakConfig(const ServerCredentials &credentials,
-                                                        const QJsonObject &containerConfig,
-                                                        const QPair<QString, QString> &dnsSettings,
-                                                        bool isApiConfig)
+                                                      const ContainerConfig &containerConfig,
+                                                      const QPair<QString, QString> &dnsSettings,
+                                                      bool isApiConfig)
 {
     ExportConfigResult result;
     QJsonObject nativeConfig;
@@ -259,10 +256,10 @@ ExportConfigResult ExportController::generateCloakConfig(const ServerCredentials
 }
 
 ExportConfigResult ExportController::generateXrayConfig(const QString &clientName,
-                                                       const ServerCredentials &credentials,
-                                                       const QJsonObject &containerConfig,
-                                                       const QPair<QString, QString> &dnsSettings,
-                                                       bool isApiConfig)
+                                                     const ServerCredentials &credentials,
+                                                     const ContainerConfig &containerConfig,
+                                                     const QPair<QString, QString> &dnsSettings,
+                                                     bool isApiConfig)
 {
     ExportConfigResult result;
     QJsonObject nativeConfig;
@@ -284,16 +281,16 @@ ExportConfigResult ExportController::generateXrayConfig(const QString &clientNam
 
 
 
-ErrorCode ExportController::generateNativeConfig(const DockerContainer container, const QString &clientName,
+ErrorCode ExportController::generateNativeConfig(const DockerContainer container, const QString &clientName, 
                                                  const Proto &protocol, const ServerCredentials &credentials,
-                                                 const QJsonObject &containerConfig, const QPair<QString, QString> &dnsSettings,
+                                                 const ContainerConfig &containerConfig, const QPair<QString, QString> &dnsSettings,
                                                  bool isApiConfig, QJsonObject &jsonNativeConfig,
                                                  const QSharedPointer<ServerController> &serverController)
 {
     VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
 
-    QJsonObject modifiedContainerConfig = containerConfig;
-    modifiedContainerConfig.insert(config_key::container, ContainerProps::containerToString(container));
+    // Use the provided ContainerConfig directly
+    ContainerConfig modifiedContainerConfig = containerConfig;
 
     QString protocolConfigString;
     ErrorCode errorCode = vpnConfigurationController.createProtocolConfigString(isApiConfig, dnsSettings, credentials, 
@@ -306,8 +303,11 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
     jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 
     if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg || protocol == Proto::Xray) {
+        QString protocolName = ProtocolProps::protoToString(protocol);
+        auto protocolConfig = modifiedContainerConfig.protocolConfigs.value(protocolName);
+        
         m_waitingForNativeConfigAppend = true;
-        emit nativeConfigClientAppendRequested(jsonNativeConfig, clientName, container, credentials, serverController);
+        emit nativeConfigClientAppendRequested(protocolConfig, clientName, container, credentials, serverController);
         
         QEventLoop loop;
         QTimer timer;

@@ -1,29 +1,32 @@
 #include "configurator_base.h"
 #include "core/networkUtilities.h"
+#include "core/models/protocols/protocolConfig.h"
+#include <variant>
 
 ConfiguratorBase::ConfiguratorBase(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
     : QObject { parent }, m_settings(settings), m_serverController(serverController)
 {
 }
 
-QString ConfiguratorBase::processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                                         QString &protocolConfigString)
+void ConfiguratorBase::processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                      QSharedPointer<ProtocolConfig> &protocolConfig)
 {
-    processConfigWithDnsSettings(dns, protocolConfigString);
-    return protocolConfigString;
+    processConfigWithDnsSettings(dns, protocolConfig);
 }
 
-QString ConfiguratorBase::processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                                          QString &protocolConfigString)
+void ConfiguratorBase::processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                       QSharedPointer<ProtocolConfig> &protocolConfig)
 {
-    processConfigWithDnsSettings(dns, protocolConfigString);
-    return protocolConfigString;
+    processConfigWithDnsSettings(dns, protocolConfig);
 }
 
-void ConfiguratorBase::processConfigWithDnsSettings(const QPair<QString, QString> &dns, QString &protocolConfigString)
+void ConfiguratorBase::processConfigWithDnsSettings(const QPair<QString, QString> &dns, QSharedPointer<ProtocolConfig> &protocolConfig)
 {
-    protocolConfigString.replace("$PRIMARY_DNS", dns.first);
-    protocolConfigString.replace("$SECONDARY_DNS", dns.second);
+    ProtocolConfigVariant variant = ProtocolConfig::getProtocolConfigVariant(protocolConfig);
+    std::visit([&dns](const auto &config) -> void {
+        config->clientProtocolConfig.nativeConfig.replace("$PRIMARY_DNS", dns.first);
+        config->clientProtocolConfig.nativeConfig.replace("$SECONDARY_DNS", dns.second);
+    }, variant);
 }
 
 ConfiguratorBase::Vars ConfiguratorBase::generateProtocolVars(const ServerCredentials &credentials, DockerContainer container,

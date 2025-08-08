@@ -10,6 +10,9 @@
 
 #include "core/defs.h"
 #include "core/models/containers/containers_defs.h"
+#include "core/models/containers/containerConfig.h"
+#include "core/models/protocols/protocolConfig.h"
+#include "core/models/servers/serverConfig.h"
 
 class ServerController;
 class Settings;
@@ -34,10 +37,10 @@ public:
 
 signals:
     void clientAppendRequested(const DockerContainer container, const ServerCredentials &credentials, 
-                              const QJsonObject &containerConfig, const QString &clientName, 
+                              const ContainerConfig &containerConfig, const QString &clientName, 
                               const QSharedPointer<ServerController> &serverController);
     
-    void nativeConfigClientAppendRequested(const QJsonObject &jsonNativeConfig, const QString &clientName, 
+    void nativeConfigClientAppendRequested(const QSharedPointer<ProtocolConfig> &protocolConfig, const QString &clientName, 
                                           const DockerContainer container, const ServerCredentials &credentials, 
                                           const QSharedPointer<ServerController> &serverController);
 
@@ -48,55 +51,55 @@ public slots:
     void onClientAppendCompleted(ErrorCode errorCode);
     void onNativeConfigClientAppendCompleted(ErrorCode errorCode);
 
-    ExportConfigResult generateFullAccessConfig(const QJsonObject &serverConfig);
+    ExportConfigResult generateFullAccessConfig(const QSharedPointer<ServerConfig> &serverConfig);
     
     ExportConfigResult generateConnectionConfig(const QString &clientName, 
                                                const ServerCredentials &credentials,
                                                const DockerContainer container,
-                                               const QJsonObject &containerConfig,
-                                               const QJsonObject &serverConfig,
+                                               const ContainerConfig &containerConfig,
+                                               const QSharedPointer<ServerConfig> &serverConfig,
                                                const QPair<QString, QString> &dnsSettings);
     
     ExportConfigResult generateOpenVpnConfig(const QString &clientName,
                                             const ServerCredentials &credentials,
                                             const DockerContainer container,
-                                            const QJsonObject &containerConfig,
+                                            const ContainerConfig &containerConfig,
                                             const QPair<QString, QString> &dnsSettings,
                                             bool isApiConfig = false);
     
     ExportConfigResult generateWireGuardConfig(const QString &clientName,
                                               const ServerCredentials &credentials,
-                                              const QJsonObject &containerConfig,
+                                              const ContainerConfig &containerConfig,
                                               const QPair<QString, QString> &dnsSettings,
                                               bool isApiConfig = false);
     
     ExportConfigResult generateAwgConfig(const QString &clientName,
                                         const ServerCredentials &credentials,
-                                        const QJsonObject &containerConfig,
+                                        const ContainerConfig &containerConfig,
                                         const QPair<QString, QString> &dnsSettings,
                                         bool isApiConfig = false);
     
     ExportConfigResult generateShadowSocksConfig(const ServerCredentials &credentials,
                                                 const DockerContainer container,
-                                                const QJsonObject &containerConfig,
+                                                const ContainerConfig &containerConfig,
                                                 const QPair<QString, QString> &dnsSettings,
                                                 bool isApiConfig = false);
     
     ExportConfigResult generateCloakConfig(const ServerCredentials &credentials,
-                                          const QJsonObject &containerConfig,
+                                          const ContainerConfig &containerConfig,
                                           const QPair<QString, QString> &dnsSettings,
                                           bool isApiConfig = false);
     
     ExportConfigResult generateXrayConfig(const QString &clientName,
                                          const ServerCredentials &credentials,
-                                         const QJsonObject &containerConfig,
+                                         const ContainerConfig &containerConfig,
                                          const QPair<QString, QString> &dnsSettings,
                                          bool isApiConfig = false);
 
 private:
     ErrorCode generateNativeConfig(const DockerContainer container, const QString &clientName, 
                                   const Proto &protocol, const ServerCredentials &credentials,
-                                  const QJsonObject &containerConfig, const QPair<QString, QString> &dnsSettings,
+                                  const ContainerConfig &containerConfig, const QPair<QString, QString> &dnsSettings,
                                   bool isApiConfig, QJsonObject &jsonNativeConfig,
                                   const QSharedPointer<ServerController> &serverController);
     

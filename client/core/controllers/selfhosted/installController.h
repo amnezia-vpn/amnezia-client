@@ -10,6 +10,8 @@
 
 #include "core/defs.h"
 #include "core/models/containers/containers_defs.h"
+#include "core/models/containers/containerConfig.h"
+#include "core/models/servers/serverConfig.h"
 
 class ServerController;
 class Settings;
@@ -40,7 +42,7 @@ public:
     InstallResult scanServerForInstalledContainers(const ServerCredentials &serverCredentials);
     
     InstallResult updateContainer(const DockerContainer container, const ServerCredentials &serverCredentials,
-                                 const QJsonObject &containerConfig);
+                                 const ContainerConfig &containerConfig);
 
     // Server management operations  
     ErrorCode removeProcessedServer(const ServerCredentials &serverCredentials);
@@ -48,7 +50,7 @@ public:
     ErrorCode removeAllContainers(const ServerCredentials &serverCredentials);
     ErrorCode removeProcessedContainer(const DockerContainer container, const ServerCredentials &serverCredentials);
     
-    ErrorCode removeApiConfig(const QJsonObject &serverConfig);
+    ErrorCode removeApiConfig(const QSharedPointer<ServerConfig> &serverConfig);
     ErrorCode clearCachedProfile(const ServerCredentials &serverCredentials);
 
     // Utility methods  
@@ -61,7 +63,7 @@ public:
 
 signals:
     void clientAppendRequested(const DockerContainer container, const ServerCredentials &credentials,
-                              const QJsonObject &containerConfig, const QString &clientName,
+                              const ContainerConfig &containerConfig, const QString &clientName,
                               const QSharedPointer<ServerController> &serverController);
     
     void containerInstalled(const InstallResult &result);
@@ -81,23 +83,23 @@ signals:
 private:
     // Installation helpers
     ErrorCode installServer(const DockerContainer container, 
-                           const QMap<DockerContainer, QJsonObject> &installedContainers,
+                           const QMap<DockerContainer, ContainerConfig> &installedContainers,
                            const ServerCredentials &serverCredentials,
                            const QSharedPointer<ServerController> &serverController,
-                           QString &finishMessage, QJsonObject &serverConfig);
+                           QString &finishMessage, QSharedPointer<ServerConfig> &serverConfig);
                            
     ErrorCode installContainer(const DockerContainer container,
-                              const QMap<DockerContainer, QJsonObject> &installedContainers,
+                              const QMap<DockerContainer, ContainerConfig> &installedContainers,
                               const ServerCredentials &serverCredentials,
                               const QSharedPointer<ServerController> &serverController,
                               QString &finishMessage);
 
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials,
                                             const QSharedPointer<ServerController> &serverController,
-                                            QMap<DockerContainer, QJsonObject> &installedContainers);
+                                            QMap<DockerContainer, ContainerConfig> &installedContainers);
 
-    QJsonObject generateContainerConfig(const DockerContainer container, int port, 
-                                       const TransportProto transportProto);
+    ContainerConfig generateContainerConfig(const DockerContainer container, int port, 
+                                           const TransportProto transportProto);
     
     bool isServerAlreadyExists(const ServerCredentials &serverCredentials) const;
 

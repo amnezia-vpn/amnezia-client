@@ -12,8 +12,11 @@
 #include "core/models/protocols/ikev2ProtocolConfig.h"
 #include "core/models/protocols/openvpnProtocolConfig.h"
 #include "core/models/protocols/shadowsocksProtocolConfig.h"
+#include "core/models/protocols/torWebsiteProtocolConfig.h"
 #include "core/models/protocols/wireguardProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/protocolConfig.h"
+#include <variant>
 
 VpnConfigurationsController::VpnConfigurationsController(const std::shared_ptr<Settings> &settings,
                                                          QSharedPointer<ServerController> serverController, QObject *parent)
@@ -36,31 +39,33 @@ QScopedPointer<ConfiguratorBase> VpnConfigurationsController::createConfigurator
     }
 }
 
-QSharedPointer<ProtocolConfig> VpnConfigurationsController::createProtocolConfig(const Proto protocol, const QJsonObject &protocolConfigJson)
+QSharedPointer<ProtocolConfig> VpnConfigurationsController::createProtocolConfig(const Proto protocol)
 {
     switch (protocol) {
     case Proto::OpenVpn: 
-        return QSharedPointer<OpenVpnProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+        return QSharedPointer<OpenVpnProtocolConfig>::create(QJsonObject(), ProtocolProps::protoToString(protocol));
     case Proto::ShadowSocks: 
-        return QSharedPointer<ShadowsocksProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+        return QSharedPointer<ShadowsocksProtocolConfig>::create(QJsonObject(), ProtocolProps::protoToString(protocol));
     case Proto::Cloak: 
-        return QSharedPointer<CloakProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+        return QSharedPointer<CloakProtocolConfig>::create(QJsonObject(), ProtocolProps::protoToString(protocol));
     case Proto::WireGuard: 
-        return QSharedPointer<WireGuardProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+        return QSharedPointer<WireGuardProtocolConfig>::create(QJsonObject(), ProtocolProps::protoToString(protocol));
     case Proto::Awg: 
-        return QSharedPointer<AwgProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+        return QSharedPointer<AwgProtocolConfig>::create(QJsonObject(), ProtocolProps::protoToString(protocol));
     case Proto::Xray: 
     case Proto::SSXray: 
-        return QSharedPointer<XrayProtocolConfig>::create(protocolConfigJson, ProtocolProps::protoToString(protocol));
+        return QSharedPointer<XrayProtocolConfig>::create(QJsonObject(), ProtocolProps::protoToString(protocol));
     case Proto::Ikev2: 
         return QSharedPointer<Ikev2ProtocolConfig>::create(ProtocolProps::protoToString(protocol));
+    case Proto::TorWebSite:
+        return QSharedPointer<TorWebsiteProtocolConfig>::create(QJsonObject(), ProtocolProps::protoToString(protocol));
     default: 
         return nullptr;
     }
 }
 
 ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const ServerCredentials &credentials,
-                                                                        const DockerContainer container, QJsonObject &containerConfig)
+                                                                        const DockerContainer container, ContainerConfig &containerConfig)
 {
     ErrorCode errorCode = ErrorCode::NoError;
 
@@ -69,13 +74,16 @@ ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const Se
     }
 
     for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
-        QJsonObject protocolConfigJson = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
-
-        // Create ProtocolConfig from JSON
-        auto protocolConfig = createProtocolConfig(protocol, protocolConfigJson);
+        QString protocolName = ProtocolProps::protoToString(protocol);
+        auto protocolConfig = containerConfig.protocolConfigs.value(protocolName);
+        
         if (!protocolConfig) {
-            errorCode = ErrorCode::InternalError;
-            return errorCode;
+            protocolConfig = createProtocolConfig(protocol);
+            if (!protocolConfig) {
+                errorCode = ErrorCode::InternalError;
+                return errorCode;
+            }
+            containerConfig.protocolConfigs.insert(protocolName, protocolConfig);
         }
 
         auto configurator = createConfigurator(protocol);
@@ -84,35 +92,16 @@ ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const Se
             return errorCode;
         }
 
-        // Extract nativeConfig and store back in JSON for backward compatibility
-        QString nativeConfig;
-        if (auto openVpnConfig = qSharedPointerCast<OpenVpnProtocolConfig>(result)) {
-            nativeConfig = openVpnConfig->clientProtocolConfig.nativeConfig;
-        } else if (auto wgConfig = qSharedPointerCast<WireGuardProtocolConfig>(result)) {
-            nativeConfig = wgConfig->clientProtocolConfig.nativeConfig;
-        } else if (auto awgConfig = qSharedPointerCast<AwgProtocolConfig>(result)) {
-            nativeConfig = awgConfig->clientProtocolConfig.nativeConfig;
-        } else if (auto cloakConfig = qSharedPointerCast<CloakProtocolConfig>(result)) {
-            nativeConfig = cloakConfig->clientProtocolConfig.nativeConfig;
-        } else if (auto xrayConfig = qSharedPointerCast<XrayProtocolConfig>(result)) {
-            nativeConfig = xrayConfig->clientProtocolConfig.nativeConfig;
-        } else if (auto shadowsocksConfig = qSharedPointerCast<ShadowsocksProtocolConfig>(result)) {
-            nativeConfig = shadowsocksConfig->clientProtocolConfig.nativeConfig;
-        } else if (auto ikev2Config = qSharedPointerCast<Ikev2ProtocolConfig>(result)) {
-            nativeConfig = ikev2Config->clientProtocolConfig.nativeConfig;
-        }
-
-        protocolConfigJson.insert(config_key::last_config, nativeConfig);
-        containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfigJson);
+        containerConfig.protocolConfigs.insert(protocolName, result);
     }
 
     return errorCode;
 }
 
 ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isApiConfig, const QPair<QString, QString> &dns,
-                                                                  const ServerCredentials &credentials, const DockerContainer container,
-                                                                  const QJsonObject &containerConfig, const Proto protocol,
-                                                                  QString &protocolConfigString)
+                                                              const ServerCredentials &credentials, const DockerContainer container,
+                                                              const ContainerConfig &containerConfig, const Proto protocol,
+                                                              QString &protocolConfigString)
 {
     ErrorCode errorCode = ErrorCode::NoError;
 
@@ -120,9 +109,8 @@ ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isA
         return errorCode;
     }
 
-    // Create ProtocolConfig from JSON
-    QJsonObject protocolConfigJson = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
-    auto protocolConfig = createProtocolConfig(protocol, protocolConfigJson);
+    QString protocolName = ProtocolProps::protoToString(protocol);
+    auto protocolConfig = containerConfig.protocolConfigs.value(protocolName);
     if (!protocolConfig) {
         errorCode = ErrorCode::InternalError;
         return errorCode;
@@ -134,31 +122,17 @@ ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isA
         return errorCode;
     }
 
-    // Extract nativeConfig
-    QString nativeConfig;
-    if (auto openVpnConfig = qSharedPointerCast<OpenVpnProtocolConfig>(result)) {
-        nativeConfig = openVpnConfig->clientProtocolConfig.nativeConfig;
-    } else if (auto wgConfig = qSharedPointerCast<WireGuardProtocolConfig>(result)) {
-        nativeConfig = wgConfig->clientProtocolConfig.nativeConfig;
-    } else if (auto awgConfig = qSharedPointerCast<AwgProtocolConfig>(result)) {
-        nativeConfig = awgConfig->clientProtocolConfig.nativeConfig;
-    } else if (auto cloakConfig = qSharedPointerCast<CloakProtocolConfig>(result)) {
-        nativeConfig = cloakConfig->clientProtocolConfig.nativeConfig;
-    } else if (auto xrayConfig = qSharedPointerCast<XrayProtocolConfig>(result)) {
-        nativeConfig = xrayConfig->clientProtocolConfig.nativeConfig;
-    } else if (auto shadowsocksConfig = qSharedPointerCast<ShadowsocksProtocolConfig>(result)) {
-        nativeConfig = shadowsocksConfig->clientProtocolConfig.nativeConfig;
-    } else if (auto ikev2Config = qSharedPointerCast<Ikev2ProtocolConfig>(result)) {
-        nativeConfig = ikev2Config->clientProtocolConfig.nativeConfig;
-    }
-
-    protocolConfigString = configurator->processConfigWithExportSettings(dns, isApiConfig, nativeConfig);
+    configurator->processConfigWithExportSettings(dns, isApiConfig, result);
+    ProtocolConfigVariant variant = ProtocolConfig::getProtocolConfigVariant(result);
+    std::visit([&protocolConfigString](const auto &config) -> void {
+        protocolConfigString = config->clientProtocolConfig.nativeConfig;
+    }, variant);
 
     return errorCode;
 }
 
-QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
-                                                                const QJsonObject &containerConfig, const DockerContainer container)
+QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QString, QString> &dns, const QSharedPointer<ServerConfig> &serverConfig,
+                                                                const ContainerConfig &containerConfig, const DockerContainer container)
 {
     QJsonObject vpnConfiguration {};
 
@@ -166,22 +140,44 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
         return vpnConfiguration;
     }
 
-    bool isApiConfig = serverConfig.value(config_key::configVersion).toInt();
+    bool isApiConfig = static_cast<int>(serverConfig->type);
 
     for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
         if (isApiConfig && container == DockerContainer::Cloak && proto == ProtocolEnumNS::Proto::ShadowSocks) {
             continue;
         }
 
-        QString protocolConfigString =
-                containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
+        QString protocolName = ProtocolProps::protoToString(proto);
+        auto protocolConfig = containerConfig.protocolConfigs.value(protocolName);
+        QString protocolConfigString;
+        
+        if (protocolConfig) {
+            auto configurator = createConfigurator(proto);
+            configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfig);
+            ProtocolConfigVariant variant = ProtocolConfig::getProtocolConfigVariant(protocolConfig);
+            std::visit([&protocolConfigString](const auto &config) -> void {
+                protocolConfigString = config->clientProtocolConfig.nativeConfig;
+            }, variant);
+        } else {
+            protocolConfigString = "";
+        }
 
-        auto configurator = createConfigurator(proto);
-        protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
-
-        QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+        QJsonObject vpnConfigData;
+        if (proto == Proto::Xray || proto == Proto::SSXray) {
+            vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+        } else {
+            vpnConfigData[config_key::config] = protocolConfigString;
+            if (protocolConfig) {
+                QJsonObject protocolJson = protocolConfig->toJson();
+                for (auto it = protocolJson.begin(); it != protocolJson.end(); ++it) {
+                    if (it.key() != config_key::config && it.key() != config_key::last_config) {
+                        vpnConfigData[it.key()] = it.value();
+                    }
+                }
+            }
+        }
+        
         if (container == DockerContainer::Awg || container == DockerContainer::WireGuard) {
-            // add mtu for old configs
             if (vpnConfigData[config_key::mtu].toString().isEmpty()) {
                 vpnConfigData[config_key::mtu] =
                         container == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
@@ -197,31 +193,32 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
     vpnConfiguration[config_key::dns1] = dns.first;
     vpnConfiguration[config_key::dns2] = dns.second;
 
-    vpnConfiguration[config_key::hostName] = serverConfig.value(config_key::hostName).toString();
-    vpnConfiguration[config_key::description] = serverConfig.value(config_key::description).toString();
+    vpnConfiguration[config_key::hostName] = serverConfig->hostName;
+    vpnConfiguration[config_key::description] = serverConfig->toJson().value(config_key::description).toString();
 
-    vpnConfiguration[config_key::configVersion] = serverConfig.value(config_key::configVersion).toInt();
-    // TODO: try to get hostName, port, description for 3rd party configs
-    // vpnConfiguration[config_key::port] = ...;
+    vpnConfiguration[config_key::configVersion] = static_cast<int>(serverConfig->type);
+
 
     return vpnConfiguration;
 }
 
-void VpnConfigurationsController::updateContainerConfigAfterInstallation(const DockerContainer container, QJsonObject &containerConfig,
-                                                                         const QString &stdOut)
+void VpnConfigurationsController::updateContainerConfigAfterInstallation(const DockerContainer container, ContainerConfig &containerConfig,
+                                                                        const QString &stdOut)
 {
     Proto mainProto = ContainerProps::defaultProtocol(container);
 
     if (container == DockerContainer::TorWebSite) {
-        QJsonObject protocol = containerConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+        QString protocolName = ProtocolProps::protoToString(mainProto);
+        auto protocolConfig = containerConfig.protocolConfigs.value(protocolName);
 
         qDebug() << "amnezia-tor onions" << stdOut;
 
         QString onion = stdOut;
         onion.replace("\n", "");
-        protocol.insert(config_key::site, onion);
-
-        containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
+        
+        if (auto torConfig = qSharedPointerCast<TorWebsiteProtocolConfig>(protocolConfig)) {
+            torConfig->serverProtocolConfig.site = onion;
+        }
     }
 }
 

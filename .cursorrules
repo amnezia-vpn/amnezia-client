@@ -1,0 +1,69 @@
+# Amnezia VPN Client - MVVM Refactoring Rules
+
+## Architecture Requirements
+
+### MVVM Pattern
+- Follow Model-View-ViewModel architecture strictly
+- Maintain clear separation of concerns between layers
+- UI controllers should only handle user input and delegate to core controllers
+- Core controllers contain all business logic and data manipulation
+
+### Dependencies Direction
+- UI layer depends on Core layer (unidirectional dependency)
+- UI controllers must not depend on each other
+- Core controllers must not depend on each other (exceptions: ServerController, VpnConfigurationsController, GatewayController can be created "on the fly")
+
+### Settings Usage
+- UI classes must NOT use Settings class directly
+- Create wrapper methods in core controllers for Settings operations
+
+### Server Controller Creation
+- ServerController creation must happen in Core controllers, never in UI
+- Remove direct instantiation: `new ServerController(m_settings)` from UI code
+
+## Code Organization
+
+### Folder Structure
+- Core controllers: `client/core/controllers/`
+- Core models: `client/core/models/`  
+- UI controllers: `client/ui/controllers/`
+- UI models: `client/ui/models/`
+- Common models and controllers in root of respective folders
+
+### Controller Management
+- All controllers must be instantiated in central `coreController`
+- Dependencies between core controllers resolved in `coreController`
+- UI controllers accept core controllers via constructor injection
+- UI controllers should be renamed with "UI" suffix (e.g., `exportUIController`)
+
+## Code Style
+
+### Comments
+- Do NOT include comments in code
+- Code should be self-documenting
+
+### Models Behavior
+- Models should only display data
+- Keep core models as pure data structures without business logic
+
+## Refactoring Process
+
+### UI Controller Refactoring
+- Remove all business logic from UI controllers
+- Replace direct method calls with delegation to core controllers
+- Maintain only UI-specific logic (signals, model updates)
+- Remove Settings dependencies
+
+### Core Controller Pattern
+- Create corresponding methods in core controllers for UI operations
+- Core controllers handle all complex logic, network operations, file I/O
+- Return structured results with error codes and data
+- Manage ServerController lifecycle internally
+
+## Git Workflow
+- Use `git mv` for renaming controllers to maintain history
+
+## Error Handling
+- Core controllers return structured error results
+- UI controllers only handle error presentation
+- Maintain consistent error propagation patterns 

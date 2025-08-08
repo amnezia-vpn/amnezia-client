@@ -1,9 +1,6 @@
 #include "awg_configurator.h"
 #include "protocols/protocols_defs.h"
 
-#include <QJsonDocument>
-#include <QJsonObject>
-
 AwgConfigurator::AwgConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
     : WireguardConfigurator(settings, serverController, true, parent)
 {

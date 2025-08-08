@@ -2,9 +2,10 @@
 #define CLIENTMANAGEMENTMODEL_H
 
 #include <QAbstractListModel>
-#include <QJsonArray>
+#include <QList>
 
 #include "core/controllers/selfhosted/clientManagementController.h"
+#include "core/models/clientInfo.h"
 
 class ClientManagementModel : public QAbstractListModel
 {
@@ -33,11 +34,11 @@ signals:
     void adminConfigRevoked(const DockerContainer container);
 
 private slots:
-    void onClientsDataUpdated(const QJsonArray &clientsTable);
+    void onClientsDataUpdated(const QList<ClientInfo> &clientsList);
     void onClientRenamed(const int row, const QString &newName);
 
 private:
-    QJsonArray m_clientsTable;
+    QList<ClientInfo> m_clientsList;
     QSharedPointer<ClientManagementController> m_clientManagementController;
 };
 

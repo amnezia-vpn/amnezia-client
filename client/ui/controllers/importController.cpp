@@ -13,6 +13,19 @@
 #include "core/qrCodeUtils.h"
 #include "core/serialization/serialization.h"
 #include "protocols/protocols_defs.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/models/protocols/wireguardProtocolConfig.h"
+#include "core/models/protocols/openvpnProtocolConfig.h"
+#include "core/models/protocols/shadowsocksProtocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/cloakProtocolConfig.h"
+#include "core/models/protocols/protocolConfig.h"
+#include "core/models/servers/selfHostedServerConfig.h"
+#include "core/models/servers/serverConfig.h"
+#include <variant>
+#include "core/models/servers/apiV1ServerConfig.h"
+#include "core/models/servers/apiV2ServerConfig.h"
+#include "core/models/containers/containerConfig.h"
 #include "systemController.h"
 #include "utilities.h"
 
@@ -167,7 +180,7 @@ bool ImportController::extractConfigFromData(QString data)
     switch (m_configType) {
     case ConfigTypes::OpenVpn: {
         m_config = extractOpenVpnConfig(config);
-        if (!m_config.empty()) {
+        if (m_config) {
             checkForMaliciousStrings(m_config);
             return true;
         }
@@ -176,23 +189,24 @@ bool ImportController::extractConfigFromData(QString data)
     case ConfigTypes::Awg:
     case ConfigTypes::WireGuard: {
         m_config = extractWireGuardConfig(config);
-        return m_config.empty() ? false : true;
+        return m_config ? true : false;
     }
     case ConfigTypes::Xray: {
         m_config = extractXrayConfig(config);
-        return m_config.empty() ? false : true;
+        return m_config ? true : false;
     }
     case ConfigTypes::Amnezia: {
-        m_config = QJsonDocument::fromJson(config.toUtf8()).object();
+        QJsonObject configJson = QJsonDocument::fromJson(config.toUtf8()).object();
 
-        if (apiUtils::isServerFromApi(m_config)) {
-            auto apiConfig = m_config.value(apiDefs::key::apiConfig).toObject();
+        if (apiUtils::isServerFromApi(configJson)) {
+            auto apiConfig = configJson.value(apiDefs::key::apiConfig).toObject();
             apiConfig[apiDefs::key::vpnKey] = data;
-            m_config[apiDefs::key::apiConfig] = apiConfig;
+            configJson[apiDefs::key::apiConfig] = apiConfig;
         }
+        m_config = ServerConfig::createServerConfig(configJson);
 
         processAmneziaConfig(m_config);
-        if (!m_config.empty()) {
+        if (m_config) {
             checkForMaliciousStrings(m_config);
             return true;
         }
@@ -218,13 +232,14 @@ bool ImportController::extractConfigFromQr(const QByteArray &data)
 {
     QJsonObject dataObj = QJsonDocument::fromJson(data).object();
     if (!dataObj.isEmpty()) {
-        m_config = dataObj;
+        m_config = ServerConfig::createServerConfig(dataObj);
         return true;
     }
 
     QByteArray ba_uncompressed = qUncompress(data);
     if (!ba_uncompressed.isEmpty()) {
-        m_config = QJsonDocument::fromJson(ba_uncompressed).object();
+        QJsonObject configObj = QJsonDocument::fromJson(ba_uncompressed).object();
+        m_config = ServerConfig::createServerConfig(configObj);
         return true;
     }
 
@@ -238,7 +253,8 @@ bool ImportController::extractConfigFromQr(const QByteArray &data)
         }
 
         if (!ba.isEmpty()) {
-            m_config = QJsonDocument::fromJson(ba).object();
+            QJsonObject configObj = QJsonDocument::fromJson(ba).object();
+            m_config = ServerConfig::createServerConfig(configObj);
             return true;
         }
     }
@@ -248,7 +264,10 @@ bool ImportController::extractConfigFromQr(const QByteArray &data)
 
 QString ImportController::getConfig()
 {
-    return QJsonDocument(m_config).toJson(QJsonDocument::Indented);
+    if (!m_config) {
+        return QString();
+    }
+    return QJsonDocument(m_config->toJson()).toJson(QJsonDocument::Indented);
 }
 
 QString ImportController::getConfigFileName()
@@ -268,95 +287,84 @@ bool ImportController::isNativeWireGuardConfig()
 
 void ImportController::processNativeWireGuardConfig()
 {
-    auto containers = m_config.value(config_key::containers).toArray();
-    if (!containers.isEmpty()) {
-        auto container = containers.at(0).toObject();
-        auto serverProtocolConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::WireGuard)).toObject();
-        auto clientProtocolConfig = QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
-
-        QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
-        QString junkPacketMinSize = QString::number(10);
-        QString junkPacketMaxSize = QString::number(50);
-        clientProtocolConfig[config_key::junkPacketCount] = junkPacketCount;
-        clientProtocolConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
-        clientProtocolConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
-        clientProtocolConfig[config_key::initPacketJunkSize] = "0";
-        clientProtocolConfig[config_key::responsePacketJunkSize] = "0";
-        clientProtocolConfig[config_key::initPacketMagicHeader] = "1";
-        clientProtocolConfig[config_key::responsePacketMagicHeader] = "2";
-        clientProtocolConfig[config_key::underloadPacketMagicHeader] = "3";
-        clientProtocolConfig[config_key::transportPacketMagicHeader] = "4";
-
-        // clientProtocolConfig[config_key::cookieReplyPacketJunkSize] = "0";
-        // clientProtocolConfig[config_key::transportPacketJunkSize] = "0";
-
-        // clientProtocolConfig[config_key::specialJunk1] = "";
-        // clientProtocolConfig[config_key::specialJunk2] = "";
-        // clientProtocolConfig[config_key::specialJunk3] = "";
-        // clientProtocolConfig[config_key::specialJunk4] = "";
-        // clientProtocolConfig[config_key::specialJunk5] = "";
-        // clientProtocolConfig[config_key::controlledJunk1] = "";
-        // clientProtocolConfig[config_key::controlledJunk2] = "";
-        // clientProtocolConfig[config_key::controlledJunk3] = "";
-        // clientProtocolConfig[config_key::specialHandshakeTimeout] = "0";
-
-        clientProtocolConfig[config_key::isObfuscationEnabled] = true;
-
-        serverProtocolConfig[config_key::last_config] = QString(QJsonDocument(clientProtocolConfig).toJson());
-        container["wireguard"] = serverProtocolConfig;
-        containers.replace(0, container);
-        m_config[config_key::containers] = containers;
+    if (!m_config) return;
+    
+    auto selfHostedConfig = qSharedPointerCast<SelfHostedServerConfig>(m_config);
+    if (!selfHostedConfig) return;
+    
+    QString wireguardContainerName = ContainerProps::containerTypeToString(DockerContainer::WireGuard);
+    if (!selfHostedConfig->containerConfigs.contains(wireguardContainerName)) {
+        return;
     }
+    
+    ContainerConfig wireguardContainer = selfHostedConfig->containerConfigs.value(wireguardContainerName);
+    if (!wireguardContainer.protocolConfigs.contains("wireguard")) {
+        return;
+    }
+    
+    auto wireguardProtocol = wireguardContainer.protocolConfigs.value("wireguard");
+    
+    QJsonObject awgProtocolConfigJson;
+    awgProtocolConfigJson[config_key::protocolName] = "awg";
+    awgProtocolConfigJson[config_key::last_config] = wireguardProtocol->toJson().value(config_key::last_config);
+    
+    auto awgConfig = QSharedPointer<AwgProtocolConfig>::create(awgProtocolConfigJson, "awg");
+    
+    QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
+    awgConfig->serverProtocolConfig.junkPacketCount = junkPacketCount;
+    awgConfig->serverProtocolConfig.junkPacketMinSize = "10";
+    awgConfig->serverProtocolConfig.junkPacketMaxSize = "50";
+    awgConfig->serverProtocolConfig.initPacketJunkSize = "0";
+    awgConfig->serverProtocolConfig.responsePacketJunkSize = "0";
+    awgConfig->serverProtocolConfig.initPacketMagicHeader = "1";
+    awgConfig->serverProtocolConfig.responsePacketMagicHeader = "2";
+    awgConfig->serverProtocolConfig.underloadPacketMagicHeader = "3";
+    awgConfig->serverProtocolConfig.transportPacketMagicHeader = "4";
+    
+    wireguardContainer.protocolConfigs["wireguard"] = awgConfig;
+    selfHostedConfig->containerConfigs[wireguardContainerName] = wireguardContainer;
 }
 
 void ImportController::importConfig()
 {
-    ServerCredentials credentials;
-    credentials.hostName = m_config.value(config_key::hostName).toString();
-    credentials.port = m_config.value(config_key::port).toInt();
-    credentials.userName = m_config.value(config_key::userName).toString();
-    credentials.secretData = m_config.value(config_key::password).toString();
+    if (!m_config) {
+        emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
+        return;
+    }
 
-    if (credentials.isValid() || m_config.contains(config_key::containers)) {
-        m_serversModel->addServer(m_config);
+    if (auto selfHostedConfig = qSharedPointerCast<SelfHostedServerConfig>(m_config)) {
+        if (selfHostedConfig->serverCredentials.isValid() || !selfHostedConfig->containerConfigs.isEmpty()) {
+            m_serversModel->addServer(m_config->toJson());
         emit importFinished();
-    } else if (m_config.contains(config_key::configVersion)) {
-        quint16 crc = qChecksum(QJsonDocument(m_config).toJson());
+        } else {
+            qDebug() << "Failed to import profile - invalid credentials or no containers";
+            emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
+        }
+    } else if (apiUtils::isServerFromApi(m_config->toJson())) {
+        quint16 crc = qChecksum(QJsonDocument(m_config->toJson()).toJson());
         if (m_serversModel->isServerFromApiAlreadyExists(crc)) {
             emit importErrorOccurred(ErrorCode::ApiConfigAlreadyAdded, true);
         } else {
-            m_config.insert(config_key::crc, crc);
+            QJsonObject configJson = m_config->toJson();
+            configJson[config_key::crc] = crc;
+            auto updatedConfig = ServerConfig::createServerConfig(configJson);
 
-            m_serversModel->addServer(m_config);
+            m_serversModel->addServer(updatedConfig->toJson());
             emit importFinished();
         }
     } else {
-        qDebug() << "Failed to import profile";
-        qDebug().noquote() << QJsonDocument(m_config).toJson();
+        qDebug() << "Failed to import profile - unknown config type";
+        qDebug().noquote() << QJsonDocument(m_config->toJson()).toJson();
         emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
     }
 
-    m_config = {};
+    m_config.reset();
     m_configFileName.clear();
     m_maliciousWarningText.clear();
 }
 
-QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
+QSharedPointer<ServerConfig> ImportController::extractOpenVpnConfig(const QString &data)
 {
-    QJsonObject openVpnConfig;
-    openVpnConfig[config_key::config] = data;
-
-    QJsonObject lastConfig;
-    lastConfig[config_key::last_config] = QString(QJsonDocument(openVpnConfig).toJson());
-    lastConfig[config_key::isThirdPartyConfig] = true;
-
-    QJsonObject containers;
-    containers.insert(config_key::container, QJsonValue("amnezia-openvpn"));
-    containers.insert(config_key::openvpn, QJsonValue(lastConfig));
-
-    QJsonArray arr;
-    arr.push_back(containers);
-
     QString hostName;
     const static QRegularExpression hostNameRegExp("remote\\s+([^\\s]+)");
     QRegularExpressionMatch hostNameMatch = hostNameRegExp.match(data);
@@ -364,26 +372,34 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
         hostName = hostNameMatch.captured(1);
     }
 
-    QJsonObject config;
-    config[config_key::containers] = arr;
-    config[config_key::defaultContainer] = "amnezia-openvpn";
-    config[config_key::description] = m_settings->nextAvailableServerName();
+    auto serverConfig = QSharedPointer<SelfHostedServerConfig>::create();
+    serverConfig->hostName = hostName;
+    serverConfig->description = m_settings->nextAvailableServerName();
+    serverConfig->defaultContainer = "amnezia-openvpn";
 
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatchIterator dnsMatch = dnsRegExp.globalMatch(data);
     if (dnsMatch.hasNext()) {
-        config[config_key::dns1] = dnsMatch.next().captured(1);
+        serverConfig->dns1 = dnsMatch.next().captured(1);
     }
     if (dnsMatch.hasNext()) {
-        config[config_key::dns2] = dnsMatch.next().captured(1);
+        serverConfig->dns2 = dnsMatch.next().captured(1);
     }
 
-    config[config_key::hostName] = hostName;
+    auto openVpnProtocolConfig = QSharedPointer<OpenVpnProtocolConfig>::create();
+    openVpnProtocolConfig->clientProtocolConfig.nativeConfig = data;
+    openVpnProtocolConfig->isThirdPartyConfig = true;
 
-    return config;
+    ContainerConfig containerConfig;
+    containerConfig.container = DockerContainer::OpenVpn;
+    containerConfig.protocolConfigs["openvpn"] = openVpnProtocolConfig;
+
+    serverConfig->containerConfigs["amnezia-openvpn"] = containerConfig;
+
+    return serverConfig;
 }
 
-QJsonObject ImportController::extractWireGuardConfig(const QString &data)
+QSharedPointer<ServerConfig> ImportController::extractWireGuardConfig(const QString &data)
 {
     QMap<QString, QString> configMap;
     auto configByLines = data.split("\n");
@@ -399,9 +415,6 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         }
     }
 
-    QJsonObject lastConfig;
-    lastConfig[config_key::config] = data;
-
     auto url { QUrl::fromUserInput(configMap.value("Endpoint")) };
     QString hostName;
     QString port;
@@ -410,7 +423,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     } else {
         qDebug() << "Key parameter 'Endpoint' is missing or has an invalid format";
         emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
-        return QJsonObject();
+        return nullptr;
     }
 
     if (url.port() != -1) {
@@ -419,39 +432,11 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
         port = protocols::wireguard::defaultPort;
     }
 
-    lastConfig[config_key::hostName] = hostName;
-    lastConfig[config_key::port] = port.toInt();
-
-    if (!configMap.value("PrivateKey").isEmpty() && !configMap.value("Address").isEmpty() && !configMap.value("PublicKey").isEmpty()) {
-        lastConfig[config_key::client_priv_key] = configMap.value("PrivateKey");
-        lastConfig[config_key::client_ip] = configMap.value("Address");
-
-        if (!configMap.value("PresharedKey").isEmpty()) {
-            lastConfig[config_key::psk_key] = configMap.value("PresharedKey");
-        } else if (!configMap.value("PreSharedKey").isEmpty()) {
-            lastConfig[config_key::psk_key] = configMap.value("PreSharedKey");
-        }
-
-        lastConfig[config_key::server_pub_key] = configMap.value("PublicKey");
-    } else {
+    if (configMap.value("PrivateKey").isEmpty() || configMap.value("Address").isEmpty() || configMap.value("PublicKey").isEmpty()) {
         qDebug() << "One of the key parameters is missing (PrivateKey, Address, PublicKey)";
         emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
-        return QJsonObject();
+        return nullptr;
     }
-
-    if (!configMap.value("MTU").isEmpty()) {
-        lastConfig[config_key::mtu] = configMap.value("MTU");
-    }
-
-    if (!configMap.value("PersistentKeepalive").isEmpty()) {
-        lastConfig[config_key::persistent_keep_alive] = configMap.value("PersistentKeepalive");
-    }
-
-    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configMap.value("AllowedIPs").split(", "));
-
-    lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
-
-    QString protocolName = "wireguard";
 
     const QStringList requiredJunkFields = { config_key::junkPacketCount,           config_key::junkPacketMinSize,
                                              config_key::junkPacketMaxSize,         config_key::initPacketJunkSize,
@@ -459,115 +444,170 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
                                              config_key::responsePacketMagicHeader, config_key::underloadPacketMagicHeader,
                                              config_key::transportPacketMagicHeader };
 
-    const QStringList optionalJunkFields = { // config_key::cookieReplyPacketJunkSize,
-                                             // config_key::transportPacketJunkSize,
-                                             config_key::specialJunk1,    config_key::specialJunk2,    config_key::specialJunk3,
+    const QStringList optionalJunkFields = { config_key::specialJunk1,    config_key::specialJunk2,    config_key::specialJunk3,
                                              config_key::specialJunk4,    config_key::specialJunk5,    config_key::controlledJunk1,
                                              config_key::controlledJunk2, config_key::controlledJunk3, config_key::specialHandshakeTimeout
     };
 
     bool hasAllRequiredFields = std::all_of(requiredJunkFields.begin(), requiredJunkFields.end(),
                                             [&configMap](const QString &field) { return !configMap.value(field).isEmpty(); });
-    if (hasAllRequiredFields) {
-        for (const QString &field : requiredJunkFields) {
-            lastConfig[field] = configMap.value(field);
-        }
 
-        for (const QString &field : optionalJunkFields) {
-            if (!configMap.value(field).isEmpty()) {
-                lastConfig[field] = configMap.value(field);
-            }
-        }
-
-        protocolName = "awg";
-        m_configType = ConfigTypes::Awg;
-    }
-
-    if (!configMap.value("MTU").isEmpty()) {
-        lastConfig[config_key::mtu] = configMap.value("MTU");
-    } else {
-        lastConfig[config_key::mtu] = protocolName == "awg" ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
-    }
-
-    QJsonObject wireguardConfig;
-    wireguardConfig[config_key::last_config] = QString(QJsonDocument(lastConfig).toJson());
-    wireguardConfig[config_key::isThirdPartyConfig] = true;
-    wireguardConfig[config_key::port] = port;
-    wireguardConfig[config_key::transport_proto] = "udp";
-
-    QJsonObject containers;
-    containers.insert(config_key::container, QJsonValue("amnezia-" + protocolName));
-    containers.insert(protocolName, QJsonValue(wireguardConfig));
-
-    QJsonArray arr;
-    arr.push_back(containers);
-
-    QJsonObject config;
-    config[config_key::containers] = arr;
-    config[config_key::defaultContainer] = "amnezia-" + protocolName;
-    config[config_key::description] = m_settings->nextAvailableServerName();
+    auto serverConfig = QSharedPointer<SelfHostedServerConfig>::create();
+    serverConfig->hostName = hostName;
+    serverConfig->description = m_settings->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp(
             "DNS = "
             "(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatch dnsMatch = dnsRegExp.match(data);
     if (dnsMatch.hasMatch()) {
-        config[config_key::dns1] = dnsMatch.captured(1);
-        config[config_key::dns2] = dnsMatch.captured(2);
+        serverConfig->dns1 = dnsMatch.captured(1);
+        serverConfig->dns2 = dnsMatch.captured(2);
     }
 
-    config[config_key::hostName] = hostName;
+    ContainerConfig containerConfig;
+    QSharedPointer<ProtocolConfig> protocolConfig;
 
-    return config;
+    if (hasAllRequiredFields) {
+        m_configType = ConfigTypes::Awg;
+        serverConfig->defaultContainer = "amnezia-awg";
+        containerConfig.container = DockerContainer::Awg;
+
+        auto awgConfig = QSharedPointer<AwgProtocolConfig>::create();
+        awgConfig->clientProtocolConfig.nativeConfig = data;
+        awgConfig->clientProtocolConfig.clientPrivateKey = configMap.value("PrivateKey");
+        awgConfig->clientProtocolConfig.clientIp = configMap.value("Address");
+        awgConfig->serverProtocolConfig.serverPublicKey = configMap.value("PublicKey");
+        
+        if (!configMap.value("PresharedKey").isEmpty()) {
+            awgConfig->clientProtocolConfig.pskKey = configMap.value("PresharedKey");
+        } else if (!configMap.value("PreSharedKey").isEmpty()) {
+            awgConfig->clientProtocolConfig.pskKey = configMap.value("PreSharedKey");
+        }
+
+        awgConfig->serverProtocolConfig.hostName = hostName;
+        awgConfig->serverProtocolConfig.port = port.toInt();
+        awgConfig->serverProtocolConfig.mtu = configMap.value("MTU").isEmpty() ? protocols::awg::defaultMtu : configMap.value("MTU").toInt();
+        
+        if (!configMap.value("PersistentKeepalive").isEmpty()) {
+            awgConfig->clientProtocolConfig.persistentKeepalive = configMap.value("PersistentKeepalive");
+        }
+
+        QStringList allowedIps = configMap.value("AllowedIPs").split(", ");
+        awgConfig->clientProtocolConfig.allowedIps = allowedIps;
+
+        for (const QString &field : requiredJunkFields) {
+            QString value = configMap.value(field);
+            if (field == config_key::junkPacketCount) awgConfig->serverProtocolConfig.junkPacketCount = value;
+            else if (field == config_key::junkPacketMinSize) awgConfig->serverProtocolConfig.junkPacketMinSize = value;
+            else if (field == config_key::junkPacketMaxSize) awgConfig->serverProtocolConfig.junkPacketMaxSize = value;
+            else if (field == config_key::initPacketJunkSize) awgConfig->serverProtocolConfig.initPacketJunkSize = value;
+            else if (field == config_key::responsePacketJunkSize) awgConfig->serverProtocolConfig.responsePacketJunkSize = value;
+            else if (field == config_key::initPacketMagicHeader) awgConfig->serverProtocolConfig.initPacketMagicHeader = value;
+            else if (field == config_key::responsePacketMagicHeader) awgConfig->serverProtocolConfig.responsePacketMagicHeader = value;
+            else if (field == config_key::underloadPacketMagicHeader) awgConfig->serverProtocolConfig.underloadPacketMagicHeader = value;
+            else if (field == config_key::transportPacketMagicHeader) awgConfig->serverProtocolConfig.transportPacketMagicHeader = value;
+        }
+
+        for (const QString &field : optionalJunkFields) {
+            QString value = configMap.value(field);
+            if (!value.isEmpty()) {
+                if (field == config_key::specialJunk1) awgConfig->serverProtocolConfig.specialJunk1 = value;
+                else if (field == config_key::specialJunk2) awgConfig->serverProtocolConfig.specialJunk2 = value;
+                else if (field == config_key::specialJunk3) awgConfig->serverProtocolConfig.specialJunk3 = value;
+                else if (field == config_key::specialJunk4) awgConfig->serverProtocolConfig.specialJunk4 = value;
+                else if (field == config_key::specialJunk5) awgConfig->serverProtocolConfig.specialJunk5 = value;
+                else if (field == config_key::controlledJunk1) awgConfig->serverProtocolConfig.controlledJunk1 = value;
+                else if (field == config_key::controlledJunk2) awgConfig->serverProtocolConfig.controlledJunk2 = value;
+                else if (field == config_key::controlledJunk3) awgConfig->serverProtocolConfig.controlledJunk3 = value;
+                else if (field == config_key::specialHandshakeTimeout) awgConfig->serverProtocolConfig.specialHandshakeTimeout = value;
+            }
+        }
+
+        awgConfig->isThirdPartyConfig = true;
+        protocolConfig = awgConfig;
+        containerConfig.protocolConfigs["awg"] = protocolConfig;
+    } else {
+        serverConfig->defaultContainer = "amnezia-wireguard";
+        containerConfig.container = DockerContainer::WireGuard;
+
+        auto wgConfig = QSharedPointer<WireGuardProtocolConfig>::create();
+        wgConfig->clientProtocolConfig.nativeConfig = data;
+        wgConfig->clientProtocolConfig.clientPrivateKey = configMap.value("PrivateKey");
+        wgConfig->clientProtocolConfig.clientIp = configMap.value("Address");
+        wgConfig->serverProtocolConfig.serverPublicKey = configMap.value("PublicKey");
+        
+        if (!configMap.value("PresharedKey").isEmpty()) {
+            wgConfig->clientProtocolConfig.pskKey = configMap.value("PresharedKey");
+        } else if (!configMap.value("PreSharedKey").isEmpty()) {
+            wgConfig->clientProtocolConfig.pskKey = configMap.value("PreSharedKey");
+        }
+
+        wgConfig->serverProtocolConfig.hostName = hostName;
+        wgConfig->serverProtocolConfig.port = port.toInt();
+        wgConfig->serverProtocolConfig.mtu = configMap.value("MTU").isEmpty() ? protocols::wireguard::defaultMtu : configMap.value("MTU").toInt();
+        
+        if (!configMap.value("PersistentKeepalive").isEmpty()) {
+            wgConfig->clientProtocolConfig.persistentKeepalive = configMap.value("PersistentKeepalive");
+        }
+
+        QStringList allowedIps = configMap.value("AllowedIPs").split(", ");
+        wgConfig->clientProtocolConfig.allowedIps = allowedIps;
+
+        wgConfig->isThirdPartyConfig = true;
+        protocolConfig = wgConfig;
+        containerConfig.protocolConfigs["wireguard"] = protocolConfig;
+    }
+
+    serverConfig->containerConfigs[serverConfig->defaultContainer] = containerConfig;
+
+    return serverConfig;
 }
 
-QJsonObject ImportController::extractXrayConfig(const QString &data, const QString &description)
+QSharedPointer<ServerConfig> ImportController::extractXrayConfig(const QString &data, const QString &description)
 {
     QJsonParseError parserErr;
     QJsonDocument jsonConf = QJsonDocument::fromJson(data.toLocal8Bit(), &parserErr);
 
-    QJsonObject xrayVpnConfig;
-    xrayVpnConfig[config_key::config] = jsonConf.toJson().constData();
-    QJsonObject lastConfig;
-    lastConfig[config_key::last_config] = jsonConf.toJson().constData();
-    lastConfig[config_key::isThirdPartyConfig] = true;
-
-    QJsonObject containers;
-    if (m_configType == ConfigTypes::ShadowSocks) {
-        containers.insert(config_key::ssxray, QJsonValue(lastConfig));
-        containers.insert(config_key::container, QJsonValue("amnezia-ssxray"));
-    } else {
-        containers.insert(config_key::container, QJsonValue("amnezia-xray"));
-        containers.insert(config_key::xray, QJsonValue(lastConfig));
-    }
-
-    QJsonArray arr;
-    arr.push_back(containers);
-
     QString hostName;
-
     const static QRegularExpression hostNameRegExp("\"address\":\\s*\"([^\"]+)");
     QRegularExpressionMatch hostNameMatch = hostNameRegExp.match(data);
     if (hostNameMatch.hasMatch()) {
         hostName = hostNameMatch.captured(1);
     }
 
-    QJsonObject config;
-    config[config_key::containers] = arr;
+    auto serverConfig = QSharedPointer<SelfHostedServerConfig>::create();
+    serverConfig->hostName = hostName;
+    serverConfig->description = description.isEmpty() ? m_settings->nextAvailableServerName() : description;
+
+    ContainerConfig containerConfig;
+    QSharedPointer<ProtocolConfig> protocolConfig;
 
     if (m_configType == ConfigTypes::ShadowSocks) {
-        config[config_key::defaultContainer] = "amnezia-ssxray";
-    } else {
-        config[config_key::defaultContainer] = "amnezia-xray";
-    }
-    if (description.isEmpty()) {
-        config[config_key::description] = m_settings->nextAvailableServerName();
-    } else {
-        config[config_key::description] = description;
-    }
-    config[config_key::hostName] = hostName;
+        serverConfig->defaultContainer = "amnezia-ssxray";
+        containerConfig.container = DockerContainer::ShadowSocks;
 
-    return config;
+        auto shadowsocksConfig = QSharedPointer<ShadowsocksProtocolConfig>::create();
+        shadowsocksConfig->clientProtocolConfig.nativeConfig = data;
+        shadowsocksConfig->isThirdPartyConfig = true;
+
+        protocolConfig = shadowsocksConfig;
+        containerConfig.protocolConfigs["ssxray"] = protocolConfig;
+    } else {
+        serverConfig->defaultContainer = "amnezia-xray";
+        containerConfig.container = DockerContainer::Xray;
+
+        auto xrayConfig = QSharedPointer<XrayProtocolConfig>::create();
+        xrayConfig->clientProtocolConfig.nativeConfig = data;
+        xrayConfig->isThirdPartyConfig = true;
+
+        protocolConfig = xrayConfig;
+        containerConfig.protocolConfigs["xray"] = protocolConfig;
+    }
+
+    serverConfig->containerConfigs[serverConfig->defaultContainer] = containerConfig;
+
+    return serverConfig;
 }
 
 #ifdef Q_OS_ANDROID
@@ -677,20 +717,41 @@ QString ImportController::getQrCodeScanProgressString()
 }
 #endif
 
-void ImportController::checkForMaliciousStrings(const QJsonObject &serverConfig)
+void ImportController::checkForMaliciousStrings(const QSharedPointer<ServerConfig> &serverConfig)
 {
-    const QJsonArray &containers = serverConfig[config_key::containers].toArray();
-    for (const QJsonValue &container : containers) {
-        auto containerConfig = container.toObject();
-        auto containerName = containerConfig[config_key::container].toString();
-        if ((containerName == ContainerProps::containerToString(DockerContainer::OpenVpn))
-            || (containerName == ContainerProps::containerToString(DockerContainer::Cloak))
-            || (containerName == ContainerProps::containerToString(DockerContainer::ShadowSocks))) {
+    if (!serverConfig) return;
+    
+    auto selfHostedConfig = qSharedPointerCast<SelfHostedServerConfig>(serverConfig);
+    if (!selfHostedConfig) return;
 
-            QString protocolConfig =
-                    containerConfig[ProtocolProps::protoToString(Proto::OpenVpn)].toObject()[config_key::last_config].toString();
-            QString protocolConfigJson = QJsonDocument::fromJson(protocolConfig.toUtf8()).object()[config_key::config].toString();
+    for (const auto &containerEntry : selfHostedConfig->containerConfigs) {
+        const ContainerConfig &containerConfig = containerEntry.second;
+        
+        if (containerConfig.container == DockerContainer::OpenVpn || 
+            containerConfig.container == DockerContainer::Cloak || 
+            containerConfig.container == DockerContainer::ShadowSocks) {
 
+            QString protocolConfigJson;
+            
+            for (const auto &protocolEntry : containerConfig.protocolConfigs) {
+                auto protocolConfig = protocolEntry.second;
+                ProtocolConfigVariant variant = ProtocolConfig::getProtocolConfigVariant(protocolConfig);
+                
+                std::visit([&protocolConfigJson](const auto &config) -> void {
+                    using ConfigType = std::decay_t<decltype(*config)>;
+                    if constexpr (std::is_same_v<ConfigType, OpenVpnProtocolConfig> ||
+                                  std::is_same_v<ConfigType, CloakProtocolConfig> ||
+                                  std::is_same_v<ConfigType, ShadowsocksProtocolConfig>) {
+                        protocolConfigJson = config->clientProtocolConfig.nativeConfig;
+                    }
+                }, variant);
+                
+                if (!protocolConfigJson.isEmpty()) {
+                    break;
+                }
+            }
+
+            if (!protocolConfigJson.isEmpty()) {
             // https://github.com/OpenVPN/openvpn/blob/master/doc/man-sections/script-options.rst
             QStringList dangerousTags {
                 "up", "tls-verify", "ipchange", "client-connect", "route-up", "route-pre-down", "client-disconnect", "down", "learn-address", "auth-user-pass-verify"
@@ -715,34 +776,39 @@ void ImportController::checkForMaliciousStrings(const QJsonObject &serverConfig)
                 m_maliciousWarningText.push_back(tr("<br>In the imported configuration, potentially dangerous lines were found:"));
                 for (const auto &string : maliciousStrings) {
                     m_maliciousWarningText.push_back(QString("<br><i>%1</i>").arg(string));
+                    }
                 }
             }
         }
     }
 }
 
-void ImportController::processAmneziaConfig(QJsonObject &config)
+void ImportController::processAmneziaConfig(QSharedPointer<ServerConfig> &config)
 {
-    auto containers = config.value(config_key::containers).toArray();
-    for (auto i = 0; i < containers.size(); i++) {
-        auto container = containers.at(i).toObject();
-        auto dockerContainer = ContainerProps::containerFromString(container.value(config_key::container).toString());
+    if (!config) return;
+    
+    auto selfHostedConfig = qSharedPointerCast<SelfHostedServerConfig>(config);
+    if (!selfHostedConfig) return;
+    
+    for (auto &containerEntry : selfHostedConfig->containerConfigs) {
+        QString containerName = containerEntry.first;
+        ContainerConfig &containerConfig = containerEntry.second;
+        
+        DockerContainer dockerContainer = ContainerProps::containerFromString(containerName);
         if (dockerContainer == DockerContainer::Awg || dockerContainer == DockerContainer::WireGuard) {
-            auto containerConfig = container.value(ContainerProps::containerTypeToString(dockerContainer)).toObject();
-            auto protocolConfig = containerConfig.value(config_key::last_config).toString();
-            if (protocolConfig.isEmpty()) {
-                return;
+            QString protocolName = ContainerProps::containerTypeToString(dockerContainer);
+            if (containerConfig.protocolConfigs.contains(protocolName)) {
+                auto protocolConfig = containerConfig.protocolConfigs.value(protocolName);
+                
+                if (auto wgConfig = qSharedPointerCast<WireGuardProtocolConfig>(protocolConfig)) {
+                    wgConfig->serverProtocolConfig.mtu = 
+                        dockerContainer == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+                } else if (auto awgConfig = qSharedPointerCast<AwgProtocolConfig>(protocolConfig)) {
+                    awgConfig->serverProtocolConfig.mtu = 
+                        dockerContainer == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+                }
             }
-
-            QJsonObject jsonConfig = QJsonDocument::fromJson(protocolConfig.toUtf8()).object();
-            jsonConfig[config_key::mtu] =
-                    dockerContainer == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
-
-            containerConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
-
-            container[ContainerProps::containerTypeToString(dockerContainer)] = containerConfig;
-            containers.replace(i, container);
-            config.insert(config_key::containers, containers);
         }
     }
 }
+

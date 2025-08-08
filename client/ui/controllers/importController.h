@@ -5,6 +5,7 @@
 
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
+#include "core/models/servers/serverConfig.h"
 
 namespace
 {
@@ -61,13 +62,13 @@ signals:
     void restoreAppConfig(const QByteArray &data);
 
 private:
-    QJsonObject extractOpenVpnConfig(const QString &data);
-    QJsonObject extractWireGuardConfig(const QString &data);
-    QJsonObject extractXrayConfig(const QString &data, const QString &description = "");
+    QSharedPointer<ServerConfig> extractOpenVpnConfig(const QString &data);
+    QSharedPointer<ServerConfig> extractWireGuardConfig(const QString &data);
+    QSharedPointer<ServerConfig> extractXrayConfig(const QString &data, const QString &description = "");
 
-    void checkForMaliciousStrings(const QJsonObject &protocolConfig);
+    void checkForMaliciousStrings(const QSharedPointer<ServerConfig> &serverConfig);
 
-    void processAmneziaConfig(QJsonObject &config);
+    void processAmneziaConfig(QSharedPointer<ServerConfig> &config);
 
 #if defined Q_OS_ANDROID || defined Q_OS_IOS
     void stopDecodingQr();
@@ -77,7 +78,7 @@ private:
     QSharedPointer<ContainersModel> m_containersModel;
     std::shared_ptr<Settings> m_settings;
 
-    QJsonObject m_config;
+    QSharedPointer<ServerConfig> m_config;
     QString m_configFileName;
     ConfigTypes m_configType;
     QString m_maliciousWarningText;

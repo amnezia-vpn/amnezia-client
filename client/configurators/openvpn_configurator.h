@@ -28,10 +28,10 @@ public:
     QSharedPointer<ProtocolConfig> createConfig(const ServerCredentials &credentials, DockerContainer container,
                                                 const QSharedPointer<ProtocolConfig> &protocolConfig, ErrorCode &errorCode) override;
 
-    QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                           QString &protocolConfigString);
-    QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                            QString &protocolConfigString);
+    void processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                        QSharedPointer<ProtocolConfig> &protocolConfig) override;
+    void processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                         QSharedPointer<ProtocolConfig> &protocolConfig) override;
 
     Vars generateProtocolVars(const ServerCredentials &credentials, DockerContainer container,
                              const QSharedPointer<ProtocolConfig> &protocolConfig) const override;

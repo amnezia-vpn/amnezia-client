@@ -13,6 +13,7 @@
 
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/models/servers/selfHostedServerConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
 #include "core/networkUtilities.h"
 #include "logger.h"
 #include "utilities.h"
@@ -40,21 +41,21 @@ InstallResult InstallController::installContainer(DockerContainer container, int
 
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
 
-    QJsonObject containerConfig = generateContainerConfig(container, port, transportProto);
+    ContainerConfig containerConfig = generateContainerConfig(container, port, transportProto);
 
     if (shouldCreateServer && isServerAlreadyExists(serverCredentials)) {
         result.errorCode = ErrorCode::InternalError;
         return result;
     }
 
-    QMap<DockerContainer, QJsonObject> installedContainers;
+    QMap<DockerContainer, ContainerConfig> installedContainers;
     ErrorCode errorCode = getAlreadyInstalledContainers(serverCredentials, serverController, installedContainers);
     if (errorCode != ErrorCode::NoError) {
         result.errorCode = errorCode;
         return result;
     }
 
-    QJsonObject serverConfig;
+    QSharedPointer<ServerConfig> serverConfig;
     if (shouldCreateServer) {
         errorCode = installServer(container, installedContainers, serverCredentials, 
                                  serverController, result.message, serverConfig);
@@ -84,7 +85,7 @@ InstallResult InstallController::scanServerForInstalledContainers(const ServerCr
     result.isInstalledContainerFound = false;
     result.isServiceInstall = false;
 
-    QMap<DockerContainer, QJsonObject> installedContainers;
+    QMap<DockerContainer, ContainerConfig> installedContainers;
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
     result.errorCode = getAlreadyInstalledContainers(serverCredentials, serverController, installedContainers);
 
@@ -93,7 +94,7 @@ InstallResult InstallController::scanServerForInstalledContainers(const ServerCr
 
         for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
             auto container = iterator.key();
-            QJsonObject containerConfig = iterator.value();
+            ContainerConfig containerConfig = iterator.value();
 
             if (ContainerProps::isSupportedByCurrentPlatform(container)) {
                 result.errorCode = vpnConfigurationController.createProtocolConfigForContainer(serverCredentials, container, containerConfig);
@@ -115,7 +116,7 @@ InstallResult InstallController::scanServerForInstalledContainers(const ServerCr
 
 ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentials &credentials,
                                                           const QSharedPointer<ServerController> &serverController,
-                                                          QMap<DockerContainer, QJsonObject> &installedContainers)
+                                                          QMap<DockerContainer, ContainerConfig> &installedContainers)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -148,18 +149,58 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
             DockerContainer container = ContainerProps::containerFromString(containerName);
             if (container != DockerContainer::None) {
-                QJsonObject containerConfigObject;
-                containerConfigObject.insert(config_key::container, ContainerProps::containerToString(container));
+                ContainerConfig containerConfig;
+                containerConfig.containerName = ContainerProps::containerToString(container);
 
                 auto containerProto = ContainerProps::defaultProtocol(container);
                 auto containerProtoString = ProtocolProps::protoToString(containerProto);
 
+                // Create appropriate protocol config based on container type
+                QSharedPointer<ProtocolConfig> protocolConfig;
+                
+                // Create a temporary QJsonObject to construct the protocol config
                 QJsonObject protoConfigObject;
                 protoConfigObject.insert(config_key::port, port);
                 protoConfigObject.insert(config_key::transport_proto, transportProto);
-
-                containerConfigObject.insert(containerProtoString, protoConfigObject);
-                installedContainers.insert(container, containerConfigObject);
+                
+                // Create the appropriate protocol config based on type
+                switch (containerProto) {
+                case Proto::OpenVpn:
+                    protocolConfig = QSharedPointer<OpenVpnProtocolConfig>::create(protoConfigObject, containerProtoString);
+                    break;
+                case Proto::WireGuard:
+                    protocolConfig = QSharedPointer<WireGuardProtocolConfig>::create(protoConfigObject, containerProtoString);
+                    break;
+                case Proto::Awg:
+                    protocolConfig = QSharedPointer<AwgProtocolConfig>::create(protoConfigObject, containerProtoString);
+                    break;
+                case Proto::Cloak:
+                    protocolConfig = QSharedPointer<CloakProtocolConfig>::create(protoConfigObject, containerProtoString);
+                    break;
+                case Proto::ShadowSocks:
+                    protocolConfig = QSharedPointer<ShadowsocksProtocolConfig>::create(protoConfigObject, containerProtoString);
+                    break;
+                case Proto::Xray:
+                case Proto::SSXray:
+                    protocolConfig = QSharedPointer<XrayProtocolConfig>::create(protoConfigObject, containerProtoString);
+                    break;
+                case Proto::Ikev2:
+                    protocolConfig = QSharedPointer<Ikev2ProtocolConfig>::create(protoConfigObject, containerProtoString);
+                    break;
+                case Proto::Sftp:
+                    protocolConfig = QSharedPointer<SftpProtocolConfig>::create(protoConfigObject, containerProtoString);
+                    break;
+                case Proto::Socks5Proxy:
+                    protocolConfig = QSharedPointer<Socks5ProtocolConfig>::create(protoConfigObject, containerProtoString);
+                    break;
+                default:
+                    continue; // Skip unknown protocols
+                }
+                
+                if (protocolConfig) {
+                    containerConfig.protocolConfigs.insert(containerProtoString, protocolConfig);
+                    installedContainers.insert(container, containerConfig);
+                }
             }
         }
     }
@@ -167,45 +208,45 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
     return ErrorCode::NoError;
 }
 
-ErrorCode InstallController::installServer(const DockerContainer container, 
-                                       const QMap<DockerContainer, QJsonObject> &installedContainers,
-                                       const ServerCredentials &serverCredentials,
-                                       const QSharedPointer<ServerController> &serverController,
-                                       QString &finishMessage, QJsonObject &serverConfig)
+ErrorCode InstallController::installServer(const DockerContainer container,
+                                          const QMap<DockerContainer, ContainerConfig> &installedContainers,
+                                          const ServerCredentials &serverCredentials,
+                                          const QSharedPointer<ServerController> &serverController,
+                                          QString &finishMessage, QSharedPointer<ServerConfig> &serverConfig)
 {
     if (installedContainers.size() > 1) {
         finishMessage += tr("\nAdded containers that were already installed on the server");
     }
 
-    serverConfig.insert(config_key::hostName, serverCredentials.hostName);
-    serverConfig.insert(config_key::userName, serverCredentials.userName);
-    serverConfig.insert(config_key::password, serverCredentials.secretData);
-    serverConfig.insert(config_key::port, serverCredentials.port);
-    serverConfig.insert(config_key::description, m_settings->nextAvailableServerName());
+    // Create a SelfHostedServerConfig and populate it properly
+    serverConfig = QSharedPointer<SelfHostedServerConfig>::create(QJsonObject());
+    auto selfHostedConfig = qSharedPointerCast<SelfHostedServerConfig>(serverConfig);
+    
+    selfHostedConfig->hostName = serverCredentials.hostName;
+    selfHostedConfig->serverCredentials = serverCredentials;
+    selfHostedConfig->name = m_settings->nextAvailableServerName();
+    selfHostedConfig->defaultContainer = ContainerProps::containerToString(container);
+    selfHostedConfig->type = amnezia::ServerConfigType::SelfHosted;
 
-    QJsonArray containerConfigs;
     VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
     
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
         auto containerConfig = iterator.value();
+        QString containerName = ContainerProps::containerToString(iterator.key());
 
-        if (ContainerProps::isSupportedByCurrentPlatform(container)) {
+        if (ContainerProps::isSupportedByCurrentPlatform(iterator.key())) {
             auto errorCode = vpnConfigurationController.createProtocolConfigForContainer(serverCredentials, iterator.key(),
                                                                                          containerConfig);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
             }
-            containerConfigs.append(containerConfig);
-        } else {
-            containerConfigs.append(containerConfig);
         }
+        
+        selfHostedConfig->containerConfigs.insert(containerName, containerConfig);
     }
 
-    serverConfig.insert(config_key::containers, containerConfigs);
-    serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
-
     int serverIndex = m_settings->nextAvailableServerIndex();
-    m_settings->setServerConfig(serverIndex, serverConfig);
+    m_settings->setServerConfig(serverIndex, serverConfig->toJson());
     m_settings->setDefaultServerIndex(serverIndex);
 
     finishMessage = tr("Server '%1' was successfully added").arg(serverCredentials.hostName);
@@ -213,7 +254,7 @@ ErrorCode InstallController::installServer(const DockerContainer container,
 }
 
 ErrorCode InstallController::installContainer(const DockerContainer container,
-                                           const QMap<DockerContainer, QJsonObject> &installedContainers,
+                                           const QMap<DockerContainer, ContainerConfig> &installedContainers,
                                            const ServerCredentials &serverCredentials,
                                            const QSharedPointer<ServerController> &serverController,
                                            QString &finishMessage)
@@ -263,71 +304,85 @@ bool InstallController::isServerAlreadyExists(const ServerCredentials &serverCre
     return false;
 }
 
-QJsonObject InstallController::generateContainerConfig(const DockerContainer container, int port, 
-                                                      const TransportProto transportProto)
+ContainerConfig InstallController::generateContainerConfig(const DockerContainer container, int port,
+                                                           const TransportProto transportProto)
 {
-    QJsonObject config;
+    ContainerConfig containerConfig;
+    containerConfig.containerName = ContainerProps::containerToString(container);
+    
     auto mainProto = ContainerProps::defaultProtocol(container);
     for (auto protocol : ContainerProps::protocolsForContainer(container)) {
-        QJsonObject containerConfig;
-
+        QSharedPointer<ProtocolConfig> protocolConfig;
+        
         if (protocol == mainProto) {
-            containerConfig.insert(config_key::port, QString::number(port));
-            containerConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, protocol));
-
-            if (container == DockerContainer::Awg) {
-                QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
-                QString junkPacketMinSize = QString::number(10);
-                QString junkPacketMaxSize = QString::number(50);
-
+            // Create the appropriate protocol config based on the protocol type
+            if (protocol == Proto::Awg && container == DockerContainer::Awg) {
+                // Use the VpnConfigurationsController to create proper AwgProtocolConfig
+                // For now, create a basic protocol config and set values
+                protocolConfig = QSharedPointer<AwgProtocolConfig>::create(QJsonObject(), ProtocolProps::protoToString(protocol));
+                auto awgConfig = qSharedPointerCast<AwgProtocolConfig>(protocolConfig);
+                
+                // Set server protocol config
+                awgConfig->serverProtocolConfig.port = QString::number(port);
+                awgConfig->serverProtocolConfig.transportProto = ProtocolProps::transportProtoToString(transportProto, protocol);
+                
+                // Generate AWG-specific parameters
+                awgConfig->serverProtocolConfig.junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
+                awgConfig->serverProtocolConfig.junkPacketMinSize = QString::number(10);
+                awgConfig->serverProtocolConfig.junkPacketMaxSize = QString::number(50);
+                
                 int s1 = QRandomGenerator::global()->bounded(15, 150);
                 int s2 = QRandomGenerator::global()->bounded(15, 150);
-
                 QSet<int> usedValues;
                 usedValues.insert(s1);
-
                 while (usedValues.contains(s2) || s1 + AwgConstant::messageInitiationSize == s2 + AwgConstant::messageResponseSize) {
                     s2 = QRandomGenerator::global()->bounded(15, 150);
                 }
                 usedValues.insert(s2);
-
-                QString initPacketJunkSize = QString::number(s1);
-                QString responsePacketJunkSize = QString::number(s2);
-
+                
+                awgConfig->serverProtocolConfig.initPacketJunkSize = QString::number(s1);
+                awgConfig->serverProtocolConfig.responsePacketJunkSize = QString::number(s2);
+                
                 QSet<QString> headersValue;
                 while (headersValue.size() != 4) {
                     auto max = (std::numeric_limits<qint32>::max)();
                     headersValue.insert(QString::number(QRandomGenerator::global()->bounded(5, max)));
                 }
-
                 auto headersValueList = headersValue.values();
-
-                QString initPacketMagicHeader = headersValueList.at(0);
-                QString responsePacketMagicHeader = headersValueList.at(1);
-                QString underloadPacketMagicHeader = headersValueList.at(2);
-                QString transportPacketMagicHeader = headersValueList.at(3);
-
-                containerConfig[config_key::junkPacketCount] = junkPacketCount;
-                containerConfig[config_key::junkPacketMinSize] = junkPacketMinSize;
-                containerConfig[config_key::junkPacketMaxSize] = junkPacketMaxSize;
-                containerConfig[config_key::initPacketJunkSize] = initPacketJunkSize;
-                containerConfig[config_key::responsePacketJunkSize] = responsePacketJunkSize;
-                containerConfig[config_key::initPacketMagicHeader] = initPacketMagicHeader;
-                containerConfig[config_key::responsePacketMagicHeader] = responsePacketMagicHeader;
-                containerConfig[config_key::underloadPacketMagicHeader] = underloadPacketMagicHeader;
-                containerConfig[config_key::transportPacketMagicHeader] = transportPacketMagicHeader;
-            } else if (container == DockerContainer::Sftp) {
-                containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
-                containerConfig.insert(config_key::password, Utils::getRandomString(16));
-            } else if (container == DockerContainer::Socks5Proxy) {
-                containerConfig.insert(config_key::userName, protocols::socks5Proxy::defaultUserName);
-                containerConfig.insert(config_key::password, Utils::getRandomString(16));
+                awgConfig->serverProtocolConfig.initPacketMagicHeader = headersValueList.at(0);
+                awgConfig->serverProtocolConfig.responsePacketMagicHeader = headersValueList.at(1);
+                awgConfig->serverProtocolConfig.underloadPacketMagicHeader = headersValueList.at(2);
+                awgConfig->serverProtocolConfig.transportPacketMagicHeader = headersValueList.at(3);
+                
+            } else {
+                // For other protocols, create basic protocol configs
+                // This will need to be expanded for each protocol type
+                protocolConfig = QSharedPointer<ProtocolConfig>::create(QJsonObject(), ProtocolProps::protoToString(protocol));
+                
+                // For now, store basic port and transport info as JSON until all protocol configs are properly structured
+                QJsonObject tempConfig;
+                tempConfig.insert(config_key::port, QString::number(port));
+                tempConfig.insert(config_key::transport_proto, ProtocolProps::transportProtoToString(transportProto, protocol));
+                
+                if (container == DockerContainer::Sftp) {
+                    tempConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
+                    tempConfig.insert(config_key::password, Utils::getRandomString(16));
+                } else if (container == DockerContainer::Socks5Proxy) {
+                    tempConfig.insert(config_key::userName, protocols::socks5Proxy::defaultUserName);
+                    tempConfig.insert(config_key::password, Utils::getRandomString(16));
+                }
+                
+                // Store this in the protocol config's internal JSON for now
+                // TODO: Replace with proper protocol config structure
+                protocolConfig = QSharedPointer<ProtocolConfig>::create(tempConfig, ProtocolProps::protoToString(protocol));
             }
-
-            config.insert(config_key::container, ContainerProps::containerToString(container));
+        } else {
+            // Non-main protocols get basic configs
+            protocolConfig = QSharedPointer<ProtocolConfig>::create(QJsonObject(), ProtocolProps::protoToString(protocol));
         }
-        config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+        
+        containerConfig.protocolConfigs.insert(ProtocolProps::protoToString(protocol), protocolConfig);
     }
     
-    return config;
+    return containerConfig;
 } 

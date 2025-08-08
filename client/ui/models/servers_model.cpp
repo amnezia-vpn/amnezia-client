@@ -639,49 +639,7 @@ bool ServersModel::setProcessedServerData(const QString &roleString, const QVari
 
 bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
 {
-    auto serverConfig = m_servers1.at(m_defaultServerIndex);
-    auto defaultContainer = ContainerProps::containerFromString(serverConfig->defaultContainer);
-
-    for (const auto &container : serverConfig->containerConfigs) {
-        if (container.containerName != serverConfig->defaultContainer) {
-            continue;
-        }
-        if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
-            auto protocolConfigVariant = ProtocolConfig::getProtocolConfigVariant(container.protocolConfigs[serverConfig->defaultContainer]);
-            return std::visit(
-                    [](const auto &ptr) -> bool {
-                        if constexpr (requires {
-                                          ptr->clientProtocolConfig;
-                                          ptr->clientProtocolConfig.wireGuardData;
-                                      }) {
-                            const auto nativeConfig = ptr->clientProtocolConfig.nativeConfig;
-                            const auto allowedIps = ptr->clientProtocolConfig.wireGuardData.allowedIps;
-
-                            return (nativeConfig.contains("AllowedIPs") && !nativeConfig.contains("AllowedIPs = 0.0.0.0/0, ::/0"))
-                                    || (!allowedIps.isEmpty() && !allowedIps.contains("0.0.0.0/0"));
-                        } else {
-                            return false;
-                        }
-                    },
-                    protocolConfigVariant);
-        } else if (defaultContainer == DockerContainer::Cloak || defaultContainer == DockerContainer::OpenVpn
-                   || defaultContainer == DockerContainer::ShadowSocks) {
-            auto protocolConfigVariant = ProtocolConfig::getProtocolConfigVariant(
-                    container.protocolConfigs[ContainerProps::containerTypeToString(DockerContainer::OpenVpn)]);
-            return std::visit(
-                    [](const auto &ptr) -> bool {
-                        if constexpr (requires { ptr->clientProtocolConfig; }) {
-                            const auto nativeConfig = ptr->clientProtocolConfig.nativeConfig;
-
-                            return (!nativeConfig.isEmpty() && !nativeConfig.contains("redirect-gateway"));
-                        } else {
-                            return false;
-                        }
-                    },
-                    protocolConfigVariant);
-        }
-    }
-    return false;
+    return m_serverConfigController->isDefaultServerDefaultContainerHasSplitTunneling();
 }
 
 bool ServersModel::isServerFromApi(const int serverIndex)

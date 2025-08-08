@@ -11,7 +11,7 @@
 #include "core/controllers/selfhosted/clientManagementController.h"
 #include "ui/controllers/appSplitUIController.h"
 #include "ui/controllers/allowedDnsUIController.h"
-#include "ui/controllers/connectionController.h"
+#include "ui/controllers/connectionUIController.h"
 #include "core/controllers/selfhosted/exportController.h"
 #include "core/controllers/selfhosted/installController.h"
 #include "ui/controllers/selfhosted/exportUIController.h"
@@ -24,6 +24,7 @@
 #include "ui/controllers/systemController.h"
 #include "core/controllers/settingsController.h"
 #include "core/controllers/dnsController.h"
+#include "core/controllers/connectionController.h"
 #include "core/controllers/splitTunnelingController.h"
 
 #include "ui/models/allowed_dns_model.h"
@@ -107,7 +108,7 @@ private:
 
     QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 
-    QScopedPointer<ConnectionController> m_connectionController;
+    QScopedPointer<ConnectionUIController> m_connectionController;
     QScopedPointer<FocusController> m_focusController;
     QSharedPointer<PageController> m_pageController;
     QSharedPointer<ExportController> m_exportController;

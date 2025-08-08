@@ -10,6 +10,7 @@
 
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/controllers/selfhosted/exportController.h"
+#include "core/models/containers/containers_defs.h"
 #include "core/qrCodeUtils.h"
 #include "systemController.h"
 
@@ -32,7 +33,7 @@ void ExportUIController::generateFullAccessConfig()
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getProcessedServerIndex();
-    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
 
     auto result = m_coreExportController->generateFullAccessConfig(serverConfig);
     
@@ -55,9 +56,12 @@ void ExportUIController::generateConnectionConfig(const QString &clientName)
     int serverIndex = m_serversModel->getProcessedServerIndex();
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());
-    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
-    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto dnsSettings = m_serversModel->getDnsPair(serverIndex);
+    
+    // Get the container config from the server config instead of the containers model
+    QString containerName = ContainerProps::containerToString(container);
+    ContainerConfig containerConfig = serverConfig->containerConfigs.value(containerName);
 
     auto result = m_coreExportController->generateConnectionConfig(clientName, credentials, container, 
                                                                    containerConfig, serverConfig, dnsSettings);

@@ -22,22 +22,7 @@ SelfhostedConfigController::SelfhostedConfigController(std::shared_ptr<Settings>
     m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
 }
 
-bool SelfhostedConfigController::isDefaultServerDefaultContainerHasSplitTunneling() const
-{
-    int defaultServerIndex = m_settings->defaultServerIndex();
-    auto servers = m_settings->serversArray();
-    if (defaultServerIndex >= servers.size()) return false;
-    
-    auto serverConfig = ServerConfig::createServerConfig(servers.at(defaultServerIndex).toObject());
-    auto defaultContainer = ContainerProps::containerFromString(serverConfig->defaultContainer);
-    
-    if (!serverConfig->containerConfigs.contains(serverConfig->defaultContainer)) {
-        return false;
-    }
-    
-    const auto &containerConfig = serverConfig->containerConfigs[serverConfig->defaultContainer];
-    return checkSplitTunnelingInContainer(containerConfig, serverConfig->defaultContainer);
-}
+ 
 
 void SelfhostedConfigController::toggleAmneziaDns(bool enabled)
 {
@@ -152,30 +137,4 @@ bool SelfhostedConfigController::isProtocolSupported(Proto protocol) const
     }
 }
 
-bool SelfhostedConfigController::checkSplitTunnelingInContainer(const ContainerConfig &containerConfig, 
-                                                               const QString &defaultContainer) const
-{
-    for (const auto &protocol : containerConfig.protocolConfigs) {
-        Proto protoType = ProtocolProps::protoFromString(protocol->protocolName);
-        
-        switch (protoType) {
-        case Proto::Awg: {
-            auto awgConfig = protocol.dynamicCast<AwgProtocolConfig>();
-            if (awgConfig && awgConfig->clientConfig.awgConfig.mtu != 0) {
-                return true;
-            }
-            break;
-        }
-        case Proto::WireGuard: {
-            auto wgConfig = protocol.dynamicCast<WireGuardProtocolConfig>();
-            if (wgConfig && wgConfig->clientConfig.mtu != 0) {
-                return true;
-            }
-            break;
-        }
-        default:
-            break;
-        }
-    }
-    return false;
-} 
+ 

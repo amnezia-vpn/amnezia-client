@@ -5,8 +5,10 @@
 
 #include "configurators/configurator_base.h"
 #include "core/models/containers/containers_defs.h"
+#include "core/models/containers/containerConfig.h"
 #include "core/defs.h"
 #include "core/models/protocols/protocolConfig.h"
+#include "core/models/servers/serverConfig.h"
 #include "settings.h"
 
 class VpnConfigurationsController : public QObject
@@ -18,19 +20,21 @@ public:
 
 public slots:
     ErrorCode createProtocolConfigForContainer(const ServerCredentials &credentials, const DockerContainer container,
-                                               QJsonObject &containerConfig);
+                                               ContainerConfig &containerConfig);
     ErrorCode createProtocolConfigString(const bool isApiConfig, const QPair<QString, QString> &dns, const ServerCredentials &credentials,
-                                         const DockerContainer container, const QJsonObject &containerConfig, const Proto protocol,
+                                         const DockerContainer container, const ContainerConfig &containerConfig, const Proto protocol,
                                          QString &protocolConfigString);
-    QJsonObject createVpnConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
-                                       const QJsonObject &containerConfig, const DockerContainer container);
+    QJsonObject createVpnConfiguration(const QPair<QString, QString> &dns, const QSharedPointer<ServerConfig> &serverConfig,
+                                       const ContainerConfig &containerConfig, const DockerContainer container);
 
-    static void updateContainerConfigAfterInstallation(const DockerContainer container, QJsonObject &containerConfig, const QString &stdOut);
+    static void updateContainerConfigAfterInstallation(const DockerContainer container, ContainerConfig &containerConfig, const QString &stdOut);
 signals:
+
+public:
+    QSharedPointer<ProtocolConfig> createProtocolConfig(const Proto protocol);
 
 private:
     QScopedPointer<ConfiguratorBase> createConfigurator(const Proto protocol);
-    QSharedPointer<ProtocolConfig> createProtocolConfig(const Proto protocol, const QJsonObject &protocolConfigJson);
 
     std::shared_ptr<Settings> m_settings;
     QSharedPointer<ServerController> m_serverController;

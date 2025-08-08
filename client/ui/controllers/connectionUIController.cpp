@@ -1,4 +1,4 @@
-#include "connectionController.h"
+#include "connectionUIController.h"
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     #include <QGuiApplication>
@@ -7,71 +7,59 @@
 #endif
 
 #include "core/controllers/vpnConfigurationController.h"
+#include "core/models/containers/containers_defs.h"
 #include "version.h"
 
-ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
-                                           const QSharedPointer<ContainersModel> &containersModel,
-                                           const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                           const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
-                                           QObject *parent)
+ConnectionUIController::ConnectionUIController(const QSharedPointer<ServersModel> &serversModel,
+                                               const QSharedPointer<ContainersModel> &containersModel,
+                                               const QSharedPointer<ClientManagementModel> &clientManagementModel,
+                                               const QSharedPointer<ConnectionController> &connectionController, const std::shared_ptr<Settings> &settings,
+                                               QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_clientManagementModel(clientManagementModel),
-      m_vpnConnection(vpnConnection),
+      m_connectionController(connectionController),
       m_settings(settings)
 {
-    connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this, &ConnectionController::onConnectionStateChanged);
-    connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn, Qt::QueuedConnection);
-    connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
+    connect(m_connectionController.get(), &ConnectionController::connectionEstablished, this, [this]() {
+        onConnectionStateChanged(Vpn::ConnectionState::Connected);
+    });
+    connect(m_connectionController.get(), &ConnectionController::connectionTerminated, this, [this]() {
+        onConnectionStateChanged(Vpn::ConnectionState::Disconnected);
+    });
+    connect(m_connectionController.get(), &ConnectionController::connectionError, this, [this](ErrorCode) {
+        onConnectionStateChanged(Vpn::ConnectionState::Error);
+    });
 
-    connect(this, &ConnectionController::connectButtonClicked, this, &ConnectionController::toggleConnection, Qt::QueuedConnection);
+    connect(this, &ConnectionUIController::connectButtonClicked, this, &ConnectionUIController::toggleConnection, Qt::QueuedConnection);
 
     m_state = Vpn::ConnectionState::Disconnected;
 }
 
-void ConnectionController::openConnection()
+void ConnectionUIController::openConnection()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true)) {
-        emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
-        return;
-    }
-#endif
-
     int serverIndex = m_serversModel->getDefaultServerIndex();
-    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
 
     DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
-
-    if (!m_containersModel->isSupportedByCurrentPlatform(container)) {
-        emit connectionErrorOccurred(ErrorCode::NotSupportedOnThisPlatform);
-        return;
-    }
-
-    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
-
-    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
-
     auto dns = m_serversModel->getDnsPair(serverIndex);
 
-    auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container);
-    emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);
+    m_connectionController->openConnection(serverIndex, serverConfig, container, credentials, dns);
 }
 
-void ConnectionController::closeConnection()
+void ConnectionUIController::closeConnection()
 {
-    emit disconnectFromVpn();
+    m_connectionController->closeConnection();
 }
 
-ErrorCode ConnectionController::getLastConnectionError()
+ErrorCode ConnectionUIController::getLastConnectionError()
 {
     return m_vpnConnection->lastError();
 }
 
-void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
+void ConnectionUIController::onConnectionStateChanged(Vpn::ConnectionState state)
 {
     m_state = state;
 
@@ -124,7 +112,7 @@ void ConnectionController::onConnectionStateChanged(Vpn::ConnectionState state)
     emit connectionStateChanged();
 }
 
-void ConnectionController::onCurrentContainerUpdated()
+void ConnectionUIController::onCurrentContainerUpdated()
 {
     if (m_isConnected || m_isConnectionInProgress) {
         emit reconnectWithUpdatedContainer(tr("Settings updated successfully, reconnnection..."));
@@ -134,23 +122,23 @@ void ConnectionController::onCurrentContainerUpdated()
     }
 }
 
-void ConnectionController::onTranslationsUpdated()
+void ConnectionUIController::onTranslationsUpdated()
 {
     // get translated text of current state
     onConnectionStateChanged(getCurrentConnectionState());
 }
 
-Vpn::ConnectionState ConnectionController::getCurrentConnectionState()
+Vpn::ConnectionState ConnectionUIController::getCurrentConnectionState()
 {
     return m_state;
 }
 
-QString ConnectionController::connectionStateText() const
+QString ConnectionUIController::connectionStateText() const
 {
     return m_connectionStateText;
 }
 
-void ConnectionController::toggleConnection()
+void ConnectionUIController::toggleConnection()
 {
     if (m_state == Vpn::ConnectionState::Preparing) {
         emit preparingConfig();
@@ -166,12 +154,12 @@ void ConnectionController::toggleConnection()
     }
 }
 
-bool ConnectionController::isConnectionInProgress() const
+bool ConnectionUIController::isConnectionInProgress() const
 {
     return m_isConnectionInProgress;
 }
 
-bool ConnectionController::isConnected() const
+bool ConnectionUIController::isConnected() const
 {
     return m_isConnected;
 }

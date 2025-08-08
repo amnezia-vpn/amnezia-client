@@ -17,7 +17,6 @@ public:
     explicit SelfhostedConfigController(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
 
     // Self-hosted specific functionality
-    bool isDefaultServerDefaultContainerHasSplitTunneling() const;
     
     // Amnezia DNS management
     void toggleAmneziaDns(bool enabled);

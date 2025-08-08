@@ -296,18 +296,14 @@ QSharedPointer<ProtocolConfig> WireguardConfigurator::createConfig(const ServerC
     return result;
 }
 
-QString WireguardConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns,
-                                                              const bool isApiConfig, QString &protocolConfigString)
+void WireguardConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns,
+                                                           const bool isApiConfig, QSharedPointer<ProtocolConfig> &protocolConfig)
 {
-    processConfigWithDnsSettings(dns, protocolConfigString);
-
-    return protocolConfigString;
+    processConfigWithDnsSettings(dns, protocolConfig);
 }
 
-QString WireguardConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns,
-                                                               const bool isApiConfig, QString &protocolConfigString)
+void WireguardConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns,
+                                                            const bool isApiConfig, QSharedPointer<ProtocolConfig> &protocolConfig)
 {
-    processConfigWithDnsSettings(dns, protocolConfigString);
-
-    return protocolConfigString;
+    processConfigWithDnsSettings(dns, protocolConfig);
 }

@@ -8,6 +8,15 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLoggingCategory>
+
+#include "core/models/protocols/openvpnProtocolConfig.h"
+#include "core/models/protocols/wireguardProtocolConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/shadowsocksProtocolConfig.h"
+#include "core/models/protocols/cloakProtocolConfig.h"
+#include "core/models/protocols/sftpProtocolConfig.h"
+#include "core/models/protocols/socks5ProtocolConfig.h"
 #include <QPointer>
 #include <QTemporaryFile>
 #include <QThread>
@@ -247,7 +256,7 @@ ErrorCode ServerController::removeContainer(const ServerCredentials &credentials
                      replaceVars(amnezia::scriptData(SharedScriptType::remove_container), generateVarsForContainer(credentials, container)));
 }
 
-ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config, bool isUpdate)
+ErrorCode ServerController::setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, bool isUpdate)
 {
     qDebug().noquote() << "ServerController::setupContainer" << ContainerProps::containerToString(container);
     ErrorCode e = ErrorCode::NoError;
@@ -307,8 +316,8 @@ ErrorCode ServerController::setupContainer(const ServerCredentials &credentials,
     return startupContainerWorker(credentials, container, config);
 }
 
-ErrorCode ServerController::updateContainer(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &oldConfig,
-                                            QJsonObject &newConfig)
+ErrorCode ServerController::updateContainer(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &oldConfig,
+                                            ContainerConfig &newConfig)
 {
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
     qDebug() << "ServerController::updateContainer for container" << container << "reinstall required is" << reinstallRequired;
@@ -324,86 +333,20 @@ ErrorCode ServerController::updateContainer(const ServerCredentials &credentials
     }
 }
 
-bool ServerController::isReinstallContainerRequired(DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig)
+bool ServerController::isReinstallContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig)
 {
-    Proto mainProto = ContainerProps::defaultProtocol(container);
+    const auto &mainProto = ContainerProps::defaultProtocol(container);
+    const QString protocolName = ProtocolProps::protoToString(mainProto);
 
-    const QJsonObject &oldProtoConfig = oldConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
-    const QJsonObject &newProtoConfig = newConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
-
-    if (container == DockerContainer::OpenVpn) {
-        if (oldProtoConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto)
-            != newProtoConfig.value(config_key::transport_proto).toString(protocols::openvpn::defaultTransportProto))
-            return true;
-
-        if (oldProtoConfig.value(config_key::port).toString(protocols::openvpn::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::openvpn::defaultPort))
-            return true;
+    const auto oldProtocolConfig = oldConfig.protocolConfigs.value(protocolName);
+    const auto newProtocolConfig = newConfig.protocolConfigs.value(protocolName);
+    
+    if (!oldProtocolConfig || !newProtocolConfig) {
+        return true;  // If either config is missing, reinstall is required
     }
 
-    if (container == DockerContainer::Cloak) {
-        if (oldProtoConfig.value(config_key::port).toString(protocols::cloak::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::cloak::defaultPort))
-            return true;
-    }
-
-    if (container == DockerContainer::ShadowSocks) {
-        if (oldProtoConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::shadowsocks::defaultPort))
-            return true;
-    }
-
-    if (container == DockerContainer::Awg) {
-        if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
-             != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
-            || (oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
-                != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
-            || (oldProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount)
-                != newProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount))
-            || (oldProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize)
-                != newProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize))
-            || (oldProtoConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize)
-                != newProtoConfig.value(config_key::junkPacketMaxSize).toString(protocols::awg::defaultJunkPacketMaxSize))
-            || (oldProtoConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize)
-                != newProtoConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize))
-            || (oldProtoConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize)
-                != newProtoConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize))
-            || (oldProtoConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader)
-                != newProtoConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader))
-            || (oldProtoConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader)
-                != newProtoConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader))
-            || (oldProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader)
-                != newProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader))
-            || (oldProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader))
-                    != newProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader))
-            // || (oldProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize)
-            //     != newProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize))
-            // || (oldProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize)
-            //     != newProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize))
-
-            return true;
-    }
-
-    if (container == DockerContainer::WireGuard) {
-        if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
-             != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
-            || (oldProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)
-                != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)))
-            return true;
-    }
-
-    if (container == DockerContainer::Socks5Proxy) {
-        return true;
-    }
-
-    if (container == DockerContainer::Xray) {
-        if (oldProtoConfig.value(config_key::port).toString(protocols::xray::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::xray::defaultPort)) {
-            return true;
-        }
-    }
-
-    return false;
+    // Use the existing isServerSettingsEqual method from ProtocolConfig
+    return !oldProtocolConfig->isServerSettingsEqual(newProtocolConfig);
 }
 
 ErrorCode ServerController::installDockerWorker(const ServerCredentials &credentials, DockerContainer container)
@@ -435,13 +378,13 @@ ErrorCode ServerController::installDockerWorker(const ServerCredentials &credent
     return error;
 }
 
-ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ErrorCode ServerController::prepareHostWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config)
 {
     // create folder on host
     return runScript(credentials, replaceVars(amnezia::scriptData(SharedScriptType::prepare_host), generateVarsForContainer(credentials, container)));
 }
 
-ErrorCode ServerController::buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ErrorCode ServerController::buildContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config)
 {
     QString dockerFilePath = amnezia::server::getDockerfileFolder(container) + "/Dockerfile";
     QString scriptString = QString("sudo rm %1").arg(dockerFilePath);
@@ -479,7 +422,7 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
     return error;
 }
 
-ErrorCode ServerController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
+ErrorCode ServerController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -502,7 +445,7 @@ ErrorCode ServerController::runContainerWorker(const ServerCredentials &credenti
     return e;
 }
 
-ErrorCode ServerController::configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
+ErrorCode ServerController::configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config)
 {
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -524,7 +467,7 @@ ErrorCode ServerController::configureContainerWorker(const ServerCredentials &cr
     return e;
 }
 
-ErrorCode ServerController::startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ErrorCode ServerController::startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config)
 {
     QString script = amnezia::scriptData(ProtocolScriptType::container_startup, container);
 
@@ -546,7 +489,7 @@ ErrorCode ServerController::startupContainerWorker(const ServerCredentials &cred
 
 
 ServerController::Vars ServerController::generateVarsForContainer(const ServerCredentials &credentials, DockerContainer container,
-                                                                  const QJsonObject &config)
+                                                                  const ContainerConfig &config)
 {
     // For VPN containers, use configurator pattern
     if (ContainerProps::containerService(container) != ServiceType::Other) {
@@ -582,7 +525,9 @@ ServerController::Vars ServerController::generateVarsForContainer(const ServerCr
             }
             
             if (configurator) {
-                return configurator->generateProtocolVars(credentials, container, config);
+                QString protocolName = ProtocolProps::protoToString(protocol);
+                auto protocolConfig = config.protocolConfigs.value(protocolName);
+                return configurator->generateProtocolVars(credentials, container, protocolConfig);
             }
         }
     }
@@ -606,33 +551,37 @@ ServerController::Vars ServerController::generateVarsForContainer(const ServerCr
 
     // Handle container-specific variables for non-VPN services
     if (container == DockerContainer::Sftp) {
-        SftpProtocolConfig protocolConfig(config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject(),
-                                         ProtocolProps::protoToString(Proto::Sftp));
+        QString protocolName = ProtocolProps::protoToString(Proto::Sftp);
+        auto sftpConfig = qSharedPointerCast<SftpProtocolConfig>(config.protocolConfigs.value(protocolName));
         
-        QString port = protocolConfig.serverProtocolConfig.port;
-        if (port.isEmpty()) {
-            port = QString::number(ProtocolProps::defaultPort(Proto::Sftp));
+        if (sftpConfig) {
+            QString port = sftpConfig->serverProtocolConfig.port;
+            if (port.isEmpty()) {
+                port = QString::number(ProtocolProps::defaultPort(Proto::Sftp));
+            }
+            
+            vars.append({{"$SFTP_PORT", port}});
+            vars.append({{"$SFTP_USER", sftpConfig->serverProtocolConfig.userName}});
+            vars.append({{"$SFTP_PASSWORD", sftpConfig->serverProtocolConfig.password}});
         }
-        
-        vars.append({{"$SFTP_PORT", port}});
-        vars.append({{"$SFTP_USER", protocolConfig.serverProtocolConfig.userName}});
-        vars.append({{"$SFTP_PASSWORD", protocolConfig.serverProtocolConfig.password}});
     } else if (container == DockerContainer::Socks5Proxy) {
-        Socks5ProtocolConfig protocolConfig(config.value(ProtocolProps::protoToString(Proto::Socks5Proxy)).toObject(),
-                                           ProtocolProps::protoToString(Proto::Socks5Proxy));
+        QString protocolName = ProtocolProps::protoToString(Proto::Socks5Proxy);
+        auto socks5Config = qSharedPointerCast<Socks5ProtocolConfig>(config.protocolConfigs.value(protocolName));
         
-        QString port = protocolConfig.serverProtocolConfig.port;
-        if (port.isEmpty()) {
-            port = protocols::socks5Proxy::defaultPort;
+        if (socks5Config) {
+            QString port = socks5Config->serverProtocolConfig.port;
+            if (port.isEmpty()) {
+                port = protocols::socks5Proxy::defaultPort;
+            }
+            
+            vars.append({{"$SOCKS5_PROXY_PORT", port}});
+            
+            const QString &username = socks5Config->serverProtocolConfig.userName;
+            const QString &password = socks5Config->serverProtocolConfig.password;
+            QString socks5user = (!username.isEmpty() && !password.isEmpty()) ? QString("users %1:CL:%2").arg(username, password) : "";
+            vars.append({{"$SOCKS5_USER", socks5user}});
+            vars.append({{"$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong"}});
         }
-        
-        vars.append({{"$SOCKS5_PROXY_PORT", port}});
-        
-        const QString &username = protocolConfig.serverProtocolConfig.userName;
-        const QString &password = protocolConfig.serverProtocolConfig.password;
-        QString socks5user = (!username.isEmpty() && !password.isEmpty()) ? QString("users %1:CL:%2").arg(username, password) : "";
-        vars.append({{"$SOCKS5_USER", socks5user}});
-        vars.append({{"$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong"}});
     }
 
     return vars;
@@ -674,7 +623,7 @@ QString ServerController::replaceVars(const QString &script, const Vars &vars)
     return s;
 }
 
-ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &config)
+ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config)
 {
     if (container == DockerContainer::Dns) {
         return ErrorCode::NoError;
@@ -691,15 +640,37 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     };
 
     const Proto protocol = ContainerProps::defaultProtocol(container);
-    const QString containerString = ProtocolProps::protoToString(protocol);
-    const QJsonObject containerConfig = config.value(containerString).toObject();
+    const QString protocolName = ProtocolProps::protoToString(protocol);
+    auto protocolConfig = config.protocolConfigs.value(protocolName);
 
     QStringList fixedPorts = ContainerProps::fixedPortsForContainer(container);
 
-    QString defaultPort("%1");
-    QString port = containerConfig.value(config_key::port).toString(defaultPort.arg(ProtocolProps::defaultPort(protocol)));
-    QString defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol);
-    QString transportProto = containerConfig.value(config_key::transport_proto).toString(defaultTransportProto);
+    QString port = QString::number(ProtocolProps::defaultPort(protocol)); // default
+    QString transportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(protocol), protocol); // default
+    
+    if (protocolConfig) {
+        if (auto openVpnConfig = qSharedPointerCast<OpenVpnProtocolConfig>(protocolConfig)) {
+            port = openVpnConfig->serverProtocolConfig.port;
+            transportProto = openVpnConfig->serverProtocolConfig.transportProto;
+        } else if (auto wgConfig = qSharedPointerCast<WireGuardProtocolConfig>(protocolConfig)) {
+            port = wgConfig->serverProtocolConfig.port;
+            transportProto = wgConfig->serverProtocolConfig.transportProto;
+        } else if (auto awgConfig = qSharedPointerCast<AwgProtocolConfig>(protocolConfig)) {
+            port = awgConfig->serverProtocolConfig.port;
+            transportProto = awgConfig->serverProtocolConfig.transportProto;
+        } else if (auto xrayConfig = qSharedPointerCast<XrayProtocolConfig>(protocolConfig)) {
+            port = xrayConfig->serverProtocolConfig.port;
+            transportProto = xrayConfig->serverProtocolConfig.transportProto;
+        } else if (auto shadowsocksConfig = qSharedPointerCast<ShadowsocksProtocolConfig>(protocolConfig)) {
+            port = shadowsocksConfig->serverProtocolConfig.port;
+        } else if (auto cloakConfig = qSharedPointerCast<CloakProtocolConfig>(protocolConfig)) {
+            port = cloakConfig->serverProtocolConfig.port;
+        } else if (auto sftpConfig = qSharedPointerCast<SftpProtocolConfig>(protocolConfig)) {
+            port = sftpConfig->serverProtocolConfig.port;
+        } else if (auto socks5Config = qSharedPointerCast<Socks5ProtocolConfig>(protocolConfig)) {
+            port = socks5Config->serverProtocolConfig.port;
+        }
+    }
 
     // TODO reimplement with netstat
     QString script = QString("which lsof > /dev/null 2>&1 || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);

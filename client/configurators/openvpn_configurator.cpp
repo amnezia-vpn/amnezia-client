@@ -1,8 +1,7 @@
 #include "openvpn_configurator.h"
 
 #include <QDebug>
-#include <QJsonDocument>
-#include <QJsonObject>
+
 #include <QProcess>
 #include <QString>
 #include <QTemporaryDir>
@@ -14,6 +13,8 @@
 #endif
 
 #include "core/networkUtilities.h"
+#include "core/models/protocols/protocolConfig.h"
+#include <variant>
 #include "core/models/containers/containers_defs.h"
 #include "core/controllers/selfhosted/serverController.h"
 #include "core/scripts_registry.h"
@@ -146,83 +147,93 @@ QSharedPointer<ProtocolConfig> OpenVpnConfigurator::createConfig(const ServerCre
     return openVpnConfig;
 }
 
-QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                                            QString &protocolConfigString)
+void OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                         QSharedPointer<ProtocolConfig> &protocolConfig)
 {
-    processConfigWithDnsSettings(dns, protocolConfigString);
+    processConfigWithDnsSettings(dns, protocolConfig);
 
-    QJsonObject json = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
-    QString config = json[config_key::config].toString();
+    ProtocolConfigVariant variant = ProtocolConfig::getProtocolConfigVariant(protocolConfig);
+    std::visit([this, &dns, isApiConfig](const auto &config) -> void {
+        if constexpr (std::is_same_v<std::decay_t<decltype(config)>, QSharedPointer<OpenVpnProtocolConfig>>) {
+            QString &nativeConfig = config->clientProtocolConfig.nativeConfig;
 
-    if (!isApiConfig) {
-        QRegularExpression regex("redirect-gateway.*");
-        config.replace(regex, "");
-        
-        // We don't use secondary DNS if primary DNS is AmneziaDNS
-        if (dns.first.contains(protocols::dns::amneziaDnsIp)) {
-            QRegularExpression dnsRegex("dhcp-option DNS " + dns.second);
-            config.replace(dnsRegex, "");
-        }
+            if (!isApiConfig) {
+                QRegularExpression regex("redirect-gateway.*");
+                nativeConfig.replace(regex, "");
+                
+                // We don't use secondary DNS if primary DNS is AmneziaDNS
+                if (dns.first.contains(protocols::dns::amneziaDnsIp)) {
+                    QRegularExpression dnsRegex("dhcp-option DNS " + dns.second);
+                    nativeConfig.replace(dnsRegex, "");
+                }
 
-        if (!m_settings->isSitesSplitTunnelingEnabled()) {
-            config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
-            config.append("block-ipv6\n");
-        } else if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+                if (!m_settings->isSitesSplitTunnelingEnabled()) {
+                    nativeConfig.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
+                    nativeConfig.append("block-ipv6\n");
+                } else if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
 
-               // no redirect-gateway
-        } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
+                   // no redirect-gateway
+                } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-            config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
-            // Prevent ipv6 leak
+                    nativeConfig.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
+                    // Prevent ipv6 leak
 #endif
-            config.append("block-ipv6\n");
-        }
-    }
+                    nativeConfig.append("block-ipv6\n");
+                }
+
+                QStringList routeList = m_settings->vpnRoutes();
+
+                if (!routeList.isEmpty()) {
+                    for (auto route : routeList) {
+                        nativeConfig.append("\nroute " + route + " 255.255.255.255 vpn_gateway\n");
+                    }
+                }
+            }
 
 #ifndef MZ_WINDOWS
-    config.replace("block-outside-dns", "");
+            nativeConfig.replace("block-outside-dns", "");
 #endif
 
 #if (defined(MZ_MACOS) || defined(MZ_LINUX))
-    QString dnsConf = QString("\nscript-security 2\n"
-                              "up %1/update-resolv-conf.sh\n"
-                              "down %1/update-resolv-conf.sh\n")
-                              .arg(qApp->applicationDirPath());
+            QString dnsConf = QString("\nscript-security 2\n"
+                                      "up %1/update-resolv-conf.sh\n"
+                                      "down %1/update-resolv-conf.sh\n")
+                                      .arg(qApp->applicationDirPath());
 
-    config.append(dnsConf);
+            nativeConfig.append(dnsConf);
 #endif
-
-    json[config_key::config] = config;
-    return QJsonDocument(json).toJson();
+        }
+    }, variant);
 }
 
-QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                                             QString &protocolConfigString)
+void OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                          QSharedPointer<ProtocolConfig> &protocolConfig)
 {
-    processConfigWithDnsSettings(dns, protocolConfigString);
+    processConfigWithDnsSettings(dns, protocolConfig);
 
-    QJsonObject json = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
-    QString config = json[config_key::config].toString();
+    ProtocolConfigVariant variant = ProtocolConfig::getProtocolConfigVariant(protocolConfig);
+    std::visit([&dns](const auto &config) -> void {
+        if constexpr (std::is_same_v<std::decay_t<decltype(config)>, QSharedPointer<OpenVpnProtocolConfig>>) {
+            QString &nativeConfig = config->clientProtocolConfig.nativeConfig;
 
-    QRegularExpression regex("redirect-gateway.*");
-    config.replace(regex, "");
+            QRegularExpression regex("redirect-gateway.*");
+            nativeConfig.replace(regex, "");
 
-    // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (dns.first.contains(protocols::dns::amneziaDnsIp)) {
-        QRegularExpression dnsRegex("dhcp-option DNS " + dns.second);
-        config.replace(dnsRegex, "");
-    }
+            // We don't use secondary DNS if primary DNS is AmneziaDNS
+            if (dns.first.contains(protocols::dns::amneziaDnsIp)) {
+                QRegularExpression dnsRegex("dhcp-option DNS " + dns.second);
+                nativeConfig.replace(dnsRegex, "");
+            }
 
-    config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
+            nativeConfig.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
 
-    // Prevent ipv6 leak
-    config.append("block-ipv6\n");
+            // Prevent ipv6 leak
+            nativeConfig.append("block-ipv6\n");
 
-    // remove block-outside-dns for all exported configs
-    config.replace("block-outside-dns", "");
-
-    json[config_key::config] = config;
-    return QJsonDocument(json).toJson();
+            // remove block-outside-dns for all exported configs
+            nativeConfig.replace("block-outside-dns", "");
+        }
+    }, variant);
 }
 
 ErrorCode OpenVpnConfigurator::signCert(DockerContainer container, const ServerCredentials &credentials, QString clientId)
