@@ -41,7 +41,7 @@ ApiSettingsController::~ApiSettingsController()
 {
 }
 
-bool ApiSettingsController::getAccountInfo(bool reload)
+ErrorCode ApiSettingsController::getAccountInfo(bool reload)
 {
     if (reload) {
         QEventLoop wait;
@@ -67,8 +67,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
 
     ErrorCode errorCode = gatewayController.post(QString("%1v1/account_info"), apiPayload, responseBody);
     if (errorCode != ErrorCode::NoError) {
-        emit errorOccurred(errorCode);
-        return false;
+        return errorCode;
     }
 
     QJsonObject accountInfo = QJsonDocument::fromJson(responseBody).object();
@@ -79,7 +78,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
         updateApiDevicesModel();
     }
 
-    return true;
+    return ErrorCode::NoError;
 }
 
 void ApiSettingsController::updateApiCountryModel()

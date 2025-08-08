@@ -5,9 +5,12 @@
 #include <QQmlContext>
 #include <QThread>
 
-#include "ui/controllers/api/apiConfigsController.h"
-#include "ui/controllers/api/apiSettingsController.h"
-#include "ui/controllers/api/apiPremV1MigrationController.h"
+#include "ui/controllers/api/apiConfigUIController.h"
+#include "ui/controllers/api/apiSettingsUIController.h"
+#include "ui/controllers/api/apiPremV1MigrationUIController.h"
+#include "core/controllers/api/apiConfigController.h"
+#include "core/controllers/api/apiSettingsController.h"
+#include "core/controllers/api/apiPremV1MigrationController.h"
 #include "core/controllers/selfhosted/clientManagementController.h"
 #include "ui/controllers/appSplitUIController.h"
 #include "ui/controllers/allowedDnsUIController.h"
@@ -122,9 +125,13 @@ private:
     QScopedPointer<AppSplitUIController> m_appSplitUIController;
     QScopedPointer<AllowedDnsUIController> m_allowedDnsUIController;
 
-    QScopedPointer<ApiSettingsController> m_apiSettingsController;
-    QScopedPointer<ApiConfigsController> m_apiConfigsController;
-    QScopedPointer<ApiPremV1MigrationController> m_apiPremV1MigrationController;
+    QSharedPointer<ApiSettingsController> m_apiSettingsCoreController;
+    QSharedPointer<ApiConfigsController> m_apiConfigsCoreController;
+    QSharedPointer<ApiPremV1MigrationController> m_apiPremV1MigrationCoreController;
+
+    QScopedPointer<ApiSettingsUIController> m_apiSettingsUIController;
+    QScopedPointer<ApiConfigUIController> m_apiConfigUIController;
+    QScopedPointer<ApiPremV1MigrationUIController> m_apiPremV1MigrationUIController;
 
     QSharedPointer<SettingsController> m_settingsController;
     QSharedPointer<DnsController> m_dnsController;

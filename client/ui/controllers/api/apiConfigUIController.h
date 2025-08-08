@@ -1,18 +1,25 @@
-#ifndef APICONFIGSCONTROLLER_H
-#define APICONFIGSCONTROLLER_H
+#ifndef APICONFIGUICONTROLLER_H
+#define APICONFIGUICONTROLLER_H
 
 #include <QObject>
+#include <QSharedPointer>
 
-#include "configurators/openvpn_configurator.h"
+#include "core/defs.h"
 #include "ui/models/api/apiServicesModel.h"
 #include "ui/models/servers_model.h"
 
-class ApiConfigsController : public QObject
+class Settings;
+class ApiConfigsController;
+
+class ApiConfigUIController : public QObject
 {
     Q_OBJECT
 public:
-    ApiConfigsController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ApiServicesModel> &apiServicesModel,
-                         const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+    explicit ApiConfigUIController(const QSharedPointer<ServersModel> &serversModel,
+                                   const QSharedPointer<ApiServicesModel> &apiServicesModel,
+                                   const QSharedPointer<ApiConfigsController> &coreController,
+                                   const std::shared_ptr<Settings> &settings,
+                                   QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY vpnKeyExportReady)
@@ -21,7 +28,6 @@ public:
 public slots:
     bool exportNativeConfig(const QString &serverCountryCode, const QString &fileName);
     bool revokeNativeConfig(const QString &serverCountryCode);
-    // bool exportVpnKey(const QString &fileName);
     void prepareVpnKeyExport();
     void copyVpnKeyToClipboard();
 
@@ -39,13 +45,11 @@ public slots:
     bool isVlessProtocol();
 
 signals:
-    void errorOccurred(ErrorCode errorCode);
-
+    void errorOccurred(amnezia::ErrorCode errorCode);
     void installServerFromApiFinished(const QString &message);
     void changeApiCountryFinished(const QString &message);
     void reloadServerFromApiFinished(const QString &message);
     void updateServerFromApiFinished();
-
     void vpnKeyExportReady();
 
 private:
@@ -53,14 +57,12 @@ private:
     int getQrCodesCount();
     QString getVpnKey();
 
-    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
-
-    QList<QString> m_qrCodes;
-    QString m_vpnKey;
-
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ApiServicesModel> m_apiServicesModel;
+    QSharedPointer<ApiConfigsController> m_coreController;
     std::shared_ptr<Settings> m_settings;
 };
 
-#endif // APICONFIGSCONTROLLER_H
+#endif // APICONFIGUICONTROLLER_H
+
+

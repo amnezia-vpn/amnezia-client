@@ -18,12 +18,9 @@ public:
     ~ApiSettingsController();
 
 public slots:
-    bool getAccountInfo(bool reload);
+    ErrorCode getAccountInfo(bool reload);
     void updateApiCountryModel();
     void updateApiDevicesModel();
-
-signals:
-    void errorOccurred(ErrorCode errorCode);
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

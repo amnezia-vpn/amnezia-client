@@ -13,6 +13,9 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/qrCodeUtils.h
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/gatewayController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiConfigController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiSettingsController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiPremV1MigrationController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/selfhostedConfigController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installationController.h
@@ -69,6 +72,9 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/qrCodeUtils.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/gatewayController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiConfigController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiSettingsController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiPremV1MigrationController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/selfhostedConfigController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installationController.cpp

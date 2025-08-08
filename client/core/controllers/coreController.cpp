@@ -165,15 +165,18 @@ void CoreController::initUIControllers()
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
 
-    m_apiSettingsController.reset(
-            new ApiSettingsController(m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settings));
-    m_engine->rootContext()->setContextProperty("ApiSettingsController", m_apiSettingsController.get());
+    m_apiSettingsCoreController = QSharedPointer<ApiSettingsController>::create(m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settings);
+    m_apiConfigsCoreController = QSharedPointer<ApiConfigsController>::create(m_serversModel, m_apiServicesModel, m_settings);
+    m_apiPremV1MigrationCoreController = QSharedPointer<ApiPremV1MigrationController>::create(m_serversModel, m_settings, this);
 
-    m_apiConfigsController.reset(new ApiConfigsController(m_serversModel, m_apiServicesModel, m_settings));
-    m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigsController.get());
+    m_apiSettingsUIController.reset(new ApiSettingsUIController(m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_apiSettingsCoreController, m_settings));
+    m_engine->rootContext()->setContextProperty("ApiSettingsController", m_apiSettingsUIController.get());
 
-    m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversModel, m_settings, this));
-    m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
+    m_apiConfigUIController.reset(new ApiConfigUIController(m_serversModel, m_apiServicesModel, m_apiConfigsCoreController, m_settings));
+    m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigUIController.get());
+
+    m_apiPremV1MigrationUIController.reset(new ApiPremV1MigrationUIController(m_serversModel, m_apiPremV1MigrationCoreController, m_settings));
+    m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationUIController.get());
     
     setupControllerSignalConnections();
 }
@@ -355,7 +358,7 @@ void CoreController::initErrorMessagesHandler()
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
     });
 
-    connect(m_apiConfigsController.get(), &ApiConfigsController::errorOccurred, m_pageController.get(),
+    connect(m_apiConfigUIController.get(), &ApiConfigUIController::errorOccurred, m_pageController.get(),
             qOverload<ErrorCode>(&PageController::showErrorMessage));
 }
 
@@ -418,7 +421,7 @@ void CoreController::initPrepareConfigHandler()
     connect(m_connectionController.get(), &ConnectionUIController::prepareConfig, this, [this]() {
         emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Preparing);
 
-        if (!m_apiConfigsController->isConfigValid()) {
+        if (!m_apiConfigUIController->isConfigValid()) {
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }
@@ -434,19 +437,19 @@ void CoreController::initPrepareConfigHandler()
 
 void CoreController::initImportPremiumV2VpnKeyHandler()
 {
-    connect(m_apiPremV1MigrationController.get(), &ApiPremV1MigrationController::importPremiumV2VpnKey, this, [this](const QString &vpnKey) {
+    connect(m_apiPremV1MigrationUIController.get(), &ApiPremV1MigrationUIController::importPremiumV2VpnKey, this, [this](const QString &vpnKey) {
         m_importController->extractConfigFromData(vpnKey);
         m_importController->importConfig();
 
-        emit m_apiPremV1MigrationController->migrationFinished();
+        emit m_apiPremV1MigrationUIController->migrationFinished();
     });
 }
 
 void CoreController::initShowMigrationDrawerHandler()
 {
     QTimer::singleShot(1000, this, [this]() {
-        if (m_apiPremV1MigrationController->isPremV1MigrationReminderActive() && m_apiPremV1MigrationController->hasConfigsToMigration()) {
-            m_apiPremV1MigrationController->showMigrationDrawer();
+        if (m_apiPremV1MigrationUIController->isPremV1MigrationReminderActive() && m_apiPremV1MigrationUIController->hasConfigsToMigration()) {
+            m_apiPremV1MigrationUIController->showMigrationDrawer();
         }
     });
 }
