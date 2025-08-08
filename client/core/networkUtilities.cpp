@@ -488,8 +488,9 @@ QString NetworkUtilities::getGatewayAndIface()
 
 QNetworkInterface NetworkUtilities::getDefaultIface()
 {
-    int index = -1;
 #ifdef Q_OS_WIN
+    int index = -1;
+
     ULONG size = 0;
     if (ERROR_BUFFER_OVERFLOW != GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_GATEWAYS, nullptr, nullptr, &size)) {
         return {};
@@ -519,6 +520,7 @@ QNetworkInterface NetworkUtilities::getDefaultIface()
     }
 
     free(adapters);
+    return QNetworkInterface::interfaceFromIndex(index);
 #endif
 #ifdef Q_OS_MAC
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -528,7 +530,7 @@ QNetworkInterface NetworkUtilities::getDefaultIface()
 
     sockaddr_in addr = {};
     addr.sin_family = AF_INET;
-    addr.sin_port = 0;
+    addr.sin_port = htons(53);
     inet_pton(AF_INET, "1.1.1.1", &addr.sin_addr);
 
     if (::connect(sock, (sockaddr*)&addr, sizeof(addr)) != 0) {
@@ -556,12 +558,12 @@ QNetworkInterface NetworkUtilities::getDefaultIface()
 
         auto* sa = reinterpret_cast<sockaddr_in*>(ifa->ifa_addr);
         if (sa->sin_addr.s_addr == local_addr.sin_addr.s_addr) {
-            index = if_nametoindex(ifa->ifa_name);
+            return QNetworkInterface::interfaceFromName(ifa->ifa_name);
         }
     }
 #endif
 #ifdef Q_OS_LINUX
 
 #endif
-    return QNetworkInterface::interfaceFromIndex(index);
+    return {};
 }
