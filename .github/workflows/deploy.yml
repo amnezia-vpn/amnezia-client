@@ -31,7 +31,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'gcc_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -112,7 +112,7 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2019_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -175,7 +175,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'desktop'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia qthttpserver'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia qthttpserver qtwebsockets'
         arch: 'clang_64'
         dir: ${{ runner.temp }}
         set-env: 'true'
@@ -187,7 +187,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'ios'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
@@ -290,7 +290,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
@@ -367,7 +367,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
@@ -410,7 +410,7 @@ jobs:
     env:
       ANDROID_BUILD_PLATFORM: android-34
       QT_VERSION: 6.7.3
-      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools qthttpserver'
+      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools qthttpserver qtwebsockets'
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
