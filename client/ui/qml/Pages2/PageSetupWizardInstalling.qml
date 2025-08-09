@@ -85,90 +85,74 @@ PageType {
         ]
     }
 
-    FlickableType {
+    ListViewType {
+        id: listView
+
         anchors.fill: parent
-        contentHeight: content.height
 
-        Column {
-            id: content
+        currentIndex: -1
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        model: proxyContainersModel
 
-            spacing: 16
+        delegate: ColumnLayout {
+            width: listView.width
 
-            ListView {
-                id: container
-                width: parent.width
-                height: container.contentItem.height
-                currentIndex: -1
-                clip: true
-                interactive: false
-                model: proxyContainersModel
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.topMargin: 20
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                delegate: Item {
-                    implicitWidth: container.width
-                    implicitHeight: delegateContent.implicitHeight
+                headerText: qsTr("Installing")
+                descriptionText: name
+            }
 
-                    ColumnLayout {
-                        id: delegateContent
+            ProgressBarType {
+                id: progressBar
 
-                        anchors.fill: parent
-                        anchors.rightMargin: 16
-                        anchors.leftMargin: 16
+                Layout.fillWidth: true
+                Layout.topMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                        BaseHeaderType {
-                            Layout.fillWidth: true
-                            Layout.topMargin: 20
+                Timer {
+                    id: timer
 
-                            headerText: qsTr("Installing")
-                            descriptionText: name
-                        }
-
-                        ProgressBarType {
-                            id: progressBar
-
-                            Layout.fillWidth: true
-                            Layout.topMargin: 32
-
-                            Timer {
-                                id: timer
-
-                                interval: 300
-                                repeat: true
-                                running: root.isTimerRunning
-                                onTriggered: {
-                                    progressBar.value += 0.003
-                                }
-                            }
-                        }
-
-                        ParagraphTextType {
-                            id: progressText
-
-                            Layout.fillWidth: true
-                            Layout.topMargin: 8
-
-                            text: root.progressBarText
-                        }
-
-                        BasicButtonType {
-                            id: cancelIntallationButton
-
-                            Layout.fillWidth: true
-                            Layout.topMargin: 24
-
-                            visible: root.isCancelButtonVisible
-
-                            text: qsTr("Cancel installation")
-
-                            clickedFunc: function() {
-                                InstallController.cancelInstallation()
-                                PageController.showBusyIndicator(true)
-                            }
-                        }
+                    interval: 300
+                    repeat: true
+                    running: root.isTimerRunning
+                    onTriggered: {
+                        progressBar.value += 0.003
                     }
+                }
+            }
+
+            ParagraphTextType {
+                id: progressText
+
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: root.progressBarText
+            }
+
+            BasicButtonType {
+                id: cancelIntallationButton
+
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: root.isCancelButtonVisible
+
+                text: qsTr("Cancel installation")
+
+                clickedFunc: function() {
+                    InstallController.cancelInstallation()
+                    PageController.showBusyIndicator(true)
                 }
             }
         }

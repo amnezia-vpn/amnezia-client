@@ -403,9 +403,19 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QJsonObject config;
             Proto mainProto = ContainerProps::defaultProtocol(container);
             const auto &protocols = ContainerProps::protocolsForContainer(container);
+            
             for (const auto &protocol : protocols) {
                 QJsonObject containerConfig;
-                if (protocol == mainProto) {
+                
+                // for Multiprotocols (OpenVPN over SS, OpenVPN over Cloak)
+                bool shouldProcessProtocol = false;
+                if (container == DockerContainer::ShadowSocks || container == DockerContainer::Cloak) {
+                    shouldProcessProtocol = true;
+                } else {
+                    shouldProcessProtocol = (protocol == mainProto);
+                }
+                
+                if (shouldProcessProtocol) {
                     containerConfig.insert(config_key::port, port);
                     containerConfig.insert(config_key::transport_proto, transportProto);
 
@@ -550,14 +560,97 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         qDebug() << siteName;
 
                         containerConfig.insert(config_key::site, siteName);
+                    } else if (protocol == Proto::OpenVpn) {
+                        QString serverConfig = serverController->getTextFileFromContainer(container, credentials,
+                                                                                          protocols::openvpn::serverConfigPath, errorCode);
+
+                        QMap<QString, QString> serverConfigMap;
+                        auto serverConfigLines = serverConfig.split("\n");
+                        for (auto &line : serverConfigLines) {
+                            auto trimmedLine = line.trimmed();
+                            if (trimmedLine.startsWith("#") || trimmedLine.isEmpty()) {
+                                continue;
+                            } else {
+                                QStringList parts = trimmedLine.split(" ");
+                                if (parts.count() >= 2) {
+                                    QString key = parts[0];
+                                    QString value = parts.mid(1).join(" ");
+                                    serverConfigMap.insert(key, value);
+                                }
+                            }
+                        }
+
+                        QString serverValue = serverConfigMap.value("server");
+
+                        if (!serverValue.isEmpty()) {
+                            QStringList serverParts = serverValue.split(" ");
+                            if (serverParts.count() >= 1) {
+                                containerConfig[config_key::subnet_address] = serverParts[0];
+                            }
+                        }
+
+                        bool ncpDisable = serverConfig.contains("ncp-disable");
+                        containerConfig[config_key::ncp_disable] = ncpDisable;
+
+                        bool tlsAuth = serverConfig.contains("tls-auth");
+                        containerConfig[config_key::tls_auth] = tlsAuth;
+
+                        bool blockOutsideDns = serverConfig.contains("block-outside-dns");
+                        
+                        containerConfig[config_key::block_outside_dns] = blockOutsideDns;
+
+                        QString cipher = serverConfigMap.value("cipher");
+                        if (!cipher.isEmpty()) {
+                            containerConfig[config_key::cipher] = cipher;
+                        }
+
+                        QString hash = serverConfigMap.value("auth");
+                        if (!hash.isEmpty()) {
+                            containerConfig[config_key::hash] = hash;
+                        }
+                    } else if (protocol == Proto::Cloak) {
+                        QString cloakConfig = serverController->getTextFileFromContainer(container, credentials,
+                                                                                         "/opt/amnezia/cloak/ck-config.json", errorCode);
+
+                        QJsonDocument doc = QJsonDocument::fromJson(cloakConfig.toUtf8());
+                        
+                        if (!doc.isNull() && doc.isObject()) {
+                            QJsonObject cloakConfigObj = doc.object();
+                            
+                            QString site = cloakConfigObj.value("RedirAddr").toString();
+                            if (!site.isEmpty()) {
+                                containerConfig[config_key::site] = site;
+                            }
+                        } else {
+                            qDebug() << "Failed to parse main loop Cloak JSON config";
+                        }
+                        
+                    } else if (protocol == Proto::ShadowSocks) {
+                        QString shadowsocksConfig = serverController->getTextFileFromContainer(container, credentials,
+                                                                                               "/opt/amnezia/shadowsocks/ss-config.json", errorCode);
+
+                        QJsonDocument doc = QJsonDocument::fromJson(shadowsocksConfig.toUtf8());
+                        
+                        if (!doc.isNull() && doc.isObject()) {
+                            QJsonObject ssConfigObj = doc.object();
+                            QString cipher = ssConfigObj.value("method").toString();
+                            if (!cipher.isEmpty()) {
+                                containerConfig[config_key::cipher] = cipher;
+                            }
+                        } else {
+                            qDebug() << "Failed to parse main loop Shadowsocks JSON config";
+                        }
                     }
 
                     config.insert(config_key::container, ContainerProps::containerToString(container));
                 }
-                config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+                if (shouldProcessProtocol) {
+                    config.insert(ProtocolProps::protoToString(protocol), containerConfig);
+                }
             }
             installedContainers.insert(container, config);
         }
+
         const static QRegularExpression torOrDnsRegExp("(amnezia-(?:torwebsite|dns)).*?([0-9]*)/(udp|tcp).*");
         QRegularExpressionMatch torOrDnsRegMatch = torOrDnsRegExp.match(containerInfo);
         if (torOrDnsRegMatch.hasMatch()) {
@@ -721,6 +814,8 @@ void InstallController::clearCachedProfile(QSharedPointer<ServerController> serv
     m_clientManagementModel->revokeClient(containerConfig, container, serverCredentials, serverIndex, serverController);
 
     emit cachedProfileCleared(tr("%1 cached profile cleared").arg(ContainerProps::containerHumanNames().value(container)));
+    QJsonObject updatedConfig = m_settings->containerConfig(serverIndex, container);
+    emit profileCleared(updatedConfig);
 }
 
 QRegularExpression InstallController::ipAddressPortRegExp()

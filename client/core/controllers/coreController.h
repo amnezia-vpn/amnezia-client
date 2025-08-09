@@ -5,6 +5,10 @@
 #include <QQmlContext>
 #include <QThread>
 
+#ifndef Q_OS_ANDROID
+    #include "ui/systemtray_notificationhandler.h"
+#endif
+
 #include "ui/controllers/api/apiConfigsController.h"
 #include "ui/controllers/api/apiSettingsController.h"
 #include "ui/controllers/api/apiPremV1MigrationController.h"
@@ -61,6 +65,7 @@ public:
 
 signals:
     void translationsUpdated();
+    void websiteUrlChanged(const QString &newUrl);
 
 private:
     void initModels();

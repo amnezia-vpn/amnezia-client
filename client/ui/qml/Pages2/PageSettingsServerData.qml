@@ -18,10 +18,6 @@ PageType {
 
     signal lastItemTabClickedSignal()
 
-    onFocusChanged: content.isServerWithWriteAccess ?
-                        labelWithButton.forceActiveFocus() :
-                        labelWithButton3.forceActiveFocus()
-
     Connections {
         target: InstallController
 
@@ -63,218 +59,194 @@ PageType {
         target: ServersModel
 
         function onProcessedServerIndexChanged() {
-            content.isServerWithWriteAccess = ServersModel.isProcessedServerHasWriteAccess()
+            listView.isServerWithWriteAccess = ServersModel.isProcessedServerHasWriteAccess()
         }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        contentHeight: content.height
+    ListViewType {
+        id: listView
 
-        ColumnLayout {
-            id: content
+        property bool isServerWithWriteAccess: ServersModel.isProcessedServerHasWriteAccess()
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        anchors.fill: parent
 
-            property bool isServerWithWriteAccess: ServersModel.isProcessedServerHasWriteAccess()
+        model: serverActions
+
+        delegate: ColumnLayout {
+            width: listView.width
 
             LabelWithButtonType {
-                id: labelWithButton
-                visible: content.isServerWithWriteAccess
                 Layout.fillWidth: true
 
-                text: qsTr("Check the server for previously installed Amnezia services")
-                descriptionText: qsTr("Add them to the application if they were not displayed")
+                visible: isVisible
+
+                text: title
+                descriptionText: description
+                textColor: tColor
 
                 clickedFunction: function() {
+                    clickedHandler()
+                }
+            }
+
+            DividerType {
+                visible: isVisible
+            }
+        }
+    }
+
+    property list<QtObject> serverActions: [
+        check,
+        reboot,
+        remove,
+        clear,
+        reset,
+        switch_to_premium,
+    ]
+
+    QtObject {
+        id: check
+
+        property bool isVisible: true
+        readonly property string title: qsTr("Check the server for previously installed Amnezia services")
+        readonly property string description: qsTr("Add them to the application if they were not displayed")
+        readonly property var tColor: AmneziaStyle.color.paleGray
+        readonly property var clickedHandler: function() {
+            PageController.showBusyIndicator(true)
+            InstallController.scanServerForInstalledContainers()
+            PageController.showBusyIndicator(false)
+        }
+    }
+
+    QtObject {
+        id: reboot
+
+        property bool isVisible: true
+        readonly property string title: qsTr("Reboot server")
+        readonly property string description: ""
+        readonly property var tColor: AmneziaStyle.color.vibrantRed
+        readonly property var clickedHandler: function() {
+            var headerText = qsTr("Do you want to reboot the server?")
+            var descriptionText = qsTr("The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?")
+            var yesButtonText = qsTr("Continue")
+            var noButtonText = qsTr("Cancel")
+
+            var yesButtonFunction = function() {
+                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                    PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
+                } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.scanServerForInstalledContainers()
+                    InstallController.rebootProcessedServer()
                     PageController.showBusyIndicator(false)
                 }
             }
+            var noButtonFunction = function() {
 
-            DividerType {
-                visible: content.isServerWithWriteAccess
             }
 
-            LabelWithButtonType {
-                id: labelWithButton2
-                visible: content.isServerWithWriteAccess
-                Layout.fillWidth: true
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
+    }
 
-                text: qsTr("Reboot server")
-                textColor: AmneziaStyle.color.vibrantRed
+    QtObject {
+        id: remove
 
-                clickedFunction: function() {
-                    var headerText = qsTr("Do you want to reboot the server?")
-                    var descriptionText = qsTr("The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
+        property bool isVisible: true
+        readonly property string title: qsTr("Remove server from application")
+        readonly property string description: ""
+        readonly property var tColor: AmneziaStyle.color.vibrantRed
+        readonly property var clickedHandler: function() {
+            var headerText = qsTr("Do you want to remove the server from application?")
+            var descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
+            var yesButtonText = qsTr("Continue")
+            var noButtonText = qsTr("Cancel")
 
-                    var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
-                        } else {
-                            PageController.showBusyIndicator(true)
-                            InstallController.rebootProcessedServer()
-                            PageController.showBusyIndicator(false)
-                        }
-                        if (!GC.isMobile()) {
-                            labelWithButton5.forceActiveFocus()
-                        }
-                    }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            labelWithButton2.forceActiveFocus()
-                        }
-                    }
-
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var yesButtonFunction = function() {
+                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                    PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
+                } else {
+                    PageController.showBusyIndicator(true)
+                    InstallController.removeProcessedServer()
+                    PageController.showBusyIndicator(false)
                 }
             }
+            var noButtonFunction = function() {
 
-            DividerType {
-                visible: content.isServerWithWriteAccess
             }
 
-            LabelWithButtonType {
-                id: labelWithButton3
-                Layout.fillWidth: true
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
+    }
 
-                text: qsTr("Remove server from application")
-                textColor: AmneziaStyle.color.vibrantRed
+    QtObject {
+        id: clear
 
-                clickedFunction: function() {
-                    var headerText = qsTr("Do you want to remove the server from application?")
-                    var descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
+        property bool isVisible: true
+        readonly property string title: qsTr("Clear server from Amnezia software")
+        readonly property string description: ""
+        readonly property var tColor: AmneziaStyle.color.vibrantRed
+        readonly property var clickedHandler: function() {
+            var headerText = qsTr("Do you want to clear server from Amnezia software?")
+            var descriptionText = qsTr("All users whom you shared a connection with will no longer be able to connect to it.")
+            var yesButtonText = qsTr("Continue")
+            var noButtonText = qsTr("Cancel")
 
-                    var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
-                        } else {
-                            PageController.showBusyIndicator(true)
-                            InstallController.removeProcessedServer()
-                            PageController.showBusyIndicator(false)
-                        }
-                        if (!GC.isMobile()) {
-                            labelWithButton5.forceActiveFocus()
-                        }
-                    }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            labelWithButton3.forceActiveFocus()
-                        }
-                    }
-
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var yesButtonFunction = function() {
+                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                    PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
+                } else {
+                    PageController.goToPage(PageEnum.PageDeinstalling)
+                    InstallController.removeAllContainers()
                 }
             }
+            var noButtonFunction = function() {
 
-            DividerType {}
+            }
 
-            LabelWithButtonType {
-                id: labelWithButton4
-                visible: content.isServerWithWriteAccess
-                Layout.fillWidth: true
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
+    }
 
-                text: qsTr("Clear server from Amnezia software")
-                textColor: AmneziaStyle.color.vibrantRed
+    QtObject {
+        id: reset
 
-                clickedFunction: function() {
-                    var headerText = qsTr("Do you want to clear server from Amnezia software?")
-                    var descriptionText = qsTr("All users whom you shared a connection with will no longer be able to connect to it.")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
+        property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+        readonly property string title: qsTr("Reset API config")
+        readonly property string description: ""
+        readonly property var tColor: AmneziaStyle.color.vibrantRed
+        readonly property var clickedHandler: function() {
+            var headerText = qsTr("Do you want to reset API config?")
+            var descriptionText = ""
+            var yesButtonText = qsTr("Continue")
+            var noButtonText = qsTr("Cancel")
 
-                    var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
-                        } else {
-                            PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeAllContainers()
-                        }
-                        if (!GC.isMobile()) {
-                            labelWithButton5.forceActiveFocus()
-                        }
-                    }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            labelWithButton4.forceActiveFocus()
-                        }
-                    }
-
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var yesButtonFunction = function() {
+                if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                    PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
+                } else {
+                    PageController.showBusyIndicator(true)
+                    InstallController.removeApiConfig(ServersModel.processedIndex)
+                    PageController.showBusyIndicator(false)
                 }
             }
+            var noButtonFunction = function() {
 
-            DividerType {
-                visible: content.isServerWithWriteAccess
             }
 
-            LabelWithButtonType {
-                id: labelWithButton5
-                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
-                Layout.fillWidth: true
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
+    }
 
-                text: qsTr("Reset API config")
-                textColor: AmneziaStyle.color.vibrantRed
+    QtObject {
+        id: switch_to_premium
 
-                clickedFunction: function() {
-                    var headerText = qsTr("Do you want to reset API config?")
-                    var descriptionText = ""
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
-                        } else {
-                            PageController.showBusyIndicator(true)
-                            InstallController.removeApiConfig(ServersModel.processedIndex)
-                            PageController.showBusyIndicator(false)
-                        }
-
-                        if (!GC.isMobile()) {
-                            labelWithButton5.forceActiveFocus()
-                        }
-                    }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            labelWithButton5.forceActiveFocus()
-                        }
-                    }
-                    
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                }
-            }
-
-            DividerType {
-                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
-            }
-
-            LabelWithButtonType {
-                id: labelWithButton6
-                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersModel.processedServerIsPremium
-                Layout.fillWidth: true
-
-                text: qsTr("Switch to the new Amnezia Premium subscription")
-                textColor: AmneziaStyle.color.vibrantRed
-
-                clickedFunction: function() {
-                    PageController.goToPageHome()
-                    ApiPremV1MigrationController.showMigrationDrawer()
-                }
-            }
-
-            DividerType {
-                visible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersModel.processedServerIsPremium
-            }
+        property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+        readonly property string title: qsTr("Switch to the new Amnezia Premium subscription")
+        readonly property string description: ""
+        readonly property var tColor: AmneziaStyle.color.vibrantRed
+        readonly property var clickedHandler: function() {
+            PageController.goToPageHome()
+            ApiPremV1MigrationController.showMigrationDrawer()
         }
     }
 }

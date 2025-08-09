@@ -29,96 +29,13 @@ PageType {
         }
     }
 
-    QtObject {
-        id: telegramGroup
-
-        readonly property string title: qsTr("Telegram group")
-        readonly property string description: qsTr("To discuss features")
-        readonly property string imageSource: "qrc:/images/controls/telegram.svg"
-        readonly property var handler: function() {
-            Qt.openUrlExternally(qsTr("https://t.me/amnezia_vpn_en"))
-        }
-    }
-
-    QtObject {
-        id: mail
-
-        readonly property string title: qsTr("support@amnezia.org")
-        readonly property string description: qsTr("For reviews and bug reports")
-        readonly property string imageSource: "qrc:/images/controls/mail.svg"
-        readonly property var handler: function() {
-            Qt.openUrlExternally(qsTr("mailto:support@amnezia.org"))
-        }
-    }
-
-    QtObject {
-        id: github
-
-        readonly property string title: qsTr("GitHub")
-        readonly property string description: qsTr("Discover the source code")
-        readonly property string imageSource: "qrc:/images/controls/github.svg"
-        readonly property var handler: function() {
-            Qt.openUrlExternally(qsTr("https://github.com/amnezia-vpn/amnezia-client"))
-        }
-    }
-
-    QtObject {
-        id: website
-
-        readonly property string title: qsTr("Website")
-        readonly property string description: qsTr("Visit official website")
-        readonly property string imageSource: "qrc:/images/controls/amnezia.svg"
-        readonly property var handler: function() {
-            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
-        }
-    }
-
-    property list<QtObject> contacts: [
-        telegramGroup,
-        mail,
-        github,
-        website
-    ]
-
-    ListView {
+    ListViewType {
         id: listView
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         anchors.left: parent.left
-
-        property bool isFocusable: true
-
-        Keys.onTabPressed: {
-            FocusController.nextKeyTabItem()
-        }
-
-        Keys.onBacktabPressed: {
-            FocusController.previousKeyTabItem()
-        }
-
-        Keys.onUpPressed: {
-            FocusController.nextKeyUpItem()
-        }
-
-        Keys.onDownPressed: {
-            FocusController.nextKeyDownItem()
-        }
-
-        Keys.onLeftPressed: {
-            FocusController.nextKeyLeftItem()
-        }
-
-        Keys.onRightPressed: {
-            FocusController.nextKeyRightItem()
-        }
-
-        ScrollBar.vertical: ScrollBarType {}
-
-        model: contacts
-
-        clip: true
 
         header: ColumnLayout {
             width: listView.width
@@ -170,11 +87,12 @@ PageType {
             }
         }
 
+        model: contacts
+
         delegate: ColumnLayout {
             width: listView.width
 
             LabelWithButtonType {
-                id: telegramButton
                 Layout.fillWidth: true
                 Layout.topMargin: 6
 
@@ -255,6 +173,57 @@ PageType {
                     Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl("policy"))
                 }
             }
+        }
+    }
+    
+    property list<QtObject> contacts: [
+        telegramGroup,
+        mail,
+        github,
+        website
+    ]
+
+    QtObject {
+        id: telegramGroup
+
+        readonly property string title: qsTr("Telegram group")
+        readonly property string description: qsTr("To discuss features")
+        readonly property string imageSource: "qrc:/images/controls/telegram.svg"
+        readonly property var handler: function() {
+            Qt.openUrlExternally(qsTr("https://t.me/amnezia_vpn_en"))
+        }
+    }
+
+    QtObject {
+        id: mail
+
+        readonly property string title: qsTr("support@amnezia.org")
+        readonly property string description: qsTr("For reviews and bug reports")
+        readonly property string imageSource: "qrc:/images/controls/mail.svg"
+        readonly property var handler: function() {
+            Qt.openUrlExternally(qsTr("mailto:support@amnezia.org"))
+        }
+    }
+
+    QtObject {
+        id: github
+
+        readonly property string title: qsTr("GitHub")
+        readonly property string description: qsTr("Discover the source code")
+        readonly property string imageSource: "qrc:/images/controls/github.svg"
+        readonly property var handler: function() {
+            Qt.openUrlExternally(qsTr("https://github.com/amnezia-vpn/amnezia-client"))
+        }
+    }
+
+    QtObject {
+        id: website
+
+        readonly property string title: qsTr("Website")
+        readonly property string description: qsTr("Visit official website")
+        readonly property string imageSource: "qrc:/images/controls/amnezia.svg"
+        readonly property var handler: function() {
+            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
         }
     }
 }

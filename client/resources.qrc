@@ -127,7 +127,7 @@
         <file>ui/qml/Components/SelectLanguageDrawer.qml</file>
         <file>ui/qml/Components/ServersListView.qml</file>
         <file>ui/qml/Components/SettingsContainersListView.qml</file>
-        <file>ui/qml/Components/ShareConnectionDrawer.qml</file>
+
         <file>ui/qml/Components/TransportProtoSelector.qml</file>
         <file>ui/qml/Components/AddSitePanel.qml</file>
         <file>ui/qml/Config/GlobalConfig.qml</file>
@@ -228,6 +228,7 @@
         <file>ui/qml/Pages2/PageSetupWizardViewConfig.qml</file>
         <file>ui/qml/Pages2/PageShare.qml</file>
         <file>ui/qml/Pages2/PageShareFullAccess.qml</file>
+        <file>ui/qml/Pages2/PageShareConnection.qml</file>
         <file>ui/qml/Pages2/PageStart.qml</file>
         <file>ui/qml/Components/RenameServerDrawer.qml</file>
         <file>ui/qml/Controls2/ListViewType.qml</file>
@@ -240,6 +241,7 @@
         <file>ui/qml/Components/ApiPremV1SubListDrawer.qml</file>
         <file>ui/qml/Components/OtpCodeDrawer.qml</file>
         <file>ui/qml/Components/AwgTextField.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>

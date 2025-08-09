@@ -13,25 +13,31 @@ import "../Config"
 PageType {
     id: root
 
-    FlickableType {
-        id: fl
+    BackButtonType {
+        id: backButton
+
         anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.topMargin: 20
 
-        ColumnLayout {
-            id: content
-
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            spacing: 16
-
-            BackButtonType {
-                id: backButton
-                Layout.topMargin: 20
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
             }
+        }
+    }
+
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.left: parent.left
+
+        header: ColumnLayout {
+            width: listView.width
 
             BaseHeaderType {
                 Layout.fillWidth: true
@@ -41,6 +47,13 @@ PageType {
                 headerText: qsTr("Connection key")
                 descriptionText: qsTr("A line that starts with vpn://...")
             }
+        }
+
+        spacing: 16
+        model: 1 // fake model to force the ListView to be created without a model
+
+        delegate: ColumnLayout {
+            width: listView.width
 
             TextFieldWithHeaderType {
                 id: textKey
@@ -60,23 +73,26 @@ PageType {
                 }
             }
         }
-    }
 
-    BasicButtonType {
-        id: continueButton
+        footer: ColumnLayout {
+            width: listView.width
 
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.rightMargin: 16
-        anchors.leftMargin: 16
-        anchors.bottomMargin: 32
+            BasicButtonType {
+                id: continueButton
 
-        text: qsTr("Continue")
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.topMargin: 16
+                Layout.bottomMargin: 32
 
-        clickedFunc: function() {
-            if (ImportController.extractConfigFromData(textKey.textField.text)) {
-                PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                text: qsTr("Continue")
+
+                clickedFunc: function() {
+                    if (ImportController.extractConfigFromData(textKey.textField.text)) {
+                        PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                    }
+                }
             }
         }
     }
