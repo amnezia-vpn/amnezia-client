@@ -38,6 +38,8 @@ public:
 
     QFuture<ErrorCode> closeConnection();
 
+    ErrorCode getLastConnectionError() const;
+
 signals:
     void configurationPrepared(const QJsonObject &vpnConfiguration);
     void connectionEstablished();

@@ -18,7 +18,6 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/api/apiPremV1MigrationController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/selfhostedConfigController.h
-    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installationController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/clientManagementController.h
     ${CLIENT_ROOT_DIR}/core/controllers/configController.h
     ${CLIENT_ROOT_DIR}/core/controllers/dnsController.h
@@ -77,7 +76,6 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/api/apiPremV1MigrationController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/serverController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/selfhostedConfigController.cpp
-    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installationController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/clientManagementController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/configController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/dnsController.cpp

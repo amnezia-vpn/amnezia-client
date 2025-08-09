@@ -105,17 +105,17 @@ QSharedPointer<ProtocolConfig> SelfhostedConfigController::createProtocolConfig(
 
     switch (protocol) {
     case Proto::Awg:
-        return QSharedPointer<AwgProtocolConfig>::create();
+        return QSharedPointer<AwgProtocolConfig>::create(QJsonObject{}, ProtocolProps::protoToString(Proto::Awg));
     case Proto::Cloak:
-        return QSharedPointer<CloakProtocolConfig>::create();
+        return QSharedPointer<CloakProtocolConfig>::create(QJsonObject{}, ProtocolProps::protoToString(Proto::Cloak));
     case Proto::OpenVpn:
-        return QSharedPointer<OpenVpnProtocolConfig>::create();
+        return QSharedPointer<OpenVpnProtocolConfig>::create(QJsonObject{}, ProtocolProps::protoToString(Proto::OpenVpn));
     case Proto::ShadowSocks:
-        return QSharedPointer<ShadowsocksProtocolConfig>::create();
+        return QSharedPointer<ShadowsocksProtocolConfig>::create(QJsonObject{}, ProtocolProps::protoToString(Proto::ShadowSocks));
     case Proto::WireGuard:
-        return QSharedPointer<WireGuardProtocolConfig>::create();
+        return QSharedPointer<WireGuardProtocolConfig>::create(QJsonObject{}, ProtocolProps::protoToString(Proto::WireGuard));
     case Proto::Xray:
-        return QSharedPointer<XrayProtocolConfig>::create();
+        return QSharedPointer<XrayProtocolConfig>::create(QJsonObject{}, ProtocolProps::protoToString(Proto::Xray));
     default:
         logger.warning() << "Unknown protocol in createProtocolConfig:" << ProtocolProps::protoToString(protocol);
         return nullptr;

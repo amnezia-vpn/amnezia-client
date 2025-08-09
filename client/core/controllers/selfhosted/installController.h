@@ -61,6 +61,8 @@ public:
     ErrorCode addEmptyServer(const ServerCredentials &serverCredentials);
     bool isConfigValid(const ServerCredentials &serverCredentials) const;
 
+    ErrorCode checkSshConnection(const ServerCredentials &serverCredentials, const QString &privateKeyPassphrase);
+
 signals:
     void clientAppendRequested(const DockerContainer container, const ServerCredentials &credentials,
                               const ContainerConfig &containerConfig, const QString &clientName,

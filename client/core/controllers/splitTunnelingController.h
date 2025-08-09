@@ -10,7 +10,6 @@
 
 #include "settings.h"
 #include "core/defs.h"
-#include "platforms/android/installedAppInfo.h"
 #include "vpnconnection.h"
 
 using namespace amnezia;

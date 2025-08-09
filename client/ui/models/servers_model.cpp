@@ -35,7 +35,6 @@ namespace
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
     m_serverConfigController = std::make_shared<SelfhostedConfigController>(settings);
-    m_installationController = std::make_shared<InstallationController>(settings);
     m_settingsController = std::make_shared<SettingsController>(settings);
     
     m_isAmneziaDnsEnabled = m_settingsController->isAmneziaDnsEnabled();
@@ -445,13 +444,10 @@ const QString ServersModel::getDefaultServerDefaultContainerName()
 
 ErrorCode ServersModel::removeAllContainers(const QSharedPointer<ServerController> &serverController)
 {
-    Q_UNUSED(serverController)
-    
-    auto serverConfig = m_servers1.at(m_processedServerIndex);
-    auto future = m_installationController->removeAllContainers(serverConfig);
-    
-    ErrorCode errorCode = future.result();
+    auto credentials = serverCredentials(m_processedServerIndex);
+    ErrorCode errorCode = serverController->removeAllContainers(credentials);
     if (errorCode == ErrorCode::NoError) {
+        auto serverConfig = m_servers1.at(m_processedServerIndex);
         serverConfig->containerConfigs.clear();
         editServer(serverConfig, m_processedServerIndex);
     }
@@ -460,35 +456,26 @@ ErrorCode ServersModel::removeAllContainers(const QSharedPointer<ServerControlle
 
 ErrorCode ServersModel::rebootServer(const QSharedPointer<ServerController> &serverController)
 {
-    Q_UNUSED(serverController)
-    
-    auto serverConfig = m_servers1.at(m_processedServerIndex);
-    auto future = m_installationController->rebootServer(serverConfig);
-    return future.result();
+    auto credentials = serverCredentials(m_processedServerIndex);
+    return serverController->rebootServer(credentials);
 }
 
 ErrorCode ServersModel::removeContainer(const QSharedPointer<ServerController> &serverController, const int containerIndex)
 {
-    Q_UNUSED(serverController)
-    
-    auto serverConfig = m_servers1.at(m_processedServerIndex);
+    auto credentials = serverCredentials(m_processedServerIndex);
     auto dockerContainer = static_cast<DockerContainer>(containerIndex);
-
-    auto future = m_installationController->removeContainer(serverConfig, dockerContainer);
-    ErrorCode errorCode = future.result();
-
+    ErrorCode errorCode = serverController->removeContainer(credentials, dockerContainer);
     if (errorCode == ErrorCode::NoError) {
+        auto serverConfig = m_servers1.at(m_processedServerIndex);
         serverConfig->containerConfigs.remove(ContainerProps::containerToString(dockerContainer));
-
         auto defaultContainer = ContainerProps::containerFromString(serverConfig->defaultContainer);
-        if (defaultContainer == containerIndex) {
+        if (defaultContainer == dockerContainer) {
             if (serverConfig->containerConfigs.empty()) {
                 serverConfig->defaultContainer = ContainerProps::containerToString(DockerContainer::None);
             } else {
                 serverConfig->defaultContainer = serverConfig->containerConfigs.begin()->containerName;
             }
         }
-
         editServer(serverConfig, m_processedServerIndex);
     }
     return errorCode;

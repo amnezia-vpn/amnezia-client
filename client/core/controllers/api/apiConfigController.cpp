@@ -204,7 +204,7 @@ namespace
         serverConfig[config_key::containers] = newServerConfig.value(config_key::containers);
         serverConfig[config_key::hostName] = newServerConfig.value(config_key::hostName);
 
-        if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+        if (newServerConfig.value(config_key::configVersion).toInt() == static_cast<int>(amnezia::ServerConfigType::ApiV2)) {
             serverConfig[config_key::configVersion] = newServerConfig.value(config_key::configVersion);
             serverConfig[config_key::description] = newServerConfig.value(config_key::description);
             serverConfig[config_key::name] = newServerConfig.value(config_key::name);
@@ -217,7 +217,7 @@ namespace
         map.insert(newServerConfig.value(configKey::apiConfig).toObject().toVariantMap());
         auto apiConfig = QJsonObject::fromVariantMap(map);
 
-        if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+        if (newServerConfig.value(config_key::configVersion).toInt() == static_cast<int>(amnezia::ServerConfigType::ApiV2)) {
             apiConfig.insert(apiDefs::key::supportedProtocols,
                              QJsonDocument::fromJson(apiResponseBody).object().value(apiDefs::key::supportedProtocols).toArray());
         }
@@ -312,7 +312,7 @@ void ApiConfigsController::prepareVpnKeyExport()
 
     m_qrCodes = qrCodeUtils::generateQrCodeImageSeries(vpnKey.toUtf8());
 
-    emit vpnKeyExportReady();
+    
 }
 
 void ApiConfigsController::copyVpnKeyToClipboard()
@@ -390,15 +390,17 @@ ErrorCode ApiConfigsController::updateServiceFromGateway(const int serverIndex, 
                                                     bool reloadServiceConfig)
 {
     auto serverConfigPtr = m_serversModel->getServerConfig(serverIndex);
+    auto serverConfigJson = serverConfigPtr->toJson();
+    auto apiConfig = serverConfigJson.value(configKey::apiConfig).toObject();
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_settings->getInstallationUuid(true),
                                             apiConfig.value(configKey::userCountryCode).toString(),
-                                            newCountryCode,
+        newCountryCode,
                                             apiConfig.value(configKey::serviceType).toString(),
                                             apiConfig.value(configKey::serviceProtocol).toString(),
-                                            serverConfig.value(configKey::authData).toObject() };
+                                            serverConfigJson.value(configKey::authData).toObject() };
 
     ProtocolData protocolData = generateProtocolData(gatewayRequestData.serviceProtocol);
 
@@ -447,7 +449,8 @@ ErrorCode ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     auto serverConfigPtr = m_serversModel->getServerConfig(serverIndex);
     auto installationUuid = m_settings->getInstallationUuid(true);
 
-    QString serviceProtocol = serverConfig.value(configKey::protocol).toString();
+    auto serverConfigJson2 = serverConfigPtr->toJson();
+    QString serviceProtocol = serverConfigJson2.value(configKey::protocol).toString();
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
 
     QJsonObject apiPayload;
@@ -455,8 +458,8 @@ ErrorCode ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     apiPayload[configKey::uuid] = installationUuid;
     apiPayload[configKey::osVersion] = QSysInfo::productType();
     apiPayload[configKey::appVersion] = QString(APP_VERSION);
-    apiPayload[configKey::accessToken] = serverConfig.value(configKey::accessToken).toString();
-    apiPayload[configKey::apiEndpoint] = serverConfig.value(configKey::apiEndpoint).toString();
+    apiPayload[configKey::accessToken] = serverConfigJson2.value(configKey::accessToken).toString();
+    apiPayload[configKey::apiEndpoint] = serverConfigJson2.value(configKey::apiEndpoint).toString();
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/proxy_config"), apiPayload, responseBody);
@@ -482,7 +485,7 @@ ErrorCode ApiConfigsController::deactivateDevice()
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     if (!apiUtils::isPremiumServer(serverConfigObject)) {
-        return true;
+        return ErrorCode::NoError;
     }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
@@ -516,7 +519,7 @@ ErrorCode ApiConfigsController::deactivateExternalDevice(const QString &uuid, co
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     if (!apiUtils::isPremiumServer(serverConfigObject)) {
-        return true;
+        return ErrorCode::NoError;
     }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
@@ -581,7 +584,8 @@ void ApiConfigsController::setCurrentProtocol(const QString &protocolName)
 
     serverConfigObject.insert(configKey::apiConfig, apiConfigObject);
 
-    m_serversModel->editServer(serverConfigObject, serverIndex);
+    auto updatedPtr = ServerConfig::createServerConfig(serverConfigObject);
+    m_serversModel->editServer(updatedPtr, serverIndex);
 }
 
 bool ApiConfigsController::isVlessProtocol()

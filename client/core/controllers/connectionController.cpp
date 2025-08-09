@@ -86,3 +86,8 @@ bool ConnectionController::isServerSupported(DockerContainer container) const
 {
     return ContainerProps::isSupportedByCurrentPlatform(container);
 }
+
+ErrorCode ConnectionController::getLastConnectionError() const
+{
+    return m_vpnConnection ? m_vpnConnection->lastError() : ErrorCode::NoError;
+}

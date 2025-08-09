@@ -386,3 +386,12 @@ ContainerConfig InstallController::generateContainerConfig(const DockerContainer
     
     return containerConfig;
 } 
+
+ErrorCode InstallController::checkSshConnection(const ServerCredentials &serverCredentials, const QString &privateKeyPassphrase)
+{
+    Q_UNUSED(privateKeyPassphrase);
+    QSharedPointer<ServerController> serverController(new ServerController(m_settings));
+    ErrorCode errorCode = ErrorCode::NoError;
+    serverController->checkSshConnection(serverCredentials, errorCode);
+    return errorCode;
+}

@@ -6,6 +6,7 @@
 
 #include "core/defs.h"
 #include "core/models/servers/serverConfig.h"
+#include "core/models/containers/containers_defs.h"
 
 class Settings;
 

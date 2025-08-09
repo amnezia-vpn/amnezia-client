@@ -56,7 +56,7 @@ void ConnectionUIController::closeConnection()
 
 ErrorCode ConnectionUIController::getLastConnectionError()
 {
-    return m_vpnConnection->lastError();
+    return m_connectionController->getLastConnectionError();
 }
 
 void ConnectionUIController::onConnectionStateChanged(Vpn::ConnectionState state)

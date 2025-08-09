@@ -198,11 +198,12 @@ void CoreController::setupControllerSignalConnections()
     
     connect(m_exportController.data(), &ExportController::nativeConfigClientAppendRequested,
             clientManagementController.data(),
-            [clientManagementController](const QSharedPointer<ProtocolConfig> &protocolConfig, const QString &clientName, 
-                                       const DockerContainer container, const ServerCredentials &credentials, 
+            [clientManagementController](const QSharedPointer<ProtocolConfig> &protocolConfig, const QString &clientName,
+                                       const DockerContainer container, const ServerCredentials &credentials,
                                        const QSharedPointer<ServerController> &serverController) {
                 QList<ClientInfo> clientsList;
-                ErrorCode result = clientManagementController->appendClient(protocolConfig, clientName, container, 
+                auto nonConstProtocolConfig = QSharedPointer<ProtocolConfig>(protocolConfig);
+                ErrorCode result = clientManagementController->appendClient(nonConstProtocolConfig, clientName, container,
                                                                            credentials, serverController, clientsList);
                 emit clientManagementController->nativeConfigClientAppendCompleted(result);
             });
@@ -391,10 +392,7 @@ void CoreController::initAdminConfigRevokedHandler()
 
 void CoreController::initPassphraseRequestHandler()
 {
-    connect(m_installController.get(), &InstallController::passphraseRequestStarted, m_pageController.get(),
-            &PageController::showPassphraseRequestDrawer);
-    connect(m_pageController.get(), &PageController::passphraseRequestDrawerClosed, m_installController.get(),
-            &InstallController::setEncryptedPassphrase);
+    
 }
 
 void CoreController::initTranslationsUpdatedHandler()
@@ -426,7 +424,7 @@ void CoreController::initPrepareConfigHandler()
             return;
         }
 
-        if (!m_installController->isConfigValid()) {
+        if (!m_installController->isConfigValid(m_serversModel->getProcessedServerCredentials())) {
             emit m_vpnConnection->connectionStateChanged(Vpn::ConnectionState::Disconnected);
             return;
         }

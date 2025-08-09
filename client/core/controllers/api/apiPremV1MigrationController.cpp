@@ -19,7 +19,8 @@ bool ApiPremV1MigrationController::hasConfigsToMigration()
 
     auto serversCount = m_serversModel->getServersCount();
     for (size_t i = 0; i < serversCount; i++) {
-        auto serverConfigObject = m_serversModel->getServerConfig(i);
+        auto serverConfigPtr = m_serversModel->getServerConfig(i);
+        auto serverConfigObject = serverConfigPtr->toJson();
 
         if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV1) {
             continue;

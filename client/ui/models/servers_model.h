@@ -5,7 +5,6 @@
 
 #include "core/controllers/selfhosted/serverController.h"
 #include "core/controllers/selfhosted/selfhostedConfigController.h"
-#include "core/controllers/selfhosted/installationController.h"
 #include "core/controllers/settingsController.h"
 #include "core/models/servers/serverConfig.h"
 #include "settings.h"
@@ -161,7 +160,6 @@ private:
 
     std::shared_ptr<Settings> m_settings;
     std::shared_ptr<SelfhostedConfigController> m_serverConfigController;
-    std::shared_ptr<InstallationController> m_installationController;
     std::shared_ptr<SettingsController> m_settingsController;
 
     int m_defaultServerIndex;

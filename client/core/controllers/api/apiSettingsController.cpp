@@ -53,7 +53,8 @@ ErrorCode ApiSettingsController::getAccountInfo(bool reload)
                                         m_settings->isStrictKillSwitchEnabled());
 
     auto processedIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfig = m_serversModel->getServerConfig(processedIndex);
+    auto serverConfigPtr = m_serversModel->getServerConfig(processedIndex);
+    auto serverConfig = serverConfigPtr->toJson();
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
     auto authData = serverConfig.value(configKey::authData).toObject();
 

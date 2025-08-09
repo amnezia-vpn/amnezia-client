@@ -41,7 +41,7 @@ void SettingsController::toggleAmneziaDns(bool enable)
 
 void SettingsController::configureLogging(bool enabled)
 {
-    m_settings->setIsLoggingEnabled(enabled);
+    m_settings->setSaveLogs(enabled);
 }
 
 void SettingsController::checkLoggingExpiration()
@@ -59,14 +59,14 @@ void SettingsController::checkLoggingExpiration()
 void SettingsController::clearLogs()
 {
     logger.info() << "Clearing application logs";
-    
+
 #ifdef Q_OS_ANDROID
     AndroidController::instance()->clearLogs();
 #else
     Logger::clearLogs(false);
     Logger::clearServiceLogs();
 #endif
-    
+
     logger.info() << "Logs cleared successfully";
 }
 
@@ -114,7 +114,7 @@ QString SettingsController::getSecondaryDns() const
 
 bool SettingsController::isAmneziaDnsEnabled() const
 {
-    return m_settings->isUseAmneziaDns();
+    return m_settings->useAmneziaDns();
 }
 
 bool SettingsController::isLoggingEnabled() const
@@ -134,7 +134,7 @@ bool SettingsController::isStrictKillSwitchEnabled() const
 
 bool SettingsController::isAutoStartEnabled() const
 {
-    return m_settings->isAutoStart();
+    return Autostart::isAutostart();
 }
 
 bool SettingsController::isAutoConnectEnabled() const
