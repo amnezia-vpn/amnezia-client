@@ -69,10 +69,10 @@ PageType {
         }
 
         model: 1 // fake model to force the ListView to be created without a model
-        spacing: 16
 
         delegate: ColumnLayout {
             width: listView.width
+            spacing: 16
 
             TextFieldWithHeaderType {
                 id: primaryDns
