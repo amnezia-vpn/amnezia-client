@@ -31,11 +31,6 @@ public:
     
     // API server utilities
     bool isServerFromApiAlreadyExists(quint16 crc) const;
-    bool isServerFromApiAlreadyExists(const QString &userCountryCode, 
-                                     const QString &serviceType, 
-                                     const QString &serviceProtocol) const;
-    bool isApiKeyExpired(int serverIndex) const;
-    void removeApiConfig(int serverIndex);
     
     // General utilities
     QStringList getAllInstalledServicesName(int serverIndex) const;

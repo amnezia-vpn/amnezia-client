@@ -38,6 +38,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/../common/logger/logger.h
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.h
     ${CLIENT_ROOT_DIR}/core/api/apiUtils.h
+    ${CLIENT_ROOT_DIR}/core/utils/fileUtils.h
 )
 
 # Mozilla headres
@@ -99,6 +100,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/../common/logger/logger.cpp
     ${CLIENT_ROOT_DIR}/utils/qmlUtils.cpp
     ${CLIENT_ROOT_DIR}/core/api/apiUtils.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/fileUtils.cpp
 )
 
 # Mozilla sources

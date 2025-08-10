@@ -127,10 +127,10 @@ void CoreController::initUIControllers()
 {
     auto coreConnectionController = QSharedPointer<ConnectionController>::create(m_vpnConnection, m_settings, this);
     m_connectionController.reset(
-            new ConnectionUIController(m_serversModel, m_containersModel, m_clientManagementModel, coreConnectionController, m_settings));
+            new ConnectionUIController(m_serversModel, m_containersModel, m_clientManagementModel, coreConnectionController));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
-    m_pageController.reset(new PageController(m_serversModel, m_settings));
+    m_pageController.reset(new PageController(m_serversModel, m_settingsController));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
 
     m_focusController.reset(new FocusController(m_engine, this));
@@ -140,13 +140,13 @@ void CoreController::initUIControllers()
     m_exportUIController.reset(new ExportUIController(m_serversModel, m_containersModel, m_clientManagementModel, m_exportController, clientManagementController));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportUIController.get());
 
-    m_installUIController.reset(new InstallUIController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_installController, clientManagementController));
+    m_installUIController.reset(new InstallUIController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_installController, m_apiConfigsCoreController, clientManagementController));
     m_engine->rootContext()->setContextProperty("InstallController", m_installUIController.get());
 
     connect(m_installUIController.get(), &InstallUIController::currentContainerUpdated, m_connectionController.get(),
             &ConnectionUIController::onCurrentContainerUpdated);
 
-    m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
+    m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settingsController));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
     m_settingsUIController.reset(
@@ -162,20 +162,20 @@ void CoreController::initUIControllers()
     m_appSplitUIController.reset(new AppSplitUIController(m_splitTunnelingController, m_appSplitTunnelingModel));
     m_engine->rootContext()->setContextProperty("AppSplitTunnelingController", m_appSplitUIController.get());
 
-    m_systemController.reset(new SystemController(m_settings));
+    m_systemController.reset(new SystemController());
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
 
     m_apiSettingsCoreController = QSharedPointer<ApiSettingsController>::create(m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settings);
     m_apiConfigsCoreController = QSharedPointer<ApiConfigsController>::create(m_serversModel, m_apiServicesModel, m_settings);
     m_apiPremV1MigrationCoreController = QSharedPointer<ApiPremV1MigrationController>::create(m_serversModel, m_settings, this);
 
-    m_apiSettingsUIController.reset(new ApiSettingsUIController(m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_apiSettingsCoreController, m_settings));
+    m_apiSettingsUIController.reset(new ApiSettingsUIController(m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_apiSettingsCoreController));
     m_engine->rootContext()->setContextProperty("ApiSettingsController", m_apiSettingsUIController.get());
 
-    m_apiConfigUIController.reset(new ApiConfigUIController(m_serversModel, m_apiServicesModel, m_apiConfigsCoreController, m_settings));
+    m_apiConfigUIController.reset(new ApiConfigUIController(m_serversModel, m_apiServicesModel, m_apiConfigsCoreController));
     m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigUIController.get());
 
-    m_apiPremV1MigrationUIController.reset(new ApiPremV1MigrationUIController(m_serversModel, m_apiPremV1MigrationCoreController, m_settings));
+    m_apiPremV1MigrationUIController.reset(new ApiPremV1MigrationUIController(m_serversModel, m_apiPremV1MigrationCoreController));
     m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationUIController.get());
     
     setupControllerSignalConnections();

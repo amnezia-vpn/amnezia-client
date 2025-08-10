@@ -110,6 +110,14 @@ private:
     ErrorCode revokeXray(const int row, const DockerContainer container, const ServerCredentials &credentials,
                         const QSharedPointer<ServerController> &serverController, QList<ClientInfo> &clientsList);
 
+    // Internal wrappers to fetch clients list then delegate to detailed versions
+    ErrorCode revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials, 
+                            const int serverIndex, const QSharedPointer<ServerController> &serverController);
+    ErrorCode revokeWireGuard(const int row, const DockerContainer container, const ServerCredentials &credentials,
+                              const QSharedPointer<ServerController> &serverController);
+    ErrorCode revokeXray(const int row, const DockerContainer container, const ServerCredentials &credentials,
+                         const QSharedPointer<ServerController> &serverController);
+
     // Helper methods
     bool isClientExists(const QString &clientId, const QList<ClientInfo> &clientsList);
     void migration(const QByteArray &clientsTableString, QList<ClientInfo> &clientsList);

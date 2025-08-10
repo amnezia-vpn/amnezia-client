@@ -43,6 +43,7 @@ InstallUIController::InstallUIController(const QSharedPointer<ServersModel> &ser
                                         const QSharedPointer<ProtocolsModel> &protocolsModel,
                                         const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                         QSharedPointer<InstallController> coreInstallController,
+                                        QSharedPointer<ApiConfigsController> apiConfigsCoreController,
                                         QSharedPointer<ClientManagementController> clientManagementController,
                                         QObject *parent)
     : QObject(parent),
@@ -51,6 +52,7 @@ InstallUIController::InstallUIController(const QSharedPointer<ServersModel> &ser
       m_protocolModel(protocolsModel),
       m_clientManagementModel(clientManagementModel),
       m_coreInstallController(coreInstallController),
+      m_apiConfigsCoreController(apiConfigsCoreController),
       m_clientManagementController(clientManagementController)
 {
 }
@@ -210,7 +212,9 @@ void InstallUIController::removeProcessedContainer()
 
 void InstallUIController::removeApiConfig(const int serverIndex)
 {
-    m_serversModel->removeApiConfig(serverIndex);
+    if (m_apiConfigsCoreController) {
+        m_apiConfigsCoreController->removeApiConfig(serverIndex);
+    }
     emit apiConfigRemoved(tr("Api config removed"));
 }
 

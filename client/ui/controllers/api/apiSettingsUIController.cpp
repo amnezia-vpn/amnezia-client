@@ -1,22 +1,19 @@
 #include "apiSettingsUIController.h"
 
 #include "core/controllers/api/apiSettingsController.h"
-#include "settings.h"
 
 ApiSettingsUIController::ApiSettingsUIController(const QSharedPointer<ServersModel> &serversModel,
                                                  const QSharedPointer<ApiAccountInfoModel> &apiAccountInfoModel,
                                                  const QSharedPointer<ApiCountryModel> &apiCountryModel,
                                                  const QSharedPointer<ApiDevicesModel> &apiDevicesModel,
-                                                 const QSharedPointer<ApiSettingsController> &coreController,
-                                                 const std::shared_ptr<Settings> &settings,
+                                                  const QSharedPointer<ApiSettingsController> &coreController,
                                                  QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_apiAccountInfoModel(apiAccountInfoModel),
       m_apiCountryModel(apiCountryModel),
       m_apiDevicesModel(apiDevicesModel),
-      m_coreController(coreController),
-      m_settings(settings)
+       m_coreController(coreController)
 {
     
 }

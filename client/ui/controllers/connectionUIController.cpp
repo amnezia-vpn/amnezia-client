@@ -13,14 +13,13 @@
 ConnectionUIController::ConnectionUIController(const QSharedPointer<ServersModel> &serversModel,
                                                const QSharedPointer<ContainersModel> &containersModel,
                                                const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                               const QSharedPointer<ConnectionController> &connectionController, const std::shared_ptr<Settings> &settings,
+                                               const QSharedPointer<ConnectionController> &connectionController,
                                                QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_clientManagementModel(clientManagementModel),
-      m_connectionController(connectionController),
-      m_settings(settings)
+      m_connectionController(connectionController)
 {
     connect(m_connectionController.get(), &ConnectionController::connectionEstablished, this, [this]() {
         onConnectionStateChanged(Vpn::ConnectionState::Connected);

@@ -167,6 +167,11 @@ QString SettingsController::getInstallationUuid() const
     return m_settings->getInstallationUuid(false);
 }
 
+QString SettingsController::nextAvailableServerName() const
+{
+    return m_settings->nextAvailableServerName();
+}
+
 void SettingsController::resetGatewayEndpoint()
 {
     m_settings->resetGatewayEndpoint();

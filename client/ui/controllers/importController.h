@@ -7,6 +7,8 @@
 #include "ui/models/servers_model.h"
 #include "core/models/servers/serverConfig.h"
 
+class SettingsController;
+
 namespace
 {
     enum class ConfigTypes {
@@ -27,7 +29,7 @@ class ImportController : public QObject
 public:
     explicit ImportController(const QSharedPointer<ServersModel> &serversModel,
                               const QSharedPointer<ContainersModel> &containersModel,
-                              const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+                              const QSharedPointer<SettingsController> &settingsController, QObject *parent = nullptr);
 
 public slots:
     void importConfig();
@@ -76,7 +78,7 @@ private:
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
-    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<SettingsController> m_settingsController;
 
     QSharedPointer<ServerConfig> m_config;
     QString m_configFileName;

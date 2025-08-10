@@ -67,59 +67,7 @@ bool ConfigController::isServerFromApiAlreadyExists(quint16 crc) const
     return false;
 }
 
-bool ConfigController::isServerFromApiAlreadyExists(const QString &userCountryCode, 
-                                                   const QString &serviceType, 
-                                                   const QString &serviceProtocol) const
-{
-    auto servers = m_settings->serversArray();
-    for (const auto &server : servers) {
-        auto serverConfig = ServerConfig::createServerConfig(server.toObject());
-        
-        if (serverConfig->hostName == "api.amnezia.org") {
-            auto apiV2Config = serverConfig.dynamicCast<ApiV2ServerConfig>();
-            if (apiV2Config && 
-                apiV2Config->apiConfigData.countryCode == userCountryCode &&
-                apiV2Config->apiConfigData.serviceInfo.serviceType == serviceType &&
-                apiV2Config->apiConfigData.serviceInfo.serviceProtocol == serviceProtocol) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-bool ConfigController::isApiKeyExpired(int serverIndex) const
-{
-    auto servers = m_settings->serversArray();
-    if (serverIndex >= servers.size()) return false;
-    
-    auto serverConfig = ServerConfig::createServerConfig(servers.at(serverIndex).toObject());
-    
-    if (serverConfig->hostName == "api.amnezia.org") {
-        auto apiV2Config = serverConfig.dynamicCast<ApiV2ServerConfig>();
-        if (apiV2Config) {
-            QDateTime expiresAt = QDateTime::fromString(apiV2Config->apiConfigData.serviceInfo.expiresAt, Qt::ISODate);
-            return QDateTime::currentDateTime() > expiresAt;
-        }
-    }
-    return false;
-}
-
-void ConfigController::removeApiConfig(int serverIndex)
-{
-    auto servers = m_settings->serversArray();
-    if (serverIndex >= servers.size()) return;
-    
-    auto serverConfig = ServerConfig::createServerConfig(servers.at(serverIndex).toObject());
-    
-    if (serverConfig->hostName == "api.amnezia.org") {
-        auto apiV2Config = serverConfig.dynamicCast<ApiV2ServerConfig>();
-        if (apiV2Config) {
-            apiV2Config->apiConfigData = ApiV2ServerConfig::ApiConfigData{};
-            updateServerInSettings(apiV2Config, serverIndex);
-        }
-    }
-}
+// Removed API-specific helpers; moved to ApiConfigsController
 
 QStringList ConfigController::getAllInstalledServicesName(int serverIndex) const
 {

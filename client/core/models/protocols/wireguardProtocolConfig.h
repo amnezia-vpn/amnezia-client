@@ -27,7 +27,6 @@ namespace wireguard
         QString transportProto;
 
         QString subnetAddress;
-        QString mtu;
     };
 
     struct ClientProtocolConfig

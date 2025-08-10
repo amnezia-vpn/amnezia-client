@@ -40,6 +40,12 @@ public slots:
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
 
+      bool isServerFromApiAlreadyExists(const QString &userCountryCode,
+                                        const QString &serviceType,
+                                        const QString &serviceProtocol) const;
+      bool isApiKeyExpired(int serverIndex) const;
+      void removeApiConfig(int serverIndex);
+
     QList<QString> m_qrCodes;
     QString m_vpnKey;
 

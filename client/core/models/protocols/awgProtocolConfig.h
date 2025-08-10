@@ -32,7 +32,6 @@ namespace awg
         QString transportProto;
 
         QString subnetAddress;
-        QString mtu;
 
         AwgData awgData;
     };

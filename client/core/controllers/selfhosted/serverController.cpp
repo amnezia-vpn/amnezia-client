@@ -462,6 +462,7 @@ ErrorCode ServerController::configureContainerWorker(const ServerCredentials &cr
                                                  generateVarsForContainer(credentials, container, config)),
                                      cbReadStdOut, cbReadStdErr);
 
+    // ensure header is included where needed; call into controller utility if accessible
     VpnConfigurationsController::updateContainerConfigAfterInstallation(container, config, stdOut);
 
     return e;

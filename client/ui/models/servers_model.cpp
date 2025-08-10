@@ -567,10 +567,6 @@ bool ServersModel::isServerFromApiAlreadyExists(const quint16 crc)
     return m_serverConfigController->isServerFromApiAlreadyExists(crc);
 }
 
-bool ServersModel::isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol)
-{
-    return m_serverConfigController->isServerFromApiAlreadyExists(userCountryCode, serviceType, serviceProtocol);
-}
 
 bool ServersModel::serverHasInstalledContainers(const int serverIndex) const
 {
@@ -634,55 +630,7 @@ bool ServersModel::isServerFromApi(const int serverIndex)
     return data(serverIndex, IsServerFromTelegramApiRole).toBool() || data(serverIndex, IsServerFromGatewayApiRole).toBool();
 }
 
-bool ServersModel::isApiKeyExpired(const int serverIndex)
-{
-    // auto serverConfig = m_servers1.at(serverIndex);
-    // auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
-    // auto publicKeyInfo = apiConfig.value(configKey::publicKeyInfo).toObject();
-    // const QString expiresAt = publicKeyInfo.value(configKey::expiresAt).toString();
-    // if (expiresAt.isEmpty()) {
-    //     publicKeyInfo.insert(configKey::expiresAt, QDateTime::currentDateTimeUtc().addDays(1).toString(Qt::ISODate));
-    //     apiConfig.insert(configKey::publicKeyInfo, publicKeyInfo);
-    //     serverConfig.insert(configKey::apiConfig, apiConfig);
-    //     editServer(serverConfig, serverIndex);
-
-    //     return false;
-    // }
-
-    // auto expiresAtDateTime = QDateTime::fromString(expiresAt, Qt::ISODate).toUTC();
-    // if (expiresAtDateTime < QDateTime::currentDateTimeUtc()) {
-    //     return true;
-    // }
-    // return false;
-}
-
-void ServersModel::removeApiConfig(const int serverIndex)
-{
-//     auto serverConfig = m_servers1.at(serverIndex);
-
-// #ifdef Q_OS_IOS
-//     QString vpncName = QString("%1 (%2) %3")
-//                                .arg(serverConfig[config_key::description].toString())
-//                                .arg(serverConfig[config_key::hostName].toString())
-//                                .arg(serverConfig[config_key::vpnproto].toString());
-
-//     AmneziaVPN::removeVPNC(vpncName.toStdString());
-// #endif
-
-//     serverConfig.remove(config_key::dns1);
-//     serverConfig.remove(config_key::dns2);
-//     serverConfig.remove(config_key::containers);
-//     serverConfig.remove(config_key::hostName);
-
-//     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
-//     apiConfig.remove(configKey::publicKeyInfo);
-//     serverConfig.insert(configKey::apiConfig, apiConfig);
-
-//     serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
-
-//     editServer(serverConfig, serverIndex);
-}
 
 const QString ServersModel::getDefaultServerImagePathCollapsed()
 {

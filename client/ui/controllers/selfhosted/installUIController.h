@@ -13,6 +13,8 @@
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/selfhosted/clientManagementController.h"
 
+class ApiConfigsController;
+
 class InstallUIController : public QObject
 {
     Q_OBJECT
@@ -21,6 +23,7 @@ public:
                                  const QSharedPointer<ProtocolsModel> &protocolsModel,
                                  const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                  QSharedPointer<InstallController> coreInstallController,
+                                 QSharedPointer<ApiConfigsController> apiConfigsCoreController,
                                  QSharedPointer<ClientManagementController> clientManagementController,
                                  QObject *parent = nullptr);
     ~InstallUIController();
@@ -93,6 +96,7 @@ private:
     QSharedPointer<ProtocolsModel> m_protocolModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
     QSharedPointer<InstallController> m_coreInstallController;
+    QSharedPointer<ApiConfigsController> m_apiConfigsCoreController;
     QSharedPointer<ClientManagementController> m_clientManagementController;
 
     ServerCredentials m_processedServerCredentials;

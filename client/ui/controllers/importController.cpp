@@ -27,6 +27,7 @@
 #include "core/models/servers/apiV2ServerConfig.h"
 #include "core/models/containers/containerConfig.h"
 #include "systemController.h"
+#include "core/controllers/settingsController.h"
 #include "utilities.h"
 
 #ifdef Q_OS_ANDROID
@@ -82,8 +83,8 @@ namespace
 } // namespace
 
 ImportController::ImportController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
-                                   const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
+                                   const QSharedPointer<SettingsController> &settingsController, QObject *parent)
+    : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settingsController(settingsController)
 {
 #ifdef Q_OS_ANDROID
     mInstance = this;
@@ -374,7 +375,7 @@ QSharedPointer<ServerConfig> ImportController::extractOpenVpnConfig(const QStrin
 
     auto serverConfig = QSharedPointer<SelfHostedServerConfig>::create();
     serverConfig->hostName = hostName;
-    serverConfig->description = m_settings->nextAvailableServerName();
+    serverConfig->description = m_settingsController->nextAvailableServerName();
     serverConfig->defaultContainer = "amnezia-openvpn";
 
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
@@ -454,7 +455,7 @@ QSharedPointer<ServerConfig> ImportController::extractWireGuardConfig(const QStr
 
     auto serverConfig = QSharedPointer<SelfHostedServerConfig>::create();
     serverConfig->hostName = hostName;
-    serverConfig->description = m_settings->nextAvailableServerName();
+    serverConfig->description = m_settingsController->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp(
             "DNS = "
@@ -578,30 +579,20 @@ QSharedPointer<ServerConfig> ImportController::extractXrayConfig(const QString &
 
     auto serverConfig = QSharedPointer<SelfHostedServerConfig>::create();
     serverConfig->hostName = hostName;
-    serverConfig->description = description.isEmpty() ? m_settings->nextAvailableServerName() : description;
+    serverConfig->name = description.isEmpty() ? m_settingsController->nextAvailableServerName() : description;
 
     ContainerConfig containerConfig;
-    QSharedPointer<ProtocolConfig> protocolConfig;
+    auto protocolConfig = QSharedPointer<XrayProtocolConfig>::create();
+    protocolConfig->clientProtocolConfig.nativeConfig = data;
+    protocolConfig->isThirdPartyConfig = true;
 
     if (m_configType == ConfigTypes::ShadowSocks) {
         serverConfig->defaultContainer = "amnezia-ssxray";
-        containerConfig.container = DockerContainer::ShadowSocks;
-
-        auto shadowsocksConfig = QSharedPointer<ShadowsocksProtocolConfig>::create();
-        shadowsocksConfig->clientProtocolConfig.nativeConfig = data;
-        shadowsocksConfig->isThirdPartyConfig = true;
-
-        protocolConfig = shadowsocksConfig;
+        containerConfig.containerType = DockerContainer::ShadowSocks;
         containerConfig.protocolConfigs["ssxray"] = protocolConfig;
     } else {
         serverConfig->defaultContainer = "amnezia-xray";
-        containerConfig.container = DockerContainer::Xray;
-
-        auto xrayConfig = QSharedPointer<XrayProtocolConfig>::create();
-        xrayConfig->clientProtocolConfig.nativeConfig = data;
-        xrayConfig->isThirdPartyConfig = true;
-
-        protocolConfig = xrayConfig;
+        containerConfig.containerType = DockerContainer::Xray;
         containerConfig.protocolConfigs["xray"] = protocolConfig;
     }
 
@@ -790,12 +781,12 @@ void ImportController::processAmneziaConfig(QSharedPointer<ServerConfig> &config
     auto selfHostedConfig = qSharedPointerCast<SelfHostedServerConfig>(config);
     if (!selfHostedConfig) return;
     
-    for (auto &containerEntry : selfHostedConfig->containerConfigs) {
-        QString containerName = containerEntry.first;
-        ContainerConfig &containerConfig = containerEntry.second;
-        
-        DockerContainer dockerContainer = ContainerProps::containerFromString(containerName);
-        if (dockerContainer == DockerContainer::Awg || dockerContainer == DockerContainer::WireGuard) {
+    for (auto &containerConfig : selfHostedConfig->containerConfigs) {
+        if (containerConfig.containerType == DockerContainer::Awg || containerConfig.containerType == DockerContainer::WireGuard) {
+
+
+
+
             QString protocolName = ContainerProps::containerTypeToString(dockerContainer);
             if (containerConfig.protocolConfigs.contains(protocolName)) {
                 auto protocolConfig = containerConfig.protocolConfigs.value(protocolName);

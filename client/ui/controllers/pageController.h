@@ -6,6 +6,7 @@
 
 #include "core/defs.h"
 #include "ui/models/servers_model.h"
+#include "core/controllers/settingsController.h"
 
 namespace PageLoader
 {
@@ -86,7 +87,7 @@ class PageController : public QObject
 {
     Q_OBJECT
 public:
-    explicit PageController(const QSharedPointer<ServersModel> &serversModel, const std::shared_ptr<Settings> &settings,
+    explicit PageController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<SettingsController> &settingsController,
                             QObject *parent = nullptr);
 
 public slots:
@@ -148,7 +149,7 @@ signals:
 private:
     QSharedPointer<ServersModel> m_serversModel;
 
-    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<SettingsController> m_settingsController;
 
     bool m_isTriggeredByConnectButton;
 

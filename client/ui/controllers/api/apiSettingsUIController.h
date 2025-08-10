@@ -10,7 +10,6 @@
 #include "ui/models/api/apiDevicesModel.h"
 #include "ui/models/servers_model.h"
 
-class Settings;
 class ApiSettingsController;
 
 class ApiSettingsUIController : public QObject
@@ -22,7 +21,6 @@ public:
                                      const QSharedPointer<ApiCountryModel> &apiCountryModel,
                                      const QSharedPointer<ApiDevicesModel> &apiDevicesModel,
                                      const QSharedPointer<ApiSettingsController> &coreController,
-                                     const std::shared_ptr<Settings> &settings,
                                      QObject *parent = nullptr);
     ~ApiSettingsUIController();
 
@@ -40,7 +38,7 @@ private:
     QSharedPointer<ApiCountryModel> m_apiCountryModel;
     QSharedPointer<ApiDevicesModel> m_apiDevicesModel;
     QSharedPointer<ApiSettingsController> m_coreController;
-    std::shared_ptr<Settings> m_settings;
+    
 };
 
 #endif // APISETTINGSUICONTROLLER_H

@@ -15,6 +15,8 @@
 #include "core/models/protocols/torWebsiteProtocolConfig.h"
 #include "core/models/protocols/wireguardProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/models/protocols/sftpProtocolConfig.h"
+#include "core/models/protocols/socks5ProtocolConfig.h"
 #include "core/models/protocols/protocolConfig.h"
 #include <variant>
 

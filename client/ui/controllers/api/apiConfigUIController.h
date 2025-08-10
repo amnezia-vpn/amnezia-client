@@ -8,7 +8,6 @@
 #include "ui/models/api/apiServicesModel.h"
 #include "ui/models/servers_model.h"
 
-class Settings;
 class ApiConfigsController;
 
 class ApiConfigUIController : public QObject
@@ -18,7 +17,6 @@ public:
     explicit ApiConfigUIController(const QSharedPointer<ServersModel> &serversModel,
                                    const QSharedPointer<ApiServicesModel> &apiServicesModel,
                                    const QSharedPointer<ApiConfigsController> &coreController,
-                                   const std::shared_ptr<Settings> &settings,
                                    QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
@@ -60,7 +58,7 @@ private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ApiServicesModel> m_apiServicesModel;
     QSharedPointer<ApiConfigsController> m_coreController;
-    std::shared_ptr<Settings> m_settings;
+    
 };
 
 #endif // APICONFIGUICONTROLLER_H

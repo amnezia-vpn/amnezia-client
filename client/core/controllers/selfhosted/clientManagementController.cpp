@@ -11,6 +11,9 @@
 #include "core/models/protocols/shadowsocksProtocolConfig.h"
 #include "core/models/protocols/cloakProtocolConfig.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
+#include "core/models/protocols/sftpProtocolConfig.h"
+#include "core/models/protocols/socks5ProtocolConfig.h"
+#include "core/models/protocols/torWebsiteProtocolConfig.h"
 #include "core/models/protocols/protocolConfig.h"
 #include "core/models/clientInfo.h"
 #include <variant>
@@ -408,7 +411,7 @@ ErrorCode ClientManagementController::wgShow(const DockerContainer container, co
 
     ErrorCode error = ErrorCode::NoError;
     QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+    std::function<ErrorCode(const QString &, libssh::Client &)> cbReadStdOut = [&](const QString &data, libssh::Client &){
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };

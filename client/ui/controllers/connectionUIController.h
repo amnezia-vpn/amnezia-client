@@ -18,7 +18,7 @@ public:
 
     explicit ConnectionUIController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                     const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                    const QSharedPointer<ConnectionController> &connectionController, const std::shared_ptr<Settings> &settings,
+                                    const QSharedPointer<ConnectionController> &connectionController,
                                     QObject *parent = nullptr);
 
     ~ConnectionUIController() = default;
@@ -61,7 +61,7 @@ private:
 
     QSharedPointer<ConnectionController> m_connectionController;
 
-    std::shared_ptr<Settings> m_settings;
+    
 
     bool m_isConnected = false;
     bool m_isConnectionInProgress = false;

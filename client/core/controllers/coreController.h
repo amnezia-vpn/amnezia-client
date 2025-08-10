@@ -25,6 +25,7 @@
 #include "ui/controllers/settingsUIController.h"
 #include "ui/controllers/siteSplitUIController.h"
 #include "ui/controllers/systemController.h"
+#include "core/utils/fileUtils.h"
 #include "core/controllers/settingsController.h"
 #include "core/controllers/dnsController.h"
 #include "core/controllers/connectionController.h"

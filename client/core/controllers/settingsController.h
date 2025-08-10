@@ -52,6 +52,9 @@ public:
     // Installation UUID
     QString getInstallationUuid() const;
 
+    // Server naming
+    QString nextAvailableServerName() const;
+
     // Gateway endpoint functionality
     void resetGatewayEndpoint();
     void setGatewayEndpoint(const QString &endpoint);

@@ -112,7 +112,6 @@ public slots:
     QPair<QString, QString> getDnsPair(const int serverIndex);
 
     bool isServerFromApiAlreadyExists(const quint16 crc);
-    bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol);
 
     QVariant getDefaultServerData(const QString roleString);
 
@@ -122,8 +121,6 @@ public slots:
     bool isDefaultServerDefaultContainerHasSplitTunneling();
 
     bool isServerFromApi(const int serverIndex);
-    bool isApiKeyExpired(const int serverIndex);
-    void removeApiConfig(const int serverIndex);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

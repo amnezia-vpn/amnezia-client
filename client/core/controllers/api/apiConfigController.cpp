@@ -9,7 +9,7 @@
 #include "core/api/apiUtils.h"
 #include "core/controllers/api/gatewayController.h"
 #include "core/qrCodeUtils.h"
-#include "ui/controllers/systemController.h"
+#include "core/utils/fileUtils.h"
 #include "core/models/servers/serverConfig.h"
 #include "core/models/servers/apiV2ServerConfig.h"
 #include "version.h"
@@ -271,7 +271,7 @@ ErrorCode ApiConfigsController::exportNativeConfig(const QString &serverCountryC
     QString nativeConfig = jsonConfig.value(configKey::config).toString();
     nativeConfig.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", protocolData.wireGuardClientPrivKey);
 
-    SystemController::saveFile(fileName, nativeConfig);
+    FileUtils::saveFile(fileName, nativeConfig);
     return ErrorCode::NoError;
 }
 
@@ -302,7 +302,8 @@ ErrorCode ApiConfigsController::revokeNativeConfig(const QString &serverCountryC
 
 void ApiConfigsController::prepareVpnKeyExport()
 {
-    auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
+    auto serverConfigPtr = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
+    auto serverConfigObject = serverConfigPtr->toJson();
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     auto vpnKey = apiConfigObject.value(apiDefs::key::vpnKey).toString();
@@ -343,6 +344,66 @@ ErrorCode ApiConfigsController::fillAvailableServices()
     return ErrorCode::NoError;
 }
 
+bool ApiConfigsController::isServerFromApiAlreadyExists(const QString &userCountryCode,
+                                                       const QString &serviceType,
+                                                       const QString &serviceProtocol) const
+{
+    auto servers = m_settings->serversArray();
+    for (const auto &server : servers) {
+        auto serverConfig = ServerConfig::createServerConfig(server.toObject());
+        if (serverConfig->type != amnezia::ServerConfigType::ApiV2) continue;
+        auto apiV2Config = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
+        if (!apiV2Config) continue;
+
+        if (apiV2Config->apiConfig.userCountryCode == userCountryCode &&
+            apiV2Config->apiConfig.serviceType == serviceType &&
+            apiV2Config->apiConfig.serviceProtocol == serviceProtocol) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ApiConfigsController::isApiKeyExpired(int serverIndex) const
+{
+    auto servers = m_settings->serversArray();
+    if (serverIndex >= servers.size()) return false;
+
+    auto serverConfig = ServerConfig::createServerConfig(servers.at(serverIndex).toObject());
+    if (serverConfig->type != amnezia::ServerConfigType::ApiV2) return false;
+
+    auto apiV2Config = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
+    if (!apiV2Config) return false;
+
+    QString expiresIso = apiV2Config->apiConfig.publicKey.expiresAt;
+    if (expiresIso.isEmpty()) {
+        expiresIso = apiV2Config->apiConfig.subscription.end_date;
+    }
+    if (expiresIso.isEmpty()) return false;
+
+    auto expiresAt = QDateTime::fromString(expiresIso, Qt::ISODate);
+    return QDateTime::currentDateTime() > expiresAt;
+}
+
+void ApiConfigsController::removeApiConfig(int serverIndex)
+{
+    auto servers = m_settings->serversArray();
+    if (serverIndex >= servers.size()) return;
+
+    auto serverConfig = ServerConfig::createServerConfig(servers.at(serverIndex).toObject());
+    if (serverConfig->type != amnezia::ServerConfigType::ApiV2) return;
+
+    auto apiV2 = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
+    if (!apiV2) return;
+
+    apiV2->containerConfigs.clear();
+    apiV2->apiConfig.publicKey.expiresAt.clear();
+    apiV2->apiConfig.vpnKey.clear();
+    apiV2->defaultContainer = ContainerProps::containerToString(DockerContainer::None);
+
+    m_serversModel->editServer(apiV2, serverIndex);
+}
+
 ErrorCode ApiConfigsController::importServiceFromGateway()
 {
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
@@ -354,8 +415,8 @@ ErrorCode ApiConfigsController::importServiceFromGateway()
                                             m_apiServicesModel->getSelectedServiceProtocol(),
                                             QJsonObject() };
 
-    if (m_serversModel->isServerFromApiAlreadyExists(gatewayRequestData.userCountryCode, gatewayRequestData.serviceType,
-                                                     gatewayRequestData.serviceProtocol)) {
+    if (isServerFromApiAlreadyExists(gatewayRequestData.userCountryCode, gatewayRequestData.serviceType,
+                                     gatewayRequestData.serviceProtocol)) {
         return ErrorCode::ApiConfigAlreadyAdded;
     }
 
@@ -556,17 +617,17 @@ bool ApiConfigsController::isConfigValid()
 
     if (configSource == amnezia::ServerConfigType::ApiV1
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        m_serversModel->removeApiConfig(serverIndex);
+        removeApiConfig(serverIndex);
         return updateServiceFromTelegram(serverIndex);
     } else if (configSource == amnezia::ServerConfigType::ApiV2
                && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         return updateServiceFromGateway(serverIndex, "", "");
-    } else if (configSource && m_serversModel->isApiKeyExpired(serverIndex)) {
+    } else if (configSource && isApiKeyExpired(serverIndex)) {
         qDebug() << "attempt to update api config by expires_at event";
         if (configSource == amnezia::ServerConfigType::ApiV2) {
             return updateServiceFromGateway(serverIndex, "", "");
         } else {
-            m_serversModel->removeApiConfig(serverIndex);
+            removeApiConfig(serverIndex);
             return updateServiceFromTelegram(serverIndex);
         }
     }
