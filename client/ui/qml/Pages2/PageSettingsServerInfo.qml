@@ -19,21 +19,17 @@ import "../Components"
 PageType {
     id: root
 
-    property int pageSettingsServerProtocols: 0
-    property int pageSettingsServerServices: 1
-    property int pageSettingsServerData: 2
-    property int pageSettingsApiServerInfo: 3
-    property int pageSettingsApiLanguageList: 4
+    readonly property int pageSettingsServerProtocols: 0
+    readonly property int pageSettingsServerServices: 1
+    readonly property int pageSettingsServerData: 2
 
     property var processedServer
-
-    defaultActiveFocusItem: focusItem
 
     Connections {
         target: PageController
 
         function onGoToPageSettingsServerServices() {
-            tabBar.currentIndex = root.pageSettingsServerServices
+            tabBar.setCurrentIndex(root.pageSettingsServerServices)
         }
     }
 
@@ -62,50 +58,33 @@ PageType {
         }
     }
 
-    Item {
-        id: focusItem
-        //KeyNavigation.tab: header
-    }
-
     ColumnLayout {
+        objectName: "mainLayout"
+
         anchors.fill: parent
+        anchors.topMargin: 20
 
         spacing: 4
 
         BackButtonType {
             id: backButton
-
-            Layout.topMargin: 20
-            KeyNavigation.tab: headerContent.actionButton
-
-            backButtonFunction: function() {
-                if (nestedStackView.currentIndex === root.pageSettingsApiServerInfo &&
-                        root.processedServer.isCountrySelectionAvailable) {
-                    nestedStackView.currentIndex = root.pageSettingsApiLanguageList
-                } else {
-                    PageController.closePage()
-                }
-            }
+            objectName: "backButton"
         }
 
-        HeaderType {
+        HeaderTypeWithButton {
             id: headerContent
+            objectName: "headerContent"
+
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
+            Layout.bottomMargin: 10
 
-            actionButtonImage: nestedStackView.currentIndex === root.pageSettingsApiLanguageList ? "qrc:/images/controls/settings.svg"
-                                                                                                 : "qrc:/images/controls/edit-3.svg"
+            actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
             headerText: root.processedServer.name
             descriptionText: {
-                if (root.processedServer.isServerFromGatewayApi) {
-                    if (nestedStackView.currentIndex === root.pageSettingsApiLanguageList) {
-                        return qsTr("Subscription is valid until ") + ApiServicesModel.getSelectedServiceData("endDate")
-                    } else {
-                        return ApiServicesModel.getSelectedServiceData("serviceDescription")
-                    }
-                } else if (root.processedServer.isServerFromTelegramApi) {
+                if (root.processedServer.isServerFromTelegramApi) {
                     return root.processedServer.serverDescription
                 } else if (root.processedServer.hasWriteAccess) {
                     return root.processedServer.credentialsLogin + " · " + root.processedServer.hostName
@@ -114,18 +93,12 @@ PageType {
                 }
             }
 
-            KeyNavigation.tab: tabBar
-
             actionButtonFunction: function() {
-                if (nestedStackView.currentIndex === root.pageSettingsApiLanguageList) {
-                    nestedStackView.currentIndex = root.pageSettingsApiServerInfo
-                } else {
-                    serverNameEditDrawer.open()
-                }
+                serverNameEditDrawer.openTriggered()
             }
         }
 
-        DrawerType2 {
+        RenameServerDrawer {
             id: serverNameEditDrawer
 
             parent: root
@@ -133,65 +106,7 @@ PageType {
             anchors.fill: parent
             expandedHeight: root.height * 0.35
 
-            onClosed: {
-                if (!GC.isMobile()) {
-                    headerContent.actionButton.forceActiveFocus()
-                }
-            }
-
-            expandedContent: ColumnLayout {
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 32
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
-
-                Connections {
-                    target: serverNameEditDrawer
-                    enabled: !GC.isMobile()
-                    function onOpened() {
-                        serverName.textField.forceActiveFocus()
-                    }
-                }
-
-                Item {
-                    id: focusItem1
-                    KeyNavigation.tab: serverName.textField
-                }
-
-                TextFieldWithHeaderType {
-                    id: serverName
-
-                    Layout.fillWidth: true
-                    headerText: qsTr("Server name")
-                    textFieldText: root.processedServer.name
-                    textField.maximumLength: 30
-                    checkEmptyText: true
-
-                    KeyNavigation.tab: saveButton
-                }
-
-                BasicButtonType {
-                    id: saveButton
-
-                    Layout.fillWidth: true
-
-                    text: qsTr("Save")
-                    KeyNavigation.tab: focusItem1
-
-                    clickedFunc: function() {
-                        if (serverName.textFieldText === "") {
-                            return
-                        }
-
-                        if (serverName.textFieldText !== root.processedServer.name) {
-                            ServersModel.setProcessedServerData("name", serverName.textFieldText);
-                        }
-                        serverNameEditDrawer.close()
-                    }
-                }
-            }
+            serverNameText: root.processedServer.name
         }
 
         TabBar {
@@ -207,37 +122,27 @@ PageType {
                 color: AmneziaStyle.color.transparent
             }
 
-            visible: !ServersModel.getProcessedServerData("isServerFromGatewayApi")
-
-            activeFocusOnTab: true
-            onFocusChanged: {
-                if (activeFocus) {
-                    protocolsTab.forceActiveFocus()
-                }
-            }
 
             TabButtonType {
                 id: protocolsTab
                 visible: protocolsPage.installedProtocolsCount
                 width: protocolsPage.installedProtocolsCount ? undefined : 0
-                isSelected: tabBar.currentIndex === root.pageSettingsServerProtocols
+                isSelected: TabBar.tabBar.currentIndex === root.pageSettingsServerProtocols
                 text: qsTr("Protocols")
 
-                KeyNavigation.tab: servicesTab
-                Keys.onReturnPressed: tabBar.currentIndex = root.pageSettingsServerProtocols
-                Keys.onEnterPressed: tabBar.currentIndex = root.pageSettingsServerProtocols
+                Keys.onReturnPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerProtocols)
+                Keys.onEnterPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerProtocols)
             }
 
             TabButtonType {
                 id: servicesTab
                 visible: servicesPage.installedServicesCount
                 width: servicesPage.installedServicesCount ? undefined : 0
-                isSelected: tabBar.currentIndex === root.pageSettingsServerServices
+                isSelected: TabBar.tabBar.currentIndex === root.pageSettingsServerServices
                 text: qsTr("Services")
 
-                KeyNavigation.tab: dataTab
-                Keys.onReturnPressed: tabBar.currentIndex = root.pageSettingsServerServices
-                Keys.onEnterPressed: tabBar.currentIndex = root.pageSettingsServerServices
+                Keys.onReturnPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerServices)
+                Keys.onEnterPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerServices)
             }
 
             TabButtonType {
@@ -245,63 +150,32 @@ PageType {
                 isSelected: tabBar.currentIndex === root.pageSettingsServerData
                 text: qsTr("Management")
 
-                Keys.onReturnPressed: tabBar.currentIndex = root.pageSettingsServerData
-                Keys.onEnterPressed: tabBar.currentIndex = root.pageSettingsServerData
-                Keys.onTabPressed: function() {
-                    if (nestedStackView.currentIndex === root.pageSettingsServerProtocols) {
-                        return protocolsPage
-                    } else if (nestedStackView.currentIndex === root.pageSettingsServerProtocols) {
-                        return servicesPage
-                    } else {
-                        return dataPage
-                    }
-                }
+                Keys.onReturnPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerData)
+                Keys.onEnterPressed: TabBar.tabBar.setCurrentIndex(root.pageSettingsServerData)
             }
         }
 
         StackLayout {
             id: nestedStackView
+
             Layout.fillWidth: true
 
-            currentIndex: ServersModel.getProcessedServerData("isServerFromGatewayApi") ?
-                              (ServersModel.getProcessedServerData("isCountrySelectionAvailable") ?
-                                   root.pageSettingsApiLanguageList : root.pageSettingsApiServerInfo) : tabBar.currentIndex
+            currentIndex: tabBar.currentIndex
 
             PageSettingsServerProtocols {
                 id: protocolsPage
                 stackView: root.stackView
-
-                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
 
             PageSettingsServerServices {
                 id: servicesPage
                 stackView: root.stackView
-
-                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
 
             PageSettingsServerData {
                 id: dataPage
                 stackView: root.stackView
-
-                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
-            }
-
-            PageSettingsApiServerInfo {
-                id: apiInfoPage
-                stackView: root.stackView
-
-//                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
-            }
-
-            PageSettingsApiLanguageList {
-                id: apiLanguageListPage
-                stackView: root.stackView
-
-//                onLastItemTabClickedSignal: lastItemTabClicked(focusItem)
             }
         }
-
     }
 }

@@ -83,6 +83,16 @@ void SitesModel::removeSite(QModelIndex index)
     endRemoveRows();
 }
 
+void SitesModel::removeSites()
+{
+    beginResetModel();
+
+    m_settings->removeAllVpnSites(m_currentRouteMode);
+    fillSites();
+
+    endResetModel();
+}
+
 int SitesModel::getRouteMode()
 {
     return m_currentRouteMode;

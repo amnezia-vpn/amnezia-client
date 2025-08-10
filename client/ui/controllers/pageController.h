@@ -31,7 +31,16 @@ namespace PageLoader
         PageSettingsLogging,
         PageSettingsSplitTunneling,
         PageSettingsAppSplitTunneling,
-
+        PageSettingsKillSwitch,
+        PageSettingsApiServerInfo,
+        PageSettingsApiAvailableCountries,
+        PageSettingsApiSupport,
+        PageSettingsApiInstructions,
+        PageSettingsApiNativeConfigs,
+        PageSettingsApiDevices,
+        PageSettingsApiSubscriptionKey,
+        PageSettingsKillSwitchExceptions,
+        
         PageServiceSftpSettings,
         PageServiceTorWebsiteSettings,
         PageServiceDnsSettings,
@@ -53,7 +62,7 @@ namespace PageLoader
         PageProtocolOpenVpnSettings,
         PageProtocolShadowSocksSettings,
         PageProtocolCloakSettings,
-        PageProtocolXraySettings,        
+        PageProtocolXraySettings,
         PageProtocolWireGuardSettings,
         PageProtocolAwgSettings,
         PageProtocolIKev2Settings,
@@ -63,6 +72,7 @@ namespace PageLoader
         PageProtocolAwgClientSettings,
 
         PageShareFullAccess,
+        PageShareConnection,
 
         PageDevMenu
     };
@@ -100,9 +110,11 @@ public slots:
     void closeApplication();
 
     void setDrawerDepth(const int depth);
-    int getDrawerDepth();
+    int getDrawerDepth() const;
+    int incrementDrawerDepth();
+    int decrementDrawerDepth();
 
-  private slots:
+private slots:
     void onShowErrorMessage(amnezia::ErrorCode errorCode);
 
 signals:
@@ -134,9 +146,6 @@ signals:
 
     void escapePressed();
     void closeTopDrawer();
-
-    void forceTabBarActiveFocus();
-    void forceStackActiveFocus();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;

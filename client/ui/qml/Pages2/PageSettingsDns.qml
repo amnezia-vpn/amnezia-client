@@ -14,13 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: primaryDns.textField
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -29,14 +22,20 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20
 
-        KeyNavigation.tab: root.defaultActiveFocusItem
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    FlickableType {
-        id: fl
+    ListViewType {
+        id: listView
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.right: parent.right
+        anchors.left: parent.left
 
         property var isServerFromApi: ServersModel.isServerFromApi(ServersModel.defaultIndex)
 
@@ -48,25 +47,23 @@ PageType {
             }
         }
 
-        ColumnLayout {
-            id: content
-
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
-
+        header: ColumnLayout {
+            width: listView.width
             spacing: 16
 
-            HeaderType {
+            BaseHeaderType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 headerText: qsTr("DNS servers")
             }
 
             ParagraphTextType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                
                 text: qsTr("If AmneziaDNS is not used or installed")
             }
 
@@ -74,33 +71,46 @@ PageType {
                 id: primaryDns
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 headerText: qsTr("Primary DNS")
 
-                textFieldText: SettingsController.primaryDns
+                textField.text: SettingsController.primaryDns
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
-
-                KeyNavigation.tab: secondaryDns.textField
             }
 
             TextFieldWithHeaderType {
                 id: secondaryDns
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 headerText: qsTr("Secondary DNS")
 
-                textFieldText: SettingsController.secondaryDns
+                textField.text: SettingsController.secondaryDns
                 textField.validator: RegularExpressionValidator {
                     regularExpression: InstallController.ipAddressRegExp()
                 }
-
-                KeyNavigation.tab: restoreDefaultButton
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+        spacing: 16
+
+        delegate: ColumnLayout {
+            width: listView.width
 
             BasicButtonType {
                 id: restoreDefaultButton
+
                 Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 defaultColor: AmneziaStyle.color.transparent
                 hoveredColor: AmneziaStyle.color.translucentWhite
@@ -118,47 +128,40 @@ PageType {
 
                     var yesButtonFunction = function() {
                         SettingsController.primaryDns = "1.1.1.1"
-                        primaryDns.textFieldText = SettingsController.primaryDns
+                        primaryDns.textField.text = SettingsController.primaryDns
                         SettingsController.secondaryDns = "1.0.0.1"
-                        secondaryDns.textFieldText = SettingsController.secondaryDns
+                        secondaryDns.textField.text = SettingsController.secondaryDns
                         PageController.showNotificationMessage(qsTr("Settings have been reset"))
-
-                        if (!GC.isMobile()) {
-                            defaultActiveFocusItem.forceActiveFocus()
-                        }
                     }
                     var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            defaultActiveFocusItem.forceActiveFocus()
-                        }
                     }
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
-
-                KeyNavigation.tab: saveButton
             }
+        }
+
+        footer: ColumnLayout {
+            width: listView.width
 
             BasicButtonType {
                 id: saveButton
 
                 Layout.fillWidth: true
+                Layout.margins: 16
 
                 text: qsTr("Save")
 
                 clickedFunc: function() {
-                    if (primaryDns.textFieldText !== SettingsController.primaryDns) {
-                        SettingsController.primaryDns = primaryDns.textFieldText
+                    if (primaryDns.textField.text !== SettingsController.primaryDns) {
+                        SettingsController.primaryDns = primaryDns.textField.text
                     }
-                    if (secondaryDns.textFieldText !== SettingsController.secondaryDns) {
-                        SettingsController.secondaryDns = secondaryDns.textFieldText
+                    if (secondaryDns.textField.text !== SettingsController.secondaryDns) {
+                        SettingsController.secondaryDns = secondaryDns.textField.text
                     }
                     PageController.showNotificationMessage(qsTr("Settings saved"))
                 }
-
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
             }
         }
     }
-
 }

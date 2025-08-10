@@ -18,13 +18,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     ColumnLayout {
         id: header
 
@@ -36,10 +29,9 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: servers
         }
 
-        HeaderType {
+        BaseHeaderType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
@@ -48,95 +40,71 @@ PageType {
         }
     }
 
-    FlickableType {
-        id: fl
+    ListViewType {
+        id: servers
+        objectName: "servers"
+
+        width: parent.width
         anchors.top: header.bottom
         anchors.topMargin: 16
-        contentHeight: col.implicitHeight
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        Column {
-            id: col
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
 
-            ListView {
-                id: servers
-                width: parent.width
-                height: servers.contentItem.height
+        model: ServersModel
 
-                model: ServersModel
+        delegate: Item {
+            implicitWidth: servers.width
+            implicitHeight: delegateContent.implicitHeight
 
-                clip: true
-                interactive: false
+            ColumnLayout {
+                id: delegateContent
 
-                activeFocusOnTab: true
-                focus: true
-                Keys.onTabPressed: {
-                    if (currentIndex < servers.count - 1) {
-                        servers.incrementCurrentIndex()
-                    } else {
-                        servers.currentIndex = 0
-                        focusItem.forceActiveFocus()
-                        root.lastItemTabClicked()
-                    }
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
 
-                    fl.ensureVisible(this.currentItem)
-                }
+                LabelWithButtonType {
+                    id: server
+                    Layout.fillWidth: true
 
-                onVisibleChanged: {
-                    if (visible) {
-                        currentIndex = 0
-                    }
-                }
+                    text: name
 
-                delegate: Item {
-                    implicitWidth: servers.width
-                    implicitHeight: delegateContent.implicitHeight
-
-                    onFocusChanged: {
-                        if (focus) {
-                            server.rightButton.forceActiveFocus()
-                        }
-                    }
-
-                    ColumnLayout {
-                        id: delegateContent
-
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-
-                        LabelWithButtonType {
-                            id: server
-                            Layout.fillWidth: true
-
-                            text: name
-                            parentFlickable: fl
-                            descriptionText: {
-                                var servicesNameString = ""
-                                var servicesName = ServersModel.getAllInstalledServicesName(index)
-                                for (var i = 0; i < servicesName.length; i++) {
-                                    servicesNameString += servicesName[i] + " · "
-                                }
-
-                                if (ServersModel.isServerFromApi(index)) {
-                                    return servicesNameString + serverDescription
-                                } else {
-                                    return servicesNameString + hostName
-                                }
-                            }
-                            rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                            clickedFunction: function() {
-                                ServersModel.processedIndex = index
-                                PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                            }
+                    descriptionText: {
+                        var servicesNameString = ""
+                        var servicesName = ServersModel.getAllInstalledServicesName(index)
+                        for (var i = 0; i < servicesName.length; i++) {
+                            servicesNameString += servicesName[i] + " · "
                         }
 
-                        DividerType {}
+                        if (ServersModel.isServerFromApi(index)) {
+                            return servicesNameString + serverDescription
+                        } else {
+                            return servicesNameString + hostName
+                        }
+                    }
+                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                    clickedFunction: function() {
+                        ServersModel.processedIndex = index
+
+                        if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
+                            PageController.showBusyIndicator(true)
+                            let result = ApiSettingsController.getAccountInfo(false)
+                            PageController.showBusyIndicator(false)
+                            if (!result) {
+                                return
+                            }
+
+                            PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+                        } else {
+                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                        }
                     }
                 }
+
+                DividerType {}
             }
         }
     }

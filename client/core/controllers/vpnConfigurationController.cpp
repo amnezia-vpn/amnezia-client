@@ -77,8 +77,7 @@ ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isA
 }
 
 QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
-                                                                const QJsonObject &containerConfig, const DockerContainer container,
-                                                                ErrorCode &errorCode)
+                                                                const QJsonObject &containerConfig, const DockerContainer container)
 {
     QJsonObject vpnConfiguration {};
 
@@ -103,7 +102,8 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
         if (container == DockerContainer::Awg || container == DockerContainer::WireGuard) {
             // add mtu for old configs
             if (vpnConfigData[config_key::mtu].toString().isEmpty()) {
-                vpnConfigData[config_key::mtu] = container == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+                vpnConfigData[config_key::mtu] =
+                        container == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
             }
         }
 

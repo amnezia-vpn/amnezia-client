@@ -8,6 +8,7 @@
 
 #include "core/networkUtilities.h"
 
+#include "settings.h"
 #include "logger.h"
 #include "ikev2_vpn_protocol_linux.h"
 #include "utilities.h"
@@ -28,8 +29,8 @@ Ikev2Protocol::Ikev2Protocol(const QJsonObject &configuration, QObject* parent) 
     m_routeGateway = NetworkUtilities::getGatewayAndIface();
     m_vpnGateway = "192.168.43.10";
     m_vpnLocalAddress = "192.168.43.10";
-    m_remoteAddress = configuration.value(amnezia::config_key::hostName).toString();
-    m_routeMode = configuration.value(amnezia::config_key::splitTunnelType).toInt();
+    m_remoteAddress = NetworkUtilities::getIPAddress(configuration.value(amnezia::config_key::hostName).toString());
+    m_routeMode = static_cast<Settings::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
 }
 
 Ikev2Protocol::~Ikev2Protocol()
@@ -103,27 +104,25 @@ ErrorCode Ikev2Protocol::start()
         for (auto iter = lines.begin(); iter!=lines.end(); iter++)
         {
             if (iter->contains("0.0.0.0/0")) {
-
-                m_routeGateway = iter->split("===", Qt::SkipEmptyParts).first();
-                m_routeGateway = m_routeGateway.split("   ").at(2);
-                m_routeGateway = m_routeGateway.split("/").first();
-                m_vpnLocalAddress = m_routeGateway;
-                qDebug() << "m_routeGateway " << m_routeGateway;
-
+                m_vpnGateway = iter->split("===", Qt::SkipEmptyParts).first();
+                m_vpnGateway = m_vpnGateway.split("   ").at(2);
+                m_vpnGateway = m_vpnGateway.split("/").first();
+                m_vpnLocalAddress = m_vpnGateway;
+                qDebug() << "m_vpnGateway " << m_vpnGateway;
 
                 // killSwitch toggle
                 if (QVariant(m_config.value(config_key::killSwitchOption).toString()).toBool()) {
+                    m_config.insert("vpnServer", m_remoteAddress);
                     IpcClient::Interface()->enableKillSwitch(m_config, 0);
                 }
 
-                if (m_routeMode == 0) {
+                if (m_routeMode == Settings::RouteMode::VpnAllSites) {
                     IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
                     IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
                     IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
                 }
 
                 IpcClient::Interface()->StopRoutingIpv6();
-
             }
         }
         setConnectionState(Vpn::ConnectionState::Connected);

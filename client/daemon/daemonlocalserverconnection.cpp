@@ -159,9 +159,10 @@ void DaemonLocalServerConnection::disconnected() {
   write(obj);
 }
 
-void DaemonLocalServerConnection::backendFailure() {
+void DaemonLocalServerConnection::backendFailure(DaemonError err) {
   QJsonObject obj;
   obj.insert("type", "backendFailure");
+  obj.insert("errorCode", static_cast<int>(err));
   write(obj);
 }
 

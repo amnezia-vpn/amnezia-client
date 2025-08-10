@@ -5,7 +5,7 @@
 
 
 @implementation QIOSApplicationDelegate (AmneziaVPNDelegate)
-
+#if !MACOS_NE
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     [application setMinimumBackgroundFetchInterval: UIApplicationBackgroundFetchIntervalMinimum];
@@ -57,5 +57,5 @@
     }
     return NO;
 }
-
+#endif
 @end

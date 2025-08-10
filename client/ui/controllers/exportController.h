@@ -50,9 +50,6 @@ signals:
     void saveFile(const QString &fileName, const QString &data);
 
 private:
-    QList<QString> generateQrCodeImageSeries(const QByteArray &data);
-    QString svgToBase64(const QString &image);
-
     int getQrCodesCount();
 
     void clearPreviousConfig();

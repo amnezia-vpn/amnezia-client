@@ -23,4 +23,6 @@
     <string name="notificationSettingsDialogTitle">Настройки уведомлений</string>
     <string name="notificationSettingsDialogMessage">Для показа уведомлений необходимо включить уведомления в системных настройках</string>
     <string name="openNotificationSettings">Открыть настройки уведомлений</string>
+
+    <string name="tvNoFileBrowser">Пожалуйста, установите приложение для просмотра файлов</string>
 </resources>

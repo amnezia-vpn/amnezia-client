@@ -15,6 +15,7 @@ import "Pages2"
 Window  {
     id: root
     objectName: "mainWindow"
+
     visible: true
     width: GC.screenWidth
     height: GC.screenHeight
@@ -25,14 +26,41 @@ Window  {
 
     color: AmneziaStyle.color.midnightBlack
 
-    onClosing: function() {
-        console.debug("QML onClosing signal")
+    onClosing: function(close) {
+        close.accepted = false
         PageController.closeWindow()
     }
 
     title: "AmneziaVPN"
 
+    Item { // This item is needed for focus handling
+        id: defaultFocusItem
+        objectName: "defaultFocusItem"
+
+        focus: true
+
+        Keys.onPressed: function(event) {
+            switch (event.key) {
+            case Qt.Key_Tab:
+            case Qt.Key_Down:
+            case Qt.Key_Right:
+                FocusController.nextKeyTabItem()
+                break
+            case Qt.Key_Backtab:
+            case Qt.Key_Up:
+            case Qt.Key_Left:
+                FocusController.previousKeyTabItem()
+                break
+            default:
+                PageController.keyPressEvent(event.key)
+                event.accepted = true
+            }
+        }
+    }
+
     Connections {
+        objectName: "pageControllerConnections"
+
         target: PageController
 
         function onRaiseMainWindow() {
@@ -58,7 +86,7 @@ Window  {
         }
 
         function onShowPassphraseRequestDrawer() {
-            privateKeyPassphraseDrawer.open()
+            privateKeyPassphraseDrawer.openTriggered()
         }
 
         function onGoToPageSettingsBackup() {
@@ -72,6 +100,8 @@ Window  {
     }
 
     Connections {
+        objectName: "settingsControllerConnections"
+
         target: SettingsController
 
         function onChangeSettingsFinished(finishedMessage) {
@@ -80,11 +110,15 @@ Window  {
     }
 
     PageStart {
+        objectName: "pageStart"
+
         width: root.width
         height: root.height
     }
 
     Item {
+        objectName: "popupNotificationItem"
+
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
@@ -108,6 +142,8 @@ Window  {
     }
 
     Item {
+        objectName: "popupErrorMessageItem"
+
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
@@ -120,6 +156,8 @@ Window  {
     }
 
     Item {
+        objectName: "privateKeyPassphraseDrawerItem"
+
         anchors.fill: parent
 
         DrawerType2 {
@@ -128,7 +166,7 @@ Window  {
             anchors.fill: parent
             expandedHeight: root.height * 0.35
 
-            expandedContent: ColumnLayout {
+            expandedStateContent: ColumnLayout {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -139,12 +177,12 @@ Window  {
                 Connections {
                     target: privateKeyPassphraseDrawer
                     function onOpened() {
-                        passphrase.textFieldText = ""
+                        passphrase.textField.text = ""
                         passphrase.textField.forceActiveFocus()
                     }
 
                     function onAboutToHide() {
-                        if (passphrase.textFieldText !== "") {
+                        if (passphrase.textField.text !== "") {
                             PageController.showBusyIndicator(true)
                         }
                     }
@@ -167,8 +205,6 @@ Window  {
                     clickedFunc: function() {
                         hidePassword = !hidePassword
                     }
-
-                    KeyNavigation.tab: saveButton
                 }
 
                 BasicButtonType {
@@ -186,8 +222,8 @@ Window  {
                     text: qsTr("Save")
 
                     clickedFunc: function() {
-                        privateKeyPassphraseDrawer.close()
-                        PageController.passphraseRequestDrawerClosed(passphrase.textFieldText)
+                        privateKeyPassphraseDrawer.closeTriggered()
+                        PageController.passphraseRequestDrawerClosed(passphrase.textField.text)
                     }
                 }
             }
@@ -195,6 +231,8 @@ Window  {
     }
 
     Item {
+        objectName: "questionDrawerItem"
+
         anchors.fill: parent
 
         QuestionDrawer {
@@ -205,6 +243,8 @@ Window  {
     }
 
     Item {
+        objectName: "busyIndicatorItem"
+
         anchors.fill: parent
 
         BusyIndicatorType {
@@ -221,26 +261,26 @@ Window  {
         questionDrawer.noButtonText = noButtonText
 
         questionDrawer.yesButtonFunction = function() {
-            questionDrawer.close()
+            questionDrawer.closeTriggered()
             if (yesButtonFunction && typeof yesButtonFunction === "function") {
                 yesButtonFunction()
             }
         }
         questionDrawer.noButtonFunction = function() {
-            questionDrawer.close()
+            questionDrawer.closeTriggered()
             if (noButtonFunction && typeof noButtonFunction === "function") {
                 noButtonFunction()
             }
         }
-        questionDrawer.open()
+        questionDrawer.openTriggered()
     }
 
     FileDialog {
         id: mainFileDialog
+        objectName: "mainFileDialog"
 
         property bool isSaveMode: false
 
-        objectName: "mainFileDialog"
         fileMode: isSaveMode ? FileDialog.SaveFile : FileDialog.OpenFile
 
         onAccepted: SystemController.fileDialogClosed(true)

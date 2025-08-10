@@ -13,111 +13,64 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 
 
-ListView {
+ListViewType {
     id: root
 
-    width: parent.width
-    height: root.contentItem.height
+    anchors.fill: parent
 
-    clip: true
-    interactive: false
+    delegate: ColumnLayout {
+        width: root.width
 
-    activeFocusOnTab: true
-    Keys.onTabPressed: {
-        if (currentIndex < this.count - 1) {
-            this.incrementCurrentIndex()
-        } else {
-            currentIndex = 0
-            lastItemTabClickedSignal()
-        }
-    }
+        LabelWithButtonType {
+            Layout.fillWidth: true
 
-    onCurrentIndexChanged: {
-        if (visible) {
-            if (fl.contentHeight > fl.height) {
-                var item = this.currentItem
-                if (item.y < fl.height) {
-                    fl.contentY = item.y
-                } else if (item.y + item.height > fl.contentY + fl.height) {
-                    fl.contentY = item.y + item.height - fl.height
-                }
-            }
-        }
-    }
+            text: name
+            descriptionText: description
+            rightImageSource: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
 
-    onVisibleChanged: {
-        if (visible) {
-            this.currentIndex = 0
-        }
-    }
+            clickedFunction: function() {
+                if (isInstalled) {
+                    var containerIndex = root.model.mapToSource(index)
+                    ContainersModel.setProcessedContainerIndex(containerIndex)
 
-    delegate: Item {
-        implicitWidth: root.width
-        implicitHeight: delegateContent.implicitHeight
-
-        onActiveFocusChanged: {
-            if (activeFocus) {
-                containerRadioButton.rightButton.forceActiveFocus()
-            }
-        }
-
-        ColumnLayout {
-            id: delegateContent
-
-            anchors.fill: parent
-
-            LabelWithButtonType {
-                id: containerRadioButton
-                implicitWidth: parent.width
-
-                text: name
-                descriptionText: description
-                rightImageSource: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
-
-                clickedFunction: function() {
-                    if (isInstalled) {
-                        var containerIndex = root.model.mapToSource(index)
-                        ContainersModel.setProcessedContainerIndex(containerIndex)
-
-                        if (serviceType !== ProtocolEnum.Other) {
-                            if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
-                                ProtocolsModel.updateModel(config)
-                                PageController.goToPage(PageEnum.PageProtocolRaw)
-                                return
-                            }
-                        }
-
-                        switch (containerIndex) {
-                        case ContainerEnum.Ipsec: {
+                    if (serviceType !== ProtocolEnum.Other) {
+                        if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
                             ProtocolsModel.updateModel(config)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
-                            break
+                            return
                         }
-                        case ContainerEnum.Dns: {
-                            PageController.goToPage(PageEnum.PageServiceDnsSettings)
-                            break
-                        }
-                        default: {
-                            ProtocolsModel.updateModel(config)
-                            PageController.goToPage(PageEnum.PageSettingsServerProtocol)
-                        }
-                        }
-
-                    } else {
-                        ContainersModel.setProcessedContainerIndex(root.model.mapToSource(index))
-                        InstallController.setShouldCreateServer(false)
-                        PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                     }
-                }
 
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: false
+                    switch (containerIndex) {
+                    case ContainerEnum.Ipsec: {
+                        ProtocolsModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageProtocolRaw)
+                        break
+                    }
+                    case ContainerEnum.Dns: {
+                        PageController.goToPage(PageEnum.PageServiceDnsSettings)
+                        break
+                    }
+                    default: {
+                        ProtocolsModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageSettingsServerProtocol)
+                    }
+                    }
+
+                } else {
+                    ContainersModel.setProcessedContainerIndex(root.model.mapToSource(index))
+                    InstallController.setShouldCreateServer(false)
+                    PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 }
             }
 
-            DividerType {}
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                enabled: false
+            }
         }
+
+        DividerType {}
     }
 }

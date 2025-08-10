@@ -39,28 +39,32 @@ public:
     {
         m_className = className;
     }
+
+    Logger(Logger const &) = delete;
+    Logger &operator=(Logger const &) = delete;
+
     const QString &className() const
     {
         return m_className;
     }
 
-    class Log
+    class LogStreamer
     {
     public:
-        Log(Logger *logger, LogLevel level);
-        ~Log();
+        LogStreamer(Logger *logger, LogLevel level);
+        ~LogStreamer();
 
-        Log &operator<<(uint64_t t);
-        Log &operator<<(const char *t);
-        Log &operator<<(const QString &t);
-        Log &operator<<(const QStringList &t);
-        Log &operator<<(const QByteArray &t);
-        Log &operator<<(const QJsonObject &t);
-        Log &operator<<(QTextStreamFunction t);
-        Log &operator<<(const void *t);
+        LogStreamer &operator<<(uint64_t t);
+        LogStreamer &operator<<(const char *t);
+        LogStreamer &operator<<(const QString &t);
+        LogStreamer &operator<<(const QStringList &t);
+        LogStreamer &operator<<(const QByteArray &t);
+        LogStreamer &operator<<(const QJsonObject &t);
+        LogStreamer &operator<<(QTextStreamFunction t);
+        LogStreamer &operator<<(const void *t);
 
         // Q_ENUM
-        template<typename T> typename std::enable_if<QtPrivate::IsQEnumHelper<T>::Value, Log &>::type operator<<(T t)
+        template<typename T> typename std::enable_if<QtPrivate::IsQEnumHelper<T>::Value, LogStreamer &>::type operator<<(T t)
         {
             const QMetaObject *meta = qt_getEnumMetaObject(t);
             const char *name = qt_getEnumName(t);
@@ -87,16 +91,14 @@ public:
         Data *m_data;
     };
 
-    Log error();
-    Log warning();
-    Log info();
-    Log debug();
+    LogStreamer error();
+    LogStreamer warning();
+    LogStreamer info();
+    LogStreamer debug();
     QString sensitive(const QString &input);
 
 private:
-    Logger() {};
-    Logger(Logger const &) = delete;
-    Logger &operator=(Logger const &) = delete;
+    Logger() = default;
 
     static QString userLogsDir();
 
@@ -105,7 +107,7 @@ private:
     static QString m_logFileName;
     static QString m_serviceLogFileName;
 
-    friend void debugMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    friend void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
     // compat with Mozilla logger
     QString m_className;

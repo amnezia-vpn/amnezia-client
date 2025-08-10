@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Style 1.0
 
 import "TextTypes"
+import "../Config"
 
 Popup {
     id: root
@@ -28,11 +29,11 @@ Popup {
     }
 
     onOpened: {
-        focusItem.forceActiveFocus()
+        timer.start()
     }
 
     onClosed: {
-        PageController.forceStackActiveFocus()
+        FocusController.dropRootObject(root)
     }
 
     background: Rectangle {
@@ -40,6 +41,17 @@ Popup {
 
         color: "white"
         radius: 4
+    }
+
+    Timer {
+        id: timer
+        interval: 200 // Milliseconds
+        onTriggered: {
+            FocusController.pushRootObject(root)
+            FocusController.setFocusItem(closeButton)
+        }
+        repeat: false // Stop the timer after one trigger
+        running: true // Start the timer
     }
 
     contentItem: Item {
@@ -72,11 +84,6 @@ Popup {
                 }
             }
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: closeButton
-            }
-
             BasicButtonType {
                 id: closeButton
                 visible: closeButtonVisible
@@ -92,7 +99,6 @@ Popup {
                 borderWidth: 0
 
                 text: qsTr("Close")
-                KeyNavigation.tab: focusItem
 
                 clickedFunc: function() {
                     root.close()

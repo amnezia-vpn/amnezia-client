@@ -12,14 +12,7 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
 
     BackButtonType {
         id: backButton
@@ -29,32 +22,43 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20
 
-        KeyNavigation.tab: amneziaDnsSwitch
+        onActiveFocusChanged: {
+            if(backButton.enabled && backButton.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    FlickableType {
-        id: fl
+    ListViewType {
+        id: listView
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        ColumnLayout {
-            id: content
+        header: ColumnLayout {
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+            width: listView.width
 
-            HeaderType {
+            BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 headerText: qsTr("Connection")
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+
+        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser when have migrated to 6.9
+
+            width: listView.width
 
             SwitcherType {
                 id: amneziaDnsSwitch
+
                 Layout.fillWidth: true
                 Layout.margins: 16
 
@@ -67,14 +71,13 @@ PageType {
                         SettingsController.toggleAmneziaDns(checked)
                     }
                 }
-
-                KeyNavigation.tab: dnsServersButton.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
                 id: dnsServersButton
+
                 Layout.fillWidth: true
 
                 text: qsTr("DNS servers")
@@ -84,14 +87,13 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsDns)
                 }
-
-                KeyNavigation.tab: splitTunnelingButton.rightButton
             }
 
             DividerType {}
 
             LabelWithButtonType {
                 id: splitTunnelingButton
+
                 Layout.fillWidth: true
 
                 text: qsTr("Site-based split tunneling")
@@ -101,24 +103,19 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
                 }
-
-                Keys.onTabPressed: {
-                    if (splitTunnelingButton2.visible) {
-                        return splitTunnelingButton2.rightButton.forceActiveFocus()
-                    } else if (killSwitchSwitcher.visible) {
-                        return killSwitchSwitcher.forceActiveFocus()
-                    } else {
-                        lastItemTabClicked()
-                    }
-                }
             }
 
-            DividerType {
-                visible: root.isAppSplitTinnelingEnabled
-            }
+            DividerType {}
+
+        }
+
+        footer: ColumnLayout { // TODO(CyAn84): move to delegate,add DelegateChooser when have migrated to 6.9
+
+            width: listView.width
 
             LabelWithButtonType {
                 id: splitTunnelingButton2
+
                 visible: root.isAppSplitTinnelingEnabled
 
                 Layout.fillWidth: true
@@ -130,44 +127,25 @@ PageType {
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
                 }
-
-                Keys.onTabPressed: {
-                    if (killSwitchSwitcher.visible) {
-                        return killSwitchSwitcher.forceActiveFocus()
-                    } else {
-                        lastItemTabClicked()
-                    }
-                }
             }
 
             DividerType {
                 visible: root.isAppSplitTinnelingEnabled
             }
 
-            SwitcherType {
-                id: killSwitchSwitcher
+            LabelWithButtonType {
+                id: killSwitchButton
                 visible: !GC.isMobile()
 
                 Layout.fillWidth: true
-                Layout.margins: 16
 
                 text: qsTr("KillSwitch")
-                descriptionText: qsTr("Disables your internet if your encrypted VPN connection drops out for any reason.")
+                descriptionText: qsTr("Blocks network connections without VPN")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                checked: SettingsController.isKillSwitchEnabled()
-                checkable: !ConnectionController.isConnected
-                onCheckedChanged: {
-                    if (checked !== SettingsController.isKillSwitchEnabled()) {
-                        SettingsController.toggleKillSwitch(checked)
-                    }
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsKillSwitch)
                 }
-                onClicked: {
-                    if (!checkable) {
-                        PageController.showNotificationMessage(qsTr("Cannot change killSwitch settings during active connection"))
-                    }
-                }
-
-                Keys.onTabPressed: lastItemTabClicked()
             }
 
             DividerType {

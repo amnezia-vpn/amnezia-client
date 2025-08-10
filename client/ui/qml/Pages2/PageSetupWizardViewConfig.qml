@@ -16,13 +16,6 @@ PageType {
 
     property bool showContent: false
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -30,8 +23,12 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
-
-        KeyNavigation.tab: showContentButton
+        
+        onActiveFocusChanged: {
+            if(backButton.enabled && backButton.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
     Connections {
@@ -55,27 +52,29 @@ PageType {
         }
     }
 
-    FlickableType {
-        id: fl
+    ListViewType {
+        id: listView
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight + connectButton.implicitHeight
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        ColumnLayout {
-            id: content
+        header: ColumnLayout {
+            width: listView.width
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
-
-            HeaderType {
+            BaseHeaderType {
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                
                 headerText: qsTr("New connection")
             }
 
             RowLayout {
                 Layout.topMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 spacing: 8
 
                 visible: fileName.text !== ""
@@ -97,7 +96,9 @@ PageType {
             BasicButtonType {
                 id: showContentButton
                 Layout.topMargin: 16
-                Layout.leftMargin: -8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 implicitHeight: 32
 
                 defaultColor: AmneziaStyle.color.transparent
@@ -107,7 +108,6 @@ PageType {
                 textColor: AmneziaStyle.color.goldenApricot
 
                 text: showContent ? qsTr("Collapse content") : qsTr("Show content")
-                KeyNavigation.tab: connectButton
 
                 clickedFunc: function() {
                     showContent = !showContent
@@ -116,16 +116,28 @@ PageType {
 
             CheckBoxType {
                 id: cloakingCheckBox
+                objectName: "cloakingCheckBox"
 
                 visible: ImportController.isNativeWireGuardConfig()
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 text: qsTr("Enable WireGuard obfuscation. It may be useful if WireGuard is blocked on your provider.")
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+
+        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser after have migrated to 6.9
+            width: listView.width
 
             WarningType {
-                Layout.topMargin: 16
                 Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 textString: ImportController.getMaliciousWarningText()
                 textFormat: Qt.RichText
@@ -138,8 +150,10 @@ PageType {
             }
 
             WarningType {
-                Layout.topMargin: 16
                 Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 textString: qsTr("Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.")
 
@@ -148,7 +162,10 @@ PageType {
 
             Rectangle {
                 Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.bottomMargin: 48
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
 
                 implicitHeight: configContent.implicitHeight
 
@@ -169,36 +186,38 @@ PageType {
                 }
             }
         }
-    }
 
-    Rectangle {
-        anchors.fill: columnContent
-        anchors.bottomMargin: -24
-        color: AmneziaStyle.color.midnightBlack
-        opacity: 0.8
-    }
+        footer: ColumnLayout {
+            width: listView.width
 
-    ColumnLayout {
-        id: columnContent
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.rightMargin: 16
-        anchors.leftMargin: 16
+            BasicButtonType {
+                id: connectButton
 
-        Keys.onTabPressed: lastItemTabClicked(focusItem)
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.bottomMargin: 32
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
 
-        BasicButtonType {
-            id: connectButton
-            Layout.fillWidth: true
-            Layout.bottomMargin: 32
+                text: qsTr("Connect")
+                clickedFunc: function() {
+                    const headerItem = listView.headerItem;
+                    if (!headerItem) {
+                        console.error("Header item not found in ListView")
+                        return
+                    }
 
-            text: qsTr("Connect")
-            clickedFunc: function() {
-                if (cloakingCheckBox.checked) {
-                    ImportController.processNativeWireGuardConfig()
+                    const cloakingCheckBoxItem = listView.findChildWithObjectName(headerItem.children, "cloakingCheckBox");
+                    if (!cloakingCheckBoxItem) {
+                        console.error("cloakingCheckBox not found")
+                        return
+                    }
+
+                    if (cloakingCheckBoxItem.checked) {
+                        ImportController.processNativeWireGuardConfig()
+                    }
+                    ImportController.importConfig()
                 }
-                ImportController.importConfig()
             }
         }
     }

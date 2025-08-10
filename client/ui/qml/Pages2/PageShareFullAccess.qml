@@ -15,15 +15,9 @@ import "../Controls2/TextTypes"
 import "../Components"
 import "../Config"
 
+
 PageType {
     id: root
-
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
 
     BackButtonType {
         id: backButton
@@ -33,28 +27,28 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20
 
-        KeyNavigation.tab: serverSelector
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    FlickableType {
+    ListViewType {
+        id: listView
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        ColumnLayout {
-            id: content
+        header: ColumnLayout {
+            width: listView.width
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
-
-            spacing: 0
-
-            HeaderType {
+            BaseHeaderType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 Layout.topMargin: 24
 
                 headerText: qsTr("Full access to the server and VPN")
@@ -62,6 +56,8 @@ PageType {
 
             ParagraphTextType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 Layout.topMargin: 24
                 Layout.bottomMargin: 24
 
@@ -72,11 +68,14 @@ PageType {
 
             DropDownType {
                 id: serverSelector
+                objectName: "serverSelector"
 
                 signal severSelectorIndexChanged
                 property int currentIndex: 0
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
@@ -84,8 +83,6 @@ PageType {
 
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
-
-                KeyNavigation.tab: shareButton
 
                 listView: ListViewWithRadioButtonType {
                     id: serverSelectorListView
@@ -111,9 +108,9 @@ PageType {
                             serverSelector.currentIndex = serverSelectorListView.currentIndex
                         }
 
-                        shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
-                        shareConnectionDrawer.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
-                        serverSelector.close()
+                        shareConnectionPage.headerText = qsTr("Accessing ") + serverSelector.text
+                        shareConnectionPage.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
+                        serverSelector.closeTriggered()
                     }
 
                     Component.onCompleted: {
@@ -128,16 +125,23 @@ PageType {
                     }
                 }
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+        spacing: 0
+
+        delegate: ColumnLayout {
+            width: listView.width
 
             BasicButtonType {
                 id: shareButton
                 Layout.fillWidth: true
-                Layout.topMargin: 40
+                Layout.topMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: qsTr("Share")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
-
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
@@ -150,13 +154,9 @@ PageType {
                         ExportController.generateFullAccessConfig()
                     }
 
-                    shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
-                    shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
-
-                    shareConnectionDrawer.open()
-                    shareConnectionDrawer.contentVisible = true
-
                     PageController.showBusyIndicator(false)
+                    
+                    PageController.goToPage(PageEnum.PageShareConnection)
                 }
             }
         }
@@ -166,10 +166,5 @@ PageType {
         id: shareConnectionDrawer
 
         anchors.fill: parent
-        onClosed: {
-            if (!GC.isMobile()) {
-                focusItem.forceActiveFocus()
-            }
-        }
     }
 }

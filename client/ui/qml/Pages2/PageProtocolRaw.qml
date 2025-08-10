@@ -19,202 +19,154 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
-    ColumnLayout {
-        id: header
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
         anchors.topMargin: 20
 
-        BackButtonType {
-            id: backButton
-            KeyNavigation.tab: listView
-        }
-
-        HeaderType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            headerText: ContainersModel.getProcessedContainerName() + qsTr(" settings")
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: header.bottom
-        anchors.left: parent.left
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
+        anchors.bottom: parent.bottom
         anchors.right: parent.right
-        contentHeight: content.height
+        anchors.left: parent.left
 
-        Column {
-            id: content
+        header: ColumnLayout {
+            width: listView.width
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.topMargin: 32
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16
 
-            ListView {
-                id: listView
-                width: parent.width
-                height: contentItem.height
-                clip: true
-                interactive: false
-                model: ProtocolsModel
+                headerText: ContainersModel.getProcessedContainerName() + qsTr(" settings")
+            }
+        }
 
-                activeFocusOnTab: true
-                focus: true
+        model: ProtocolsModel
 
-                onActiveFocusChanged: {
-                    if (focus) {
-                        listView.currentIndex = 0
-                        listView.currentItem.focusItem.forceActiveFocus()
-                    }
+        delegate: ColumnLayout {
+            width: listView.width
+
+            LabelWithButtonType {
+                id: button
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Show connection options")
+
+                clickedFunction: function() {
+                    configContentDrawer.openTriggered()
                 }
 
-                delegate: Item {
-                    implicitWidth: parent.width
-                    implicitHeight: delegateContent.implicitHeight
+                MouseArea {
+                    anchors.fill: button
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
+                }
+            }
 
-                    property alias focusItem: button
+            DividerType {}
 
-                    ColumnLayout {
-                        id: delegateContent
+            DrawerType2 {
+                id: configContentDrawer
 
-                        anchors.fill: parent
+                expandedHeight: root.height * 0.9
 
-                        LabelWithButtonType {
-                            id: button
+                parent: root
+                anchors.fill: parent
 
-                            Layout.fillWidth: true
+                expandedStateContent: Item {
+                    implicitHeight: configContentDrawer.expandedHeight
 
-                            text: qsTr("Show connection options")
+                    BackButtonType {
+                        id: drawerBackButton
 
-                            clickedFunction: function() {
-                                configContentDrawer.open()
-                            }
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.topMargin: 16
 
-                            KeyNavigation.tab: removeButton
+                        backButtonFunction: function() {
+                            configContentDrawer.closeTriggered()
+                        }
+                    }
 
-                            MouseArea {
-                                anchors.fill: button
-                                cursorShape: Qt.PointingHandCursor
-                                enabled: false
+                    ListViewType {
+                        id: drawerListView
+
+                        anchors.top: drawerBackButton.bottom
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        anchors.left: parent.left
+
+                        header: ColumnLayout {
+                            width: drawerListView.width
+
+                            Header2Type {
+                                Layout.fillWidth: true
+                                Layout.topMargin: 16
+                                Layout.leftMargin: 16
+                                Layout.rightMargin: 16
+
+                                headerText: qsTr("Connection options %1").arg(protocolName)
                             }
                         }
 
-                        DividerType {}
+                        model: 1 // fake model to force the ListView to be created without a model
 
-                        DrawerType2 {
-                            id: configContentDrawer
+                        delegate: ColumnLayout {
+                            width: drawerListView.width
 
-                            expandedHeight: root.height * 0.9
+                            TextArea {
+                                id: configText
 
-                            onClosed: {
-                                if (!GC.isMobile()) {
-                                    defaultActiveFocusItem.forceActiveFocus()
-                                }
-                            }
+                                Layout.fillWidth: true
+                                Layout.topMargin: 16
+                                Layout.leftMargin: 16
+                                Layout.rightMargin: 16
 
-                            parent: root
-                            anchors.fill: parent
+                                padding: 0
+                                height: 24
 
-                            expandedContent: Item {
-                                implicitHeight: configContentDrawer.expandedHeight
+                                color: AmneziaStyle.color.paleGray
+                                selectionColor: AmneziaStyle.color.richBrown
+                                selectedTextColor: AmneziaStyle.color.paleGray
 
-                                Connections {
-                                    target: configContentDrawer
-                                    enabled: !GC.isMobile()
-                                    function onOpened() {
-                                        focusItem1.forceActiveFocus()
-                                    }
-                                }
+                                font.pixelSize: 16
+                                font.weight: Font.Medium
+                                font.family: "PT Root UI VF"
 
-                                Item {
-                                    id: focusItem1
-                                    KeyNavigation.tab: backButton1
-                                }
+                                text: rawConfig
 
-                                BackButtonType {
-                                    id: backButton1
+                                wrapMode: Text.Wrap
 
-                                    anchors.top: parent.top
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.topMargin: 16
-
-                                    backButtonFunction: function() {
-                                        configContentDrawer.close()
-                                    }
-
-                                    KeyNavigation.tab: focusItem1
-                                }
-
-                                FlickableType {
-                                    anchors.top: backButton1.bottom
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.bottom: parent.bottom
-                                    contentHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
-
-                                    ColumnLayout {
-                                        id: configContent
-
-                                        anchors.fill: parent
-                                        anchors.rightMargin: 16
-                                        anchors.leftMargin: 16
-
-                                        Header2Type {
-                                            Layout.fillWidth: true
-                                            Layout.topMargin: 16
-
-                                            headerText: qsTr("Connection options %1").arg(protocolName)
-                                        }
-
-                                        TextArea {
-                                            id: configText
-
-                                            Layout.fillWidth: true
-                                            Layout.topMargin: 16
-                                            Layout.bottomMargin: 16
-
-                                            padding: 0
-                                            leftPadding: 0
-                                            height: 24
-
-                                            color: AmneziaStyle.color.paleGray
-                                            selectionColor: AmneziaStyle.color.richBrown
-                                            selectedTextColor: AmneziaStyle.color.paleGray
-
-                                            font.pixelSize: 16
-                                            font.weight: Font.Medium
-                                            font.family: "PT Root UI VF"
-
-                                            text: rawConfig
-
-                                            wrapMode: Text.Wrap
-
-                                            background: Rectangle {
-                                                color: AmneziaStyle.color.transparent
-                                            }
-                                        }
-                                    }
+                                background: Rectangle {
+                                    color: AmneziaStyle.color.transparent
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+
+        footer: ColumnLayout {
+            width: listView.width
 
             LabelWithButtonType {
                 id: removeButton
@@ -226,7 +178,6 @@ PageType {
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
                 textColor: AmneziaStyle.color.vibrantRed
 
-                Keys.onTabPressed: lastItemTabClicked(focusItem)
                 clickedFunction: function() {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                     var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
@@ -237,11 +188,7 @@ PageType {
                         PageController.goToPage(PageEnum.PageDeinstalling)
                         InstallController.removeProcessedContainer()
                     }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            focusItem.forceActiveFocus()
-                        }
-                    }
+                    var noButtonFunction = function() {}
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }

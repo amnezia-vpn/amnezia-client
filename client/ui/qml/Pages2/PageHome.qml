@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import SortFilterProxyModel 0.2
 
@@ -19,37 +20,71 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     Connections {
+        objectName: "pageControllerConnections"
+
         target: PageController
 
         function onRestorePageHomeState(isContainerInstalled) {
-            drawer.open()
+            drawer.openTriggered()
             if (isContainerInstalled) {
                 containersDropDown.rootButtonClickedFunction()
             }
         }
     }
 
+    Connections {
+
+        target: ApiPremV1MigrationController
+
+        function onMigrationFinished() {
+            apiPremV1MigrationDrawer.closeTriggered()
+
+            var headerText = qsTr("You've successfully switched to the new Amnezia Premium subscription!")
+            var descriptionText = qsTr("Old keys will no longer work. Please use your new subscription key to connect. \nThank you for staying with us!")
+            var yesButtonText = qsTr("Continue")
+            var noButtonText = ""
+
+            var yesButtonFunction = function() {
+            }
+            var noButtonFunction = function() {
+            }
+
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
+
+        function onShowMigrationDrawer() {
+            apiPremV1MigrationDrawer.openTriggered()
+        }
+    }
+
     Item {
+        objectName: "homeColumnItem"
+
         anchors.fill: parent
         anchors.bottomMargin: drawer.collapsedHeight
 
         ColumnLayout {
-            anchors.fill: parent
-            anchors.topMargin: 34
-            anchors.bottomMargin: 34
+            objectName: "homeColumnLayout"
 
-            Item {
-                id: focusItem
-                KeyNavigation.tab: loggingButton.visible ?
-                                       loggingButton :
-                                       connectButton
+            anchors.fill: parent
+            anchors.topMargin: 12
+            anchors.bottomMargin: 16
+
+            AdLabel {
+                id: adLabel
+
+                Layout.fillWidth: true
+                Layout.preferredHeight: adLabel.contentHeight
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 22
             }
 
             BasicButtonType {
                 id: loggingButton
+                objectName: "loggingButton"
+
                 property bool isLoggingEnabled: SettingsController.isLoggingEnabled
 
                 Layout.alignment: Qt.AlignHCenter
@@ -66,10 +101,8 @@ PageType {
                 visible: isLoggingEnabled ? true : false
                 text: qsTr("Logging enabled")
 
-                Keys.onEnterPressed: loggingButton.clicked()
-                Keys.onReturnPressed: loggingButton.clicked()
-
-                KeyNavigation.tab: connectButton
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
 
                 onClicked: {
                     PageController.goToPage(PageEnum.PageSettingsLogging)
@@ -78,16 +111,17 @@ PageType {
 
             ConnectButton {
                 id: connectButton
+                objectName: "connectButton"
+
                 Layout.fillHeight: true
                 Layout.alignment: Qt.AlignCenter
-                KeyNavigation.tab: splitTunnelingButton
             }
 
             BasicButtonType {
                 id: splitTunnelingButton
+                objectName: "splitTunnelingButton"
 
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                Layout.bottomMargin: 34
                 leftPadding: 16
                 rightPadding: 16
 
@@ -110,58 +144,43 @@ PageType {
                 text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
 
                 leftImageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
+                leftImageColor: ""
                 rightImageSource: "qrc:/images/controls/chevron-down.svg"
 
-                Keys.onEnterPressed: splitTunnelingButton.clicked()
-                Keys.onReturnPressed: splitTunnelingButton.clicked()
-
-                KeyNavigation.tab: drawer
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
 
                 onClicked: {
-                    homeSplitTunnelingDrawer.open()
+                    homeSplitTunnelingDrawer.openTriggered()
                 }
 
                 HomeSplitTunnelingDrawer {
                     id: homeSplitTunnelingDrawer
-                    parent: root
+                    objectName: "homeSplitTunnelingDrawer"
 
-                    onClosed: {
-                        if (!GC.isMobile()) {
-                            focusItem.forceActiveFocus()
-                        }
-                    }
+                    parent: root
                 }
             }
         }
     }
 
-
     DrawerType2 {
         id: drawer
+        objectName: "drawerProtocol"
+
         anchors.fill: parent
 
-        onClosed: {
-            if (!GC.isMobile()) {
-                focusItem.forceActiveFocus()
-            }
-        }
+        collapsedStateContent: Item {
+            objectName: "ProtocolDrawerCollapsedContent"
 
-        collapsedContent: Item {
             implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
             Component.onCompleted: {
                 drawer.expandedHeight = implicitHeight
             }
-            Connections {
-                target: drawer
-                enabled: !GC.isMobile()
-                function onActiveFocusChanged() {
-                    if (drawer.activeFocus && !drawer.isOpened) {
-                        collapsedButtonChevron.forceActiveFocus()
-                    }
-                }
-            }
+
             ColumnLayout {
                 id: collapsed
+                objectName: "collapsedColumnLayout"
 
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -180,6 +199,8 @@ PageType {
                 }
 
                 RowLayout {
+                    objectName: "rowLayout"
+
                     Layout.topMargin: 14
                     Layout.leftMargin: 24
                     Layout.rightMargin: 24
@@ -188,9 +209,11 @@ PageType {
                     spacing: 0
 
                     Connections {
+                        objectName: "drawerConnections"
+
                         target: drawer
-                        function onEntered() {
-                            if (drawer.isCollapsed) {
+                        function onCursorEntered() {
+                            if (drawer.isCollapsedStateActive) {
                                 collapsedButtonChevron.backgroundColor = collapsedButtonChevron.hoveredColor
                                 collapsedButtonHeader.opacity = 0.8
                             } else {
@@ -198,8 +221,8 @@ PageType {
                             }
                         }
 
-                        function onExited() {
-                            if (drawer.isCollapsed) {
+                        function onCursorExited() {
+                            if (drawer.isCollapsedStateActive) {
                                 collapsedButtonChevron.backgroundColor = collapsedButtonChevron.defaultColor
                                 collapsedButtonHeader.opacity = 1
                             } else {
@@ -208,7 +231,7 @@ PageType {
                         }
 
                         function onPressed(pressed, entered) {
-                            if (drawer.isCollapsed) {
+                            if (drawer.isCollapsedStateActive) {
                                 collapsedButtonChevron.backgroundColor = pressed ? collapsedButtonChevron.pressedColor : entered ? collapsedButtonChevron.hoveredColor : collapsedButtonChevron.defaultColor
                                 collapsedButtonHeader.opacity = 0.7
                             } else {
@@ -219,6 +242,8 @@ PageType {
 
                     Header1TextType {
                         id: collapsedButtonHeader
+                        objectName: "collapsedButtonHeader"
+
                         Layout.maximumWidth: drawer.width - 48 - 18 - 12
 
                         maximumLineCount: 2
@@ -227,8 +252,6 @@ PageType {
                         text: ServersModel.defaultServerName
                         horizontalAlignment: Qt.AlignHCenter
 
-                        KeyNavigation.tab: tabBar
-
                         Behavior on opacity {
                             PropertyAnimation { duration: 200 }
                         }
@@ -236,10 +259,11 @@ PageType {
 
                     ImageButtonType {
                         id: collapsedButtonChevron
+                        objectName: "collapsedButtonChevron"
 
                         Layout.leftMargin: 8
 
-                        visible: drawer.isCollapsed
+                        visible: drawer.isCollapsedStateActive()
 
                         hoverEnabled: false
                         image: "qrc:/images/controls/chevron-down.svg"
@@ -252,27 +276,26 @@ PageType {
                         topPadding: 4
                         bottomPadding: 3
 
-                        Keys.onEnterPressed: collapsedButtonChevron.clicked()
-                        Keys.onReturnPressed: collapsedButtonChevron.clicked()
-                        Keys.onTabPressed: lastItemTabClicked()
-
+                        Keys.onEnterPressed: this.clicked()
+                        Keys.onReturnPressed: this.clicked()
 
                         onClicked: {
-                            if (drawer.isCollapsed) {
-                                drawer.open()
+                            if (drawer.isCollapsedStateActive()) {
+                                drawer.openTriggered()
                             }
                         }
                     }
                 }
 
                 RowLayout {
+                    objectName: "rowLayoutLabel"
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     Layout.topMargin: 8
-                    Layout.bottomMargin: drawer.isCollapsed ? 44 : ServersModel.isDefaultServerFromApi ? 61 : 16
+                    Layout.bottomMargin: drawer.isCollapsedStateActive ? 44 : ServersModel.isDefaultServerFromApi ? 61 : 16
                     spacing: 0
 
                     BasicButtonType {
-                        enabled: (ServersModel.defaultServerImagePathCollapsed !== "") && drawer.isCollapsed
+                        enabled: (ServersModel.defaultServerImagePathCollapsed !== "") && drawer.isCollapsedStateActive
                         hoverEnabled: enabled
 
                         implicitHeight: 36
@@ -290,32 +313,43 @@ PageType {
                         buttonTextLabel.font.pixelSize: 13
                         buttonTextLabel.font.weight: 400
 
-                        text: drawer.isCollapsed ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
+                        text: drawer.isCollapsedStateActive ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
                         leftImageSource: ServersModel.defaultServerImagePathCollapsed
+                        leftImageColor: ""
                         changeLeftImageSize: false
 
                         rightImageSource: hoverEnabled ? "qrc:/images/controls/chevron-down.svg" : ""
 
+                        Keys.onEnterPressed: this.clicked()
+                        Keys.onReturnPressed: this.clicked()
+
                         onClicked: {
                             ServersModel.processedIndex = ServersModel.defaultIndex
-                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                        }
-                    }
-                }
-            }
 
-            Connections {
-                target: drawer
-                enabled: !GC.isMobile()
-                function onIsCollapsedChanged() {
-                    if (!drawer.isCollapsed) {
-                        focusItem1.forceActiveFocus()
+                            if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
+                                if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
+                                    PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
+                                } else {
+                                    PageController.showBusyIndicator(true)
+                                    let result = ApiSettingsController.getAccountInfo(false)
+                                    PageController.showBusyIndicator(false)
+                                    if (!result) {
+                                        return
+                                    }
+
+                                    PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+                                }
+                            } else {
+                                PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                            }
+                        }
                     }
                 }
             }
 
             ColumnLayout {
                 id: serversMenuHeader
+                objectName: "serversMenuHeader"
 
                 anchors.top: collapsed.bottom
                 anchors.right: parent.right
@@ -327,13 +361,9 @@ PageType {
 
                     visible: !ServersModel.isDefaultServerFromApi
 
-                    Item {
-                        id: focusItem1
-                        KeyNavigation.tab: containersDropDown
-                    }
-
                     DropDownType {
                         id: containersDropDown
+                        objectName: "containersDropDown"
 
                         rootButtonImageColor: AmneziaStyle.color.midnightBlack
                         rootButtonBackgroundColor: AmneziaStyle.color.paleGray
@@ -344,28 +374,28 @@ PageType {
                         rootButtonTextTopMargin: 8
                         rootButtonTextBottomMargin: 8
 
+                        enabled: drawer.isOpened
+
                         text: ServersModel.defaultServerDefaultContainerName
                         textColor: AmneziaStyle.color.midnightBlack
                         headerText: qsTr("VPN protocol")
                         headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                         rootButtonClickedFunction: function() {
-                            containersDropDown.open()
+                            containersDropDown.openTriggered()
                         }
 
                         drawerParent: root
-                        KeyNavigation.tab: serversMenuContent
 
                         listView: HomeContainersListView {
                             id: containersListView
+                            objectName: "containersListView"
+
                             rootWidth: root.width
-                            onVisibleChanged: {
-                                if (containersDropDown.visible && !GC.isMobile()) {
-                                    focusItem1.forceActiveFocus()
-                                }
-                            }
 
                             Connections {
+                                objectName: "rowLayoutConnections"
+
                                 target: ServersModel
 
                                 function onDefaultServerIndexChanged() {
@@ -407,170 +437,29 @@ PageType {
 
             ButtonGroup {
                 id: serversRadioButtonGroup
+                objectName: "serversRadioButtonGroup"
             }
 
-            ListView {
+            ServersListView {
                 id: serversMenuContent
+                objectName: "serversMenuContent"
 
-                anchors.top: serversMenuHeader.bottom
-                anchors.right: parent.right
-                anchors.left: parent.left
-                anchors.bottom: parent.bottom
-                anchors.topMargin: 16
-
-                model: ServersModel
-                currentIndex: ServersModel.defaultIndex
-
-                ScrollBar.vertical: ScrollBar {
-                    id: scrollBar
-                    policy: serversMenuContent.height >= serversMenuContent.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
-                }
-
-
-                activeFocusOnTab: true
-                focus: true
-
-                property int focusItemIndex: 0
-                onActiveFocusChanged: {
-                    if (activeFocus) {
-                        serversMenuContent.focusItemIndex = 0
-                        serversMenuContent.itemAtIndex(focusItemIndex).forceActiveFocus()
-                    }
-                }
-
-                onFocusItemIndexChanged: {
-                    const focusedElement = serversMenuContent.itemAtIndex(focusItemIndex)
-                    if (focusedElement) {
-                        if (focusedElement.y + focusedElement.height > serversMenuContent.height) {
-                            serversMenuContent.contentY = focusedElement.y + focusedElement.height - serversMenuContent.height
-                        } else {
-                            serversMenuContent.contentY = 0
-                        }
-                    }
-                }
-
-                Keys.onUpPressed: scrollBar.decrease()
-                Keys.onDownPressed: scrollBar.increase()
+                isFocusable: false
 
                 Connections {
                     target: drawer
-                    enabled: !GC.isMobile()
-                    function onIsCollapsedChanged() {
-                        if (drawer.isCollapsed) {
-                            const item = serversMenuContent.itemAtIndex(serversMenuContent.focusItemIndex)
-                            if (item) { item.serverRadioButtonProperty.focus = false }
-                        }
-                    }
-                }
 
-                Connections {
-                    target: ServersModel
-                    function onDefaultServerIndexChanged(serverIndex) {
-                        serversMenuContent.currentIndex = serverIndex
-                    }
-                }
-
-                clip: true
-
-                delegate: Item {
-                    id: menuContentDelegate
-
-                    property variant delegateData: model
-                    property VerticalRadioButton serverRadioButtonProperty: serverRadioButton
-
-                    implicitWidth: serversMenuContent.width
-                    implicitHeight: serverRadioButtonContent.implicitHeight
-
-                    onActiveFocusChanged: {
-                        if (activeFocus) {
-                            serverRadioButton.forceActiveFocus()
-                        }
-                    }
-
-                    ColumnLayout {
-                        id: serverRadioButtonContent
-
-                        anchors.fill: parent
-                        anchors.rightMargin: 16
-                        anchors.leftMargin: 16
-
-                        spacing: 0
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            VerticalRadioButton {
-                                id: serverRadioButton
-
-                                Layout.fillWidth: true
-
-                                text: name
-                                descriptionText: serverDescription
-
-                                checked: index === serversMenuContent.currentIndex
-                                checkable: !ConnectionController.isConnected
-
-                                ButtonGroup.group: serversRadioButtonGroup
-
-                                onClicked: {
-                                    if (ConnectionController.isConnected) {
-                                        PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
-                                        return
-                                    }
-
-                                    serversMenuContent.currentIndex = index
-
-                                    ServersModel.defaultIndex = index
-                                }
-
-                                MouseArea {
-                                    anchors.fill: serverRadioButton
-                                    cursorShape: Qt.PointingHandCursor
-                                    enabled: false
-                                }
-
-                                Keys.onTabPressed: serverInfoButton.forceActiveFocus()
-                                Keys.onEnterPressed: serverRadioButton.clicked()
-                                Keys.onReturnPressed: serverRadioButton.clicked()
-                            }
-
-                            ImageButtonType {
-                                id: serverInfoButton
-                                image: "qrc:/images/controls/settings.svg"
-                                imageColor: AmneziaStyle.color.paleGray
-
-                                implicitWidth: 56
-                                implicitHeight: 56
-
-                                z: 1
-
-                                Keys.onTabPressed: {
-                                    if (serversMenuContent.focusItemIndex < serversMenuContent.count - 1) {
-                                        serversMenuContent.focusItemIndex++
-                                        serversMenuContent.itemAtIndex(serversMenuContent.focusItemIndex).forceActiveFocus()
-                                    } else {
-                                        focusItem1.forceActiveFocus()
-                                        serversMenuContent.contentY = 0
-                                    }
-                                }
-                                Keys.onEnterPressed: serverInfoButton.clicked()
-                                Keys.onReturnPressed: serverInfoButton.clicked()
-
-                                onClicked: function() {
-                                    ServersModel.processedIndex = index
-                                    PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                                    drawer.close()
-                                }
-                            }
-                        }
-
-                        DividerType {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 0
-                            Layout.rightMargin: 0
-                        }
+                    // this item shouldn't be focused when drawer is closed
+                    function onIsOpenedChanged() {
+                        serversMenuContent.isFocusable = drawer.isOpened
                     }
                 }
             }
         }
+    }
+
+    ApiPremV1MigrationDrawer {
+        id: apiPremV1MigrationDrawer
+        anchors.fill: parent
     }
 }

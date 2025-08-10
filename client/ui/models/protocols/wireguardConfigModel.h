@@ -10,6 +10,7 @@ struct WgConfig
 {
     WgConfig(const QJsonObject &jsonConfig);
 
+    QString subnetAddress;
     QString port;
     QString clientMtu;
 
@@ -24,7 +25,8 @@ class WireGuardConfigModel : public QAbstractListModel
 
 public:
     enum Roles {
-        PortRole = Qt::UserRole + 1,
+        SubnetAddressRole = Qt::UserRole + 1,
+        PortRole,
         ClientMtuRole
     };
 

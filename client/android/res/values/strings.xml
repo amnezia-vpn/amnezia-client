@@ -23,4 +23,6 @@
     <string name="notificationSettingsDialogTitle">Notification settings</string>
     <string name="notificationSettingsDialogMessage">To show notifications, you must enable notifications in the system settings</string>
     <string name="openNotificationSettings">Open notification settings</string>
+
+    <string name="tvNoFileBrowser">Please install a file management utility to browse files</string>
 </resources>

@@ -14,19 +14,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-
-        onFocusChanged: {
-            if (focusItem.activeFocus) {
-                fl.contentY = 0
-            }
-        }
-    }
-
     BackButtonType {
         id: backButton
 
@@ -35,34 +22,42 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20
 
-        KeyNavigation.tab: GC.isMobile() ? switcher : switcherAutoStart
+        onActiveFocusChanged: {
+            if(backButton.enabled && backButton.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    FlickableType {
-        id: fl
+    ListViewType {
+        id: listView
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        ColumnLayout {
-            id: content
+        header: ColumnLayout {
+            width: listView.width
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            spacing: 0
-
-            HeaderType {
+            BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 headerText: qsTr("Application")
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+
+        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser when have migrated to 6.9
+
+            width: listView.width
 
             SwitcherType {
-                id: switcher
+                id: switcherAllowScreenshots
+
                 visible: GC.isMobile()
 
                 Layout.fillWidth: true
@@ -76,10 +71,6 @@ PageType {
                         SettingsController.toggleScreenshotsEnabled(checked)
                     }
                 }
-
-                KeyNavigation.tab: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted ?
-                    labelWithButtonNotification.rightButton : labelWithButtonLanguage.rightButton
-                parentFlickable: fl
             }
 
             DividerType {
@@ -88,15 +79,14 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButtonNotification
+
                 visible: Qt.platform.os === "android" && !SettingsController.isNotificationPermissionGranted
+
                 Layout.fillWidth: true
 
                 text: qsTr("Enable notifications")
                 descriptionText: qsTr("Enable notifications to show the VPN state in the status bar")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                KeyNavigation.tab: labelWithButtonLanguage.rightButton
-                parentFlickable: fl
 
                 clickedFunction: function() {
                     SettingsController.requestNotificationPermission()
@@ -109,6 +99,7 @@ PageType {
 
             SwitcherType {
                 id: switcherAutoStart
+
                 visible: !GC.isMobile()
 
                 Layout.fillWidth: true
@@ -116,9 +107,6 @@ PageType {
 
                 text: qsTr("Auto start")
                 descriptionText: qsTr("Launch the application every time the device is starts")
-
-                KeyNavigation.tab: switcherAutoConnect
-                parentFlickable: fl
 
                 checked: SettingsController.isAutoStartEnabled()
                 onCheckedChanged: {
@@ -134,6 +122,7 @@ PageType {
 
             SwitcherType {
                 id: switcherAutoConnect
+
                 visible: !GC.isMobile()
 
                 Layout.fillWidth: true
@@ -141,9 +130,6 @@ PageType {
 
                 text: qsTr("Auto connect")
                 descriptionText: qsTr("Connect to VPN on app start")
-
-                KeyNavigation.tab: switcherStartMinimized
-                parentFlickable: fl
 
                 checked: SettingsController.isAutoConnectEnabled()
                 onCheckedChanged: {
@@ -154,21 +140,22 @@ PageType {
             }
 
             DividerType {
-                visible: !GC.isMobile()
+                visible: !GC.isMobile() && !IsMacOsNeBuild
             }
 
             SwitcherType {
                 id: switcherStartMinimized
+
                 visible: !GC.isMobile()
 
                 Layout.fillWidth: true
                 Layout.margins: 16
 
                 text: qsTr("Start minimized")
-                descriptionText: qsTr("Launch application minimized")
+                descriptionText: qsTr("Launch application minimized (works with autostart option turned on)")
 
-                KeyNavigation.tab: labelWithButtonLanguage.rightButton
-                parentFlickable: fl
+                enabled: switcherAutoStart.checked
+                opacity: enabled ? 1.0 : 0.5
 
                 checked: SettingsController.isStartMinimizedEnabled()
                 onCheckedChanged: {
@@ -181,20 +168,23 @@ PageType {
             DividerType {
                 visible: !GC.isMobile()
             }
+        }
+
+        footer: ColumnLayout {
+
+            width: listView.width
 
             LabelWithButtonType {
                 id: labelWithButtonLanguage
+
                 Layout.fillWidth: true
 
                 text: qsTr("Language")
                 descriptionText: LanguageModel.currentLanguageName
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                KeyNavigation.tab: labelWithButtonLogging.rightButton
-                parentFlickable: fl
-
                 clickedFunction: function() {
-                    selectLanguageDrawer.open()
+                    selectLanguageDrawer.openTriggered()
                 }
             }
 
@@ -202,14 +192,12 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButtonLogging
+
                 Layout.fillWidth: true
 
                 text: qsTr("Logging")
                 descriptionText: SettingsController.isLoggingEnabled ? qsTr("Enabled") : qsTr("Disabled")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                KeyNavigation.tab: labelWithButtonReset.rightButton
-                parentFlickable: fl
 
                 clickedFunction: function() {
                     PageController.goToPage(PageEnum.PageSettingsLogging)
@@ -220,14 +208,12 @@ PageType {
 
             LabelWithButtonType {
                 id: labelWithButtonReset
+                
                 Layout.fillWidth: true
 
                 text: qsTr("Reset settings and remove all data from the application")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 textColor: AmneziaStyle.color.vibrantRed
-
-                Keys.onTabPressed: lastItemTabClicked()
-                parentFlickable: fl
 
                 clickedFunction: function() {
                     var headerText = qsTr("Reset settings and remove all data from the application?")
@@ -243,15 +229,8 @@ PageType {
                             SettingsController.clearSettings()
                             PageController.goToPageHome()
                         }
-
-                        if (!GC.isMobile()) {
-                            root.defaultActiveFocusItem.forceActiveFocus()
-                        }
                     }
                     var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            root.defaultActiveFocusItem.forceActiveFocus()
-                        }
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -267,11 +246,5 @@ PageType {
 
         width: root.width
         height: root.height
-
-        onClosed: {
-            if (!GC.isMobile()) {
-                focusItem.forceActiveFocus()
-            }
-        }
     }
 }

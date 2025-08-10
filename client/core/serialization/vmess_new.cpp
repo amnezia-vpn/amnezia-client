@@ -104,7 +104,7 @@ QJsonObject Deserialize(const QString &vmessStr, QString *alias, QString *errMes
         server.users.first().security = "auto";
     }
 
-    const static auto getQueryValue = [&query](const QString &key, const QString &defaultValue) {
+    const auto getQueryValue = [&query](const QString &key, const QString &defaultValue) {
         if (query.hasQueryItem(key))
             return query.queryItemValue(key, QUrl::FullyDecoded);
         else

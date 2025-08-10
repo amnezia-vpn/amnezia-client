@@ -91,6 +91,13 @@
             android:exported="false"
             android:theme="@style/Translucent" />
 
+        <activity android:name=".TvFilePicker"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:exported="false"
+            android:theme="@style/Translucent" />
+
         <activity
             android:name=".ImportConfigActivity"
             android:excludeFromRecents="true"

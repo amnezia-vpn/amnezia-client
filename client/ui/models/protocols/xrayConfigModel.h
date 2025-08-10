@@ -12,7 +12,8 @@ class XrayConfigModel : public QAbstractListModel
 
 public:
     enum Roles {
-        SiteRole
+        SiteRole,
+        PortRole
     };
 
     explicit XrayConfigModel(QObject *parent = nullptr);

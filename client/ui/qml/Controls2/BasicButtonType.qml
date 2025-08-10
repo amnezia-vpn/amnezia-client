@@ -24,29 +24,44 @@ Button {
 
     property string leftImageSource
     property string rightImageSource
-    property string leftImageColor
+    property string leftImageColor: textColor
     property bool changeLeftImageSize: true
 
     property bool squareLeftSide: false
-
-    property FlickableType parentFlickable
 
     property var clickedFunc
 
     property alias buttonTextLabel: buttonText
 
+    property bool isFocusable: true
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+
+    Keys.onUpPressed: {
+        FocusController.nextKeyUpItem()
+    }
+    
+    Keys.onDownPressed: {
+        FocusController.nextKeyDownItem()
+    }
+    
+    Keys.onLeftPressed: {
+        FocusController.nextKeyLeftItem()
+    }
+
+    Keys.onRightPressed: {
+        FocusController.nextKeyRightItem()
+    }
+    
     implicitHeight: 56
 
     hoverEnabled: true
-    focusPolicy: Qt.TabFocus
-
-    onFocusChanged: {
-        if (root.activeFocus) {
-            if (root.parentFlickable) {
-                root.parentFlickable.ensureVisible(this)
-            }
-        }
-    }
 
     background: Rectangle {
         id: focusBorder
@@ -150,7 +165,7 @@ Button {
             ButtonTextType {
                 id: buttonText
 
-                color: textColor
+                color: root.textColor
                 text: root.text
                 visible: root.text === "" ? false : true
 

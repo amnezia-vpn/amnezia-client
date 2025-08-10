@@ -6,11 +6,7 @@
 #include <QObject>
 #include <QSettings>
 
-#include "keychain.h"
-
-constexpr const char *settingsKeyTag = "settingsKeyTag";
-constexpr const char *settingsIvTag = "settingsIvTag";
-constexpr const char *keyChainName = "AmneziaVPN-Keychain";
+#include "../client/3rd/qtkeychain/qtkeychain/keychain.h"
 
 class SecureQSettings : public QObject
 {
@@ -44,7 +40,7 @@ public:
 private:
     QSettings m_settings;
 
-    mutable QMap<QString, QVariant> m_cache;
+    mutable QHash<QString, QVariant> m_cache;
 
     QStringList encryptedKeys; // encode only key listed here
     // only this fields need for backup

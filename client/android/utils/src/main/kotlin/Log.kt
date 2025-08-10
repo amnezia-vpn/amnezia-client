@@ -10,6 +10,8 @@ import java.nio.channels.FileChannel
 import java.nio.channels.FileLock
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.ZonedDateTime
+import java.time.ZoneOffset
 import java.util.concurrent.locks.ReentrantLock
 import org.amnezia.vpn.util.Log.Priority.D
 import org.amnezia.vpn.util.Log.Priority.E
@@ -135,8 +137,8 @@ object Log {
     }
 
     private fun formatLogMsg(tag: String, msg: String, priority: Priority): String {
-        val date = LocalDateTime.now().format(dateTimeFormat)
-        return "$date ${Process.myPid()} ${Process.myTid()} $priority [${Thread.currentThread().name}] " +
+        val utcDate = ZonedDateTime.now(ZoneOffset.UTC).format(dateTimeFormat)
+        return "${utcDate}Z ${Process.myPid()} ${Process.myTid()} $priority [${Thread.currentThread().name}] " +
             "$tag: $msg\n"
     }
 

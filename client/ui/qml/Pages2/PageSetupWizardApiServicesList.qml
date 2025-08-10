@@ -14,87 +14,77 @@ import "../Config"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    ColumnLayout {
-        id: header
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+        Layout.topMargin: 20
 
-        spacing: 0
-
-        Item {
-            id: focusItem
-            KeyNavigation.tab: backButton
-        }
-
-        BackButtonType {
-            id: backButton
-            Layout.topMargin: 20
-//                KeyNavigation.tab: fileButton.rightButton
-        }
-
-        HeaderType {
-            Layout.fillWidth: true
-            Layout.topMargin: 8
-            Layout.rightMargin: 16
-            Layout.leftMargin: 16
-            Layout.bottomMargin: 16
-
-            headerText: qsTr("VPN by Amnezia")
-            descriptionText: qsTr("Choose a VPN service that suits your needs.")
+        onActiveFocusChanged: {
+            if(backButton.enabled && backButton.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
     }
 
-    ListView {
-        id: servicesListView
-        anchors.top: header.bottom
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.topMargin: 16
+
+        header: ColumnLayout {
+            width: listView.width
+
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 24
+
+                headerText: qsTr("VPN by Amnezia")
+                descriptionText: qsTr("Choose a VPN service that suits your needs.")
+            }
+        }
+
         spacing: 0
 
-        currentIndex: 1
-        clip: true
         model: ApiServicesModel
 
-        ScrollBar.vertical: ScrollBar {}
+        delegate: ColumnLayout {
 
-        delegate: Item {
-            implicitWidth: servicesListView.width
-            implicitHeight: delegateContent.implicitHeight
+            width: listView.width
 
-            ColumnLayout {
-                id: delegateContent
+            enabled: isServiceAvailable
 
-                anchors.fill: parent
+            CardWithIconsType {
+                id: card
 
-                CardWithIconsType {
-                    id: card
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 16
 
-                    Layout.fillWidth: true
-                    Layout.rightMargin: 16
-                    Layout.leftMargin: 16
-                    Layout.bottomMargin: 16
+                headerText: name
+                bodyText: cardDescription
+                footerText: price
 
-                    headerText: name
-                    bodyText: cardDescription
-                    footerText: price
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                    enabled: isServiceAvailable
-
-                    onClicked: {
-                        if (isServiceAvailable) {
-                            ApiServicesModel.setServiceIndex(index)
-                            PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
-                        }
+                onClicked: {
+                    if (isServiceAvailable) {
+                        ApiServicesModel.setServiceIndex(index)
+                        PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
                     }
                 }
+                
+                Keys.onEnterPressed: clicked()
+                Keys.onReturnPressed: clicked()
             }
         }
     }

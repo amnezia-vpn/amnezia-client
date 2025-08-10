@@ -21,8 +21,6 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
     property bool pageEnabled
 
     Component.onCompleted: {
@@ -48,13 +46,16 @@ PageType {
 
     QtObject {
         id: onlyForwardApps
-        property string name: qsTr("Only the apps from the list should have access via VPN")
-        property int type: routeMode.onlyForwardApps
+
+        readonly property string name: qsTr("Only the apps from the list should have access via VPN")
+        readonly property int type: routeMode.onlyForwardApps
     }
+
     QtObject {
         id: allExceptApps
-        property string name: qsTr("Apps from the list should not have access via VPN")
-        property int type: routeMode.allExceptApps
+        
+        readonly property string name: qsTr("Apps from the list should not have access via VPN")
+        readonly property int type: routeMode.allExceptApps
     }
 
     function getRouteModesModelIndex() {
@@ -64,11 +65,6 @@ PageType {
         } else if (routeMode.allExceptApps === currentRouteMode) {
             return 1
         }
-    }
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
     }
 
     ColumnLayout {
@@ -82,36 +78,24 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: switcher
         }
 
-        RowLayout {
-            HeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
+        HeaderTypeWithSwitcher {
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
-                headerText: qsTr("App split tunneling")
+            headerText: qsTr("App split tunneling")
 
+            enabled: root.pageEnabled
+            showSwitcher: true
+            switcher {
+                checked: AppSplitTunnelingModel.isTunnelingEnabled
                 enabled: root.pageEnabled
             }
-
-            SwitcherType {
-                id: switcher
-
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-
-                enabled: root.pageEnabled
-
-                KeyNavigation.tab: selector.enabled ?
-                                       selector :
-                                       searchField.textField
-
-                checked: AppSplitTunnelingModel.isTunnelingEnabled
-                onToggled: {                    
-                    AppSplitTunnelingModel.toggleSplitTunneling(checked)
-                    selector.text = root.routeModesModel[getRouteModesModelIndex()].name
-                }
+            switcherFunction: function(checked) {
+                AppSplitTunnelingModel.toggleSplitTunneling(checked)
+                selector.text = root.routeModesModel[getRouteModesModelIndex()].name
             }
         }
 
@@ -128,27 +112,25 @@ PageType {
 
             headerText: qsTr("Mode")
 
-            enabled: Qt.platform.os === "android" && root.pageEnabled
-
-            KeyNavigation.tab: searchField.textField
+            enabled: (Qt.platform.os === "android") && root.pageEnabled
 
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
 
                 model: root.routeModesModel
 
-                currentIndex: getRouteModesModelIndex()
+                selectedIndex: getRouteModesModelIndex()
 
                 clickedFunction: function() {
                     selector.text = selectedText
-                    selector.close()
-                    if (AppSplitTunnelingModel.routeMode !== root.routeModesModel[currentIndex].type) {
-                        AppSplitTunnelingModel.routeMode = root.routeModesModel[currentIndex].type
+                    selector.closeTriggered()
+                    if (AppSplitTunnelingModel.routeMode !== root.routeModesModel[selectedIndex].type) {
+                        AppSplitTunnelingModel.routeMode = root.routeModesModel[selectedIndex].type
                     }
                 }
 
                 Component.onCompleted: {
-                    if (root.routeModesModel[currentIndex].type === AppSplitTunnelingModel.routeMode) {
+                    if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingModel.routeMode) {
                         selector.text = selectedText
                     } else {
                         selector.text = root.routeModesModel[0].name
@@ -158,84 +140,63 @@ PageType {
                 Connections {
                     target: AppSplitTunnelingModel
                     function onRouteModeChanged() {
-                        currentIndex = getRouteModesModelIndex()
+                        selectedIndex = getRouteModesModelIndex()
                     }
                 }
             }
         }
     }
 
-    FlickableType {
+    ListViewType {
+        id: listView
+
         anchors.top: header.bottom
-        anchors.topMargin: 16
-        contentHeight: col.implicitHeight + addAppButton.implicitHeight + addAppButton.anchors.bottomMargin + addAppButton.anchors.topMargin
+        anchors.bottom: addAppButton.top
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        enabled: root.pageEnabled
+        model: SortFilterProxyModel {
+            id: proxyAppSplitTunnelingModel
+            sourceModel: AppSplitTunnelingModel
+            filters: RegExpFilter {
+                roleName: "appPath"
+                pattern: ".*" + searchField.textField.text + ".*"
+                caseSensitivity: Qt.CaseInsensitive
+            }
+            sorters: [
+                RoleSorter { roleName: "appPath"; sortOrder: Qt.AscendingOrder }
+            ]
+        }
 
-        Column {
-            id: col
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        delegate: ColumnLayout {
+            width: listView.width
 
-            ListView {
-                id: apps
-                width: parent.width
-                height: apps.contentItem.height
+            LabelWithButtonType {
+                Layout.fillWidth: true
 
-                model: SortFilterProxyModel {
-                    id: proxyAppSplitTunnelingModel
-                    sourceModel: AppSplitTunnelingModel
-                    filters: RegExpFilter {
-                        roleName: "appPath"
-                        pattern: ".*" + searchField.textField.text + ".*"
-                        caseSensitivity: Qt.CaseInsensitive
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: appPath
+                rightImageSource: "qrc:/images/controls/trash.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
+
+                clickedFunction: function() {
+                    var headerText = qsTr("Remove ") + appPath + "?"
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        AppSplitTunnelingController.removeApp(proxyAppSplitTunnelingModel.mapToSource(index))
                     }
-                    sorters: [
-                        RoleSorter { roleName: "appPath"; sortOrder: Qt.AscendingOrder }
-                    ]
-                }
-
-                clip: true
-                interactive: false
-
-                delegate: Item {
-                    implicitWidth: apps.width
-                    implicitHeight: delegateContent.implicitHeight
-
-                    ColumnLayout {
-                        id: delegateContent
-
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-
-                        LabelWithButtonType {
-                            Layout.fillWidth: true
-
-                            text: appPath
-                            rightImageSource: "qrc:/images/controls/trash.svg"
-                            rightImageColor: AmneziaStyle.color.paleGray
-
-                            clickedFunction: function() {
-                                var headerText = qsTr("Remove ") + appPath + "?"
-                                var yesButtonText = qsTr("Continue")
-                                var noButtonText = qsTr("Cancel")
-
-                                var yesButtonFunction = function() {
-                                    AppSplitTunnelingController.removeApp(proxyAppSplitTunnelingModel.mapToSource(index))
-                                }
-                                var noButtonFunction = function() {
-                                }
-
-                                showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                            }
-                        }
-
-                        DividerType {}
+                    var noButtonFunction = function() {
                     }
+
+                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
+
+            DividerType {}
         }
     }
 
@@ -264,10 +225,9 @@ PageType {
 
             Layout.fillWidth: true
 
-            textFieldPlaceholderText: qsTr("application name")
+            textField.placeholderText: qsTr("application name")
             buttonImageSource: "qrc:/images/controls/plus.svg"
 
-            Keys.onTabPressed: lastItemTabClicked(focusItem)
             rightButtonClickedOnEnter: true
 
             clickedFunc: function() {
@@ -281,7 +241,7 @@ PageType {
                         AppSplitTunnelingController.addApp(fileName)
                     }
                 } else if (Qt.platform.os === "android"){
-                    installedAppDrawer.open()
+                    installedAppDrawer.openTriggered()
                 }
 
                 PageController.showBusyIndicator(false)

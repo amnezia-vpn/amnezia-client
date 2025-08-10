@@ -21,248 +21,211 @@ PageType {
 
     property bool isClearCacheVisible: ServersModel.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ContainersModel.getProcessedContainerIndex())
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
-    ColumnLayout {
-        id: header
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
         anchors.topMargin: 20
+        
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
+    }
 
-        BackButtonType {
-            id: backButton
-            KeyNavigation.tab: protocols
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.left: parent.left
+
+        header: ColumnLayout {
+            width: listView.width
+
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 32
+
+                headerText: ContainersModel.getProcessedContainerName() + qsTr(" settings")
+            }
         }
 
-        HeaderType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.bottomMargin: 32
+        model: ProtocolsModel
 
-            headerText: ContainersModel.getProcessedContainerName() + qsTr(" settings")
-        }
+        delegate: ColumnLayout {
+            id: delegateContent
 
-        ListView {
-            id: protocols
-            Layout.fillWidth: true
-            height: protocols.contentItem.height
-            clip: true
-            interactive: true
-            model: ProtocolsModel
+            width: listView.width
 
-            property int currentFocusIndex: 0
+            property bool isClientSettingsVisible: (protocolIndex === ProtocolEnum.WireGuard) || (protocolIndex === ProtocolEnum.Awg)
+            property bool isServerSettingsVisible: ServersModel.isProcessedServerHasWriteAccess()
 
-            activeFocusOnTab: true
-            onActiveFocusChanged: {
-                if (activeFocus) {
-                    this.currentFocusIndex = 0
-                    protocols.itemAtIndex(currentFocusIndex).focusItem.forceActiveFocus()
+            LabelWithButtonType {
+                id: clientSettings
+
+                Layout.fillWidth: true
+
+                text: protocolName + qsTr(" connection settings")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                visible: delegateContent.isClientSettingsVisible
+
+                clickedFunction: function() {
+                    if (isClientProtocolExists) {
+                        switch (protocolIndex) {
+                        case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                        case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                        }
+                        PageController.goToPage(clientProtocolPage);
+                    } else {
+                        PageController.showNotificationMessage(qsTr("Click the \"connect\" button to create a connection configuration"))
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: clientSettings
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
                 }
             }
 
-            Keys.onTabPressed: {
-                if (currentFocusIndex < this.count - 1) {
-                    currentFocusIndex += 1
-                    protocols.itemAtIndex(currentFocusIndex).focusItem.forceActiveFocus()
-                } else {
-                    clearCacheButton.forceActiveFocus()
+            DividerType {
+                visible: delegateContent.isClientSettingsVisible
+            }
+
+            LabelWithButtonType {
+                id: serverSettings
+
+                Layout.fillWidth: true
+
+                text: protocolName + qsTr(" server settings")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                visible: delegateContent.isServerSettingsVisible
+
+                clickedFunction: function() {
+                    switch (protocolIndex) {
+                    case ProtocolEnum.OpenVpn: OpenVpnConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                    case ProtocolEnum.ShadowSocks: ShadowSocksConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                    case ProtocolEnum.Cloak: CloakConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                    case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                    case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                    case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                    case ProtocolEnum.Sftp: SftpConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                    case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                    case ProtocolEnum.Socks5Proxy: Socks5ProxyConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                    }
+                    PageController.goToPage(serverProtocolPage);
+                }
+
+                MouseArea {
+                    anchors.fill: serverSettings
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
                 }
             }
 
-            delegate: Item {
-                property var focusItem: clientSettings.rightButton
+            DividerType {
+                visible: delegateContent.isServerSettingsVisible
+            }
+        }
 
-                implicitWidth: protocols.width
-                implicitHeight: delegateContent.implicitHeight
+        footer: ColumnLayout {
 
-                ColumnLayout {
-                    id: delegateContent
+            width: listView.width
 
-                    anchors.fill: parent
+            LabelWithButtonType {
+                id: clearCacheButton
 
-                    property bool isClientSettingsVisible: protocolIndex === ProtocolEnum.WireGuard || protocolIndex === ProtocolEnum.Awg
-                    property bool isServerSettingsVisible: ServersModel.isProcessedServerHasWriteAccess()
+                Layout.fillWidth: true
 
-                    LabelWithButtonType {
-                        id: clientSettings
+                visible: root.isClearCacheVisible
 
-                        Layout.fillWidth: true
+                text: qsTr("Clear profile")
 
-                        text: protocolName + qsTr(" connection settings")
-                        rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                        visible: delegateContent.isClientSettingsVisible
+                clickedFunction: function() {
+                    var headerText = qsTr("Clear %1 profile?").arg(ContainersModel.getProcessedContainerName())
+                    var descriptionText = qsTr("The connection configuration will be deleted for this device only")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-                        clickedFunction: function() {
-                            if (isClientProtocolExists) {
-                                switch (protocolIndex) {
-                                case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                                case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                                }
-                                PageController.goToPage(clientProtocolPage);
-                            } else {
-                                PageController.showNotificationMessage(qsTr("Click the \"connect\" button to create a connection configuration"))
-                            }
+                    var yesButtonFunction = function() {
+                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                            var message = qsTr("Unable to clear %1 profile while there is an active connection").arg(ContainersModel.getProcessedContainerName())
+                            PageController.showNotificationMessage(message)
+                            return
                         }
 
-                        MouseArea {
-                            anchors.fill: clientSettings
-                            cursorShape: Qt.PointingHandCursor
-                            enabled: false
+                        PageController.showBusyIndicator(true)
+                        InstallController.clearCachedProfile()
+                        PageController.showBusyIndicator(false)
+                    }
+
+                    var noButtonFunction = function() {
+                    }
+
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+
+                MouseArea {
+                    anchors.fill: clearCacheButton
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
+                }
+            }
+
+            DividerType {
+                visible: root.isClearCacheVisible
+            }
+
+            LabelWithButtonType {
+                id: removeButton
+
+                Layout.fillWidth: true
+
+                visible: ServersModel.isProcessedServerHasWriteAccess()
+
+                text: qsTr("Remove ")
+                textColor: AmneziaStyle.color.vibrantRed
+
+                clickedFunction: function() {
+                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
+                    var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
+                                && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                            PageController.showNotificationMessage(qsTr("Cannot remove active container"))
+                        } else
+                        {
+                            PageController.goToPage(PageEnum.PageDeinstalling)
+                            InstallController.removeProcessedContainer()
                         }
                     }
+                    var noButtonFunction = function() {
 
-                    DividerType {
-                        visible: delegateContent.isClientSettingsVisible
                     }
 
-                    LabelWithButtonType {
-                        id: serverSettings
-
-                        Layout.fillWidth: true
-
-                        text: protocolName + qsTr(" server settings")
-                        rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                        visible: delegateContent.isServerSettingsVisible
-
-                        clickedFunction: function() {
-                            switch (protocolIndex) {
-                            case ProtocolEnum.OpenVpn: OpenVpnConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                            case ProtocolEnum.ShadowSocks: ShadowSocksConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                            case ProtocolEnum.Cloak: CloakConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                            case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                            case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                            case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                            case ProtocolEnum.Sftp: SftpConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                            case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                            case ProtocolEnum.Socks5Proxy: Socks5ProxyConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                            }
-                            PageController.goToPage(serverProtocolPage);
-                        }
-
-                        MouseArea {
-                            anchors.fill: serverSettings
-                            cursorShape: Qt.PointingHandCursor
-                            enabled: false
-                        }
-                    }
-
-                    DividerType {
-                        visible: delegateContent.isServerSettingsVisible
-                    }
-                }
-            }
-        }
-
-        LabelWithButtonType {
-            id: clearCacheButton
-
-            Layout.fillWidth: true
-
-            visible: root.isClearCacheVisible
-            KeyNavigation.tab: removeButton
-
-            text: qsTr("Clear profile")
-
-            clickedFunction: function() {
-                var headerText = qsTr("Clear %1 profile?").arg(ContainersModel.getProcessedContainerName())
-                var descriptionText = qsTr("The connection configuration will be deleted for this device only")
-                var yesButtonText = qsTr("Continue")
-                var noButtonText = qsTr("Cancel")
-
-                var yesButtonFunction = function() {
-                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                        var message = qsTr("Unable to clear %1 profile while there is an active connection").arg(ContainersModel.getProcessedContainerName())
-                        PageController.showNotificationMessage(message)
-                        return
-                    }
-
-                    PageController.showBusyIndicator(true)
-                    InstallController.clearCachedProfile()
-                    PageController.showBusyIndicator(false)
-                }
-                var noButtonFunction = function() {
-                    if (!GC.isMobile()) {
-                        focusItem.forceActiveFocus()
-                    }
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
 
-                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-            }
-
-            MouseArea {
-                anchors.fill: clearCacheButton
-                cursorShape: Qt.PointingHandCursor
-                enabled: false
-            }
-        }
-
-        DividerType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            visible: root.isClearCacheVisible
-        }
-
-        LabelWithButtonType {
-            id: removeButton
-
-            Layout.fillWidth: true
-
-            visible: ServersModel.isProcessedServerHasWriteAccess()
-            Keys.onTabPressed: lastItemTabClicked(focusItem)
-
-            text: qsTr("Remove ")
-            textColor: AmneziaStyle.color.vibrantRed
-
-            clickedFunction: function() {
-                var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
-                var descriptionText = qsTr("All users with whom you shared a connection will no longer be able to connect to it.")
-                var yesButtonText = qsTr("Continue")
-                var noButtonText = qsTr("Cancel")
-
-                var yesButtonFunction = function() {
-                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
-                    && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                        PageController.showNotificationMessage(qsTr("Cannot remove active container"))
-                    } else
-                    {
-                        PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeProcessedContainer()
-                    }
+                MouseArea {
+                    anchors.fill: removeButton
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
                 }
-                var noButtonFunction = function() {
-                    if (!GC.isMobile()) {
-                        focusItem.forceActiveFocus()
-                    }
-                }
-
-                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
             }
 
-            MouseArea {
-                anchors.fill: removeButton
-                cursorShape: Qt.PointingHandCursor
-                enabled: false
+            DividerType {
+                visible: ServersModel.isProcessedServerHasWriteAccess()
             }
-        }
-
-        DividerType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            visible: ServersModel.isProcessedServerHasWriteAccess()
         }
     }
 }
-

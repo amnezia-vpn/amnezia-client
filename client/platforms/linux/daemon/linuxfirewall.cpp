@@ -196,6 +196,8 @@ QStringList LinuxFirewall::getDNSRules(const QStringList& servers)
         result << QStringLiteral("-o amn0+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
         result << QStringLiteral("-o tun0+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
         result << QStringLiteral("-o tun0+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
+        result << QStringLiteral("-o tun2+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
+        result << QStringLiteral("-o tun2+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
     }
     return result;
 }
@@ -277,6 +279,7 @@ void LinuxFirewall::install()
     installAnchor(Both, QStringLiteral("200.allowVPN"), {
                                                             QStringLiteral("-o amn0+ -j ACCEPT"),
                                                             QStringLiteral("-o tun0+ -j ACCEPT"),
+                                                            QStringLiteral("-o tun2+ -j ACCEPT"),
                                                         });
 
     installAnchor(IPv4, QStringLiteral("120.blockNets"), {});
@@ -452,9 +455,6 @@ void LinuxFirewall::updateDNSServers(const QStringList& servers)
 
 void LinuxFirewall::updateAllowNets(const QStringList& servers)
 {
-    static QStringList existingServers {};
-
-    existingServers = servers;
     execute(QStringLiteral("iptables -F %1.110.allowNets").arg(kAnchorName));
     for (const QString& rule : getAllowRule(servers))
         execute(QStringLiteral("iptables -A %1.110.allowNets %2").arg(kAnchorName, rule));

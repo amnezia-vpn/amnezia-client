@@ -22,12 +22,39 @@ RadioButton {
     property string pressedBorderColor: AmneziaStyle.color.softGoldenApricot
     property string selectedBorderColor: AmneziaStyle.color.goldenApricot
     property string defaultBodredColor: AmneziaStyle.color.transparent
+    property string focusBorderColor: AmneziaStyle.color.paleGray
     property int borderWidth: 0
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
     hoverEnabled: true
+
+    property bool isFocusable: true
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+
+    Keys.onUpPressed: {
+        FocusController.nextKeyUpItem()
+    }
+
+    Keys.onDownPressed: {
+        FocusController.nextKeyDownItem()
+    }
+
+    Keys.onLeftPressed: {
+        FocusController.nextKeyLeftItem()
+    }
+
+    Keys.onRightPressed: {
+        FocusController.nextKeyRightItem()
+    }
 
     indicator: Rectangle {
         anchors.fill: parent
@@ -52,6 +79,8 @@ RadioButton {
                     return pressedBorderColor
                 } else if (root.checked) {
                     return selectedBorderColor
+                } else if (root.activeFocus) {
+                    return focusBorderColor
                 }
             }
             return defaultBodredColor
@@ -59,7 +88,7 @@ RadioButton {
 
         border.width: {
             if (root.enabled) {
-                if(root.checked) {
+                if(root.checked || root.activeFocus) {
                     return 1
                 }
                 return root.pressed ? 1 : 0

@@ -4,6 +4,7 @@
 
 #include "windowsservicemanager.h"
 
+#include <QApplication>
 #include <QTimer>
 
 #include "Windows.h"
@@ -16,35 +17,44 @@ namespace {
 Logger logger("WindowsServiceManager");
 }
 
-WindowsServiceManager::WindowsServiceManager(LPCWSTR serviceName) {
+WindowsServiceManager::WindowsServiceManager(SC_HANDLE serviceManager,
+                                             SC_HANDLE service)
+    : QObject(qApp), m_serviceManager(serviceManager), m_service(service) {
+  m_timer.setSingleShot(false);
+}
+
+std::unique_ptr<WindowsServiceManager> WindowsServiceManager::open(
+    const QString serviceName) {
+  LPCWSTR service = (const wchar_t*)serviceName.utf16();
+
   DWORD err = NULL;
   auto scm_rights = SC_MANAGER_CONNECT | SC_MANAGER_ENUMERATE_SERVICE |
                     SC_MANAGER_QUERY_LOCK_STATUS | STANDARD_RIGHTS_READ;
-  m_serviceManager = OpenSCManager(NULL,  // local computer
-                                   NULL,  // servicesActive database
-                                   scm_rights);
+  auto manager = OpenSCManager(NULL,  // local computer
+                               NULL,  // servicesActive database
+                               scm_rights);
   err = GetLastError();
   if (err != NULL) {
     logger.error() << " OpenSCManager failed code: " << err;
-    return;
+    return {};
   }
   logger.debug() << "OpenSCManager access given - " << err;
 
-  logger.debug() << "Opening Service - "
-                 << QString::fromWCharArray(serviceName);
+  logger.debug() << "Opening Service - " << serviceName;
   // Try to get an elevated handle
-  m_service = OpenService(m_serviceManager,  // SCM database
-                          serviceName,       // name of service
-                          (GENERIC_READ | SERVICE_START | SERVICE_STOP));
+  auto serviceHandle =
+      OpenService(manager,  // SCM database
+                  service,  // name of service
+                  (GENERIC_READ | SERVICE_START | SERVICE_STOP));
   err = GetLastError();
   if (err != NULL) {
+    CloseServiceHandle(manager);
     WindowsUtils::windowsLog("OpenService failed");
-    return;
+    return {};
   }
-  m_has_access = true;
-  m_timer.setSingleShot(false);
 
   logger.debug() << "Service manager execute access granted";
+  return std::make_unique<WindowsServiceManager>(manager, serviceHandle);
 }
 
 WindowsServiceManager::~WindowsServiceManager() {
@@ -85,10 +95,6 @@ bool WindowsServiceManager::startPolling(DWORD goal_state, int max_wait_sec) {
 
 SERVICE_STATUS_PROCESS WindowsServiceManager::getStatus() {
   SERVICE_STATUS_PROCESS serviceStatus;
-  if (!m_has_access) {
-    logger.debug() << "Need read access to get service state";
-    return serviceStatus;
-  }
   DWORD dwBytesNeeded;  // Contains missing bytes if struct is too small?
   QueryServiceStatusEx(m_service,                       // handle to service
                        SC_STATUS_PROCESS_INFO,          // information level
@@ -119,10 +125,6 @@ bool WindowsServiceManager::startService() {
 }
 
 bool WindowsServiceManager::stopService() {
-  if (!m_has_access) {
-    logger.error() << "Need execute access to stop services";
-    return false;
-  }
   auto state = getStatus().dwCurrentState;
   if (state != SERVICE_RUNNING && state != SERVICE_START_PENDING) {
     logger.warning() << ("Service stop not possible, as its not running");

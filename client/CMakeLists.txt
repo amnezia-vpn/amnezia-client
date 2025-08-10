@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(PROJECT AmneziaVPN)
 project(${PROJECT})
 
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
@@ -31,9 +30,8 @@ add_definitions(-DDEV_AGW_PUBLIC_KEY="$ENV{DEV_AGW_PUBLIC_KEY}")
 add_definitions(-DDEV_AGW_ENDPOINT="$ENV{DEV_AGW_ENDPOINT}")
 add_definitions(-DDEV_S3_ENDPOINT="$ENV{DEV_S3_ENDPOINT}")
 
-if(IOS)
-    set(PACKAGES ${PACKAGES} Multimedia)
-endif()
+add_definitions(-DFREE_V2_ENDPOINT="$ENV{FREE_V2_ENDPOINT}")
+add_definitions(-DPREM_V1_ENDPOINT="$ENV{PREM_V1_ENDPOINT}")
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} Widgets)
@@ -48,16 +46,15 @@ set(LIBS ${LIBS}
     Qt6::Core5Compat Qt6::Concurrent
 )
 
-if(IOS)
-    set(LIBS ${LIBS} Qt6::Multimedia)
-endif()
-
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(LIBS ${LIBS} Qt6::Widgets)
 endif()
 
 qt_standard_project_setup()
 qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
+target_include_directories(${PROJECT} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+)
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
@@ -96,11 +93,6 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/translations/translations.qrc.in ${CMAK
 qt6_add_resources(QRC ${I18NQRC} ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 # -- i18n end
 
-if(IOS)
-    execute_process(COMMAND bash ${CMAKE_CURRENT_LIST_DIR}/ios/scripts/openvpn.sh args
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
-endif()
-
 set(IS_CI ${CI})
 if(IS_CI)
     message("Detected CI env")
@@ -110,8 +102,8 @@ if(IS_CI)
     endif()
 endif()
 
-
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/3rdparty.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/sources.cmake)
 
 include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/../ipc
@@ -120,162 +112,28 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-configure_file(${CMAKE_CURRENT_LIST_DIR}/../version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
-
-set(HEADERS ${HEADERS}
-    ${CMAKE_CURRENT_LIST_DIR}/migrations.h
-    ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc.h
-    ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.h
-    ${CMAKE_CURRENT_LIST_DIR}/containers/containers_defs.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/defs.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/errorstrings.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/apiController.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/serverController.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/vpnConfigurationController.h
-    ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.h
-    ${CMAKE_CURRENT_LIST_DIR}/protocols/qml_register_protocols.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/pages.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.h
-    ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.h
-    ${CMAKE_CURRENT_BINARY_DIR}/version.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/serialization.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/transfer.h
-    ${CMAKE_CURRENT_LIST_DIR}/core/enums/apiEnums.h
-    ${CMAKE_CURRENT_LIST_DIR}/../common/logger/logger.h
-)
-
-# Mozilla headres
-set(HEADERS ${HEADERS}
-    ${CMAKE_CURRENT_LIST_DIR}/mozilla/models/server.h
-    ${CMAKE_CURRENT_LIST_DIR}/mozilla/shared/ipaddress.h
-    ${CMAKE_CURRENT_LIST_DIR}/mozilla/shared/leakdetector.h
-    ${CMAKE_CURRENT_LIST_DIR}/mozilla/controllerimpl.h
-    ${CMAKE_CURRENT_LIST_DIR}/mozilla/localsocketcontroller.h
-)
+if(MACOS_NE)
+    message("MACOS_NE is ON")
+    add_definitions(-DQ_OS_MAC)
+    add_definitions(-DMACOS_NE)
+    message("Add macros for MacOS Network Extension")
+else()
+    message("MACOS_NE is OFF")
+endif()
 
 include_directories(mozilla)
 include_directories(mozilla/shared)
 include_directories(mozilla/models)
 
-if(NOT IOS)
-    set(HEADERS ${HEADERS}
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.h
-    )
-endif()
-
-if(NOT ANDROID)
-    set(HEADERS ${HEADERS}
-        ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.h
-    )
-endif()
-
-set(SOURCES ${SOURCES}
-    ${CMAKE_CURRENT_LIST_DIR}/migrations.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/amnezia_application.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/containers/containers_defs.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/errorstrings.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/scripts_registry.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/server_defs.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/apiController.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/serverController.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/controllers/vpnConfigurationController.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/protocols/protocols_defs.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/qautostart.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/protocols/vpnprotocol.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/sshclient.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/networkUtilities.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/outbound.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/inbound.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/ss.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/ssd.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vless.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/trojan.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/core/serialization/vmess_new.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../common/logger/logger.cpp
-)
-
-# Mozilla sources
-set(SOURCES ${SOURCES}
-    ${CMAKE_CURRENT_LIST_DIR}/mozilla/models/server.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/mozilla/shared/ipaddress.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/mozilla/shared/leakdetector.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/mozilla/localsocketcontroller.cpp
-)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/../version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
 endif()
 
-if(NOT IOS)
-    set(SOURCES ${SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/QRCodeReaderBase.cpp
-    )
-endif()
-
-if(NOT ANDROID)
-    set(SOURCES ${SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/ui/notificationhandler.cpp
-    )
-endif()
-
-file(GLOB COMMON_FILES_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/*.h)
-file(GLOB COMMON_FILES_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/*.cpp)
-
-file(GLOB_RECURSE PAGE_LOGIC_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/*.h)
-file(GLOB_RECURSE PAGE_LOGIC_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/pages_logic/*.cpp)
-
-file(GLOB CONFIGURATORS_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/configurators/*.h)
-file(GLOB CONFIGURATORS_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/configurators/*.cpp)
-
-file(GLOB UI_MODELS_H CONFIGURE_DEPENDS
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/*.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/protocols/*.h
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/services/*.h
-)
-file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/*.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/protocols/*.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/ui/models/services/*.cpp
-)
-
-file(GLOB UI_CONTROLLERS_H CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/controllers/*.h)
-file(GLOB UI_CONTROLLERS_CPP CONFIGURE_DEPENDS ${CMAKE_CURRENT_LIST_DIR}/ui/controllers/*.cpp)
-
-set(HEADERS ${HEADERS}
-    ${COMMON_FILES_H}
-    ${PAGE_LOGIC_H}
-    ${CONFIGURATORS_H}
-    ${UI_MODELS_H}
-    ${UI_CONTROLLERS_H}
-)
-set(SOURCES ${SOURCES}
-    ${COMMON_FILES_CPP}
-    ${PAGE_LOGIC_CPP}
-    ${CONFIGURATORS_CPP}
-    ${UI_MODELS_CPP}
-    ${UI_CONTROLLERS_CPP}
-)
-
 if(WIN32)
     configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/platforms/windows/amneziavpn.rc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
-    )
-
-    set(HEADERS ${HEADERS}
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_windows.h
-    )
-
-    set(SOURCES ${SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/ikev2_vpn_protocol_windows.cpp
-    )
-
-    set(RESOURCES ${RESOURCES}
         ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn.rc
     )
 
@@ -292,7 +150,7 @@ if(WIN32)
 endif()
 
 if(APPLE)
-    cmake_policy(SET CMP0099 OLD)
+    cmake_policy(SET CMP0099 NEW)
     cmake_policy(SET CMP0114 NEW)
 
     if(NOT BUILD_OSX_APP_IDENTIFIER)
@@ -311,7 +169,6 @@ if(APPLE)
     set(CMAKE_XCODE_GENERATE_SCHEME FALSE)
     set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ${BUILD_VPN_DEVELOPMENT_TEAM})
     set(CMAKE_XCODE_ATTRIBUTE_GROUP_ID_IOS ${BUILD_IOS_GROUP_IDENTIFIER})
-
 endif()
 
 if(LINUX AND NOT ANDROID)
@@ -328,33 +185,8 @@ if(LINUX AND NOT ANDROID)
 
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
-    message("Client desktop build")
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     add_compile_definitions(AMNEZIA_DESKTOP)
-
-    set(HEADERS ${HEADERS}
-        ${CMAKE_CURRENT_LIST_DIR}/core/ipcclient.h
-        ${CMAKE_CURRENT_LIST_DIR}/core/privileged_process.h
-        ${CMAKE_CURRENT_LIST_DIR}/ui/systemtray_notificationhandler.h
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnprotocol.h
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnovercloakprotocol.h
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/shadowsocksvpnprotocol.h
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/wireguardprotocol.h
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/xrayprotocol.h
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/awgprotocol.h
-    )
-
-    set(SOURCES ${SOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/core/ipcclient.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/core/privileged_process.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/ui/systemtray_notificationhandler.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnprotocol.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/openvpnovercloakprotocol.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/shadowsocksvpnprotocol.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/wireguardprotocol.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/xrayprotocol.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/protocols/awgprotocol.cpp
-    )
 endif()
 
 if(ANDROID)
@@ -364,7 +196,9 @@ endif()
 if(IOS)
     include(cmake/ios.cmake)
     include(cmake/ios-arch-fixup.cmake)
-elseif(APPLE AND NOT IOS)
+elseif(APPLE AND MACOS_NE)
+    include(cmake/macos_ne.cmake)
+elseif(APPLE)
     include(cmake/osxtools.cmake)
     include(cmake/macos.cmake)
 endif()
@@ -385,7 +219,7 @@ elseif(APPLE AND NOT IOS)
     set(DEPLOY_PLATFORM_PATH "macos")
 endif()
 
-if(NOT IOS AND NOT ANDROID)
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
@@ -400,7 +234,6 @@ if(NOT IOS AND NOT ANDROID)
         $<TARGET_FILE_DIR:${PROJECT}>
         COMMAND_EXPAND_LISTS
     )
-
 endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})

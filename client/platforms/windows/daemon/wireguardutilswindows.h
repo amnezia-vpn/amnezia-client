@@ -9,16 +9,21 @@
 
 #include <QHostAddress>
 #include <QObject>
+#include <QPointer>
 
 #include "daemon/wireguardutils.h"
 #include "windowsroutemonitor.h"
 #include "windowstunnelservice.h"
 
+class WindowsFirewall;
+class WindowsRouteMonitor;
+
 class WireguardUtilsWindows final : public WireguardUtils {
   Q_OBJECT
 
  public:
-  WireguardUtilsWindows(QObject* parent);
+  static std::unique_ptr<WireguardUtilsWindows> create(WindowsFirewall* fw,
+                                                       QObject* parent);
   ~WireguardUtilsWindows();
 
   bool interfaceExists() override { return m_tunnel.isRunning(); }
@@ -39,15 +44,19 @@ class WireguardUtilsWindows final : public WireguardUtils {
   bool addExclusionRoute(const IPAddress& prefix) override;
   bool deleteExclusionRoute(const IPAddress& prefix) override;
 
+  bool WireguardUtilsWindows::excludeLocalNetworks(const QList<IPAddress>& addresses) override;
+
  signals:
   void backendFailure();
 
  private:
+  WireguardUtilsWindows(QObject* parent, WindowsFirewall* fw);
   void buildMibForwardRow(const IPAddress& prefix, void* row);
 
   quint64 m_luid = 0;
   WindowsTunnelService m_tunnel;
-  WindowsRouteMonitor m_routeMonitor;
+  QPointer<WindowsRouteMonitor> m_routeMonitor;
+  QPointer<WindowsFirewall> m_firewall;
 };
 
 #endif  // WIREGUARDUTILSWINDOWS_H

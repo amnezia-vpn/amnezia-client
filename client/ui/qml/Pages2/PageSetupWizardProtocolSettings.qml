@@ -29,273 +29,238 @@ PageType {
         ]
     }
 
-    FlickableType {
-        anchors.fill: parent
-        contentHeight: content.height
+    BackButtonType {
+        id: backButton
 
-        Column {
-            id: content
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.topMargin: 20
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
+    }
 
-            ListView {
-                id: processedContainerListView
-                width: parent.width
-                height: contentItem.height
-                currentIndex: -1
-                clip: true
-                interactive: false
-                model: proxyContainersModel
+    ListViewType {
+        id: listView
 
-                delegate: Item {
-                    implicitWidth: processedContainerListView.width
-                    implicitHeight: (delegateContent.implicitHeight > root.height) ? delegateContent.implicitHeight : root.height
+        anchors.top: backButton.bottom
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-                    property alias port:port
+        currentIndex: -1
 
-                    ColumnLayout {
-                        id: delegateContent
+        model: proxyContainersModel
 
-                        anchors.fill: parent
-                        anchors.rightMargin: 16
-                        anchors.leftMargin: 16
+        delegate: ColumnLayout {
+            width: listView.width
 
-                        Item {
-                            id: focusItem
-                            KeyNavigation.tab: backButton
+            BaseHeaderType {
+                id: header
+
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                headerText: qsTr("Installing %1").arg(name)
+                descriptionText: description
+            }
+
+            BasicButtonType {
+                id: showDetailsButton
+
+                Layout.topMargin: 16
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                implicitHeight: 32
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.goldenApricot
+
+                text: qsTr("More detailed")
+
+                clickedFunc: function() {
+                    showDetailsDrawer.openTriggered()
+                }
+            }
+
+            DrawerType2 {
+                id: showDetailsDrawer
+                parent: root
+
+                anchors.fill: parent
+                expandedHeight: parent.height * 0.9
+                expandedStateContent: Item {
+                    implicitHeight: showDetailsDrawer.expandedHeight
+
+                    BackButtonType {
+                        id: showDetailsBackButton
+
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.topMargin: 16
+
+                        backButtonFunction: function() {
+                            showDetailsDrawer.closeTriggered()
                         }
+                    }
 
-                        BackButtonType {
-                            id: backButton
+                    ListViewType {
+                        id: showDetailsListView
 
-                            Layout.topMargin: 20
-                            Layout.rightMargin: -16
-                            Layout.leftMargin: -16
+                        anchors.top: showDetailsBackButton.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
 
-                            KeyNavigation.tab: showDetailsButton
-                        }
+                        header: ColumnLayout {
+                            width: showDetailsListView.width
 
-                        HeaderType {
-                            id: header
+                            Header2Type {
+                                id: showDetailsDrawerHeader
 
-                            Layout.fillWidth: true
+                                Layout.fillWidth: true
+                                Layout.topMargin: 16
+                                Layout.rightMargin: 16
+                                Layout.leftMargin: 16
 
-                            headerText: qsTr("Installing %1").arg(name)
-                            descriptionText: description
-                        }
-
-                        BasicButtonType {
-                            id: showDetailsButton
-
-                            Layout.topMargin: 16
-                            Layout.leftMargin: -8
-
-                            implicitHeight: 32
-
-                            defaultColor: AmneziaStyle.color.transparent
-                            hoveredColor: AmneziaStyle.color.translucentWhite
-                            pressedColor: AmneziaStyle.color.sheerWhite
-                            disabledColor: AmneziaStyle.color.mutedGray
-                            textColor: AmneziaStyle.color.goldenApricot
-
-                            text: qsTr("More detailed")
-                            KeyNavigation.tab: transportProtoSelector
-
-                            clickedFunc: function() {
-                                showDetailsDrawer.open()
+                                headerText: name
                             }
                         }
 
-                        DrawerType2 {
-                            id: showDetailsDrawer
-                            parent: root
-                            onClosed: {
-                                if (!GC.isMobile()) {
-                                    defaultActiveFocusItem.forceActiveFocus()
-                                }
+                        model: 1 // fake model to force the ListView to be created without a model
+
+                        delegate: ColumnLayout {
+                            width: showDetailsListView.width
+
+                            ParagraphTextType {
+                                Layout.fillWidth: true
+                                Layout.topMargin: 16
+                                Layout.bottomMargin: 16
+                                Layout.leftMargin: 16
+                                Layout.rightMargin: 16
+
+                                text: detailedDescription
+                                textFormat: Text.MarkdownText
                             }
 
-                            anchors.fill: parent
-                            expandedHeight: parent.height * 0.9
-                            expandedContent: Item {
-                                Connections {
-                                    target: showDetailsDrawer
-                                    enabled: !GC.isMobile()
-                                    function onOpened() {
-                                        focusItem2.forceActiveFocus()
-                                    }
-                                }
+                            Rectangle {
+                                Layout.fillHeight: true
+                                Layout.leftMargin: 16
+                                Layout.rightMargin: 16
 
-                                implicitHeight: showDetailsDrawer.expandedHeight
-
-                                Item {
-                                    id: focusItem2
-                                    KeyNavigation.tab: showDetailsBackButton
-                                    onFocusChanged: {
-                                        if (focusItem2.activeFocus) {
-                                            fl.contentY = 0
-                                        }
-                                    }
-                                }
-
-                                BackButtonType {
-                                    id: showDetailsBackButton
-
-                                    anchors.top: parent.top
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.topMargin: 16
-
-                                    KeyNavigation.tab: showDetailsCloseButton
-
-                                    backButtonFunction: function() {
-                                        showDetailsDrawer.close()
-                                    }
-                                }
-
-                                FlickableType {
-                                    id: fl
-                                    anchors.top: showDetailsBackButton.bottom
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.bottom: parent.bottom
-                                    contentHeight: {
-                                        var emptySpaceHeight = parent.height - showDetailsBackButton.implicitHeight - showDetailsBackButton.anchors.topMargin
-                                        return (showDetailsDrawerContent.height > emptySpaceHeight) ?
-                                                    showDetailsDrawerContent.height : emptySpaceHeight
-                                    }
-
-                                    ColumnLayout {
-                                        id: showDetailsDrawerContent
-
-                                        anchors.top: parent.top
-                                        anchors.left: parent.left
-                                        anchors.right: parent.right
-                                        anchors.rightMargin: 16
-                                        anchors.leftMargin: 16
-
-                                        Header2Type {
-                                            id: showDetailsDrawerHeader
-                                            Layout.fillWidth: true
-                                            Layout.topMargin: 16
-
-                                            headerText: name
-                                        }
-
-                                        ParagraphTextType {
-                                            Layout.fillWidth: true
-                                            Layout.topMargin: 16
-                                            Layout.bottomMargin: 16
-
-                                            text: detailedDescription
-                                            textFormat: Text.MarkdownText
-                                        }
-
-                                        Rectangle {
-                                            Layout.fillHeight: true
-                                            color: AmneziaStyle.color.transparent
-                                        }
-
-                                        BasicButtonType {
-                                            id: showDetailsCloseButton
-                                            Layout.fillWidth: true
-                                            Layout.bottomMargin: 32
-                                            parentFlickable: fl
-
-                                            text: qsTr("Close")
-                                            Keys.onTabPressed: lastItemTabClicked(focusItem2)
-
-											clickedFunc: function()  {
-                                                showDetailsDrawer.close()
-                                            }
-                                        }
-                                    }
-                                }
+                                color: AmneziaStyle.color.transparent
                             }
                         }
 
-                        ParagraphTextType {
-                            id: transportProtoHeader
+                        footer: ColumnLayout {
+                            width: showDetailsListView.width
 
-                            Layout.topMargin: 16
+                            BasicButtonType {
+                                id: showDetailsCloseButton
+                                Layout.fillWidth: true
+                                Layout.bottomMargin: 32
+                                Layout.leftMargin: 16
+                                Layout.rightMargin: 16
 
-                            text: qsTr("Network protocol")
-                        }
+                                text: qsTr("Close")
 
-                        TransportProtoSelector {
-                            id: transportProtoSelector
-
-                            Layout.fillWidth: true
-                            rootWidth: root.width
-
-                            KeyNavigation.tab: (port.visible && port.enabled) ? port.textField : installButton
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: port
-
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
-
-                            headerText: qsTr("Port")
-                            textField.maximumLength: 5
-                            textField.validator: IntValidator { bottom: 1; top: 65535 }
-
-                            KeyNavigation.tab: installButton
-                        }
-
-                        Rectangle {
-                            Layout.fillHeight: true
-                            color: AmneziaStyle.color.transparent
-                        }
-
-                        BasicButtonType {
-                            id: installButton
-
-                            Layout.fillWidth: true
-                            Layout.bottomMargin: 32
-
-                            text: qsTr("Install")
-
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
-
-                            clickedFunc: function() {
-                                if (!port.textField.acceptableInput &&
-                                        ContainerProps.containerTypeToString(dockerContainer) !== "torwebsite" &&
-                                        ContainerProps.containerTypeToString(dockerContainer) !== "ikev2") {
-                                    port.errorText = qsTr("The port must be in the range of 1 to 65535")
-                                    return
+                                clickedFunc: function()  {
+                                    showDetailsDrawer.closeTriggered()
                                 }
-
-                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.install(dockerContainer, port.textFieldText, transportProtoSelector.currentIndex)
                             }
-                        }
-
-                        Component.onCompleted: {
-                            var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
-
-                            if (ProtocolProps.defaultPort(defaultContainerProto) < 0) {
-                                port.visible = false
-                            } else {
-                                port.textFieldText = ProtocolProps.getPortForInstall(defaultContainerProto)
-                            }
-                            transportProtoSelector.currentIndex = ProtocolProps.defaultTransportProto(defaultContainerProto)
-
-                            port.enabled = ProtocolProps.defaultPortChangeable(defaultContainerProto)
-                            var protocolSelectorVisible = ProtocolProps.defaultTransportProtoChangeable(defaultContainerProto)
-                            transportProtoSelector.visible = protocolSelectorVisible
-                            transportProtoHeader.visible = protocolSelectorVisible
-
-                            if (port.visible && port.enabled)
-                                defaultActiveFocusItem = port.textField
-                            else
-                                defaultActiveFocusItem = focusItem
                         }
                     }
                 }
+            }
+
+            ParagraphTextType {
+                id: transportProtoHeader
+
+                Layout.topMargin: 16
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                text: qsTr("Network protocol")
+            }
+
+            TransportProtoSelector {
+                id: transportProtoSelector
+
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                rootWidth: root.width
+            }
+
+            TextFieldWithHeaderType {
+                id: port
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                headerText: qsTr("Port")
+                textField.maximumLength: 5
+                textField.validator: IntValidator { bottom: 1; top: 65535 }
+            }
+
+            Rectangle {
+                Layout.fillHeight: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                color: AmneziaStyle.color.transparent
+            }
+
+            BasicButtonType {
+                id: installButton
+
+                Layout.fillWidth: true
+                Layout.bottomMargin: 32
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                text: qsTr("Install")
+
+                clickedFunc: function() {
+                    if (!port.textField.acceptableInput &&
+                            ContainerProps.containerTypeToString(dockerContainer) !== "torwebsite" &&
+                            ContainerProps.containerTypeToString(dockerContainer) !== "ikev2") {
+                        port.errorText = qsTr("The port must be in the range of 1 to 65535")
+                        return
+                    }
+
+                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                    InstallController.install(dockerContainer, port.textField.text, transportProtoSelector.currentIndex)
+                }
+            }
+
+            Component.onCompleted: {
+                var defaultContainerProto =  ContainerProps.defaultProtocol(dockerContainer)
+
+                if (ProtocolProps.defaultPort(defaultContainerProto) < 0) {
+                    port.visible = false
+                } else {
+                    port.textField.text = ProtocolProps.getPortForInstall(defaultContainerProto)
+                }
+                transportProtoSelector.currentIndex = ProtocolProps.defaultTransportProto(defaultContainerProto)
+
+                port.enabled = ProtocolProps.defaultPortChangeable(defaultContainerProto)
+                var protocolSelectorVisible = ProtocolProps.defaultTransportProtoChangeable(defaultContainerProto)
+                transportProtoSelector.visible = protocolSelectorVisible
+                transportProtoHeader.visible = protocolSelectorVisible
             }
         }
     }

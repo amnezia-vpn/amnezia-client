@@ -239,7 +239,7 @@ ErrorCode Ikev2Protocol::start()
                                 "-CipherTransformConstants GCMAES128 "
                                 "-EncryptionMethod AES256 "
                                 "-IntegrityCheckMethod SHA256 "
-                                "-PfsGroup None "
+                                "-PfsGroup PFS2048 "
                                 "-DHGroup Group14 "
                                 "-PassThru -Force\"")
                             .arg(tunnelName());

@@ -8,6 +8,8 @@
 #include <QDateTime>
 #include <QTimer>
 
+#include "daemon/daemonerrors.h"
+#include "daemonerrors.h"
 #include "dnsutils.h"
 #include "interfaceconfig.h"
 #include "iputils.h"
@@ -51,7 +53,7 @@ class Daemon : public QObject {
    */
   void activationFailure();
   void disconnected();
-  void backendFailure();
+  void backendFailure(DaemonError reason = DaemonError::ERROR_FATAL);
 
  private:
   bool maybeUpdateResolvers(const InterfaceConfig& config);

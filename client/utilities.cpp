@@ -190,12 +190,17 @@ bool Utils::processIsRunning(const QString &fileName, const bool fullFlag)
     CloseHandle(hSnapshot);
     return false;
 
-#elif defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+#elif defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(MACOS_NE)
     return false;
 #else
     QProcess process;
+    QStringList arguments;
+    if (fullFlag) {
+        arguments << "-f";
+    }
+    arguments << fileName;
     process.setProcessChannelMode(QProcess::MergedChannels);
-    process.start("pgrep", QStringList({ fullFlag ? "-f" : "", fileName }));
+    process.start("pgrep", arguments);
     process.waitForFinished();
     if (process.exitStatus() == QProcess::NormalExit) {
         if (fullFlag) {
@@ -248,7 +253,7 @@ bool Utils::killProcessByName(const QString &name)
 #elif defined Q_OS_IOS || defined(Q_OS_ANDROID)
     return false;
 #else
-    QProcess::execute(QString("pkill %1").arg(name));
+    return QProcess::execute("pkill", { name }) == 0;
 #endif
 }
 

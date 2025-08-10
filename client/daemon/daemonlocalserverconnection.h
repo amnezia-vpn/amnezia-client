@@ -7,6 +7,8 @@
 
 #include <QObject>
 
+#include "daemonerrors.h"
+
 class QLocalSocket;
 
 class DaemonLocalServerConnection final : public QObject {
@@ -23,7 +25,7 @@ class DaemonLocalServerConnection final : public QObject {
 
   void connected(const QString& pubkey);
   void disconnected();
-  void backendFailure();
+  void backendFailure(DaemonError err);
 
   void write(const QJsonObject& obj);
 

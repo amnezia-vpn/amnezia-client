@@ -16,13 +16,6 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     BackButtonType {
         id: backButton
 
@@ -31,24 +24,25 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20
 
-        KeyNavigation.tab: switcher
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    FlickableType {
-        id: fl
+    ListViewType {
+        id: listView
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        ColumnLayout {
-            id: content
+        header: ColumnLayout {
+            width: listView.width
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            spacing: 0
-
-            HeaderType {
+            BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -60,6 +54,7 @@ PageType {
 
             SwitcherType {
                 id: switcher
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
@@ -68,7 +63,7 @@ PageType {
                 text: qsTr("Enable logs")
 
                 checked: SettingsController.isLoggingEnabled
-                //KeyNavigation.tab: openFolderButton
+                
                 onCheckedChanged: {
                     if (checked !== SettingsController.isLoggingEnabled) {
                         SettingsController.isLoggingEnabled = checked
@@ -79,15 +74,12 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
-                // id: labelWithButton2
                 Layout.fillWidth: true
                 Layout.topMargin: -8
 
                 text: qsTr("Clear logs")
                 leftImageSource: "qrc:/images/controls/trash.svg"
                 isSmallLeftImage: true
-
-                // KeyNavigation.tab: labelWithButton3
 
                 clickedFunction: function() {
                     var headerText = qsTr("Clear logs?")
@@ -99,19 +91,27 @@ PageType {
                         SettingsController.clearLogs()
                         PageController.showBusyIndicator(false)
                         PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
-                        if (!GC.isMobile()) {
-                            focusItem.forceActiveFocus()
-                        }
                     }
+
                     var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            focusItem.forceActiveFocus()
-                        }
+
                     }
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
+        }
+
+        model: logTypes
+
+        snapMode: ListView.SnapOneItem
+
+        delegate: ColumnLayout {
+            id: delegateContent
+
+            width: listView.width
+
+            enabled: isVisible
 
             ListItemTitleType {
                 Layout.fillWidth: true
@@ -119,7 +119,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Client logs")
+                text: title
             }
 
             ParagraphTextType {
@@ -129,30 +129,27 @@ PageType {
                 Layout.rightMargin: 16
 
                 color: AmneziaStyle.color.mutedGray
-                text: qsTr("AmneziaVPN logs")
+
+                text: description
             }
 
             LabelWithButtonType {
-                // id: labelWithButton2
                 Layout.fillWidth: true
                 Layout.topMargin: -8
                 Layout.bottomMargin: -8
+
+                visible: !GC.isMobile()
 
                 text: qsTr("Open logs folder")
                 leftImageSource: "qrc:/images/controls/folder-open.svg"
                 isSmallLeftImage: true
 
-                // KeyNavigation.tab: labelWithButton3
-
-                clickedFunction: function() {
-                    SettingsController.openLogsFolder()
-                }
+                clickedFunction: openLogsHandler
             }
 
             DividerType {}
 
             LabelWithButtonType {
-                // id: labelWithButton2
                 Layout.fillWidth: true
                 Layout.topMargin: -8
                 Layout.bottomMargin: -8
@@ -161,114 +158,76 @@ PageType {
                 leftImageSource: "qrc:/images/controls/save.svg"
                 isSmallLeftImage: true
 
-                // KeyNavigation.tab: labelWithButton3
-
-                clickedFunction: function() {
-                    var fileName = ""
-                    if (GC.isMobile()) {
-                        fileName = "AmneziaVPN.log"
-                    } else {
-                        fileName = SystemController.getFileName(qsTr("Save"),
-                                                                qsTr("Logs files (*.log)"),
-                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
-                                                                true,
-                                                                ".log")
-                    }
-                    if (fileName !== "") {
-                        PageController.showBusyIndicator(true)
-                        SettingsController.exportLogsFile(fileName)
-                        PageController.showBusyIndicator(false)
-                        PageController.showNotificationMessage(qsTr("Logs file saved"))
-                    }
-                }
+                clickedFunction: exportLogsHandler
             }
 
             DividerType {}
+        }
+    }
 
-            ListItemTitleType {
-                visible: !GC.isMobile()
+    // Show service logs only if this is NOT a macOS build with
+    // Network-Extension (IsMacOsNeBuild is injected from C++ at run-time)
+    property list<QtObject> logTypes: IsMacOsNeBuild ? [
+        clientLogs
+    ] : [
+        clientLogs,
+        serviceLogs
+    ]
 
-                Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+    QtObject {
+        id: clientLogs
 
-                text: qsTr("Service logs")
+        readonly property string title: qsTr("Client logs")
+        readonly property string description: qsTr("AmneziaVPN logs")
+        readonly property bool isVisible: true
+        readonly property var openLogsHandler: function() {
+            SettingsController.openLogsFolder()
+        }
+        readonly property var exportLogsHandler: function() {
+            var fileName = ""
+            if (GC.isMobile()) {
+                fileName = "AmneziaVPN.log"
+            } else {
+                fileName = SystemController.getFileName(qsTr("Save"),
+                                                        qsTr("Logs files (*.log)"),
+                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
+                                                        true,
+                                                        ".log")
             }
-
-            ParagraphTextType {
-                visible: !GC.isMobile()
-
-                Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                color: AmneziaStyle.color.mutedGray
-                text: qsTr("AmneziaVPN-service logs")
+            if (fileName !== "") {
+                PageController.showBusyIndicator(true)
+                SettingsController.exportLogsFile(fileName)
+                PageController.showBusyIndicator(false)
+                PageController.showNotificationMessage(qsTr("Logs file saved"))
             }
+        }
+    }
 
-            LabelWithButtonType {
-                // id: labelWithButton2
+    QtObject {
+        id: serviceLogs
 
-                visible: !GC.isMobile()
-
-                Layout.fillWidth: true
-                Layout.topMargin: -8
-                Layout.bottomMargin: -8
-
-                text: qsTr("Open logs folder")
-                leftImageSource: "qrc:/images/controls/folder-open.svg"
-                isSmallLeftImage: true
-
-                // KeyNavigation.tab: labelWithButton3
-
-                clickedFunction: function() {
-                    SettingsController.openServiceLogsFolder()
-                }
+        readonly property string title: qsTr("Service logs")
+        readonly property string description: qsTr("AmneziaVPN-service logs")
+        readonly property bool isVisible: !GC.isMobile() && !IsMacOsNeBuild
+        readonly property var openLogsHandler: function() {
+            SettingsController.openServiceLogsFolder()
+        }
+        readonly property var exportLogsHandler: function() {
+            var fileName = ""
+            if (GC.isMobile()) {
+                fileName = "AmneziaVPN-service.log"
+            } else {
+                fileName = SystemController.getFileName(qsTr("Save"),
+                                                        qsTr("Logs files (*.log)"),
+                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN-service",
+                                                        true,
+                                                        ".log")
             }
-
-            DividerType {
-                visible: !GC.isMobile()
-            }
-
-            LabelWithButtonType {
-                // id: labelWithButton2
-
-                visible: !GC.isMobile()
-
-                Layout.fillWidth: true
-                Layout.topMargin: -8
-                Layout.bottomMargin: -8
-
-                text: qsTr("Export logs")
-                leftImageSource: "qrc:/images/controls/save.svg"
-                isSmallLeftImage: true
-
-                // KeyNavigation.tab: labelWithButton3
-
-                clickedFunction: function() {
-                    var fileName = ""
-                    if (GC.isMobile()) {
-                        fileName = "AmneziaVPN-service.log"
-                    } else {
-                        fileName = SystemController.getFileName(qsTr("Save"),
-                                                                qsTr("Logs files (*.log)"),
-                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN-service",
-                                                                true,
-                                                                ".log")
-                    }
-                    if (fileName !== "") {
-                        PageController.showBusyIndicator(true)
-                        SettingsController.exportServiceLogsFile(fileName)
-                        PageController.showBusyIndicator(false)
-                        PageController.showNotificationMessage(qsTr("Logs file saved"))
-                    }
-                }
-            }
-
-            DividerType {
-                visible: !GC.isMobile()
+            if (fileName !== "") {
+                PageController.showBusyIndicator(true)
+                SettingsController.exportServiceLogsFile(fileName)
+                PageController.showBusyIndicator(false)
+                PageController.showNotificationMessage(qsTr("Logs file saved"))
             }
         }
     }

@@ -23,13 +23,6 @@ PageType {
 
     property var isServerFromTelegramApi: ServersModel.getDefaultServerData("isServerFromTelegramApi")
     
-    defaultActiveFocusItem: searchField.textField
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
     property bool pageEnabled
 
     Component.onCompleted: {
@@ -99,38 +92,24 @@ PageType {
 
         BackButtonType {
             id: backButton
-            KeyNavigation.tab: switcher
         }
 
-        RowLayout {
-            HeaderType {
-                enabled: root.pageEnabled
+        HeaderTypeWithSwitcher {
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
+            headerText: qsTr("Split tunneling")
 
-                headerText: qsTr("Split tunneling")
-            }
-
-            SwitcherType {
-                id: switcher
-
-                enabled: root.pageEnabled
-
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-
-                function onToggledFunc() {
-                    SitesModel.toggleSplitTunneling(this.checked)
-                    selector.text = root.routeModesModel[getRouteModesModelIndex()].name
-                }
-
+            enabled: root.pageEnabled
+            showSwitcher: true
+            switcher {
                 checked: SitesModel.isTunnelingEnabled
-                onToggled: { onToggledFunc() }
-                Keys.onEnterPressed: { onToggledFunc() }
-                Keys.onReturnPressed: { onToggledFunc() }
-
-                KeyNavigation.tab: selector
+                enabled: root.pageEnabled
+            }
+            switcherFunction: function(checked) {
+                SitesModel.toggleSplitTunneling(checked)
+                selector.text = root.routeModesModel[getRouteModesModelIndex()].name
             }
         }
 
@@ -154,18 +133,18 @@ PageType {
 
                 model: root.routeModesModel
 
-                currentIndex: getRouteModesModelIndex()
+                selectedIndex: getRouteModesModelIndex()
 
                 clickedFunction: function() {
                     selector.text = selectedText
-                    selector.close()
-                    if (SitesModel.routeMode !== root.routeModesModel[currentIndex].type) {
-                        SitesModel.routeMode = root.routeModesModel[currentIndex].type
+                    selector.closeTriggered()
+                    if (SitesModel.routeMode !== root.routeModesModel[selectedIndex].type) {
+                        SitesModel.routeMode = root.routeModesModel[selectedIndex].type
                     }
                 }
 
                 Component.onCompleted: {
-                    if (root.routeModesModel[currentIndex].type === SitesModel.routeMode) {
+                    if (root.routeModesModel[selectedIndex].type === SitesModel.routeMode) {
                         selector.text = selectedText
                     } else {
                         selector.text = root.routeModesModel[0].name
@@ -175,125 +154,77 @@ PageType {
                 Connections {
                     target: SitesModel
                     function onRouteModeChanged() {
-                        currentIndex = getRouteModesModelIndex()
+                        selectedIndex = getRouteModesModelIndex()
                     }
                 }
-            }
-
-            KeyNavigation.tab: {
-                return sites.count > 0 ?
-                            sites :
-                            searchField.textField
             }
         }
     }
 
-    FlickableType {
-        id: fl
+    ListViewType {
+        id: listView
+
         anchors.top: header.bottom
         anchors.topMargin: 16
-        contentHeight: col.implicitHeight + addSiteButton.implicitHeight + addSiteButton.anchors.bottomMargin + addSiteButton.anchors.topMargin
+        anchors.bottom: addSiteButton.top
+
+        width: parent.width
 
         enabled: root.pageEnabled
 
-        Column {
-            id: col
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            ListView {
-                id: sites
-                width: parent.width
-                height: sites.contentItem.height
-
-                model: SortFilterProxyModel {
-                    id: proxySitesModel
-                    sourceModel: SitesModel
-                    filters: [
-                        AnyOf {
-                            RegExpFilter {
-                                roleName: "url"
-                                pattern: ".*" + searchField.textField.text + ".*"
-                                caseSensitivity: Qt.CaseInsensitive
-                            }
-                            RegExpFilter {
-                                roleName: "ip"
-                                pattern: ".*" + searchField.textField.text + ".*"
-                                caseSensitivity: Qt.CaseInsensitive
-                            }
-                        }
-                    ]
-                }
-
-                clip: true
-                interactive: false
-
-                activeFocusOnTab: true
-                focus: true
-                Keys.onTabPressed: {
-                    if (currentIndex < this.count - 1) {
-                        this.incrementCurrentIndex()
-                    } else {
-                        currentIndex = 0
-                        searchField.textField.forceActiveFocus()
+        model: SortFilterProxyModel {
+            id: proxySitesModel
+            sourceModel: SitesModel
+            filters: [
+                AnyOf {
+                    RegExpFilter {
+                        roleName: "url"
+                        pattern: ".*" + searchField.textField.text + ".*"
+                        caseSensitivity: Qt.CaseInsensitive
                     }
-
-                    fl.ensureVisible(currentItem)
+                    RegExpFilter {
+                        roleName: "ip"
+                        pattern: ".*" + searchField.textField.text + ".*"
+                        caseSensitivity: Qt.CaseInsensitive
+                    }
                 }
+            ]
+        }
 
-                delegate: Item {
-                    implicitWidth: sites.width
-                    implicitHeight: delegateContent.implicitHeight
+        delegate: ColumnLayout {
+            width: listView.width
 
-                    onActiveFocusChanged: {
-                        if (activeFocus) {
+            LabelWithButtonType {
+                id: site
+                Layout.fillWidth: true
+
+                text: url
+                descriptionText: ip
+                rightImageSource: "qrc:/images/controls/trash.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
+
+                clickedFunction: function() {
+                    var headerText = qsTr("Remove ") + url + "?"
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        SitesController.removeSite(proxySitesModel.mapToSource(index))
+                        if (!GC.isMobile()) {
+                            site.rightButton.forceActiveFocus()
+                        }
+                    }
+                    var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
                             site.rightButton.forceActiveFocus()
                         }
                     }
 
-                    ColumnLayout {
-                        id: delegateContent
-
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-
-                        LabelWithButtonType {
-                            id: site
-                            Layout.fillWidth: true
-
-                            text: url
-                            descriptionText: ip
-                            rightImageSource: "qrc:/images/controls/trash.svg"
-                            rightImageColor: AmneziaStyle.color.paleGray
-
-                            clickedFunction: function() {
-                                var headerText = qsTr("Remove ") + url + "?"
-                                var yesButtonText = qsTr("Continue")
-                                var noButtonText = qsTr("Cancel")
-
-                                var yesButtonFunction = function() {
-                                    SitesController.removeSite(proxySitesModel.mapToSource(index))
-                                    if (!GC.isMobile()) {
-                                        site.rightButton.forceActiveFocus()
-                                    }
-                                }
-                                var noButtonFunction = function() {
-                                    if (!GC.isMobile()) {
-                                        site.rightButton.forceActiveFocus()
-                                    }
-                                }
-
-                                showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                            }
-                        }
-
-                        DividerType {}
-                    }
+                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
+            DividerType {}
         }
     }
 
@@ -323,14 +254,13 @@ PageType {
             Layout.fillWidth: true
             rightButtonClickedOnEnter: true
 
-            textFieldPlaceholderText: qsTr("website or IP")
+            textField.placeholderText: qsTr("website or IP")
             buttonImageSource: "qrc:/images/controls/plus.svg"
-            KeyNavigation.tab: GC.isMobile() ? focusItem : addSiteButtonImage
 
             clickedFunc: function() {
                 PageController.showBusyIndicator(true)
-                SitesController.addSite(textFieldText)
-                textFieldText = ""
+                SitesController.addSite(textField.text)
+                textField.text = ""
                 PageController.showBusyIndicator(false)
             }
         }
@@ -344,13 +274,11 @@ PageType {
             imageColor: AmneziaStyle.color.paleGray
 
             onClicked: function () {
-                moreActionsDrawer.open()
+                moreActionsDrawer.openTriggered()
             }
 
             Keys.onReturnPressed: addSiteButtonImage.clicked()
             Keys.onEnterPressed: addSiteButtonImage.clicked()
-
-            Keys.onTabPressed: lastItemTabClicked(focusItem)
         }
     }
 
@@ -360,43 +288,18 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.4375
 
-        onClosed: {
-            if (root.defaultActiveFocusItem && !GC.isMobile()) {
-                root.defaultActiveFocusItem.forceActiveFocus()
-            }
-        }
-
-        expandedContent: ColumnLayout {
+        expandedStateContent: ColumnLayout {
             id: moreActionsDrawerContent
 
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
 
-            Connections {
-                target: moreActionsDrawer
-
-                function onOpened() {
-                    focusItem1.forceActiveFocus()
-                }
-
-                function onActiveFocusChanged() {
-                    if (!GC.isMobile()) {
-                        focusItem1.forceActiveFocus()
-                    }
-                }
-            }
-
-            Item {
-                id: focusItem1
-                KeyNavigation.tab: importSitesButton.rightButton
-            }
-
             Header2Type {
                 Layout.fillWidth: true
                 Layout.margins: 16
 
-                headerText: qsTr("Import / Export Sites")
+                headerText: qsTr("Additional options")
             }
 
             LabelWithButtonType {
@@ -407,10 +310,8 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    importSitesDrawer.open()
+                    importSitesDrawer.openTriggered()
                 }
-
-                KeyNavigation.tab: exportSitesButton
             }
 
             DividerType {}
@@ -419,8 +320,6 @@ PageType {
                 id: exportSitesButton
                 Layout.fillWidth: true
                 text: qsTr("Save site list")
-
-                KeyNavigation.tab: focusItem1
 
                 clickedFunction: function() {
                     var fileName = ""
@@ -436,9 +335,37 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         SitesController.exportSites(fileName)
-                        moreActionsDrawer.close()
+                        moreActionsDrawer.closeTriggered()
                         PageController.showBusyIndicator(false)
                     }
+                }
+            }
+
+            DividerType {}
+            
+            LabelWithButtonType {
+                id: clearSitesButton
+                Layout.fillWidth: true
+
+                text: qsTr("Clear site list")
+                rightImageSource: "qrc:/images/controls/trash.svg"
+
+                clickedFunction: function() {
+                    var headerText = qsTr("Clear site list?")
+                    var descriptionText = qsTr("All sites will be removed from list.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        PageController.showBusyIndicator(true)
+                        SitesController.removeSites()
+                        PageController.showBusyIndicator(false)
+                    }
+                    var noButtonFunction = function() {
+                        
+                    }
+
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
 
@@ -452,27 +379,8 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.4375
 
-        onClosed: {
-            if (!GC.isMobile()) {
-                moreActionsDrawer.forceActiveFocus()
-            }
-        }
-
-        expandedContent: Item {
+        expandedStateContent: Item {
             implicitHeight: importSitesDrawer.expandedHeight
-
-            Connections {
-                target: importSitesDrawer
-                enabled: !GC.isMobile()
-                function onOpened() {
-                    focusItem2.forceActiveFocus()
-                }
-            }
-
-            Item {
-                id: focusItem2
-                KeyNavigation.tab: importSitesDrawerBackButton
-            }
 
             BackButtonType {
                 id: importSitesDrawerBackButton
@@ -482,27 +390,27 @@ PageType {
                 anchors.right: parent.right
                 anchors.topMargin: 16
 
-                KeyNavigation.tab: importSitesButton2
-
                 backButtonFunction: function() {
-                    importSitesDrawer.close()
+                    importSitesDrawer.closeTriggered()
+                }
+                
+                onFocusChanged: {
+                    if (this.activeFocus) {
+                        importSitesDrawerListView.positionViewAtBeginning()
+                    }
                 }
             }
 
-            FlickableType {
+            ListViewType {
+                id: importSitesDrawerListView
+
                 anchors.top: importSitesDrawerBackButton.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
 
-                contentHeight: importSitesDrawerContent.height
-
-                ColumnLayout {
-                    id: importSitesDrawerContent
-
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
+                header: ColumnLayout {
+                    width: importSitesDrawerListView.width
 
                     Header2Type {
                         Layout.fillWidth: true
@@ -510,51 +418,67 @@ PageType {
 
                         headerText: qsTr("Import a list of sites")
                     }
+                }
+
+                model: importOptions
+
+                delegate: ColumnLayout {
+                    width: importSitesDrawerListView.width
 
                     LabelWithButtonType {
-                        id: importSitesButton2
                         Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                        text: qsTr("Replace site list")
-                        KeyNavigation.tab: importSitesButton3
+                        text: title
 
                         clickedFunction: function() {
-                            var fileName = SystemController.getFileName(qsTr("Open sites file"),
-                                                                        qsTr("Sites files (*.json)"))
-                            if (fileName !== "") {
-                                importSitesDrawerContent.importSites(fileName, true)
-                            }
+                            clickedHandler()
                         }
-                    }
-
-                    DividerType {}
-
-                    LabelWithButtonType {
-                        id: importSitesButton3
-                        Layout.fillWidth: true
-                        text: qsTr("Add imported sites to existing ones")
-                        KeyNavigation.tab: focusItem2
-
-                        clickedFunction: function() {
-                            var fileName = SystemController.getFileName(qsTr("Open sites file"),
-                                                                        qsTr("Sites files (*.json)"))
-                            if (fileName !== "") {
-                                importSitesDrawerContent.importSites(fileName, false)
-                            }
-                        }
-                    }
-
-                    function importSites(fileName, replaceExistingSites) {
-                        PageController.showBusyIndicator(true)
-                        SitesController.importSites(fileName, replaceExistingSites)
-                        PageController.showBusyIndicator(false)
-                        importSitesDrawer.close()
-                        moreActionsDrawer.close()
                     }
 
                     DividerType {}
                 }
             }
         }
+    }
+
+    property list<QtObject> importOptions: [
+        replaceOption,
+        addOption,
+    ]
+
+    QtObject {
+        id: replaceOption
+
+        readonly property string title: qsTr("Replace site list")
+        readonly property var clickedHandler: function() {
+            var fileName = SystemController.getFileName(qsTr("Open sites file"),
+                                                        qsTr("Sites files (*.json)"))
+            if (fileName !== "") {
+                root.importSites(fileName, true)
+            }
+        }
+    }
+
+    QtObject {
+        id: addOption
+
+        readonly property string title: qsTr("Add imported sites to existing ones")
+        readonly property var clickedHandler: function() {
+            var fileName = SystemController.getFileName(qsTr("Open sites file"),
+                                                        qsTr("Sites files (*.json)"))
+            if (fileName !== "") {
+                root.importSites(fileName, false)
+            }
+        }
+    }
+
+    function importSites(fileName, replaceExistingSites) {
+        PageController.showBusyIndicator(true)
+        SitesController.importSites(fileName, replaceExistingSites)
+        PageController.showBusyIndicator(false)
+        importSitesDrawer.closeTriggered()
+        moreActionsDrawer.closeTriggered()
     }
 }

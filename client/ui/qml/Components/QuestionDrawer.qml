@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -20,7 +22,7 @@ DrawerType2 {
     property var yesButtonFunction
     property var noButtonFunction
 
-    expandedContent: ColumnLayout {
+    expandedStateContent: ColumnLayout {
         id: content
 
         anchors.top: parent.top
@@ -33,21 +35,13 @@ DrawerType2 {
             root.expandedHeight = content.implicitHeight + 32
         }
 
-        Connections {
-            target: root
-            enabled: !GC.isMobile()
-            function onOpened() {
-                focusItem.forceActiveFocus()
-            }
-        }
-
         Header2TextType {
             Layout.fillWidth: true
             Layout.topMargin: 16
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
-            text: headerText
+            text: root.headerText
         }
 
         ParagraphTextType {
@@ -56,12 +50,7 @@ DrawerType2 {
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
-            text: descriptionText
-        }
-
-        Item {
-            id: focusItem
-            KeyNavigation.tab: yesButton
+            text: root.descriptionText
         }
 
         BasicButtonType {
@@ -71,15 +60,13 @@ DrawerType2 {
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
-            text: yesButtonText
+            text: root.yesButtonText
 
             clickedFunc: function() {
-                if (yesButtonFunction && typeof yesButtonFunction === "function") {
-                    yesButtonFunction()
+                if (root.yesButtonFunction && typeof root.yesButtonFunction === "function") {
+                    root.yesButtonFunction()
                 }
             }
-
-            KeyNavigation.tab: noButton
         }
 
         BasicButtonType {
@@ -95,15 +82,15 @@ DrawerType2 {
             textColor: AmneziaStyle.color.paleGray
             borderWidth: 1
 
-            text: noButtonText
+            visible: root.noButtonText !== ""
+
+            text: root.noButtonText
 
             clickedFunc: function() {
-                if (noButtonFunction && typeof noButtonFunction === "function") {
-                    noButtonFunction()
+                if (root.noButtonFunction && typeof root.noButtonFunction === "function") {
+                    root.noButtonFunction()
                 }
             }
-
-            KeyNavigation.tab: focusItem
         }
     }
 }

@@ -152,21 +152,29 @@ bool RouterLinux::routeDeleteList(const QString &gw, const QStringList &ips)
     return cnt;
 }
 
+bool RouterLinux::isServiceActive(const QString &serviceName) {
+    QProcess process;
+    process.start("systemctl", { "is-active", "--quiet", serviceName });
+    process.waitForFinished();
+
+    return process.exitCode() == 0;
+}
+
 void RouterLinux::flushDns()
 {
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
 
     //check what the dns manager use
-    if (QFileInfo::exists("/usr/bin/nscd")
-        || QFileInfo::exists("/usr/sbin/nscd")
-        || QFileInfo::exists("/usr/lib/systemd/system/nscd.service"))
-    {
-        p.start("systemctl restart nscd");
-    }
-    else
-    {
-        p.start("systemctl restart systemd-resolved");
+    if (isServiceActive("nscd.service")) {
+        qDebug() << "Restarting nscd.service";
+        p.start("systemctl", { "restart", "nscd" });
+    } else if (isServiceActive("systemd-resolved.service")) {
+        qDebug() << "Restarting systemd-resolved.service";
+        p.start("systemctl", { "restart", "systemd-resolved" });
+    } else {
+        qDebug() << "No suitable DNS manager found.";
+        return;
     }
 
     p.waitForFinished();

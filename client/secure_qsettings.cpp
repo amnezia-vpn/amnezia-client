@@ -1,7 +1,7 @@
 #include "secure_qsettings.h"
 
-#include "QAead.h"
-#include "QBlockCipher.h"
+#include "../client/3rd/QSimpleCrypto/src/include/QAead.h"
+#include "../client/3rd/QSimpleCrypto/src/include/QBlockCipher.h"
 #include "utilities.h"
 #include <QDataStream>
 #include <QDebug>
@@ -14,6 +14,12 @@
 #include <QTimer>
 
 using namespace QKeychain;
+
+namespace {
+    constexpr const char *settingsKeyTag = "settingsKeyTag";
+    constexpr const char *settingsIvTag = "settingsIvTag";
+    constexpr const char *keyChainName = "AmneziaVPN-Keychain";
+}
 
 SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent)
     : QObject { parent }, m_settings(organization, application, parent), encryptedKeys({ "Servers/serversList" })
@@ -49,7 +55,7 @@ QVariant SecureQSettings::value(const QString &key, const QVariant &defaultValue
     // check if value is not encrypted, v. < 2.0.x
     retVal = m_settings.value(key);
     if (retVal.isValid()) {
-        if (retVal.userType() == QVariant::ByteArray && retVal.toByteArray().mid(0, magicString.size()) == magicString) {
+        if (retVal.userType() == QMetaType::QByteArray && retVal.toByteArray().mid(0, magicString.size()) == magicString) {
 
             if (getEncKey().isEmpty() || getEncIv().isEmpty()) {
                 qCritical() << "SecureQSettings::setValue Decryption requested, but key is empty";

@@ -16,152 +16,134 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
-    ColumnLayout {
-        id: backButtonLayout
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
         anchors.topMargin: 20
 
-        BackButtonType {
-            id: backButton
-            KeyNavigation.tab: listview
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: backButtonLayout.bottom
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        Column {
-            id: content
+        enabled: ServersModel.isProcessedServerHasWriteAccess()
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        model: WireGuardConfigModel
 
-            enabled: ServersModel.isProcessedServerHasWriteAccess()
+        delegate: ColumnLayout {
+            width: listView.width
 
-            ListView {
-                id: listview
+            property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
 
-                width: parent.width
-                height: listview.contentItem.height
+            spacing: 0
 
-                clip: true
-                interactive: false
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                model: WireGuardConfigModel
+                headerText: qsTr("WG settings")
+            }
 
-                activeFocusOnTab: true
-                onActiveFocusChanged: {
-                    if (activeFocus) {
-                        listview.itemAtIndex(0)?.focusItemId.forceActiveFocus()
+            TextFieldWithHeaderType {
+                id: vpnAddressSubnetTextField
+
+                Layout.fillWidth: true
+                Layout.topMargin: 40
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                enabled: delegateItem.isEnabled
+
+                headerText: qsTr("VPN address subnet")
+                textField.text: subnetAddress
+
+                textField.onEditingFinished: {
+                    if (textField.text !== subnetAddress) {
+                        subnetAddress = textField.text
                     }
                 }
 
-                delegate: Item {
-                    id: delegateItem
+                checkEmptyText: true
+            }
 
-                    property alias focusItemId: portTextField.textField
-                    property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
+            TextFieldWithHeaderType {
+                id: portTextField
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                    implicitWidth: listview.width
-                    implicitHeight: col.implicitHeight
+                enabled: delegateItem.isEnabled
 
-                    ColumnLayout {
-                        id: col
+                headerText: qsTr("Port")
+                textField.text: port
+                textField.maximumLength: 5
+                textField.validator: IntValidator { bottom: 1; top: 65535 }
 
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
-
-                        spacing: 0
-
-                        HeaderType {
-                            Layout.fillWidth: true
-                            headerText: qsTr("WG settings")
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: portTextField
-                            Layout.fillWidth: true
-                            Layout.topMargin: 40
-
-                            enabled: delegateItem.isEnabled
-
-                            headerText: qsTr("Port")
-                            textFieldText: port
-                            textField.maximumLength: 5
-                            textField.validator: IntValidator { bottom: 1; top: 65535 }
-
-                            KeyNavigation.tab: saveButton
-
-                            textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
-                                }
-                            }
-
-                            checkEmptyText: true
-                        }
-
-                        BasicButtonType {
-                            id: saveButton
-                            Layout.fillWidth: true
-                            Layout.topMargin: 24
-                            Layout.bottomMargin: 24
-
-                            enabled: portTextField.errorText === ""
-
-                            text: qsTr("Save")
-
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
-
-                            onClicked: function() {
-                                forceActiveFocus()
-
-                                var headerText = qsTr("Save settings?")
-                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
-                                var yesButtonText = qsTr("Continue")
-                                var noButtonText = qsTr("Cancel")
-
-                                var yesButtonFunction = function() {
-                                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                                        PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                                        return
-                                    }
-
-                                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                    InstallController.updateContainer(WireGuardConfigModel.getConfig())
-                                }
-                                var noButtonFunction = function() {
-                                    if (!GC.isMobile()) {
-                                        saveRestartButton.forceActiveFocus()
-                                    }
-                                }
-                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                            }
-
-                            Keys.onEnterPressed: saveButton.clicked()
-                            Keys.onReturnPressed: saveButton.clicked()
-                        }
+                textField.onEditingFinished: {
+                    if (textField.text !== port) {
+                        port = textField.text
                     }
                 }
+
+                checkEmptyText: true
+            }
+
+            BasicButtonType {
+                id: saveButton
+                
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.bottomMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                enabled: portTextField.errorText === "" &&
+                         vpnAddressSubnetTextField.errorText === ""
+
+                text: qsTr("Save")
+
+                onClicked: function() {
+                    forceActiveFocus()
+
+                    var headerText = qsTr("Save settings?")
+                    var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                            PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                            return
+                        }
+
+                        PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                        InstallController.updateContainer(WireGuardConfigModel.getConfig())
+                    }
+                    var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            saveButton.forceActiveFocus()
+                        }
+                    }
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+
+                Keys.onEnterPressed: saveButton.clicked()
+                Keys.onReturnPressed: saveButton.clicked()
             }
         }
     }

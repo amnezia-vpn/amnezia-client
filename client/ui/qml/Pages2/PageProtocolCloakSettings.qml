@@ -16,190 +16,191 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: listview.currentItem.trafficFromField.textField
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
-    ColumnLayout {
-        id: backButtonLayout
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
         anchors.topMargin: 20
 
-        BackButtonType {
-            id: backButton
-            KeyNavigation.tab: listview.currentItem.trafficFromField.textField
+        onActiveFocusChanged: {
+            if(backButton.enabled && backButton.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: backButtonLayout.bottom
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        Column {
-            id: content
+        property int selectedIndex: 0
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        enabled: ServersModel.isProcessedServerHasWriteAccess()
 
-            enabled: ServersModel.isProcessedServerHasWriteAccess()
+        header: ColumnLayout {
+            width: listView.width
 
-            ListView {
-                id: listview
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                width: parent.width
-                height: listview.contentItem.height
+                headerText: qsTr("Cloak settings")
+            }
+        }
 
-                clip: true
-                interactive: false
+        model: CloakConfigModel
 
-                model: CloakConfigModel
+        delegate: ColumnLayout {
+            width: listView.width
 
-                delegate: Item {
-                    implicitWidth: listview.width
-                    implicitHeight: col.implicitHeight
+            property alias trafficFromField: trafficFromField
 
-                    property alias trafficFromField: trafficFromField
+            spacing: 0
 
-                    ColumnLayout {
-                        id: col
+            TextFieldWithHeaderType {
+                id: trafficFromField
 
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                Layout.fillWidth: true
+                Layout.topMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
+                headerText: qsTr("Disguised as traffic from")
+                textField.text: site
 
-                        spacing: 0
+                textField.onEditingFinished: {
+                    if (textField.text !== site) {
+                        var tmpText = textField.text
+                        tmpText = tmpText.toLocaleLowerCase()
 
-                        HeaderType {
-                            Layout.fillWidth: true
-
-                            headerText: qsTr("Cloak settings")
+                        var indexHttps = tmpText.indexOf("https://")
+                        if (indexHttps === 0) {
+                            tmpText = textField.text.substring(8)
+                        } else {
+                            site = textField.text
                         }
+                    }
+                }
 
-                        TextFieldWithHeaderType {
-                            id: trafficFromField
+                checkEmptyText: true
+            }
 
-                            Layout.fillWidth: true
-                            Layout.topMargin: 32
+            TextFieldWithHeaderType {
+                id: portTextField
 
-                            headerText: qsTr("Disguised as traffic from")
-                            textFieldText: site
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                            textField.onEditingFinished: {
-                                if (textFieldText !== site) {
-                                    var tmpText = textFieldText
-                                    tmpText = tmpText.toLocaleLowerCase()
+                headerText: qsTr("Port")
+                textField.text: port
+                textField.maximumLength: 5
+                textField.validator: IntValidator { bottom: 1; top: 65535 }
 
-                                    var indexHttps = tmpText.indexOf("https://")
-                                    if (indexHttps === 0) {
-                                        tmpText = textFieldText.substring(8)
-                                    } else {
-                                        site = textFieldText
-                                    }
-                                }
-                            }
+                textField.onEditingFinished: {
+                    if (textField.text !== port) {
+                        port = textField.text
+                    }
+                }
 
-                            KeyNavigation.tab: portTextField.textField
-                        }
+                checkEmptyText: true
+            }
 
-                        TextFieldWithHeaderType {
-                            id: portTextField
+            DropDownType {
+                id: cipherDropDown
 
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                            headerText: qsTr("Port")
-                            textFieldText: port
-                            textField.maximumLength: 5
-                            textField.validator: IntValidator { bottom: 1; top: 65535 }
+                descriptionText: qsTr("Cipher")
+                headerText: qsTr("Cipher")
 
-                            textField.onEditingFinished: {
-                                if (textFieldText !== port) {
-                                    port = textFieldText
-                                }
-                            }
+                drawerParent: root
 
-                            KeyNavigation.tab: cipherDropDown
-                        }
+                listView: ListViewWithRadioButtonType {
+                    id: cipherListView
 
-                        DropDownType {
-                            id: cipherDropDown
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
+                    rootWidth: root.width
 
-                            descriptionText: qsTr("Cipher")
-                            headerText: qsTr("Cipher")
+                    model: ListModel {
+                        ListElement { name : "chacha20-ietf-poly1305" }
+                        ListElement { name : "xchacha20-ietf-poly1305" }
+                        ListElement { name : "aes-256-gcm" }
+                        ListElement { name : "aes-192-gcm" }
+                        ListElement { name : "aes-128-gcm" }
+                    }
 
-                            drawerParent: root
-                            KeyNavigation.tab: saveRestartButton
+                    clickedFunction: function() {
+                        cipherDropDown.text = selectedText
+                        cipher = cipherDropDown.text
+                        cipherDropDown.closeTriggered()
+                    }
 
-                            listView: ListViewWithRadioButtonType {
-                                id: cipherListView
+                    Component.onCompleted: {
+                        cipherDropDown.text = cipher
 
-                                rootWidth: root.width
-
-                                model: ListModel {
-                                    ListElement { name : "chacha20-ietf-poly1305" }
-                                    ListElement { name : "xchacha20-ietf-poly1305" }
-                                    ListElement { name : "aes-256-gcm" }
-                                    ListElement { name : "aes-192-gcm" }
-                                    ListElement { name : "aes-128-gcm" }
-                                }
-
-                                clickedFunction: function() {
-                                    cipherDropDown.text = selectedText
-                                    cipher = cipherDropDown.text
-                                    cipherDropDown.close()
-                                }
-
-                                Component.onCompleted: {
-                                    cipherDropDown.text = cipher
-
-                                    for (var i = 0; i < cipherListView.model.count; i++) {
-                                        if (cipherListView.model.get(i).name === cipherDropDown.text) {
-                                            currentIndex = i
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        BasicButtonType {
-                            id: saveRestartButton
-
-                            Layout.fillWidth: true
-                            Layout.topMargin: 24
-                            Layout.bottomMargin: 24
-
-                            text: qsTr("Save")
-                            Keys.onTabPressed: lastItemTabClicked(focusItem)
-
-                            clickedFunc: function() {
-                                forceActiveFocus()
-
-                                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                                    return
-                                }
-
-                                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                InstallController.updateContainer(CloakConfigModel.getConfig())
+                        for (var i = 0; i < cipherListView.model.count; i++) {
+                            if (cipherListView.model.get(i).name === cipherDropDown.text) {
+                                selectedIndex = i
                             }
                         }
                     }
                 }
+            }
+
+            BasicButtonType {
+                id: saveButton
+
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.bottomMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                enabled: trafficFromField.errorText === "" &&
+                         portTextField.errorText === ""
+
+                text: qsTr("Save")
+
+                clickedFunc: function() {
+                    forceActiveFocus()
+
+                    var headerText = qsTr("Save settings?")
+                    var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                            PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                            return
+                        }
+
+                        PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                        InstallController.updateContainer(CloakConfigModel.getConfig())
+                    }
+
+                    var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            saveButton.forceActiveFocus()
+                        }
+                    }
+
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+
+                Keys.onEnterPressed: saveButton.clicked()
+                Keys.onReturnPressed: saveButton.clicked()
             }
         }
     }

@@ -21,52 +21,40 @@ PageType {
 
     property var installedServicesCount
 
-    onFocusChanged: settingsContainersListView.forceActiveFocus()
-    signal lastItemTabClickedSignal()
+    SettingsContainersListView {
+        id: settingsContainersListView
 
-    FlickableType {
-        id: fl
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight
+        anchors.fill: parent
 
-        Column {
-            id: content
+        Connections {
+            target: ServersModel
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            SettingsContainersListView {
-                id: settingsContainersListView
-
-                Connections {
-                    target: ServersModel
-
-                    function onProcessedServerIndexChanged() {
-                        settingsContainersListView.updateContainersModelFilters()
-                    }
-                }
-
-                function updateContainersModelFilters() {
-                    if (ServersModel.isProcessedServerHasWriteAccess()) {
-                        proxyContainersModel.filters = ContainersModelFilters.getWriteAccessServicesListFilters()
-                    } else {
-                        proxyContainersModel.filters = ContainersModelFilters.getReadAccessServicesListFilters()
-                    }
-                    root.installedServicesCount = proxyContainersModel.count
-                }
-
-                model: SortFilterProxyModel {
-                    id: proxyContainersModel
-                    sourceModel: ContainersModel
-                    sorters: [
-                        RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
-                    ]
-                }
-
-                Component.onCompleted: updateContainersModelFilters()
+            function onProcessedServerIndexChanged() {
+                settingsContainersListView.updateContainersModelFilters()
             }
+        }
+
+        function updateContainersModelFilters() {
+            if (ServersModel.isProcessedServerHasWriteAccess()) {
+                proxyContainersModel.filters = ContainersModelFilters.getWriteAccessServicesListFilters()
+            } else {
+                proxyContainersModel.filters = ContainersModelFilters.getReadAccessServicesListFilters()
+            }
+            root.installedServicesCount = proxyContainersModel.count
+        }
+
+        model: SortFilterProxyModel {
+            id: proxyContainersModel
+            sourceModel: ContainersModel
+            sorters: [
+                RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
+            ]
+        }
+
+        Component.onCompleted: {
+            settingsContainersListView.isFocusable = true
+            settingsContainersListView.interactive = true
+            updateContainersModelFilters()
         }
     }
 }

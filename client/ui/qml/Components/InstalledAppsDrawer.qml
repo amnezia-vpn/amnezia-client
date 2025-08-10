@@ -26,7 +26,7 @@ DrawerType2 {
         id: installedAppsModel
     }
 
-    expandedContent: Item {
+    expandedStateContent: Item {
         id: container
 
         implicitHeight: expandedHeight
@@ -43,7 +43,7 @@ DrawerType2 {
             BackButtonType {
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
                 backButtonFunction: function() {
-                    root.close()
+                    root.closeTriggered()
                 }
             }
 
@@ -57,7 +57,7 @@ DrawerType2 {
                 headerText: qsTr("Choose application")
             }
 
-            ListView {
+            ListViewType {
                 id: listView
 
                 Layout.fillWidth: true
@@ -65,9 +65,6 @@ DrawerType2 {
                 Layout.topMargin: 16
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
-
-                clip: true
-                interactive: true
 
                 model: SortFilterProxyModel {
                     id: proxyInstalledAppsModel
@@ -79,47 +76,35 @@ DrawerType2 {
                     }
                 }
 
-                ScrollBar.vertical: ScrollBar {
-                    id: scrollBar
-                    policy: ScrollBar.AlwaysOn
-                }
-
                 ButtonGroup {
                     id: buttonGroup
                 }
 
-                delegate: Item {
-                    implicitWidth: root.width
-                    implicitHeight: delegateContent.implicitHeight
+                delegate: ColumnLayout {
+                    width: listView.width
 
-                    ColumnLayout {
-                        id: delegateContent
+                    RowLayout {
+                        CheckBoxType {
+                            Layout.fillWidth: true
 
-                        anchors.fill: parent
-
-                        RowLayout {
-                            CheckBoxType {
-                                Layout.fillWidth: true
-
-                                text: appName
-                                checked: isAppSelected
-                                onCheckedChanged: {
-                                    installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
-                                }
-                            }
-
-                            Image {
-                                source: "image://installedAppImage/" + appIcon
-
-                                sourceSize.width: 24
-                                sourceSize.height: 24
-
-                                Layout.rightMargin: 48
+                            text: appName
+                            checked: isAppSelected
+                            onCheckedChanged: {
+                                installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
                             }
                         }
 
-                        DividerType {}
+                        Image {
+                            source: "image://installedAppImage/" + appIcon
+
+                            sourceSize.width: 24
+                            sourceSize.height: 24
+
+                            Layout.rightMargin: 48
+                        }
                     }
+
+                    DividerType {}
                 }
             }
         }
@@ -136,7 +121,7 @@ DrawerType2 {
 
             backgroundColor: AmneziaStyle.color.slateGray
 
-            textFieldPlaceholderText: qsTr("application name")
+            textField.placeholderText: qsTr("application name")
         }
 
         BasicButtonType {
@@ -155,7 +140,7 @@ DrawerType2 {
                 PageController.showBusyIndicator(true)
                 AppSplitTunnelingController.addApps(installedAppsModel.getSelectedAppsInfo())
                 PageController.showBusyIndicator(false)
-                root.close()
+                root.closeTriggered()
             }
         }
     }

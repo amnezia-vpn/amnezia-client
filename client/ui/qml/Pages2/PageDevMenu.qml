@@ -16,87 +16,73 @@ import "../Components"
 PageType {
     id: root
 
-    defaultActiveFocusItem: focusItem
-
-    Item {
-        id: focusItem
-        KeyNavigation.tab: backButton
-    }
-
-    ColumnLayout {
-        id: backButtonLayout
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
         anchors.topMargin: 20
-
-        BackButtonType {
-            id: backButton
-            // KeyNavigation.tab: removeButton
-        }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: backButtonLayout.bottom
+    ListViewType {
+        id: listView
+        anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        ColumnLayout {
-            id: content
+        header: ColumnLayout {
+            width: listView.width
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            HeaderType {
-                id: header
-
+            BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
                 headerText: "Dev menu"
             }
+        }
+        
+        model: 1 // fake model to force the ListView to be created without a model
 
+        spacing: 16
+
+        delegate: ColumnLayout {
+            width: listView.width
 
             TextFieldWithHeaderType {
-                id: passwordTextField
-
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
-                parentFlickable: fl
 
                 headerText: qsTr("Gateway endpoint")
-                textFieldText: SettingsController.gatewayEndpoint
+                textField.text: SettingsController.gatewayEndpoint
 
-                buttonImageSource: textFieldText !== "" ? "qrc:/images/controls/refresh-cw.svg" : ""
+                buttonImageSource: textField.text !== "" ? "qrc:/images/controls/refresh-cw.svg" : ""
 
                 clickedFunc: function() {
                     SettingsController.resetGatewayEndpoint()
                 }
 
                 textField.onEditingFinished: {
-                    textFieldText = textField.text.replace(/^\s+|\s+$/g, '')
-                    if (textFieldText !== SettingsController.gatewayEndpoint) {
-                        SettingsController.gatewayEndpoint = textFieldText
+                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                    if (textField.text !== SettingsController.gatewayEndpoint) {
+                        SettingsController.gatewayEndpoint = textField.text
                     }
                 }
-
-                // KeyNavigation.tab: saveButton
             }
+        }
+
+        footer: ColumnLayout {
+            width: listView.width
 
             SwitcherType {
-                id: switcher
-
                 Layout.fillWidth: true
+                Layout.topMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
-                Layout.topMargin: 16
 
                 text: qsTr("Dev gateway environment")
                 checked: SettingsController.isDevGatewayEnv

@@ -1,13 +1,11 @@
 #include "languageModel.h"
 
-LanguageModel::LanguageModel(std::shared_ptr<Settings> settings, QObject *parent)
-    : m_settings(settings), QAbstractListModel(parent)
+LanguageModel::LanguageModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<LanguageSettings::AvailableLanguageEnum>();
     for (int i = 0; i < metaEnum.keyCount(); i++) {
-        m_availableLanguages.push_back(
-            LanguageModelData {getLocalLanguageName(static_cast<LanguageSettings::AvailableLanguageEnum>(i)),
-                              static_cast<LanguageSettings::AvailableLanguageEnum>(i) });
+        m_availableLanguages.push_back(LanguageModelData { getLocalLanguageName(static_cast<LanguageSettings::AvailableLanguageEnum>(i)),
+                                                           static_cast<LanguageSettings::AvailableLanguageEnum>(i) });
     }
 }
 
@@ -50,8 +48,7 @@ QString LanguageModel::getLocalLanguageName(const LanguageSettings::AvailableLan
     case LanguageSettings::AvailableLanguageEnum::Burmese: strLanguage = "မြန်မာဘာသာ"; break;
     case LanguageSettings::AvailableLanguageEnum::Urdu: strLanguage = "اُرْدُوْ"; break;
     case LanguageSettings::AvailableLanguageEnum::Hindi: strLanguage = "हिन्दी"; break;
-    default:
-        break;
+    default: break;
     }
 
     return strLanguage;
@@ -104,11 +101,39 @@ QString LanguageModel::getCurrentLanguageName()
     return m_availableLanguages[getCurrentLanguageIndex()].name;
 }
 
-QString LanguageModel::getCurrentSiteUrl()
+LanguageSettings::AvailableLanguageEnum LanguageModel::getSystemLanguageEnum()
+{
+    QLocale locale = QLocale::system();
+    switch (locale.language()) {
+    case QLocale::Russian: return LanguageSettings::AvailableLanguageEnum::Russian;
+    case QLocale::Chinese: return LanguageSettings::AvailableLanguageEnum::China_cn;
+    case QLocale::Ukrainian: return LanguageSettings::AvailableLanguageEnum::Ukrainian;
+    case QLocale::Persian: return LanguageSettings::AvailableLanguageEnum::Persian;
+    case QLocale::Arabic: return LanguageSettings::AvailableLanguageEnum::Arabic;
+    case QLocale::Burmese: return LanguageSettings::AvailableLanguageEnum::Burmese;
+    case QLocale::Urdu: return LanguageSettings::AvailableLanguageEnum::Urdu;
+    case QLocale::Hindi: return LanguageSettings::AvailableLanguageEnum::Hindi;
+    case QLocale::English: return LanguageSettings::AvailableLanguageEnum::English;
+    default: return LanguageSettings::AvailableLanguageEnum::English;
+    }
+}
+
+QString LanguageModel::getCurrentSiteUrl(const QString &path)
 {
     auto language = static_cast<LanguageSettings::AvailableLanguageEnum>(getCurrentLanguageIndex());
     switch (language) {
-    case LanguageSettings::AvailableLanguageEnum::Russian: return "https://storage.googleapis.com/kldscp/amnezia.org";
-    default: return "https://amnezia.org";
+    case LanguageSettings::AvailableLanguageEnum::Russian:
+        return "https://storage.googleapis.com/amnezia/amnezia.org" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
+    default: return QString("https://amnezia.org") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
+    }
+}
+
+QString LanguageModel::getCurrentDocsUrl(const QString &path)
+{
+    auto language = static_cast<LanguageSettings::AvailableLanguageEnum>(getCurrentLanguageIndex());
+    switch (language) {
+    case LanguageSettings::AvailableLanguageEnum::Russian:
+        return "https://storage.googleapis.com/amnezia/docs" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
+    default: return QString("https://docs.amnezia.org") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
     }
 }

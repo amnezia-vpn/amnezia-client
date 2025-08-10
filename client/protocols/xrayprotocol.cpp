@@ -1,17 +1,14 @@
 #include "xrayprotocol.h"
 
-#include "utilities.h"
-#include "containers/containers_defs.h"
-#include "core/networkUtilities.h"
-
 #include <QCryptographicHash>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkInterface>
 
+#include "core/networkUtilities.h"
+#include "utilities.h"
 
-XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent):
-    VpnProtocol(configuration, parent)
+XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
     readXrayConfiguration(configuration);
     m_routeGateway = NetworkUtilities::getGatewayAndIface();
@@ -22,9 +19,8 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent):
 
 XrayProtocol::~XrayProtocol()
 {
+    qDebug() << "XrayProtocol::~XrayProtocol()";
     XrayProtocol::stop();
-    QThread::msleep(200);
-    m_xrayProcess.close();
 }
 
 ErrorCode XrayProtocol::start()
@@ -34,10 +30,6 @@ ErrorCode XrayProtocol::start()
     if (!QFileInfo::exists(xrayExecPath())) {
         setLastError(ErrorCode::XrayExecutableMissing);
         return lastError();
-    }
-
-    if (Utils::processIsRunning(Utils::executable(xrayExecPath(), true))) {
-        Utils::killProcessByName(Utils::executable(xrayExecPath(), true));
     }
 
 #ifdef QT_DEBUG
@@ -51,12 +43,16 @@ ErrorCode XrayProtocol::start()
 
     QStringList args = QStringList() << "-c" << m_xrayCfgFile.fileName() << "-format=json";
 
-    qDebug().noquote() << "XrayProtocol::start()"
-                       << xrayExecPath() << args.join(" ");
+    qDebug().noquote() << "XrayProtocol::start()" << xrayExecPath() << args.join(" ");
 
     m_xrayProcess.setProcessChannelMode(QProcess::MergedChannels);
-
     m_xrayProcess.setProgram(xrayExecPath());
+
+    if (Utils::processIsRunning(Utils::executable("xray", false))) {
+        qDebug().noquote() << "kill previos xray";
+        Utils::killProcessByName(Utils::executable("xray", false));
+    }
+
     m_xrayProcess.setArguments(args);
 
     connect(&m_xrayProcess, &QProcess::readyReadStandardOutput, this, [this]() {
@@ -65,18 +61,15 @@ ErrorCode XrayProtocol::start()
 #endif
     });
 
-    connect(&m_xrayProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [this](int exitCode, QProcess::ExitStatus exitStatus) {
-        qDebug().noquote() << "XrayProtocol finished, exitCode, exitStatus" << exitCode << exitStatus;
-        setConnectionState(Vpn::ConnectionState::Disconnected);
-        if (exitStatus != QProcess::NormalExit) {
-            emit protocolError(amnezia::ErrorCode::XrayExecutableCrashed);
-            stop();
-        }
-        if (exitCode != 0) {
-            emit protocolError(amnezia::ErrorCode::InternalError);
-            stop();
-        }
-    });
+    connect(&m_xrayProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,
+            [this](int exitCode, QProcess::ExitStatus exitStatus) {
+                qDebug().noquote() << "XrayProtocol finished, exitCode, exitStatus" << exitCode << exitStatus;
+                setConnectionState(Vpn::ConnectionState::Disconnected);
+                if ((exitStatus != QProcess::NormalExit) || (exitCode != 0)) {
+                    emit protocolError(amnezia::ErrorCode::XrayExecutableCrashed);
+                    emit setConnectionState(Vpn::ConnectionState::Error);
+                }
+            });
 
     m_xrayProcess.start();
     m_xrayProcess.waitForStarted();
@@ -85,10 +78,9 @@ ErrorCode XrayProtocol::start()
         setConnectionState(Vpn::ConnectionState::Connecting);
         QThread::msleep(1000);
         return startTun2Sock();
-    }
-    else return ErrorCode::XrayExecutableMissing;
+    } else
+        return ErrorCode::XrayExecutableMissing;
 }
-
 
 ErrorCode XrayProtocol::startTun2Sock()
 {
@@ -101,71 +93,73 @@ ErrorCode XrayProtocol::startTun2Sock()
     connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::stateChanged, this,
             [&](QProcess::ProcessState newState) { qDebug() << "PrivilegedProcess stateChanged" << newState; });
 
-    connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::setConnectionState, this,
-            [&](int vpnState) {
-                qDebug() << "PrivilegedProcess setConnectionState " << vpnState;
-                if (vpnState == Vpn::ConnectionState::Connected)
-                {
-                    setConnectionState(Vpn::ConnectionState::Connecting);
-                    QList<QHostAddress> dnsAddr;
-                    dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns1).toString()));
-                    dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns2).toString()));
+    connect(m_t2sProcess.data(), &IpcProcessTun2SocksReplica::setConnectionState, this, [&](int vpnState) {
+        qDebug() << "PrivilegedProcess setConnectionState " << vpnState;
+        if (vpnState == Vpn::ConnectionState::Connected) {
+            setConnectionState(Vpn::ConnectionState::Connecting);
+            QList<QHostAddress> dnsAddr;
+
+            dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns1).toString()));
+            // We don't use secondary DNS if primary DNS is AmneziaDNS
+            if (!m_configData.value(amnezia::config_key::dns1).toString().
+                 contains(amnezia::protocols::dns::amneziaDnsIp)) {
+                dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns2).toString()));
+            }
 #ifdef Q_OS_WIN
-                    QThread::msleep(8000);
+            QThread::msleep(8000);
 #endif
 #ifdef Q_OS_MACOS
-                    QThread::msleep(5000);
-                    IpcClient::Interface()->createTun("utun22", amnezia::protocols::xray::defaultLocalAddr);
-                    IpcClient::Interface()->updateResolvers("utun22", dnsAddr);
+            QThread::msleep(5000);
+            IpcClient::Interface()->createTun("utun22", amnezia::protocols::xray::defaultLocalAddr);
+            IpcClient::Interface()->updateResolvers("utun22", dnsAddr);
 #endif
 #ifdef Q_OS_LINUX
-                    QThread::msleep(1000);
-                    IpcClient::Interface()->createTun("tun2", amnezia::protocols::xray::defaultLocalAddr);
-                    IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
+            QThread::msleep(1000);
+            IpcClient::Interface()->createTun("tun2", amnezia::protocols::xray::defaultLocalAddr);
+            IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
 #endif
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-                    // killSwitch toggle
-                    if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
-                        m_configData.insert("vpnServer", m_remoteAddress);
-                        IpcClient::Interface()->enableKillSwitch(m_configData, 0);
-                    }
+            // killSwitch toggle
+            if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
+                m_configData.insert("vpnServer", m_remoteAddress);
+                IpcClient::Interface()->enableKillSwitch(m_configData, 0);
+            }
 #endif
-                    if (m_routeMode == 0) {
-                        IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
-                        IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
-                        IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
-                    }
-                    IpcClient::Interface()->StopRoutingIpv6();
+            if (m_routeMode == Settings::RouteMode::VpnAllSites) {
+                IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
+                IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
+                IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
+            }
+            IpcClient::Interface()->StopRoutingIpv6();
 #ifdef Q_OS_WIN
-                    IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
-                    QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
-                    for (int i = 0; i < netInterfaces.size(); i++) {
-                        for (int j = 0; j < netInterfaces.at(i).addressEntries().size(); j++)
-                        {
-                            // killSwitch toggle
-                            if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
-                                if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
-                                    IpcClient::Interface()->enableKillSwitch(QJsonObject(), netInterfaces.at(i).index());
-                                }
-                                m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
-                                m_configData.insert("vpnGateway", m_vpnGateway);
-                                m_configData.insert("vpnServer", m_remoteAddress);
-                                IpcClient::Interface()->enablePeerTraffic(m_configData);
-                            }
+            IpcClient::Interface()->updateResolvers("tun2", dnsAddr);
+            QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
+            for (int i = 0; i < netInterfaces.size(); i++) {
+                for (int j = 0; j < netInterfaces.at(i).addressEntries().size(); j++) {
+                    // killSwitch toggle
+                    if (m_vpnLocalAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
+                        if (QVariant(m_configData.value(config_key::killSwitchOption).toString()).toBool()) {
+                            IpcClient::Interface()->enableKillSwitch(m_configData, netInterfaces.at(i).index());
                         }
+                        m_configData.insert("vpnAdapterIndex", netInterfaces.at(i).index());
+                        m_configData.insert("vpnGateway", m_vpnGateway);
+                        m_configData.insert("vpnServer", m_remoteAddress);
+                        IpcClient::Interface()->enablePeerTraffic(m_configData);
                     }
-#endif
-                    setConnectionState(Vpn::ConnectionState::Connected);
                 }
+            }
+#endif
+            setConnectionState(Vpn::ConnectionState::Connected);
+        }
 #if !defined(Q_OS_MACOS)
-                if (vpnState == Vpn::ConnectionState::Disconnected) {
-                    setConnectionState(Vpn::ConnectionState::Disconnected);
-                    IpcClient::Interface()->deleteTun("tun2");
-                    IpcClient::Interface()->StartRoutingIpv6();
-                    IpcClient::Interface()->clearSavedRoutes();
-                }
+        if (vpnState == Vpn::ConnectionState::Disconnected) {
+            setConnectionState(Vpn::ConnectionState::Disconnected);
+            IpcClient::Interface()->deleteTun("tun2");
+            IpcClient::Interface()->StartRoutingIpv6();
+            IpcClient::Interface()->clearSavedRoutes();
+        }
 #endif
-            });
+    });
 
     return ErrorCode::NoError;
 }
@@ -177,14 +171,14 @@ void XrayProtocol::stop()
     IpcClient::Interface()->StartRoutingIpv6();
 #endif
     qDebug() << "XrayProtocol::stop()";
-    m_xrayProcess.terminate();
+    m_xrayProcess.disconnect();
+    m_xrayProcess.kill();
+    m_xrayProcess.waitForFinished(3000);
     if (m_t2sProcess) {
         m_t2sProcess->stop();
     }
 
-#ifdef Q_OS_WIN
-    Utils::signalCtrl(m_xrayProcess.processId(), CTRL_C_EVENT);
-#endif
+    setConnectionState(Vpn::ConnectionState::Disconnected);
 }
 
 QString XrayProtocol::xrayExecPath()
@@ -207,7 +201,7 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
     m_localPort = QString(amnezia::protocols::xray::defaultLocalProxyPort).toInt();
     m_remoteHost = configuration.value(amnezia::config_key::hostName).toString();
     m_remoteAddress = NetworkUtilities::getIPAddress(m_remoteHost);
-    m_routeMode = configuration.value(amnezia::config_key::splitTunnelType).toInt();
+    m_routeMode = static_cast<Settings::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
     m_primaryDNS = configuration.value(amnezia::config_key::dns1).toString();
     m_secondaryDNS = configuration.value(amnezia::config_key::dns2).toString();
 }

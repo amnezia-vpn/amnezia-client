@@ -40,30 +40,20 @@ public slots:
 
     void onTranslationsUpdated();
 
-    ErrorCode updateProtocolConfig(const DockerContainer container, const ServerCredentials &credentials, QJsonObject &containerConfig,
-                                   QSharedPointer<ServerController> serverController = nullptr);
-
 signals:
     void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
     void disconnectFromVpn();
     void connectionStateChanged();
 
-    void connectionErrorOccurred(const QString &errorMessage);
     void connectionErrorOccurred(ErrorCode errorCode);
     void reconnectWithUpdatedContainer(const QString &message);
 
-    void noInstalledContainers();
-
     void connectButtonClicked();
     void preparingConfig();
-
-    void updateApiConfigFromGateway();
-    void updateApiConfigFromTelegram();
-    void configFromApiUpdated();
+    void prepareConfig();
 
 private:
     Vpn::ConnectionState getCurrentConnectionState();
-    bool isProtocolConfigExists(const QJsonObject &containerConfig, const DockerContainer container);
 
     void continueConnection();
 

@@ -6,27 +6,42 @@
 
 #include "containers/containers_defs.h"
 
-namespace AwgConstant {
+namespace AwgConstant
+{
     const int messageInitiationSize = 148;
     const int messageResponseSize = 92;
+    const int messageCookieReplySize = 64;
+    const int messageTransportSize = 32;
 }
 
 struct AwgConfig
 {
     AwgConfig(const QJsonObject &jsonConfig);
 
+    QString subnetAddress;
     QString port;
 
     QString clientMtu;
     QString clientJunkPacketCount;
     QString clientJunkPacketMinSize;
     QString clientJunkPacketMaxSize;
+    QString clientSpecialJunk1;
+    QString clientSpecialJunk2;
+    QString clientSpecialJunk3;
+    QString clientSpecialJunk4;
+    QString clientSpecialJunk5;
+    QString clientControlledJunk1;
+    QString clientControlledJunk2;
+    QString clientControlledJunk3;
+    QString clientSpecialHandshakeTimeout;
 
     QString serverJunkPacketCount;
     QString serverJunkPacketMinSize;
     QString serverJunkPacketMaxSize;
     QString serverInitPacketJunkSize;
     QString serverResponsePacketJunkSize;
+    QString serverCookieReplyPacketJunkSize;
+    QString serverTransportPacketJunkSize;
     QString serverInitPacketMagicHeader;
     QString serverResponsePacketMagicHeader;
     QString serverUnderloadPacketMagicHeader;
@@ -34,7 +49,6 @@ struct AwgConfig
 
     bool hasEqualServerSettings(const AwgConfig &other) const;
     bool hasEqualClientSettings(const AwgConfig &other) const;
-
 };
 
 class AwgConfigModel : public QAbstractListModel
@@ -43,22 +57,35 @@ class AwgConfigModel : public QAbstractListModel
 
 public:
     enum Roles {
-        PortRole = Qt::UserRole + 1,
+        SubnetAddressRole = Qt::UserRole + 1,
+        PortRole,
 
         ClientMtuRole,
         ClientJunkPacketCountRole,
         ClientJunkPacketMinSizeRole,
         ClientJunkPacketMaxSizeRole,
+        ClientSpecialJunk1Role,
+        ClientSpecialJunk2Role,
+        ClientSpecialJunk3Role,
+        ClientSpecialJunk4Role,
+        ClientSpecialJunk5Role,
+        ClientControlledJunk1Role,
+        ClientControlledJunk2Role,
+        ClientControlledJunk3Role,
+        ClientSpecialHandshakeTimeoutRole,
 
         ServerJunkPacketCountRole,
         ServerJunkPacketMinSizeRole,
         ServerJunkPacketMaxSizeRole,
         ServerInitPacketJunkSizeRole,
         ServerResponsePacketJunkSizeRole,
+        ServerCookieReplyPacketJunkSizeRole,
+        ServerTransportPacketJunkSizeRole,
+
         ServerInitPacketMagicHeaderRole,
         ServerResponsePacketMagicHeaderRole,
         ServerUnderloadPacketMagicHeaderRole,
-        ServerTransportPacketMagicHeaderRole
+        ServerTransportPacketMagicHeaderRole,
     };
 
     explicit AwgConfigModel(QObject *parent = nullptr);
@@ -73,7 +100,7 @@ public slots:
     QJsonObject getConfig();
 
     bool isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4);
-    bool isPacketSizeEqual(const int s1, const int s2);
+    bool isPacketSizeEqual(const int s1, const int s2/*, const int s3, const int s4*/);
 
     bool isServerSettingsEqual();
 
