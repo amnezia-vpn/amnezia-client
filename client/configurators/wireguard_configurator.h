@@ -1,6 +1,7 @@
 #ifndef WIREGUARD_CONFIGURATOR_H
 #define WIREGUARD_CONFIGURATOR_H
 
+#include <QHostAddress>
 #include <QObject>
 #include <QProcessEnvironment>
 
@@ -12,8 +13,8 @@ class WireguardConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    WireguardConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, bool isAwg,
-                          QObject *parent = nullptr);
+    WireguardConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
+                          bool isAwg, QObject *parent = nullptr);
 
     struct ConnectionData
     {
@@ -26,15 +27,18 @@ public:
         QString port;
     };
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                         ErrorCode &errorCode);
+    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
+                         const QJsonObject &containerConfig, ErrorCode &errorCode);
 
-    QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig, QString &protocolConfigString);
-    QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig, QString &protocolConfigString);
+    QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                           QString &protocolConfigString);
+    QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                            QString &protocolConfigString);
 
     static ConnectionData genClientKeys();
 
 private:
+    QList<QHostAddress> getIpsFromConf(const QString &input);
     ConnectionData prepareWireguardConfig(const ServerCredentials &credentials, DockerContainer container,
                                           const QJsonObject &containerConfig, ErrorCode &errorCode);
 

@@ -29,7 +29,7 @@ Rectangle {
         cursorShape: Qt.PointingHandCursor
 
         onClicked: function() {
-            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl() + "/premium")
+            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl("premium"))
         }
     }
 
@@ -54,7 +54,7 @@ Rectangle {
             Layout.rightMargin: 10
             Layout.leftMargin: 10
 
-            text: qsTr("Amnezia Premium - for access to any website")
+            text: qsTr("Amnezia Premium - for access to all websites and online resources")
             color: AmneziaStyle.color.pearlGray
 
             lineHeight: 18

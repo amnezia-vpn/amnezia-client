@@ -25,47 +25,52 @@ PageType {
         }
     }
 
-    ColumnLayout {
-        id: backButtonLayout
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
         anchors.topMargin: 20
-
-        BackButtonType {
-            id: backButton
+        
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: backButtonLayout.bottom
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        ColumnLayout {
-            id: content
+        header: ColumnLayout {
+            width: listView.width
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            spacing: 0
-
-            HeaderType {
+            BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 headerText: qsTr("Tor website settings")
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+
+        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser after migrate to 6.9
+            width: listView.width
 
             LabelWithButtonType {
                 id: websiteName
+
                 Layout.fillWidth: true
                 Layout.topMargin: 32
+                Layout.bottomMargin: 24
 
                 text: qsTr("Website address")
                 descriptionText: {
@@ -83,15 +88,16 @@ PageType {
                 clickedFunction: function() {
                     GC.copyToClipBoard(descriptionText)
                     PageController.showNotificationMessage(qsTr("Copied"))
-                    if (!GC.isMobile()) {
-                        this.rightButton.forceActiveFocus()
-                    }
                 }
             }
+        }
+
+        footer: ColumnLayout {
+            width: listView.width
 
             ParagraphTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 40
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

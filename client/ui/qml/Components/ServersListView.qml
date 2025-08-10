@@ -15,7 +15,7 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-ListView {
+ListViewType {
     id: root
 
     property int selectedIndex: ServersModel.defaultIndex
@@ -28,19 +28,12 @@ ListView {
 
     model: ServersModel
 
-    ScrollBar.vertical: ScrollBarType {}
-
-    property bool isFocusable: true
-
     Connections {
         target: ServersModel
         function onDefaultServerIndexChanged(serverIndex) {
             root.selectedIndex = serverIndex
         }
     }
-
-    clip: true
-    reuseItems: true
 
     delegate: Item {
         id: menuContentDelegate
@@ -110,7 +103,24 @@ ListView {
 
                     onClicked: function() {
                         ServersModel.processedIndex = index
-                        PageController.goToPage(PageEnum.PageSettingsServerInfo)
+
+                        if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
+                            if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
+                                PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
+                            } else {
+                                PageController.showBusyIndicator(true)
+                                let result = ApiSettingsController.getAccountInfo(false)
+                                PageController.showBusyIndicator(false)
+                                if (!result) {
+                                    return
+                                }
+
+                                PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+                            }
+                        } else {
+                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                        }
+
                         drawer.closeTriggered()
                     }
                 }

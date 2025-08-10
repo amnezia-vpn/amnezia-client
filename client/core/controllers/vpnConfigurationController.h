@@ -12,7 +12,8 @@ class VpnConfigurationsController : public QObject
 {
     Q_OBJECT
 public:
-    explicit VpnConfigurationsController(const std::shared_ptr<Settings> &settings, QSharedPointer<ServerController> serverController, QObject *parent = nullptr);
+    explicit VpnConfigurationsController(const std::shared_ptr<Settings> &settings, QSharedPointer<ServerController> serverController,
+                                         QObject *parent = nullptr);
 
 public slots:
     ErrorCode createProtocolConfigForContainer(const ServerCredentials &credentials, const DockerContainer container,
@@ -21,7 +22,7 @@ public slots:
                                          const DockerContainer container, const QJsonObject &containerConfig, const Proto protocol,
                                          QString &protocolConfigString);
     QJsonObject createVpnConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
-                                       const QJsonObject &containerConfig, const DockerContainer container, ErrorCode &errorCode);
+                                       const QJsonObject &containerConfig, const DockerContainer container);
 
     static void updateContainerConfigAfterInstallation(const DockerContainer container, QJsonObject &containerConfig, const QString &stdOut);
 signals:

@@ -17,6 +17,8 @@
 #include "leakdetector.h"
 #include "logger.h"
 
+#include "killswitch.h"
+
 constexpr const int WG_TUN_PROC_TIMEOUT = 5000;
 constexpr const char* WG_RUNTIME_DIR = "/var/run/amneziawg";
 
@@ -119,6 +121,12 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     if (!config.m_responsePacketJunkSize.isEmpty()) {
         out << "s2=" << config.m_responsePacketJunkSize << "\n";
     }
+    if (!config.m_cookieReplyPacketJunkSize.isEmpty()) {
+        out << "s3=" << config.m_cookieReplyPacketJunkSize << "\n";
+    }
+    if (!config.m_transportPacketJunkSize.isEmpty()) {
+        out << "s4=" << config.m_transportPacketJunkSize << "\n";
+    }
     if (!config.m_initPacketMagicHeader.isEmpty()) {
         out << "h1=" << config.m_initPacketMagicHeader << "\n";
     }
@@ -132,13 +140,26 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
         out << "h4=" << config.m_transportPacketMagicHeader << "\n";
     }
 
+    for (const QString& key : config.m_specialJunk.keys()) {
+        out << key.toLower() << "=" << config.m_specialJunk.value(key) << "\n";
+    }
+    for (const QString& key : config.m_controlledJunk.keys()) {
+        out << key.toLower() << "=" << config.m_controlledJunk.value(key) << "\n";
+    }
+    if (!config.m_specialHandshakeTimeout.isEmpty()) {
+        out << "itime=" << config.m_specialHandshakeTimeout << "\n";
+    }
+
     int err = uapiErrno(uapiCommand(message));
     if (err != 0) {
         logger.error() << "Interface configuration failed:" << strerror(err);
     } else {
         if (config.m_killSwitchEnabled) {
             FirewallParams params { };
-            params.dnsServers.append(config.m_dnsServer);
+            params.dnsServers.append(config.m_primaryDnsServer);
+            if (!config.m_secondaryDnsServer.isEmpty()) {
+                params.dnsServers.append(config.m_secondaryDnsServer);
+            }
             if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
                 params.blockAll = true;
                 if (config.m_excludedAddresses.size()) {
@@ -182,7 +203,7 @@ bool WireguardUtilsLinux::deleteInterface() {
     QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
 
     // double-check + ensure our firewall is installed and enabled
-    LinuxFirewall::uninstall();
+    KillSwitch::instance()->disableKillSwitch();
     return true;
 }
 

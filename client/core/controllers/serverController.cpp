@@ -138,7 +138,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
 
     if (overwriteMode == libssh::ScpOverwriteMode::ScpOverwriteExisting) {
         e = runScript(credentials,
-                      replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(path),
+                      replaceVars(QStringLiteral("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName, path),
                                   genVarsForScript(credentials, container)),
                       cbReadStd, cbReadStd);
 
@@ -146,7 +146,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
             return e;
     } else if (overwriteMode == libssh::ScpOverwriteMode::ScpAppendToExisting) {
         e = runScript(credentials,
-                      replaceVars(QString("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName).arg(tmpFileName),
+                      replaceVars(QStringLiteral("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName, tmpFileName),
                                   genVarsForScript(credentials, container)),
                       cbReadStd, cbReadStd);
 
@@ -154,7 +154,7 @@ ErrorCode ServerController::uploadTextFileToContainer(DockerContainer container,
             return e;
 
         e = runScript(credentials,
-                      replaceVars(QString("sudo docker exec -i $CONTAINER_NAME sh -c \"cat %1 >> %2\"").arg(tmpFileName).arg(path),
+                      replaceVars(QStringLiteral("sudo docker exec -i $CONTAINER_NAME sh -c \"cat %1 >> %2\"").arg(tmpFileName, path),
                                   genVarsForScript(credentials, container)),
                       cbReadStd, cbReadStd);
 
@@ -177,7 +177,7 @@ QByteArray ServerController::getTextFileFromContainer(DockerContainer container,
 
     errorCode = ErrorCode::NoError;
 
-    QString script = QString("sudo docker exec -i %1 sh -c \"xxd -p \'%2\'\"").arg(ContainerProps::containerToString(container)).arg(path);
+    QString script = QStringLiteral("sudo docker exec -i %1 sh -c \"xxd -p '%2'\"").arg(ContainerProps::containerToString(container), path);
 
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
@@ -349,7 +349,7 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
         if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
              != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
             || (oldProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort)
-             != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
+                != newProtoConfig.value(config_key::port).toString(protocols::awg::defaultPort))
             || (oldProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount)
                 != newProtoConfig.value(config_key::junkPacketCount).toString(protocols::awg::defaultJunkPacketCount))
             || (oldProtoConfig.value(config_key::junkPacketMinSize).toString(protocols::awg::defaultJunkPacketMinSize)
@@ -366,8 +366,13 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
                 != newProtoConfig.value(config_key::responsePacketMagicHeader).toString(protocols::awg::defaultResponsePacketMagicHeader))
             || (oldProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader)
                 != newProtoConfig.value(config_key::underloadPacketMagicHeader).toString(protocols::awg::defaultUnderloadPacketMagicHeader))
-            || (oldProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader)
-                != newProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader)))
+            || (oldProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader))
+                    != newProtoConfig.value(config_key::transportPacketMagicHeader).toString(protocols::awg::defaultTransportPacketMagicHeader))
+            // || (oldProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize)
+            //     != newProtoConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize))
+            // || (oldProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize)
+            //     != newProtoConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize))
+
             return true;
     }
 
@@ -375,12 +380,19 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
         if ((oldProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress)
              != newProtoConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress))
             || (oldProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)
-            != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)))
+                != newProtoConfig.value(config_key::port).toString(protocols::wireguard::defaultPort)))
             return true;
     }
 
     if (container == DockerContainer::Socks5Proxy) {
         return true;
+    }
+
+    if (container == DockerContainer::Xray) {
+        if (oldProtoConfig.value(config_key::port).toString(protocols::xray::defaultPort)
+            != newProtoConfig.value(config_key::port).toString(protocols::xray::defaultPort)) {
+            return true;
+        }
     }
 
     return false;
@@ -439,15 +451,24 @@ ErrorCode ServerController::buildContainerWorker(const ServerCredentials &creden
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
+    auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
 
-    errorCode =
+    ErrorCode error =
             runScript(credentials,
                       replaceVars(amnezia::scriptData(SharedScriptType::build_container), genVarsForScript(credentials, container, config)),
-                      cbReadStdOut);
-    if (errorCode)
-        return errorCode;
+                      cbReadStdOut, cbReadStdErr);
 
-    return errorCode;
+    if (stdOut.contains("doesn't work on cgroups v2"))
+        return ErrorCode::ServerDockerOnCgroupsV2;
+    if (stdOut.contains("cgroup mountpoint does not exist"))
+        return ErrorCode::ServerCgroupMountpoint;
+    if (stdOut.contains("have reached") && stdOut.contains("pull rate limit"))
+        return ErrorCode::DockerPullRateLimit;
+
+    return error;
 }
 
 ErrorCode ServerController::runContainerWorker(const ServerCredentials &credentials, DockerContainer container, QJsonObject &config)
@@ -625,6 +646,9 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     vars.append({ { "$UNDERLOAD_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::underloadPacketMagicHeader).toString() } });
     vars.append({ { "$TRANSPORT_PACKET_MAGIC_HEADER", amneziaWireguarConfig.value(config_key::transportPacketMagicHeader).toString() } });
 
+    vars.append({ { "$COOKIE_REPLY_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::cookieReplyPacketJunkSize).toString() } });
+    vars.append({ { "$TRANSPORT_PACKET_JUNK_SIZE", amneziaWireguarConfig.value(config_key::transportPacketJunkSize).toString() } });
+
     // Socks5 proxy vars
     vars.append({ { "$SOCKS5_PROXY_PORT", socks5ProxyConfig.value(config_key::port).toString(protocols::socks5Proxy::defaultPort) } });
     auto username = socks5ProxyConfig.value(config_key::userName).toString();
@@ -709,7 +733,7 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
     QString transportProto = containerConfig.value(config_key::transport_proto).toString(defaultTransportProto);
 
     // TODO reimplement with netstat
-    QString script = QString("which lsof &>/dev/null || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);
+    QString script = QString("which lsof > /dev/null 2>&1 || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);
     for (auto &port : fixedPorts) {
         script = script.append("|:%1").arg(port);
     }
@@ -757,10 +781,6 @@ ErrorCode ServerController::isServerPortBusy(const ServerCredentials &credential
 
 ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, DockerContainer container)
 {
-    if (credentials.userName == "root") {
-        return ErrorCode::NoError;
-    }
-
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
@@ -774,8 +794,16 @@ ErrorCode ServerController::isUserInSudo(const ServerCredentials &credentials, D
     const QString scriptData = amnezia::scriptData(SharedScriptType::check_user_in_sudo);
     ErrorCode error = runScript(credentials, replaceVars(scriptData, genVarsForScript(credentials)), cbReadStdOut, cbReadStdErr);
 
-    if (!stdOut.contains("sudo"))
+    if (credentials.userName != "root" && stdOut.contains("sudo:") && !stdOut.contains("uname:") && stdOut.contains("not found"))
+        return ErrorCode::ServerSudoPackageIsNotPreinstalled;
+    if (credentials.userName != "root" && !stdOut.contains("sudo") && !stdOut.contains("wheel"))
         return ErrorCode::ServerUserNotInSudo;
+    if (stdOut.contains("can't cd to") || stdOut.contains("Permission denied") || stdOut.contains("No such file or directory"))
+        return ErrorCode::ServerUserDirectoryNotAccessible;
+    if (stdOut.contains("sudoers") || stdOut.contains("is not allowed to run sudo on"))
+        return ErrorCode::ServerUserNotAllowedInSudoers;
+    if (stdOut.contains("password is required"))
+        return ErrorCode::ServerUserPasswordRequired;
 
     return error;
 }
@@ -807,7 +835,7 @@ ErrorCode ServerController::isServerDpkgBusy(const ServerCredentials &credential
 
             if (stdOut.contains("Packet manager not found"))
                 return ErrorCode::ServerPacketManagerError;
-            if (stdOut.contains("fuser not installed"))
+            if (stdOut.contains("fuser not installed") || stdOut.contains("cat not installed"))
                 return ErrorCode::NoError;
 
             if (stdOut.isEmpty()) {

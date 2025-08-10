@@ -31,7 +31,7 @@ PageType {
             id: backButton
         }
 
-        HeaderType {
+        BaseHeaderType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
@@ -40,24 +40,19 @@ PageType {
         }
     }
 
-    ListView {
+    ListViewType {
         id: servers
         objectName: "servers"
 
         width: parent.width
         anchors.top: header.bottom
         anchors.topMargin: 16
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
 
-        height: 500
-
-        property bool isFocusable: true
 
         model: ServersModel
-
-        clip: true
-        reuseItems: true
 
         delegate: Item {
             implicitWidth: servers.width
@@ -93,7 +88,19 @@ PageType {
 
                     clickedFunction: function() {
                         ServersModel.processedIndex = index
-                        PageController.goToPage(PageEnum.PageSettingsServerInfo)
+
+                        if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
+                            PageController.showBusyIndicator(true)
+                            let result = ApiSettingsController.getAccountInfo(false)
+                            PageController.showBusyIndicator(false)
+                            if (!result) {
+                                return
+                            }
+
+                            PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+                        } else {
+                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                        }
                     }
                 }
 

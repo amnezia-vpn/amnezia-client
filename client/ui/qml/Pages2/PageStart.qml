@@ -132,27 +132,22 @@ PageType {
             PageController.showNotificationMessage(message)
         }
 
-        function onInstallServerFromApiFinished(message) {
-            PageController.showBusyIndicator(false)
-            if (!ConnectionController.isConnected) {
-                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersModel.processedIndex = ServersModel.defaultIndex
+        function onRemoveProcessedServerFinished(finishedMessage) {
+            if (!ServersModel.getServersCount()) {
+                PageController.goToPageHome()
+            } else {
+                PageController.goToStartPage()
+                PageController.goToPage(PageEnum.PageSettingsServersList)
             }
-
-            PageController.goToPageHome()
-            PageController.showNotificationMessage(message)
+            PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onChangeApiCountryFinished(message) {
-            PageController.showBusyIndicator(false)
+        function onNoInstalledContainers() {
+            PageController.setTriggeredByConnectButton(true)
 
-            PageController.goToPageHome()
-            PageController.showNotificationMessage(message)
-        }
-
-        function onReloadServerFromApiFinished(message) {
-            PageController.goToPageHome()
-            PageController.showNotificationMessage(message)
+            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
+            InstallController.setShouldCreateServer(false)
+            PageController.goToPage(PageEnum.PageSetupWizardEasy)
         }
     }
 
@@ -164,14 +159,6 @@ PageType {
         function onReconnectWithUpdatedContainer(message) {
             PageController.showNotificationMessage(message)
             PageController.closePage()
-        }
-
-        function onNoInstalledContainers() {
-            PageController.setTriggeredByConnectButton(true)
-
-            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
-            InstallController.setShouldCreateServer(false)
-            PageController.goToPage(PageEnum.PageSetupWizardEasy)
         }
     }
 
@@ -211,6 +198,38 @@ PageType {
                                    "disabled after 14 days, and all log files will be deleted.")
                 PageController.showNotificationMessage(message)
             }
+        }
+    }
+
+    Connections {
+        target: ApiSettingsController
+
+        function onErrorOccurred(error) {
+            PageController.showErrorMessage(error)
+        }
+    }
+
+    Connections {
+        target: ApiConfigsController
+
+        function onInstallServerFromApiFinished(message) {
+            if (!ConnectionController.isConnected) {
+                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                ServersModel.processedIndex = ServersModel.defaultIndex
+            }
+
+            PageController.goToPageHome()
+            PageController.showNotificationMessage(message)
+        }
+
+        function onChangeApiCountryFinished(message) {
+            PageController.goToPageHome()
+            PageController.showNotificationMessage(message)
+        }
+
+        function onReloadServerFromApiFinished(message) {
+            PageController.goToPageHome()
+            PageController.showNotificationMessage(message)
         }
     }
 

@@ -23,9 +23,15 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    ListView {
+    ListViewType {
         id: listView
 
         anchors.top: backButton.bottom
@@ -33,14 +39,10 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
 
-        property bool isFocusable: true
-
-        ScrollBar.vertical: ScrollBarType {}
-
         header: ColumnLayout {
             width: listView.width
 
-            HeaderType {
+            BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -101,8 +103,7 @@ PageType {
         }
 
         model: logTypes
-        clip: true
-        reuseItems: true
+
         snapMode: ListView.SnapOneItem
 
         delegate: ColumnLayout {
@@ -164,7 +165,11 @@ PageType {
         }
     }
 
-    property list<QtObject> logTypes: [
+    // Show service logs only if this is NOT a macOS build with
+    // Network-Extension (IsMacOsNeBuild is injected from C++ at run-time)
+    property list<QtObject> logTypes: IsMacOsNeBuild ? [
+        clientLogs
+    ] : [
         clientLogs,
         serviceLogs
     ]
@@ -203,7 +208,7 @@ PageType {
 
         readonly property string title: qsTr("Service logs")
         readonly property string description: qsTr("AmneziaVPN-service logs")
-        readonly property bool isVisible: !GC.isMobile()
+        readonly property bool isVisible: !GC.isMobile() && !IsMacOsNeBuild
         readonly property var openLogsHandler: function() {
             SettingsController.openServiceLogsFolder()
         }

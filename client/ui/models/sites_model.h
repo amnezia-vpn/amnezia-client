@@ -28,6 +28,7 @@ public slots:
     bool addSite(const QString &hostname, const QString &ip);
     void addSites(const QMap<QString, QString> &sites, bool replaceExisting);
     void removeSite(QModelIndex index);
+    void removeSites();
 
     int getRouteMode();
     void setRouteMode(int routeMode);

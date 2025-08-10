@@ -14,7 +14,7 @@
     #include "platforms/android/android_controller.h"
 #endif
 
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include "platforms/ios/ios_controller.h"
     #include <CoreFoundation/CoreFoundation.h>
 #endif
@@ -58,7 +58,9 @@ void SystemController::saveFile(const QString &fileName, const QString &data)
     const auto url = fi.absoluteDir().absolutePath();
 #endif
 
+#ifndef MACOS_NE
     QDesktopServices::openUrl(url);
+#endif
 #endif
 }
 

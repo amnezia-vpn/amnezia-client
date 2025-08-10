@@ -19,6 +19,7 @@ public slots:
     void addSite(QString hostname);
     void removeSite(int index);
 
+    void removeSites();
     void importSites(const QString &fileName, bool replaceExisting);
     void exportSites(const QString &fileName);
 

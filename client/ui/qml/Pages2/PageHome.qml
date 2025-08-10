@@ -33,6 +33,31 @@ PageType {
         }
     }
 
+    Connections {
+
+        target: ApiPremV1MigrationController
+
+        function onMigrationFinished() {
+            apiPremV1MigrationDrawer.closeTriggered()
+
+            var headerText = qsTr("You've successfully switched to the new Amnezia Premium subscription!")
+            var descriptionText = qsTr("Old keys will no longer work. Please use your new subscription key to connect. \nThank you for staying with us!")
+            var yesButtonText = qsTr("Continue")
+            var noButtonText = ""
+
+            var yesButtonFunction = function() {
+            }
+            var noButtonFunction = function() {
+            }
+
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
+
+        function onShowMigrationDrawer() {
+            apiPremV1MigrationDrawer.openTriggered()
+        }
+    }
+
     Item {
         objectName: "homeColumnItem"
 
@@ -76,8 +101,8 @@ PageType {
                 visible: isLoggingEnabled ? true : false
                 text: qsTr("Logging enabled")
 
-                Keys.onEnterPressed: loggingButton.clicked()
-                Keys.onReturnPressed: loggingButton.clicked()
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
 
                 onClicked: {
                     PageController.goToPage(PageEnum.PageSettingsLogging)
@@ -122,8 +147,8 @@ PageType {
                 leftImageColor: ""
                 rightImageSource: "qrc:/images/controls/chevron-down.svg"
 
-                Keys.onEnterPressed: splitTunnelingButton.clicked()
-                Keys.onReturnPressed: splitTunnelingButton.clicked()
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
 
                 onClicked: {
                     homeSplitTunnelingDrawer.openTriggered()
@@ -251,8 +276,8 @@ PageType {
                         topPadding: 4
                         bottomPadding: 3
 
-                        Keys.onEnterPressed: collapsedButtonChevron.clicked()
-                        Keys.onReturnPressed: collapsedButtonChevron.clicked()
+                        Keys.onEnterPressed: this.clicked()
+                        Keys.onReturnPressed: this.clicked()
 
                         onClicked: {
                             if (drawer.isCollapsedStateActive()) {
@@ -295,9 +320,28 @@ PageType {
 
                         rightImageSource: hoverEnabled ? "qrc:/images/controls/chevron-down.svg" : ""
 
+                        Keys.onEnterPressed: this.clicked()
+                        Keys.onReturnPressed: this.clicked()
+
                         onClicked: {
                             ServersModel.processedIndex = ServersModel.defaultIndex
-                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
+
+                            if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
+                                if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
+                                    PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
+                                } else {
+                                    PageController.showBusyIndicator(true)
+                                    let result = ApiSettingsController.getAccountInfo(false)
+                                    PageController.showBusyIndicator(false)
+                                    if (!result) {
+                                        return
+                                    }
+
+                                    PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+                                }
+                            } else {
+                                PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                            }
                         }
                     }
                 }
@@ -412,5 +456,10 @@ PageType {
                 }
             }
         }
+    }
+
+    ApiPremV1MigrationDrawer {
+        id: apiPremV1MigrationDrawer
+        anchors.fill: parent
     }
 }

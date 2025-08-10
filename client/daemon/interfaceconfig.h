@@ -6,6 +6,7 @@
 #define INTERFACECONFIG_H
 
 #include <QList>
+#include <QMap>
 #include <QString>
 
 #include "ipaddress.h"
@@ -31,12 +32,14 @@ class InterfaceConfig {
   QString m_serverIpv4AddrIn;
   QString m_serverPskKey;
   QString m_serverIpv6AddrIn;
-  QString m_dnsServer;
+  QString m_primaryDnsServer;
+  QString m_secondaryDnsServer;
   int m_serverPort = 0;
   int m_deviceMTU = 1420;
   QList<IPAddress> m_allowedIPAddressRanges;
   QStringList m_excludedAddresses;
   QStringList m_vpnDisabledApps;
+  QStringList m_allowedDnsServers;
   bool m_killSwitchEnabled;
 #if defined(MZ_ANDROID) || defined(MZ_IOS)
   QString m_installationId;
@@ -47,10 +50,15 @@ class InterfaceConfig {
   QString m_junkPacketMaxSize;
   QString m_initPacketJunkSize;
   QString m_responsePacketJunkSize;
+  QString m_cookieReplyPacketJunkSize;
+  QString m_transportPacketJunkSize;
   QString m_initPacketMagicHeader;
   QString m_responsePacketMagicHeader;
   QString m_underloadPacketMagicHeader;
   QString m_transportPacketMagicHeader;
+  QMap<QString, QString> m_specialJunk;
+  QMap<QString, QString> m_controlledJunk;
+  QString m_specialHandshakeTimeout;
 
   QJsonObject toJson() const;
   QString toWgConf(

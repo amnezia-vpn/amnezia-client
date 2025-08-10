@@ -1,4 +1,5 @@
 import HevSocks5Tunnel
+import NetworkExtension
 
 public enum Socks5Tunnel {
 

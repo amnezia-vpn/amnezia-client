@@ -8,7 +8,7 @@
 #include <QTemporaryFile>
 #include <QThread>
 #include <qtimer.h>
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
     #include <QGuiApplication>
 #else
     #include <QApplication>
@@ -24,7 +24,7 @@ SshConfigurator::SshConfigurator(std::shared_ptr<Settings> settings, const QShar
 
 QString SshConfigurator::convertOpenSShKey(const QString &key)
 {
-#ifndef Q_OS_IOS
+#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
 
@@ -67,9 +67,10 @@ QString SshConfigurator::convertOpenSShKey(const QString &key)
 #endif
 }
 
+// DEAD CODE.
 void SshConfigurator::openSshTerminal(const ServerCredentials &credentials)
 {
-#ifndef Q_OS_IOS
+#if !defined(Q_OS_IOS) && !defined(MACOS_NE)
     QProcess *p = new QProcess();
     p->setProcessChannelMode(QProcess::SeparateChannels);
 
@@ -101,7 +102,7 @@ QProcessEnvironment SshConfigurator::prepareEnv()
     pathEnvVar.clear();
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\cygwin;");
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "\\openvpn;");
-#elif defined(Q_OS_MACX)
+#elif defined(Q_OS_MACX) && !defined(MACOS_NE)
     pathEnvVar.prepend(QDir::toNativeSeparators(QApplication::applicationDirPath()) + "/Contents/MacOS");
 #endif
 
