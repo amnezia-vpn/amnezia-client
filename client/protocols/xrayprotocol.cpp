@@ -33,7 +33,7 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
     m_t2sProcess = IpcClient::InterfaceTun2Socks();
-    m_defaultIface = NetworkUtilities::getDefaultIface();
+    m_ifaceIndex = NetworkUtilities::getDefaultIface().index();
 }
 
 XrayProtocol::~XrayProtocol()
@@ -188,14 +188,14 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
 void XrayProtocol::sockCallback(uintptr_t fd)
 {
 #ifdef Q_OS_DARWIN
-    if (int idx = m_defaultIface.index(); idx > 0)
+    if (m_ifaceIndex > 0)
     {
-        setsockopt(fd, IPPROTO_IP, IP_BOUND_IF, &idx, sizeof(idx));
-        setsockopt(fd, IPPROTO_IPV6, IPV6_BOUND_IF, &idx, sizeof(idx));
+        setsockopt(fd, IPPROTO_IP, IP_BOUND_IF, &m_ifaceIndex, sizeof(m_ifaceIndex));
+        setsockopt(fd, IPPROTO_IPV6, IPV6_BOUND_IF, &m_ifaceIndex, sizeof(m_ifaceIndex));
     }
 #endif
 #ifdef Q_OS_WIN
-    if (DWORD idx = m_defaultIface.index(); idx > 0) {
+    if (DWORD idx = m_ifaceIndex; idx > 0) {
         setsockopt(fd, IPPROTO_IPV6, IPV6_UNICAST_IF, reinterpret_cast<char *>(&idx), sizeof(idx));
         idx = htonl(idx); // IP_UNICAST_IF expects index in network byte order
         setsockopt(fd, IPPROTO_IP, IP_UNICAST_IF, reinterpret_cast<char *>(&idx), sizeof(idx));
