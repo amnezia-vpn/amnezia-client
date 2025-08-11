@@ -900,6 +900,52 @@ void IosController::restorePurchases(std::function<void(bool success,
     }];
 }
 
+void IosController::fetchProducts(const QStringList &productIds,
+                                  std::function<void(const QList<QVariantMap> &products,
+                                                     const QStringList &invalidIds,
+                                                     const QString &errorString)> &&callback)
+{
+    StoreKitController *controller = [StoreKitController sharedInstance];
+    NSMutableSet<NSString *> *ids = [NSMutableSet setWithCapacity:productIds.size()];
+    for (const auto &pid : productIds) {
+        [ids addObject:pid.toNSString()];
+    }
+    __block auto cb = std::move(callback);
+
+    [controller fetchProductsWithIdentifiers:ids
+                                  completion:^(NSArray<SKProduct *> * _Nonnull products,
+                                               NSArray<NSString *> * _Nonnull invalidIdentifiers,
+                                               NSError * _Nullable error) {
+        QList<QVariantMap> outProducts;
+        for (SKProduct *p in products) {
+            QVariantMap m;
+            m["productId"] = QString::fromUtf8(p.productIdentifier.UTF8String);
+            m["title"] = QString::fromUtf8(p.localizedTitle.UTF8String);
+            m["description"] = QString::fromUtf8(p.localizedDescription.UTF8String);
+            // Price and currency
+            QString price = QString::fromUtf8(p.price.stringValue.UTF8String);
+            NSString *currencyCode = [p.priceLocale objectForKey:NSLocaleCurrencyCode];
+            m["price"] = price;
+            m["currencyCode"] = currencyCode ? QString::fromUtf8(currencyCode.UTF8String) : QString();
+            outProducts.push_back(m);
+        }
+
+        QStringList invalid;
+        for (NSString *inv in invalidIdentifiers) {
+            invalid.push_back(QString::fromUtf8(inv.UTF8String));
+        }
+
+        QString err;
+        if (error) {
+            err = QString::fromUtf8(error.localizedDescription.UTF8String);
+        }
+
+        if (cb) {
+            cb(outProducts, invalid, err);
+        }
+    }];
+}
+
 void IosController::requestInetAccess() {
     NSURL *url = [NSURL URLWithString:@"http://captive.apple.com/generate_204"];
     if (!url) {

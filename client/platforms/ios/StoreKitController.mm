@@ -11,6 +11,9 @@
                                                        NSString *_Nullable productId,
                                                        NSError *_Nullable error);
 @property (nonatomic, copy) void (^restoreCompletion)(BOOL success, NSError *_Nullable error);
+@property (nonatomic, copy) void (^productsFetchCompletion)(NSArray<SKProduct *> *products,
+                                                            NSArray<NSString *> *invalidIdentifiers,
+                                                            NSError *_Nullable error);
 @property (nonatomic, strong) SKProductsRequest *productsRequest;
 @end
 
@@ -58,24 +61,44 @@
     [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
 }
 
+- (void)fetchProductsWithIdentifiers:(NSSet<NSString *> *)productIdentifiers
+                          completion:(void (^)(NSArray<SKProduct *> *products,
+                                               NSArray<NSString *> *invalidIdentifiers,
+                                               NSError *_Nullable error))completion
+{
+    self.productsFetchCompletion = completion;
+    self.productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:productIdentifiers];
+    self.productsRequest.delegate = self;
+    [self.productsRequest start];
+}
+
 #pragma mark - SKProductsRequestDelegate
 
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response
 {
-    SKProduct *product = response.products.firstObject;
-    if (!product) {
-        if (self.purchaseCompletion) {
+    if (self.purchaseCompletion) {
+        SKProduct *product = response.products.firstObject;
+        if (!product) {
             NSError *error = [NSError errorWithDomain:@"StoreKitController"
                                                  code:0
                                              userInfo:@{ NSLocalizedDescriptionKey : @"Product not found" }];
             self.purchaseCompletion(NO, nil, nil, error);
             self.purchaseCompletion = nil;
+            self.productsRequest = nil;
+            return;
         }
+        SKPayment *payment = [SKPayment paymentWithProduct:product];
+        [[SKPaymentQueue defaultQueue] addPayment:payment];
+        self.productsRequest = nil;
         return;
     }
-    SKPayment *payment = [SKPayment paymentWithProduct:product];
-    [[SKPaymentQueue defaultQueue] addPayment:payment];
-    self.productsRequest = nil;
+
+    if (self.productsFetchCompletion) {
+        self.productsFetchCompletion(response.products, response.invalidProductIdentifiers, nil);
+        self.productsFetchCompletion = nil;
+        self.productsRequest = nil;
+        return;
+    }
 }
 
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error
@@ -83,6 +106,10 @@
     if (self.purchaseCompletion) {
         self.purchaseCompletion(NO, nil, nil, error);
         self.purchaseCompletion = nil;
+    }
+    if (self.productsFetchCompletion) {
+        self.productsFetchCompletion(@[], @[], error);
+        self.productsFetchCompletion = nil;
     }
     self.productsRequest = nil;
 }

@@ -6,6 +6,7 @@
 #define STOREKITCONTROLLER_H
 
 #import <Foundation/Foundation.h>
+#import <StoreKit/StoreKit.h>
 
 @interface StoreKitController : NSObject
 
@@ -18,6 +19,12 @@
                                   NSError *_Nullable error))completion;
 
 - (void)restorePurchasesWithCompletion:(void (^)(BOOL success, NSError *_Nullable error))completion;
+
+// Fetch product information for a set of identifiers without initiating a purchase
+- (void)fetchProductsWithIdentifiers:(NSSet<NSString *> *)productIdentifiers
+                          completion:(void (^)(NSArray<SKProduct *> *products,
+                                               NSArray<NSString *> *invalidIdentifiers,
+                                               NSError *_Nullable error))completion;
 
 @end
 

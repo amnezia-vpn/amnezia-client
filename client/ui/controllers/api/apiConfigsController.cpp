@@ -342,6 +342,36 @@ void ApiConfigsController::copyVpnKeyToClipboard()
 
 bool ApiConfigsController::fillAvailableServices()
 {
+    // iOS: fetch and log available IAP products (requires known identifiers)
+#ifdef Q_OS_IOS
+    {
+        const QStringList productIds = {
+            QStringLiteral("7e09f1f163e9463bb6d3213e6e9e8ad9"),
+            QStringLiteral("c358c8fc0b314f49bb0d0215e1bb6821")
+
+            // Add more product identifiers here as needed
+        };
+        IosController::Instance()->fetchProducts(productIds,
+            [](const QList<QVariantMap> &products,
+               const QStringList &invalidIds,
+               const QString &errorString) {
+                if (!errorString.isEmpty()) {
+                    qDebug() << "IAP fetch error:" << errorString;
+                    return;
+                }
+                for (const auto &p : products) {
+                    qDebug().nospace() << "IAP product id=" << p.value("productId").toString()
+                                       << ", title=" << p.value("title").toString()
+                                       << ", price=" << p.value("price").toString()
+                                       << " " << p.value("currencyCode").toString();
+                }
+                if (!invalidIds.isEmpty()) {
+                    qDebug() << "Invalid IAP IDs:" << invalidIds;
+                }
+            });
+    }
+#endif
+
     QJsonObject apiPayload;
     apiPayload[configKey::osVersion] = QSysInfo::productType();
 
