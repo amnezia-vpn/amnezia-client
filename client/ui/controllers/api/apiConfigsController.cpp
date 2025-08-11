@@ -12,6 +12,8 @@
 #include "ui/controllers/systemController.h"
 #include "version.h"
 
+#include "platforms/ios/ios_controller.h"
+
 namespace
 {
     namespace configKey
@@ -163,7 +165,7 @@ namespace
             auto clientProtocolConfig =
                     QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
 
-            //TODO looks like this block can be removed after v1 configs EOL
+            // TODO looks like this block can be removed after v1 configs EOL
 
             serverProtocolConfig[config_key::junkPacketCount] = clientProtocolConfig.value(config_key::junkPacketCount);
             serverProtocolConfig[config_key::junkPacketMinSize] = clientProtocolConfig.value(config_key::junkPacketMinSize);
@@ -221,6 +223,26 @@ namespace
 
         serverConfig[configKey::apiConfig] = apiConfig;
 
+        return ErrorCode::NoError;
+    }
+
+    ErrorCode processPurchase(QString &transactionId)
+    {
+
+#ifdef Q_OS_IOS
+        ErrorCode errorCode = ErrorCode::NoError;
+        IosController::Instance()->purchaseProduct(
+                "7e09f1f163e9463bb6d3213e6e9e8ad9",
+                [&transactionId, &errorCode](bool ok, const QString &txId, const QString &prodId, const QString &err) {
+                    if (ok) {
+                        qDebug() << "Purchased" << prodId << txId;
+                        transactionId = txId;
+                    } else {
+                        qDebug() << "Error" << err;
+                        errorCode = ErrorCode::InternalError;
+                    }
+                });
+#endif
         return ErrorCode::NoError;
     }
 }
@@ -363,8 +385,22 @@ bool ApiConfigsController::importServiceFromGateway()
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
 
+    ErrorCode errorCode;
     QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
+
+#ifdef Q_OS_IOS
+    QString transactionId;
+    errorCode = processPurchase(transactionId);
+    if (errorCode != ErrorCode::NoError) {
+        QJsonObject authData;
+        authData[apiDefs::key::apiKey] = transactionId;
+        apiPayload[configKey::authData] = authData;
+
+        errorCode = executeRequest(QString("%1v1/app_store_config"), apiPayload, responseBody);
+    }
+#else
+    errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
+#endif
 
     QJsonObject serverConfig;
     if (errorCode == ErrorCode::NoError) {
@@ -378,6 +414,12 @@ bool ApiConfigsController::importServiceFromGateway()
         apiConfig.insert(configKey::userCountryCode, m_apiServicesModel->getCountryCode());
         apiConfig.insert(configKey::serviceType, m_apiServicesModel->getSelectedServiceType());
         apiConfig.insert(configKey::serviceProtocol, m_apiServicesModel->getSelectedServiceProtocol());
+
+#ifdef Q_OS_IOS
+        QJsonObject authData;
+        authData[apiDefs::key::apiKey] = transactionId;
+        serverConfig[configKey::authData] = authData;
+#endif
 
         serverConfig.insert(configKey::apiConfig, apiConfig);
 

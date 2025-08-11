@@ -132,7 +132,7 @@ PageType {
 
         clickedFunc: function() {
             var endpoint = ApiServicesModel.getStoreEndpoint()
-            if (endpoint !== undefined && endpoint !== "") {
+            if (endpoint !== undefined && endpoint !== "" && Qt.platform.os !== "ios") {
                 Qt.openUrlExternally(endpoint)
                 PageController.closePage()
                 PageController.closePage()
