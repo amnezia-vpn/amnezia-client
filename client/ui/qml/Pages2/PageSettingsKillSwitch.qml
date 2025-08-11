@@ -64,12 +64,15 @@ PageType {
 
                 enabled: SettingsController.isKillSwitchEnabled && !ConnectionController.isConnected
                 checked: !SettingsController.strictKillSwitchEnabled
+                checkable: false
 
                 text: qsTr("Soft KillSwitch")
                 descriptionText: qsTr("Internet access is blocked if the VPN disconnects unexpectedly")
 
                 onClicked: function() {
-                    SettingsController.strictKillSwitchEnabled = false
+                    if (SettingsController.strictKillSwitchEnabled) {
+                        SettingsController.strictKillSwitchEnabled = false
+                    }
                 }
 
                 Keys.onEnterPressed: this.clicked()
@@ -88,11 +91,16 @@ PageType {
                 enabled: false
                 // enabled: SettingsController.isKillSwitchEnabled && !ConnectionController.isConnected
                 checked: SettingsController.strictKillSwitchEnabled
+                checkable: false
 
                 text: qsTr("Strict KillSwitch")
                 descriptionText: qsTr("Internet connection is blocked even when VPN is turned off manually or hasn't started")
 
                 onClicked: function() {
+                    if (SettingsController.strictKillSwitchEnabled) {
+                        return
+                    }
+
                     var headerText = qsTr("Just a little heads-up")
                     var descriptionText = qsTr("If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.")
                     var yesButtonText = qsTr("Continue")
