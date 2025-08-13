@@ -87,9 +87,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: false
-                enabled: false
-                // enabled: SettingsController.isKillSwitchEnabled && !ConnectionController.isConnected
+                enabled: SettingsController.isKillSwitchEnabled && !ConnectionController.isConnected
                 checked: SettingsController.strictKillSwitchEnabled
                 checkable: false
 
