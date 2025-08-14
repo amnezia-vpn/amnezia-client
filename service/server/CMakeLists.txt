@@ -31,15 +31,6 @@ elseif(LINUX)
     set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/linux/x86_64")
 endif()
 
-if(AMNEZIA_XRAY_DYNAMIC_LIB)
-    add_custom_command(TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${AMNEZIA_XRAY_DYNAMIC_LIB}
-        $<TARGET_FILE_DIR:${PROJECT}>)
-endif()
-
-
-
 set(QSIMPLECRYPTO_DIR ${CMAKE_CURRENT_LIST_DIR}/../../client/3rd/QSimpleCrypto/src)
 
 
@@ -413,6 +404,13 @@ elseif(LINUX)
     set(DEPLOY_PLATFORM_PATH "linux/client")
 elseif(APPLE AND NOT IOS)
     set(DEPLOY_PLATFORM_PATH "macos")
+endif()
+
+if(AMNEZIA_XRAY_DYNAMIC_LIB)
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${AMNEZIA_XRAY_DYNAMIC_LIB}
+        $<TARGET_FILE_DIR:${PROJECT}>)
 endif()
 
 add_custom_command(
