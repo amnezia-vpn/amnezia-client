@@ -529,10 +529,20 @@ ErrorCode ClientManagementModel::renameClient(const int row, const QString &clie
     return error;
 }
 
-ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContainer container, const ServerCredentials &credentials,
+ErrorCode ClientManagementModel::revokeClient(const QString name, const DockerContainer container, const ServerCredentials &credentials,
                                               const int serverIndex, const QSharedPointer<ServerController> &serverController)
 {
     ErrorCode errorCode = ErrorCode::NoError;
+
+    int row = 0;
+    for (int i = 0; i < rowCount(); i++) {
+        auto client_i = m_clientsTable.at(i).toObject();
+        auto client_data = client_i.value(configKey::userData).toObject();
+        QString clientName = client_data.value(configKey::clientName).toString();
+        if (clientName == name)
+            row = i;
+    }
+
     auto client = m_clientsTable.at(row).toObject();
     QString clientId = client.value(configKey::clientId).toString();
 

@@ -29,16 +29,6 @@ PageType {
         Xray
     }
 
-    signal revokeConfig(int index)
-    onRevokeConfig: function(index) {
-        PageController.showBusyIndicator(true)
-        ExportController.revokeConfig(index,
-                                      ContainersModel.getProcessedContainerIndex(),
-                                      ServersModel.getProcessedServerCredentials())
-        PageController.showBusyIndicator(false)
-        PageController.showNotificationMessage(qsTr("Config revoked"))
-    }
-
     Connections {
         target: ExportController
 
@@ -805,7 +795,12 @@ PageType {
 
                                         var yesButtonFunction = function() {
                                             clientInfoDrawer.closeTriggered()
-                                            root.revokeConfig(index)
+                                            PageController.showBusyIndicator(true)
+                                            ExportController.revokeConfig(clientName,
+                                                                          ContainersModel.getProcessedContainerIndex(),
+                                                                          ServersModel.getProcessedServerCredentials())
+                                            PageController.showBusyIndicator(false)
+                                            PageController.showNotificationMessage(qsTr("Config revoked"))
                                         }
                                         var noButtonFunction = function() {
                                         }
