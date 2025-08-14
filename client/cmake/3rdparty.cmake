@@ -10,7 +10,6 @@ include(${CLIENT_ROOT_DIR}/3rd/qrcodegen/qrcodegen.cmake)
 
 set(LIBSSH_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/")
 set(OPENSSL_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/")
-set(AMNEZIA_XRAY_ROOT_DIR "${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/amnezia_xray")
 
 set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
 
@@ -21,17 +20,11 @@ if(WIN32)
         set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/windows/x86_64")
         set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libssl.lib")
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
-        set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64/amnezia_xray.lib")
-        set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64")
-        set(AMNEZIA_XRAY_DYNAMIC_LIB "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64/amnezia_xray.dll")
     else()
         set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/windows/x86/ssh.lib")
         set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/windows/x86")
         set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libssl.lib")
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
-        set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86/amnezia_xray.lib")
-        set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86")
-        set(AMNEZIA_XRAY_DYNAMIC_LIB "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64/amnezia_xray.dll")
     endif()
 elseif(APPLE AND NOT IOS)
     if(MACOS_NE)
@@ -45,10 +38,7 @@ elseif(APPLE AND NOT IOS)
     endif()
     set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/macos/include")
     set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libssl.a")
-    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libcrypto.a")
-    set(LIBS ${LIBS} "resolv")
-    set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/darwin/x86_64/amnezia_xray.a")
-    set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/darwin/x86_64")
+    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libcrypto.a")    
 elseif(IOS)
     set(LIBSSH_INCLUDE_DIR "${LIBSSH_ROOT_DIR}/ios/arm64")
     set(LIBSSH_LIB_PATH "${LIBSSH_ROOT_DIR}/ios/arm64/libssh.a")
@@ -71,15 +61,6 @@ elseif(LINUX)
     set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/linux/include")
     set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/linux/x86_64/libssl.a")
     set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/x86_64/libcrypto.a")
-    set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/linux/x86_64/amnezia_xray.a")
-    set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/linux/x86_64")
-endif()
-    
-if (AMNEZIA_XRAY_DYNAMIC_LIB)
-    add_custom_command(TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${AMNEZIA_XRAY_DYNAMIC_LIB}
-        $<TARGET_FILE_DIR:${PROJECT}>)
 endif()
 
 file(COPY ${OPENSSL_LIB_SSL_PATH} ${OPENSSL_LIB_CRYPTO_PATH}
@@ -97,8 +78,6 @@ set(LIBS ${LIBS}
     ${OPENSSL_LIB_CRYPTO_PATH}
 )
 
-set(LIBS ${LIBS} ${AMNEZIA_XRAY_LIB_PATH})
-
 add_compile_definitions(_WINSOCKAPI_)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
@@ -115,5 +94,4 @@ include_directories(
     ${CLIENT_ROOT_DIR}/3rd/qtkeychain/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/libssh/include
-    ${AMNEZIA_XRAY_INCLUDE_DIR}
 )

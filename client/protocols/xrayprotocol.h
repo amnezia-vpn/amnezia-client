@@ -7,8 +7,6 @@
 #include "vpnprotocol.h"
 #include "settings.h"
 
-#include <cstdint>
-
 class XrayProtocol : public VpnProtocol
 {
 public:
@@ -26,16 +24,6 @@ protected:
     QJsonObject m_xrayConfig;
 
 private:
-    static void ctxSockCallback(uintptr_t fd, void* ctx) {
-        reinterpret_cast<XrayProtocol*>(ctx)->sockCallback(fd);
-    }
-    static void ctxLogHandler(char* str, void* ctx) {
-        reinterpret_cast<XrayProtocol*>(ctx)->logHandler(str);
-    }
-
-    void sockCallback(uintptr_t fd);
-    void logHandler(char* str);
-
     int m_localPort;
     QString m_remoteHost;
     QString m_remoteAddress;
@@ -47,7 +35,6 @@ private:
     QSharedPointer<IpcProcessTun2SocksReplica> m_t2sProcess;
 #endif
     QTemporaryFile m_xrayCfgFile;
-    int m_ifaceIndex;
 };
 
 #endif // XRAYPROTOCOL_H

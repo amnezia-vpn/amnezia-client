@@ -1,7 +1,6 @@
 #include "xrayprotocol.h"
 
-#include "amnezia_application.h"
-#include "amnezia_xray.h"
+#include "core/ipcclient.h"
 #include "utilities.h"
 #include "core/networkUtilities.h"
 
@@ -9,31 +8,15 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkInterface>
-#ifdef Q_OS_DARWIN
-    #include <arpa/inet.h>
-    #include <cerrno>
-    #include <cstddef>
-    #include <cstdint>
-    #include <cstring>
-    #include <ifaddrs.h>
-    #include <net/if.h>
-    #include <netinet/in.h>
-    #include <netinet/ip.h>
-    #include <sys/socket.h>
-#endif
-#ifdef Q_OS_WIN
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
-#endif
+#include <QJsonDocument>
 
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
     readXrayConfiguration(configuration);
-    m_routeGateway = NetworkUtilities::getGatewayAndIface();
+    m_routeGateway = NetworkUtilities::getGatewayAndIface().first;
     m_vpnGateway = amnezia::protocols::xray::defaultLocalAddr;
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
     m_t2sProcess = IpcClient::InterfaceTun2Socks();
-    m_ifaceIndex = NetworkUtilities::getDefaultIface().index();
 }
 
 XrayProtocol::~XrayProtocol()
@@ -45,19 +28,8 @@ XrayProtocol::~XrayProtocol()
 ErrorCode XrayProtocol::start()
 {
     qDebug() << "XrayProtocol::start()";
-    if (0 != amnezia_xray_setsockcallback(&XrayProtocol::ctxSockCallback, this))
-    {
-        return ErrorCode::InternalError;
-    }
-    auto cfg = QJsonDocument(m_xrayConfig).toJson().toStdString();
-    if (auto err = amnezia_xray_configure(cfg.data()); err != 0) {
-        return ErrorCode::InternalError;
-    }
-    if (auto err = amnezia_xray_start(); err != 0) {
-        return ErrorCode::InternalError;
-    }
 
-    amnezia_xray_setloghandler(&XrayProtocol::ctxLogHandler, this);
+    IpcClient::Interface()->xrayStart(QJsonDocument(m_xrayConfig).toJson());
 
     setConnectionState(Vpn::ConnectionState::Connecting);
     return startTun2Sock();
@@ -159,7 +131,7 @@ void XrayProtocol::stop()
 #endif
     qDebug() << "XrayProtocol::stop()";
 
-    amnezia_xray_stop();
+    IpcClient::Interface()->xrayStop();
 
     if (m_t2sProcess) {
         m_t2sProcess->stop();
@@ -183,29 +155,4 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
     m_routeMode = static_cast<Settings::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
     m_primaryDNS = configuration.value(amnezia::config_key::dns1).toString();
     m_secondaryDNS = configuration.value(amnezia::config_key::dns2).toString();
-}
-
-void XrayProtocol::sockCallback(uintptr_t fd)
-{
-#ifdef Q_OS_DARWIN
-    if (m_ifaceIndex > 0)
-    {
-        setsockopt(fd, IPPROTO_IP, IP_BOUND_IF, &m_ifaceIndex, sizeof(m_ifaceIndex));
-        setsockopt(fd, IPPROTO_IPV6, IPV6_BOUND_IF, &m_ifaceIndex, sizeof(m_ifaceIndex));
-    }
-#endif
-#ifdef Q_OS_WIN
-    if (DWORD idx = m_ifaceIndex; idx > 0) {
-        setsockopt(fd, IPPROTO_IPV6, IPV6_UNICAST_IF, reinterpret_cast<char *>(&idx), sizeof(idx));
-        idx = htonl(idx); // IP_UNICAST_IF expects index in network byte order
-        setsockopt(fd, IPPROTO_IP, IP_UNICAST_IF, reinterpret_cast<char *>(&idx), sizeof(idx));
-    }
-#endif
-}
-
-void XrayProtocol::logHandler(char* str)
-{
-    QMetaObject::invokeMethod(amnApp, [str = QString(str)] () {
-        qDebug() << str;
-    }, Qt::QueuedConnection);
 }

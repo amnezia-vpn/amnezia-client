@@ -15,8 +15,8 @@
 
 #include "logger.h"
 #include "router.h"
-
 #include "killswitch.h"
+#include "xray.h"
 
 #ifdef Q_OS_WIN
     #include "tapcontroller_win.h"
@@ -239,4 +239,14 @@ bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)
 bool IpcServer::refreshKillSwitch(bool enabled)
 {
     return KillSwitch::instance()->refresh(enabled);
+}
+
+void IpcServer::xrayStart(const QString& cfg)
+{
+    return Xray::getInstance().startXray(cfg);
+}
+
+void IpcServer::xrayStop()
+{
+    return Xray::getInstance().stopXray();
 }

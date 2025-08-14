@@ -249,12 +249,14 @@ DWORD GetAdaptersAddressesWrapper(const ULONG Family,
 }
 #endif
 
-QString NetworkUtilities::getGatewayAndIface()
+QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 {
 #ifdef Q_OS_WIN
     constexpr int BUFF_LEN = 100;
     char buff[BUFF_LEN] = {'\0'};
-    QString result;
+
+    QString resGateway;
+    int resIndex = -1;
 
     PIP_ADAPTER_ADDRESSES pAdapterAddresses = nullptr;
     DWORD dwRetVal =
@@ -277,7 +279,9 @@ QString NetworkUtilities::getGatewayAndIface()
                 struct sockaddr_in addr;
                 if (inet_pton(AF_INET, buff, &addr.sin_addr) == 1) {
                     qDebug() <<  "this is true v4 !";
-                    result = gw;
+                    
+                    resGateway = gw;
+                    resIndex = pCurAddress->IfIndex;
                 }
             }
         }
@@ -285,7 +289,7 @@ QString NetworkUtilities::getGatewayAndIface()
     }
 
     free(pAdapterAddresses);
-    return result;
+    return { resGateway, QNetworkInterface::interfaceFromIndex(resIndex) };
 #endif
 #ifdef Q_OS_LINUX
     constexpr int BUFFER_SIZE = 100;
@@ -302,7 +306,7 @@ QString NetworkUtilities::getGatewayAndIface()
 
     if ((sock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE)) < 0) {
         perror("socket failed");
-        return "";
+        return {};
     }
 
     memset(msgbuf, 0, sizeof(msgbuf));
@@ -326,7 +330,7 @@ QString NetworkUtilities::getGatewayAndIface()
     /* send msg */
     if (send(sock, nlmsg, nlmsg->nlmsg_len, 0) < 0) {
         perror("send failed");
-        return "";
+        return {};
     }
 
     /* receive response */
@@ -335,7 +339,7 @@ QString NetworkUtilities::getGatewayAndIface()
         received_bytes = recv(sock, ptr, sizeof(buffer) - msg_len, 0);
         if (received_bytes < 0) {
             perror("Error in recv");
-            return "";
+            return {};
         }
 
         nlh = (struct nlmsghdr *) ptr;
@@ -345,7 +349,7 @@ QString NetworkUtilities::getGatewayAndIface()
             (nlmsg->nlmsg_type == NLMSG_ERROR))
         {
             perror("Error in received packet");
-            return "";
+            return {};
         }
 
         /* If we received all data break */
@@ -398,10 +402,12 @@ QString NetworkUtilities::getGatewayAndIface()
         }
     }
     close(sock);
-    return gateway_address;
+    return { gateway_address, QNetworkInterface::interfaceFromName(interface) };
 #endif
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     QString gateway;
+    int index = -1;
+
     int mib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_FLAGS, RTF_GATEWAY};
     int afinet_type[] = {AF_INET, AF_INET6};
 
@@ -459,7 +465,10 @@ QString NetworkUtilities::getGatewayAndIface()
                                &(reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_GATEWAY]))->sin_addr,
                                sizeof(struct in_addr));
                         if (inet_ntop(AF_INET, srcStr4, dstStr4, INET_ADDRSTRLEN) != nullptr)
+                        {
                             gateway = dstStr4;
+                            index = rt->rtm_index;
+                        }
                         break;
                     }
                 }
@@ -473,7 +482,10 @@ QString NetworkUtilities::getGatewayAndIface()
                                &(reinterpret_cast<struct sockaddr_in6*>(sa_tab[RTAX_GATEWAY]))->sin6_addr,
                                sizeof(struct in6_addr));
                         if (inet_ntop(AF_INET6, srcStr6, dstStr6, INET6_ADDRSTRLEN) != nullptr)
+                        {
                             gateway = dstStr6;
+                            index = rt->rtm_index;
+                        }
                         break;
                     }
                 }
@@ -482,88 +494,6 @@ QString NetworkUtilities::getGatewayAndIface()
         free(buf);
     }
 
-    return gateway;
+    return { gateway, QNetworkInterface::interfaceFromIndex(index) };
 #endif
-}
-
-QNetworkInterface NetworkUtilities::getDefaultIface()
-{
-#ifdef Q_OS_WIN
-    int index = -1;
-
-    ULONG size = 0;
-    if (ERROR_BUFFER_OVERFLOW != GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_GATEWAYS, nullptr, nullptr, &size)) {
-        return {};
-    }
-
-    auto* adapters = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(malloc(size));
-    if (adapters == nullptr) {
-        return {};
-    }
-
-    ULONG err = GetAdaptersAddresses(AF_UNSPEC, GAA_FLAG_INCLUDE_GATEWAYS, nullptr, adapters, &size);
-    if (err != NO_ERROR) {
-        free(adapters);
-        return {};
-    }
-
-    for (auto* adapter = adapters; adapter != nullptr; adapter = adapter->Next) {
-        if (adapter->OperStatus != IfOperStatusUp) {
-            continue;
-        }
-
-        auto* gw = adapter->FirstGatewayAddress;
-        if (gw && gw->Address.lpSockaddr->sa_family == AF_INET)
-        {
-            index = adapter->IfIndex;
-        }
-    }
-
-    free(adapters);
-    return QNetworkInterface::interfaceFromIndex(index);
-#endif
-#ifdef Q_OS_MAC
-    int sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sock < 0) {
-        return {};
-    }
-
-    sockaddr_in addr = {};
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(53);
-    inet_pton(AF_INET, "1.1.1.1", &addr.sin_addr);
-
-    if (::connect(sock, (sockaddr*)&addr, sizeof(addr)) != 0) {
-        close(sock);
-        return {};
-    }
-
-    sockaddr_in local_addr = {};
-    socklen_t len = sizeof(local_addr);
-    if (0 != getsockname(sock, reinterpret_cast<sockaddr*>(&local_addr), &len)) {
-        close(sock);
-        return {};
-    }
-    close(sock);
-
-    ifaddrs* ifas;
-    if (0 != getifaddrs(&ifas)) {
-        return {};
-    }
-
-    for (auto* ifa = ifas; ifa != nullptr; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET) {
-            continue;
-        }
-
-        auto* sa = reinterpret_cast<sockaddr_in*>(ifa->ifa_addr);
-        if (sa->sin_addr.s_addr == local_addr.sin_addr.s_addr) {
-            return QNetworkInterface::interfaceFromName(ifa->ifa_name);
-        }
-    }
-#endif
-#ifdef Q_OS_LINUX
-
-#endif
-    return {};
 }

@@ -17,7 +17,7 @@ public:
     static bool checkIPv4Format(const QString &ip);
     static bool checkIpSubnetFormat(const QString &ip);
     static bool checkIpv6Enabled();
-    static QString getGatewayAndIface();
+    static QPair<QString, QNetworkInterface> getGatewayAndIface();
     // Returns the Interface Index that could Route to dst
     static int AdapterIndexTo(const QHostAddress& dst);
 
@@ -31,8 +31,6 @@ public:
     static QString netMaskFromIpWithSubnet(const QString ip);
     static QString ipAddressFromIpWithSubnet(const QString ip);
     static QStringList summarizeRoutes(const QStringList &ips, const QString cidr);
-
-    static QNetworkInterface getDefaultIface();
 };
 
 #endif // NETWORKUTILITIES_H
