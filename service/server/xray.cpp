@@ -76,7 +76,7 @@ void Xray::sockCallback(uintptr_t fd)
     }
 #endif
 #ifdef Q_OS_WIN
-    if (DWORD idx = m_ifaceIndex; idx > 0) {
+    if (DWORD idx = m_defaultIfaceIdx; idx > 0) {
         setsockopt(fd, IPPROTO_IPV6, IPV6_UNICAST_IF, reinterpret_cast<char *>(&idx), sizeof(idx));
         idx = htonl(idx); // IP_UNICAST_IF expects index in network byte order
         setsockopt(fd, IPPROTO_IP, IP_UNICAST_IF, reinterpret_cast<char *>(&idx), sizeof(idx));
