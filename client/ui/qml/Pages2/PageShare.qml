@@ -760,7 +760,7 @@ PageType {
 
                                                     if (clientNameEditor.textField.text !== clientName) {
                                                         PageController.showBusyIndicator(true)
-                                                        ExportController.renameClient(index,
+                                                        ExportController.renameClient(clientId,
                                                                                       clientNameEditor.textField.text,
                                                                                       ContainersModel.getProcessedContainerIndex(),
                                                                                       ServersModel.getProcessedServerCredentials())
@@ -796,7 +796,7 @@ PageType {
                                         var yesButtonFunction = function() {
                                             clientInfoDrawer.closeTriggered()
                                             PageController.showBusyIndicator(true)
-                                            ExportController.revokeConfig(clientName,
+                                            ExportController.revokeConfig(clientId,
                                                                           ContainersModel.getProcessedContainerIndex(),
                                                                           ServersModel.getProcessedServerCredentials())
                                             PageController.showBusyIndicator(false)
