@@ -264,7 +264,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 
     if (dwRetVal != NO_ERROR) {
         qDebug() << "ipv4 stack detect GetAdaptersAddresses failed.";
-        return "";
+        return {};
     }
 
     PIP_ADAPTER_ADDRESSES pCurAddress = pAdapterAddresses;
@@ -417,17 +417,17 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 
         size_t needed = 0;
         if (sysctl(mib, sizeof(mib) / sizeof(int), nullptr, &needed, nullptr, 0) < 0)
-            return "";
+            return {};
 
         char* buf;
         if ((buf = new char[needed]) == 0)
-            return "";
+            return {};
 
         if (sysctl(mib, sizeof(mib) / sizeof(int), buf, &needed, nullptr, 0) < 0)
         {
             qDebug() << "sysctl: net.route.0.0.dump";
             delete[] buf;
-            return gateway;
+            return {};
         }
 
         struct rt_msghdr* rt;
