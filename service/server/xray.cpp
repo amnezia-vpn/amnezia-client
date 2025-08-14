@@ -34,7 +34,7 @@ void Xray::startXray(const QString &cfg)
 #ifdef Q_OS_LINUX
     m_defaultIfaceName = defaultIface.name().toUtf8();
 #else
-    m_defaultIfaceIdx = defaultIfaceIdx;
+    m_defaultIfaceIdx = defaultIface.index();
 #endif
 
     if (auto err = amnezia_xray_setsockcallback(ctxSockCallback, this); err != nullptr) {
@@ -70,9 +70,9 @@ void Xray::stopXray()
 void Xray::sockCallback(uintptr_t fd)
 {
 #ifdef Q_OS_MAC
-    if (m_ifaceIndex > 0) {
-        setsockopt(fd, IPPROTO_IP, IP_BOUND_IF, &m_ifaceIndex, sizeof(m_ifaceIndex));
-        setsockopt(fd, IPPROTO_IPV6, IPV6_BOUND_IF, &m_ifaceIndex, sizeof(m_ifaceIndex));
+    if (m_defaultIfaceIdx > 0) {
+        setsockopt(fd, IPPROTO_IP, IP_BOUND_IF, &m_defaultIfaceIdx, sizeof(m_defaultIfaceIdx));
+        setsockopt(fd, IPPROTO_IPV6, IPV6_BOUND_IF, &m_defaultIfaceIdx, sizeof(m_defaultIfaceIdx));
     }
 #endif
 #ifdef Q_OS_WIN
