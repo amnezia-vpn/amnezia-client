@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QNetworkInterface>
+#include <QCoreApplication>
 #include <amnezia_xray.h>
 #include <qdebug.h>
 
@@ -50,6 +51,8 @@ void Xray::startXray(const QString &cfg)
         return;
     }
 
+    amnezia_xray_setloghandler(ctxLogHandler, this);
+
     if (auto err = amnezia_xray_start(); err != nullptr) {
         qDebug() << "[xray] failed to start: " << err;
         free(err);
@@ -65,6 +68,13 @@ void Xray::stopXray()
         free(err);
         return;
     }
+}
+
+void Xray::logHandler(char* str)
+{
+    QMetaObject::invokeMethod(qApp, [str = QString::fromUtf8(str)] {
+        qDebug() << "[xray]" << str;
+    }, Qt::QueuedConnection);
 }
 
 void Xray::sockCallback(uintptr_t fd)
