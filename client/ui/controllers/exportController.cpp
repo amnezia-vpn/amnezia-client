@@ -302,6 +302,7 @@ void ExportController::revokeConfig(const QString &clientId, const DockerContain
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorCode);
     }
+    emit revokeConfigCompleted();
 }
 
 void ExportController::renameClient(const QString &clientId, const QString &clientName, const DockerContainer container,

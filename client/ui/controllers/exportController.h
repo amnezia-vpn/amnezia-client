@@ -43,6 +43,7 @@ public slots:
 
 signals:
     void generateConfig(int type);
+    void revokeConfigCompleted();
     void exportErrorOccurred(const QString &errorMessage);
     void exportErrorOccurred(ErrorCode errorCode);
 

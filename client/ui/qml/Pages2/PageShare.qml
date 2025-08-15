@@ -32,38 +32,43 @@ PageType {
     Connections {
         target: ExportController
 
+        function onRevokeConfigCompleted() {
+            PageController.showBusyIndicator(false)
+            PageController.showNotificationMessage(qsTr("Config revoked"))
+        }
+
         function onGenerateConfig(type) {
             PageController.showBusyIndicator(true)
 
             switch (type) {
-            case PageShare.ConfigType.AmneziaConnection: {
-                ExportController.generateConnectionConfig(clientNameTextField.textField.text);
-                break;
-            }
-            case PageShare.ConfigType.OpenVpn: {
-                ExportController.generateOpenVpnConfig(clientNameTextField.textField.text)
-                break
-            }
-            case PageShare.ConfigType.WireGuard: {
-                ExportController.generateWireGuardConfig(clientNameTextField.textField.text)
-                break
-            }
-            case PageShare.ConfigType.Awg: {
-                ExportController.generateAwgConfig(clientNameTextField.textField.text)
-                break
-            }
-            case PageShare.ConfigType.ShadowSocks: {
-                ExportController.generateShadowSocksConfig()
-                break
-            }
-            case PageShare.ConfigType.Cloak: {
-                ExportController.generateCloakConfig()
-                break
-            }
-            case PageShare.ConfigType.Xray: {
-                ExportController.generateXrayConfig(clientNameTextField.textField.text)
-                break
-            }
+                case PageShare.ConfigType.AmneziaConnection: {
+                    ExportController.generateConnectionConfig(clientNameTextField.textField.text);
+                    break;
+                }
+                case PageShare.ConfigType.OpenVpn: {
+                    ExportController.generateOpenVpnConfig(clientNameTextField.textField.text)
+                    break
+                }
+                case PageShare.ConfigType.WireGuard: {
+                    ExportController.generateWireGuardConfig(clientNameTextField.textField.text)
+                    break
+                }
+                case PageShare.ConfigType.Awg: {
+                    ExportController.generateAwgConfig(clientNameTextField.textField.text)
+                    break
+                }
+                case PageShare.ConfigType.ShadowSocks: {
+                    ExportController.generateShadowSocksConfig()
+                    break
+                }
+                case PageShare.ConfigType.Cloak: {
+                    ExportController.generateCloakConfig()
+                    break
+                }
+                case PageShare.ConfigType.Xray: {
+                    ExportController.generateXrayConfig(clientNameTextField.textField.text)
+                    break
+                }
             }
 
             PageController.showBusyIndicator(false)
@@ -799,8 +804,6 @@ PageType {
                                             ExportController.revokeConfig(clientId,
                                                                           ContainersModel.getProcessedContainerIndex(),
                                                                           ServersModel.getProcessedServerCredentials())
-                                            PageController.showBusyIndicator(false)
-                                            PageController.showNotificationMessage(qsTr("Config revoked"))
                                         }
                                         var noButtonFunction = function() {
                                         }
