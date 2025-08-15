@@ -183,6 +183,9 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     requestBody[configKey::keyPayload] = QString(encryptedKeyPayload.toBase64());
     requestBody[configKey::apiPayload] = QString(encryptedApiPayload.toBase64());
 
+    qDebug() << "sleep 5 seconds";
+    QThread::msleep(5000);
+
     QNetworkReply *reply = amnApp->networkManager()->post(request, QJsonDocument(requestBody).toJson());
 
     QEventLoop wait;
