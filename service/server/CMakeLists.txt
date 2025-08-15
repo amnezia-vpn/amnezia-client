@@ -17,11 +17,9 @@ if(WIN32)
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64/amnezia_xray.lib")
         set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64")
-        set(AMNEZIA_XRAY_DYNAMIC_LIB "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64/amnezia_xray.dll")
     else()
         set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86/amnezia_xray.lib")
         set(AMNEZIA_XRAY_INCLUDE_DIR "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86")
-        set(AMNEZIA_XRAY_DYNAMIC_LIB "${AMNEZIA_XRAY_ROOT_DIR}/windows/x86_64/amnezia_xray.dll")
     endif()
 elseif(APPLE AND NOT IOS)
     set(AMNEZIA_XRAY_LIB_PATH "${AMNEZIA_XRAY_ROOT_DIR}/darwin/x86_64/amnezia_xray.a")
@@ -404,13 +402,6 @@ elseif(LINUX)
     set(DEPLOY_PLATFORM_PATH "linux/client")
 elseif(APPLE AND NOT IOS)
     set(DEPLOY_PLATFORM_PATH "macos")
-endif()
-
-if(AMNEZIA_XRAY_DYNAMIC_LIB)
-    add_custom_command(TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${AMNEZIA_XRAY_DYNAMIC_LIB}
-        $<TARGET_FILE_DIR:${PROJECT}>)
 endif()
 
 add_custom_command(
