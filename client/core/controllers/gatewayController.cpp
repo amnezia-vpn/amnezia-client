@@ -114,6 +114,7 @@ ErrorCode GatewayController::get(const QString &endpoint, QByteArray &responseBo
 
 ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
 {
+    qDebug() << "apiPayload" << apiPayload;
 #ifdef Q_OS_IOS
     IosController::Instance()->requestInetAccess();
     QThread::msleep(10);
@@ -126,8 +127,13 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     request.setUrl(endpoint.arg(m_gatewayEndpoint));
 
     // bypass killSwitch exceptions for API-gateway
+    qDebug() << "url" << request.url();
+    qDebug() << "host" << QUrl(request.url()).host();
+    qDebug() << "ip" << NetworkUtilities::getIPAddress(request.url().host());
+    qDebug() << "endpoint" << endpoint;
 #ifdef AMNEZIA_DESKTOP
     if (m_isStrictKillSwitchEnabled) {
+        qDebug() << "m_isStrictKillSwitchEnabled";
         QString host = QUrl(request.url()).host();
         QString ip = NetworkUtilities::getIPAddress(host);
         if (!ip.isEmpty()) {
@@ -154,6 +160,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
         EVP_PKEY *publicKey = nullptr;
         try {
             QByteArray rsaKey = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
+            qDebug() << "rsaKey" << rsaKey;
             QSimpleCrypto::QRsa rsa;
             publicKey = rsa.getPublicKeyFromByteArray(rsaKey);
         } catch (...) {
