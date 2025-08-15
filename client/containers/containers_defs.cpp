@@ -308,10 +308,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     }
 
 #elif defined(Q_OS_LINUX)
-    switch (c) {
-    case DockerContainer::Ipsec: return false;
-    default: return true;
-    }
+    return true;
 
 #else
     return false;
