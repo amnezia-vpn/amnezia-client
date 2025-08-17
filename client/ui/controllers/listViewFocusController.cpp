@@ -279,7 +279,7 @@ bool ListViewFocusController::isFirstFocusItemInListView() const
         return isFirstFocusItemInDelegate() && (m_delegateIndex == 0) && !hasHeader();
     }
     case Section::Header: {
-        isFirstFocusItemInDelegate();
+        return isFirstFocusItemInDelegate();
     }
     case Section::Default: {
         return true;
