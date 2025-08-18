@@ -24,6 +24,7 @@ static Ikev2Protocol* self = nullptr;
 Ikev2Protocol::Ikev2Protocol(const QJsonObject &configuration, QObject* parent) :
     VpnProtocol(configuration, parent)
 {
+	qDebug() << "IpsecProtocol::Ikev2Protocol()";
     self = this;
     readIkev2Configuration(configuration);
     m_routeGateway = NetworkUtilities::getGatewayAndIface();
@@ -48,12 +49,14 @@ void Ikev2Protocol::stop()
 
 void Ikev2Protocol::readIkev2Configuration(const QJsonObject &configuration)
 {
+    qDebug() << "IpsecProtocol::readIkev2Configuration()";
     QJsonObject ikev2_data = configuration.value(ProtocolProps::key_proto_config_data(Proto::Ikev2)).toObject();
     m_config = QJsonDocument::fromJson(ikev2_data.value(config_key::config).toString().toUtf8()).object();
 }
 
 ErrorCode Ikev2Protocol::start()
 {
+    qDebug() << "IpsecProtocol::start()";
     STACK_OF(X509) *certstack = sk_X509_new_null();
     BIO *p12 = BIO_new(BIO_s_mem());
 
@@ -135,8 +138,8 @@ ErrorCode Ikev2Protocol::start()
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Ikev2Protocol::create_new_vpn(const QString & vpn_name,
                                    const QString & serv_addr) {
-   qDebug() << "Ikev2Protocol::create_new_vpn()";
-   return true;
+    qDebug() << "Ikev2Protocol::create_new_vpn()";
+    return true;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Ikev2Protocol::delete_vpn_connection(const QString &vpn_name) {
@@ -145,12 +148,14 @@ bool Ikev2Protocol::delete_vpn_connection(const QString &vpn_name) {
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Ikev2Protocol::connect_to_vpn(const QString &vpn_name) {
+    qDebug() << "IpsecProtocol::connect_to_vpn()";
     IpcClient::Interface()->startIPsec(vpn_name);
     QThread::msleep(3000);
     return true;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Ikev2Protocol::disconnect_vpn() {
+    qDebug() << "IpsecProtocol::disconnect_vpn()";
     IpcClient::Interface()->stopIPsec("ikev2-vpn");
     IpcClient::Interface()->disableKillSwitch();
     IpcClient::Interface()->StartRoutingIpv6();
