@@ -12,7 +12,15 @@ RUN chmod a+x /opt/amnezia/start.sh
 
 RUN mkdir -p /opt/amnezia/xray
 
-RUN curl -L https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-64.zip > /root/xray.zip;\
+RUN SERVER_ARCH=$(uname -m) && \
+  if [ "$SERVER_ARCH" = "x86_64" ]; then XRAY_ARCH="64"; \
+  elif [ "$SERVER_ARCH" = "i686" ]; then XRAY_ARCH="32"; \
+  elif [ "$SERVER_ARCH" = "aarch64" ]; then XRAY_ARCH="arm64-v8a"; \
+  elif [ "$SERVER_ARCH" = "arm" ]; then XRAY_ARCH="arm32-v5a"; \
+  elif [ "$SERVER_ARCH" = "armv6l" ]; then XRAY_ARCH="arm32-v6a"; \
+  elif [ "$SERVER_ARCH" = "armv7l" ]; then XRAY_ARCH="arm32-v7a"; \
+  else exit -1; fi && \
+  curl -L https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-${XRAY_ARCH}.zip > /root/xray.zip;\
   unzip /root/xray.zip -d /usr/bin/;\
   chmod a+x /usr/bin/xray;
 

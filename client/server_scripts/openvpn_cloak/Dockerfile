@@ -16,10 +16,10 @@ RUN echo -e "#!/bin/bash\ntail -f /dev/null" > /opt/amnezia/start.sh
 RUN chmod a+x /opt/amnezia/start.sh
 
 RUN SERVER_ARCH=$(uname -m) && \
-  if [ $SERVER_ARCH="x86_64" ]; then CK_ARCH="amd64"; \
-  elif [ $SERVER_ARCH="i686" ]; then CK_ARCH="386"; \
-  elif [ $SERVER_ARCH="aarch64" ]; then CK_ARCH="arm64"; \
-  elif [ $SERVER_ARCH="arm" ]; then CK_ARCH="arm"; \
+  if [ "$SERVER_ARCH" = "x86_64" ]; then CK_ARCH="amd64"; \
+  elif [ "$SERVER_ARCH" = "i686" ]; then CK_ARCH="386"; \
+  elif [ "$SERVER_ARCH" = "aarch64" ]; then CK_ARCH="arm64"; \
+  elif [ "$SERVER_ARCH" = "arm" ]; then CK_ARCH="arm"; \
   else exit -1; fi && \
   curl -L https://github.com/cbeuw/Cloak/releases/download/${CLOAK_RELEASE}/ck-server-linux-${CK_ARCH}-${CLOAK_RELEASE} > /usr/bin/ck-server && \
   chmod a+x /usr/bin/ck-server && \
