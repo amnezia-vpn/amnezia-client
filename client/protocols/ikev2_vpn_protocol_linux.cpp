@@ -2,6 +2,8 @@
 #include <QFileInfo>
 #include <QProcess>
 
+#include <QNetworkInterface>
+
 #include <QThread>
 
 #include <chrono>
@@ -24,7 +26,7 @@ static Ikev2Protocol* self = nullptr;
 Ikev2Protocol::Ikev2Protocol(const QJsonObject &configuration, QObject* parent) :
     VpnProtocol(configuration, parent)
 {
-	qDebug() << "IpsecProtocol::Ikev2Protocol()";
+    qDebug() << "IpsecProtocol::Ikev2Protocol()";
     self = this;
     readIkev2Configuration(configuration);
     m_routeGateway = NetworkUtilities::getGatewayAndIface();
@@ -32,6 +34,7 @@ Ikev2Protocol::Ikev2Protocol(const QJsonObject &configuration, QObject* parent) 
     m_vpnLocalAddress = "192.168.43.10";
     m_remoteAddress = NetworkUtilities::getIPAddress(configuration.value(amnezia::config_key::hostName).toString());
     m_routeMode = static_cast<Settings::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
+    m_configData = configuration;
 }
 
 Ikev2Protocol::~Ikev2Protocol()
@@ -107,11 +110,19 @@ ErrorCode Ikev2Protocol::start()
         for (auto iter = lines.begin(); iter!=lines.end(); iter++)
         {
             if (iter->contains("0.0.0.0/0")) {
+                QList<QHostAddress> dnsAddr;
+
+                dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns1).toString()));
+                // We don't use secondary DNS if primary DNS is AmneziaDNS
+                if (!m_configData.value(amnezia::config_key::dns1).toString().
+                     contains(amnezia::protocols::dns::amneziaDnsIp)) {
+                    dnsAddr.push_back(QHostAddress(m_configData.value(config_key::dns2).toString()));
+                }
+
                 m_vpnGateway = iter->split("===", Qt::SkipEmptyParts).first();
                 m_vpnGateway = m_vpnGateway.split("   ").at(2);
                 m_vpnGateway = m_vpnGateway.split("/").first();
                 m_vpnLocalAddress = m_vpnGateway;
-                qDebug() << "m_vpnGateway " << m_vpnGateway;
 
                 // killSwitch toggle
                 if (QVariant(m_config.value(config_key::killSwitchOption).toString()).toBool()) {
@@ -123,6 +134,17 @@ ErrorCode Ikev2Protocol::start()
                     IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
                     IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
                     IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
+                }
+
+                QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
+                for (int i = 0; i < netInterfaces.size(); i++) {
+                    for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
+                    {
+                        if (netInterfaces.at(i).addressEntries().at(j).ip().toString() == m_vpnGateway)
+                        {
+                            IpcClient::Interface()->updateResolvers(netInterfaces.at(i).humanReadableName(), dnsAddr);
+                        }
+                    }
                 }
 
                 IpcClient::Interface()->StopRoutingIpv6();

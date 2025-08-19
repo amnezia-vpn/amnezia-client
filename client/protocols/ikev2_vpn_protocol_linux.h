@@ -35,6 +35,7 @@ private:
 
 private:
     QJsonObject m_config;
+    QJsonObject m_configData;
     QString m_remoteAddress;
     int m_routeMode;
 
