@@ -16,160 +16,124 @@ import "../Components"
 PageType {
     id: root
 
-    Item {
-        id: focusItem
-        onFocusChanged: {
-            if (activeFocus) {
-                fl.ensureVisible(focusItem)
-            }
-        }
-        KeyNavigation.tab: backButton
-    }
-
-    ColumnLayout {
-        id: backButtonLayout
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
         anchors.topMargin: 20
 
-        BackButtonType {
-            id: backButton
-            KeyNavigation.tab: listview.currentItem.mtuTextField.textField
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: backButtonLayout.bottom
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight + saveButton.implicitHeight + saveButton.anchors.bottomMargin + saveButton.anchors.topMargin
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        Column {
-            id: content
+        model: WireGuardConfigModel
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        delegate: ColumnLayout {
+            width: listView.width
 
-            ListView {
-                id: listview
+            property alias mtuTextField: mtuTextField
+            property bool isSaveButtonEnabled: mtuTextField.errorText === ""
 
-                width: parent.width
-                height: listview.contentItem.height
+            spacing: 0
 
-                clip: true
-                interactive: false
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                model: WireGuardConfigModel
+                headerText: qsTr("WG settings")
+            }
 
-                delegate: Item {
-                    id: delegateItem
-                    implicitWidth: listview.width
-                    implicitHeight: col.implicitHeight
+            TextFieldWithHeaderType {
+                id: mtuTextField
+                Layout.fillWidth: true
+                Layout.topMargin: 40
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                    property alias mtuTextField: mtuTextField
-                    property bool isSaveButtonEnabled: mtuTextField.errorText === ""
+                headerText: qsTr("MTU")
+                textField.text: clientMtu
+                textField.validator: IntValidator { bottom: 576; top: 65535 }
 
-                    ColumnLayout {
-                        id: col
-
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
-
-                        spacing: 0
-
-                        BaseHeaderType {
-                            Layout.fillWidth: true
-
-                            headerText: qsTr("WG settings")
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: mtuTextField
-                            Layout.fillWidth: true
-                            Layout.topMargin: 40
-
-                            headerText: qsTr("MTU")
-                            textField.text: clientMtu
-                            textField.validator: IntValidator { bottom: 576; top: 65535 }
-
-                            textField.onEditingFinished: {
-                                if (textField.text !== clientMtu) {
-                                    clientMtu = textField.text
-                                }
-                            }
-                            checkEmptyText: true
-                            KeyNavigation.tab: saveButton
-                        }
-
-                        Header2TextType {
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
-
-                            text: qsTr("Server settings")
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: portTextField
-                            Layout.fillWidth: true
-                            Layout.topMargin: 8
-
-                            enabled: false
-
-                            headerText: qsTr("Port")
-                            textField.text: port
-                        }
-                    }
+                textField.onEditingFinished: {
+                    if (textField.text !== clientMtu) {
+                        clientMtu = textField.text
+                    } 
                 }
+                checkEmptyText: true
+            }
+
+            Header2TextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Server settings")
+            }
+
+            TextFieldWithHeaderType {
+                id: portTextField
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                enabled: false
+
+                headerText: qsTr("Port")
+                textField.text: port
             }
         }
-    }
 
-    BasicButtonType {
-        id: saveButton
+        footer: ColumnLayout {
+            width: listView.width
 
-        anchors.right: root.right
-        anchors.left: root.left
-        anchors.bottom: root.bottom
+            BasicButtonType {
+                id: saveButton
 
-        anchors.topMargin: 24
-        anchors.bottomMargin: 24
-        anchors.rightMargin: 16
-        anchors.leftMargin: 16
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.bottomMargin: 24
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
 
-        enabled: listview.currentItem.isSaveButtonEnabled
+                enabled: listView.currentItem.isSaveButtonEnabled
 
-        text: qsTr("Save")
+                text: qsTr("Save")
 
-        clickedFunc: function() {
-            forceActiveFocus()
-            var headerText = qsTr("Save settings?")
-            var descriptionText = qsTr("Only the settings for this device will be changed")
-            var yesButtonText = qsTr("Continue")
-            var noButtonText = qsTr("Cancel")
+                clickedFunc: function() {
+                    var headerText = qsTr("Save settings?")
+                    var descriptionText = qsTr("Only the settings for this device will be changed")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
 
-            var yesButtonFunction = function() {
-                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                    return
-                }
+                    var yesButtonFunction = function() {
+                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                            PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                            return
+                        }
 
-                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                InstallController.updateContainer(WireGuardConfigModel.getConfig())
-            }
-            var noButtonFunction = function() {
-                if (!GC.isMobile()) {
-                    saveButton.forceActiveFocus()
+                        PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                        InstallController.updateContainer(WireGuardConfigModel.getConfig())
+                    }
+                    var noButtonFunction = function() {}
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

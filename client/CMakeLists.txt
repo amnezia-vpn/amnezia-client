@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(PROJECT AmneziaVPN)
 project(${PROJECT})
 
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
@@ -53,6 +52,9 @@ endif()
 
 qt_standard_project_setup()
 qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
+target_include_directories(${PROJECT} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+)
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
@@ -110,6 +112,15 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+if(MACOS_NE)
+    message("MACOS_NE is ON")
+    add_definitions(-DQ_OS_MAC)
+    add_definitions(-DMACOS_NE)
+    message("Add macros for MacOS Network Extension")
+else()
+    message("MACOS_NE is OFF")
+endif()
+
 include_directories(mozilla)
 include_directories(mozilla/shared)
 include_directories(mozilla/models)
@@ -139,7 +150,7 @@ if(WIN32)
 endif()
 
 if(APPLE)
-    cmake_policy(SET CMP0099 OLD)
+    cmake_policy(SET CMP0099 NEW)
     cmake_policy(SET CMP0114 NEW)
 
     if(NOT BUILD_OSX_APP_IDENTIFIER)
@@ -158,7 +169,6 @@ if(APPLE)
     set(CMAKE_XCODE_GENERATE_SCHEME FALSE)
     set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ${BUILD_VPN_DEVELOPMENT_TEAM})
     set(CMAKE_XCODE_ATTRIBUTE_GROUP_ID_IOS ${BUILD_IOS_GROUP_IDENTIFIER})
-
 endif()
 
 if(LINUX AND NOT ANDROID)
@@ -166,8 +176,7 @@ if(LINUX AND NOT ANDROID)
     link_directories(${CMAKE_CURRENT_LIST_DIR}/platforms/linux)
 endif()
 
-if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
-    message("Client desktop build")
+if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     add_compile_definitions(AMNEZIA_DESKTOP)
 endif()
 
@@ -178,7 +187,9 @@ endif()
 if(IOS)
     include(cmake/ios.cmake)
     include(cmake/ios-arch-fixup.cmake)
-elseif(APPLE AND NOT IOS)
+elseif(APPLE AND MACOS_NE)
+    include(cmake/macos_ne.cmake)
+elseif(APPLE)
     include(cmake/osxtools.cmake)
     include(cmake/macos.cmake)
 endif()
@@ -199,7 +210,7 @@ elseif(APPLE AND NOT IOS)
     set(DEPLOY_PLATFORM_PATH "macos")
 endif()
 
-if(NOT IOS AND NOT ANDROID)
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_custom_command(
         TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
@@ -214,7 +225,6 @@ if(NOT IOS AND NOT ANDROID)
         $<TARGET_FILE_DIR:${PROJECT}>
         COMMAND_EXPAND_LISTS
     )
-
 endif()
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})

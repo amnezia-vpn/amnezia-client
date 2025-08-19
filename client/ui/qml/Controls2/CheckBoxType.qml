@@ -34,13 +34,30 @@ CheckBox {
 
     property string imageSource: "qrc:/images/controls/check.svg"
 
-    property var parentFlickable
-    onFocusChanged: {
-        if (root.activeFocus) {
-            if (root.parentFlickable) {
-                root.parentFlickable.ensureVisible(root)
-            }
-        }
+    property bool isFocusable: true
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+
+    Keys.onUpPressed: {
+        FocusController.nextKeyUpItem()
+    }
+    
+    Keys.onDownPressed: {
+        FocusController.nextKeyDownItem()
+    }
+    
+    Keys.onLeftPressed: {
+        FocusController.nextKeyLeftItem()
+    }
+
+    Keys.onRightPressed: {
+        FocusController.nextKeyRightItem()
     }
 
     hoverEnabled: enabled ? true : false
@@ -156,15 +173,17 @@ CheckBox {
         enabled: false
     }
 
+    Keys.onEnterPressed: event => handleSwitch(event)
+    Keys.onReturnPressed: event => handleSwitch(event)
+    Keys.onSpacePressed: event => handleSwitch(event)
 
-    Keys.onEnterPressed: {
-        root.checked = !root.checked
+    function handleSwitch(event) {
+        if (!event.isAutoRepeat) {
+            root.checked = !root.checked
+            root.checkedChanged()
+        }
+        event.accepted = true
     }
-
-    Keys.onReturnPressed: {
-        root.checked = !root.checked
-    }
-
 }
 
 

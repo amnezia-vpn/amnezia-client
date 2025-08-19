@@ -14,146 +14,58 @@ import "../Config"
 PageType {
     id: root
 
-    FlickableType {
-        id: fl
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        contentHeight: content.height
+    ListViewType {
+        id: listView
 
-        ColumnLayout {
-            id: content
+        anchors.fill: parent
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            spacing: 0
+        header: ColumnLayout {
+            width: listView.width
 
             BaseHeaderType {
                 id: header
                 Layout.fillWidth: true
                 Layout.topMargin: 24
+                Layout.bottomMargin: 16
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
                 headerText: qsTr("Settings")
             }
+        }
+
+        model: settingsEntries
+
+        delegate: ColumnLayout {
+            width: listView.width
+
+            spacing: 0
 
             LabelWithButtonType {
-                id: account
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-
-                text: qsTr("Servers")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: "qrc:/images/controls/server.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsServersList)
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                id: connection
                 Layout.fillWidth: true
 
-                text: qsTr("Connection")
+                visible: isVisible
+
+                text: title
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: "qrc:/images/controls/radio.svg"
+                leftImageSource: leftImagePath
 
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsConnection)
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                id: application
-                Layout.fillWidth: true
-
-                text: qsTr("Application")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: "qrc:/images/controls/app.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsApplication)
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                id: news
-                Layout.fillWidth: true
-
-                text: qsTr("News & Notifications")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: NewsModel.hasUnread ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
-
-                clickedFunction: function() {
-                    ApiNewsController.fetchNews();
-                    PageController.goToPage(PageEnum.PageSettingsNewsNotifications)
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                id: backup
-                Layout.fillWidth: true
-
-                text: qsTr("Backup")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: "qrc:/images/controls/save.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsBackup)
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                id: about
-                Layout.fillWidth: true
-
-                text: qsTr("About AmneziaVPN")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: "qrc:/images/controls/amnezia.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsAbout)
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                id: devConsole
-                visible: SettingsController.isDevModeEnabled
-                Layout.fillWidth: true
-
-                text: qsTr("Dev console")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: "qrc:/images/controls/bug.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageDevMenu)
-                }
+                clickedFunction: clickedHandler
             }
 
             DividerType {
-                visible: SettingsController.isDevModeEnabled
+                visible: isVisible
             }
+        }
+
+        footer: ColumnLayout {
+            width: listView.width
 
             LabelWithButtonType {
                 id: close
+
                 visible: GC.isDesktop()
                 Layout.fillWidth: true
-                Layout.preferredHeight: about.height
 
                 text: qsTr("Close application")
                 leftImageSource: "qrc:/images/controls/x-circle.svg"
@@ -165,8 +77,100 @@ PageType {
             }
 
             DividerType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 visible: GC.isDesktop()
             }
+        }
+    }
+
+    property list<QtObject> settingsEntries: [
+        servers,
+        connection,
+        application,
+        news,
+        backup,
+        about,
+        devConsole
+    ]
+
+    QtObject {
+        id: servers
+
+        property string title: qsTr("Servers")
+        readonly property string leftImagePath: "qrc:/images/controls/server.svg"
+        property bool isVisible: true
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageSettingsServersList)
+        }
+    }
+
+    QtObject {
+        id: connection
+
+        property string title: qsTr("Connection")
+        readonly property string leftImagePath: "qrc:/images/controls/radio.svg"
+        property bool isVisible: true
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageSettingsConnection)
+        }
+    }
+
+    QtObject {
+        id: application
+
+        property string title: qsTr("Application")
+        readonly property string leftImagePath: "qrc:/images/controls/app.svg"
+        property bool isVisible: true
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageSettingsApplication)
+        }
+    }
+
+    QtObject {
+        id: news
+
+        property string title: qsTr("News & Notifications")
+        readonly property string leftImagePath: NewsModel.hasUnread ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
+        property bool isVisible: true
+        readonly property var clickedHandler: function() {
+            ApiNewsController.fetchNews();
+            PageController.goToPage(PageEnum.PageSettingsNewsNotifications)
+        }
+    }
+
+    QtObject {
+        id: backup
+
+        property string title: qsTr("Backup")
+        readonly property string leftImagePath: "qrc:/images/controls/save.svg"
+        property bool isVisible: true
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageSettingsBackup)
+        }
+    }
+
+    QtObject {
+        id: about
+
+        property string title: qsTr("About AmneziaVPN")
+        readonly property string leftImagePath: "qrc:/images/controls/amnezia.svg"
+        property bool isVisible: true
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageSettingsAbout)
+        }
+    }
+
+    QtObject {
+        id: devConsole
+
+        property string title: qsTr("Dev console")
+        readonly property string leftImagePath: "qrc:/images/controls/bug.svg"
+        property bool isVisible: SettingsController.isDevModeEnabled
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageDevMenu)
         }
     }
 }

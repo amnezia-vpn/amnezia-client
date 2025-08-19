@@ -14,86 +14,77 @@ import "../Config"
 PageType {
     id: root
 
-    ColumnLayout {
-        id: header
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
+        Layout.topMargin: 20
 
-        spacing: 0
-
-        BackButtonType {
-            id: backButton
-            Layout.topMargin: 20
-        }
-
-        BaseHeaderType {
-            Layout.fillWidth: true
-            Layout.topMargin: 8
-            Layout.rightMargin: 16
-            Layout.leftMargin: 16
-            Layout.bottomMargin: 16
-
-            headerText: qsTr("VPN by Amnezia")
-            descriptionText: qsTr("Choose a VPN service that suits your needs.")
+        onActiveFocusChanged: {
+            if(backButton.enabled && backButton.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
     }
 
-    ListView {
-        id: servicesListView
+    ListViewType {
+        id: listView
 
-        anchors.top: header.bottom
+        anchors.top: backButton.bottom
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.topMargin: 16
-        spacing: 0
 
-        property bool isFocusable: true
-        
-        clip: true
-        reuseItems: true
+        header: ColumnLayout {
+            width: listView.width
+
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 24
+
+                headerText: qsTr("VPN by Amnezia")
+                descriptionText: qsTr("Choose a VPN service that suits your needs.")
+            }
+        }
+
+        spacing: 0
 
         model: ApiServicesModel
 
-        ScrollBar.vertical: ScrollBarType {}
+        delegate: ColumnLayout {
 
-        delegate: Item {
-            implicitWidth: servicesListView.width
-            implicitHeight: delegateContent.implicitHeight
+            width: listView.width
 
             enabled: isServiceAvailable
 
-            ColumnLayout {
-                id: delegateContent
+            CardWithIconsType {
+                id: card
 
-                anchors.fill: parent
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.bottomMargin: 16
 
-                CardWithIconsType {
-                    id: card
+                headerText: name
+                bodyText: cardDescription
+                footerText: price
 
-                    Layout.fillWidth: true
-                    Layout.rightMargin: 16
-                    Layout.leftMargin: 16
-                    Layout.bottomMargin: 16
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                    headerText: name
-                    bodyText: cardDescription
-                    footerText: price
-
-                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                    onClicked: {
-                        if (isServiceAvailable) {
-                            ApiServicesModel.setServiceIndex(index)
-                            PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
-                        }
+                onClicked: {
+                    if (isServiceAvailable) {
+                        ApiServicesModel.setServiceIndex(index)
+                        PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
                     }
-                    
-                    Keys.onEnterPressed: clicked()
-                    Keys.onReturnPressed: clicked()
                 }
+                
+                Keys.onEnterPressed: clicked()
+                Keys.onReturnPressed: clicked()
             }
         }
     }

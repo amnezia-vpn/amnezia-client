@@ -190,7 +190,7 @@ bool Utils::processIsRunning(const QString &fileName, const bool fullFlag)
     CloseHandle(hSnapshot);
     return false;
 
-#elif defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+#elif defined(Q_OS_IOS) || defined(Q_OS_ANDROID) || defined(MACOS_NE)
     return false;
 #else
     QProcess process;

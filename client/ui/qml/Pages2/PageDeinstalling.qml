@@ -20,7 +20,9 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
+
         sourceModel: ServersModel
+
         filters: [
             ValueFilter {
                 roleName: "isCurrentlyProcessed"
@@ -29,66 +31,54 @@ PageType {
         ]
     }
 
-    FlickableType {
-        id: fl
+    ListViewType {
+        id: listView
+
         anchors.fill: parent
-        contentHeight: content.height
 
-        Column {
-            id: content
+        spacing: 16
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        model: proxyServersModel
 
-            spacing: 16
+        delegate: ColumnLayout {
+            width: listView.width
 
-            Repeater {
-                model: proxyServersModel
-                delegate: Item {
-                    implicitWidth: parent.width
-                    implicitHeight: delegateContent.implicitHeight
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.topMargin: 20
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                    ColumnLayout {
-                        id: delegateContent
+                headerText: qsTr("Removing services from %1").arg(name)
+            }
 
-                        anchors.fill: parent
-                        anchors.rightMargin: 16
-                        anchors.leftMargin: 16
+            ProgressBarType {
+                id: progressBar
 
-                        BaseHeaderType {
-                            Layout.fillWidth: true
-                            Layout.topMargin: 20
+                Layout.fillWidth: true
+                Layout.topMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                            headerText: qsTr("Removing services from %1").arg(name)
-                        }
+                Timer {
+                    id: timer
 
-                        ProgressBarType {
-                            id: progressBar
-
-                            Layout.fillWidth: true
-                            Layout.topMargin: 32
-
-                            Timer {
-                                id: timer
-
-                                interval: 300
-                                repeat: true
-                                running: true
-                                onTriggered: {
-                                    progressBar.value += 0.003
-                                }
-                            }
-                        }
-
-                        ParagraphTextType {
-                            Layout.fillWidth: true
-                            Layout.topMargin: 8
-
-                            text: qsTr("Usually it takes no more than 5 minutes")
-                        }
+                    interval: 300
+                    repeat: true
+                    running: true
+                    onTriggered: {
+                        progressBar.value += 0.003
                     }
                 }
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Usually it takes no more than 5 minutes")
             }
         }
     }

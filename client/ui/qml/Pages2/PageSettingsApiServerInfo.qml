@@ -111,17 +111,6 @@ PageType {
                     serverNameEditDrawer.openTriggered()
                 }
             }
-
-            RenameServerDrawer {
-                id: serverNameEditDrawer
-
-                parent: root
-
-                anchors.fill: parent
-                expandedHeight: root.height * 0.35
-
-                serverNameText: root.processedServer.name
-            }
         }
 
         delegate: ColumnLayout {
@@ -158,6 +147,32 @@ PageType {
 
             readonly property bool isVisibleForAmneziaFree: ApiAccountInfoModel.data("isComponentVisible")
 
+            SwitcherType {
+                id: switcher
+
+                readonly property bool isVlessProtocol: ApiConfigsController.isVlessProtocol()
+
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
+
+                text: qsTr("Use VLESS protocol")
+                checked: switcher.isVlessProtocol
+                onToggled: function() {
+                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
+                    } else {
+                        PageController.showBusyIndicator(true)
+                        ApiConfigsController.setCurrentProtocol(switcher.isVlessProtocol ? "awg" : "vless")
+                        ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
+                        PageController.showBusyIndicator(false)
+                    }
+                }
+            }
+
             WarningType {
                 id: warning
 
@@ -172,7 +187,13 @@ PageType {
 
                 iconPath: "qrc:/images/controls/alert-circle.svg"
 
-                visible: ApiAccountInfoModel.data("hasExpiredWorker")
+                visible: {
+                    for (let i = 0; i < ApiCountryModel.count; ++i) {
+                        if (ApiCountryModel.get(i).isWorkerExpired)
+                            return true;
+                    }
+                    return false;
+                }
             }
 
             LabelWithButtonType {
@@ -181,35 +202,30 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: warning.visible ? 16 : 32
 
-                visible: false //footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForAmneziaFree
 
                 text: qsTr("Subscription Key")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    shareConnectionDrawer.headerText = qsTr("Amnezia Premium subscription key")
-
-                    shareConnectionDrawer.openTriggered()
-                    shareConnectionDrawer.isSelfHostedConfig = false;
-                    shareConnectionDrawer.shareButtonText = qsTr("Save VPN key as a file")
-                    shareConnectionDrawer.copyButtonText = qsTr("Copy VPN key")
-
-
+                    PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
                     PageController.showBusyIndicator(true)
 
                     ApiConfigsController.prepareVpnKeyExport()
 
                     PageController.showBusyIndicator(false)
+                    
+                    // Navigate to PageShareConnection page
+                    //PageController.goToPage(PageEnum.PageShareConnection)
                 }
             }
 
             DividerType {
-                visible: false //footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForAmneziaFree
             }
 
             LabelWithButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: warning.visible ? 16 : 32
 
                 visible: footer.isVisibleForAmneziaFree
 
@@ -394,9 +410,12 @@ PageType {
         }
     }
 
-    ShareConnectionDrawer {
-        id: shareConnectionDrawer
+    RenameServerDrawer {
+        id: serverNameEditDrawer
 
         anchors.fill: parent
+        expandedHeight: parent.height * 0.35
+
+        serverNameText: root.processedServer.name
     }
 }

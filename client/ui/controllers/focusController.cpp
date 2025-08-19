@@ -4,6 +4,12 @@
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
 
+#include "logger.h"
+
+namespace {
+    Logger logger("FocusController");
+}
+
 FocusController::FocusController(QQmlApplicationEngine *engine, QObject *parent)
     : QObject { parent },
       m_engine { engine },
@@ -85,7 +91,7 @@ void FocusController::dropRootObject(QObject *object)
         dropListView();
         setFocusOnDefaultItem();
     } else {
-        qWarning() << "===>> TRY TO DROP WRONG ROOT OBJECT: " << m_rootObjects.top() << " SHOULD BE: " << object;
+        logger.warning() << "TRY TO DROP WRONG ROOT OBJECT: " << m_rootObjects.top() << " SHOULD BE: " << object;
     }
 }
 
@@ -101,7 +107,7 @@ void FocusController::reload(Direction direction)
     QObject *rootObject = (m_rootObjects.empty() ? m_engine->rootObjects().value(0) : m_rootObjects.top());
 
     if (!rootObject) {
-        qCritical() << "No ROOT OBJECT found!";
+        logger.error() << "No ROOT OBJECT found!";
         resetRootObject();
         dropListView();
         return;
@@ -113,7 +119,7 @@ void FocusController::reload(Direction direction)
               direction == Direction::Forward ? FocusControl::isLess : FocusControl::isMore);
 
     if (m_focusChain.empty()) {
-        qWarning() << "Focus chain is empty!";
+        logger.warning() << "Focus chain is empty!";
         resetRootObject();
         dropListView();
         return;
@@ -131,7 +137,7 @@ void FocusController::nextItem(Direction direction)
     }
 
     if (m_focusChain.empty()) {
-        qWarning() << "There are no items to navigate";
+        logger.warning() << "There are no items to navigate";
         setFocusOnDefaultItem();
         return;
     }
@@ -149,7 +155,7 @@ void FocusController::nextItem(Direction direction)
     const auto focusedItem = qobject_cast<QQuickItem *>(m_focusChain.at(focusedItemIndex));
 
     if (focusedItem == nullptr) {
-        qWarning() << "Failed to get item to focus on. Setting focus on default";
+        logger.warning() << "Failed to get item to focus on. Setting focus on default";
         setFocusOnDefaultItem();
         return;
     }

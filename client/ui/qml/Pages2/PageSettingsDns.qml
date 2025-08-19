@@ -21,13 +21,21 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    FlickableType {
-        id: fl
+    ListViewType {
+        id: listView
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.right: parent.right
+        anchors.left: parent.left
 
         property var isServerFromApi: ServersModel.isServerFromApi(ServersModel.defaultIndex)
 
@@ -39,32 +47,40 @@ PageType {
             }
         }
 
-        ColumnLayout {
-            id: content
-
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
-
+        header: ColumnLayout {
+            width: listView.width
             spacing: 16
 
             BaseHeaderType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 headerText: qsTr("DNS servers")
             }
 
             ParagraphTextType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                
                 text: qsTr("If AmneziaDNS is not used or installed")
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+
+        delegate: ColumnLayout {
+            width: listView.width
+            spacing: 16
 
             TextFieldWithHeaderType {
                 id: primaryDns
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 headerText: qsTr("Primary DNS")
 
                 textField.text: SettingsController.primaryDns
@@ -77,6 +93,9 @@ PageType {
                 id: secondaryDns
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 headerText: qsTr("Secondary DNS")
 
                 textField.text: SettingsController.secondaryDns
@@ -87,7 +106,11 @@ PageType {
 
             BasicButtonType {
                 id: restoreDefaultButton
+
                 Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 defaultColor: AmneziaStyle.color.transparent
                 hoveredColor: AmneziaStyle.color.translucentWhite
@@ -121,6 +144,7 @@ PageType {
                 id: saveButton
 
                 Layout.fillWidth: true
+                Layout.margins: 16
 
                 text: qsTr("Save")
 
@@ -136,5 +160,4 @@ PageType {
             }
         }
     }
-
 }

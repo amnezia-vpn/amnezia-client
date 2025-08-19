@@ -25,325 +25,288 @@ PageType {
         }
     }
 
-    ColumnLayout {
-        id: backButtonLayout
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
         anchors.topMargin: 20
 
-        BackButtonType {
-            id: backButton
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: backButtonLayout.bottom
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: listview.implicitHeight
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        ListView {
-            id: listview
+        model: Socks5ProxyConfigModel
 
-            width: parent.width
-            height: listview.contentItem.height
+        delegate: ColumnLayout {
+            width: listView.width
 
-            clip: true
-            interactive: false
+            spacing: 0
 
-            model: Socks5ProxyConfigModel
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            onFocusChanged: {
-                if (focus) {
-                    listview.currentItem.focusItemId.forceActiveFocus()
+                headerText: qsTr("SOCKS5 settings")
+            }
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 32
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16
+
+                text: qsTr("Host")
+                descriptionText: ServersModel.getProcessedServerData("hostName")
+
+                descriptionOnTop: true
+
+                rightImageSource: "qrc:/images/controls/copy.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
+
+                clickedFunction: function() {
+                    GC.copyToClipBoard(descriptionText)
+                    PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
 
-            delegate: Item {
-                implicitWidth: listview.width
-                implicitHeight: content.implicitHeight
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16
 
-                property alias focusItemId: hostLabel.rightButton
+                text: qsTr("Port")
+                descriptionText: port
 
-                ColumnLayout {
-                    id: content
+                descriptionOnTop: true
+
+                rightImageSource: "qrc:/images/controls/copy.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
+
+                clickedFunction: function() {
+                    GC.copyToClipBoard(descriptionText)
+                    PageController.showNotificationMessage(qsTr("Copied"))
+                }
+            }
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16
+
+                text: qsTr("User name")
+                descriptionText: username
+
+                descriptionOnTop: true
+
+                rightImageSource: "qrc:/images/controls/copy.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
+
+                clickedFunction: function() {
+                    GC.copyToClipBoard(descriptionText)
+                    PageController.showNotificationMessage(qsTr("Copied"))
+                }
+            }
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16
+
+                text: qsTr("Password")
+                descriptionText: password
+
+                descriptionOnTop: true
+
+                rightImageSource: "qrc:/images/controls/copy.svg"
+                rightImageColor: AmneziaStyle.color.paleGray
+
+                buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+
+                clickedFunction: function() {
+                    GC.copyToClipBoard(descriptionText)
+                    PageController.showNotificationMessage(qsTr("Copied"))
+                }
+            }
+
+            DrawerType2 {
+                id: changeSettingsDrawer
+                parent: root
+
+                anchors.fill: parent
+                expandedHeight: root.height * 0.9
+
+                expandedStateContent: ColumnLayout {
+                    property string tempPort: port
+                    property string tempUsername: username
+                    property string tempPassword: password
 
                     anchors.top: parent.top
                     anchors.left: parent.left
                     anchors.right: parent.right
-
+                    anchors.topMargin: 32
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
                     spacing: 0
+
+                    Connections {
+                        target: changeSettingsDrawer
+                        function onOpened() {
+                            tempPort = port
+                            tempUsername = username
+                            tempPassword = password
+                        }
+                        function onClosed() {
+                            port = tempPort
+                            username = tempUsername
+                            password = tempPassword
+                            portTextField.textField.text = port
+                            usernameTextField.textField.text = username
+                            passwordTextField.textField.text = password
+                        }
+                    }
 
                     BaseHeaderType {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16
                         Layout.rightMargin: 16
+                        Layout.bottomMargin: 16
 
                         headerText: qsTr("SOCKS5 settings")
                     }
 
-                    LabelWithButtonType {
-                        id: hostLabel
+                    TextFieldWithHeaderType {
+                        id: portTextField
+
                         Layout.fillWidth: true
-                        Layout.topMargin: 32
+                        Layout.topMargin: 40
+                        Layout.rightMargin: 16
+                        Layout.bottomMargin: 16
 
-                        parentFlickable: fl
+                        headerText: qsTr("Port")
+                        textField.text: port
+                        textField.maximumLength: 5
+                        textField.validator: IntValidator { bottom: 1; top: 65535 }
 
-                        text: qsTr("Host")
-                        descriptionText: ServersModel.getProcessedServerData("hostName")
-
-                        descriptionOnTop: true
-
-                        rightImageSource: "qrc:/images/controls/copy.svg"
-                        rightImageColor: AmneziaStyle.color.paleGray
-
-                        clickedFunction: function() {
-                            GC.copyToClipBoard(descriptionText)
-                            PageController.showNotificationMessage(qsTr("Copied"))
-                            if (!GC.isMobile()) {
-                                this.rightButton.forceActiveFocus()
+                        textField.onEditingFinished: {
+                            textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                            if (textField.text !== port) {
+                                port = textField.text
                             }
                         }
                     }
 
-                    LabelWithButtonType {
-                        id: portLabel
+                    TextFieldWithHeaderType {
+                        id: usernameTextField
+
                         Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.bottomMargin: 16
 
-                        text: qsTr("Port")
-                        descriptionText: port
+                        headerText: qsTr("Username")
+                        textField.placeholderText: "username"
+                        textField.text: username
+                        textField.maximumLength: 32
 
-                        descriptionOnTop: true
-
-                        parentFlickable: fl
-
-                        rightImageSource: "qrc:/images/controls/copy.svg"
-                        rightImageColor: AmneziaStyle.color.paleGray
-
-                        clickedFunction: function() {
-                            GC.copyToClipBoard(descriptionText)
-                            PageController.showNotificationMessage(qsTr("Copied"))
-                            if (!GC.isMobile()) {
-                                this.rightButton.forceActiveFocus()
+                        textField.onEditingFinished: {
+                            textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                            if (textField.text !== username) {
+                                username = textField.text
                             }
                         }
                     }
 
-                    LabelWithButtonType {
-                        id: usernameLabel
+                    TextFieldWithHeaderType {
+                        id: passwordTextField
+
+                        property bool hidePassword: true
+
                         Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.bottomMargin: 16
 
-                        text: qsTr("User name")
-                        descriptionText: username
+                        headerText: qsTr("Password")
+                        textField.placeholderText: "password"
+                        textField.text: password
+                        textField.maximumLength: 32
 
-                        descriptionOnTop: true
+                        textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
+                        buttonImageSource: textField.text !== "" ? (hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg")
+                                                                 : ""
 
-                        parentFlickable: fl
-
-                        rightImageSource: "qrc:/images/controls/copy.svg"
-                        rightImageColor: AmneziaStyle.color.paleGray
-
-                        clickedFunction: function() {
-                            GC.copyToClipBoard(descriptionText)
-                            PageController.showNotificationMessage(qsTr("Copied"))
-                            if (!GC.isMobile()) {
-                                this.rightButton.forceActiveFocus()
-                            }
+                        clickedFunc: function() {
+                            hidePassword = !hidePassword
                         }
-                    }
 
-                    LabelWithButtonType {
-                        id: passwordLabel
-                        Layout.fillWidth: true
-
-                        text: qsTr("Password")
-                        descriptionText: password
-
-                        descriptionOnTop: true
-
-                        parentFlickable: fl
-
-                        rightImageSource: "qrc:/images/controls/copy.svg"
-                        rightImageColor: AmneziaStyle.color.paleGray
-
-                        buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
-
-                        clickedFunction: function() {
-                            GC.copyToClipBoard(descriptionText)
-                            PageController.showNotificationMessage(qsTr("Copied"))
-                            if (!GC.isMobile()) {
-                                this.rightButton.forceActiveFocus()
-                            }
-                        }
-                    }
-
-                    DrawerType2 {
-                        id: changeSettingsDrawer
-                        parent: root
-
-                        anchors.fill: parent
-                        expandedHeight: root.height * 0.9
-
-                        expandedStateContent: ColumnLayout {
-                            property string tempPort: port
-                            property string tempUsername: username
-                            property string tempPassword: password
-
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.topMargin: 32
-                            anchors.leftMargin: 16
-                            anchors.rightMargin: 16
-                            spacing: 0
-
-                            Connections {
-                                target: changeSettingsDrawer
-                                function onOpened() {
-                                    tempPort = port
-                                    tempUsername = username
-                                    tempPassword = password
-                                }
-                                function onClosed() {
-                                    port = tempPort
-                                    username = tempUsername
-                                    password = tempPassword
-                                    portTextField.textField.text = port
-                                    usernameTextField.textField.text = username
-                                    passwordTextField.textField.text = password
-                                }
-                            }
-
-                            BaseHeaderType {
-                                Layout.fillWidth: true
-
-                                headerText: qsTr("SOCKS5 settings")
-                            }
-
-                            TextFieldWithHeaderType {
-                                id: portTextField
-
-                                Layout.fillWidth: true
-                                Layout.topMargin: 40
-                                parentFlickable: fl
-
-                                headerText: qsTr("Port")
-                                textField.text: port
-                                textField.maximumLength: 5
-                                textField.validator: IntValidator { bottom: 1; top: 65535 }
-
-                                textField.onEditingFinished: {
-                                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                                    if (textField.text !== port) {
-                                        port = textField.text
-                                    }
-                                }
-                            }
-
-                            TextFieldWithHeaderType {
-                                id: usernameTextField
-
-                                Layout.fillWidth: true
-                                Layout.topMargin: 16
-                                parentFlickable: fl
-
-                                headerText: qsTr("Username")
-                                textField.placeholderText: "username"
-                                textField.text: username
-                                textField.maximumLength: 32
-
-                                textField.onEditingFinished: {
-                                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                                    if (textField.text !== username) {
-                                        username = textField.text
-                                    }
-                                }
-                            }
-
-                            TextFieldWithHeaderType {
-                                id: passwordTextField
-
-                                property bool hidePassword: true
-
-                                Layout.fillWidth: true
-                                Layout.topMargin: 16
-                                parentFlickable: fl
-
-                                headerText: qsTr("Password")
-                                textField.placeholderText: "password"
-                                textField.text: password
-                                textField.maximumLength: 32
-
-                                textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
-                                buttonImageSource: textField.text !== "" ? (hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg")
-                                                                        : ""
-
-                                clickedFunc: function() {
-                                    hidePassword = !hidePassword
-                                }
-
-                                textField.onFocusChanged: {
-                                    textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                                    if (textField.text !== password) {
-                                        password = textField.text
-                                    }
-                                }
-                            }
-
-                            BasicButtonType {
-                                id: saveButton
-
-                                Layout.fillWidth: true
-                                Layout.topMargin: 24
-                                Layout.bottomMargin: 24
-
-                                text: qsTr("Change connection settings")
-
-                                clickedFunc: function() {
-                                    forceActiveFocus()
-
-                                    if (!portTextField.textField.acceptableInput) {
-                                        portTextField.errorText = qsTr("The port must be in the range of 1 to 65535")
-                                        return
-                                    }
-                                    if (usernameTextField.textField.text && passwordTextField.textField.text === "") {
-                                        passwordTextField.errorText = qsTr("Password cannot be empty")
-                                        return
-                                    } else if (usernameTextField.textField.text === "" && passwordTextField.textField.text) {
-                                        usernameTextField.errorText = qsTr("Username cannot be empty")
-                                        return
-                                    }
-
-                                    PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                                    InstallController.updateContainer(Socks5ProxyConfigModel.getConfig())
-                                    tempPort = portTextField.textField.text
-                                    tempUsername = usernameTextField.textField.text
-                                    tempPassword = passwordTextField.textField.text
-                                    changeSettingsDrawer.closeTriggered()
-                                }
+                        textField.onFocusChanged: {
+                            textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                            if (textField.text !== password) {
+                                password = textField.text
                             }
                         }
                     }
 
                     BasicButtonType {
-                        id: changeSettingsButton
+                        id: saveButton
 
                         Layout.fillWidth: true
                         Layout.topMargin: 24
                         Layout.bottomMargin: 24
-                        Layout.leftMargin: 16
                         Layout.rightMargin: 16
 
                         text: qsTr("Change connection settings")
 
                         clickedFunc: function() {
-                            forceActiveFocus()
-                            changeSettingsDrawer.openTriggered()
+                            if (!portTextField.textField.acceptableInput) {
+                                portTextField.errorText = qsTr("The port must be in the range of 1 to 65535")
+                                return
+                            }
+                            if (usernameTextField.textField.text && passwordTextField.textField.text === "") {
+                                passwordTextField.errorText = qsTr("Password cannot be empty")
+                                return
+                            } else if (usernameTextField.textField.text === "" && passwordTextField.textField.text) {
+                                usernameTextField.errorText = qsTr("Username cannot be empty")
+                                return
+                            }
+
+                            PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                            InstallController.updateContainer(Socks5ProxyConfigModel.getConfig())
+                            tempPort = portTextField.textField.text
+                            tempUsername = usernameTextField.textField.text
+                            tempPassword = passwordTextField.textField.text
+                            changeSettingsDrawer.closeTriggered()
                         }
                     }
+                }
+            }
+
+            BasicButtonType {
+                id: changeSettingsButton
+
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.bottomMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Change connection settings")
+
+                clickedFunc: function() {
+                    changeSettingsDrawer.openTriggered()
                 }
             }
         }

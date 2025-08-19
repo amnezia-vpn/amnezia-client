@@ -27,8 +27,6 @@ Button {
 
     property alias focusItem: rightImage
 
-    property FlickableType parentFlickable
-
     hoverEnabled: true
 
     background: Rectangle {
@@ -42,22 +40,6 @@ Button {
         Behavior on color {
             PropertyAnimation { duration: 200 }
         }
-    }
-
-    function ensureVisible(item) {
-        if (item.activeFocus) {
-            if (root.parentFlickable) {
-                root.parentFlickable.ensureVisible(root)
-            }
-        }
-    }
-
-    onFocusChanged: {
-        ensureVisible(root)
-    }
-
-    focusItem.onFocusChanged: {
-        root.ensureVisible(focusItem)
     }
 
     contentItem: Item {

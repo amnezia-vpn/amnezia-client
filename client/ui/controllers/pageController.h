@@ -40,6 +40,7 @@ namespace PageLoader
         PageSettingsApiInstructions,
         PageSettingsApiNativeConfigs,
         PageSettingsApiDevices,
+        PageSettingsApiSubscriptionKey,
         PageSettingsKillSwitchExceptions,
         
         PageServiceSftpSettings,
@@ -73,6 +74,7 @@ namespace PageLoader
         PageProtocolAwgClientSettings,
 
         PageShareFullAccess,
+        PageShareConnection,
 
         PageDevMenu
     };

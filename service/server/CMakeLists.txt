@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
 set(PROJECT AmneziaVPN-service)
-project(${PROJECT})
+project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION})
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -162,7 +162,14 @@ if (WIN32 OR APPLE OR LINUX)
     )
 endif()
 
+set(RESOURCES)
+
 if(WIN32)
+    configure_file(
+        ${CMAKE_CURRENT_LIST_DIR}/amneziavpn-service.rc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn-service.rc
+    )
+
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/tapcontroller_win.h
         ${CMAKE_CURRENT_LIST_DIR}/router_win.h
@@ -201,6 +208,10 @@ if(WIN32)
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowspingsender.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsnetworkwatcher.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/windowsutils.cpp
+    )
+
+    set(RESOURCES ${RESOURCES}
+        ${CMAKE_CURRENT_BINARY_DIR}/amneziavpn-service.rc
     )
 
     set(LIBS
@@ -308,7 +319,7 @@ include_directories(
 )
 
 
-add_executable(${PROJECT} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT} ${SOURCES} ${HEADERS} ${RESOURCES})
 target_link_libraries(${PROJECT} PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::RemoteObjects Qt6::Core5Compat Qt6::DBus ${LIBS})
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 

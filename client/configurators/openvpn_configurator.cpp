@@ -118,6 +118,12 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
         QRegularExpression regex("redirect-gateway.*");
         config.replace(regex, "");
         
+        // We don't use secondary DNS if primary DNS is AmneziaDNS
+        if (dns.first.contains(protocols::dns::amneziaDnsIp)) {
+            QRegularExpression dnsRegex("dhcp-option DNS " + dns.second);
+            config.replace(dnsRegex, "");
+        }
+
         if (!m_settings->isSitesSplitTunnelingEnabled()) {
             config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
             config.append("block-ipv6\n");
@@ -125,7 +131,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
 
                // no redirect-gateway
         } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
             config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
             // Prevent ipv6 leak
 #endif
@@ -160,6 +166,12 @@ QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString
 
     QRegularExpression regex("redirect-gateway.*");
     config.replace(regex, "");
+
+    // We don't use secondary DNS if primary DNS is AmneziaDNS
+    if (dns.first.contains(protocols::dns::amneziaDnsIp)) {
+        QRegularExpression dnsRegex("dhcp-option DNS " + dns.second);
+        config.replace(dnsRegex, "");
+    }
 
     config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
 
