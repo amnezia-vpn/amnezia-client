@@ -344,11 +344,14 @@ void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *repl
     std::mt19937 generator(randomDevice());
     std::shuffle(proxyUrls.begin(), proxyUrls.end(), generator);
 
-    QEventLoop wait;
-    QList<QSslError> sslErrors;
     QByteArray responseBody;
 
-    for (const QString &proxyUrl : proxyUrls) {
+    auto bypassFunction = [this](const QString &endpoint, const QString &proxyUrl, QNetworkReply *reply,
+                                 std::function<QNetworkReply *(const QString &url)> requestFunction,
+                                 std::function<bool(QNetworkReply * reply, const QList<QSslError> &sslErrors)> replyProcessingFunction) {
+        QEventLoop wait;
+        QList<QSslError> sslErrors;
+
         qDebug() << "go to the next proxy endpoint";
         reply->deleteLater(); // delete the previous reply
         reply = requestFunction(endpoint.arg(proxyUrl));
@@ -358,6 +361,20 @@ void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *repl
         wait.exec();
 
         if (replyProcessingFunction(reply, sslErrors)) {
+            return true;
+        }
+        return false;
+    };
+
+    if (!m_proxyUrl.isEmpty()) {
+        if (bypassFunction(endpoint, m_proxyUrl, reply, requestFunction, replyProcessingFunction)) {
+            return;
+        }
+    }
+
+    for (const QString &proxyUrl : proxyUrls) {
+        if (bypassFunction(endpoint, proxyUrl, reply, requestFunction, replyProcessingFunction)) {
+            m_proxyUrl = proxyUrl;
             break;
         }
     }
