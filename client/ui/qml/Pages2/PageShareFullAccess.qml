@@ -104,12 +104,13 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        if (serverSelector.currentIndex !== serverSelectorListView.currentIndex) {
-                            serverSelector.currentIndex = serverSelectorListView.currentIndex
+                        if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
+                            serverSelector.currentIndex = serverSelectorListView.selectedIndex
+                            serverSelector.severSelectorIndexChanged()
                         }
 
-                        shareConnectionPage.headerText = qsTr("Accessing ") + serverSelector.text
-                        shareConnectionPage.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
+                        PageShareConnection.headerText = qsTr("Accessing ") + serverSelector.text
+                        PageShareConnection.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
                         serverSelector.closeTriggered()
                     }
 
@@ -121,7 +122,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
+                        ServersModel.processedIndex = proxyServersModel.mapToSource(selectedIndex)
                     }
                 }
             }
