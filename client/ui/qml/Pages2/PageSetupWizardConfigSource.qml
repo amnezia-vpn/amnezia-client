@@ -86,7 +86,7 @@ PageType {
 
                             visible: PageController.isStartPageVisible()
                             checked: SettingsController.isLoggingEnabled
-                            onCheckedChanged: {
+                            onToggled: function() {
                                 if (checked !== SettingsController.isLoggingEnabled) {
                                     SettingsController.isLoggingEnabled = checked
                                 }

@@ -66,7 +66,7 @@ PageType {
                 descriptionText: qsTr("If AmneziaDNS is installed on the server")
 
                 checked: SettingsController.isAmneziaDnsEnabled()
-                onCheckedChanged: {
+                onToggled: function() {
                     if (checked !== SettingsController.isAmneziaDnsEnabled()) {
                         SettingsController.toggleAmneziaDns(checked)
                     }
