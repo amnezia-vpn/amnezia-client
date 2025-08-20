@@ -1,7 +1,9 @@
 #include "secure_qsettings.h"
 
+#ifndef IOS_SIM
 #include "../client/3rd/QSimpleCrypto/src/include/QAead.h"
 #include "../client/3rd/QSimpleCrypto/src/include/QBlockCipher.h"
+#endif
 #include "utilities.h"
 #include <QDataStream>
 #include <QDebug>
@@ -179,26 +181,36 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
 
 QByteArray SecureQSettings::encryptText(const QByteArray &value) const
 {
-    QSimpleCrypto::QBlockCipher cipher;
     QByteArray result;
+#ifndef IOS_SIM
+    QSimpleCrypto::QBlockCipher cipher;
     try {
         result = cipher.encryptAesBlockCipher(value, getEncKey(), getEncIv());
     } catch (...) { // todo change error handling in QSimpleCrypto?
         qCritical() << "error when encrypting the settings value";
     }
     return result;
+#else
+    // Simulator: store plaintext (still wrapped by magicString in setValue)
+    return value;
+#endif
 }
 
 QByteArray SecureQSettings::decryptText(const QByteArray &ba) const
 {
-    QSimpleCrypto::QBlockCipher cipher;
     QByteArray result;
+#ifndef IOS_SIM
+    QSimpleCrypto::QBlockCipher cipher;
     try {
         result = cipher.decryptAesBlockCipher(ba, getEncKey(), getEncIv());
     } catch (...) { // todo change error handling in QSimpleCrypto?
         qCritical() << "error when decrypting the settings value";
     }
     return result;
+#else
+    // Simulator: values were stored in plaintext
+    return ba;
+#endif
 }
 
 bool SecureQSettings::encryptionRequired() const
@@ -217,8 +229,14 @@ QByteArray SecureQSettings::getEncKey() const
 
     if (m_key.isEmpty()) {
         // Create new key
+        QByteArray key;
+#ifndef IOS_SIM
         QSimpleCrypto::QBlockCipher cipher;
-        QByteArray key = cipher.generatePrivateSalt(32);
+        key = cipher.generatePrivateSalt(32);
+#else
+        key.resize(32);
+        for (int i = 0; i < key.size(); ++i) key[i] = static_cast<char>(QRandomGenerator::global()->generate() & 0xFF);
+#endif
         if (key.isEmpty()) {
             qCritical() << "SecureQSettings::getEncKey Unable to generate new enc key";
         }
@@ -243,8 +261,14 @@ QByteArray SecureQSettings::getEncIv() const
 
     if (m_iv.isEmpty()) {
         // Create new IV
+        QByteArray iv;
+#ifndef IOS_SIM
         QSimpleCrypto::QBlockCipher cipher;
-        QByteArray iv = cipher.generatePrivateSalt(32);
+        iv = cipher.generatePrivateSalt(32);
+#else
+        iv.resize(32);
+        for (int i = 0; i < iv.size(); ++i) iv[i] = static_cast<char>(QRandomGenerator::global()->generate() & 0xFF);
+#endif
         if (iv.isEmpty()) {
             qCritical() << "SecureQSettings::getEncIv Unable to generate new enc IV";
         }

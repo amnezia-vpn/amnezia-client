@@ -36,8 +36,14 @@ while(IOS_TARGETS)
 
     ## I just want to say it's amazing this doesn't explode with syntax errors.
     message("Patching architectures for ${TARGET_NAME}")
+    # Use appropriate simulator arch depending on host. Apple Silicon uses arm64; Intel uses x86_64.
+    if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+        set(_MZ_SIM_ARCH "arm64")
+    else()
+        set(_MZ_SIM_ARCH "x86_64")
+    endif()
     set_target_properties(${TARGET_NAME} PROPERTIES
         XCODE_ATTRIBUTE_ARCHS[sdk=iphoneos*] "arm64"
-        XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] "x86_64"
+        XCODE_ATTRIBUTE_ARCHS[sdk=iphonesimulator*] "${_MZ_SIM_ARCH}"
     )
 endwhile()

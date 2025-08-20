@@ -6,7 +6,9 @@
 
 #include <fcntl.h>
 
+#ifndef IOS_SIM
 #include <libssh/libssh.h>
+#endif
 
 #include "defs.h"
 
@@ -14,9 +16,7 @@ using namespace amnezia;
 
 namespace libssh {
     enum ScpOverwriteMode {
-        /*! Overwrite any existing files */
         ScpOverwriteExisting = O_TRUNC,
-        /*! Append new content if the file already exists */
         ScpAppendToExisting = O_APPEND
     };
     class Client : public QObject
@@ -44,9 +44,15 @@ namespace libssh {
         ErrorCode fromFileErrorCode(QFileDevice::FileError fileError);
         static int callback(const char *prompt, char *buf, size_t len, int echo, int verify, void *userdata);
 
+#ifndef IOS_SIM
         ssh_session m_session = nullptr;
         ssh_channel m_channel = nullptr;
         ssh_scp m_scpSession = nullptr;
+#else
+        void* m_session = nullptr;
+        void* m_channel = nullptr;
+        void* m_scpSession = nullptr;
+#endif
 
         static std::function<QString()> m_passphraseCallback;
     signals:

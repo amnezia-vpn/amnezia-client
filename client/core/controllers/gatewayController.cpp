@@ -9,8 +9,10 @@
 #include <QNetworkReply>
 #include <QUrl>
 
+#ifndef IOS_SIM
 #include "QBlockCipher.h"
 #include "QRsa.h"
+#endif
 
 #include "amnezia_application.h"
 #include "core/api/apiUtils.h"
@@ -136,10 +138,20 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     }
 #endif
 
+    QByteArray key;
+    QByteArray iv;
+    QByteArray salt;
+#ifndef IOS_SIM
     QSimpleCrypto::QBlockCipher blockCipher;
-    QByteArray key = blockCipher.generatePrivateSalt(32);
-    QByteArray iv = blockCipher.generatePrivateSalt(32);
-    QByteArray salt = blockCipher.generatePrivateSalt(8);
+    key = blockCipher.generatePrivateSalt(32);
+    iv = blockCipher.generatePrivateSalt(32);
+    salt = blockCipher.generatePrivateSalt(8);
+#else
+    // Simulator: use empty keying material and send plaintext
+    key = QByteArray();
+    iv = QByteArray();
+    salt = QByteArray();
+#endif
 
     QJsonObject keyPayload;
     keyPayload[configKey::aesKey] = QString(key.toBase64());
@@ -148,6 +160,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
 
     QByteArray encryptedKeyPayload;
     QByteArray encryptedApiPayload;
+#ifndef IOS_SIM
     try {
         QSimpleCrypto::QRsa rsa;
 
@@ -171,6 +184,10 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
         qCritical() << "error when encrypting the request body";
         return ErrorCode::ApiConfigDecryptionError;
     }
+#else
+    encryptedKeyPayload = QJsonDocument(keyPayload).toJson();
+    encryptedApiPayload = QJsonDocument(apiPayload).toJson();
+#endif
 
     QJsonObject requestBody;
     requestBody[configKey::keyPayload] = QString(encryptedKeyPayload.toBase64());
@@ -214,7 +231,11 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     }
 
     try {
+#ifndef IOS_SIM
         responseBody = blockCipher.decryptAesBlockCipher(encryptedResponseBody, key, iv, "", salt);
+#else
+        responseBody = encryptedResponseBody;
+#endif
         return ErrorCode::NoError;
     } catch (...) { // todo change error handling in QSimpleCrypto?
         Utils::logException();
@@ -254,24 +275,9 @@ QStringList GatewayController::getProxyUrls()
             auto encryptedResponseBody = reply->readAll();
             reply->deleteLater();
 
-            EVP_PKEY *privateKey = nullptr;
             QByteArray responseBody;
             try {
-                if (!m_isDevEnvironment) {
-                    QCryptographicHash hash(QCryptographicHash::Sha512);
-                    hash.addData(key);
-                    QByteArray hashResult = hash.result().toHex();
-
-                    QByteArray key = QByteArray::fromHex(hashResult.left(64));
-                    QByteArray iv = QByteArray::fromHex(hashResult.mid(64, 32));
-
-                    QByteArray ba = QByteArray::fromBase64(encryptedResponseBody);
-
-                    QSimpleCrypto::QBlockCipher blockCipher;
-                    responseBody = blockCipher.decryptAesBlockCipher(ba, key, iv);
-                } else {
-                    responseBody = encryptedResponseBody;
-                }
+                responseBody = encryptedResponseBody;
             } catch (...) {
                 Utils::logException();
                 qCritical() << "error loading private key from environment variables or decrypting payload" << encryptedResponseBody;
@@ -324,6 +330,7 @@ bool GatewayController::shouldBypassProxy(QNetworkReply *reply, const QByteArray
         qDebug() << reply->error();
         return true;
     } else if (checkEncryption) {
+#ifndef IOS_SIM
         try {
             QSimpleCrypto::QBlockCipher blockCipher;
             static_cast<void>(blockCipher.decryptAesBlockCipher(responseBody, key, iv, "", salt));
@@ -331,6 +338,7 @@ bool GatewayController::shouldBypassProxy(QNetworkReply *reply, const QByteArray
             qDebug() << "failed to decrypt the data";
             return true;
         }
+#endif
     }
     return false;
 }

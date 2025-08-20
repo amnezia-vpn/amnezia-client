@@ -18,7 +18,9 @@
 #include "ui/models/installedAppsModel.h"
 #include "version.h"
 
+#ifndef IOS_SIM
 #include "platforms/ios/QRCodeReaderBase.h"
+#endif
 
 #include "protocols/qml_register_protocols.h"
 
@@ -132,7 +134,9 @@ void AmneziaApplication::registerTypes()
     declareQmlProtocolEnum();
     declareQmlContainerEnum();
 
+#ifndef IOS_SIM
     qmlRegisterType<QRCodeReader>("QRCodeReader", 1, 0, "QRCodeReader");
+#endif
 
     m_containerProps.reset(new ContainerProps());
     qmlRegisterSingletonInstance("ContainerProps", 1, 0, "ContainerProps", m_containerProps.get());

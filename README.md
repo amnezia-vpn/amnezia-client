@@ -142,9 +142,30 @@ Add a user-defined variable to both AmneziaVPN and WireGuardNetworkExtension tar
 key `PATH` and value `${PATH}/path/to/bin/folder/with/go/executable`, e.g. `${PATH}:/usr/local/go/bin`.
 
 if the above error persists on your M1 Mac, then most probably you need to install arch based CMake 
+
+### How to build for iOS Simulator
+
+Building for the iOS Simulator uses the iOS Qt toolchain but targets the `iphonesimulator` SDK and the host architecture. Network Extension targets and device-only frameworks are excluded in simulator builds.
+
+```bash
+export QT_BIN_DIR="<PATH-TO-QT-FOLDER>/Qt/<QT-VERSION>/ios/bin"
+export QT_MACOS_ROOT_DIR="<PATH-TO-QT-FOLDER>/Qt/<QT-VERSION>/macos"
+export QT_IOS_BIN=$QT_BIN_DIR
+mkdir build-ios-sim
+$QT_IOS_BIN/qt-cmake . -B build-ios-sim -GXcode \
+  -DQT_HOST_PATH=$QT_MACOS_ROOT_DIR \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+  -DCMAKE_OSX_SYSROOT=iphonesimulator
+
+cd build-ios-sim
+xcodebuild -project AmneziaVPN.xcodeproj -scheme AmneziaVPN build
 ```
+
+Notes:
+- On Apple Silicon, you can force simulator arch explicitly by adding: `-DCMAKE_OSX_ARCHITECTURES=arm64`.
+- The Network Extension is not built or embedded for the simulator, as it is unsupported on iOS Simulator.
+- Simulator builds need simulator-slice prebuilts for OpenSSL, libssh, and zlib under `client/3rd-prebuilt/3rd-prebuilt`. If missing, CMake will fail with a clear error indicating expected paths.
 arch -arm64 brew install cmake
-```
 
 Build might fail with the "source files not found" error the first time you try it, because the modern XCode build system compiles dependencies in parallel, and some dependencies end up being built after the ones that
 require them. In this case, simply restart the build.
