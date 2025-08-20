@@ -171,10 +171,9 @@ void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
                         IpcClient::Interface()->routeAddList(gw, QStringList() << ip);
                         m_settings->addVpnSite(mode, site, ip);
                     }
-                    flushDns();
-                    break;
                 }
             }
+            flushDns();
         };
         QHostInfo::lookupHost(site, this, cbResolv);
     }

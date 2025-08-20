@@ -51,7 +51,6 @@ void SitesController::addSite(QString hostname)
         for (const QHostAddress &addr : hostInfo.addresses()) {
             if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
                 processSite(hostInfo.hostName(), addr.toString());
-                break;
             }
         }
     };
