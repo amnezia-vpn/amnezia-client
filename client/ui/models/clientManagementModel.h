@@ -61,7 +61,7 @@ signals:
 private:
     bool isClientExists(const QString &clientId);
 
-    int clientIndexByID(const QString &clientId);
+    int clientIndexById(const QString &clientId);
 
     void migration(const QByteArray &clientsTableString);
 

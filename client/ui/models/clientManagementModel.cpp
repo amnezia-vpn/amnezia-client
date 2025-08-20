@@ -386,7 +386,7 @@ bool ClientManagementModel::isClientExists(const QString &clientId)
     return false;
 }
 
-int ClientManagementModel::clientIndexByID(const QString &clientId)
+int ClientManagementModel::clientIndexById(const QString &clientId)
 {
     int row = 0;
     for (int i = 0; i < rowCount(); i++) {
@@ -514,7 +514,7 @@ ErrorCode ClientManagementModel::renameClient(const QString &clientId, const QSt
                                               const ServerCredentials &credentials,
                                               const QSharedPointer<ServerController> &serverController, bool addTimeStamp)
 {
-    int row = clientIndexByID(clientId);
+    int row = clientIndexById(clientId);
     auto client = m_clientsTable.at(row).toObject();
     auto userData = client[configKey::userData].toObject();
     userData[configKey::clientName] = clientName;
@@ -548,9 +548,8 @@ ErrorCode ClientManagementModel::revokeClient(const QString &clientId, const Doc
                                               const int serverIndex, const QSharedPointer<ServerController> &serverController)
 {
     ErrorCode errorCode = ErrorCode::NoError;
-    int row = clientIndexByID(clientId);
+    int row = clientIndexById(clientId);
     auto client = m_clientsTable.at(row).toObject();
-    // QString clientId = client.value(configKey::clientId).toString();
 
     switch(container)
     {
