@@ -58,9 +58,9 @@ AmneziaApplication::~AmneziaApplication()
 
     m_vpnConnectionThread.quit();
 
-    if (!m_vpnConnectionThread.wait(5000)) {
+    if (!m_vpnConnectionThread.wait(4000)) {
         m_vpnConnectionThread.terminate();
-        m_vpnConnectionThread.wait();
+        m_vpnConnectionThread.wait(1000);
     }
 
     if (m_engine) {
