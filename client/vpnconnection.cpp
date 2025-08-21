@@ -55,19 +55,7 @@ void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
 void VpnConnection::onKillSwitchModeChanged(bool enabled)
 {
 #ifdef AMNEZIA_DESKTOP
-    if (!m_IpcClient) {
-        m_IpcClient = new IpcClient(this);
-    }
-
-    if (!m_IpcClient->isSocketConnected()) {
-        if (!IpcClient::init(m_IpcClient)) {
-            qWarning() << "Error occurred when init IPC client";
-            emit serviceIsNotReady();
-            return;
-        }
-    }
-
-    if (IpcClient::Interface()) {
+    if (InterfaceReady()) {
         qDebug() << "Set KillSwitch Strict mode enabled " << enabled;
         IpcClient::Interface()->refreshKillSwitch(enabled);
     }
@@ -80,7 +68,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 #ifdef AMNEZIA_DESKTOP
     auto container = m_settings->defaultContainer(m_settings->defaultServerIndex());
 
-    if (IpcClient::Interface()) {
+    if (InterfaceReady()) {
         if (state == Vpn::ConnectionState::Connected) {
             IpcClient::Interface()->resetIpStack();
             IpcClient::Interface()->flushDns();
@@ -212,10 +200,30 @@ void VpnConnection::deleteRoutes(const QStringList &ips)
 #endif
 }
 
+bool VpnConnection::InterfaceReady()
+{
+#ifdef AMNEZIA_DESKTOP
+    if (!m_IpcClient) {
+        m_IpcClient = new IpcClient(this);
+    }
+
+    if (!m_IpcClient->isSocketConnected()) {
+        if (!IpcClient::init(m_IpcClient)) {
+            qWarning() << "Error occurred when init IPC client";
+            emit serviceIsNotReady();
+            return false;
+        }
+    }
+
+    return IpcClient::Interface() != nullptr;
+#endif
+    return true;
+}
+
 void VpnConnection::flushDns()
 {
 #ifdef AMNEZIA_DESKTOP
-    if (IpcClient::Interface())
+    if (InterfaceReady())
         IpcClient::Interface()->flushDns();
 #endif
 }
@@ -240,20 +248,11 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
                         .arg(serverIndex)
                         .arg(ContainerProps::containerToString(container))
              << m_settings->routeMode();
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    if (!m_IpcClient) {
-        m_IpcClient = new IpcClient(this);
-    }
 
-    if (!m_IpcClient->isSocketConnected()) {
-        if (!IpcClient::init(m_IpcClient)) {
-            qWarning() << "Error occurred when init IPC client";
-            emit serviceIsNotReady();
-            emit connectionStateChanged(Vpn::ConnectionState::Error);
-            return;
-        }
+    if (!InterfaceReady()) {
+        emit connectionStateChanged(Vpn::ConnectionState::Error);
+        return;
     }
-#endif
 
     m_remoteAddress = NetworkUtilities::getIPAddress(credentials.hostName);
     emit connectionStateChanged(Vpn::ConnectionState::Connecting);
@@ -442,8 +441,9 @@ void VpnConnection::disconnectFromVpn()
     qDebug() << "VpnConnection::disconnectFromVpn()";
 #ifdef AMNEZIA_DESKTOP
     QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
-    if (IpcClient::Interface()) {
 
+
+    if (InterfaceReady()) {
         QRemoteObjectPendingReply<bool> flushDnsResp = IpcClient::Interface()->flushDns();
         flushDnsResp.waitForFinished(1000);
 
