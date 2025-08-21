@@ -6,8 +6,9 @@
 #include <QObject>
 #include <QJsonArray>
 
-#include "logger.h"
+#include "qjsonarray.h"
 #include "router.h"
+#include "logger.h"
 
 #include "killswitch.h"
 
