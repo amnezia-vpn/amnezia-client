@@ -38,8 +38,18 @@ void SitesController::addSite(QString hostname)
         m_sitesModel->addSite(hostname, ip);
 
         if (!ip.isEmpty()) {
-            QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
-                                      Q_ARG(QStringList, QStringList() << ip));
+            QStringList ips = ip.split(',', Qt::SkipEmptyParts);
+            QStringList validIps;
+            for (const QString &singleIp : ips) {
+                QString trimmedIp = singleIp.trimmed();
+                if (NetworkUtilities::checkIpSubnetFormat(trimmedIp)) {
+                    validIps.append(trimmedIp);
+                }
+            }
+            if (!validIps.isEmpty()) {
+                QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
+                                          Q_ARG(QStringList, validIps));
+            }
         } else if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
             QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
                                       Q_ARG(QStringList, QStringList() << hostname));
@@ -48,10 +58,17 @@ void SitesController::addSite(QString hostname)
 
     const auto &resolveCallback = [this, processSite](const QHostInfo &hostInfo) {
         const QList<QHostAddress> &addresses = hostInfo.addresses();
+        QStringList resolvedIps;
+
         for (const QHostAddress &addr : hostInfo.addresses()) {
             if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
-                processSite(hostInfo.hostName(), addr.toString());
+                resolvedIps.append(addr.toString());
             }
+        }
+
+        if (!resolvedIps.isEmpty()) {
+            QString aggregatedIps = resolvedIps.join(',');
+            processSite(hostInfo.hostName(), aggregatedIps);
         }
     };
 
@@ -119,10 +136,32 @@ void SitesController::importSites(const QString &fileName, bool replaceExisting)
 
         if (ip.isEmpty()) {
             ips.append(hostname);
+            sites.insert(hostname, ip);
         } else {
-            ips.append(ip);
+            QStringList importedIps = ip.split(',', Qt::SkipEmptyParts);
+            QStringList validIps;
+            for (const QString &singleIp : importedIps) {
+                QString trimmedIp = singleIp.trimmed();
+                if (NetworkUtilities::checkIpSubnetFormat(trimmedIp)) {
+                    validIps.append(trimmedIp);
+                    ips.append(trimmedIp);
+                }
+            }
+
+            if (sites.contains(hostname)) {
+                QString existingIps = sites.value(hostname);
+                if (!existingIps.isEmpty()) {
+                    QStringList existingIpList = existingIps.split(',', Qt::SkipEmptyParts);
+                    existingIpList.append(validIps);
+                    existingIpList.removeDuplicates();
+                    sites.insert(hostname, existingIpList.join(','));
+                } else {
+                    sites.insert(hostname, validIps.join(','));
+                }
+            } else {
+                sites.insert(hostname, validIps.join(','));
+            }
         }
-        sites.insert(hostname, ip);
     }
 
     m_sitesModel->addSites(sites, replaceExisting);

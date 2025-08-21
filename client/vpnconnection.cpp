@@ -162,16 +162,26 @@ void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
     for (const QString &site : sites) {
         const auto &cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo) {
             const QList<QHostAddress> &addresses = hostInfo.addresses();
-            QString ipv4Addr;
+            QStringList newIps;
+            QString existingIpsStr = m_settings->vpnSites(mode).value(site).toString();
+            QStringList existingIps = existingIpsStr.split(',', Qt::SkipEmptyParts);
+            
             for (const QHostAddress &addr : hostInfo.addresses()) {
                 if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
                     const QString &ip = addr.toString();
                     // qDebug() << "VpnConnection::addSitesRoutes updating site" << site << ip;
-                    if (!ips.contains(ip)) {
+                    if (!ips.contains(ip) && !existingIps.contains(ip)) {
                         IpcClient::Interface()->routeAddList(gw, QStringList() << ip);
-                        m_settings->addVpnSite(mode, site, ip);
+                        newIps.append(ip);
                     }
                 }
+            }
+
+            if (!newIps.isEmpty()) {
+                existingIps.append(newIps);
+                existingIps.removeDuplicates();
+                QString aggregatedIps = existingIps.join(',');
+                m_settings->addVpnSite(mode, site, aggregatedIps);
             }
             flushDns();
         };
