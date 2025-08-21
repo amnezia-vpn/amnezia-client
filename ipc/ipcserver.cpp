@@ -83,7 +83,7 @@ bool IpcServer::routeDeleteList(const QString &gw, const QStringList &ips)
     return Router::routeDeleteList(gw, ips);
 }
 
-void IpcServer::flushDns()
+bool IpcServer::flushDns()
 {
 #ifdef MZ_DEBUG
     qDebug() << "IpcServer::flushDns";

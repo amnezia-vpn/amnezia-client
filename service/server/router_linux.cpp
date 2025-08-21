@@ -160,7 +160,7 @@ bool RouterLinux::isServiceActive(const QString &serviceName) {
     return process.exitCode() == 0;
 }
 
-void RouterLinux::flushDns()
+bool RouterLinux::flushDns()
 {
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
@@ -174,7 +174,7 @@ void RouterLinux::flushDns()
         p.start("systemctl", { "restart", "systemd-resolved" });
     } else {
         qDebug() << "No suitable DNS manager found.";
-        return;
+        return false;
     }
 
     p.waitForFinished();
@@ -183,6 +183,8 @@ void RouterLinux::flushDns()
         qDebug().noquote() << "Flush dns completed";
     else
         qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
+
+    return true;
 }
 
 bool RouterLinux::createTun(const QString &dev, const QString &subnet) {

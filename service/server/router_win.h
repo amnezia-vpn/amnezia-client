@@ -39,7 +39,7 @@ public:
     int routeAddList(const QString &gw, const QStringList &ips);
     bool clearSavedRoutes();
     int routeDeleteList(const QString &gw, const QStringList &ips);
-    void flushDns();
+    bool flushDns();
     void resetIpStack();
 
     void StartRoutingIpv6();

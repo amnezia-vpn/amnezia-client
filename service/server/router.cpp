@@ -42,14 +42,14 @@ int Router::routeDeleteList(const QString &gw, const QStringList &ips)
 #endif
 }
 
-void Router::flushDns()
+bool Router::flushDns()
 {
 #ifdef Q_OS_WIN
-    RouterWin::Instance().flushDns();
+    return RouterWin::Instance().flushDns();
 #elif defined (Q_OS_MAC)
-    RouterMac::Instance().flushDns();
+    return RouterMac::Instance().flushDns();
 #elif defined Q_OS_LINUX
-    RouterLinux::Instance().flushDns();
+    return RouterLinux::Instance().flushDns();
 #endif
 }
 

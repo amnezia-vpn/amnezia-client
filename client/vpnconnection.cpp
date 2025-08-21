@@ -443,12 +443,14 @@ void VpnConnection::disconnectFromVpn()
 #ifdef AMNEZIA_DESKTOP
     QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
     if (IpcClient::Interface()) {
-        IpcClient::Interface()->flushDns();
+
+        QRemoteObjectPendingReply<bool> flushDnsResp = IpcClient::Interface()->flushDns();
+        flushDnsResp.waitForFinished(1000);
 
         qDebug() << "Flushed DNS";
         // delete cached routes
-        QRemoteObjectPendingReply<bool> response = IpcClient::Interface()->clearSavedRoutes();
-        response.waitForFinished(1000);
+        QRemoteObjectPendingReply<bool> clearSavedRoutesResp = IpcClient::Interface()->clearSavedRoutes();
+        clearSavedRoutesResp.waitForFinished(1000);
     }
 
     qDebug() << "Flushed DNS and routes";

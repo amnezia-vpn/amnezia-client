@@ -273,7 +273,7 @@ int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
     return success_count;
 }
 
-void RouterWin::flushDns()
+bool RouterWin::flushDns()
 {
     QProcess p;
     p.setProcessChannelMode(QProcess::MergedChannels);
@@ -281,6 +281,7 @@ void RouterWin::flushDns()
 
     p.start(command);
     p.waitForFinished();
+    return true;
     //qDebug().noquote() << "OUTPUT ipconfig /flushdns: " + p.readAll();
 }
 
