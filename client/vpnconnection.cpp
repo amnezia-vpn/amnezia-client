@@ -440,10 +440,8 @@ void VpnConnection::disconnectFromVpn()
 {
     qDebug() << "VpnConnection::disconnectFromVpn()";
 #ifdef AMNEZIA_DESKTOP
-    QString proto = m_settings->defaultContainerName(m_settings->defaultServerIndex());
-
-
     if (InterfaceReady()) {
+        qDebug() << "Interface is ready!";
         QRemoteObjectPendingReply<bool> flushDnsResp = IpcClient::Interface()->flushDns();
         flushDnsResp.waitForFinished(1000);
 
