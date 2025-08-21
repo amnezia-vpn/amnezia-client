@@ -438,7 +438,6 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 
 void VpnConnection::disconnectFromVpn()
 {
-    qDebug() << "VpnConnection::disconnectFromVpn()";
 #ifdef AMNEZIA_DESKTOP
     if (InterfaceReady()) {
         qDebug() << "Interface is ready!";
@@ -450,8 +449,6 @@ void VpnConnection::disconnectFromVpn()
         QRemoteObjectPendingReply<bool> clearSavedRoutesResp = IpcClient::Interface()->clearSavedRoutes();
         clearSavedRoutesResp.waitForFinished(1000);
     }
-
-    qDebug() << "Flushed DNS and routes";
 #endif
 
 #ifdef Q_OS_ANDROID
