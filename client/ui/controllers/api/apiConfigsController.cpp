@@ -2,6 +2,7 @@
 
 #include <QClipboard>
 #include <QEventLoop>
+#include <algorithm>
 
 #include "amnezia_application.h"
 #include "configurators/wireguard_configurator.h"
@@ -347,18 +348,20 @@ bool ApiConfigsController::fillAvailableServices()
     {
         const QStringList productIds = {
             QStringLiteral("7e09f1f163e9463bb6d3213e6e9e8ad9"),
-            QStringLiteral("c358c8fc0b314f49bb0d0215e1bb6821")
+            QStringLiteral("c358c8fc0b314f49bb0d0215e1bb6821"),
+            QStringLiteral("com.amnezia.AmneziaVPN.6_month")
 
             // Add more product identifiers here as needed
         };
         IosController::Instance()->fetchProducts(productIds,
-            [](const QList<QVariantMap> &products,
-               const QStringList &invalidIds,
-               const QString &errorString) {
+            [productIds](const QList<QVariantMap> &products,
+                         const QStringList &invalidIds,
+                         const QString &errorString) {
                 if (!errorString.isEmpty()) {
                     qDebug() << "IAP fetch error:" << errorString;
                     return;
                 }
+
                 for (const auto &p : products) {
                     qDebug().nospace() << "IAP product id=" << p.value("productId").toString()
                                        << ", title=" << p.value("title").toString()
@@ -367,6 +370,41 @@ bool ApiConfigsController::fillAvailableServices()
                 }
                 if (!invalidIds.isEmpty()) {
                     qDebug() << "Invalid IAP IDs:" << invalidIds;
+                }
+
+                // Find the first valid product ID preserving our desired order
+                QString firstValidId;
+                for (const auto &candidate : productIds) {
+                    const bool isInvalid = invalidIds.contains(candidate);
+                    if (isInvalid) {
+                        continue;
+                    }
+                    // Ensure it exists in returned products list
+                    const bool found = std::any_of(products.begin(), products.end(), [&](const QVariantMap &p) {
+                        return p.value("productId").toString() == candidate;
+                    });
+                    if (found) {
+                        firstValidId = candidate;
+                        break;
+                    }
+                }
+
+                if (!firstValidId.isEmpty()) {
+                    qDebug() << "Attempting IAP purchase for" << firstValidId;
+                    IosController::Instance()->purchaseProduct(
+                        firstValidId,
+                        [](bool success,
+                           const QString &transactionId,
+                           const QString &purchasedProductId,
+                           const QString &errorString) {
+                            if (success) {
+                                qDebug() << "IAP purchase succeeded" << purchasedProductId << transactionId;
+                            } else {
+                                qDebug() << "IAP purchase failed for" << purchasedProductId << ":" << errorString;
+                            }
+                        });
+                } else {
+                    qDebug() << "No valid IAP product IDs available to purchase.";
                 }
             });
     }
