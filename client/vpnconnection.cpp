@@ -42,7 +42,7 @@ VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject *parent
 
 VpnConnection::~VpnConnection()
 {
-#if defined AMNEZIA_DESKTOP
+#ifdef AMNEZIA_DESKTOP
     disconnectFromVpn();
 #endif
 }
