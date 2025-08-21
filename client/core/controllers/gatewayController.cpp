@@ -61,7 +61,7 @@ ErrorCode GatewayController::get(const QString &endpoint, QByteArray &responseBo
     request.setTransferTimeout(m_requestTimeoutMsecs);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    request.setUrl(QString(endpoint).arg(m_gatewayEndpoint));
+    request.setUrl(QString(endpoint).arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
 
     // bypass killSwitch exceptions for API-gateway
 #ifdef AMNEZIA_DESKTOP
@@ -123,7 +123,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     request.setTransferTimeout(m_requestTimeoutMsecs);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    request.setUrl(endpoint.arg(m_gatewayEndpoint));
+    request.setUrl(endpoint.arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
 
     // bypass killSwitch exceptions for API-gateway
 #ifdef AMNEZIA_DESKTOP
@@ -365,6 +365,36 @@ void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *repl
         }
         return false;
     };
+
+    if (m_proxyUrl.isEmpty()) {
+        QNetworkRequest request;
+        request.setTransferTimeout(1000);
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+        QEventLoop wait;
+        QList<QSslError> sslErrors;
+        QNetworkReply *reply;
+
+        for (const QString &proxyUrl : proxyUrls) {
+            request.setUrl(proxyUrl + "lmbd-health");
+            reply = amnApp->networkManager()->get(request);
+
+            connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
+            connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
+            wait.exec();
+
+            if (reply->error() == QNetworkReply::NetworkError::NoError) {
+                reply->deleteLater();
+
+                m_proxyUrl = proxyUrl;
+                if (!m_proxyUrl.isEmpty()) {
+                    break;
+                }
+            } else {
+                reply->deleteLater();
+            }
+        }
+    }
 
     if (!m_proxyUrl.isEmpty()) {
         if (bypassFunction(endpoint, m_proxyUrl, reply, requestFunction, replyProcessingFunction)) {
