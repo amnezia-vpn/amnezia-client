@@ -234,9 +234,9 @@ namespace
         ErrorCode errorCode = ErrorCode::NoError;
         IosController::Instance()->purchaseProduct(
                 "7e09f1f163e9463bb6d3213e6e9e8ad9",
-                [&transactionId, &errorCode](bool ok, const QString &txId, const QString &prodId, const QString &err) {
+                [&transactionId, &errorCode](bool ok, const QString &txId, const QString &prodId, const QString &receipt, const QString &err) {
                     if (ok) {
-                        qDebug() << "Purchased" << prodId << txId;
+                        qDebug() << "Purchased" << prodId << txId << ", receipt size=" << receipt.size();
                         transactionId = txId;
                     } else {
                         qDebug() << "Error" << err;
@@ -396,9 +396,10 @@ bool ApiConfigsController::fillAvailableServices()
                         [](bool success,
                            const QString &transactionId,
                            const QString &purchasedProductId,
+                           const QString &receipt,
                            const QString &errorString) {
                             if (success) {
-                                qDebug() << "IAP purchase succeeded" << purchasedProductId << transactionId;
+                                qDebug() << "IAP purchase succeeded" << purchasedProductId << transactionId << ", receipt size=" << receipt.size();
                             } else {
                                 qDebug() << "IAP purchase failed for" << purchasedProductId << ":" << errorString;
                             }

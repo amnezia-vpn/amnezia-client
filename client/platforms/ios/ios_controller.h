@@ -62,6 +62,7 @@ public:
                          std::function<void(bool success,
                                             const QString &transactionId,
                                             const QString &purchasedProductId,
+                                            const QString &receiptBase64,
                                             const QString &errorString)> &&callback);
     void restorePurchases(std::function<void(bool success,
                                              const QString &errorString)> &&callback);

@@ -16,6 +16,7 @@
              completion:(void (^)(BOOL success,
                                   NSString *_Nullable transactionId,
                                   NSString *_Nullable productId,
+                                  NSString *_Nullable receiptBase64,
                                   NSError *_Nullable error))completion;
 
 - (void)restorePurchasesWithCompletion:(void (^)(BOOL success, NSError *_Nullable error))completion;

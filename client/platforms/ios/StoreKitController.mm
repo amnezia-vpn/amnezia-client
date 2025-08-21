@@ -9,12 +9,16 @@
 @property (nonatomic, copy) void (^purchaseCompletion)(BOOL success,
                                                        NSString *_Nullable transactionId,
                                                        NSString *_Nullable productId,
+                                                       NSString *_Nullable receiptBase64,
                                                        NSError *_Nullable error);
 @property (nonatomic, copy) void (^restoreCompletion)(BOOL success, NSError *_Nullable error);
 @property (nonatomic, copy) void (^productsFetchCompletion)(NSArray<SKProduct *> *products,
                                                             NSArray<NSString *> *invalidIdentifiers,
                                                             NSError *_Nullable error);
 @property (nonatomic, strong) SKProductsRequest *productsRequest;
+@property (nonatomic, strong) SKReceiptRefreshRequest *receiptRefreshRequest;
+@property (nonatomic, copy) NSString *pendingTransactionId;
+@property (nonatomic, copy) NSString *pendingProductId;
 @end
 
 @implementation StoreKitController
@@ -47,6 +51,7 @@
              completion:(void (^)(BOOL success,
                                   NSString *_Nullable transactionId,
                                   NSString *_Nullable productId,
+                                  NSString *_Nullable receiptBase64,
                                   NSError *_Nullable error))completion
 {
     self.purchaseCompletion = completion;
@@ -72,7 +77,29 @@
     [self.productsRequest start];
 }
 
-#pragma mark - SKProductsRequestDelegate
+// Helper to read the Base64-encoded app receipt from bundle
+- (NSString *)base64AppReceipt
+{
+    NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
+    if (!receiptURL) {
+        return nil;
+    }
+    NSData *receiptData = [NSData dataWithContentsOfURL:receiptURL];
+    if (!receiptData || receiptData.length == 0) {
+        return nil;
+    }
+    return [receiptData base64EncodedStringWithOptions:0];
+}
+
+// Start a receipt refresh request to obtain or update the app receipt
+- (void)startReceiptRefresh
+{
+    self.receiptRefreshRequest = [[SKReceiptRefreshRequest alloc] initWithReceiptProperties:nil];
+    self.receiptRefreshRequest.delegate = self;
+    [self.receiptRefreshRequest start];
+}
+
+#pragma mark - SKProductsRequestDelegate / SKRequestDelegate
 
 - (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response
 {
@@ -82,7 +109,7 @@
             NSError *error = [NSError errorWithDomain:@"StoreKitController"
                                                  code:0
                                              userInfo:@{ NSLocalizedDescriptionKey : @"Product not found" }];
-            self.purchaseCompletion(NO, nil, nil, error);
+            self.purchaseCompletion(NO, nil, nil, nil, error);
             self.purchaseCompletion = nil;
             self.productsRequest = nil;
             return;
@@ -103,8 +130,21 @@
 
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error
 {
+    // Distinguish between product fetch vs. receipt refresh failure
+    if (request == self.receiptRefreshRequest) {
+        // Receipt refresh failed; if we still have a pending purchase, complete without receipt
+        if (self.purchaseCompletion) {
+            self.purchaseCompletion(YES, self.pendingTransactionId, self.pendingProductId, nil, nil);
+            self.purchaseCompletion = nil;
+        }
+        self.pendingTransactionId = nil;
+        self.pendingProductId = nil;
+        self.receiptRefreshRequest = nil;
+        return;
+    }
+
     if (self.purchaseCompletion) {
-        self.purchaseCompletion(NO, nil, nil, error);
+        self.purchaseCompletion(NO, nil, nil, nil, error);
         self.purchaseCompletion = nil;
     }
     if (self.productsFetchCompletion) {
@@ -120,22 +160,34 @@
 {
     for (SKPaymentTransaction *transaction in transactions) {
         switch (transaction.transactionState) {
-        case SKPaymentTransactionStatePurchased:
-            if (self.purchaseCompletion) {
-                self.purchaseCompletion(YES,
-                                       transaction.transactionIdentifier,
-                                       transaction.payment.productIdentifier,
-                                       nil);
-                self.purchaseCompletion = nil;
+        case SKPaymentTransactionStatePurchased: {
+            // On purchase success, try to attach the Base64 app receipt
+            NSString *receipt = [self base64AppReceipt];
+            if (receipt.length > 0) {
+                if (self.purchaseCompletion) {
+                    self.purchaseCompletion(YES,
+                                           transaction.transactionIdentifier,
+                                           transaction.payment.productIdentifier,
+                                           receipt,
+                                           nil);
+                    self.purchaseCompletion = nil;
+                }
+            } else {
+                // No receipt found yet: start a refresh and defer completion
+                self.pendingTransactionId = transaction.transactionIdentifier;
+                self.pendingProductId = transaction.payment.productIdentifier;
+                [self startReceiptRefresh];
             }
             [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
             self.productsRequest = nil;
             break;
+        }
         case SKPaymentTransactionStateFailed:
             if (self.purchaseCompletion) {
                 self.purchaseCompletion(NO,
                                        transaction.transactionIdentifier,
                                        transaction.payment.productIdentifier,
+                                       nil,
                                        transaction.error);
                 self.purchaseCompletion = nil;
             }
@@ -146,6 +198,20 @@
         case SKPaymentTransactionStatePurchasing:
         case SKPaymentTransactionStateDeferred: break;
         }
+    }
+}
+
+- (void)requestDidFinish:(SKRequest *)request
+{
+    if (request == self.receiptRefreshRequest) {
+        NSString *receipt = [self base64AppReceipt];
+        if (self.purchaseCompletion) {
+            self.purchaseCompletion(YES, self.pendingTransactionId, self.pendingProductId, receipt, nil);
+            self.purchaseCompletion = nil;
+        }
+        self.pendingTransactionId = nil;
+        self.pendingProductId = nil;
+        self.receiptRefreshRequest = nil;
     }
 }
 

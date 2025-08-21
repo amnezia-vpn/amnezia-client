@@ -867,6 +867,7 @@ void IosController::purchaseProduct(const QString &productId,
                                    std::function<void(bool success,
                                                       const QString &transactionId,
                                                       const QString &purchasedProductId,
+                                                      const QString &receiptBase64,
                                                       const QString &errorString)> &&callback)
 {
     StoreKitController *controller = [StoreKitController sharedInstance];
@@ -874,13 +875,15 @@ void IosController::purchaseProduct(const QString &productId,
     [controller purchaseProduct:productId.toNSString() completion:^(BOOL s,
                                                                     NSString * _Nullable transactionId,
                                                                     NSString * _Nullable prodId,
+                                                                    NSString * _Nullable receipt,
                                                                     NSError * _Nullable error) {
         const QString txId = QString::fromUtf8((transactionId ?: @"").UTF8String);
         const QString pId  = QString::fromUtf8((prodId        ?: @"").UTF8String);
+        const QString rcpt = QString::fromUtf8(((receipt)     ?: @"").UTF8String);
         const QString err  = QString::fromUtf8((error.localizedDescription ?: @"").UTF8String);
 
         if (cb) {
-            cb(s, txId, pId, err);
+            cb(s, txId, pId, rcpt, err);
         }
     }];
 }
