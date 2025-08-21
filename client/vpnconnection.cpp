@@ -445,10 +445,13 @@ void VpnConnection::disconnectFromVpn()
     if (IpcClient::Interface()) {
         IpcClient::Interface()->flushDns();
 
+        qDebug() << "Flushed DNS";
         // delete cached routes
         QRemoteObjectPendingReply<bool> response = IpcClient::Interface()->clearSavedRoutes();
         response.waitForFinished(1000);
     }
+
+    qDebug() << "Flushed DNS and routes";
 #endif
 
 #ifdef Q_OS_ANDROID
