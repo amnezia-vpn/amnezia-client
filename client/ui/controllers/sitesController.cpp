@@ -37,22 +37,26 @@ void SitesController::addSite(QString hostname)
     const auto &processSite = [this](const QString &hostname, const QString &ip) {
         m_sitesModel->addSite(hostname, ip);
 
-        if (!ip.isEmpty()) {
-            QStringList ips = ip.split(',', Qt::SkipEmptyParts);
-            QStringList validIps;
-            for (const QString &singleIp : ips) {
-                QString trimmedIp = singleIp.trimmed();
-                if (NetworkUtilities::checkIpSubnetFormat(trimmedIp)) {
-                    validIps.append(trimmedIp);
-                }
-            }
-            if (!validIps.isEmpty()) {
+        if (ip.isEmpty()) {
+            if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
                 QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
-                                          Q_ARG(QStringList, validIps));
+                                          Q_ARG(QStringList, QStringList() << hostname));
             }
-        } else if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
+            return;
+        }
+
+        QStringList ips = ip.split(',', Qt::SkipEmptyParts);
+        QStringList validIps;
+        for (const QString &singleIp : ips) {
+            QString trimmedIp = singleIp.trimmed();
+            if (NetworkUtilities::checkIpSubnetFormat(trimmedIp)) {
+                validIps.append(trimmedIp);
+            }
+        }
+
+        if (!validIps.isEmpty()) {
             QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
-                                      Q_ARG(QStringList, QStringList() << hostname));
+                                      Q_ARG(QStringList, validIps));
         }
     };
 

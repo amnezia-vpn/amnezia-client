@@ -308,16 +308,19 @@ QStringList Settings::getVpnIps(RouteMode mode) const
     for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
         if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
             ips.append(i.key());
-        } else {
-            QString ipValue = i.value().toString();
-            if (!ipValue.isEmpty()) {
-                QStringList splitIps = ipValue.split(',', Qt::SkipEmptyParts);
-                for (const QString &ip : splitIps) {
-                    QString trimmedIp = ip.trimmed();
-                    if (NetworkUtilities::checkIpSubnetFormat(trimmedIp)) {
-                        ips.append(trimmedIp);
-                    }
-                }
+            continue;
+        }
+
+        QString ipValue = i.value().toString();
+        if (ipValue.isEmpty()) {
+            continue;
+        }
+
+        QStringList splitIps = ipValue.split(',', Qt::SkipEmptyParts);
+        for (const QString &ip : splitIps) {
+            QString trimmedIp = ip.trimmed();
+            if (NetworkUtilities::checkIpSubnetFormat(trimmedIp)) {
+                ips.append(trimmedIp);
             }
         }
     }
