@@ -42,9 +42,6 @@ VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject *parent
 
 VpnConnection::~VpnConnection()
 {
-#ifdef AMNEZIA_DESKTOP
-    disconnectFromVpn();
-#endif
 }
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
