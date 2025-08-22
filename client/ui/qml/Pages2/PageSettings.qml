@@ -134,9 +134,9 @@ PageType {
 
         property string title: qsTr("News & Notifications")
         readonly property string leftImagePath: NewsModel.hasUnread ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
-        property bool isVisible: ServersModel.hasServersFromApi
+        property bool isVisible: ServersModel.hasServersFromGatewayApi
         readonly property var clickedHandler: function() {
-            if (!ServersModel.hasServersFromApi) return;
+            if (!ServersModel.hasServersFromGatewayApi) return;
             ApiNewsController.fetchNews();
             PageController.goToPage(PageEnum.PageSettingsNewsNotifications)
         }

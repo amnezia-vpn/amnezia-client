@@ -169,15 +169,15 @@ QVariant ServersModel::data(const int index, int role) const
 
 void ServersModel::resetModel()
 {
-    bool hadApiServersBefore = hasServersFromApi();
+    bool hadGatewayApiServersBefore = hasServersFromGatewayApi();
     beginResetModel();
     m_servers = m_settings->serversArray();
     m_defaultServerIndex = m_settings->defaultServerIndex();
     m_processedServerIndex = m_defaultServerIndex;
     endResetModel();
     emit defaultServerIndexChanged(m_defaultServerIndex);
-    if (hadApiServersBefore != hasServersFromApi()) {
-        emit hasServersFromApiChanged();
+    if (hadGatewayApiServersBefore != hasServersFromGatewayApi()) {
+        emit hasServersFromGatewayApiChanged();
     }
 }
 
@@ -313,19 +313,19 @@ bool ServersModel::isDefaultServerHasWriteAccess()
 
 void ServersModel::addServer(const QJsonObject &server)
 {
-    bool hadApiServersBefore = hasServersFromApi();
+    bool hadGatewayApiServersBefore = hasServersFromGatewayApi();
     beginResetModel();
     m_settings->addServer(server);
     m_servers = m_settings->serversArray();
     endResetModel();
-    if (hadApiServersBefore != hasServersFromApi()) {
-        emit hasServersFromApiChanged();
+    if (hadGatewayApiServersBefore != hasServersFromGatewayApi()) {
+        emit hasServersFromGatewayApiChanged();
     }
 }
 
 void ServersModel::editServer(const QJsonObject &server, const int serverIndex)
 {
-    bool hadApiServersBefore = hasServersFromApi();
+    bool hadGatewayApiServersBefore = hasServersFromGatewayApi();
     m_settings->editServer(serverIndex, server);
     m_servers.replace(serverIndex, m_settings->serversArray().at(serverIndex));
     emit dataChanged(index(serverIndex, 0), index(serverIndex, 0));
@@ -339,14 +339,14 @@ void ServersModel::editServer(const QJsonObject &server, const int serverIndex)
         auto defaultContainer = qvariant_cast<DockerContainer>(getDefaultServerData("defaultContainer"));
         emit defaultServerDefaultContainerChanged(defaultContainer);
     }
-    if (hadApiServersBefore != hasServersFromApi()) {
-        emit hasServersFromApiChanged();
+    if (hadGatewayApiServersBefore != hasServersFromGatewayApi()) {
+        emit hasServersFromGatewayApiChanged();
     }
 }
 
 void ServersModel::removeServer()
 {
-    bool hadApiServersBefore = hasServersFromApi();
+    bool hadGatewayApiServersBefore = hasServersFromGatewayApi();
     beginResetModel();
     m_settings->removeServer(m_processedServerIndex);
     m_servers = m_settings->serversArray();
@@ -362,14 +362,14 @@ void ServersModel::removeServer()
     }
     setProcessedServerIndex(m_defaultServerIndex);
     endResetModel();
-    if (hadApiServersBefore != hasServersFromApi()) {
-        emit hasServersFromApiChanged();
+    if (hadGatewayApiServersBefore != hasServersFromGatewayApi()) {
+        emit hasServersFromGatewayApiChanged();
     }
 }
 
 void ServersModel::removeServer(const int serverIndex)
 {
-    bool hadApiServersBefore = hasServersFromApi();
+    bool hadGatewayApiServersBefore = hasServersFromGatewayApi();
     beginResetModel();
     m_settings->removeServer(serverIndex);
     m_servers = m_settings->serversArray();
@@ -385,8 +385,8 @@ void ServersModel::removeServer(const int serverIndex)
     }
     setProcessedServerIndex(m_defaultServerIndex);
     endResetModel();
-    if (hadApiServersBefore != hasServersFromApi()) {
-        emit hasServersFromApiChanged();
+    if (hadGatewayApiServersBefore != hasServersFromGatewayApi()) {
+        emit hasServersFromGatewayApiChanged();
     }
 }
 
@@ -775,10 +775,10 @@ bool ServersModel::isServerFromApi(const int serverIndex)
     return data(serverIndex, IsServerFromTelegramApiRole).toBool() || data(serverIndex, IsServerFromGatewayApiRole).toBool();
 }
 
-bool ServersModel::hasServersFromApi()
+bool ServersModel::hasServersFromGatewayApi()
 {
     for (int i = 0; i < m_servers.count(); ++i) {
-        if (isServerFromApi(i)) {
+        if (data(i, IsServerFromGatewayApiRole).toBool()) {
             return true;
         }
     }

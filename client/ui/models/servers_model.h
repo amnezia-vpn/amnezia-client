@@ -62,7 +62,7 @@ public:
                        defaultServerDefaultContainerChanged)
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
 
-    Q_PROPERTY(bool hasServersFromApi READ hasServersFromApi NOTIFY hasServersFromApiChanged)
+    Q_PROPERTY(bool hasServersFromGatewayApi READ hasServersFromGatewayApi NOTIFY hasServersFromGatewayApiChanged)
 
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
     Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerChanged)
@@ -84,7 +84,7 @@ public slots:
     bool isDefaultServerHasWriteAccess();
     bool hasServerWithWriteAccess();
 
-    bool hasServersFromApi();
+    bool hasServersFromGatewayApi();
 
     const int getServersCount();
 
@@ -151,7 +151,7 @@ signals:
     void updateApiCountryModel();
     void updateApiServicesModel();
 
-    void hasServersFromApiChanged();
+    void hasServersFromGatewayApiChanged();
 
 private:
     ServerCredentials serverCredentials(int index) const;

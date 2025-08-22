@@ -324,8 +324,8 @@ void CoreController::initContainerModelUpdateHandler()
     connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(), &ContainersModel::updateModel);
     connect(m_serversModel.get(), &ServersModel::defaultServerContainersUpdated, m_defaultServerContainersModel.get(),
             &ContainersModel::updateModel);
-    connect(m_serversModel.get(), &ServersModel::hasServersFromApiChanged, this, [this]() {
-        if (m_serversModel->hasServersFromApi()) {
+    connect(m_serversModel.get(), &ServersModel::hasServersFromGatewayApiChanged, this, [this]() {
+        if (m_serversModel->hasServersFromGatewayApi()) {
             m_apiNewsController->fetchNews();
         }
     });

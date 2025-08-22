@@ -4,6 +4,15 @@
 #include <QJsonObject>
 #include "core/api/apiUtils.h"
 
+namespace
+{
+    namespace configKey
+    {
+        constexpr char userCountryCode[] = "user_country_code";
+        constexpr char serviceType[] = "service_type";
+    }
+}
+
 ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel,
                                      const std::shared_ptr<Settings> &settings,
                                      QObject *parent)
@@ -13,16 +22,31 @@ ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel,
 
 void ApiNewsController::fetchNews()
 {
-    // Disable news if there are no API-based servers (only self-hosted present)
     const QJsonArray servers = m_settings->serversArray();
-    bool hasApiServer = false;
+    bool hasGatewayApiServer = false;
+    QJsonArray userCountryCodes;
+    QJsonArray serviceTypes;
+
     for (const QJsonValue &v : servers) {
-        if (v.isObject() && apiUtils::isServerFromApi(v.toObject())) {
-            hasApiServer = true;
-            break;
+        if (!v.isObject())
+            continue;
+        const QJsonObject serverObj = v.toObject();
+        if (!apiUtils::isServerFromApi(serverObj) || apiUtils::getConfigSource(serverObj) == apiDefs::ConfigSource::Telegram)
+            continue;
+        hasGatewayApiServer = true;
+
+        const QJsonObject apiConfig = serverObj.value(apiDefs::key::apiConfig).toObject();
+        const QString uc = apiConfig.value(configKey::userCountryCode).toString();
+        const QString st = apiConfig.value(configKey::serviceType).toString();
+        if (!uc.isEmpty() && !userCountryCodes.contains(uc)) {
+            userCountryCodes.append(uc);
+        }
+        if (!st.isEmpty() && !serviceTypes.contains(st)) {
+            serviceTypes.append(st);
         }
     }
-    if (!hasApiServer) {
+    if (!hasGatewayApiServer) {
+        qDebug() << "No Gateway API servers found, disabling news fetching";
         return;
     }
     GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),
@@ -30,6 +54,9 @@ void ApiNewsController::fetchNews()
     QByteArray responseBody;
     QJsonObject payload;
     payload.insert("locale", m_settings->getAppLanguage().name().split("_").first());
+
+    if (!userCountryCodes.isEmpty()) payload.insert(configKey::userCountryCode, userCountryCodes);
+    if (!serviceTypes.isEmpty()) payload.insert(configKey::serviceType, serviceTypes);
 
     ErrorCode errorCode = gatewayController.post(QString("%1v1/news"), payload, responseBody);
     if (errorCode != ErrorCode::NoError) {
