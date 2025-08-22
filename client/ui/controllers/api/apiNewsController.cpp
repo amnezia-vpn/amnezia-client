@@ -2,6 +2,7 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
+#include "core/api/apiUtils.h"
 
 ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel,
                                      const std::shared_ptr<Settings> &settings,
@@ -12,6 +13,18 @@ ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel,
 
 void ApiNewsController::fetchNews()
 {
+    // Disable news if there are no API-based servers (only self-hosted present)
+    const QJsonArray servers = m_settings->serversArray();
+    bool hasApiServer = false;
+    for (const QJsonValue &v : servers) {
+        if (v.isObject() && apiUtils::isServerFromApi(v.toObject())) {
+            hasApiServer = true;
+            break;
+        }
+    }
+    if (!hasApiServer) {
+        return;
+    }
     GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),
                                         apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
     QByteArray responseBody;

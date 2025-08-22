@@ -161,7 +161,6 @@ void CoreController::initControllers()
 
     m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
-    m_apiNewsController->fetchNews();
 }
 
 void CoreController::initAndroidController()
@@ -325,6 +324,11 @@ void CoreController::initContainerModelUpdateHandler()
     connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(), &ContainersModel::updateModel);
     connect(m_serversModel.get(), &ServersModel::defaultServerContainersUpdated, m_defaultServerContainersModel.get(),
             &ContainersModel::updateModel);
+    connect(m_serversModel.get(), &ServersModel::hasServersFromApiChanged, this, [this]() {
+        if (m_serversModel->hasServersFromApi()) {
+            m_apiNewsController->fetchNews();
+        }
+    });
     m_serversModel->resetModel();
 }
 
