@@ -58,10 +58,8 @@ AmneziaApplication::~AmneziaApplication()
     m_vpnConnectionThread.quit();
 
     if (!m_vpnConnectionThread.wait(3000)) {
-#ifndef Q_OS_LINUX
         m_vpnConnectionThread.terminate();
         m_vpnConnectionThread.wait(500);
-#endif
     }
 
     if (m_engine) {
