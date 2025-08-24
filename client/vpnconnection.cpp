@@ -32,8 +32,8 @@
 VpnConnection::VpnConnection(std::shared_ptr<Settings> settings, QObject *parent)
     : QObject(parent), m_settings(settings), m_checkTimer(new QTimer(this))
 {
-    m_checkTimer.setInterval(1000);
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
+    m_checkTimer.setInterval(1000);
     connect(IosController::Instance(), &IosController::connectionStateChanged, this, &VpnConnection::onConnectionStateChanged);
     connect(IosController::Instance(), &IosController::bytesChanged, this, &VpnConnection::onBytesChanged);
 
@@ -474,6 +474,7 @@ void VpnConnection::disconnectFromVpn()
     }
 #ifndef Q_OS_ANDROID
     if (m_vpnProtocol) {
+        m_vpnProtocol->disconnect();
         m_vpnProtocol->deleteLater();
     }
     m_vpnProtocol = nullptr;
