@@ -53,6 +53,7 @@ AmneziaApplication::~AmneziaApplication()
 {
     if (m_vpnConnection) {
         QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectFromVpn", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnect", Qt::QueuedConnection);
     }
 
     m_vpnConnectionThread.requestInterruption();

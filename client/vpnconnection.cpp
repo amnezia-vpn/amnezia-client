@@ -474,7 +474,6 @@ void VpnConnection::disconnectFromVpn()
     }
 #ifndef Q_OS_ANDROID
     if (m_vpnProtocol) {
-        m_vpnProtocol->disconnect();
         m_vpnProtocol->deleteLater();
     }
     m_vpnProtocol = nullptr;
