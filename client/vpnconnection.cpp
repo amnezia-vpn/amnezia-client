@@ -225,6 +225,13 @@ void VpnConnection::flushDns()
 #endif
 }
 
+void VpnConnection::disconnectSlots()
+{
+    if (m_vpnProtocol) {
+        m_vpnProtocol->disconnect();
+    }
+}
+
 ErrorCode VpnConnection::lastError() const
 {
 #ifdef Q_OS_ANDROID
