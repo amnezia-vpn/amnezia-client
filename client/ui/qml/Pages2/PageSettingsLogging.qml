@@ -167,7 +167,8 @@ PageType {
 
     // Show service logs only if this is NOT a macOS build with
     // Network-Extension (IsMacOsNeBuild is injected from C++ at run-time)
-    property list<QtObject> logTypes: IsMacOsNeBuild ? [
+    // or if this is NOT a mobile build
+    property list<QtObject> logTypes: (IsMacOsNeBuild || GC.isMobile()) ? [
         clientLogs
     ] : [
         clientLogs,
@@ -214,15 +215,11 @@ PageType {
         }
         readonly property var exportLogsHandler: function() {
             var fileName = ""
-            if (GC.isMobile()) {
-                fileName = "AmneziaVPN-service.log"
-            } else {
-                fileName = SystemController.getFileName(qsTr("Save"),
-                                                        qsTr("Logs files (*.log)"),
-                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN-service",
-                                                        true,
-                                                        ".log")
-            }
+            fileName = SystemController.getFileName(qsTr("Save"),
+                                                    qsTr("Logs files (*.log)"),
+                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN-service",
+                                                    true,
+                                                    ".log")
             if (fileName !== "") {
                 PageController.showBusyIndicator(true)
                 SettingsController.exportServiceLogsFile(fileName)
