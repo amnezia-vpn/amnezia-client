@@ -60,6 +60,7 @@ ErrorCode GatewayController::get(const QString &endpoint, QByteArray &responseBo
     QNetworkRequest request;
     request.setTransferTimeout(m_requestTimeoutMsecs);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setRawHeader(QString("X-Client-Request-ID").toUtf8(), QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8());
 
     request.setUrl(QString(endpoint).arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
 
@@ -122,6 +123,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     QNetworkRequest request;
     request.setTransferTimeout(m_requestTimeoutMsecs);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setRawHeader(QString("X-Client-Request-ID").toUtf8(), QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8());
 
     request.setUrl(endpoint.arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
 
