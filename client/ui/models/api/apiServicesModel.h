@@ -58,6 +58,10 @@ private:
         QString region;
         QString price;
 
+        QString description;
+        QString features;
+        QString cardDescription;
+
         QJsonObject object;
     };
 

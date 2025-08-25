@@ -29,6 +29,7 @@ namespace
         constexpr char uuid[] = "installation_uuid";
         constexpr char osVersion[] = "os_version";
         constexpr char appVersion[] = "app_version";
+        constexpr char appLanguage[] = "app_language";
 
         constexpr char userCountryCode[] = "user_country_code";
         constexpr char serverCountryCode[] = "server_country_code";
@@ -322,6 +323,7 @@ bool ApiConfigsController::fillAvailableServices()
 {
     QJsonObject apiPayload;
     apiPayload[configKey::osVersion] = QSysInfo::productType();
+    apiPayload[configKey::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);
