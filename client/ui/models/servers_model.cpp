@@ -781,8 +781,12 @@ bool ServersModel::GatewayStacks::operator==(const GatewayStacks &other) const
 QJsonObject ServersModel::GatewayStacks::toJson() const
 {
     QJsonObject obj;
-    if (!userCountryCodes.isEmpty()) obj.insert("user_country_code", QJsonArray::fromStringList(QStringList(userCountryCodes.begin(), userCountryCodes.end())));
-    if (!serviceTypes.isEmpty()) obj.insert("service_type", QJsonArray::fromStringList(QStringList(serviceTypes.begin(), serviceTypes.end())));
+    if (!userCountryCodes.isEmpty()) {
+        obj.insert(configKey::userCountryCode, QJsonArray::fromStringList(userCountryCodes.values()));
+    }
+    if (!serviceTypes.isEmpty()) {
+        obj.insert(configKey::serviceType, QJsonArray::fromStringList(serviceTypes.values()));
+    }
     return obj;
 }
 
