@@ -159,7 +159,7 @@ void CoreController::initControllers()
     m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversModel, m_settings, this));
     m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
 
-    m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings));
+    m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversModel, this));
     m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
 }
 
@@ -324,7 +324,7 @@ void CoreController::initContainerModelUpdateHandler()
     connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(), &ContainersModel::updateModel);
     connect(m_serversModel.get(), &ServersModel::defaultServerContainersUpdated, m_defaultServerContainersModel.get(),
             &ContainersModel::updateModel);
-    connect(m_serversModel.get(), &ServersModel::hasServersFromGatewayApiChanged, this, [this]() {
+    connect(m_serversModel.get(), &ServersModel::gatewayStacksChanged, this, [this]() {
         if (m_serversModel->hasServersFromGatewayApi()) {
             m_apiNewsController->fetchNews();
         }

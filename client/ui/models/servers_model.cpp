@@ -9,6 +9,7 @@
 #endif
 
 #include "core/api/apiUtils.h"
+#include <algorithm>
 
 namespace
 {
@@ -44,6 +45,8 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) 
 
     connect(this, &ServersModel::processedServerIndexChanged, this, &ServersModel::processedServerChanged);
     connect(this, &ServersModel::dataChanged, this, &ServersModel::processedServerChanged);
+
+    connect(this, &ServersModel::serversListChanged, this, &ServersModel::recomputeGatewayStacks);
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
@@ -176,9 +179,7 @@ void ServersModel::resetModel()
     m_processedServerIndex = m_defaultServerIndex;
     endResetModel();
     emit defaultServerIndexChanged(m_defaultServerIndex);
-    if (hadGatewayApiServersBefore != hasServersFromGatewayApi()) {
-        emit hasServersFromGatewayApiChanged();
-    }
+    emit serversListChanged();
 }
 
 void ServersModel::setDefaultServerIndex(const int index)
@@ -318,9 +319,7 @@ void ServersModel::addServer(const QJsonObject &server)
     m_settings->addServer(server);
     m_servers = m_settings->serversArray();
     endResetModel();
-    if (hadGatewayApiServersBefore != hasServersFromGatewayApi()) {
-        emit hasServersFromGatewayApiChanged();
-    }
+    emit serversListChanged();
 }
 
 void ServersModel::editServer(const QJsonObject &server, const int serverIndex)
@@ -339,9 +338,7 @@ void ServersModel::editServer(const QJsonObject &server, const int serverIndex)
         auto defaultContainer = qvariant_cast<DockerContainer>(getDefaultServerData("defaultContainer"));
         emit defaultServerDefaultContainerChanged(defaultContainer);
     }
-    if (hadGatewayApiServersBefore != hasServersFromGatewayApi()) {
-        emit hasServersFromGatewayApiChanged();
-    }
+    emit serversListChanged();
 }
 
 void ServersModel::removeServer()
@@ -362,9 +359,7 @@ void ServersModel::removeServer()
     }
     setProcessedServerIndex(m_defaultServerIndex);
     endResetModel();
-    if (hadGatewayApiServersBefore != hasServersFromGatewayApi()) {
-        emit hasServersFromGatewayApiChanged();
-    }
+    emit serversListChanged();
 }
 
 void ServersModel::removeServer(const int serverIndex)
@@ -385,9 +380,7 @@ void ServersModel::removeServer(const int serverIndex)
     }
     setProcessedServerIndex(m_defaultServerIndex);
     endResetModel();
-    if (hadGatewayApiServersBefore != hasServersFromGatewayApi()) {
-        emit hasServersFromGatewayApiChanged();
-    }
+    emit serversListChanged();
 }
 
 QHash<int, QByteArray> ServersModel::roleNames() const
@@ -777,12 +770,47 @@ bool ServersModel::isServerFromApi(const int serverIndex)
 
 bool ServersModel::hasServersFromGatewayApi()
 {
+    return !m_gatewayStacks.isEmpty();
+}
+
+bool ServersModel::GatewayStacks::operator==(const GatewayStacks &other) const
+{
+    return userCountryCodes == other.userCountryCodes && serviceTypes == other.serviceTypes;
+}
+
+QJsonObject ServersModel::GatewayStacks::toJson() const
+{
+    QJsonObject obj;
+    if (!userCountryCodes.isEmpty()) obj.insert("user_country_code", QJsonArray::fromStringList(QStringList(userCountryCodes.begin(), userCountryCodes.end())));
+    if (!serviceTypes.isEmpty()) obj.insert("service_type", QJsonArray::fromStringList(QStringList(serviceTypes.begin(), serviceTypes.end())));
+    return obj;
+}
+
+void ServersModel::recomputeGatewayStacks()
+{
+    const bool wasEmpty = m_gatewayStacks.isEmpty();
+
+    GatewayStacks computed;
     for (int i = 0; i < m_servers.count(); ++i) {
         if (data(i, IsServerFromGatewayApiRole).toBool()) {
-            return true;
+            const QJsonObject server = m_servers.at(i).toObject();
+            const QJsonObject apiConfig = server.value(configKey::apiConfig).toObject();
+            const QString uc = apiConfig.value(configKey::userCountryCode).toString();
+            const QString st = apiConfig.value(configKey::serviceType).toString();
+            if (!uc.isEmpty()) computed.userCountryCodes.insert(uc);
+            if (!st.isEmpty()) computed.serviceTypes.insert(st);
         }
     }
-    return false;
+
+    if (!(computed == m_gatewayStacks)) {
+        m_gatewayStacks = computed;
+        emit gatewayStacksChanged();
+    }
+
+    const bool nowEmpty = m_gatewayStacks.isEmpty();
+    if (wasEmpty != nowEmpty) {
+        emit hasServersFromGatewayApiChanged();
+    }
 }
 
 bool ServersModel::isApiKeyExpired(const int serverIndex)

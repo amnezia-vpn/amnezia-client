@@ -10,6 +10,16 @@ class ServersModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
+    struct GatewayStacks
+    {
+        QSet<QString> userCountryCodes;
+        QSet<QString> serviceTypes;
+
+        bool isEmpty() const { return userCountryCodes.isEmpty() && serviceTypes.isEmpty(); }
+        bool operator==(const GatewayStacks &other) const;
+        QJsonObject toJson() const;
+    };
+
     enum Roles {
         NameRole = Qt::UserRole + 1,
         ServerDescriptionRole,
@@ -51,6 +61,8 @@ public:
     QVariant data(const int index, int role = Qt::DisplayRole) const;
 
     void resetModel();
+
+    GatewayStacks gatewayStacks() const { return m_gatewayStacks; }
 
     Q_PROPERTY(int defaultIndex READ getDefaultServerIndex WRITE setDefaultServerIndex NOTIFY defaultServerIndexChanged)
     Q_PROPERTY(QString defaultServerName READ getDefaultServerName NOTIFY defaultServerNameChanged)
@@ -152,6 +164,8 @@ signals:
     void updateApiServicesModel();
 
     void hasServersFromGatewayApiChanged();
+    void serversListChanged();
+    void gatewayStacksChanged();
 
 private:
     ServerCredentials serverCredentials(int index) const;
@@ -173,6 +187,9 @@ private:
     int m_processedServerIndex;
 
     bool m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
+
+    GatewayStacks m_gatewayStacks;
+    void recomputeGatewayStacks();
 };
 
 #endif // SERVERSMODEL_H

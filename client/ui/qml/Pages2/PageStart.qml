@@ -367,12 +367,12 @@ PageType {
             objectName: "settingsTabButton"
 
             isSelected: tabBar.currentIndex === 2
-            image: NewsModel.hasUnread ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
+            image: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
             Binding {
                 target: settingsTabButton
                 property: "defaultColor"
                 value: "transparent"
-                when: NewsModel.hasUnread
+                when: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread)
             }
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
