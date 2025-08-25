@@ -2,7 +2,6 @@
 
 #include <QDirIterator>
 #include <QTranslator>
-#include <QCoreApplication>
 
 #if defined(Q_OS_ANDROID)
     #include "core/installedAppsImageProvider.h"

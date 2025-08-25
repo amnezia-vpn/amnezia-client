@@ -9,7 +9,6 @@
 #endif
 
 #include "core/api/apiUtils.h"
-#include <algorithm>
 
 namespace
 {
@@ -172,7 +171,6 @@ QVariant ServersModel::data(const int index, int role) const
 
 void ServersModel::resetModel()
 {
-    bool hadGatewayApiServersBefore = hasServersFromGatewayApi();
     beginResetModel();
     m_servers = m_settings->serversArray();
     m_defaultServerIndex = m_settings->defaultServerIndex();
@@ -314,7 +312,6 @@ bool ServersModel::isDefaultServerHasWriteAccess()
 
 void ServersModel::addServer(const QJsonObject &server)
 {
-    bool hadGatewayApiServersBefore = hasServersFromGatewayApi();
     beginResetModel();
     m_settings->addServer(server);
     m_servers = m_settings->serversArray();
@@ -324,7 +321,6 @@ void ServersModel::addServer(const QJsonObject &server)
 
 void ServersModel::editServer(const QJsonObject &server, const int serverIndex)
 {
-    bool hadGatewayApiServersBefore = hasServersFromGatewayApi();
     m_settings->editServer(serverIndex, server);
     m_servers.replace(serverIndex, m_settings->serversArray().at(serverIndex));
     emit dataChanged(index(serverIndex, 0), index(serverIndex, 0));
@@ -343,7 +339,6 @@ void ServersModel::editServer(const QJsonObject &server, const int serverIndex)
 
 void ServersModel::removeServer()
 {
-    bool hadGatewayApiServersBefore = hasServersFromGatewayApi();
     beginResetModel();
     m_settings->removeServer(m_processedServerIndex);
     m_servers = m_settings->serversArray();
@@ -364,7 +359,6 @@ void ServersModel::removeServer()
 
 void ServersModel::removeServer(const int serverIndex)
 {
-    bool hadGatewayApiServersBefore = hasServersFromGatewayApi();
     beginResetModel();
     m_settings->removeServer(serverIndex);
     m_servers = m_settings->serversArray();
