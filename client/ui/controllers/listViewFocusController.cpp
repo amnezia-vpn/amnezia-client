@@ -112,6 +112,7 @@ void ListViewFocusController::previousDelegate()
     case Section::Default: {
         if (hasFooter()) {
             m_currentSection = Section::Footer;
+            viewAtCurrentIndex();
             break;
         }
         [[fallthrough]];
@@ -127,9 +128,11 @@ void ListViewFocusController::previousDelegate()
     case Section::Delegate: {
         if (m_delegateIndex > 0) {
             setDelegateIndex(m_delegateIndex - 1);
+            viewAtCurrentIndex();
             break;
         } else if (hasHeader()) {
             m_currentSection = Section::Header;
+            viewAtCurrentIndex();
             break;
         }
         [[fallthrough]];
@@ -137,6 +140,7 @@ void ListViewFocusController::previousDelegate()
     case Section::Header: {
         m_isReturnNeeded = true;
         m_currentSection = Section::Default;
+        viewAtCurrentIndex();
         break;
     }
     default: {
@@ -275,7 +279,7 @@ bool ListViewFocusController::isFirstFocusItemInListView() const
         return isFirstFocusItemInDelegate() && (m_delegateIndex == 0) && !hasHeader();
     }
     case Section::Header: {
-        isFirstFocusItemInDelegate();
+        return isFirstFocusItemInDelegate();
     }
     case Section::Default: {
         return true;

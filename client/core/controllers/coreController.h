@@ -5,7 +5,7 @@
 #include <QQmlContext>
 #include <QThread>
 
-#ifndef Q_OS_ANDROID
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     #include "ui/systemtray_notificationhandler.h"
 #endif
 
@@ -50,7 +50,7 @@
 #include "ui/models/sites_model.h"
 #include "ui/models/newsmodel.h"
 
-#ifndef Q_OS_ANDROID
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     #include "ui/notificationhandler.h"
 #endif
 
@@ -99,7 +99,7 @@ private:
     QSharedPointer<VpnConnection> m_vpnConnection;
     QSharedPointer<QTranslator> m_translator;
 
-#ifndef Q_OS_ANDROID
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     QScopedPointer<NotificationHandler> m_notificationHandler;
 #endif
 
