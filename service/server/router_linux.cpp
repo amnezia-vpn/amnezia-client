@@ -281,7 +281,7 @@ bool RouterLinux::updateResolvers(const QString& ifname, const QList<QHostAddres
     return m_dnsUtil->updateResolvers(ifname, resolvers);
 }
 
-void RouterLinux::StartRoutingIpv6()
+bool RouterLinux::StartRoutingIpv6()
 {
     QProcess process;
     QStringList commands;
@@ -291,12 +291,12 @@ void RouterLinux::StartRoutingIpv6()
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start activate ipv6\n";
-        return;
+        return false;
     }
     else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not activate ipv6\n";
-        return;
+        return false;
     }
     commands.clear();
 
@@ -305,19 +305,20 @@ void RouterLinux::StartRoutingIpv6()
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start activate ipv6\n";
-        return;
+        return false;
     }
     else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not activate ipv6\n";
-        return;
+        return false;
     }
     commands.clear();
 
     qDebug().noquote() << "StartRoutingIpv6 OK";
+    return true;
 }
 
-void RouterLinux::StopRoutingIpv6()
+bool RouterLinux::StopRoutingIpv6()
 {
     QProcess process;
     QStringList commands;
@@ -327,12 +328,12 @@ void RouterLinux::StopRoutingIpv6()
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start disable ipv6\n";
-        return;
+        return false;
     }
     else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not disable ipv6\n";
-        return;
+        return false;
     }
     commands.clear();
 
@@ -341,14 +342,15 @@ void RouterLinux::StopRoutingIpv6()
     if (!process.waitForStarted(1000))
     {
         qDebug().noquote() << "Could not start disable ipv6\n";
-        return;
+        return false;
     }
     else if (!process.waitForFinished(2000))
     {
         qDebug().noquote() << "Could not disable ipv6\n";
-        return;
+        return false;
     }
     commands.clear();
 
     qDebug().noquote() << "StopRoutingIpv6 OK";
+    return true;
 }

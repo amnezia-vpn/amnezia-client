@@ -100,25 +100,25 @@ bool Router::updateResolvers(const QString& ifname, const QList<QHostAddress>& r
 }
 
 
-void Router::StopRoutingIpv6()
+bool Router::StopRoutingIpv6()
 {
 #ifdef Q_OS_WIN
-    RouterWin::Instance().StopRoutingIpv6();
+    return RouterWin::Instance().StopRoutingIpv6();
 #elif defined (Q_OS_MAC)
-    // todo fixme
+    return true;// todo fixme
 #elif defined Q_OS_LINUX
-    RouterLinux::Instance().StopRoutingIpv6();
+    return RouterLinux::Instance().StopRoutingIpv6();
 #endif
 }
 
-void Router::StartRoutingIpv6()
+bool Router::StartRoutingIpv6()
 {
 #ifdef Q_OS_WIN
-    RouterWin::Instance().StartRoutingIpv6();
+    return RouterWin::Instance().StartRoutingIpv6();
 #elif defined (Q_OS_MAC)
-    // todo fixme
+    return true;// todo fixme
 #elif defined Q_OS_LINUX
-    RouterLinux::Instance().StartRoutingIpv6();
+    return RouterLinux::Instance().StartRoutingIpv6();
 #endif
 }
 

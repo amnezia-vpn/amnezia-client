@@ -33,8 +33,8 @@ public:
     bool flushDns();
     bool createTun(const QString &dev, const QString &subnet);
     bool deleteTun(const QString &dev);
-    void StartRoutingIpv6();
-    void StopRoutingIpv6();
+    bool StartRoutingIpv6();
+    bool StopRoutingIpv6();
     bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
 public slots:
 

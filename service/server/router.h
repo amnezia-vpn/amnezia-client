@@ -23,8 +23,8 @@ public:
     static void resetIpStack();
     static bool createTun(const QString &dev, const QString &subnet);
     static bool deleteTun(const QString &dev);
-    static void StartRoutingIpv6();
-    static void StopRoutingIpv6();
+    static bool StartRoutingIpv6();
+    static bool StopRoutingIpv6();
     static bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
 };
 

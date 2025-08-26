@@ -167,8 +167,10 @@ ErrorCode XrayProtocol::startTun2Sock()
 void XrayProtocol::stop()
 {
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-    IpcClient::Interface()->disableKillSwitch();
-    IpcClient::Interface()->StartRoutingIpv6();
+    QRemoteObjectPendingReply<bool> disableKillSwitchResp = IpcClient::Interface()->disableKillSwitch();
+    disableKillSwitchResp.waitForFinished(1000);
+    QRemoteObjectPendingReply<bool> StartRoutingIpv6Resp = IpcClient::Interface()->StartRoutingIpv6();
+    StartRoutingIpv6Resp.waitForFinished(1000);
 #endif
     qDebug() << "XrayProtocol::stop()";
     m_xrayProcess.disconnect();
@@ -176,6 +178,7 @@ void XrayProtocol::stop()
     m_xrayProcess.waitForFinished(3000);
     if (m_t2sProcess) {
         m_t2sProcess->stop();
+        QThread::msleep(200);
     }
 
     setConnectionState(Vpn::ConnectionState::Disconnected);

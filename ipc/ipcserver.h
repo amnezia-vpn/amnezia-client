@@ -32,8 +32,8 @@ public:
     virtual void setLogsEnabled(bool enabled) override;
     virtual bool createTun(const QString &dev, const QString &subnet) override;
     virtual bool deleteTun(const QString &dev) override;
-    virtual void StartRoutingIpv6() override;
-    virtual void StopRoutingIpv6() override;
+    virtual bool StartRoutingIpv6() override;
+    virtual bool StopRoutingIpv6() override;
     virtual bool disableAllTraffic() override;
     virtual bool addKillSwitchAllowedRange(QStringList ranges) override;
     virtual bool resetKillSwitchAllowedRange(QStringList ranges) override;
