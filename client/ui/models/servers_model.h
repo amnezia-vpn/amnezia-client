@@ -18,13 +18,6 @@ public:
         bool isEmpty() const { return userCountryCodes.isEmpty() && serviceTypes.isEmpty(); }
         bool operator==(const GatewayStacks &other) const;
         QJsonObject toJson() const;
-
-        GatewayStacks &operator=(GatewayStacks &&other) noexcept = default;
-        GatewayStacks &operator=(const GatewayStacks &other) = default;
-        GatewayStacks() = default;
-        GatewayStacks(const GatewayStacks &other) = default;
-        GatewayStacks(GatewayStacks &&other) noexcept = default;
-        ~GatewayStacks() = default;
     };
 
     enum Roles {
