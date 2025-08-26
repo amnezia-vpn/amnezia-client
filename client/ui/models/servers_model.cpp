@@ -793,10 +793,10 @@ void ServersModel::recomputeGatewayStacks()
         if (data(i, IsServerFromGatewayApiRole).toBool()) {
             const QJsonObject server = m_servers.at(i).toObject();
             const QJsonObject apiConfig = server.value(configKey::apiConfig).toObject();
-            const QString uc = apiConfig.value(configKey::userCountryCode).toString();
-            const QString st = apiConfig.value(configKey::serviceType).toString();
-            if (!uc.isEmpty()) computed.userCountryCodes.insert(uc);
-            if (!st.isEmpty()) computed.serviceTypes.insert(st);
+            const QString userCountryCode = apiConfig.value(configKey::userCountryCode).toString();
+            const QString serviceType = apiConfig.value(configKey::serviceType).toString();
+            if (!userCountryCode.isEmpty()) computed.userCountryCodes.insert(userCountryCode);
+            if (!serviceType.isEmpty()) computed.serviceTypes.insert(serviceType);
         }
     }
 

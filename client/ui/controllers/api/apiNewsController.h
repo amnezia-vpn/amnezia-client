@@ -7,7 +7,7 @@
 #include <QJsonArray>
 
 #include "settings.h"
-#include "ui/models/newsmodel.h"
+#include "ui/models/newsModel.h"
 #include "ui/models/servers_model.h"
 #include "core/controllers/gatewayController.h"
 #include "core/api/apiDefs.h"

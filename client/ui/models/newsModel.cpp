@@ -1,4 +1,4 @@
-#include "ui/models/newsmodel.h"
+#include "ui/models/newsModel.h"
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
