@@ -43,6 +43,9 @@ namespace
         constexpr char authData[] = "auth_data";
 
         constexpr char config[] = "config";
+
+        constexpr char subscription[] = "subscription";
+        constexpr char endDate[] = "end_date";
     }
 
     struct ProtocolData
@@ -163,7 +166,7 @@ namespace
             auto clientProtocolConfig =
                     QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
 
-            //TODO looks like this block can be removed after v1 configs EOL
+            // TODO looks like this block can be removed after v1 configs EOL
 
             serverProtocolConfig[config_key::junkPacketCount] = clientProtocolConfig.value(config_key::junkPacketCount);
             serverProtocolConfig[config_key::junkPacketMinSize] = clientProtocolConfig.value(config_key::junkPacketMinSize);
@@ -223,6 +226,19 @@ namespace
 
         return ErrorCode::NoError;
     }
+
+    bool isSubscriptionExpired(const QJsonObject &apiConfig)
+    {
+        auto subscription = apiConfig.value(configKey::subscription).toObject();
+        if (subscription.isEmpty()) {
+            return false;
+        }
+        auto subscriptionEndDate = subscription.value(configKey::endDate).toString();
+        if (apiUtils::isSubscriptionExpired(subscriptionEndDate)) {
+            return true;
+        }
+        return false;
+    }
 }
 
 ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersModel> &serversModel,
@@ -241,6 +257,11 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
 
     auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+
+    if (isSubscriptionExpired(apiConfigObject)) {
+        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+        return false;
+    }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
@@ -276,6 +297,11 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 {
     auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+
+    if (isSubscriptionExpired(apiConfigObject)) {
+        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+        return false;
+    }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
@@ -396,6 +422,11 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
+    if (isSubscriptionExpired(apiConfig)) {
+        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+        return false;
+    }
+
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_settings->getInstallationUuid(true),
@@ -502,6 +533,11 @@ bool ApiConfigsController::deactivateDevice()
         return true;
     }
 
+    if (isSubscriptionExpired(apiConfigObject)) {
+        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+        return false;
+    }
+
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_settings->getInstallationUuid(true),
@@ -534,6 +570,11 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
 
     if (!apiUtils::isPremiumServer(serverConfigObject)) {
         return true;
+    }
+
+    if (isSubscriptionExpired(apiConfigObject)) {
+        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+        return false;
     }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),

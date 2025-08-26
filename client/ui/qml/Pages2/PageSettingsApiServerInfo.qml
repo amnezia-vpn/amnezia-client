@@ -29,6 +29,7 @@ PageType {
         readonly property string title: qsTr("Subscription Status")
         readonly property string contentKey: "subscriptionStatus"
         readonly property string objectImageSource: "qrc:/images/controls/info.svg"
+        readonly property bool isRichText: true
     }
 
     QtObject {
@@ -37,6 +38,7 @@ PageType {
         readonly property string title: qsTr("Valid Until")
         readonly property string contentKey: "endDate"
         readonly property string objectImageSource: "qrc:/images/controls/history.svg"
+        readonly property bool isRichText: false
     }
 
     QtObject {
@@ -45,6 +47,7 @@ PageType {
         readonly property string title: qsTr("Active Connections")
         readonly property string contentKey: "connectedDevices"
         readonly property string objectImageSource: "qrc:/images/controls/monitor.svg"
+        readonly property bool isRichText: false
     }
 
     property var processedServer
@@ -134,6 +137,7 @@ PageType {
                 imageSource: objectImageSource
                 leftText: title
                 rightText: ApiAccountInfoModel.data(contentKey)
+                rightTextFormat: isRichText ? Text.RichText : Text.PlainText
 
                 visible: rightText !== ""
             }
