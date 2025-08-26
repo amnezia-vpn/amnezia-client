@@ -45,7 +45,7 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) 
     connect(this, &ServersModel::processedServerIndexChanged, this, &ServersModel::processedServerChanged);
     connect(this, &ServersModel::dataChanged, this, &ServersModel::processedServerChanged);
 
-    connect(this, &ServersModel::serversListChanged, this, &ServersModel::recomputeGatewayStacks);
+    connect(this, &QAbstractItemModel::modelReset, this, &ServersModel::recomputeGatewayStacks);
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
@@ -177,7 +177,6 @@ void ServersModel::resetModel()
     m_processedServerIndex = m_defaultServerIndex;
     endResetModel();
     emit defaultServerIndexChanged(m_defaultServerIndex);
-    emit serversListChanged();
 }
 
 void ServersModel::setDefaultServerIndex(const int index)
@@ -316,7 +315,6 @@ void ServersModel::addServer(const QJsonObject &server)
     m_settings->addServer(server);
     m_servers = m_settings->serversArray();
     endResetModel();
-    emit serversListChanged();
 }
 
 void ServersModel::editServer(const QJsonObject &server, const int serverIndex)
@@ -334,7 +332,6 @@ void ServersModel::editServer(const QJsonObject &server, const int serverIndex)
         auto defaultContainer = qvariant_cast<DockerContainer>(getDefaultServerData("defaultContainer"));
         emit defaultServerDefaultContainerChanged(defaultContainer);
     }
-    emit serversListChanged();
 }
 
 void ServersModel::removeServer()
@@ -354,7 +351,6 @@ void ServersModel::removeServer()
     }
     setProcessedServerIndex(m_defaultServerIndex);
     endResetModel();
-    emit serversListChanged();
 }
 
 void ServersModel::removeServer(const int serverIndex)
@@ -374,14 +370,12 @@ void ServersModel::removeServer(const int serverIndex)
     }
     setProcessedServerIndex(m_defaultServerIndex);
     endResetModel();
-    emit serversListChanged();
 }
 
 QHash<int, QByteArray> ServersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
 
-    roles[NameRole] = "serverName";
     roles[NameRole] = "name";
     roles[ServerDescriptionRole] = "serverDescription";
     roles[CollapsedServerDescriptionRole] = "collapsedServerDescription";
@@ -787,26 +781,39 @@ QJsonObject ServersModel::GatewayStacks::toJson() const
 void ServersModel::recomputeGatewayStacks()
 {
     const bool wasEmpty = m_gatewayStacks.isEmpty();
-
     GatewayStacks computed;
+    bool hasNewTags = false;
+    
     for (int i = 0; i < m_servers.count(); ++i) {
         if (data(i, IsServerFromGatewayApiRole).toBool()) {
             const QJsonObject server = m_servers.at(i).toObject();
             const QJsonObject apiConfig = server.value(configKey::apiConfig).toObject();
+            
             const QString userCountryCode = apiConfig.value(configKey::userCountryCode).toString();
             const QString serviceType = apiConfig.value(configKey::serviceType).toString();
-            if (!userCountryCode.isEmpty()) computed.userCountryCodes.insert(userCountryCode);
-            if (!serviceType.isEmpty()) computed.serviceTypes.insert(serviceType);
+            
+            if (!userCountryCode.isEmpty()) {
+                if (!m_gatewayStacks.userCountryCodes.contains(userCountryCode)) {
+                    hasNewTags = true;
+                }
+                computed.userCountryCodes.insert(userCountryCode);
+            }
+            
+            if (!serviceType.isEmpty()) {
+                if (!m_gatewayStacks.serviceTypes.contains(serviceType)) {
+                    hasNewTags = true;
+                }
+                computed.serviceTypes.insert(serviceType);
+            }
         }
     }
-
-    if (!(computed == m_gatewayStacks)) {
-        m_gatewayStacks = computed;
-        emit gatewayStacksChanged();
+    
+    m_gatewayStacks = std::move(computed);
+    if (hasNewTags) {
+        emit gatewayStacksExpanded();
     }
-
-    const bool nowEmpty = m_gatewayStacks.isEmpty();
-    if (wasEmpty != nowEmpty) {
+    
+    if (wasEmpty != m_gatewayStacks.isEmpty()) {
         emit hasServersFromGatewayApiChanged();
     }
 }
