@@ -267,6 +267,7 @@ PageType {
         backupRestore,
         fileOpen,
         qrScan,
+        shareViaDevice,
         siteLink
     ]
     
@@ -350,7 +351,17 @@ PageType {
             }
         }
     }
+    QtObject {
+        id: shareViaDevice
 
+        property string title: qsTr("Get connection via your device")
+        property string description: qsTr("")
+        property string imageSource: "qrc:/images/controls/share-2.svg"
+        property bool isVisible: true
+        property var handler: function() {
+            PageController.goToPage(PageEnum.PageTransferConfigViaQR)
+        }
+    }
     QtObject {
         id: siteLink
 
