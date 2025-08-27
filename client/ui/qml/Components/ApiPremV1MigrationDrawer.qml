@@ -73,7 +73,7 @@ DrawerType2 {
                         var str = qsTr("We'll preserve all remaining days of your current subscription and give you an extra month as a thank you. ")
                         str += qsTr("This new subscription type will be actively developed with more locations and features added regularly. Currently available:")
                         str += "<ul style='margin-left: -16px;'>"
-                        str += qsTr("<li>13 locations (with more coming soon)</li>")
+                        str += qsTr("<li>20 locations (with more coming soon)</li>")
                         str += qsTr("<li>Easier switching between countries in the app</li>")
                         str += qsTr("<li>Personal dashboard to manage your subscription</li>")
                         str += "</ul>"
