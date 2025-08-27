@@ -166,11 +166,15 @@ ErrorCode XrayProtocol::startTun2Sock()
 
 void XrayProtocol::stop()
 {
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+#ifdef AMNEZIA_DESKTOP
     QRemoteObjectPendingReply<bool> disableKillSwitchResp = IpcClient::Interface()->disableKillSwitch();
     disableKillSwitchResp.waitForFinished(1000);
     QRemoteObjectPendingReply<bool> StartRoutingIpv6Resp = IpcClient::Interface()->StartRoutingIpv6();
     StartRoutingIpv6Resp.waitForFinished(1000);
+#if !defined(Q_OS_MACOS)
+    QRemoteObjectPendingReply<bool> deleteTunResp = IpcClient::Interface()->deleteTun("tun2");
+    deleteTunResp.waitForFinished(1000);
+#endif
 #endif
     qDebug() << "XrayProtocol::stop()";
     m_xrayProcess.disconnect();
