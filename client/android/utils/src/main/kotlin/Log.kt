@@ -3,6 +3,7 @@ package org.amnezia.vpn.util
 import android.content.Context
 import android.icu.text.DateFormat
 import android.icu.text.SimpleDateFormat
+import android.icu.util.TimeZone
 import android.os.Build
 import android.os.Process
 import java.io.File
@@ -12,7 +13,6 @@ import java.nio.channels.FileChannel
 import java.nio.channels.FileLock
 import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
 import java.util.concurrent.locks.ReentrantLock
 import org.amnezia.vpn.util.Log.Priority.D
 import org.amnezia.vpn.util.Log.Priority.E
