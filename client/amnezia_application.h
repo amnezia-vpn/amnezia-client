@@ -7,9 +7,9 @@
 #include <QQmlContext>
 #include <QThread>
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-    #include <QGuiApplication>
+  #include <QGuiApplication>
 #else
-    #include <QApplication>
+  #include <QApplication>
 #endif
 #include <QClipboard>
 
@@ -20,9 +20,9 @@
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-    #define AMNEZIA_BASE_CLASS QGuiApplication
+  #define AMNEZIA_BASE_CLASS QGuiApplication
 #else
-    #define AMNEZIA_BASE_CLASS QApplication
+  #define AMNEZIA_BASE_CLASS QApplication
 #endif
 
 class AmneziaApplication : public AMNEZIA_BASE_CLASS
@@ -37,7 +37,7 @@ public:
     void loadFonts();
     bool parseCommands();
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     void startLocalServer();
 #endif
 
@@ -60,6 +60,8 @@ private:
     QThread m_vpnConnectionThread;
 
     QNetworkAccessManager *m_nam;
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
 };
 
 #endif // AMNEZIA_APPLICATION_H

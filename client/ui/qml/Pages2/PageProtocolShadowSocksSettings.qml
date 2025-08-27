@@ -16,178 +16,157 @@ import "../Components"
 PageType {
     id: root
 
-    ColumnLayout {
-        id: backButtonLayout
+    BackButtonType {
+        id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
         anchors.topMargin: 20
 
-        BackButtonType {
-            id: backButton
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
         }
     }
 
-    FlickableType {
-        id: fl
-        anchors.top: backButtonLayout.bottom
+    ListViewType {
+        id: listView
+
+        anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        Column {
-            id: content
+        enabled: ServersModel.isProcessedServerHasWriteAccess()
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+        model: ShadowSocksConfigModel
 
-            enabled: ServersModel.isProcessedServerHasWriteAccess()
+        delegate: ColumnLayout {
+            width: listView.width
 
-            ListView {
-                id: listview
+            spacing: 0
 
-                width: parent.width
-                height: listview.contentItem.height
+            BaseHeaderType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                clip: true
-                interactive: false
+                headerText: qsTr("Shadowsocks settings")
+            }
 
-                model: ShadowSocksConfigModel
+            TextFieldWithHeaderType {
+                id: portTextField
 
-                delegate: Item {
-                    id: delegateItem
+                Layout.fillWidth: true
+                Layout.topMargin: 40
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                    property bool isEnabled: ServersModel.isProcessedServerHasWriteAccess()
+                enabled: listView.enabled
 
-                    implicitWidth: listview.width
-                    implicitHeight: col.implicitHeight
+                headerText: qsTr("Port")
+                textField.text: port
+                textField.maximumLength: 5
+                textField.validator: IntValidator { bottom: 1; top: 65535 }
 
-                    ColumnLayout {
-                        id: col
+                textField.onEditingFinished: {
+                    if (textField.text !== port) {
+                        port = textField.text
+                    }
+                }
 
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                checkEmptyText: true
+            }
 
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
+            DropDownType {
+                id: cipherDropDown
 
-                        spacing: 0
+                Layout.fillWidth: true
+                Layout.topMargin: 20
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                        BaseHeaderType {
-                            Layout.fillWidth: true
-                            headerText: qsTr("Shadowsocks settings")
-                        }
+                enabled: listView.enabled
 
-                        TextFieldWithHeaderType {
-                            id: portTextField
+                descriptionText: qsTr("Cipher")
+                headerText: qsTr("Cipher")
 
-                            Layout.fillWidth: true
-                            Layout.topMargin: 40
+                drawerParent: root
 
-                            enabled: delegateItem.isEnabled
+                listView: ListViewWithRadioButtonType {
 
-                            headerText: qsTr("Port")
-                            textField.text: port
-                            textField.maximumLength: 5
-                            textField.validator: IntValidator { bottom: 1; top: 65535 }
+                    id: cipherListView
 
-                            textField.onEditingFinished: {
-                                if (textField.text !== port) {
-                                    port = textField.text
-                                }
+                    rootWidth: root.width
+
+                    model: ListModel {
+                        ListElement { name : "chacha20-ietf-poly1305" }
+                        ListElement { name : "xchacha20-ietf-poly1305" }
+                        ListElement { name : "aes-256-gcm" }
+                        ListElement { name : "aes-192-gcm" }
+                        ListElement { name : "aes-128-gcm" }
+                    }
+
+                    clickedFunction: function() {
+                        cipherDropDown.text = selectedText
+                        cipher = cipherDropDown.text
+                        cipherDropDown.closeTriggered()
+                    }
+
+                    Component.onCompleted: {
+                        cipherDropDown.text = cipher
+
+                        for (var i = 0; i < cipherListView.model.count; i++) {
+                            if (cipherListView.model.get(i).name === cipherDropDown.text) {
+                                currentIndex = i
                             }
-
-                            checkEmptyText: true
-                        }
-
-                        DropDownType {
-                            id: cipherDropDown
-                            Layout.fillWidth: true
-                            Layout.topMargin: 20
-
-                            enabled: delegateItem.isEnabled
-
-                            descriptionText: qsTr("Cipher")
-                            headerText: qsTr("Cipher")
-
-                            drawerParent: root
-
-                            listView: ListViewWithRadioButtonType {
-
-                                id: cipherListView
-
-                                rootWidth: root.width
-
-                                model: ListModel {
-                                    ListElement { name : "chacha20-ietf-poly1305" }
-                                    ListElement { name : "xchacha20-ietf-poly1305" }
-                                    ListElement { name : "aes-256-gcm" }
-                                    ListElement { name : "aes-192-gcm" }
-                                    ListElement { name : "aes-128-gcm" }
-                                }
-
-                                clickedFunction: function() {
-                                    cipherDropDown.text = selectedText
-                                    cipher = cipherDropDown.text
-                                    cipherDropDown.closeTriggered()
-                                }
-
-                                Component.onCompleted: {
-                                    cipherDropDown.text = cipher
-
-                                    for (var i = 0; i < cipherListView.model.count; i++) {
-                                        if (cipherListView.model.get(i).name === cipherDropDown.text) {
-                                            currentIndex = i
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        BasicButtonType {
-                            id: saveButton
-
-                            Layout.fillWidth: true
-                            Layout.topMargin: 24
-                            Layout.bottomMargin: 24
-
-                            enabled: portTextField.errorText === ""
-
-                            text: qsTr("Save")
-
-                            clickedFunc: function() {
-                                forceActiveFocus()
-
-                                var headerText = qsTr("Save settings?")
-                                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
-                                var yesButtonText = qsTr("Continue")
-                                var noButtonText = qsTr("Cancel")
-
-                                var yesButtonFunction = function() {
-                                    if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
-                                        PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                                        return
-                                    }
-
-                                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                                    InstallController.updateContainer(ShadowSocksConfigModel.getConfig())
-                                }
-                                var noButtonFunction = function() {
-                                    if (!GC.isMobile()) {
-                                        saveButton.forceActiveFocus()
-                                    }
-                                }
-                                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                            }
-
-                            Keys.onEnterPressed: saveButton.clicked()
-                            Keys.onReturnPressed: saveButton.clicked()
                         }
                     }
                 }
+            }
+
+            BasicButtonType {
+                id: saveButton
+
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.bottomMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                enabled: portTextField.errorText === ""
+
+                text: qsTr("Save")
+
+                clickedFunc: function() {
+                    forceActiveFocus()
+
+                    var headerText = qsTr("Save settings?")
+                    var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                            PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                            return
+                        }
+
+                        PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                        InstallController.updateContainer(ShadowSocksConfigModel.getConfig())
+                    }
+                    var noButtonFunction = function() {
+                        if (!GC.isMobile()) {
+                            saveButton.forceActiveFocus()
+                        }
+                    }
+                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+
+                Keys.onEnterPressed: saveButton.clicked()
+                Keys.onReturnPressed: saveButton.clicked()
             }
         }
     }

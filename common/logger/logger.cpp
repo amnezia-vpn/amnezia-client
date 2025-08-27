@@ -9,8 +9,6 @@
 #include <QStandardPaths>
 #include <QUrl>
 
-#include <iostream>
-
 #include "utilities.h"
 #include "version.h"
 
@@ -27,7 +25,7 @@ QTextStream Logger::m_textStream;
 QString Logger::m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
 QString Logger::m_serviceLogFileName = QString("%1.log").arg(SERVICE_NAME);
 
-void debugMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     if (msg.simplified().isEmpty()) {
         return;
@@ -38,14 +36,21 @@ void debugMessageHandler(QtMsgType type, const QMessageLogContext &context, cons
         return;
     }
 
-    if (msg.startsWith("Unknown property") || msg.startsWith("Could not create pixmap") || msg.startsWith("Populating font")
-        || msg.startsWith("stale focus object")) {
+    if (msg.startsWith("Unknown property") || msg.startsWith("Could not create pixmap")
+        || msg.startsWith("Populating font") || msg.startsWith("stale focus object")) {
         return;
     }
 
-    Logger::m_textStream << qFormatLogMessage(type, context, msg) << Qt::endl << Qt::flush;
-
-    std::cout << qFormatLogMessage(type, context, msg).toStdString() << std::endl << std::flush;
+    switch (type) {
+    case QtDebugMsg: Logger::Instance().debug() << msg; break;
+    case QtInfoMsg: Logger::Instance().info() << msg; break;
+    case QtWarningMsg: Logger::Instance().warning() << msg; break;
+    case QtCriticalMsg: Logger::Instance().error() << msg; break;
+    case QtFatalMsg: {
+        Logger::Instance().error() << msg;
+    } // Brackets are needed to ensure the destructor of LogStreamer is called before abort()
+        abort();
+    }
 }
 
 Logger &Logger::Instance()
@@ -57,7 +62,7 @@ Logger &Logger::Instance()
 bool Logger::init(bool isServiceLogger)
 {
     QString path = isServiceLogger ? systemLogDir() : userLogsDir();
-    QString logFileName = isServiceLogger ? m_serviceLogFileName : m_logFileName ;
+    QString logFileName = isServiceLogger ? m_serviceLogFileName : m_logFileName;
     QDir appDir(path);
     if (!appDir.mkpath(path)) {
         return false;
@@ -71,19 +76,14 @@ bool Logger::init(bool isServiceLogger)
 
     m_file.setTextModeEnabled(true);
     m_textStream.setDevice(&m_file);
-    qSetMessagePattern("%{time yyyy-MM-dd hh:mm:ss} %{type} %{message}");
 
-#if !defined(QT_DEBUG) || defined(Q_OS_IOS)
-    qInstallMessageHandler(debugMessageHandler);
-#endif
+    qInstallMessageHandler(messageHandler);
 
     return true;
 }
 
 void Logger::deInit()
 {
-    qInstallMessageHandler(nullptr);
-    qSetMessagePattern("%{message}");
     m_textStream.setDevice(nullptr);
     m_file.close();
 }
@@ -234,76 +234,101 @@ void Logger::cleanUp()
     clearLogs(true);
 }
 
-Logger::Log::Log(Logger *logger, LogLevel logLevel) : m_logger(logger), m_logLevel(logLevel), m_data(new Data())
+Logger::LogStreamer::LogStreamer(Logger *logger, LogLevel logLevel)
+    : m_logger(logger), m_logLevel(logLevel), m_data(new Data())
 {
 }
 
-Logger::Log::~Log()
+Logger::LogStreamer::~LogStreamer()
 {
-    qDebug() << "Amnezia" << m_logger->className() << m_data->m_buffer.trimmed();
+    QString logLevelString;
+    switch (m_logLevel) {
+    case LogLevel::Trace: logLevelString = "[TRACE]"; break;
+    case LogLevel::Debug: logLevelString = "[DEBUG]"; break;
+    case LogLevel::Info: logLevelString = "[INFO]"; break;
+    case LogLevel::Warning: logLevelString = "[WARNING]"; break;
+    case LogLevel::Error: logLevelString = "[ERROR]"; break;
+    }
+
+    const QString message = QString("%1 %2 Amnezia %3 : %4")
+                                    .arg(QDateTime::currentDateTimeUtc().toString("[yyyy-MM-dd hh:mm:ss.zzzZ]"),
+                                         logLevelString, m_logger->className(), m_data->m_buffer.trimmed());
+
+    if (m_file.isOpen()) {
+        QTextStream logToFile(&m_file);
+        logToFile << message << Qt::endl << Qt::flush;
+    }
+
+    QTextStream logToOutput((m_logLevel == LogLevel::Error) ? stderr : stdout);
+    logToOutput << message << Qt::endl << Qt::flush;
+
     delete m_data;
 }
 
-Logger::Log Logger::error()
+Logger::LogStreamer Logger::error()
 {
-    return Log(this, LogLevel::Error);
+    return { this, LogLevel::Error };
 }
-Logger::Log Logger::warning()
+
+Logger::LogStreamer Logger::warning()
 {
-    return Log(this, LogLevel::Warning);
+    return { this, LogLevel::Warning };
 }
-Logger::Log Logger::info()
+
+Logger::LogStreamer Logger::info()
 {
-    return Log(this, LogLevel::Info);
+    return { this, LogLevel::Info };
 }
-Logger::Log Logger::debug()
+
+Logger::LogStreamer Logger::debug()
 {
-    return Log(this, LogLevel::Debug);
+    return { this, LogLevel::Debug };
 }
+
 QString Logger::sensitive(const QString &input)
 {
 #ifdef Q_DEBUG
     return input;
 #else
     Q_UNUSED(input);
-    return QString(8, 'X');
+    return { 8, 'X' };
 #endif
 }
 
-#define CREATE_LOG_OP_REF(x)                                                                                                               \
-    Logger::Log &Logger::Log::operator<<(x t)                                                                                              \
-    {                                                                                                                                      \
-        m_data->m_ts << t << ' ';                                                                                                          \
-        return *this;                                                                                                                      \
+#define CREATE_LOGSTREAMER_OP_REF(x)                                                                                   \
+    Logger::LogStreamer &Logger::LogStreamer::operator<<(x t)                                                          \
+    {                                                                                                                  \
+        m_data->m_ts << t << ' ';                                                                                      \
+        return *this;                                                                                                  \
     }
 
-CREATE_LOG_OP_REF(uint64_t);
-CREATE_LOG_OP_REF(const char *);
-CREATE_LOG_OP_REF(const QString &);
-CREATE_LOG_OP_REF(const QByteArray &);
-CREATE_LOG_OP_REF(const void *);
+CREATE_LOGSTREAMER_OP_REF(uint64_t);
+CREATE_LOGSTREAMER_OP_REF(const char *);
+CREATE_LOGSTREAMER_OP_REF(const QString &);
+CREATE_LOGSTREAMER_OP_REF(const QByteArray &);
+CREATE_LOGSTREAMER_OP_REF(const void *);
 
-#undef CREATE_LOG_OP_REF
+#undef CREATE_LOGSTREAMER_OP_REF
 
-Logger::Log &Logger::Log::operator<<(const QStringList &t)
+Logger::LogStreamer &Logger::LogStreamer::operator<<(const QStringList &t)
 {
     m_data->m_ts << '[' << t.join(",") << ']' << ' ';
     return *this;
 }
 
-Logger::Log &Logger::Log::operator<<(const QJsonObject &t)
+Logger::LogStreamer &Logger::LogStreamer::operator<<(const QJsonObject &t)
 {
     m_data->m_ts << QJsonDocument(t).toJson(QJsonDocument::Indented) << ' ';
     return *this;
 }
 
-Logger::Log &Logger::Log::operator<<(QTextStreamFunction t)
+Logger::LogStreamer &Logger::LogStreamer::operator<<(QTextStreamFunction t)
 {
     m_data->m_ts << t;
     return *this;
 }
 
-void Logger::Log::addMetaEnum(quint64 value, const QMetaObject *meta, const char *name)
+void Logger::LogStreamer::addMetaEnum(quint64 value, const QMetaObject *meta, const char *name)
 {
     QMetaEnum me = meta->enumerator(meta->indexOfEnumerator(name));
 

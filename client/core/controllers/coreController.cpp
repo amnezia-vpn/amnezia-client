@@ -120,6 +120,9 @@ void CoreController::initControllers()
     connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
             &ConnectionController::onCurrentContainerUpdated); // TODO remove this
 
+    connect(m_installController.get(), &InstallController::profileCleared,
+            m_protocolsModel.get(), &ProtocolsModel::updateModel);
+
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
@@ -230,7 +233,7 @@ void CoreController::initSignalHandlers()
 
 void CoreController::initNotificationHandler()
 {
-#ifndef Q_OS_ANDROID
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     m_notificationHandler.reset(NotificationHandler::create(nullptr));
 
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, m_notificationHandler.get(),
@@ -242,7 +245,10 @@ void CoreController::initNotificationHandler()
     connect(m_notificationHandler.get(), &NotificationHandler::disconnectRequested, m_connectionController.get(),
             &ConnectionController::closeConnection);
     connect(this, &CoreController::translationsUpdated, m_notificationHandler.get(), &NotificationHandler::onTranslationsUpdated);
-#endif
+
+    auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_notificationHandler.get());
+    connect(this, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
+#endif    
 }
 
 void CoreController::updateTranslator(const QLocale &locale)
@@ -279,6 +285,7 @@ void CoreController::updateTranslator(const QLocale &locale)
     m_engine->retranslate();
 
     emit translationsUpdated();
+    emit websiteUrlChanged(m_languageModel->getCurrentSiteUrl());
 }
 
 void CoreController::initErrorMessagesHandler()

@@ -191,14 +191,14 @@ QJsonObject AwgConfigModel::getConfig()
         jsonConfig[config_key::junkPacketCount] = m_clientProtocolConfig[config_key::junkPacketCount];
         jsonConfig[config_key::junkPacketMinSize] = m_clientProtocolConfig[config_key::junkPacketMinSize];
         jsonConfig[config_key::junkPacketMaxSize] = m_clientProtocolConfig[config_key::junkPacketMaxSize];
-        jsonConfig[config_key::specialJunk1] = m_clientProtocolConfig[config_key::specialJunk1];
-        jsonConfig[config_key::specialJunk2] = m_clientProtocolConfig[config_key::specialJunk2];
-        jsonConfig[config_key::specialJunk3] = m_clientProtocolConfig[config_key::specialJunk3];
-        jsonConfig[config_key::specialJunk4] = m_clientProtocolConfig[config_key::specialJunk4];
-        jsonConfig[config_key::specialJunk5] = m_clientProtocolConfig[config_key::specialJunk5];
-        jsonConfig[config_key::controlledJunk1] = m_clientProtocolConfig[config_key::controlledJunk1];
-        jsonConfig[config_key::controlledJunk2] = m_clientProtocolConfig[config_key::controlledJunk2];
-        jsonConfig[config_key::controlledJunk3] = m_clientProtocolConfig[config_key::controlledJunk3];
+        jsonConfig[config_key::specialJunk1] = m_clientProtocolConfig[config_key::specialJunk1].toString().trimmed();
+        jsonConfig[config_key::specialJunk2] = m_clientProtocolConfig[config_key::specialJunk2].toString().trimmed();
+        jsonConfig[config_key::specialJunk3] = m_clientProtocolConfig[config_key::specialJunk3].toString().trimmed();
+        jsonConfig[config_key::specialJunk4] = m_clientProtocolConfig[config_key::specialJunk4].toString().trimmed();
+        jsonConfig[config_key::specialJunk5] = m_clientProtocolConfig[config_key::specialJunk5].toString().trimmed();
+        jsonConfig[config_key::controlledJunk1] = m_clientProtocolConfig[config_key::controlledJunk1].toString().trimmed();
+        jsonConfig[config_key::controlledJunk2] = m_clientProtocolConfig[config_key::controlledJunk2].toString().trimmed();
+        jsonConfig[config_key::controlledJunk3] = m_clientProtocolConfig[config_key::controlledJunk3].toString().trimmed();
         jsonConfig[config_key::specialHandshakeTimeout] = m_clientProtocolConfig[config_key::specialHandshakeTimeout];
 
         m_serverProtocolConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());

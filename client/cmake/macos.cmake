@@ -14,7 +14,7 @@ set(LIBS ${LIBS}
     ${FW_SECURITY}
     ${FW_COREWLAN}
     ${FW_NETWORK}
-    ${FW_USERNOTIFICATIONS}
+    ${FW_USER_NOTIFICATIONS}
     ${FW_NETWORK_EXTENSION}
 )
 
@@ -35,6 +35,8 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/macos_util.mm
 )
 
+
+
 set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/images/app.icns)
 set(MACOSX_BUNDLE_ICON_FILE app.icns)
 set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
@@ -52,5 +54,4 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 message("OSX_SDK_PATH is: ${OSX_SDK_PATH}")
-
 

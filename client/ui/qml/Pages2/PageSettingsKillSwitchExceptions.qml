@@ -64,7 +64,7 @@ PageType {
         displayMarginBeginning: 40
         displayMarginEnd: 40
         
-        ScrollBar.vertical: ScrollBarType { }
+        ScrollBar.vertical: ScrollBarType {}
         
         footer: Item {
             width: listView.width

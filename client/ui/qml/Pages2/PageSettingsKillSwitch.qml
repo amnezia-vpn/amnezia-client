@@ -71,6 +71,9 @@ PageType {
                 onClicked: function() {
                     SettingsController.strictKillSwitchEnabled = false
                 }
+
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
             }
 
             DividerType {}
@@ -103,6 +106,9 @@ PageType {
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
+
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
             }
 
             DividerType {

@@ -26,12 +26,12 @@ QVariant AppSplitTunnelingModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     switch (role) {
-    case AppPathRole: {
-        return m_apps.at(index.row()).appName;
-    }
-    default: {
-        return true;
-    }
+        case AppPathRole: {
+            return m_apps.at(index.row()).appName;
+        }
+        default: {
+            return true;
+        }
     }
 
     return QVariant();
@@ -57,6 +57,13 @@ void AppSplitTunnelingModel::removeApp(QModelIndex index)
     m_apps.removeAt(index.row());
     m_settings->setVpnApps(m_currentRouteMode, m_apps);
     endRemoveRows();
+}
+
+void AppSplitTunnelingModel::clearAppsList() {
+    beginResetModel();
+    m_apps.clear();
+    m_settings->setVpnApps(m_currentRouteMode, m_apps);
+    endResetModel();
 }
 
 int AppSplitTunnelingModel::getRouteMode()

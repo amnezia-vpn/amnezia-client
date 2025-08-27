@@ -19,7 +19,7 @@
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include <CoreFoundation/CoreFoundation.h>
 #endif
 
@@ -595,7 +595,7 @@ void ImportController::startDecodingQr()
     m_totalQrCodeChunksCount = 0;
     m_receivedQrCodeChunksCount = 0;
 
-    #if defined Q_OS_IOS
+    #if defined(Q_OS_IOS) || defined(MACOS_NE)
     m_isQrCodeProcessed = true;
     #endif
     #if defined Q_OS_ANDROID

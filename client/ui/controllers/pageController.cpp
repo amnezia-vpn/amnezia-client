@@ -1,8 +1,11 @@
 #include "pageController.h"
 #include "utils/converter.h"
 #include "core/errorstrings.h"
+#if defined(MACOS_NE)
+#include "platforms/ios/ios_controller.h"
+#endif
 
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
     #include <QGuiApplication>
 #else
     #include <QApplication>
@@ -25,8 +28,12 @@ PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
 #endif
 
 #if defined Q_OS_MACX
-    connect(this, &PageController::raiseMainWindow, []() { setDockIconVisible(true); });
-    connect(this, &PageController::hideMainWindow, []() { setDockIconVisible(false); });
+    connect(this, &PageController::raiseMainWindow, []() {
+        setDockIconVisible(true);
+    });
+    connect(this, &PageController::hideMainWindow, []() {
+        setDockIconVisible(false);
+    });
 #endif
 
     connect(this, qOverload<ErrorCode>(&PageController::showErrorMessage), this, &PageController::onShowErrorMessage);
@@ -56,14 +63,11 @@ QString PageController::getPagePath(PageLoader::PageEnum page)
 
 void PageController::closeWindow()
 {
-#ifdef Q_OS_ANDROID
+// On mobile platforms, quit app on close; on desktop, just hide window
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
     qApp->quit();
 #else
-    if (m_serversModel->getServersCount() == 0) {
-        qApp->quit();
-    } else {
-        emit hideMainWindow();
-    }
+    emit hideMainWindow();
 #endif
 }
 
@@ -114,7 +118,7 @@ void PageController::showOnStartup()
     } else {
 #if defined(Q_OS_WIN) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))
         emit hideMainWindow();
-#elif defined Q_OS_MACX
+#elif defined(Q_OS_MACX)
         setDockIconVisible(false);
 #endif
     }

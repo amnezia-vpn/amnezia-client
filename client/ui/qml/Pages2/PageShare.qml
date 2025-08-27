@@ -15,6 +15,7 @@ import "../Controls2/TextTypes"
 import "../Components"
 import "../Config"
 
+
 PageType {
     id: root
 
@@ -42,67 +43,72 @@ PageType {
         target: ExportController
 
         function onGenerateConfig(type) {
-            shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
-            shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
-
-            shareConnectionDrawer.openTriggered()
             PageController.showBusyIndicator(true)
+
+            var configCaption
+            var configExtension
+            var configFileName
 
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: {
                 ExportController.generateConnectionConfig(clientNameTextField.textField.text);
+                configCaption = qsTr("Save AmneziaVPN config")
+                configExtension = ".vpn"
+                configFileName = "amnezia_config"
                 break;
             }
             case PageShare.ConfigType.OpenVpn: {
                 ExportController.generateOpenVpnConfig(clientNameTextField.textField.text)
-                shareConnectionDrawer.configCaption = qsTr("Save OpenVPN config")
-                shareConnectionDrawer.configExtension = ".ovpn"
-                shareConnectionDrawer.configFileName = "amnezia_for_openvpn"
+                configCaption = qsTr("Save OpenVPN config")
+                configExtension = ".ovpn"
+                configFileName = "amnezia_for_openvpn"
                 break
             }
             case PageShare.ConfigType.WireGuard: {
                 ExportController.generateWireGuardConfig(clientNameTextField.textField.text)
-                shareConnectionDrawer.configCaption = qsTr("Save WireGuard config")
-                shareConnectionDrawer.configExtension = ".conf"
-                shareConnectionDrawer.configFileName = "amnezia_for_wireguard"
+                configCaption = qsTr("Save WireGuard config")
+                configExtension = ".conf"
+                configFileName = "amnezia_for_wireguard"
                 break
             }
             case PageShare.ConfigType.Awg: {
                 ExportController.generateAwgConfig(clientNameTextField.textField.text)
-                shareConnectionDrawer.configCaption = qsTr("Save AmneziaWG config")
-                shareConnectionDrawer.configExtension = ".conf"
-                shareConnectionDrawer.configFileName = "amnezia_for_awg"
+                configCaption = qsTr("Save AmneziaWG config")
+                configExtension = ".conf"
+                configFileName = "amnezia_for_awg"
                 break
             }
             case PageShare.ConfigType.ShadowSocks: {
                 ExportController.generateShadowSocksConfig()
-                shareConnectionDrawer.configCaption = qsTr("Save Shadowsocks config")
-                shareConnectionDrawer.configExtension = ".json"
-                shareConnectionDrawer.configFileName = "amnezia_for_shadowsocks"
+                configCaption = qsTr("Save Shadowsocks config")
+                configExtension = ".json"
+                configFileName = "amnezia_for_shadowsocks"
                 break
             }
             case PageShare.ConfigType.Cloak: {
                 ExportController.generateCloakConfig()
-                shareConnectionDrawer.configCaption = qsTr("Save Cloak config")
-                shareConnectionDrawer.configExtension = ".json"
-                shareConnectionDrawer.configFileName = "amnezia_for_cloak"
+                configCaption = qsTr("Save Cloak config")
+                configExtension = ".json"
+                configFileName = "amnezia_for_cloak"
                 break
             }
             case PageShare.ConfigType.Xray: {
                 ExportController.generateXrayConfig(clientNameTextField.textField.text)
-                shareConnectionDrawer.configCaption = qsTr("Save XRay config")
-                shareConnectionDrawer.configExtension = ".json"
-                shareConnectionDrawer.configFileName = "amnezia_for_xray"
+                configCaption = qsTr("Save XRay config")
+                configExtension = ".json"
+                configFileName = "amnezia_for_xray"
                 break
             }
             }
 
             PageController.showBusyIndicator(false)
+            
+            var headerText = qsTr("Connection to ") + serverSelector.text
+            var configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
+            PageController.goToShareConnectionPage(headerText, configContentHeaderText, configCaption, configExtension, configFileName)
         }
 
         function onExportErrorOccurred(error) {
-            shareConnectionDrawer.closeTriggered()
-
             PageController.showErrorMessage(error)
         }
     }
@@ -256,6 +262,9 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 0
                         }
+
+                        Keys.onEnterPressed: this.clicked()
+                        Keys.onReturnPressed: this.clicked()
                     }
 
                     HorizontalRadioButton {
@@ -272,6 +281,9 @@ PageType {
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
+
+                        Keys.onEnterPressed: this.clicked()
+                        Keys.onReturnPressed: this.clicked()
                     }
                 }
             }
@@ -524,9 +536,6 @@ PageType {
 
                 text: qsTr("Share")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
-
-
-                parentFlickable: a
 
                 clickedFunc: function(){
                     if (clientNameTextField.textField.text !== "") {
@@ -826,9 +835,6 @@ PageType {
                                             root.revokeConfig(index)
                                         }
                                         var noButtonFunction = function() {
-                                            if (!GC.isMobile()) {
-                                                // focusItem1.forceActiveFocus()
-                                            }
                                         }
 
                                         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
@@ -842,9 +848,4 @@ PageType {
         }
     }
 
-    ShareConnectionDrawer {
-        id: shareConnectionDrawer
-
-        anchors.fill: parent
-    }
 }

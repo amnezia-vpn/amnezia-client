@@ -46,6 +46,7 @@ public:
     void disconnectVpn();
 
     void vpnStatusDidChange(void *pNotification);
+    
     void vpnConfigurationDidChange(void *pNotification);
 
     void getBackendLogs(std::function<void(const QString &)> &&callback);

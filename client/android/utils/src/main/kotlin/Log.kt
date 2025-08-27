@@ -12,6 +12,7 @@ import java.nio.channels.FileChannel
 import java.nio.channels.FileLock
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import java.util.concurrent.locks.ReentrantLock
 import org.amnezia.vpn.util.Log.Priority.D
 import org.amnezia.vpn.util.Log.Priority.E
@@ -40,7 +41,9 @@ private const val LOG_MAX_FILE_SIZE = 1024 * 1024
  */
 object Log {
     private val dateTimeFormat = object : ThreadLocal<DateFormat>() {
-        override fun initialValue(): DateFormat = SimpleDateFormat(DATE_TIME_PATTERN, Locale.US)
+        override fun initialValue(): DateFormat = SimpleDateFormat(DATE_TIME_PATTERN, Locale.US).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
     }
 
     private lateinit var logDir: File
@@ -139,8 +142,8 @@ object Log {
     }
 
     private fun formatLogMsg(tag: String, msg: String, priority: Priority): String {
-        val date = dateTimeFormat.get()?.format(Date())
-        return "$date ${Process.myPid()} ${Process.myTid()} $priority [${Thread.currentThread().name}] " +
+        val utcDate = dateTimeFormat.get()?.format(Date())
+        return "${utcDate}Z ${Process.myPid()} ${Process.myTid()} $priority [${Thread.currentThread().name}] " +
             "$tag: $msg\n"
     }
 
