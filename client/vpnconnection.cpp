@@ -444,7 +444,10 @@ void VpnConnection::disconnectFromVpn()
 {
 #ifdef AMNEZIA_DESKTOP
     if (InterfaceReady()) {
+
+        m_vpnProtocol.data()->stop();
         qDebug() << "Interface is ready!";
+
         QRemoteObjectPendingReply<bool> flushDnsResp = IpcClient::Interface()->flushDns();
         flushDnsResp.waitForFinished(1000);
 
@@ -479,12 +482,14 @@ void VpnConnection::disconnectFromVpn()
         emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
         return;
     }
-#ifndef Q_OS_ANDROID
+
+#if !defined(Q_OS_ANDROID) && !defined(AMNEZIA_DESKTOP)
     if (m_vpnProtocol) {
         m_vpnProtocol->deleteLater();
     }
-    m_vpnProtocol = nullptr;
 #endif
+
+    m_vpnProtocol = nullptr;
 }
 
 Vpn::ConnectionState VpnConnection::connectionState()

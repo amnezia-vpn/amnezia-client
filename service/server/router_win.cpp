@@ -445,7 +445,7 @@ bool RouterWin::updateResolvers(const QString& ifname, const QList<QHostAddress>
 }
 
 
-void RouterWin::StopRoutingIpv6()
+bool RouterWin::StopRoutingIpv6()
 {
     {
         QProcess p;
@@ -465,9 +465,10 @@ void RouterWin::StopRoutingIpv6()
         p.start(command);
         p.waitForFinished();
     }
+    return true;
 }
 
-void RouterWin::StartRoutingIpv6()
+bool RouterWin::StartRoutingIpv6()
 {
     {
         QProcess p;
@@ -487,5 +488,6 @@ void RouterWin::StartRoutingIpv6()
         p.start(command);
         p.waitForFinished();
     }
+    return true;
 }
 
