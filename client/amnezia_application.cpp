@@ -52,8 +52,9 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
 AmneziaApplication::~AmneziaApplication()
 {
     if (m_vpnConnection) {
-        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectSlots", Qt::QueuedConnection);
         QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectFromVpn", Qt::QueuedConnection);
+        QThread::msleep(2000);
+        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectSlots", Qt::QueuedConnection);
     }
 
     m_vpnConnectionThread.requestInterruption();
