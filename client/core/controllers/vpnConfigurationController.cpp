@@ -86,6 +86,7 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
     }
 
     bool isApiConfig = serverConfig.value(config_key::configVersion).toInt();
+    quint16 crc = static_cast<quint16>(serverConfig.value(config_key::crc).toInt());
 
     for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
         if (isApiConfig && container == DockerContainer::Cloak && proto == ProtocolEnumNS::Proto::ShadowSocks) {
@@ -120,7 +121,7 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
     vpnConfiguration[config_key::description] = serverConfig.value(config_key::description).toString();
 
     vpnConfiguration[config_key::configVersion] = serverConfig.value(config_key::configVersion).toInt();
-    vpnConfiguration[config_key::crc] = serverConfig.value(config_key::crc).toInt();
+    vpnConfiguration[config_key::crc] = crc;
     // TODO: try to get hostName, port, description for 3rd party configs
     // vpnConfiguration[config_key::port] = ...;
 
