@@ -120,6 +120,7 @@ QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QStr
     vpnConfiguration[config_key::description] = serverConfig.value(config_key::description).toString();
 
     vpnConfiguration[config_key::configVersion] = serverConfig.value(config_key::configVersion).toInt();
+    vpnConfiguration[config_key::crc] = serverConfig.value(config_key::crc).toInt();
     // TODO: try to get hostName, port, description for 3rd party configs
     // vpnConfiguration[config_key::port] = ...;
 
