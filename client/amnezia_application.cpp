@@ -119,7 +119,7 @@ void AmneziaApplication::init()
     Logger::setServiceLogsEnabled(enabled);
 
 #ifdef Q_OS_WIN //TODO
-    if (m_parser.isSet("a"))
+    if (m_parser.isSet(m_optAutostart))
         m_coreController->pageController()->showOnStartup();
     else
         emit m_coreController->pageController()->raiseMainWindow();
@@ -187,15 +187,15 @@ bool AmneziaApplication::parseCommands()
     m_parser.addHelpOption();
     m_parser.addVersionOption();
 
-    QCommandLineOption c_autostart { { "a", "autostart" }, "System autostart" };
-    m_parser.addOption(c_autostart);
+    m_optAutostart = QCommandLineOption({ "a", "autostart" }, "System autostart");
+    m_parser.addOption(m_optAutostart);
 
-    QCommandLineOption c_cleanup { { "c", "cleanup" }, "Cleanup logs" };
-    m_parser.addOption(c_cleanup);
+    m_optCleanup   = QCommandLineOption({ "c", "cleanup" }, "Cleanup logs");
+    m_parser.addOption(m_optCleanup);
     
     m_parser.process(*this);
 
-    if (m_parser.isSet(c_cleanup)) {
+    if (m_parser.isSet(m_optCleanup)) {
         Logger::cleanUp();
         QTimer::singleShot(100, this, [this] { quit(); });
         exec();
