@@ -25,7 +25,9 @@
 #include <QtQuick/QQuickWindow>  // for QQuickWindow
 #include <QWindow>              // for qobject_cast<QWindow*>
 
-AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv)
+AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv),
+      m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
+      m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs"))
 {
     setQuitOnLastWindowClosed(false);
 
@@ -187,10 +189,7 @@ bool AmneziaApplication::parseCommands()
     m_parser.addHelpOption();
     m_parser.addVersionOption();
 
-    m_optAutostart = QCommandLineOption({ "a", "autostart" }, "System autostart");
     m_parser.addOption(m_optAutostart);
-
-    m_optCleanup   = QCommandLineOption({ "c", "cleanup" }, "Cleanup logs");
     m_parser.addOption(m_optCleanup);
     
     m_parser.process(*this);
