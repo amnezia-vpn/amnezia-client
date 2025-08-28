@@ -325,7 +325,7 @@ void ImportController::importConfig()
         if (m_serversModel->isServerFromApiAlreadyExists(crc)) {
             emit importErrorOccurred(ErrorCode::ApiConfigAlreadyAdded, true);
         } else {
-            m_config.insert(config_key::crc, crc);
+            m_config.insert(config_key::crc, static_cast<int>(crc));
 
             m_serversModel->addServer(m_config);
             emit importFinished();
