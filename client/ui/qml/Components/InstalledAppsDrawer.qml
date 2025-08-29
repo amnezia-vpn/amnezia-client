@@ -57,7 +57,7 @@ DrawerType2 {
                 headerText: qsTr("Choose application")
             }
 
-            ListView {
+            ListViewType {
                 id: listView
 
                 Layout.fillWidth: true
@@ -65,11 +65,6 @@ DrawerType2 {
                 Layout.topMargin: 16
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
-
-                clip: true
-                interactive: true
-
-                property bool isFocusable: true
 
                 model: SortFilterProxyModel {
                     id: proxyInstalledAppsModel
@@ -81,44 +76,35 @@ DrawerType2 {
                     }
                 }
 
-                ScrollBar.vertical: ScrollBarType {}
-
                 ButtonGroup {
                     id: buttonGroup
                 }
 
-                delegate: Item {
-                    implicitWidth: root.width
-                    implicitHeight: delegateContent.implicitHeight
+                delegate: ColumnLayout {
+                    width: listView.width
 
-                    ColumnLayout {
-                        id: delegateContent
+                    RowLayout {
+                        CheckBoxType {
+                            Layout.fillWidth: true
 
-                        anchors.fill: parent
-
-                        RowLayout {
-                            CheckBoxType {
-                                Layout.fillWidth: true
-
-                                text: appName
-                                checked: isAppSelected
-                                onCheckedChanged: {
-                                    installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
-                                }
-                            }
-
-                            Image {
-                                source: "image://installedAppImage/" + appIcon
-
-                                sourceSize.width: 24
-                                sourceSize.height: 24
-
-                                Layout.rightMargin: 48
+                            text: appName
+                            checked: isAppSelected
+                            onCheckedChanged: {
+                                installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
                             }
                         }
 
-                        DividerType {}
+                        Image {
+                            source: "image://installedAppImage/" + appIcon
+
+                            sourceSize.width: 24
+                            sourceSize.height: 24
+
+                            Layout.rightMargin: 48
+                        }
                     }
+
+                    DividerType {}
                 }
             }
         }

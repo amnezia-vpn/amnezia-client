@@ -136,6 +136,8 @@ private:
 
     QString m_appVersion;
 
+    QString getPlatform();
+
     QDateTime m_loggingDisableDate;
 
     bool m_isDevModeEnabled = false;

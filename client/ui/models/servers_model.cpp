@@ -4,9 +4,11 @@
 #include "core/controllers/serverController.h"
 #include "core/networkUtilities.h"
 
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include <AmneziaVPN-Swift.h>
 #endif
+
+#include "core/api/apiUtils.h"
 
 namespace
 {
@@ -427,7 +429,7 @@ void ServersModel::updateDefaultServerContainersModel()
     emit defaultServerContainersUpdated(containers);
 }
 
-QJsonObject ServersModel::getServerConfig(const int serverIndex)
+QJsonObject ServersModel::getServerConfig(const int serverIndex) const
 {
     return m_servers.at(serverIndex).toObject();
 }
@@ -780,7 +782,7 @@ void ServersModel::removeApiConfig(const int serverIndex)
 {
     auto serverConfig = getServerConfig(serverIndex);
 
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     QString vpncName = QString("%1 (%2) %3")
                                .arg(serverConfig[config_key::description].toString())
                                .arg(serverConfig[config_key::hostName].toString())
@@ -813,4 +815,9 @@ const QString ServersModel::getDefaultServerImagePathCollapsed()
         return "";
     }
     return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(countryCode.toUpper());
+}
+
+bool ServersModel::processedServerIsPremium() const
+{
+    return apiUtils::isPremiumServer(getServerConfig(m_processedServerIndex));
 }

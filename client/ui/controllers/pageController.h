@@ -38,8 +38,9 @@ namespace PageLoader
         PageSettingsApiInstructions,
         PageSettingsApiNativeConfigs,
         PageSettingsApiDevices,
+        PageSettingsApiSubscriptionKey,
         PageSettingsKillSwitchExceptions,
-        
+
         PageServiceSftpSettings,
         PageServiceTorWebsiteSettings,
         PageServiceDnsSettings,
@@ -71,6 +72,7 @@ namespace PageLoader
         PageProtocolAwgClientSettings,
 
         PageShareFullAccess,
+        PageShareConnection,
 
         PageDevMenu
     };
@@ -123,6 +125,8 @@ signals:
     void goToPageViewConfig();
     void goToPageSettingsServerServices();
     void goToPageSettingsBackup();
+    void goToShareConnectionPage(QString headerText, QString configContentHeaderText, QString configCaption, QString configExtension,
+                                 QString configFileName);
 
     void closePage();
 

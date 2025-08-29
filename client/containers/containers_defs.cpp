@@ -261,6 +261,7 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     return true;
 
 #elif defined(Q_OS_IOS)
+    // Standard iOS build (without Network Extension limitations)
     switch (c) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::OpenVpn: return true;
@@ -269,7 +270,23 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Cloak: return true;
     case DockerContainer::SSXray: return true;
         //    case DockerContainer::ShadowSocks: return true;
-    default: return false;
+    default:
+        return false;
+    }
+
+#elif defined(MACOS_NE)
+    // macOS build using Network Extension – hide OpenVPN-based containers
+    switch (c) {
+    case DockerContainer::WireGuard: return true;
+    case DockerContainer::Awg: return true;
+    case DockerContainer::Xray: return true;
+    case DockerContainer::SSXray: return true;
+    case DockerContainer::OpenVpn:
+    case DockerContainer::Cloak:
+    case DockerContainer::ShadowSocks:
+        return false;
+    default:
+        return false;
     }
 #elif defined(Q_OS_MAC)
     switch (c) {

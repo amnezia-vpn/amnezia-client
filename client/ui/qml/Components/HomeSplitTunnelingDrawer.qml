@@ -47,8 +47,8 @@ DrawerType2 {
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {
-               PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-               root.closeTriggered()
+                PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
+                root.closeTriggered()
             }
         }
 

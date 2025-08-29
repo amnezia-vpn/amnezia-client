@@ -15,7 +15,7 @@
     #include "platforms/ios/QtAppDelegate-C-Interface.h"
 #endif
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
 bool isAnotherInstanceRunning()
 {
     QLocalSocket socket;
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
     AmneziaApplication app(argc, argv);
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (isAnotherInstanceRunning()) {
         QTimer::singleShot(1000, &app, [&]() { app.quit(); });
         return app.exec();

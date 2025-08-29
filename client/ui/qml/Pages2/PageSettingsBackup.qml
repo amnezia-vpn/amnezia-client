@@ -41,50 +41,67 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        onActiveFocusChanged: {
+            if(backButton.enabled && backButton.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    FlickableType {
-        id: fl
+    ListViewType {
+        id: listView
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-        ColumnLayout {
-            id: content
+        header: ColumnLayout {
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
+            width: listView.width
 
             spacing: 16
 
             BaseHeaderType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 headerText: qsTr("Back up your configuration")
                 descriptionText: qsTr("You can save your settings to a backup file to restore them the next time you install the application.")
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+
+        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser when have migrated to 6.9
+
+            width: listView.width
+
+            spacing: 16
 
             WarningType {
-                Layout.topMargin: 16
                 Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 textString: qsTr("The backup will contain your passwords and private keys for all servers added " +
-                                            "to AmneziaVPN. Keep this information in a secure place.")
+                                 "to AmneziaVPN. Keep this information in a secure place.")
 
                 iconPath: "qrc:/images/controls/alert-circle.svg"
             }
 
             BasicButtonType {
                 id: makeBackupButton
+
                 Layout.fillWidth: true
                 Layout.topMargin: 14
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: qsTr("Make a backup")
-
-                parentFlickable: fl
 
                 clickedFunc: function() {
                     var fileName = ""
@@ -108,8 +125,11 @@ PageType {
 
             BasicButtonType {
                 id: restoreBackupButton
+
                 Layout.fillWidth: true
                 Layout.topMargin: -8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 defaultColor: AmneziaStyle.color.transparent
                 hoveredColor: AmneziaStyle.color.translucentWhite
@@ -119,8 +139,6 @@ PageType {
                 borderWidth: 1
 
                 text: qsTr("Restore from backup")
-
-                parentFlickable: fl
 
                 clickedFunc: function() {
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),

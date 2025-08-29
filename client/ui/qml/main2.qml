@@ -26,7 +26,8 @@ Window  {
 
     color: AmneziaStyle.color.midnightBlack
 
-    onClosing: function() {
+    onClosing: function(close) {
+        close.accepted = false
         PageController.closeWindow()
     }
 

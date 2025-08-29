@@ -49,7 +49,7 @@ DrawerType2 {
             }
         }
 
-        ListView {
+        ListViewType {
             id: listView
 
             anchors.top: backButtonLayout.bottom
@@ -57,13 +57,7 @@ DrawerType2 {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
 
-            property bool isFocusable: true
             property int selectedIndex: LanguageModel.currentLanguageIndex
-
-            clip: true
-            reuseItems: true
-
-            ScrollBar.vertical: ScrollBarType {}
 
             model: LanguageModel
 

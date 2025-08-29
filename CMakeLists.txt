@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
 set(PROJECT AmneziaVPN)
+set(AMNEZIAVPN_VERSION 4.8.10.0)
 
-project(${PROJECT} VERSION 4.8.7.2
+project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
         DESCRIPTION "AmneziaVPN"
         HOMEPAGE_URL "https://amnezia.org/"
 )
@@ -11,7 +12,7 @@ string(TIMESTAMP CURRENT_DATE "%Y-%m-%d")
 set(RELEASE_DATE "${CURRENT_DATE}")
 
 set(APP_MAJOR_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH})
-set(APP_ANDROID_VERSION_CODE 2086)
+set(APP_ANDROID_VERSION_CODE 2093)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(MZ_PLATFORM_NAME "linux")
@@ -31,13 +32,19 @@ set(QT_BUILD_TOOLS_WHEN_CROSS_COMPILING ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(APPLE AND NOT IOS)
-    set(CMAKE_OSX_ARCHITECTURES "x86_64")
+if(APPLE)
+    if(IOS)
+        set(CMAKE_OSX_ARCHITECTURES "arm64")
+    elseif(MACOS_NE)
+        set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+    else()
+        set(CMAKE_OSX_ARCHITECTURES "x86_64")
+    endif()
 endif()
 
 add_subdirectory(client)
 
-if(NOT IOS AND NOT ANDROID)
+if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_subdirectory(service)
 
     include(${CMAKE_SOURCE_DIR}/deploy/installer/config.cmake)

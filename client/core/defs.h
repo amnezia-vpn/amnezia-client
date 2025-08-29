@@ -60,6 +60,7 @@ namespace amnezia
         ServerUserPasswordRequired = 210,
         ServerDockerOnCgroupsV2 = 211,
         ServerCgroupMountpoint = 212,
+        DockerPullRateLimit = 213,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,
@@ -119,6 +120,7 @@ namespace amnezia
         ApiNotFoundError = 1109,
         ApiMigrationError = 1110,
         ApiUpdateRequestError = 1111,
+        ApiSubscriptionExpiredError = 1112,
 
         // QFile errors
         OpenError = 1200,

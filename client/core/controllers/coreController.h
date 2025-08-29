@@ -5,6 +5,10 @@
 #include <QQmlContext>
 #include <QThread>
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    #include "ui/systemtray_notificationhandler.h"
+#endif
+
 #include "ui/controllers/api/apiConfigsController.h"
 #include "ui/controllers/api/apiSettingsController.h"
 #include "ui/controllers/api/apiPremV1MigrationController.h"
@@ -45,7 +49,7 @@
 #include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/sites_model.h"
 
-#ifndef Q_OS_ANDROID
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     #include "ui/notificationhandler.h"
 #endif
 
@@ -62,6 +66,7 @@ public:
 
 signals:
     void translationsUpdated();
+    void websiteUrlChanged(const QString &newUrl);
 
 private:
     void initModels();
@@ -94,7 +99,7 @@ private:
     QSharedPointer<VpnConnection> m_vpnConnection;
     QSharedPointer<QTranslator> m_translator;
 
-#ifndef Q_OS_ANDROID
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     QScopedPointer<NotificationHandler> m_notificationHandler;
 #endif
 

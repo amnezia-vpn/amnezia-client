@@ -27,6 +27,5 @@ Flickable {
 
     ScrollBar.vertical: ScrollBarType {
         id: scrollBar
-        policy: fl.height >= fl.contentHeight ? ScrollBar.AlwaysOff : ScrollBar.AlwaysOn
     }
 }
