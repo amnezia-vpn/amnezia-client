@@ -107,8 +107,9 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        if (serverSelector.currentIndex !== serverSelectorListView.currentIndex) {
-                            serverSelector.currentIndex = serverSelectorListView.currentIndex
+                        if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
+                            serverSelector.currentIndex = serverSelectorListView.selectedIndex
+                            serverSelector.severSelectorIndexChanged()
                         }
 
                         listView.headerText = qsTr("Accessing ") + serverSelector.text
@@ -124,7 +125,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
+                        ServersModel.processedIndex = proxyServersModel.mapToSource(selectedIndex)
                     }
                 }
             }
