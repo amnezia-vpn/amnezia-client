@@ -114,7 +114,7 @@ public slots:
     void toggleAmneziaDns(bool enabled);
     QPair<QString, QString> getDnsPair(const int serverIndex);
 
-    bool isServerFromApiAlreadyExists(const quint16 crc);
+    bool isServerFromApiAlreadyExists(const quint16 crc, const QJsonObject &newServer);
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol);
 
     QVariant getDefaultServerData(const QString roleString);
