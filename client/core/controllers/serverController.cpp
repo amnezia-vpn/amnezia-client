@@ -395,6 +395,13 @@ bool ServerController::isReinstallContainerRequired(DockerContainer container, c
         }
     }
 
+    if (container == DockerContainer::CryptPad) {
+        if (oldProtoConfig.value(config_key::port).toString(protocols::cryptpad::defaultPort)
+            != newProtoConfig.value(config_key::port).toString(protocols::cryptpad::defaultPort)) {
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -546,6 +553,7 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     const QJsonObject &xrayConfig = config.value(ProtocolProps::protoToString(Proto::Xray)).toObject();
     const QJsonObject &sftpConfig = config.value(ProtocolProps::protoToString(Proto::Sftp)).toObject();
     const QJsonObject &socks5ProxyConfig = config.value(ProtocolProps::protoToString(Proto::Socks5Proxy)).toObject();
+    const QJsonObject &cryptpadConfig = config.value(ProtocolProps::protoToString(Proto::CryptPad)).toObject();
 
     Vars vars;
 
@@ -656,6 +664,9 @@ ServerController::Vars ServerController::genVarsForScript(const ServerCredential
     QString socks5user = (!username.isEmpty() && !password.isEmpty()) ? QString("users %1:CL:%2").arg(username, password) : "";
     vars.append({ { "$SOCKS5_USER", socks5user } });
     vars.append({ { "$SOCKS5_AUTH_TYPE", socks5user.isEmpty() ? "none" : "strong" } });
+
+    // CryptPad vars
+    vars.append({ { "$CRYPTPAD_PORT", cryptpadConfig.value(config_key::port).toString(protocols::cryptpad::defaultPort) } });
 
     QString serverIp = (container != DockerContainer::Awg && container != DockerContainer::WireGuard && container != DockerContainer::Xray)
             ? NetworkUtilities::getIPAddress(credentials.hostName)

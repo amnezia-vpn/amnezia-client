@@ -100,6 +100,7 @@ PageLoader::PageEnum ProtocolsModel::serverProtocolPage(Proto protocol) const
     case Proto::Dns: return PageLoader::PageEnum::PageServiceDnsSettings;
     case Proto::Sftp: return PageLoader::PageEnum::PageServiceSftpSettings;
     case Proto::Socks5Proxy: return PageLoader::PageEnum::PageServiceSocksProxySettings;
+    case Proto::CryptPad: return PageLoader::PageEnum::PageServiceCryptpadSettings;
     default: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
     }
 }

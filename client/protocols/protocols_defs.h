@@ -97,6 +97,7 @@ namespace amnezia
         constexpr char xray[] = "xray";
         constexpr char ssxray[] = "ssxray";
         constexpr char socks5proxy[] = "socks5proxy";
+        constexpr char cryptpad[] = "cryptpad";
 
         constexpr char configVersion[] = "config_version";
 
@@ -253,6 +254,11 @@ namespace amnezia
             constexpr char proxyConfigPath[] = "/usr/local/3proxy/conf/3proxy.cfg";
         }
 
+        namespace cryptpad
+        {
+            constexpr char defaultPort[] = "3000";
+        }
+
     } // namespace protocols
 
     namespace ProtocolEnumNS
@@ -282,7 +288,8 @@ namespace amnezia
             TorWebSite,
             Dns,
             Sftp,
-            Socks5Proxy
+            Socks5Proxy,
+            CryptPad
         };
         Q_ENUM_NS(Proto)
 

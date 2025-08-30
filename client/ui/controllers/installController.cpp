@@ -153,6 +153,8 @@ void InstallController::install(DockerContainer container, int port, TransportPr
             } else if (container == DockerContainer::Socks5Proxy) {
                 containerConfig.insert(config_key::userName, protocols::socks5Proxy::defaultUserName);
                 containerConfig.insert(config_key::password, Utils::getRandomString(16));
+            } else if (container == DockerContainer::CryptPad) {
+                // CryptPad doesn't need additional configuration
             }
 
             config.insert(config_key::container, ContainerProps::containerToString(container));

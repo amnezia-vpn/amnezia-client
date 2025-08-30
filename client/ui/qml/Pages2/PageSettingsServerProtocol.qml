@@ -119,6 +119,7 @@ PageType {
                     case ProtocolEnum.Sftp: SftpConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                     case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
                     case ProtocolEnum.Socks5Proxy: Socks5ProxyConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                    case ProtocolEnum.CryptPad: /* CryptPad doesn't need config model */ break;
                     }
                     PageController.goToPage(serverProtocolPage);
                 }
