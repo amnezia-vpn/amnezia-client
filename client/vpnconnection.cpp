@@ -288,11 +288,21 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
 
 void VpnConnection::restartConnection()
 {
+    // Only reconnect if VPN was connected before sleep/network change
+    if (!m_wasConnectedBeforeSleep) {
+        qDebug() << "VPN was not connected before sleep/network change, skipping reconnection";
+        return;
+    }
+    
+    qDebug() << "VPN was connected before sleep/network change, attempting reconnection";
     this->disconnectFromVpn();
 #ifdef Q_OS_LINUX
     QThread::msleep(5000);
 #endif
     this->connectToVpn(m_serverIndex, m_serverCredentials, m_dockerContainer, m_vpnConfiguration);
+    
+    // Reset the flag after reconnection attempt
+    m_wasConnectedBeforeSleep = false;
 }
 
 void VpnConnection::createProtocolConnections()
@@ -308,11 +318,17 @@ void VpnConnection::createProtocolConnections()
                 qDebug() << "Connection Lose";
                 auto result = IpcClient::Interface()->stopNetworkCheck();
                 result.waitForFinished(3000);
+                // Track VPN state before connection loss
+                m_wasConnectedBeforeSleep = isConnected();
+                qDebug() << "VPN was connected before connection loss:" << m_wasConnectedBeforeSleep;
                 this->restartConnection();
             });
     connect(IpcClient::Interface().data(), &IpcInterfaceReplica::networkChange,
             this, [this]() {
                 qDebug() << "Network change";
+                // Track VPN state before network change (including sleep/wake)
+                m_wasConnectedBeforeSleep = isConnected();
+                qDebug() << "VPN was connected before network change:" << m_wasConnectedBeforeSleep;
                 this->restartConnection();
             });
 #endif

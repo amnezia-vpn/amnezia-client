@@ -6,11 +6,47 @@
 #include "leakdetector.h"
 #include "logger.h"
 
+#include <QProcess>
+#include <QMetaObject>
+#include <pthread.h>
+#include <iostream>
+
 #import <CoreWLAN/CoreWLAN.h>
 #import <Network/Network.h>
 
 namespace {
 Logger logger("MacOSNetworkWatcher");
+}
+
+// Global variables for CFRunLoop thread
+static pthread_t g_powerThread;
+static CFRunLoopRef g_powerRunLoop = nullptr;
+static bool g_shouldStopPowerThread = false;
+static PowerNotificationsListener* g_powerListener = nullptr;
+
+// Thread function for dedicated CFRunLoop
+void* powerMonitoringThread(void* arg) {
+    logger.debug() << "Power monitoring thread started";
+    
+    PowerNotificationsListener* listener = static_cast<PowerNotificationsListener*>(arg);
+    
+    // Get the runloop for this thread
+    g_powerRunLoop = CFRunLoopGetCurrent();
+    
+    // Register for power notifications in this thread
+    listener->registerForNotifications();
+    
+    // Run the CFRunLoop - this will block until CFRunLoopStop is called
+    while (!g_shouldStopPowerThread) {
+        CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1.0, true);
+    }
+    
+    // Cleanup
+    listener->cleanup();
+    g_powerRunLoop = nullptr;
+    
+    logger.debug() << "Power monitoring thread finished";
+    return nullptr;
 }
 
 @interface MacOSNetworkWatcherDelegate : NSObject <CWEventDelegate> {
@@ -40,24 +76,45 @@ Logger logger("MacOSNetworkWatcher");
 
 void PowerNotificationsListener::registerForNotifications()
 {
+    logger.debug() << "Registering for system power notifications in dedicated thread";
+    
     rootPowerDomain = IORegisterForSystemPower(this, &notifyPortRef, sleepWakeupCallBack, &notifierObj);
     if (rootPowerDomain == IO_OBJECT_NULL) {
-        logger.debug() << "Failed to register for system power notifications!";
+        logger.error() << "Failed to register for system power notifications!";
         return;
     }
 
-    logger.debug() << "IORegisterForSystemPower OK! Root port:" << rootPowerDomain;
-
-    // add the notification port to the application runloop
-    CFRunLoopAddSource(CFRunLoopGetCurrent(), IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes);	
+    // Add the notification port to the current runloop (dedicated thread)
+    CFRunLoopAddSource(CFRunLoopGetCurrent(), IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes);
+    logger.debug() << "Power notifications registered successfully";
 }
 
-static void PowerNotificationsListener::sleepWakeupCallBack(void *refParam, io_service_t service, natural_t messageType, void *messageArgument)
+void PowerNotificationsListener::cleanup()
+{
+    if (notifyPortRef != nullptr) {
+        CFRunLoopRemoveSource(CFRunLoopGetCurrent(), IONotificationPortGetRunLoopSource(notifyPortRef), kCFRunLoopCommonModes);
+        IONotificationPortDestroy(notifyPortRef);
+        notifyPortRef = nullptr;
+    }
+    
+    if (notifierObj != IO_OBJECT_NULL) {
+        IODeregisterForSystemPower(&notifierObj);
+        notifierObj = IO_OBJECT_NULL;
+    }
+    
+    if (rootPowerDomain != IO_OBJECT_NULL) {
+        IOServiceClose(rootPowerDomain);
+        rootPowerDomain = IO_OBJECT_NULL;
+    }
+}
+
+void PowerNotificationsListener::sleepWakeupCallBack(void *refParam, io_service_t service, natural_t messageType, void *messageArgument)
 {
 	Q_UNUSED(service)
 
     auto listener = static_cast<PowerNotificationsListener *>(refParam);
 
+    logger.debug() << "Power callback received, messageType:" << messageType;
     switch (messageType) {
     case kIOMessageCanSystemSleep:
         /* Idle sleep is about to kick in. This message will not be sent for forced sleep.
@@ -93,8 +150,7 @@ static void PowerNotificationsListener::sleepWakeupCallBack(void *refParam, io_s
          * however the system WILL still go to sleep.
          */
 
-        logger.debug() << "System power message: system WILL sleep.";
-
+        logger.debug() << "System power message: system WILL sleep";
         IOAllowPowerChange(listener->rootPowerDomain, reinterpret_cast<long>(messageArgument));
         break;
 
@@ -115,7 +171,11 @@ static void PowerNotificationsListener::sleepWakeupCallBack(void *refParam, io_s
 
     case kIOMessageSystemHasPoweredOn:
         /* Announces that the system and its devices have woken up. */
-        logger.debug() << "System power message: system has powered on.";
+        logger.debug() << "System has powered on - emitting sleepMode signal from dedicated CFRunLoop thread";
+        if (listener->m_watcher) {
+            // Use QMetaObject::invokeMethod for thread-safe signal emission
+            QMetaObject::invokeMethod(listener->m_watcher, "sleepMode", Qt::QueuedConnection);
+        }
         break;
 
     default:
@@ -125,12 +185,27 @@ static void PowerNotificationsListener::sleepWakeupCallBack(void *refParam, io_s
     }
 }
 
-MacOSNetworkWatcher::MacOSNetworkWatcher(QObject* parent) : IOSNetworkWatcher(parent) {
+MacOSNetworkWatcher::MacOSNetworkWatcher(QObject* parent) : IOSNetworkWatcher(parent), m_powerlistener(this) {
   MZ_COUNT_CTOR(MacOSNetworkWatcher);
 }
 
 MacOSNetworkWatcher::~MacOSNetworkWatcher() {
   MZ_COUNT_DTOR(MacOSNetworkWatcher);
+  
+  // Stop the dedicated power monitoring thread
+  if (g_powerListener) {
+    logger.debug() << "Stopping dedicated power monitoring thread";
+    g_shouldStopPowerThread = true;
+    
+    if (g_powerRunLoop) {
+      CFRunLoopStop(g_powerRunLoop);
+    }
+    
+    // Wait for thread to finish
+    pthread_join(g_powerThread, nullptr);
+    g_powerListener = nullptr;
+  }
+  
   if (m_delegate) {
     CWWiFiClient* client = CWWiFiClient.sharedWiFiClient;
     if (!client) {
@@ -154,7 +229,19 @@ void MacOSNetworkWatcher::start() {
     return;
   }
   
-  m_powerlistener.registerForNotifications(); 
+  // Start dedicated power monitoring thread with CFRunLoop
+  if (!g_powerListener) {
+    g_powerListener = &m_powerlistener;
+    g_shouldStopPowerThread = false;
+    
+    int result = pthread_create(&g_powerThread, nullptr, powerMonitoringThread, &m_powerlistener);
+    if (result != 0) {
+      logger.error() << "Failed to create power monitoring thread:" << result;
+      g_powerListener = nullptr;
+    } else {
+      logger.debug() << "Power monitoring enabled";
+    }
+  } 
 
   CWWiFiClient* client = CWWiFiClient.sharedWiFiClient;
   if (!client) {
@@ -166,6 +253,8 @@ void MacOSNetworkWatcher::start() {
   m_delegate = [[MacOSNetworkWatcherDelegate alloc] initWithObject:this];
   [client setDelegate:static_cast<MacOSNetworkWatcherDelegate*>(m_delegate)];
   [client startMonitoringEventWithType:CWEventTypeBSSIDDidChange error:nullptr];
+  
+  logger.debug() << "MacOSNetworkWatcher started successfully";
 }
 
 void MacOSNetworkWatcher::checkInterface() {
@@ -176,42 +265,70 @@ void MacOSNetworkWatcher::checkInterface() {
     return;
   }
 
-  CWWiFiClient* client = CWWiFiClient.sharedWiFiClient;
-  if (!client) {
-    logger.debug() << "Unable to retrieve the CWWiFiClient shared instance";
+  // Use wdutil to get reliable WiFi information
+  QProcess process;
+  process.start("wdutil", QStringList() << "info");
+  process.waitForFinished(5000);
+  
+  QString output = process.readAllStandardOutput();
+  QString errorOutput = process.readAllStandardError();
+  
+  logger.debug() << "wdutil exit code:" << process.exitCode();
+  
+  if (process.exitCode() != 0) {
+    logger.debug() << "wdutil failed with exit code:" << process.exitCode();
     return;
   }
-
-  CWInterface* interface = [client interface];
-  if (!interface) {
-    logger.debug() << "No default wifi interface";
-    return;
+  
+  // Parse wdutil output to find WiFi connection info
+  QStringList lines = output.split('\n');
+  QString ssid, interfaceName, security;
+  bool wifiSectionFound = false;
+  
+  for (int i = 0; i < lines.size(); i++) {
+    QString trimmedLine = lines[i].trimmed();
+    
+    if (trimmedLine == "WIFI") {
+      wifiSectionFound = true;
+      continue;
+    }
+    
+    if (wifiSectionFound) {
+      // Stop parsing when we reach next section header (all caps after separator line)
+      if (trimmedLine.startsWith("————————")) {
+        if (i + 1 < lines.size()) {
+          QString nextLine = lines[i + 1].trimmed();
+          if (!nextLine.isEmpty() && nextLine.length() > 2 && nextLine.toUpper() == nextLine && nextLine != "WIFI") {
+            break;
+          }
+        }
+        continue; // Skip separator lines
+      }
+      
+      if (trimmedLine.startsWith("Interface Name")) {
+        QStringList parts = trimmedLine.split(":");
+        if (parts.size() >= 2) {
+          interfaceName = parts[1].trimmed();
+        }
+      } else if (trimmedLine.startsWith("SSID")) {
+        QStringList parts = trimmedLine.split(":");
+        if (parts.size() >= 2) {
+          ssid = parts[1].trimmed();
+        }
+      } else if (trimmedLine.startsWith("Security")) {
+        QStringList parts = trimmedLine.split(":");
+        if (parts.size() >= 2) {
+          security = parts[1].trimmed();
+        }
+      }
+    }
   }
-
-  if (![interface powerOn]) {
-    logger.debug() << "The interface is off";
-    return;
+  
+  if (!ssid.isEmpty() && !interfaceName.isEmpty()) {
+    logger.debug() << "Found active WiFi connection on" << interfaceName 
+                   << "SSID:" << ssid << "Security:" << security;
+  } else {
+    logger.debug() << "No active WiFi connection found";
   }
-
-  NSString* ssidNS = [interface ssid];
-  if (!ssidNS) {
-    logger.debug() << "WiFi is not in used";
-    return;
-  }
-
-  QString ssid = QString::fromNSString(ssidNS);
-  if (ssid.isEmpty()) {
-    logger.debug() << "WiFi doesn't have a valid SSID";
-    return;
-  }
-
-  CWSecurity security = [interface security];
-  if (security == kCWSecurityNone || security == kCWSecurityWEP) {
-    logger.debug() << "Unsecured network found!";
-    emit unsecuredNetwork(ssid, ssid);
-    return;
-  }
-
-  logger.debug() << "Secure WiFi interface";
 }
 

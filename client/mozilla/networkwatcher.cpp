@@ -77,46 +77,24 @@ void NetworkWatcher::initialize() {
           &NetworkWatcher::onSleepMode);
   m_impl->initialize();
 
-
-
-// TODO: IMPL FOR AMNEZIA
-#if 0
-  SettingsHolder* settingsHolder = SettingsHolder::instance();
-  Q_ASSERT(settingsHolder);
-
-  m_active = settingsHolder->unsecuredNetworkAlert() ||
-             settingsHolder->captivePortalAlert();
-  m_reportUnsecuredNetwork = settingsHolder->unsecuredNetworkAlert();
-  if (m_active) {
+  // Enable sleep/wake monitoring for VPN auto-reconnection
+  logger.debug() << "Starting NetworkWatcher for sleep/wake monitoring";
+  logger.debug() << "About to call m_impl->start()";
+  try {
     m_impl->start();
+    logger.debug() << "m_impl->start() completed successfully";
+  } catch (const std::exception& e) {
+    logger.error() << "Exception in m_impl->start():" << e.what();
+  } catch (...) {
+    logger.error() << "Unknown exception in m_impl->start()";
   }
-
-  connect(settingsHolder, &SettingsHolder::unsecuredNetworkAlertChanged, this,
-          &NetworkWatcher::settingsChanged);
-  connect(settingsHolder, &SettingsHolder::captivePortalAlertChanged, this,
-          &NetworkWatcher::settingsChanged);
-
-#endif
+  m_active = true;
+  m_reportUnsecuredNetwork = false; // Disable unsecured network alerts for Amnezia
 }
 
 void NetworkWatcher::settingsChanged() {
-// TODO: IMPL FOR AMNEZIA
-#if 0
-  SettingsHolder* settingsHolder = SettingsHolder::instance();
-  m_active = settingsHolder->unsecuredNetworkAlert() ||
-             settingsHolder->captivePortalAlert();
-  m_reportUnsecuredNetwork = settingsHolder->unsecuredNetworkAlert();
-
-  if (m_active) {
-    logger.debug()
-        << "Starting Network Watcher; Reporting of Unsecured Networks: "
-        << m_reportUnsecuredNetwork;
-    m_impl->start();
-  } else {
-    logger.debug() << "Stopping Network Watcher";
-    m_impl->stop();
-  }
-#endif
+  // For Amnezia: Keep NetworkWatcher always active for sleep/wake monitoring
+  logger.debug() << "NetworkWatcher settings changed - keeping sleep monitoring active";
 }
 
 void NetworkWatcher::onSleepMode()

@@ -81,6 +81,9 @@ private:
     ServerCredentials m_serverCredentials;
     int m_serverIndex;
     DockerContainer m_dockerContainer;
+    
+    // Track VPN state before sleep for smart reconnection
+    bool m_wasConnectedBeforeSleep = false;
 
     // Only for iOS for now, check counters
     QTimer m_checkTimer;

@@ -7,7 +7,7 @@
 
 #include <QList>
 #include <QString>
-
+#include <QMap>
 #include "ipaddress.h"
 
 class QJsonObject;
