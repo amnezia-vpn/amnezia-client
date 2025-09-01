@@ -3,54 +3,55 @@
 EXTRACT_DIR="$1"
 INSTALLER_PATH="$2"
 
+set -e
+
 # Create and clean extract directory
 rm -rf "$EXTRACT_DIR"
 mkdir -p "$EXTRACT_DIR"
 
-# Mount the DMG
-MOUNT_POINT="$EXTRACT_DIR/mounted_dmg"
-hdiutil attach "$INSTALLER_PATH" -mountpoint "$MOUNT_POINT"
-if [ $? -ne 0 ]; then
-    echo "Failed to mount DMG"
+echo "[AmneziaVPN] Using extract dir: $EXTRACT_DIR"
+echo "[AmneziaVPN] Installer archive: $INSTALLER_PATH"
+
+if [ ! -f "$INSTALLER_PATH" ]; then
+    echo "[AmneziaVPN] ERROR: Installer archive not found: $INSTALLER_PATH"
     exit 1
 fi
 
-# Check if the application exists in the mounted DMG
-if [ ! -d "$MOUNT_POINT/AmneziaVPN.app" ]; then
-    echo "Error: AmneziaVPN.app not found in the mounted DMG."
-    hdiutil detach "$MOUNT_POINT" #-quiet
+# Unzip archive (ZIP expected)
+echo "[AmneziaVPN] Extracting ZIP..."
+ditto -x -k "$INSTALLER_PATH" "$EXTRACT_DIR"
+
+# Locate PKG
+PKG_PATH=$(find "$EXTRACT_DIR" -maxdepth 2 -type f -name 'AmneziaVPN.pkg' | head -n 1)
+if [ -z "$PKG_PATH" ]; then
+    echo "[AmneziaVPN] ERROR: AmneziaVPN.pkg not found after extraction"
     exit 1
 fi
 
-# Run the application
-echo "Running AmneziaVPN.app from the mounted DMG..."
-open "$MOUNT_POINT/AmneziaVPN.app"
+echo "[AmneziaVPN] Found PKG: $PKG_PATH"
 
-# Get the PID of the app launched from the DMG
-APP_PATH="$MOUNT_POINT/AmneziaVPN.app"
-PID=$(pgrep -f "$APP_PATH")
-
-if [ -z "$PID" ]; then
-    echo "Failed to retrieve PID for AmneziaVPN.app"
-    hdiutil detach "$MOUNT_POINT"
-    exit 1
+# Optional: basic signature/gatekeeper checks (non-fatal)
+if command -v pkgutil >/dev/null 2>&1; then
+    pkgutil --check-signature "$PKG_PATH" || true
+fi
+if command -v spctl >/dev/null 2>&1; then
+    spctl -a -vvv -t install "$PKG_PATH" || true
 fi
 
-# Wait for the specific PID to exit
-echo "Waiting for AmneziaVPN.app to exit..."
-while kill -0 "$PID" 2>/dev/null; do
-    sleep 1
-done
+# Run installer with admin privileges via AppleScript (prompts for password)
+echo "[AmneziaVPN] Running installer..."
+OSA_CMD='do shell script "/usr/sbin/installer -pkg '"$PKG_PATH"' -target /" with administrator privileges'
+osascript -e "$OSA_CMD"
 
-# Unmount the DMG
-hdiutil detach "$EXTRACT_DIR/mounted_dmg"
-if [ $? -ne 0 ]; then
-    echo "Failed to unmount DMG"
-    exit 1
+STATUS=$?
+if [ $STATUS -ne 0 ]; then
+    echo "[AmneziaVPN] ERROR: installer exited with status $STATUS"
+    exit $STATUS
 fi
 
-# Optional: Remove the DMG file
-rm "$INSTALLER_PATH"
+echo "[AmneziaVPN] Cleaning up..."
+rm -f "$INSTALLER_PATH" || true
+rm -rf "$EXTRACT_DIR/mounted_dmg" 2>/dev/null || true
 
-echo "Installation completed successfully"
-exit 0 
+echo "[AmneziaVPN] Installation completed successfully"
+exit 0

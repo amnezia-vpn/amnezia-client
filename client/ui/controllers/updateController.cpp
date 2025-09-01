@@ -20,12 +20,15 @@ namespace
 {
     Logger logger("UpdateController");
 
-#ifdef Q_OS_MACOS
-    const QString installerPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.dmg";
-#elif defined Q_OS_WINDOWS
-    const QString installerPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN_installer.exe";
+#if defined(Q_OS_WINDOWS)
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_x64.exe");
+    const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN_installer.exe";
+#elif defined(Q_OS_MACOS)
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_macos.zip");
+    const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.zip";
 #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    const QString installerPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.tar.zip";
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_linux.tar.zip");
+    const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.tar.zip";
 #endif
 }
 
@@ -180,14 +183,7 @@ void UpdateController::handleNetworkError(QNetworkReply* reply, const QString& o
 
 QString UpdateController::composeDownloadUrl()
 {
-    QString fileName;
-#if defined(Q_OS_WINDOWS)
-    fileName = QString("AmneziaVPN_%1_x64.exe").arg(m_version);
-#elif defined(Q_OS_MACOS)
-    fileName = QString("AmneziaVPN_%1_macos.dmg").arg(m_version);
-#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    fileName = QString("AmneziaVPN_%1_linux.tar.zip").arg(m_version);
-#endif
+    const QString fileName = QString(kInstallerRemoteFileNamePattern).arg(m_version);
     return m_baseUrl + "/" + fileName;
 }
 
@@ -200,22 +196,22 @@ void UpdateController::runInstaller()
     }
 
     QNetworkRequest request;
-    request.setTransferTimeout(7000);
+    request.setTransferTimeout(30000);
     request.setUrl(m_downloadUrl);
 
     QNetworkReply *reply = amnApp->networkManager()->get(request);
 
     QObject::connect(reply, &QNetworkReply::finished, [this, reply]() {
         if (reply->error() == QNetworkReply::NoError) {
-            QFile file(installerPath);
+            QFile file(kInstallerLocalPath);
             if (!file.open(QIODevice::WriteOnly)) {
-                logger.error() << "Failed to open installer file for writing:" << installerPath << "Error:" << file.errorString();
+                logger.error() << "Failed to open installer file for writing:" << kInstallerLocalPath << "Error:" << file.errorString();
                 reply->deleteLater();
                 return;
             }
 
             if (file.write(reply->readAll()) == -1) {
-                logger.error() << "Failed to write installer data to file:" << installerPath << "Error:" << file.errorString();
+                logger.error() << "Failed to write installer data to file:" << kInstallerLocalPath << "Error:" << file.errorString();
                 file.close();
                 reply->deleteLater();
                 return;
@@ -224,11 +220,11 @@ void UpdateController::runInstaller()
             file.close();
 
     #if defined(Q_OS_WINDOWS)
-            runWindowsInstaller(installerPath);
+            runWindowsInstaller(kInstallerLocalPath);
     #elif defined(Q_OS_MACOS)
-            runMacInstaller(installerPath);
+            runMacInstaller(kInstallerLocalPath);
     #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-            runLinuxInstaller(installerPath);
+            runLinuxInstaller(kInstallerLocalPath);
     #endif
         } else {
             if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
