@@ -183,8 +183,12 @@ void UpdateController::handleNetworkError(QNetworkReply* reply, const QString& o
 
 QString UpdateController::composeDownloadUrl()
 {
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     const QString fileName = QString(kInstallerRemoteFileNamePattern).arg(m_version);
     return m_baseUrl + "/" + fileName;
+#else
+    return QString();
+#endif
 }
 
 void UpdateController::runInstaller()
