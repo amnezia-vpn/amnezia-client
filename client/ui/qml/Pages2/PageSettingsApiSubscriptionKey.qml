@@ -119,8 +119,9 @@ PageType {
             }
 
             Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: width
+                Layout.preferredWidth: Math.min(Math.min(root.width - (Layout.leftMargin + Layout.rightMargin), root.height * 0.5), 360)
+                Layout.preferredHeight: Layout.preferredWidth
+                Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 20
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -132,6 +133,9 @@ PageType {
                 Image {
                     anchors.fill: parent
                     smooth: false
+                    fillMode: Image.PreserveAspectFit
+                    sourceSize.width: parent.width
+                    sourceSize.height: parent.height
                     source: ApiConfigsController.qrCodesCount > 0 && ApiConfigsController.qrCodes[0] ? ApiConfigsController.qrCodes[0] : ""
                 }
             }
