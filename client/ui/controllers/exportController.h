@@ -37,9 +37,8 @@ public slots:
     void exportConfig(const QString &fileName);
 
     void updateClientManagementModel(const DockerContainer container, ServerCredentials credentials);
-    void revokeConfig(const QString &clientId, const DockerContainer container, ServerCredentials credentials);
-    void renameClient(const QString &clientId, const QString &clientName, const DockerContainer container,
-                      ServerCredentials credentials);
+    void revokeConfig(const int row, const DockerContainer container, ServerCredentials credentials);
+    void renameClient(const int row, const QString &clientName, const DockerContainer container, ServerCredentials credentials);
 
 signals:
     void generateConfig(int type);

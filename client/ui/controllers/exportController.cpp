@@ -293,24 +293,21 @@ void ExportController::updateClientManagementModel(const DockerContainer contain
     }
 }
 
-void ExportController::revokeConfig(const QString &clientId, const DockerContainer container,
-                                    ServerCredentials credentials)
+void ExportController::revokeConfig(const int row, const DockerContainer container, ServerCredentials credentials)
 {
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    ErrorCode errorCode = m_clientManagementModel->revokeClient(
-            clientId, container, credentials, m_serversModel->getProcessedServerIndex(), serverController);
+    ErrorCode errorCode =
+        m_clientManagementModel->revokeClient(row, container, credentials, m_serversModel->getProcessedServerIndex(), serverController);
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorCode);
     }
     emit revokeConfigCompleted();
 }
 
-void ExportController::renameClient(const QString &clientId, const QString &clientName, const DockerContainer container,
-                                    ServerCredentials credentials)
+void ExportController::renameClient(const int row, const QString &clientName, const DockerContainer container, ServerCredentials credentials)
 {
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    ErrorCode errorCode =
-            m_clientManagementModel->renameClient(clientId, clientName, container, credentials, serverController);
+    ErrorCode errorCode = m_clientManagementModel->renameClient(row, clientName, container, credentials, serverController);
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorCode);
     }

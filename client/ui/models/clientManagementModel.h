@@ -13,7 +13,6 @@ class ClientManagementModel : public QAbstractListModel
 
 public:
     enum Roles {
-        ClientIdRole,
         ClientNameRole = Qt::UserRole + 1,
         CreationDateRole,
         LatestHandshakeRole,
@@ -45,9 +44,9 @@ public slots:
                            const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController);
     ErrorCode appendClient(const QString &clientId, const QString &clientName, const DockerContainer container,
                            const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController);
-    ErrorCode renameClient(const QString &clientId, const QString &userName, const DockerContainer container,
+    ErrorCode renameClient(const int row, const QString &userName, const DockerContainer container,
                            const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController, bool addTimeStamp = false);
-    ErrorCode revokeClient(const QString &clientId, const DockerContainer container, const ServerCredentials &credentials,
+    ErrorCode revokeClient(const int index, const DockerContainer container, const ServerCredentials &credentials,
                            const int serverIndex, const QSharedPointer<ServerController> &serverController);
     ErrorCode revokeClient(const QJsonObject &containerConfig, const DockerContainer container, const ServerCredentials &credentials,
                            const int serverIndex, const QSharedPointer<ServerController> &serverController);

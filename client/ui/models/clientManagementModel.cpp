@@ -45,7 +45,6 @@ QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
     auto userData = client.value(configKey::userData).toObject();
 
     switch (role) {
-    case ClientIdRole: return client.value(configKey::clientId).toString();
     case ClientNameRole: return userData.value(configKey::clientName).toString();
     case CreationDateRole: return userData.value(configKey::creationDate).toString();
     case LatestHandshakeRole: return userData.value(configKey::latestHandshake).toString();
@@ -386,17 +385,6 @@ bool ClientManagementModel::isClientExists(const QString &clientId)
     return false;
 }
 
-int ClientManagementModel::clientIndexById(const QString &clientId)
-{
-    int row = 0;
-    for (int i = 0; i < rowCount(); i++) {
-        QString client_id = m_clientsTable.at(i).toObject().value(configKey::clientId).toString();
-        if (client_id == clientId)
-            row = i;
-    }
-    return row;
-}
-
 ErrorCode ClientManagementModel::appendClient(const DockerContainer container, const ServerCredentials &credentials,
                                               const QJsonObject &containerConfig, const QString &clientName,
                                               const QSharedPointer<ServerController> &serverController)
@@ -477,7 +465,7 @@ ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QSt
 
     for (int i = 0; i < m_clientsTable.size(); i++) {
         if (m_clientsTable.at(i).toObject().value(configKey::clientId) == clientId) {
-            return renameClient(clientId, clientName, container, credentials, serverController, true);
+            return renameClient(i, clientName, container, credentials, serverController, true);
         }
     }
 
@@ -509,12 +497,11 @@ ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QSt
     return error;
 }
 
-ErrorCode ClientManagementModel::renameClient(const QString &clientId, const QString &clientName,
+ErrorCode ClientManagementModel::renameClient(const int row, const QString &clientName,
                                               const DockerContainer container,
                                               const ServerCredentials &credentials,
                                               const QSharedPointer<ServerController> &serverController, bool addTimeStamp)
 {
-    int row = clientIndexById(clientId);
     auto client = m_clientsTable.at(row).toObject();
     auto userData = client[configKey::userData].toObject();
     userData[configKey::clientName] = clientName;
@@ -543,13 +530,13 @@ ErrorCode ClientManagementModel::renameClient(const QString &clientId, const QSt
     return error;
 }
 
-ErrorCode ClientManagementModel::revokeClient(const QString &clientId, const DockerContainer container,
+ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContainer container,
                                               const ServerCredentials &credentials,
                                               const int serverIndex, const QSharedPointer<ServerController> &serverController)
 {
     ErrorCode errorCode = ErrorCode::NoError;
-    int row = clientIndexById(clientId);
     auto client = m_clientsTable.at(row).toObject();
+    QString clientId = client.value(configKey::clientId).toString();
 
     switch(container)
     {
@@ -921,7 +908,6 @@ ErrorCode ClientManagementModel::revokeXray(const int row,
 QHash<int, QByteArray> ClientManagementModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
-    roles[ClientIdRole] = "clientId";
     roles[ClientNameRole] = "clientName";
     roles[CreationDateRole] = "creationDate";
     roles[LatestHandshakeRole] = "latestHandshake";
