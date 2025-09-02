@@ -160,7 +160,7 @@ PageType {
 
                     PageController.showBusyIndicator(false)
                     
-                    PageController.goToShareConnectionPage(listView.headerText, listView.configContentHeaderText, "", "", "")
+                    PageController.goToShareConnectionPage(listView.headerText, listView.configContentHeaderText, "", ".vpn", "amnezia_config")
                 }
             }
         }
