@@ -53,14 +53,6 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                defaultColor: AmneziaStyle.color.paleGray
-                hoveredColor: AmneziaStyle.color.sheerWhite
-                pressedColor: AmneziaStyle.color.translucentWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.black
-                leftImageColor: "black"
-                borderWidth: 1
-
                 text: qsTr("Copy key")
                 leftImageSource: "qrc:/images/controls/copy.svg"
 
@@ -194,7 +186,7 @@ PageType {
                     font.pixelSize: 16
                     font.weight: Font.Medium
                     font.family: "PT Root UI VF"
-                    text: ApiConfigsController.vpnKey //|| ""
+                    text: ApiConfigsController.vpnKey
                     wrapMode: Text.Wrap
                     background: Rectangle { color: AmneziaStyle.color.transparent }
                 }

@@ -40,40 +40,67 @@ PageType {
         function onGenerateConfig(type) {
             PageController.showBusyIndicator(true)
 
+            var configCaption
+            var configExtension
+            var configFileName
+
             switch (type) {
-                case PageShare.ConfigType.AmneziaConnection: {
-                    ExportController.generateConnectionConfig(clientNameTextField.textField.text);
-                    break;
-                }
-                case PageShare.ConfigType.OpenVpn: {
-                    ExportController.generateOpenVpnConfig(clientNameTextField.textField.text)
-                    break
-                }
-                case PageShare.ConfigType.WireGuard: {
-                    ExportController.generateWireGuardConfig(clientNameTextField.textField.text)
-                    break
-                }
-                case PageShare.ConfigType.Awg: {
-                    ExportController.generateAwgConfig(clientNameTextField.textField.text)
-                    break
-                }
-                case PageShare.ConfigType.ShadowSocks: {
-                    ExportController.generateShadowSocksConfig()
-                    break
-                }
-                case PageShare.ConfigType.Cloak: {
-                    ExportController.generateCloakConfig()
-                    break
-                }
-                case PageShare.ConfigType.Xray: {
-                    ExportController.generateXrayConfig(clientNameTextField.textField.text)
-                    break
-                }
+            case PageShare.ConfigType.AmneziaConnection: {
+                ExportController.generateConnectionConfig(clientNameTextField.textField.text);
+                configCaption = qsTr("Save AmneziaVPN config")
+                configExtension = ".vpn"
+                configFileName = "amnezia_config"
+                break;
+            }
+            case PageShare.ConfigType.OpenVpn: {
+                ExportController.generateOpenVpnConfig(clientNameTextField.textField.text)
+                configCaption = qsTr("Save OpenVPN config")
+                configExtension = ".ovpn"
+                configFileName = "amnezia_for_openvpn"
+                break
+            }
+            case PageShare.ConfigType.WireGuard: {
+                ExportController.generateWireGuardConfig(clientNameTextField.textField.text)
+                configCaption = qsTr("Save WireGuard config")
+                configExtension = ".conf"
+                configFileName = "amnezia_for_wireguard"
+                break
+            }
+            case PageShare.ConfigType.Awg: {
+                ExportController.generateAwgConfig(clientNameTextField.textField.text)
+                configCaption = qsTr("Save AmneziaWG config")
+                configExtension = ".conf"
+                configFileName = "amnezia_for_awg"
+                break
+            }
+            case PageShare.ConfigType.ShadowSocks: {
+                ExportController.generateShadowSocksConfig()
+                configCaption = qsTr("Save Shadowsocks config")
+                configExtension = ".json"
+                configFileName = "amnezia_for_shadowsocks"
+                break
+            }
+            case PageShare.ConfigType.Cloak: {
+                ExportController.generateCloakConfig()
+                configCaption = qsTr("Save Cloak config")
+                configExtension = ".json"
+                configFileName = "amnezia_for_cloak"
+                break
+            }
+            case PageShare.ConfigType.Xray: {
+                ExportController.generateXrayConfig(clientNameTextField.textField.text)
+                configCaption = qsTr("Save XRay config")
+                configExtension = ".json"
+                configFileName = "amnezia_for_xray"
+                break
+            }
             }
 
             PageController.showBusyIndicator(false)
             
-            PageController.goToPage(PageEnum.PageShareConnection)
+            var headerText = qsTr("Connection to ") + serverSelector.text
+            var configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
+            PageController.goToShareConnectionPage(headerText, configContentHeaderText, configCaption, configExtension, configFileName)
         }
 
         function onExportErrorOccurred(error) {

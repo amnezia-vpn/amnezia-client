@@ -44,6 +44,19 @@ PageType {
             tabBarStackView.push(pagePath, { "objectName" : pagePath }, StackView.PushTransition)
         }
 
+        function onGoToShareConnectionPage(headerText, configContentHeaderText, configCaption, configExtension, configFileName) {
+            var pagePath = PageController.getPagePath(PageEnum.PageShareConnection)
+            tabBarStackView.push(pagePath,
+                                 { "objectName" : pagePath,
+                                     "headerText" : headerText,
+                                     "configContentHeaderText" : configContentHeaderText,
+                                     "configCaption" : configCaption,
+                                     "configExtension" : configExtension,
+                                     "configFileName" : configFileName
+                                 },
+                                 StackView.PushTransition)
+        }
+
         function onDisableControls(disabled) {
             isControlsDisabled = disabled
         }

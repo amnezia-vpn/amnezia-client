@@ -7,17 +7,20 @@ import Style 1.0
 import "TextTypes"
 
 RowLayout {
+    id: root
+
     property string imageSource
     property string leftText
     property var rightText
     property bool isRightTextUndefined: rightText === undefined
+    property int rightTextFormat: Text.PlainText
 
     visible: !isRightTextUndefined
 
     Image {
         Layout.preferredHeight: 18
         Layout.preferredWidth: 18
-        source: imageSource
+        source: root.imageSource
     }
 
     ListItemTitleType {
@@ -25,14 +28,15 @@ RowLayout {
         Layout.rightMargin: 10
         Layout.alignment: Qt.AlignRight
 
-        text: leftText
+        text: root.leftText
     }
 
     ParagraphTextType {
-        visible: rightText !== ""
+        visible: root.rightText !== ""
 
         Layout.alignment: Qt.AlignLeft
 
-        text: isRightTextUndefined ? "" : rightText
+        text: root.isRightTextUndefined ? "" : root.rightText
+        textFormat: root.rightTextFormat
     }
 }

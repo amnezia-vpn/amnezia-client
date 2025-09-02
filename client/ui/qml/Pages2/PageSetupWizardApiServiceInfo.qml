@@ -66,6 +66,8 @@ PageType {
                 imageSource: imagePath
                 leftText: lText
                 rightText: rText
+
+                visible: isVisible
             }
         }
 

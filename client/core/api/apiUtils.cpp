@@ -23,7 +23,7 @@ namespace
 
 bool apiUtils::isSubscriptionExpired(const QString &subscriptionEndDate)
 {
-    QDateTime now = QDateTime::currentDateTime();
+    QDateTime now = QDateTime::currentDateTimeUtc();
     QDateTime endDate = QDateTime::fromString(subscriptionEndDate, Qt::ISODateWithMs);
     return endDate < now;
 }

@@ -153,7 +153,7 @@ PageType {
                 text: qsTr("Auto-negotiate encryption")
                 checked: autoNegotiateEncryprion
 
-                onCheckedChanged: {
+                onToggled: function() {
                     if (checked !== autoNegotiateEncryprion) {
                         autoNegotiateEncryprion = checked
                     }
@@ -320,7 +320,7 @@ PageType {
 
                 text: qsTr("Additional client configuration commands")
 
-                onCheckedChanged: {
+                onToggled: function() {
                     if (!checked) {
                         additionalClientCommands = ""
                     }
@@ -357,7 +357,7 @@ PageType {
 
                 text: qsTr("Additional server configuration commands")
 
-                onCheckedChanged: {
+                onToggled: function() {
                     if (!checked) {
                         additionalServerCommands = ""
                     }

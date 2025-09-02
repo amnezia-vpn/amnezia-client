@@ -21,12 +21,6 @@ PageType {
     id: pageShareConnection
 
     property string headerText
-
-    Component.onCompleted: {
-        var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
-        headerText = qsTr("Connection to ") + serverName
-        configContentHeaderText = qsTr("File with connection settings to ") + serverName
-    }
     property string configContentHeaderText
     property string shareButtonText: qsTr("Share")
     property string copyButtonText: qsTr("Copy")
@@ -36,17 +30,17 @@ PageType {
     property string configCaption: qsTr("Save AmneziaVPN config")
     property string configFileName: "amnezia_config"
 
-    onVisibleChanged: {
-        configExtension = ".vpn"
-        configCaption = qsTr("Save AmneziaVPN config")
-        configFileName = "amnezia_config"
+    // onVisibleChanged: {
+    //     configExtension = ".vpn"
+    //     configCaption = qsTr("Save AmneziaVPN config")
+    //     configFileName = "amnezia_config"
         
-        if (visible) {
-            var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
-            headerText = qsTr("Connection to ") + serverName
-            configContentHeaderText = qsTr("File with connection settings to ") + serverName
-        }
-    }
+    //     if (visible) {
+    //         var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
+    //         headerText = qsTr("Connection to ") + serverName
+    //         configContentHeaderText = qsTr("File with connection settings to ") + serverName
+    //     }
+    // }
 
     BackButtonType {
         id: backButton
