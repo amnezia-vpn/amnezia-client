@@ -30,12 +30,16 @@ PageType {
             if (!ConnectionController.isConnected && !ContainersModel.isServiceContainer(containerIndex)) {
                 ServersModel.setDefaultContainer(ServersModel.processedIndex, containerIndex)
             }
-
+            
             PageController.closePage() // close installing page
             PageController.closePage() // close protocol settings page
 
             if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageHome)) {
                 PageController.restorePageHomeState(true)
+            }
+
+            if (stackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageSetupWizardProtocols)) {
+                PageController.goToPage(PageEnum.PageHome)
             }
 
             PageController.showNotificationMessage(finishedMessage)
