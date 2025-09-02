@@ -647,26 +647,11 @@ void ServersModel::toggleAmneziaDns(bool enabled)
     emit defaultServerDescriptionChanged();
 }
 
-bool ServersModel::isServerFromApiAlreadyExists(const quint16 crc, const QJsonObject& newServer)
+bool ServersModel::isServerFromApiAlreadyExists(const quint16 crc)
 {
     for (const auto &server : std::as_const(m_servers)) {
-        const QJsonObject serverObj = server.toObject();
-        const auto serverCrc = static_cast<quint16>(serverObj.value(config_key::crc).toInt());
-
-        if (serverCrc != 0 && serverCrc == crc) {
+        if (static_cast<quint16>(server.toObject().value(config_key::crc).toInt()) == crc) {
             return true;
-        }
-
-        if (serverCrc == 0) {
-            const auto apiConfig = serverObj.value(configKey::apiConfig).toObject();
-            const auto newApiConfig = newServer.value(configKey::apiConfig).toObject();
-
-            const auto existingVpnKey = apiConfig.value(apiDefs::key::vpnKey).toString();
-            const auto newVpnKey = newApiConfig.value(apiDefs::key::vpnKey).toString();
-
-            if (!existingVpnKey.isEmpty() && !newVpnKey.isEmpty() && existingVpnKey == newVpnKey) {
-                return true;
-            }
         }
     }
     return false;
