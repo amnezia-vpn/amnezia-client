@@ -151,6 +151,7 @@ void SettingsController::backupAppConfig(const QString &fileName)
     config["Conf/autoStart"] = Autostart::isAutostart();
     config["Conf/killSwitchEnabled"] = isKillSwitchEnabled();
     config["Conf/strictKillSwitchEnabled"] = isStrictKillSwitchEnabled();
+    config["Conf/useAmneziaDns"] = isAmneziaDnsEnabled();
 
     SystemController::saveFile(fileName, QJsonDocument(config).toJson());
 }
@@ -213,6 +214,11 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         m_settings->setKillSwitchEnabled(false);
         m_settings->setStrictKillSwitchEnabled(false);
 #endif
+
+        bool amneziaDnsEnabled = newConfigData.contains("Conf/useAmneziaDns")
+                                     ? newConfigData.value("Conf/useAmneziaDns").toBool()
+                                     : m_settings->useAmneziaDns();
+        emit amneziaDnsToggled(amneziaDnsEnabled);
 
         emit restoreBackupFinished();
     } else {
