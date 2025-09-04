@@ -186,7 +186,8 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_ANDROID)
         int appSplitTunnelingRouteMode = newConfigData.value("Conf/appsRouteMode").toInt();
-        bool appSplittunnelingEnabled = newConfigData.value("Conf/appsSplitTunnelingEnabled").toString().toLower() == "true";
+        bool appSplittunnelingEnabled =
+                newConfigData.value("Conf/appsSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
         m_appSplitTunnelingModel->setRouteMode(appSplitTunnelingRouteMode);
 
         #if defined(Q_OS_WINDOWS)
@@ -198,12 +199,13 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
                     m_appSplitTunnelingModel->clearAppsList();
                 }
         }
-
+        
         m_appSplitTunnelingModel->toggleSplitTunneling(appSplittunnelingEnabled);
 #endif
 
         int siteSplitTunnelingRouteMode = newConfigData.value("Conf/routeMode").toInt();
-        bool siteSplittunnelingEnabled = newConfigData.value("Conf/sitesSplitTunnelingEnabled").toString().toLower() == "true";
+        bool siteSplittunnelingEnabled =
+                newConfigData.value("Conf/sitesSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
         m_sitesModel->setRouteMode(siteSplitTunnelingRouteMode);
         m_sitesModel->toggleSplitTunneling(siteSplittunnelingEnabled);
 
