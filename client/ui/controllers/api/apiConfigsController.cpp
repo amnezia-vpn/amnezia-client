@@ -227,25 +227,7 @@ namespace
         return ErrorCode::NoError;
     }
 
-    ErrorCode processPurchase(QString &transactionId)
-    {
-
-#ifdef Q_OS_IOS
-        ErrorCode errorCode = ErrorCode::NoError;
-        IosController::Instance()->purchaseProduct(
-                "7e09f1f163e9463bb6d3213e6e9e8ad9",
-                [&transactionId, &errorCode](bool ok, const QString &txId, const QString &prodId, const QString &receipt, const QString &err) {
-                    if (ok) {
-                        qDebug() << "Purchased" << prodId << txId << ", receipt size=" << receipt.size();
-                        transactionId = txId;
-                    } else {
-                        qDebug() << "Error" << err;
-                        errorCode = ErrorCode::InternalError;
-                    }
-                });
-#endif
-        return ErrorCode::NoError;
-    }
+    // removed: debug-only processPurchase helper; purchase is handled synchronously in importServiceFromGateway on iOS
 }
 
 ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersModel> &serversModel,
@@ -343,25 +325,21 @@ void ApiConfigsController::copyVpnKeyToClipboard()
 
 bool ApiConfigsController::fillAvailableServices()
 {
-    // iOS: fetch and log available IAP products (requires known identifiers)
+    // iOS: only fetch and log available IAP products (no purchase here)
 #ifdef Q_OS_IOS
     {
         const QStringList productIds = {
-            QStringLiteral("7e09f1f163e9463bb6d3213e6e9e8ad9"),
-            QStringLiteral("c358c8fc0b314f49bb0d0215e1bb6821"),
+            QStringLiteral("com.amnezia.amneziavpn.1_month"),
             QStringLiteral("com.amnezia.AmneziaVPN.6_month")
-
-            // Add more product identifiers here as needed
         };
         IosController::Instance()->fetchProducts(productIds,
-            [productIds](const QList<QVariantMap> &products,
-                         const QStringList &invalidIds,
-                         const QString &errorString) {
+            [](const QList<QVariantMap> &products,
+               const QStringList &invalidIds,
+               const QString &errorString) {
                 if (!errorString.isEmpty()) {
                     qDebug() << "IAP fetch error:" << errorString;
                     return;
                 }
-
                 for (const auto &p : products) {
                     qDebug().nospace() << "IAP product id=" << p.value("productId").toString()
                                        << ", title=" << p.value("title").toString()
@@ -370,42 +348,6 @@ bool ApiConfigsController::fillAvailableServices()
                 }
                 if (!invalidIds.isEmpty()) {
                     qDebug() << "Invalid IAP IDs:" << invalidIds;
-                }
-
-                // Find the first valid product ID preserving our desired order
-                QString firstValidId;
-                for (const auto &candidate : productIds) {
-                    const bool isInvalid = invalidIds.contains(candidate);
-                    if (isInvalid) {
-                        continue;
-                    }
-                    // Ensure it exists in returned products list
-                    const bool found = std::any_of(products.begin(), products.end(), [&](const QVariantMap &p) {
-                        return p.value("productId").toString() == candidate;
-                    });
-                    if (found) {
-                        firstValidId = candidate;
-                        break;
-                    }
-                }
-
-                if (!firstValidId.isEmpty()) {
-                    qDebug() << "Attempting IAP purchase for" << firstValidId;
-                    IosController::Instance()->purchaseProduct(
-                        firstValidId,
-                        [](bool success,
-                           const QString &transactionId,
-                           const QString &purchasedProductId,
-                           const QString &receipt,
-                           const QString &errorString) {
-                            if (success) {
-                                qDebug() << "IAP purchase succeeded" << purchasedProductId << transactionId << ", receipt size=" << receipt.size();
-                            } else {
-                                qDebug() << "IAP purchase failed for" << purchasedProductId << ":" << errorString;
-                            }
-                        });
-                } else {
-                    qDebug() << "No valid IAP product IDs available to purchase.";
                 }
             });
     }
@@ -458,15 +400,77 @@ bool ApiConfigsController::importServiceFromGateway()
     QByteArray responseBody;
 
 #ifdef Q_OS_IOS
-    QString transactionId;
-    errorCode = processPurchase(transactionId);
-    if (errorCode != ErrorCode::NoError) {
-        QJsonObject authData;
-        authData[apiDefs::key::apiKey] = transactionId;
-        apiPayload[configKey::authData] = authData;
+    // On iOS (and macOS NE builds), perform purchase now (decoupled from product fetch),
+    // then send the Base64 receipt to the gateway via app_store_config.
+    QString chosenProductId;
+    {
+        // Try to select the first valid product id from a known list to be resilient.
+        const QStringList productIds = {
+            QStringLiteral("com.amnezia.amneziavpn.1_month"),
+            QStringLiteral("com.amnezia.AmneziaVPN.6_month")
+        };
 
-        errorCode = executeRequest(QString("%1v1/app_store_config"), apiPayload, responseBody);
+        // Fetch products synchronously to pick a valid id.
+        QList<QVariantMap> products;
+        QStringList invalidIds;
+        QString fetchError;
+        QEventLoop waitFetch;
+        IosController::Instance()->fetchProducts(productIds,
+            [&](const QList<QVariantMap> &prods, const QStringList &invalid, const QString &err) {
+                products = prods;
+                invalidIds = invalid;
+                fetchError = err;
+                waitFetch.quit();
+            });
+        waitFetch.exec();
+
+        if (fetchError.isEmpty()) {
+            for (const auto &candidate : productIds) {
+                if (invalidIds.contains(candidate)) continue;
+                const bool found = std::any_of(products.begin(), products.end(), [&](const QVariantMap &p) {
+                    return p.value("productId").toString() == candidate;
+                });
+                if (found) { chosenProductId = candidate; break; }
+            }
+        }
+        if (chosenProductId.isEmpty() && !productIds.isEmpty()) {
+            chosenProductId = productIds.first();
+        }
     }
+
+    bool purchaseOk = false;
+    QString receiptBase64;
+    QString purchaseError;
+    QEventLoop waitPurchase;
+    IosController::Instance()->purchaseProduct(
+        chosenProductId,
+        [&](bool success,
+            const QString &transactionId,
+            const QString &purchasedProductId,
+            const QString &receipt,
+            const QString &errorString) {
+            Q_UNUSED(transactionId)
+            Q_UNUSED(purchasedProductId)
+            purchaseOk = success;
+            receiptBase64 = receipt;
+            purchaseError = errorString;
+            waitPurchase.quit();
+        });
+    waitPurchase.exec();
+
+    if (!purchaseOk || receiptBase64.isEmpty()) {
+        qDebug() << "IAP purchase failed:" << purchaseError;
+        emit errorOccurred(ErrorCode::InternalError);
+        return false;
+    }
+
+    {
+        QJsonObject authData;
+        authData[apiDefs::key::apiKey] = receiptBase64;
+        apiPayload[configKey::authData] = authData;
+    }
+
+    errorCode = executeRequest(QString("%1v1/app_store_config"), apiPayload, responseBody);
 #else
     errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
 #endif
@@ -483,12 +487,6 @@ bool ApiConfigsController::importServiceFromGateway()
         apiConfig.insert(configKey::userCountryCode, m_apiServicesModel->getCountryCode());
         apiConfig.insert(configKey::serviceType, m_apiServicesModel->getSelectedServiceType());
         apiConfig.insert(configKey::serviceProtocol, m_apiServicesModel->getSelectedServiceProtocol());
-
-#ifdef Q_OS_IOS
-        QJsonObject authData;
-        authData[apiDefs::key::apiKey] = transactionId;
-        serverConfig[configKey::authData] = authData;
-#endif
 
         serverConfig.insert(configKey::apiConfig, apiConfig);
 
