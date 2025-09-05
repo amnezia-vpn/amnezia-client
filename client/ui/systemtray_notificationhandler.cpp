@@ -42,7 +42,13 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
     m_trayActionQuit = m_menu.addAction(QIcon(":/images/tray/cancel.png"),
                                        tr("Quit") + " " + APPLICATION_NAME,
                                        this,
-                                       [&](){ qApp->exit(); });
+                                       [&](){
+#if defined(Q_OS_LINUX)
+                m_systemTrayIcon.hide();
+                m_systemTrayIcon.setContextMenu(nullptr);
+#endif
+            qApp->quit();
+        });
 
     m_systemTrayIcon.setContextMenu(&m_menu);
     setTrayState(Vpn::ConnectionState::Disconnected);

@@ -136,7 +136,10 @@ void PageController::setTriggeredByConnectButton(bool trigger)
 
 void PageController::closeApplication()
 {
-    qApp->exit();
+#if defined(Q_OS_LINUX)
+    emit hideMainWindow();
+#endif
+    qApp->quit();
 }
 
 void PageController::setDrawerDepth(const int depth)
