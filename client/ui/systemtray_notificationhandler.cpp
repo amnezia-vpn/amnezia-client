@@ -46,8 +46,15 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
 #if defined(Q_OS_LINUX)
                 m_systemTrayIcon.hide();
                 m_systemTrayIcon.setContextMenu(nullptr);
+
+                for (auto w : qApp->topLevelWidgets()) {
+                    w->close();
+                }
+
+                QTimer::singleShot(0, qApp, []() { qApp->exit(0); });
+#else
+        qApp->quit();
 #endif
-            qApp->quit();
         });
 
     m_systemTrayIcon.setContextMenu(&m_menu);
