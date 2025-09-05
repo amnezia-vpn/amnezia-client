@@ -136,7 +136,7 @@ void PageController::setTriggeredByConnectButton(bool trigger)
 
 void PageController::closeApplication()
 {
-    qApp->quit();
+    qApp->exit();
 }
 
 void PageController::setDrawerDepth(const int depth)
