@@ -141,9 +141,8 @@ void PageController::closeApplication()
         w->close();
     }
     QTimer::singleShot(0, qApp, []() { qApp->exit(0); });
-#else
-    qApp->quit();
 #endif
+    qApp->quit();
 }
 
 void PageController::setDrawerDepth(const int depth)
