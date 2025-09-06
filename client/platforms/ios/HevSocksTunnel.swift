@@ -10,28 +10,36 @@ public enum Socks5Tunnel {
                 _ = strcpy($0, "com.apple.net.utun_control")
             }
         }
-        for fd: Int32 in 0...1024 {
-            var addr = sockaddr_ctl()
-            var ret: Int32 = -1
-            var len = socklen_t(MemoryLayout.size(ofValue: addr))
-            withUnsafeMutablePointer(to: &addr) {
-                $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                    ret = getpeername(fd, $0, &len)
+
+        func scanForUtun() -> Int32? {
+            for fd: Int32 in 0...1024 {
+                var addr = sockaddr_ctl()
+                var ret: Int32 = -1
+                var len = socklen_t(MemoryLayout.size(ofValue: addr))
+                withUnsafeMutablePointer(to: &addr) {
+                    $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                        ret = getpeername(fd, $0, &len)
+                    }
                 }
-            }
-            if ret != 0 || addr.sc_family != AF_SYSTEM {
-                continue
-            }
-            if ctlInfo.ctl_id == 0 {
-                ret = ioctl(fd, CTLIOCGINFO, &ctlInfo)
-                if ret != 0 {
-                    continue
+                if ret != 0 || addr.sc_family != AF_SYSTEM { continue }
+                if ctlInfo.ctl_id == 0 {
+                    ret = ioctl(fd, CTLIOCGINFO, &ctlInfo)
+                    if ret != 0 { continue }
                 }
+                if addr.sc_id == ctlInfo.ctl_id { return fd }
             }
-            if addr.sc_id == ctlInfo.ctl_id {
-                return fd
-            }
+            return nil
         }
+
+        // On newer iOS versions, utun can appear slightly after settings
+        // application. Poll briefly rather than aborting.
+        let deadline = Date().addingTimeInterval(3.0)
+        repeat {
+            if let fd = scanForUtun() { return fd }
+            // Sleep a bit to avoid busy-waiting
+            usleep(50_000) // 50ms
+        } while Date() < deadline
+
         return nil
     }
 
@@ -63,7 +71,8 @@ public enum Socks5Tunnel {
     @discardableResult
     public static func run(withConfig filePath: String) -> Int32 {
         guard let fileDescriptor = self.tunnelFileDescriptor else {
-            fatalError("Get tunnel file descriptor failed.")
+            // Tunnel FD not ready; do not crash the extension
+            return -1
         }
         return hev_socks5_tunnel_main(filePath.cString(using: .utf8), fileDescriptor)
     }

@@ -15,9 +15,9 @@ extension Constants {
         if let cachesDirectoryURL = FileManager.default.urls(for: .cachesDirectory,
                                                              in: .userDomainMask).first {
             return cachesDirectoryURL
-        } else {
-            fatalError("Unable to retrieve caches directory.")
         }
+        // Fallback to temporaryDirectory rather than crashing
+        return FileManager.default.temporaryDirectory
     }()
 }
 

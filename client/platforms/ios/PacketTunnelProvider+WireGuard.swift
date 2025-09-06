@@ -89,7 +89,9 @@ extension PacketTunnelProvider {
                     errorNotifier.notify(PacketTunnelProviderError.couldNotStartBackend)
                     completionHandler(PacketTunnelProviderError.couldNotStartBackend)
                 case .invalidState:
-                    fatalError()
+                    wg_log(.error, staticMessage: "Starting tunnel failed: invalid adapter state")
+                    errorNotifier.notify(PacketTunnelProviderError.couldNotStartBackend)
+                    completionHandler(PacketTunnelProviderError.couldNotStartBackend)
                 }
             }
         } catch {
