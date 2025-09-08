@@ -295,10 +295,6 @@ void ImportController::processNativeWireGuardConfig()
         // clientProtocolConfig[config_key::specialJunk3] = "";
         // clientProtocolConfig[config_key::specialJunk4] = "";
         // clientProtocolConfig[config_key::specialJunk5] = "";
-        // clientProtocolConfig[config_key::controlledJunk1] = "";
-        // clientProtocolConfig[config_key::controlledJunk2] = "";
-        // clientProtocolConfig[config_key::controlledJunk3] = "";
-        // clientProtocolConfig[config_key::specialHandshakeTimeout] = "0";
 
         clientProtocolConfig[config_key::isObfuscationEnabled] = true;
 
@@ -462,8 +458,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     const QStringList optionalJunkFields = { // config_key::cookieReplyPacketJunkSize,
                                              // config_key::transportPacketJunkSize,
                                              config_key::specialJunk1,    config_key::specialJunk2,    config_key::specialJunk3,
-                                             config_key::specialJunk4,    config_key::specialJunk5,    config_key::controlledJunk1,
-                                             config_key::controlledJunk2, config_key::controlledJunk3, config_key::specialHandshakeTimeout
+                                             config_key::specialJunk4,    config_key::specialJunk5
     };
 
     bool hasAllRequiredFields = std::all_of(requiredJunkFields.begin(), requiredJunkFields.end(),

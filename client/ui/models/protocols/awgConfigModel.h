@@ -30,10 +30,6 @@ struct AwgConfig
     QString clientSpecialJunk3;
     QString clientSpecialJunk4;
     QString clientSpecialJunk5;
-    QString clientControlledJunk1;
-    QString clientControlledJunk2;
-    QString clientControlledJunk3;
-    QString clientSpecialHandshakeTimeout;
 
     QString serverJunkPacketCount;
     QString serverJunkPacketMinSize;
@@ -69,10 +65,6 @@ public:
         ClientSpecialJunk3Role,
         ClientSpecialJunk4Role,
         ClientSpecialJunk5Role,
-        ClientControlledJunk1Role,
-        ClientControlledJunk2Role,
-        ClientControlledJunk3Role,
-        ClientSpecialHandshakeTimeoutRole,
 
         ServerJunkPacketCountRole,
         ServerJunkPacketMinSizeRole,

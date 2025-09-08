@@ -142,10 +142,6 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 // containerConfig[config_key::specialJunk3] = specialJunk3;
                 // containerConfig[config_key::specialJunk4] = specialJunk4;
                 // containerConfig[config_key::specialJunk5] = specialJunk5;
-                // containerConfig[config_key::controlledJunk1] = controlledJunk1;
-                // containerConfig[config_key::controlledJunk2] = controlledJunk2;
-                // containerConfig[config_key::controlledJunk3] = controlledJunk3;
-                // containerConfig[config_key::specialHandshakeTimeout] = specialHandshakeTimeout;
 
             } else if (container == DockerContainer::Sftp) {
                 containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
@@ -458,10 +454,6 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         // containerConfig[config_key::specialJunk3] = serverConfigMap.value(config_key::specialJunk3);
                         // containerConfig[config_key::specialJunk4] = serverConfigMap.value(config_key::specialJunk4);
                         // containerConfig[config_key::specialJunk5] = serverConfigMap.value(config_key::specialJunk5);
-                        // containerConfig[config_key::controlledJunk1] = serverConfigMap.value(config_key::controlledJunk1);
-                        // containerConfig[config_key::controlledJunk2] = serverConfigMap.value(config_key::controlledJunk2);
-                        // containerConfig[config_key::controlledJunk3] = serverConfigMap.value(config_key::controlledJunk3);
-                        // containerConfig[config_key::specialHandshakeTimeout] = serverConfigMap.value(config_key::specialHandshakeTimeout);
 
                     } else if (protocol == Proto::WireGuard) {
                         QString serverConfig = serverController->getTextFileFromContainer(container, credentials,

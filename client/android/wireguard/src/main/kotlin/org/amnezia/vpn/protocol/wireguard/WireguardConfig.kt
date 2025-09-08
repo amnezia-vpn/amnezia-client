@@ -31,10 +31,6 @@ open class WireguardConfig protected constructor(
     var i3: String?,
     var i4: String?,
     var i5: String?,
-    var j1: String?,
-    var j2: String?,
-    var j3: String?,
-    var itime: Int?
 ) : ProtocolConfig(protocolConfigBuilder) {
 
     protected constructor(builder: Builder) : this(
@@ -61,10 +57,6 @@ open class WireguardConfig protected constructor(
         builder.i3,
         builder.i4,
         builder.i5,
-        builder.j1,
-        builder.j2,
-        builder.j3,
-        builder.itime
     )
 
     fun toWgUserspaceString(): String = with(StringBuilder()) {
@@ -94,10 +86,6 @@ open class WireguardConfig protected constructor(
             i3?.let { appendLine("i3=$it") }
             i4?.let { appendLine("i4=$it") }
             i5?.let { appendLine("i5=$it") }
-            j1?.let { appendLine("j1=$it") }
-            j2?.let { appendLine("j2=$it") }
-            j3?.let { appendLine("j3=$it") }
-            itime?.let { appendLine("itime=$it") }
         }
     }
 
@@ -161,10 +149,6 @@ open class WireguardConfig protected constructor(
         internal var i3: String? = null
         internal var i4: String? = null
         internal var i5: String? = null
-        internal var j1: String? = null
-        internal var j2: String? = null
-        internal var j3: String? = null
-        internal var itime: Int? = null
 
         fun setEndpoint(endpoint: InetEndpoint) = apply { this.endpoint = endpoint }
 
@@ -194,10 +178,6 @@ open class WireguardConfig protected constructor(
         fun setI3(i3: String) = apply { this.i3 = i3 }
         fun setI4(i4: String) = apply { this.i4 = i4 }
         fun setI5(i5: String) = apply { this.i5 = i5 }
-        fun setJ1(j1: String) = apply { this.j1 = j1 }
-        fun setJ2(j2: String) = apply { this.j2 = j2 }
-        fun setJ3(j3: String) = apply { this.j3 = j3 }
-        fun setItime(itime: Int) = apply { this.itime = itime }
 
         override fun build(): WireguardConfig = configBuild().run { WireguardConfig(this@Builder) }
     }

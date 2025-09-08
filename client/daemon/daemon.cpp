@@ -440,18 +440,6 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!obj.value("I5").isNull()) {
     config.m_specialJunk["I5"] = obj.value("I5").toString();
   }
-  if (!obj.value("J1").isNull()) {
-    config.m_controlledJunk["J1"] = obj.value("J1").toString();
-  }
-  if (!obj.value("J2").isNull()) {
-    config.m_controlledJunk["J2"] = obj.value("J2").toString();
-  }
-  if (!obj.value("J3").isNull()) {
-    config.m_controlledJunk["J3"] = obj.value("J3").toString();
-  }
-  if (!obj.value("Itime").isNull()) {
-    config.m_specialHandshakeTimeout = obj.value("Itime").toString();
-  }
 
   return true;
 }
