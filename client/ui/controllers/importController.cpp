@@ -287,14 +287,8 @@ void ImportController::processNativeWireGuardConfig()
         clientProtocolConfig[config_key::underloadPacketMagicHeader] = "3";
         clientProtocolConfig[config_key::transportPacketMagicHeader] = "4";
 
-        // clientProtocolConfig[config_key::cookieReplyPacketJunkSize] = "0";
-        // clientProtocolConfig[config_key::transportPacketJunkSize] = "0";
-
-        // clientProtocolConfig[config_key::specialJunk1] = "";
-        // clientProtocolConfig[config_key::specialJunk2] = "";
-        // clientProtocolConfig[config_key::specialJunk3] = "";
-        // clientProtocolConfig[config_key::specialJunk4] = "";
-        // clientProtocolConfig[config_key::specialJunk5] = "";
+        clientProtocolConfig[config_key::cookieReplyPacketJunkSize] = "0";
+        clientProtocolConfig[config_key::transportPacketJunkSize] = "0";
 
         clientProtocolConfig[config_key::isObfuscationEnabled] = true;
 

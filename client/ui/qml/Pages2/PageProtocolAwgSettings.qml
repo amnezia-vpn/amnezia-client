@@ -187,37 +187,37 @@ PageType {
                 }
             }
 
-            // AwgTextField {
-            //     id: cookieReplyPacketJunkSizeTextField
+            AwgTextField {
+                id: cookieReplyPacketJunkSizeTextField
 
-            //     Layout.leftMargin: 16
-            //     Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            //     headerText: qsTr("S3 - Cookie reply packet junk size")
-            //     textField.text: serverCookieReplyPacketJunkSize
+                headerText: qsTr("S3 - Cookie reply packet junk size")
+                textField.text: serverCookieReplyPacketJunkSize
 
-            //     textField.onEditingFinished: {
-            //         if (textField.text !== serverCookieReplyPacketJunkSize) {
-            //             serverCookieReplyPacketJunkSize = textField.text
-            //         }
-            //     }
-            // }
+                textField.onEditingFinished: {
+                    if (textField.text !== serverCookieReplyPacketJunkSize) {
+                        serverCookieReplyPacketJunkSize = textField.text
+                    }
+                }
+            }
 
-            // AwgTextField {
-            //     id: transportPacketJunkSizeTextField
+            AwgTextField {
+                id: transportPacketJunkSizeTextField
 
-            //     Layout.leftMargin: 16
-            //     Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            //     headerText: qsTr("S4 - Transport packet junk size")
-            //     textField.text: serverTransportPacketJunkSize
+                headerText: qsTr("S4 - Transport packet junk size")
+                textField.text: serverTransportPacketJunkSize
 
-            //     textField.onEditingFinished: {
-            //         if (textField.text !== serverTransportPacketJunkSize) {
-            //             serverTransportPacketJunkSize = textField.text
-            //         }
-            //     }
-            // }
+                textField.onEditingFinished: {
+                    if (textField.text !== serverTransportPacketJunkSize) {
+                        serverTransportPacketJunkSize = textField.text
+                    }
+                }
+            }
 
             AwgTextField {
                 id: initPacketMagicHeaderTextField

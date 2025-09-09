@@ -40,12 +40,12 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     case Roles::ServerResponsePacketJunkSizeRole:
         m_serverProtocolConfig.insert(config_key::responsePacketJunkSize, value.toString());
         break;
-    // case Roles::ServerCookieReplyPacketJunkSizeRole:
-    //     m_serverProtocolConfig.insert(config_key::cookieReplyPacketJunkSize, value.toString());
-    //     break;
-    // case Roles::ServerTransportPacketJunkSizeRole:
-    //     m_serverProtocolConfig.insert(config_key::transportPacketJunkSize, value.toString());
-    //     break;
+    case Roles::ServerCookieReplyPacketJunkSizeRole:
+        m_serverProtocolConfig.insert(config_key::cookieReplyPacketJunkSize, value.toString());
+        break;
+    case Roles::ServerTransportPacketJunkSizeRole:
+        m_serverProtocolConfig.insert(config_key::transportPacketJunkSize, value.toString());
+        break;
     case Roles::ServerInitPacketMagicHeaderRole: m_serverProtocolConfig.insert(config_key::initPacketMagicHeader, value.toString()); break;
     case Roles::ServerResponsePacketMagicHeaderRole:
         m_serverProtocolConfig.insert(config_key::responsePacketMagicHeader, value.toString());
@@ -87,8 +87,8 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ServerJunkPacketMaxSizeRole: return m_serverProtocolConfig.value(config_key::junkPacketMaxSize);
     case Roles::ServerInitPacketJunkSizeRole: return m_serverProtocolConfig.value(config_key::initPacketJunkSize);
     case Roles::ServerResponsePacketJunkSizeRole: return m_serverProtocolConfig.value(config_key::responsePacketJunkSize);
-    // case Roles::ServerCookieReplyPacketJunkSizeRole: return m_serverProtocolConfig.value(config_key::cookieReplyPacketJunkSize);
-    // case Roles::ServerTransportPacketJunkSizeRole: return m_serverProtocolConfig.value(config_key::transportPacketJunkSize);
+    case Roles::ServerCookieReplyPacketJunkSizeRole: return m_serverProtocolConfig.value(config_key::cookieReplyPacketJunkSize);
+    case Roles::ServerTransportPacketJunkSizeRole: return m_serverProtocolConfig.value(config_key::transportPacketJunkSize);
     case Roles::ServerInitPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::initPacketMagicHeader);
     case Roles::ServerResponsePacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::responsePacketMagicHeader);
     case Roles::ServerUnderloadPacketMagicHeaderRole: return m_serverProtocolConfig.value(config_key::underloadPacketMagicHeader);
@@ -270,10 +270,10 @@ AwgConfig::AwgConfig(const QJsonObject &serverProtocolConfig)
     serverInitPacketJunkSize = serverProtocolConfig.value(config_key::initPacketJunkSize).toString(protocols::awg::defaultInitPacketJunkSize);
     serverResponsePacketJunkSize =
             serverProtocolConfig.value(config_key::responsePacketJunkSize).toString(protocols::awg::defaultResponsePacketJunkSize);
-    // serverCookieReplyPacketJunkSize =
-    //         serverProtocolConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize);
-    // serverTransportPacketJunkSize =
-    //         serverProtocolConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize);
+    serverCookieReplyPacketJunkSize =
+            serverProtocolConfig.value(config_key::cookieReplyPacketJunkSize).toString(protocols::awg::defaultCookieReplyPacketJunkSize);
+    serverTransportPacketJunkSize =
+            serverProtocolConfig.value(config_key::transportPacketJunkSize).toString(protocols::awg::defaultTransportPacketJunkSize);
     serverInitPacketMagicHeader =
             serverProtocolConfig.value(config_key::initPacketMagicHeader).toString(protocols::awg::defaultInitPacketMagicHeader);
     serverResponsePacketMagicHeader =
@@ -289,8 +289,8 @@ bool AwgConfig::hasEqualServerSettings(const AwgConfig &other) const
     if (subnetAddress != other.subnetAddress || port != other.port || serverJunkPacketCount != other.serverJunkPacketCount
         || serverJunkPacketMinSize != other.serverJunkPacketMinSize || serverJunkPacketMaxSize != other.serverJunkPacketMaxSize
         || serverInitPacketJunkSize != other.serverInitPacketJunkSize || serverResponsePacketJunkSize != other.serverResponsePacketJunkSize
-        // || serverCookieReplyPacketJunkSize != other.serverCookieReplyPacketJunkSize
-        // || serverTransportPacketJunkSize != other.serverTransportPacketJunkSize
+        || serverCookieReplyPacketJunkSize != other.serverCookieReplyPacketJunkSize
+        || serverTransportPacketJunkSize != other.serverTransportPacketJunkSize
         || serverInitPacketMagicHeader != other.serverInitPacketMagicHeader
         || serverResponsePacketMagicHeader != other.serverResponsePacketMagicHeader
         || serverUnderloadPacketMagicHeader != other.serverUnderloadPacketMagicHeader

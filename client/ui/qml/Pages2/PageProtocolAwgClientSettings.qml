@@ -267,29 +267,29 @@ PageType {
                 textField.text: serverResponsePacketJunkSize
             }
 
-            // AwgTextField {
-            //     id: cookieReplyPacketJunkSizeTextField
+            AwgTextField {
+                id: cookieReplyPacketJunkSizeTextField
 
-            //     Layout.leftMargin: 16
-            //     Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            //     enabled: false
+                enabled: false
 
-            //     headerText: "S3 - Cookie Reply packet junk size"
-            //     textField.text: serverCookieReplyPacketJunkSize
-            // }
+                headerText: "S3 - Cookie Reply packet junk size"
+                textField.text: serverCookieReplyPacketJunkSize
+            }
 
-            // AwgTextField {
-            //     id: transportPacketJunkSizeTextField
+            AwgTextField {
+                id: transportPacketJunkSizeTextField
 
-            //     Layout.leftMargin: 16
-            //     Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-            //     enabled: false
+                enabled: false
 
-            //     headerText: "S4 - Transport packet junk size"
-            //     textField.text: serverTransportPacketJunkSize
-            // }
+                headerText: "S4 - Transport packet junk size"
+                textField.text: serverTransportPacketJunkSize
+            }
 
             AwgTextField {
                 id: initPacketMagicHeaderTextField

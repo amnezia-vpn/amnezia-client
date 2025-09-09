@@ -79,8 +79,8 @@ void InstallController::install(DockerContainer container, int port, TransportPr
 
                 int s1 = QRandomGenerator::global()->bounded(15, 150);
                 int s2 = QRandomGenerator::global()->bounded(15, 150);
-                // int s3 = QRandomGenerator::global()->bounded(15, 150);
-                // int s4 = QRandomGenerator::global()->bounded(15, 150);
+                int s3 = QRandomGenerator::global()->bounded(0, 64);
+                int s4 = QRandomGenerator::global()->bounded(0, 32);
 
                 // Ensure all values are unique and don't create equal packet sizes
                 QSet<int> usedValues;
@@ -91,24 +91,21 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 }
                 usedValues.insert(s2);
 
-                // while (usedValues.contains(s3)
-                //        || s1 + AwgConstant::messageInitiationSize == s3 + AwgConstant::messageCookieReplySize
-                //        || s2 + AwgConstant::messageResponseSize == s3 + AwgConstant::messageCookieReplySize) {
-                //     s3 = QRandomGenerator::global()->bounded(15, 150);
-                // }
-                // usedValues.insert(s3);
+                while (usedValues.contains(s3)
+                       || s1 + AwgConstant::messageInitiationSize == s3 + AwgConstant::messageCookieReplySize
+                       || s2 + AwgConstant::messageResponseSize == s3 + AwgConstant::messageCookieReplySize) {
+                    s3 = QRandomGenerator::global()->bounded(0, 64);
+                }
+                usedValues.insert(s3);
 
-                // while (usedValues.contains(s4)
-                //        || s1 + AwgConstant::messageInitiationSize == s4 + AwgConstant::messageTransportSize
-                //        || s2 + AwgConstant::messageResponseSize == s4 + AwgConstant::messageTransportSize
-                //        || s3 + AwgConstant::messageCookieReplySize == s4 + AwgConstant::messageTransportSize) {
-                //     s4 = QRandomGenerator::global()->bounded(15, 150);
-                // }
+                while (usedValues.contains(s4)) {
+                    s4 = QRandomGenerator::global()->bounded(0, 32);
+                }
 
                 QString initPacketJunkSize = QString::number(s1);
                 QString responsePacketJunkSize = QString::number(s2);
-                // QString cookieReplyPacketJunkSize = QString::number(s3);
-                // QString transportPacketJunkSize = QString::number(s4);
+                QString cookieReplyPacketJunkSize = QString::number(s3);
+                QString transportPacketJunkSize = QString::number(s4);
 
                 QSet<QString> headersValue;
                 while (headersValue.size() != 4) {
@@ -133,15 +130,14 @@ void InstallController::install(DockerContainer container, int port, TransportPr
                 containerConfig[config_key::underloadPacketMagicHeader] = underloadPacketMagicHeader;
                 containerConfig[config_key::transportPacketMagicHeader] = transportPacketMagicHeader;
 
-                // TODO:
-                // containerConfig[config_key::cookieReplyPacketJunkSize] = cookieReplyPacketJunkSize;
-                // containerConfig[config_key::transportPacketJunkSize] = transportPacketJunkSize;
+                containerConfig[config_key::cookieReplyPacketJunkSize] = cookieReplyPacketJunkSize;
+                containerConfig[config_key::transportPacketJunkSize] = transportPacketJunkSize;
 
-                // containerConfig[config_key::specialJunk1] = specialJunk1;
-                // containerConfig[config_key::specialJunk2] = specialJunk2;
-                // containerConfig[config_key::specialJunk3] = specialJunk3;
-                // containerConfig[config_key::specialJunk4] = specialJunk4;
-                // containerConfig[config_key::specialJunk5] = specialJunk5;
+                containerConfig[config_key::specialJunk1] = "";
+                containerConfig[config_key::specialJunk2] = "";
+                containerConfig[config_key::specialJunk3] = "";
+                containerConfig[config_key::specialJunk4] = "";
+                containerConfig[config_key::specialJunk5] = "";
 
             } else if (container == DockerContainer::Sftp) {
                 containerConfig.insert(config_key::userName, protocols::sftp::defaultUserName);
