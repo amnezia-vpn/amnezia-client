@@ -101,10 +101,10 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
     out << "MTU = " << m_deviceMTU << "\n";
   }
 
-  if (!m_primaryDnsServer.isNull()) {
+  if (!m_primaryDnsServer.isEmpty()) {
     QStringList dnsServers;
     dnsServers.append(m_primaryDnsServer);
-    if (!m_secondaryDnsServer.isNull()) {
+    if (!m_secondaryDnsServer.isEmpty()) {
         dnsServers.append(m_secondaryDnsServer);
     }
     // If the DNS is not the Gateway, it's a user defined DNS

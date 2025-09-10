@@ -25,7 +25,9 @@
 #include <QtQuick/QQuickWindow>  // for QQuickWindow
 #include <QWindow>              // for qobject_cast<QWindow*>
 
-AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv)
+AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv),
+      m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
+      m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs"))
 {
     setQuitOnLastWindowClosed(false);
 
@@ -121,7 +123,7 @@ void AmneziaApplication::init()
     Logger::setServiceLogsEnabled(enabled);
 
 #ifdef Q_OS_WIN //TODO
-    if (m_parser.isSet("a"))
+    if (m_parser.isSet(m_optAutostart))
         m_coreController->pageController()->showOnStartup();
     else
         emit m_coreController->pageController()->raiseMainWindow();
@@ -189,15 +191,12 @@ bool AmneziaApplication::parseCommands()
     m_parser.addHelpOption();
     m_parser.addVersionOption();
 
-    QCommandLineOption c_autostart { { "a", "autostart" }, "System autostart" };
-    m_parser.addOption(c_autostart);
-
-    QCommandLineOption c_cleanup { { "c", "cleanup" }, "Cleanup logs" };
-    m_parser.addOption(c_cleanup);
+    m_parser.addOption(m_optAutostart);
+    m_parser.addOption(m_optCleanup);
     
     m_parser.process(*this);
 
-    if (m_parser.isSet(c_cleanup)) {
+    if (m_parser.isSet(m_optCleanup)) {
         Logger::cleanUp();
         QTimer::singleShot(100, this, [this] { quit(); });
         exec();

@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
+import SortFilterProxyModel 0.2
+
 import PageEnum 1.0
 import Style 1.0
 
@@ -54,7 +56,15 @@ PageType {
 
         spacing: 0
 
-        model: ApiServicesModel
+        model: SortFilterProxyModel {
+            id: proxyApiServicesModel
+
+            sourceModel: ApiServicesModel
+            sorters: RoleSorter {
+                roleName: "order"
+                sortOrder: Qt.AscendingOrder
+            }
+        }
 
         delegate: ColumnLayout {
 
@@ -78,7 +88,7 @@ PageType {
 
                 onClicked: {
                     if (isServiceAvailable) {
-                        ApiServicesModel.setServiceIndex(index)
+                        ApiServicesModel.setServiceIndex(proxyApiServicesModel.mapToSource(index))
                         PageController.goToPage(PageEnum.PageSetupWizardApiServiceInfo)
                     }
                 }

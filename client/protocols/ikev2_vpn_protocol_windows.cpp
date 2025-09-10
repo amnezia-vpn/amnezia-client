@@ -30,7 +30,6 @@ Ikev2Protocol::Ikev2Protocol(const QJsonObject &configuration, QObject* parent) 
 Ikev2Protocol::~Ikev2Protocol()
 {
     qDebug() << "IpsecProtocol::~IpsecProtocol()";
-    disconnect_vpn();
     Ikev2Protocol::stop();
 }
 
@@ -38,7 +37,7 @@ void Ikev2Protocol::stop()
 {
     setConnectionState(Vpn::ConnectionState::Disconnecting);
     {
-        if (! disconnect_vpn() ){
+        if (!disconnect_vpn()){
             qDebug()<<"We don't disconnect";
             setConnectionState(Vpn::ConnectionState::Error);
         }
@@ -311,7 +310,9 @@ bool Ikev2Protocol::connect_to_vpn(const QString & vpn_name){
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Ikev2Protocol::disconnect_vpn(){
     if ( hRasConn != nullptr ){
-        if ( RasHangUp(hRasConn) != ERROR_SUCCESS)
+        auto ret = RasHangUp(hRasConn);
+        qDebug() << "RasHangUp " << ret;
+        if (ret != ERROR_SUCCESS)
             return false;
     }
     QThread::msleep(3000);

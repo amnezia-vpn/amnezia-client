@@ -37,6 +37,9 @@ PageType {
     ListViewType {
         id: listView
 
+        property string headerText: ""
+        property string configContentHeaderText: ""
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         anchors.right: parent.right
@@ -104,12 +107,13 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        if (serverSelector.currentIndex !== serverSelectorListView.currentIndex) {
-                            serverSelector.currentIndex = serverSelectorListView.currentIndex
+                        if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
+                            serverSelector.currentIndex = serverSelectorListView.selectedIndex
+                            serverSelector.severSelectorIndexChanged()
                         }
 
-                        shareConnectionPage.headerText = qsTr("Accessing ") + serverSelector.text
-                        shareConnectionPage.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
+                        listView.headerText = qsTr("Accessing ") + serverSelector.text
+                        listView.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
                         serverSelector.closeTriggered()
                     }
 
@@ -121,7 +125,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
+                        ServersModel.processedIndex = proxyServersModel.mapToSource(selectedIndex)
                     }
                 }
             }
@@ -156,7 +160,7 @@ PageType {
 
                     PageController.showBusyIndicator(false)
                     
-                    PageController.goToPage(PageEnum.PageShareConnection)
+                    PageController.goToShareConnectionPage(listView.headerText, listView.configContentHeaderText, "", ".vpn", "amnezia_config")
                 }
             }
         }

@@ -53,14 +53,6 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                defaultColor: AmneziaStyle.color.paleGray
-                hoveredColor: AmneziaStyle.color.sheerWhite
-                pressedColor: AmneziaStyle.color.translucentWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.black
-                leftImageColor: "black"
-                borderWidth: 1
-
                 text: qsTr("Copy key")
                 leftImageSource: "qrc:/images/controls/copy.svg"
 
@@ -127,8 +119,9 @@ PageType {
             }
 
             Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: width
+                Layout.preferredWidth: Math.min(Math.min(root.width - (Layout.leftMargin + Layout.rightMargin), root.height * 0.5), 360)
+                Layout.preferredHeight: Layout.preferredWidth
+                Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 20
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -140,6 +133,9 @@ PageType {
                 Image {
                     anchors.fill: parent
                     smooth: false
+                    fillMode: Image.PreserveAspectFit
+                    sourceSize.width: parent.width
+                    sourceSize.height: parent.height
                     source: ApiConfigsController.qrCodesCount > 0 && ApiConfigsController.qrCodes[0] ? ApiConfigsController.qrCodes[0] : ""
                 }
             }
@@ -194,7 +190,7 @@ PageType {
                     font.pixelSize: 16
                     font.weight: Font.Medium
                     font.family: "PT Root UI VF"
-                    text: ApiConfigsController.vpnKey //|| ""
+                    text: ApiConfigsController.vpnKey
                     wrapMode: Text.Wrap
                     background: Rectangle { color: AmneziaStyle.color.transparent }
                 }
