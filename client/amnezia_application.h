@@ -56,6 +56,9 @@ private:
 
     QCommandLineParser m_parser;
 
+    QCommandLineOption m_optAutostart;
+    QCommandLineOption m_optCleanup;
+
     QSharedPointer<VpnConnection> m_vpnConnection;
     QThread m_vpnConnectionThread;
 

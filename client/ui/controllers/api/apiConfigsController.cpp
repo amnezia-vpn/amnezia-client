@@ -462,6 +462,7 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
 
         newServerConfig.insert(configKey::apiConfig, newApiConfig);
         newServerConfig.insert(configKey::authData, gatewayRequestData.authData);
+        newServerConfig.insert(config_key::crc, serverConfig.value(config_key::crc));
 
         if (serverConfig.value(config_key::nameOverriddenByUser).toBool()) {
             newServerConfig.insert(config_key::name, serverConfig.value(config_key::name));

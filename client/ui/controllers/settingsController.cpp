@@ -264,6 +264,9 @@ bool SettingsController::isAutoStartEnabled()
 void SettingsController::toggleAutoStart(bool enable)
 {
     Autostart::setAutostart(enable);
+    if (!enable) {
+        toggleStartMinimized(false);
+    }
 }
 
 bool SettingsController::isStartMinimizedEnabled()
@@ -274,6 +277,7 @@ bool SettingsController::isStartMinimizedEnabled()
 void SettingsController::toggleStartMinimized(bool enable)
 {
     m_settings->setStartMinimized(enable);
+    emit startMinimizedChanged();
 }
 
 bool SettingsController::isScreenshotsEnabled()

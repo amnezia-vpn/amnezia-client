@@ -297,10 +297,11 @@ void ExportController::revokeConfig(const int row, const DockerContainer contain
 {
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
     ErrorCode errorCode =
-            m_clientManagementModel->revokeClient(row, container, credentials, m_serversModel->getProcessedServerIndex(), serverController);
+        m_clientManagementModel->revokeClient(row, container, credentials, m_serversModel->getProcessedServerIndex(), serverController);
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorCode);
     }
+    emit revokeConfigCompleted();
 }
 
 void ExportController::renameClient(const int row, const QString &clientName, const DockerContainer container, ServerCredentials credentials)

@@ -29,18 +29,13 @@ PageType {
         Xray
     }
 
-    signal revokeConfig(int index)
-    onRevokeConfig: function(index) {
-        PageController.showBusyIndicator(true)
-        ExportController.revokeConfig(index,
-                                      ContainersModel.getProcessedContainerIndex(),
-                                      ServersModel.getProcessedServerCredentials())
-        PageController.showBusyIndicator(false)
-        PageController.showNotificationMessage(qsTr("Config revoked"))
-    }
-
     Connections {
         target: ExportController
+
+        function onRevokeConfigCompleted() {
+            PageController.showBusyIndicator(false)
+            PageController.showNotificationMessage(qsTr("Config revoked"))
+        }
 
         function onGenerateConfig(type) {
             PageController.showBusyIndicator(true)
@@ -797,7 +792,7 @@ PageType {
 
                                                     if (clientNameEditor.textField.text !== clientName) {
                                                         PageController.showBusyIndicator(true)
-                                                        ExportController.renameClient(index,
+                                                        ExportController.renameClient(proxyClientManagementModel.mapToSource(index),
                                                                                       clientNameEditor.textField.text,
                                                                                       ContainersModel.getProcessedContainerIndex(),
                                                                                       ServersModel.getProcessedServerCredentials())
@@ -832,7 +827,10 @@ PageType {
 
                                         var yesButtonFunction = function() {
                                             clientInfoDrawer.closeTriggered()
-                                            root.revokeConfig(index)
+                                            PageController.showBusyIndicator(true)
+                                            ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
+                                                                          ContainersModel.getProcessedContainerIndex(),
+                                                                          ServersModel.getProcessedServerCredentials())
                                         }
                                         var noButtonFunction = function() {
                                         }
