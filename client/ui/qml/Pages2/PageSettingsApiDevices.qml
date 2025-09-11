@@ -35,7 +35,7 @@ PageType {
                 id: backButton
             }
 
-            HeaderType {
+            BaseHeaderType {
                 id: header
 
                 Layout.fillWidth: true
@@ -77,7 +77,7 @@ PageType {
                     }
 
                     var headerText = qsTr("Are you sure you want to unlink this device?")
-                    var descriptionText = qsTr("This will unlink the device from your subscription. You can reconnect it anytime by pressing Connect.")
+                    var descriptionText = qsTr("This will unlink the device from your subscription. You can reconnect it anytime by pressing \"Reload API config\" in subscription settings on device.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 

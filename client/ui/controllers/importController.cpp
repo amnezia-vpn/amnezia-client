@@ -12,13 +12,14 @@
 #include "core/errorstrings.h"
 #include "core/qrCodeUtils.h"
 #include "core/serialization/serialization.h"
+#include "protocols/protocols_defs.h"
 #include "systemController.h"
 #include "utilities.h"
 
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include <CoreFoundation/CoreFoundation.h>
 #endif
 
@@ -286,6 +287,19 @@ void ImportController::processNativeWireGuardConfig()
         clientProtocolConfig[config_key::underloadPacketMagicHeader] = "3";
         clientProtocolConfig[config_key::transportPacketMagicHeader] = "4";
 
+        // clientProtocolConfig[config_key::cookieReplyPacketJunkSize] = "0";
+        // clientProtocolConfig[config_key::transportPacketJunkSize] = "0";
+
+        // clientProtocolConfig[config_key::specialJunk1] = "";
+        // clientProtocolConfig[config_key::specialJunk2] = "";
+        // clientProtocolConfig[config_key::specialJunk3] = "";
+        // clientProtocolConfig[config_key::specialJunk4] = "";
+        // clientProtocolConfig[config_key::specialJunk5] = "";
+        // clientProtocolConfig[config_key::controlledJunk1] = "";
+        // clientProtocolConfig[config_key::controlledJunk2] = "";
+        // clientProtocolConfig[config_key::controlledJunk3] = "";
+        // clientProtocolConfig[config_key::specialHandshakeTimeout] = "0";
+
         clientProtocolConfig[config_key::isObfuscationEnabled] = true;
 
         serverProtocolConfig[config_key::last_config] = QString(QJsonDocument(clientProtocolConfig).toJson());
@@ -438,21 +452,33 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     lastConfig[config_key::allowed_ips] = allowedIpsJsonArray;
 
     QString protocolName = "wireguard";
-    if (!configMap.value(config_key::junkPacketCount).isEmpty() && !configMap.value(config_key::junkPacketMinSize).isEmpty()
-        && !configMap.value(config_key::junkPacketMaxSize).isEmpty() && !configMap.value(config_key::initPacketJunkSize).isEmpty()
-        && !configMap.value(config_key::responsePacketJunkSize).isEmpty() && !configMap.value(config_key::initPacketMagicHeader).isEmpty()
-        && !configMap.value(config_key::responsePacketMagicHeader).isEmpty()
-        && !configMap.value(config_key::underloadPacketMagicHeader).isEmpty()
-        && !configMap.value(config_key::transportPacketMagicHeader).isEmpty()) {
-        lastConfig[config_key::junkPacketCount] = configMap.value(config_key::junkPacketCount);
-        lastConfig[config_key::junkPacketMinSize] = configMap.value(config_key::junkPacketMinSize);
-        lastConfig[config_key::junkPacketMaxSize] = configMap.value(config_key::junkPacketMaxSize);
-        lastConfig[config_key::initPacketJunkSize] = configMap.value(config_key::initPacketJunkSize);
-        lastConfig[config_key::responsePacketJunkSize] = configMap.value(config_key::responsePacketJunkSize);
-        lastConfig[config_key::initPacketMagicHeader] = configMap.value(config_key::initPacketMagicHeader);
-        lastConfig[config_key::responsePacketMagicHeader] = configMap.value(config_key::responsePacketMagicHeader);
-        lastConfig[config_key::underloadPacketMagicHeader] = configMap.value(config_key::underloadPacketMagicHeader);
-        lastConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
+
+    const QStringList requiredJunkFields = { config_key::junkPacketCount,           config_key::junkPacketMinSize,
+                                             config_key::junkPacketMaxSize,         config_key::initPacketJunkSize,
+                                             config_key::responsePacketJunkSize,    config_key::initPacketMagicHeader,
+                                             config_key::responsePacketMagicHeader, config_key::underloadPacketMagicHeader,
+                                             config_key::transportPacketMagicHeader };
+
+    const QStringList optionalJunkFields = { // config_key::cookieReplyPacketJunkSize,
+                                             // config_key::transportPacketJunkSize,
+                                             config_key::specialJunk1,    config_key::specialJunk2,    config_key::specialJunk3,
+                                             config_key::specialJunk4,    config_key::specialJunk5,    config_key::controlledJunk1,
+                                             config_key::controlledJunk2, config_key::controlledJunk3, config_key::specialHandshakeTimeout
+    };
+
+    bool hasAllRequiredFields = std::all_of(requiredJunkFields.begin(), requiredJunkFields.end(),
+                                            [&configMap](const QString &field) { return !configMap.value(field).isEmpty(); });
+    if (hasAllRequiredFields) {
+        for (const QString &field : requiredJunkFields) {
+            lastConfig[field] = configMap.value(field);
+        }
+
+        for (const QString &field : optionalJunkFields) {
+            if (!configMap.value(field).isEmpty()) {
+                lastConfig[field] = configMap.value(field);
+            }
+        }
+
         protocolName = "awg";
         m_configType = ConfigTypes::Awg;
     }
@@ -569,7 +595,7 @@ void ImportController::startDecodingQr()
     m_totalQrCodeChunksCount = 0;
     m_receivedQrCodeChunksCount = 0;
 
-    #if defined Q_OS_IOS
+    #if defined(Q_OS_IOS) || defined(MACOS_NE)
     m_isQrCodeProcessed = true;
     #endif
     #if defined Q_OS_ANDROID
@@ -665,27 +691,27 @@ void ImportController::checkForMaliciousStrings(const QJsonObject &serverConfig)
                     containerConfig[ProtocolProps::protoToString(Proto::OpenVpn)].toObject()[config_key::last_config].toString();
             QString protocolConfigJson = QJsonDocument::fromJson(protocolConfig.toUtf8()).object()[config_key::config].toString();
 
-            const QRegularExpression regExp { "(\\w+-\\w+|\\w+)" };
-            const size_t dangerousTagsMaxCount = 3;
-
             // https://github.com/OpenVPN/openvpn/blob/master/doc/man-sections/script-options.rst
             QStringList dangerousTags {
                 "up", "tls-verify", "ipchange", "client-connect", "route-up", "route-pre-down", "client-disconnect", "down", "learn-address", "auth-user-pass-verify"
             };
 
             QStringList maliciousStrings;
-            QStringList lines = protocolConfigJson.replace("\r", "").split("\n");
-            for (const QString &l : lines) {
-                QRegularExpressionMatch match = regExp.match(l);
-                if (dangerousTags.contains(match.captured(0))) {
-                    maliciousStrings << l;
+            QStringList lines = protocolConfigJson.split('\n', Qt::SkipEmptyParts);
+
+            for (const QString &rawLine : lines) {
+                QString line = rawLine.trimmed();
+
+                QString command = line.section(' ', 0, 0, QString::SectionSkipEmpty);
+                if (dangerousTags.contains(command, Qt::CaseInsensitive)) {
+                    maliciousStrings << rawLine;
                 }
             }
 
             m_maliciousWarningText = tr("This configuration contains an OpenVPN setup. OpenVPN configurations can include malicious "
                                         "scripts, so only add it if you fully trust the provider of this config. ");
 
-            if (maliciousStrings.size() >= dangerousTagsMaxCount) {
+            if (!maliciousStrings.isEmpty()) {
                 m_maliciousWarningText.push_back(tr("<br>In the imported configuration, potentially dangerous lines were found:"));
                 for (const auto &string : maliciousStrings) {
                     m_maliciousWarningText.push_back(QString("<br><i>%1</i>").arg(string));

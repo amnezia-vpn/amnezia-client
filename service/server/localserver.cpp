@@ -1,15 +1,20 @@
+#include "localserver.h"
+
 #include <QCoreApplication>
+#include <QDebug>
 #include <QFileInfo>
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QObject>
+#include <QSharedPointer>
+#include <QString>
 
 #include "ipc.h"
-#include "localserver.h"
-
+#include "killswitch.h"
 #include "logger.h"
 
 #ifdef Q_OS_WIN
-#include "tapcontroller_win.h"
+    #include "tapcontroller_win.h"
 #endif
 
 namespace {
@@ -47,6 +52,7 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 
     m_networkWatcher.initialize();
     connect(&m_networkWatcher, &NetworkWatcher::sleepMode, &m_ipcServer, &IpcServer::networkChange);
+    KillSwitch::instance()->init();
 
 #ifdef Q_OS_LINUX
     // Signal handling for a proper shutdown.

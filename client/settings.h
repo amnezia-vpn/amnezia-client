@@ -174,11 +174,12 @@ public:
 
     QLocale getAppLanguage()
     {
-        return value("Conf/appLanguage", QLocale()).toLocale();
+        QString localeStr = m_settings.value("Conf/appLanguage").toString();
+        return QLocale(localeStr);
     };
     void setAppLanguage(QLocale locale)
     {
-        setValue("Conf/appLanguage", locale);
+        setValue("Conf/appLanguage", locale.name());
     };
 
     bool isScreenshotsEnabled() const
@@ -213,6 +214,10 @@ public:
 
     bool isKillSwitchEnabled() const;
     void setKillSwitchEnabled(bool enabled);
+
+    bool isStrictKillSwitchEnabled() const;
+    void setStrictKillSwitchEnabled(bool enabled);
+
     QString getInstallationUuid(const bool needCreate);
 
     void resetGatewayEndpoint();
@@ -224,6 +229,12 @@ public:
 
     bool isHomeAdLabelVisible();
     void disableHomeAdLabel();
+
+    bool isPremV1MigrationReminderActive();
+    void disablePremV1MigrationReminder();
+    
+    QStringList allowedDnsServers() const;
+    void setAllowedDnsServers(const QStringList &servers);
 
 signals:
     void saveLogsChanged(bool enabled);

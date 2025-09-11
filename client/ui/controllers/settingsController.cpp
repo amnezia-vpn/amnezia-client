@@ -10,7 +10,7 @@
     #include "platforms/android/android_controller.h"
 #endif
 
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include <AmneziaVPN-Swift.h>
 #endif
 
@@ -32,6 +32,23 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
     checkIfNeedDisableLogs();
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this, &SettingsController::onNotificationStateChanged);
+#endif
+}
+
+QString getPlatformName()
+{
+#if defined(Q_OS_WINDOWS)
+    return "Windows";
+#elif defined(Q_OS_ANDROID)
+    return "Android";
+#elif defined(Q_OS_LINUX)
+    return "Linux";
+#elif defined(Q_OS_MACX)
+    return "MacOS";
+#elif defined(Q_OS_IOS)
+    return "iOS";
+#else
+    return "Unknown";
 #endif
 }
 
@@ -76,7 +93,7 @@ bool SettingsController::isLoggingEnabled()
 void SettingsController::toggleLogging(bool enable)
 {
     m_settings->setSaveLogs(enable);
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS)
     AmneziaVPN::toggleLogging(enable);
 #endif
     if (enable == true) {
@@ -126,13 +143,26 @@ void SettingsController::clearLogs()
 
 void SettingsController::backupAppConfig(const QString &fileName)
 {
-    SystemController::saveFile(fileName, m_settings->backupAppConfig());
+    QByteArray data = m_settings->backupAppConfig();
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    QJsonObject config = doc.object();
+
+    config["AppPlatform"] = getPlatformName();
+    config["Conf/autoStart"] = Autostart::isAutostart();
+    config["Conf/killSwitchEnabled"] = isKillSwitchEnabled();
+    config["Conf/strictKillSwitchEnabled"] = isStrictKillSwitchEnabled();
+
+    SystemController::saveFile(fileName, QJsonDocument(config).toJson());
 }
 
 void SettingsController::restoreAppConfig(const QString &fileName)
 {
-    QByteArray data;
-    SystemController::readFile(fileName, data);
+    QFile file(fileName);
+
+    file.open(QIODevice::ReadOnly);
+
+    QByteArray data = file.readAll();
+
     restoreAppConfigFromData(data);
 }
 
@@ -140,9 +170,50 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
 {
     bool ok = m_settings->restoreAppConfig(data);
     if (ok) {
+        QJsonObject newConfigData = QJsonDocument::fromJson(data).object();
+
+#if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX) || defined(Q_OS_MACX)
+        bool autoStart = false;
+        if (newConfigData.contains("Conf/autoStart")) {
+            autoStart = newConfigData["Conf/autoStart"].toBool();
+        }
+        toggleAutoStart(autoStart);
+#endif
+
         m_serversModel->resetModel();
         m_languageModel->changeLanguage(
                 static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
+
+#if defined(Q_OS_WINDOWS) || defined(Q_OS_ANDROID)
+        int appSplitTunnelingRouteMode = newConfigData.value("Conf/appsRouteMode").toInt();
+        bool appSplittunnelingEnabled = newConfigData.value("Conf/appsSplitTunnelingEnabled").toString().toLower() == "true";
+        m_appSplitTunnelingModel->setRouteMode(appSplitTunnelingRouteMode);
+
+        #if defined(Q_OS_WINDOWS)
+            m_appSplitTunnelingModel->setRouteMode(static_cast<int>(Settings::AppsRouteMode::VpnAllExceptApps));
+        #endif
+
+        if (newConfigData.contains("AppPlatform")) { //if backup is from a new version
+                if (newConfigData.value("AppPlatform").toString() != getPlatformName()) {
+                    m_appSplitTunnelingModel->clearAppsList();
+                }
+        }
+
+        m_appSplitTunnelingModel->toggleSplitTunneling(appSplittunnelingEnabled);
+#endif
+
+        int siteSplitTunnelingRouteMode = newConfigData.value("Conf/routeMode").toInt();
+        bool siteSplittunnelingEnabled = newConfigData.value("Conf/sitesSplitTunnelingEnabled").toString().toLower() == "true";
+        m_sitesModel->setRouteMode(siteSplitTunnelingRouteMode);
+        m_sitesModel->toggleSplitTunneling(siteSplittunnelingEnabled);
+
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+        m_settings->setAutoConnect(false);
+        m_settings->setStartMinimized(false);
+        m_settings->setKillSwitchEnabled(false);
+        m_settings->setStrictKillSwitchEnabled(false);
+#endif
+
         emit restoreBackupFinished();
     } else {
         emit changeSettingsErrorOccurred(tr("Backup file is corrupted"));
@@ -158,8 +229,7 @@ void SettingsController::clearSettings()
 {
     m_settings->clearSettings();
     m_serversModel->resetModel();
-    m_languageModel->changeLanguage(
-            static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
+    m_languageModel->changeLanguage(m_languageModel->getSystemLanguageEnum());
 
     m_sitesModel->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
     m_sitesModel->toggleSplitTunneling(false);
@@ -167,9 +237,11 @@ void SettingsController::clearSettings()
     m_appSplitTunnelingModel->setRouteMode(Settings::AppsRouteMode::VpnAllExceptApps);
     m_appSplitTunnelingModel->toggleSplitTunneling(false);
 
+    toggleAutoStart(false);
+
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     AmneziaVPN::clearSettings();
 #endif
 }
@@ -192,6 +264,9 @@ bool SettingsController::isAutoStartEnabled()
 void SettingsController::toggleAutoStart(bool enable)
 {
     Autostart::setAutostart(enable);
+    if (!enable) {
+        toggleStartMinimized(false);
+    }
 }
 
 bool SettingsController::isStartMinimizedEnabled()
@@ -202,6 +277,7 @@ bool SettingsController::isStartMinimizedEnabled()
 void SettingsController::toggleStartMinimized(bool enable)
 {
     m_settings->setStartMinimized(enable);
+    emit startMinimizedChanged();
 }
 
 bool SettingsController::isScreenshotsEnabled()
@@ -245,6 +321,23 @@ bool SettingsController::isKillSwitchEnabled()
 void SettingsController::toggleKillSwitch(bool enable)
 {
     m_settings->setKillSwitchEnabled(enable);
+    emit killSwitchEnabledChanged();
+    if (enable == false) {
+        emit strictKillSwitchEnabledChanged(false);
+    } else {
+        emit strictKillSwitchEnabledChanged(isStrictKillSwitchEnabled());
+    }
+}
+
+bool SettingsController::isStrictKillSwitchEnabled()
+{
+    return m_settings->isStrictKillSwitchEnabled();
+}
+
+void SettingsController::toggleStrictKillSwitch(bool enable)
+{
+    m_settings->setStrictKillSwitchEnabled(enable);
+    emit strictKillSwitchEnabledChanged(enable);
 }
 
 bool SettingsController::isNotificationPermissionGranted()

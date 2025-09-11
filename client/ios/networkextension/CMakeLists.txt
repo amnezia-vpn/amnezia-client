@@ -26,9 +26,21 @@ set_target_properties(networkextension PROPERTIES
     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
 
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../Frameworks"
-
-    XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
 )
+
+if(DEPLOY)
+    set_target_properties(networkextension PROPERTIES
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
+        XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "distr ios.org.amnezia.AmneziaVPN"
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "dev ios.org.amnezia.AmneziaVPN"
+    )
+else()
+    set_target_properties(networkextension PROPERTIES
+        XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
+    )
+endif()
 
 set_target_properties(networkextension PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"

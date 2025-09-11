@@ -21,15 +21,6 @@ Rectangle {
     border.color: getBorderColor(borderNormalColor)
     radius: 16
 
-    property FlickableType parentFlickable: null
-    onFocusChanged: {
-        if (root.activeFocus) {
-            if (root.parentFlickable) {
-                root.parentFlickable.ensureVisible(root)
-            }
-        }
-    }
-
     MouseArea {
         id: parentMouse
         anchors.fill: parent
@@ -53,6 +44,32 @@ Rectangle {
                 leftPadding: 16
                 anchors.topMargin: 16
                 anchors.bottomMargin: 16
+
+                property bool isFocusable: true
+
+                Keys.onTabPressed: {
+                    FocusController.nextKeyTabItem()
+                }
+
+                Keys.onBacktabPressed: {
+                    FocusController.previousKeyTabItem()
+                }
+
+                Keys.onUpPressed: {
+                    FocusController.nextKeyUpItem()
+                }
+                
+                Keys.onDownPressed: {
+                    FocusController.nextKeyDownItem()
+                }
+                
+                Keys.onLeftPressed: {
+                    FocusController.nextKeyLeftItem()
+                }
+
+                Keys.onRightPressed: {
+                    FocusController.nextKeyRightItem()
+                }
 
                 color: AmneziaStyle.color.paleGray
                 selectionColor:  AmneziaStyle.color.richBrown

@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -39,7 +41,7 @@ DrawerType2 {
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
-            text: headerText
+            text: root.headerText
         }
 
         ParagraphTextType {
@@ -48,7 +50,7 @@ DrawerType2 {
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
-            text: descriptionText
+            text: root.descriptionText
         }
 
         BasicButtonType {
@@ -58,11 +60,11 @@ DrawerType2 {
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
-            text: yesButtonText
+            text: root.yesButtonText
 
             clickedFunc: function() {
-                if (yesButtonFunction && typeof yesButtonFunction === "function") {
-                    yesButtonFunction()
+                if (root.yesButtonFunction && typeof root.yesButtonFunction === "function") {
+                    root.yesButtonFunction()
                 }
             }
         }
@@ -80,11 +82,13 @@ DrawerType2 {
             textColor: AmneziaStyle.color.paleGray
             borderWidth: 1
 
-            text: noButtonText
+            visible: root.noButtonText !== ""
+
+            text: root.noButtonText
 
             clickedFunc: function() {
-                if (noButtonFunction && typeof noButtonFunction === "function") {
-                    noButtonFunction()
+                if (root.noButtonFunction && typeof root.noButtonFunction === "function") {
+                    root.noButtonFunction()
                 }
             }
         }

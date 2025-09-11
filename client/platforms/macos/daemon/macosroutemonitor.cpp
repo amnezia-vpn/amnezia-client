@@ -144,7 +144,7 @@ void MacosRouteMonitor::handleRtmDelete(const struct rt_msghdr* rtm,
   for (const IPAddress& prefix : m_exclusionRoutes) {
     if (prefix.address().protocol() == protocol) {
       logger.debug() << "Removing exclusion route to"
-                     << logger.sensitive(prefix.toString());
+                     << prefix.toString();
       rtmSendRoute(RTM_DELETE, prefix, rtm->rtm_index, nullptr);
     }
   }
@@ -259,7 +259,7 @@ void MacosRouteMonitor::handleRtmUpdate(const struct rt_msghdr* rtm,
   for (const IPAddress& prefix : m_exclusionRoutes) {
     if (prefix.address().protocol() == protocol) {
       logger.debug() << "Updating exclusion route to"
-                     << logger.sensitive(prefix.toString());
+                     << prefix.toString();
       rtmSendRoute(rtm_type, prefix, ifindex, addrlist[1].constData());
     }
   }
@@ -510,8 +510,7 @@ bool MacosRouteMonitor::deleteRoute(const IPAddress& prefix, int flags) {
 }
 
 bool MacosRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
-  logger.debug() << "Adding exclusion route for"
-                 << logger.sensitive(prefix.toString());
+  logger.debug() << "Adding exclusion route for" << prefix.toString();
 
   if (m_exclusionRoutes.contains(prefix)) {
     logger.warning() << "Exclusion route already exists";
@@ -536,8 +535,7 @@ bool MacosRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
 }
 
 bool MacosRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
-  logger.debug() << "Deleting exclusion route for"
-                 << logger.sensitive(prefix.toString());
+  logger.debug() << "Deleting exclusion route for" << prefix.toString();
 
   m_exclusionRoutes.removeAll(prefix);
   if (prefix.address().protocol() == QAbstractSocket::IPv4Protocol) {

@@ -1,7 +1,7 @@
 FROM alpine:3.15
 LABEL maintainer="AmneziaVPN"
 
-ARG XRAY_RELEASE="v1.8.6"
+ARG XRAY_RELEASE="v25.8.3"
 
 RUN apk add --no-cache curl unzip bash openssl netcat-openbsd dumb-init rng-tools xz
 RUN apk --update upgrade --no-cache

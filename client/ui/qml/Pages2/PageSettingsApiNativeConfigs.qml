@@ -22,23 +22,35 @@ PageType {
     property string configExtension: ".conf"
     property string configCaption: qsTr("Save AmneziaVPN config")
 
+    BackButtonType {
+        id: backButton
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.topMargin: 20
+        
+        onActiveFocusChanged: {
+            if(backButton.enabled && backButton.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
+    }
+
     ListViewType {
         id: listView
 
-        anchors.fill: parent
-        anchors.topMargin: 20
-        anchors.bottomMargin: 24
+        anchors.top: backButton.bottom
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.left: parent.left
 
         model: ApiCountryModel
 
         header: ColumnLayout {
             width: listView.width
 
-            BackButtonType {
-                id: backButton
-            }
-
-            HeaderType {
+            BaseHeaderType {
                 id: header
 
                 Layout.fillWidth: true
@@ -59,6 +71,7 @@ PageType {
 
                 text: countryName
                 descriptionText: isWorkerExpired ? qsTr("The configuration needs to be reissued") : ""
+                hideDescription: isWorkerExpired ? true : false
                 descriptionColor: AmneziaStyle.color.vibrantRed
 
                 leftImageSource: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
@@ -104,20 +117,16 @@ PageType {
                 }
             }
 
-            FlickableType {
+            ListViewType {
+                id: drawerListView
+
                 anchors.top: moreOptionsDrawerBackButton.bottom
+                anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.bottom: parent.bottom
 
-                contentHeight: moreOptionsDrawerContent.height
-
-                ColumnLayout {
-                    id: moreOptionsDrawerContent
-
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
+                header: ColumnLayout {
+                    width: drawerListView.width
 
                     Header2Type {
                         Layout.fillWidth: true
@@ -125,9 +134,17 @@ PageType {
 
                         headerText: moreOptionsDrawer.countryName + qsTr(" configuration file")
                     }
+                }
+
+                model: 1 // fake model to force the ListView to be created without a model
+
+                delegate: ColumnLayout {
+                    width: drawerListView.width
 
                     LabelWithButtonType {
                         Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
                         text: qsTr("Generate a new configuration file")
                         descriptionText: qsTr("The previously created one will stop working")
@@ -138,9 +155,16 @@ PageType {
                     }
 
                     DividerType {}
+                }
+
+                footer: ColumnLayout {
+                    width: drawerListView.width
 
                     LabelWithButtonType {
                         Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
                         text: qsTr("Revoke the current configuration file")
 
                         clickedFunction: function() {
@@ -212,8 +236,7 @@ PageType {
             }
             moreOptionsDrawer.closeTriggered()
         }
-        var noButtonFunction = function() {
-        }
+        var noButtonFunction = function() {}
 
         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }

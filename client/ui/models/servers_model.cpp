@@ -4,9 +4,11 @@
 #include "core/controllers/serverController.h"
 #include "core/networkUtilities.h"
 
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include <AmneziaVPN-Swift.h>
 #endif
+
+#include "core/api/apiUtils.h"
 
 namespace
 {
@@ -66,6 +68,7 @@ bool ServersModel::setData(const QModelIndex &index, const QVariant &value, int 
         } else {
             server.insert(config_key::description, value.toString());
         }
+        server.insert(config_key::nameOverriddenByUser, true);
         m_settings->editServer(index.row(), server);
         m_servers.replace(index.row(), server);
         if (index.row() == m_defaultServerIndex) {
@@ -348,6 +351,25 @@ void ServersModel::removeServer()
     endResetModel();
 }
 
+void ServersModel::removeServer(const int serverIndex)
+{
+    beginResetModel();
+    m_settings->removeServer(serverIndex);
+    m_servers = m_settings->serversArray();
+
+    if (m_settings->defaultServerIndex() == serverIndex) {
+        setDefaultServerIndex(0);
+    } else if (m_settings->defaultServerIndex() > serverIndex) {
+        setDefaultServerIndex(m_settings->defaultServerIndex() - 1);
+    }
+
+    if (m_settings->serversCount() == 0) {
+        setDefaultServerIndex(-1);
+    }
+    setProcessedServerIndex(m_defaultServerIndex);
+    endResetModel();
+}
+
 QHash<int, QByteArray> ServersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -407,7 +429,7 @@ void ServersModel::updateDefaultServerContainersModel()
     emit defaultServerContainersUpdated(containers);
 }
 
-QJsonObject ServersModel::getServerConfig(const int serverIndex)
+QJsonObject ServersModel::getServerConfig(const int serverIndex) const
 {
     return m_servers.at(serverIndex).toObject();
 }
@@ -760,7 +782,7 @@ void ServersModel::removeApiConfig(const int serverIndex)
 {
     auto serverConfig = getServerConfig(serverIndex);
 
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     QString vpncName = QString("%1 (%2) %3")
                                .arg(serverConfig[config_key::description].toString())
                                .arg(serverConfig[config_key::hostName].toString())
@@ -793,4 +815,9 @@ const QString ServersModel::getDefaultServerImagePathCollapsed()
         return "";
     }
     return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(countryCode.toUpper());
+}
+
+bool ServersModel::processedServerIsPremium() const
+{
+    return apiUtils::isPremiumServer(getServerConfig(m_processedServerIndex));
 }

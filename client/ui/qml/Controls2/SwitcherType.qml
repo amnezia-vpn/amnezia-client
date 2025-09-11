@@ -64,16 +64,6 @@ Switch {
     hoverEnabled: enabled ? true : false
     focusPolicy: Qt.TabFocus
 
-    property FlickableType parentFlickable: null
-
-    onFocusChanged: {
-        if (root.activeFocus) {
-            if (root.parentFlickable) {
-                root.parentFlickable.ensureVisible(root)
-            }
-        }
-    }
-
     indicator: Rectangle {
         id: switcher
 
@@ -165,7 +155,7 @@ Switch {
     function handleSwitch(event) {
         if (!event.isAutoRepeat) {
             root.checked = !root.checked
-            root.checkedChanged()
+            root.toggled()
         }
         event.accepted = true
     }

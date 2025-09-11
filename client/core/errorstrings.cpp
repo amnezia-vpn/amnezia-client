@@ -26,6 +26,9 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::ServerUserDirectoryNotAccessible): errorMessage = QObject::tr("The server user's home directory is not accessible"); break;
     case(ErrorCode::ServerUserNotAllowedInSudoers): errorMessage = QObject::tr("Action not allowed in sudoers"); break;
     case(ErrorCode::ServerUserPasswordRequired): errorMessage = QObject::tr("The user's password is required"); break;
+    case(ErrorCode::ServerDockerOnCgroupsV2): errorMessage = QObject::tr("Docker error: runc doesn't work on cgroups v2"); break;
+    case(ErrorCode::ServerCgroupMountpoint): errorMessage = QObject::tr("Server error: cgroup mountpoint does not exist"); break;
+    case(ErrorCode::DockerPullRateLimit): errorMessage = QObject::tr("Docker error: The pull rate limit has been reached"); break;
 
     // Libssh errors
     case(ErrorCode::SshRequestDeniedError): errorMessage = QObject::tr("SSH request was denied"); break;
@@ -72,6 +75,9 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiServicesMissingError): errorMessage = QObject::tr("Missing list of available services"); break;
     case (ErrorCode::ApiConfigLimitError): errorMessage = QObject::tr("The limit of allowed configurations per subscription has been exceeded"); break;
     case (ErrorCode::ApiNotFoundError): errorMessage = QObject::tr("Error when retrieving configuration from API"); break;
+    case (ErrorCode::ApiMigrationError): errorMessage = QObject::tr("A migration error has occurred. Please contact our technical support"); break;
+    case (ErrorCode::ApiUpdateRequestError): errorMessage = QObject::tr("Please update the application to use this feature"); break;
+    case (ErrorCode::ApiSubscriptionExpiredError): errorMessage = QObject::tr("Your Amnezia Premium subscription has expired.\n Please check your email for renewal instructions.\n If you haven't received an email, please contact our support."); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;

@@ -18,7 +18,8 @@ public:
         ServiceDescriptionRole,
         EndDateRole,
         IsComponentVisibleRole,
-        HasExpiredWorkerRole
+        HasExpiredWorkerRole,
+        IsProtocolSelectionSupportedRole
     };
 
     explicit ApiAccountInfoModel(QObject *parent = nullptr);
@@ -33,7 +34,12 @@ public slots:
 
     QJsonArray getAvailableCountries();
     QJsonArray getIssuedConfigsInfo();
+
     QString getTelegramBotLink();
+    QString getEmailLink();
+    QString getBillingEmailLink();
+    QString getSiteLink();
+    QString getFullSiteLink();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
@@ -46,11 +52,14 @@ private:
         int maxDeviceCount;
 
         apiDefs::ConfigType configType;
+
+        QStringList supportedProtocols;
     };
 
     AccountInfoData m_accountInfoData;
     QJsonArray m_availableCountries;
     QJsonArray m_issuedConfigsInfo;
+    QJsonObject m_supportInfo;
 };
 
 #endif // APIACCOUNTINFOMODEL_H

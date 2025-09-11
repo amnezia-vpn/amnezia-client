@@ -6,33 +6,16 @@ ListView {
 
     property bool isFocusable: true
 
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
-    }
-
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
-    }
-
-    Keys.onUpPressed: {
-        FocusController.nextKeyUpItem()
-    }
-
-    Keys.onDownPressed: {
-        FocusController.nextKeyDownItem()
-    }
-
-    Keys.onLeftPressed: {
-        FocusController.nextKeyLeftItem()
-    }
-
-    Keys.onRightPressed: {
-        FocusController.nextKeyRightItem()
-    }
-
     ScrollBar.vertical: ScrollBarType {}
 
     clip: true
     reuseItems: true
-    snapMode: ListView.SnapToItem
+
+    function findChildWithObjectName(items, name) {
+        for (var i = 0; i < items.length; ++i) {
+            if (items[i].objectName === name)
+                return items[i];
+        }
+        return null;
+    }
 }

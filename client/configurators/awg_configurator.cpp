@@ -1,4 +1,5 @@
 #include "awg_configurator.h"
+#include "protocols/protocols_defs.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -39,6 +40,20 @@ QString AwgConfigurator::createConfig(const ServerCredentials &credentials, Dock
     jsonConfig[config_key::responsePacketMagicHeader] = configMap.value(config_key::responsePacketMagicHeader);
     jsonConfig[config_key::underloadPacketMagicHeader] = configMap.value(config_key::underloadPacketMagicHeader);
     jsonConfig[config_key::transportPacketMagicHeader] = configMap.value(config_key::transportPacketMagicHeader);
+
+    // jsonConfig[config_key::cookieReplyPacketJunkSize] = configMap.value(config_key::cookieReplyPacketJunkSize);
+    // jsonConfig[config_key::transportPacketJunkSize] = configMap.value(config_key::transportPacketJunkSize);
+
+    // jsonConfig[config_key::specialJunk1] = configMap.value(amnezia::config_key::specialJunk1);
+    // jsonConfig[config_key::specialJunk2] = configMap.value(amnezia::config_key::specialJunk2);
+    // jsonConfig[config_key::specialJunk3] = configMap.value(amnezia::config_key::specialJunk3);
+    // jsonConfig[config_key::specialJunk4] = configMap.value(amnezia::config_key::specialJunk4);
+    // jsonConfig[config_key::specialJunk5] = configMap.value(amnezia::config_key::specialJunk5);
+    // jsonConfig[config_key::controlledJunk1] = configMap.value(amnezia::config_key::controlledJunk1);
+    // jsonConfig[config_key::controlledJunk2] = configMap.value(amnezia::config_key::controlledJunk2);
+    // jsonConfig[config_key::controlledJunk3] = configMap.value(amnezia::config_key::controlledJunk3);
+    // jsonConfig[config_key::specialHandshakeTimeout] = configMap.value(amnezia::config_key::specialHandshakeTimeout);
+
     jsonConfig[config_key::mtu] =
             containerConfig.value(ProtocolProps::protoToString(Proto::Awg)).toObject().value(config_key::mtu).toString(protocols::awg::defaultMtu);
 

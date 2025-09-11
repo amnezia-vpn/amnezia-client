@@ -16,6 +16,7 @@ public:
     static QString getStringBetween(const QString &s, const QString &a, const QString &b);
     static bool checkIPv4Format(const QString &ip);
     static bool checkIpSubnetFormat(const QString &ip);
+    static bool checkIpv6Enabled();
     static QString getGatewayAndIface();
     // Returns the Interface Index that could Route to dst
     static int AdapterIndexTo(const QHostAddress& dst);
@@ -29,7 +30,6 @@ public:
 
     static QString netMaskFromIpWithSubnet(const QString ip);
     static QString ipAddressFromIpWithSubnet(const QString ip);
-
     static QStringList summarizeRoutes(const QStringList &ips, const QString cidr);
 };
 

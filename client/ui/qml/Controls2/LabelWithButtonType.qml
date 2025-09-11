@@ -9,6 +9,7 @@ import "TextTypes"
 Item {
     id: root
 
+    // property alias focusObjectName: eyeImage.objectName
     property string text
     property int textMaximumLineCount: 2
     property int textElide: Qt.ElideRight
@@ -25,7 +26,6 @@ Item {
 
     property alias rightButton: rightImage
     property alias eyeButton: eyeImage
-    property FlickableType parentFlickable
 
     property string textColor: AmneziaStyle.color.paleGray
     property string textDisabledColor: AmneziaStyle.color.mutedGray
@@ -69,25 +69,6 @@ Item {
     
     implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
     implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
-
-    onFocusChanged: {
-        if (root.activeFocus) {
-            if (root.parentFlickable) {
-                root.parentFlickable.ensureVisible(root)
-            }
-        }
-    }
-
-    Connections {
-        target: rightImage
-        function onFocusChanged() {
-            if (rightImage.activeFocus) {
-                if (root.parentFlickable) {
-                    root.parentFlickable.ensureVisible(root)
-                }
-            }
-        }
-    }
 
     MouseArea {
         anchors.fill: parent

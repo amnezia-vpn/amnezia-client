@@ -69,7 +69,7 @@ PageType {
                 Layout.topMargin: 20
             }
 
-            HeaderType {
+            HeaderTypeWithButton {
                 id: headerContent
                 objectName: "headerContent"
 
@@ -119,6 +119,10 @@ PageType {
                     checkable: !ConnectionController.isConnected
 
                     onClicked: {
+                        if (ConnectionController.isConnectionInProgress) {
+                            PageController.showNotificationMessage(qsTr("Unable change server location while trying to make an active connection"))
+                            return
+                        }
                         if (ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
                             return
@@ -133,12 +137,6 @@ PageType {
                             }
                             PageController.showBusyIndicator(false)
                         }
-                    }
-
-                    MouseArea {
-                        anchors.fill: containerRadioButton
-                        cursorShape: Qt.PointingHandCursor
-                        enabled: false
                     }
 
                     Keys.onEnterPressed: {

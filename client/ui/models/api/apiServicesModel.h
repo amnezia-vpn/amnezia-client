@@ -20,7 +20,8 @@ public:
         RegionRole,
         FeaturesRole,
         PriceRole,
-        EndDateRole
+        EndDateRole,
+        OrderRole
     };
 
     explicit ApiServicesModel(QObject *parent = nullptr);
@@ -57,6 +58,10 @@ private:
         QString timeLimit;
         QString region;
         QString price;
+
+        QString description;
+        QString features;
+        QString cardDescription;
 
         QJsonObject object;
     };

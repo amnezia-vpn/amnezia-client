@@ -71,7 +71,7 @@ PageType {
             objectName: "backButton"
         }
 
-        HeaderType {
+        HeaderTypeWithButton {
             id: headerContent
             objectName: "headerContent"
 

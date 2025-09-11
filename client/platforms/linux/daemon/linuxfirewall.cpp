@@ -455,9 +455,6 @@ void LinuxFirewall::updateDNSServers(const QStringList& servers)
 
 void LinuxFirewall::updateAllowNets(const QStringList& servers)
 {
-    static QStringList existingServers {};
-
-    existingServers = servers;
     execute(QStringLiteral("iptables -F %1.110.allowNets").arg(kAnchorName));
     for (const QString& rule : getAllowRule(servers))
         execute(QStringLiteral("iptables -A %1.110.allowNets %2").arg(kAnchorName, rule));

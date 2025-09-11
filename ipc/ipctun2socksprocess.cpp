@@ -29,7 +29,7 @@ void IpcProcessTun2Socks::start()
     QString XrayConStr = "socks5://127.0.0.1:10808";
 
 #ifdef Q_OS_WIN
-    QStringList arguments({"-device", "tun://tun2", "-proxy", XrayConStr, "-tun-post-up",
+    QStringList arguments({"-device", "tun://tun2?guid={081A8A84-8D12-4DF5-B8C4-396D5B0053E4}", "-proxy", XrayConStr, "-tun-post-up",
                            QString("cmd /c netsh interface ip set address name=\"tun2\" static %1 255.255.255.255")
                                .arg(amnezia::protocols::xray::defaultLocalAddr)});
 #endif
