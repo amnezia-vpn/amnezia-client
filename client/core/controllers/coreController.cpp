@@ -26,16 +26,8 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
 
     initNotificationHandler();
 
-    auto locale = m_settings->getAppLanguage();
-
-    if (m_languageModel->getSystemLanguageEnum() != LanguageSettings::AvailableLanguageEnum::English
-        || QLocale::system().language() == QLocale::English) {
-        locale = QLocale::system();
-        m_settings->setAppLanguage(locale);
-    }
-
     m_translator.reset(new QTranslator());
-    updateTranslator(locale);
+    updateTranslator(QLocale::system());
 }
 
 void CoreController::initModels()
