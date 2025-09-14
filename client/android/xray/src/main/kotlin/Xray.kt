@@ -166,7 +166,7 @@ class Xray : Protocol() {
             mtu = config.mtu.toLong()
             proxy = "socks5://127.0.0.1:${config.socksPort}"
             device = "fd://$fd"
-            logLevel = "warning"
+            logLevel = "warn"
         }
         LibXray.startTun2Socks(tun2SocksConfig, fd.toLong()).isNotNullOrBlank { err ->
             throw VpnStartException("Failed to start tun2socks: $err")
