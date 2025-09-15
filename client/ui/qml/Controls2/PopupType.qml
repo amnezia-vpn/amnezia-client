@@ -72,7 +72,7 @@ Popup {
                 Layout.fillWidth: true
 
                 onLinkActivated: function(link) {
-                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl(link))
+                    Qt.openUrlExternally(LanguageModel.getCurrentDocsUrl(link))
                 }
 
                 text: root.text
