@@ -62,6 +62,7 @@ public slots:
     QString getCurrentLanguageName();
     QString getCurrentSiteUrl(const QString &path = "");
     QString getCurrentDocsUrl(const QString &path = "");
+    QString getCurrentErrorUrl(const QString &path = "");
 
 signals:
     void updateTranslations(const QLocale &locale);
