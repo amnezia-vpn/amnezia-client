@@ -123,8 +123,8 @@
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="76"/>
-        <source>&lt;li&gt;13 locations (with more coming soon)&lt;/li&gt;</source>
-        <translation>&lt;li&gt;13 локаций (их число будет расти)&lt;/li&gt;</translation>
+        <source>&lt;li&gt;20 locations (with more coming soon)&lt;/li&gt;</source>
+        <translation>&lt;li&gt;20 локаций (их число будет расти)&lt;/li&gt;</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ApiPremV1MigrationDrawer.qml" line="77"/>
@@ -3634,47 +3634,38 @@ subscription key</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="55"/>
         <source>Save AmneziaVPN config</source>
-        <translation type="unfinished">Сохранить конфигурацию AmneziaVPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="62"/>
         <source>Save OpenVPN config</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="69"/>
         <source>Save WireGuard config</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="76"/>
         <source>Save AmneziaWG config</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="83"/>
         <source>Save Shadowsocks config</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="90"/>
         <source>Save Cloak config</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="97"/>
         <source>Save XRay config</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="106"/>
         <source>Connection to </source>
-        <translation type="unfinished">Подключение к </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="107"/>
         <source>File with connection settings to </source>
-        <translation type="unfinished">Файл с настройками подключения к </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="125"/>
@@ -3823,14 +3814,6 @@ subscription key</source>
 </context>
 <context>
     <name>PageShareConnection</name>
-    <message>
-        <source>Connection to </source>
-        <translation type="vanished">Подключение к </translation>
-    </message>
-    <message>
-        <source>File with connection settings to </source>
-        <translation type="vanished">Файл с настройками подключения к </translation>
-    </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="25"/>
         <source>Share</source>

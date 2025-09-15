@@ -151,6 +151,7 @@ void SettingsController::backupAppConfig(const QString &fileName)
     config["Conf/autoStart"] = Autostart::isAutostart();
     config["Conf/killSwitchEnabled"] = isKillSwitchEnabled();
     config["Conf/strictKillSwitchEnabled"] = isStrictKillSwitchEnabled();
+    config["Conf/useAmneziaDns"] = isAmneziaDnsEnabled();
 
     SystemController::saveFile(fileName, QJsonDocument(config).toJson());
 }
@@ -186,7 +187,8 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_ANDROID)
         int appSplitTunnelingRouteMode = newConfigData.value("Conf/appsRouteMode").toInt();
-        bool appSplittunnelingEnabled = newConfigData.value("Conf/appsSplitTunnelingEnabled").toString().toLower() == "true";
+        bool appSplittunnelingEnabled =
+                newConfigData.value("Conf/appsSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
         m_appSplitTunnelingModel->setRouteMode(appSplitTunnelingRouteMode);
 
         #if defined(Q_OS_WINDOWS)
@@ -198,12 +200,13 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
                     m_appSplitTunnelingModel->clearAppsList();
                 }
         }
-
+        
         m_appSplitTunnelingModel->toggleSplitTunneling(appSplittunnelingEnabled);
 #endif
 
         int siteSplitTunnelingRouteMode = newConfigData.value("Conf/routeMode").toInt();
-        bool siteSplittunnelingEnabled = newConfigData.value("Conf/sitesSplitTunnelingEnabled").toString().toLower() == "true";
+        bool siteSplittunnelingEnabled =
+                newConfigData.value("Conf/sitesSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
         m_sitesModel->setRouteMode(siteSplitTunnelingRouteMode);
         m_sitesModel->toggleSplitTunneling(siteSplittunnelingEnabled);
 
@@ -213,6 +216,11 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         m_settings->setKillSwitchEnabled(false);
         m_settings->setStrictKillSwitchEnabled(false);
 #endif
+
+        bool amneziaDnsEnabled = newConfigData.contains("Conf/useAmneziaDns")
+                                     ? newConfigData.value("Conf/useAmneziaDns").toBool()
+                                     : m_settings->useAmneziaDns();
+        emit amneziaDnsToggled(amneziaDnsEnabled);
 
         emit restoreBackupFinished();
     } else {
@@ -264,6 +272,9 @@ bool SettingsController::isAutoStartEnabled()
 void SettingsController::toggleAutoStart(bool enable)
 {
     Autostart::setAutostart(enable);
+    if (!enable) {
+        toggleStartMinimized(false);
+    }
 }
 
 bool SettingsController::isStartMinimizedEnabled()
@@ -274,6 +285,7 @@ bool SettingsController::isStartMinimizedEnabled()
 void SettingsController::toggleStartMinimized(bool enable)
 {
     m_settings->setStartMinimized(enable);
+    emit startMinimizedChanged();
 }
 
 bool SettingsController::isScreenshotsEnabled()

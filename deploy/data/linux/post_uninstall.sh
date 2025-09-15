@@ -1,6 +1,7 @@
 #!/bin/bash
 
 APP_NAME=AmneziaVPN
+ORG_NAME=AmneziaVPN.ORG
 LOG_FOLDER=/var/log/$APP_NAME
 LOG_FILE="$LOG_FOLDER/post-uninstall.log"
 APP_PATH=/opt/$APP_NAME
@@ -63,6 +64,24 @@ if test -f /usr/share/pixmaps/$APP_NAME.png; then
 	sudo rm -f /usr/share/pixmaps/$APP_NAME.png >> $LOG_FILE
 
 fi
+
+### Remove the service log file (keep post-uninstall.log)
+if test -f "$LOG_FOLDER/AmneziaVPN-service.log"; then
+    sudo rm -f "$LOG_FOLDER/AmneziaVPN-service.log" >> $LOG_FILE 2>&1
+fi
+
+### Remove user logs for current user only
+TARGET_HOME="$HOME"
+if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != "root" ]; then
+    TARGET_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+fi
+if test -d "$TARGET_HOME/.local/share/$ORG_NAME/$APP_NAME/log"; then
+    rm -rf "$TARGET_HOME/.local/share/$ORG_NAME/$APP_NAME/log" >> $LOG_FILE 2>&1
+fi
+
+# Try to remove empty app and organization directories under user share
+if rmdir "$TARGET_HOME/.local/share/$ORG_NAME/$APP_NAME" 2>/dev/null; then :; fi
+if rmdir "$TARGET_HOME/.local/share/$ORG_NAME" 2>/dev/null; then :; fi
 
 if command -v steamos-readonly &> /dev/null; then
 	sudo steamos-readonly enable >> $LOG_FILE
