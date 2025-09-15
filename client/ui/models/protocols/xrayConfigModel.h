@@ -5,6 +5,7 @@
 #include <QJsonObject>
 
 #include "containers/containers_defs.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
 
 class XrayConfigModel : public QAbstractListModel
 {
@@ -24,16 +25,17 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void updateModel(const QJsonObject &config);
-    QJsonObject getConfig();
+    void updateModel(const XrayProtocolConfig xrayProtocolConfig);
+    QSharedPointer<ProtocolConfig> getConfig();
+
+    bool isServerSettingsEqual();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    DockerContainer m_container;
-    QJsonObject m_protocolConfig;
-    QJsonObject m_fullConfig;
+    XrayProtocolConfig m_newXrayProtocolConfig;
+    XrayProtocolConfig m_oldXrayProtocolConfig;
 };
 
 #endif // XRAYCONFIGMODEL_H

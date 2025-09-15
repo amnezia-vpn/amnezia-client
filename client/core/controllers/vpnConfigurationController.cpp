@@ -8,6 +8,8 @@
 #include "configurators/wireguard_configurator.h"
 #include "configurators/xray_configurator.h"
 
+#include "core/models/protocols/torProtocolConfig.h"
+
 VpnConfigurationsController::VpnConfigurationsController(const std::shared_ptr<Settings> &settings,
                                                          QSharedPointer<ServerController> serverController, QObject *parent)
     : QObject { parent }, m_settings(settings), m_serverController(serverController)
@@ -29,117 +31,128 @@ QScopedPointer<ConfiguratorBase> VpnConfigurationsController::createConfigurator
     }
 }
 
-ErrorCode VpnConfigurationsController::createProtocolConfigForContainer(const ServerCredentials &credentials,
-                                                                        const DockerContainer container, QJsonObject &containerConfig)
+ErrorCode VpnConfigurationsController::createClientProtocolConfigs(const ServerCredentials &serverCredentials,
+                                                                   ContainerConfig &containerConfig)
 {
     ErrorCode errorCode = ErrorCode::NoError;
 
-    if (ContainerProps::containerService(container) == ServiceType::Other) {
+    if (ContainerProps::containerService(containerConfig.containerType) == ServiceType::Other) {
         return errorCode;
     }
 
-    for (Proto protocol : ContainerProps::protocolsForContainer(container)) {
-        QJsonObject protocolConfig = containerConfig.value(ProtocolProps::protoToString(protocol)).toObject();
-
+    for (Proto protocol : ContainerProps::protocolsForContainer(containerConfig.containerType)) {
         auto configurator = createConfigurator(protocol);
-        QString protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
+        auto protocolConfig = configurator->createConfig(serverCredentials, containerConfig, errorCode);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }
 
-        protocolConfig.insert(config_key::last_config, protocolConfigString);
-        containerConfig.insert(ProtocolProps::protoToString(protocol), protocolConfig);
+        containerConfig.protocolConfigs[protocolConfig->protocolName] = protocolConfig;
     }
 
     return errorCode;
 }
 
-ErrorCode VpnConfigurationsController::createProtocolConfigString(const bool isApiConfig, const QPair<QString, QString> &dns,
-                                                                  const ServerCredentials &credentials, const DockerContainer container,
-                                                                  const QJsonObject &containerConfig, const Proto protocol,
-                                                                  QString &protocolConfigString)
+ErrorCode VpnConfigurationsController::createClientProtocolConfig(const ServerCredentials &serverCredentials,
+                                                                  const ContainerConfig &containerConfig, const Proto protocol,
+                                                                  QSharedPointer<ProtocolConfig> &protocolConfig)
 {
     ErrorCode errorCode = ErrorCode::NoError;
 
-    if (ContainerProps::containerService(container) == ServiceType::Other) {
+    if (ContainerProps::containerService(containerConfig.containerType) == ServiceType::Other) {
         return errorCode;
     }
 
     auto configurator = createConfigurator(protocol);
-
-    protocolConfigString = configurator->createConfig(credentials, container, containerConfig, errorCode);
+    protocolConfig = configurator->createConfig(serverCredentials, containerConfig, errorCode);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
-    protocolConfigString = configurator->processConfigWithExportSettings(dns, isApiConfig, protocolConfigString);
 
     return errorCode;
 }
 
-QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
-                                                                const QJsonObject &containerConfig, const DockerContainer container)
+void VpnConfigurationsController::processNativeConfigForExport(const QPair<QString, QString> &dns,
+                                                               QSharedPointer<ProtocolConfig> &protocolConfig)
+{
+    auto configurator = createConfigurator(protocolConfig->protocolType);
+    protocolConfig = configurator->processConfigWithExportSettings(dns, protocolConfig);
+}
+
+QJsonObject VpnConfigurationsController::createVpnConfiguration(const QPair<QString, QString> &dns, const ContainerConfig &containerConfig,
+                                                                const DockerContainer containerType, const int configVersion,
+                                                                const QString &hostName)
 {
     QJsonObject vpnConfiguration {};
 
-    if (ContainerProps::containerService(container) == ServiceType::Other) {
+    if (ContainerProps::containerService(containerType) == ServiceType::Other) {
         return vpnConfiguration;
     }
 
-    bool isApiConfig = serverConfig.value(config_key::configVersion).toInt();
+    bool isApiConfig = configVersion;
 
-    for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(container)) {
-        if (isApiConfig && container == DockerContainer::Cloak && proto == ProtocolEnumNS::Proto::ShadowSocks) {
+    for (ProtocolEnumNS::Proto proto : ContainerProps::protocolsForContainer(containerType)) {
+        if (isApiConfig && containerType == DockerContainer::Cloak && proto == ProtocolEnumNS::Proto::ShadowSocks) {
             continue;
         }
 
-        QString protocolConfigString =
-                containerConfig.value(ProtocolProps::protoToString(proto)).toObject().value(config_key::last_config).toString();
+        QString protocolName = ProtocolProps::protoToString(proto);
+        auto protocolConfig = containerConfig.protocolConfigs.value(protocolName);
 
-        auto configurator = createConfigurator(proto);
-        protocolConfigString = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfigString);
+        if (protocolConfig) {
+            auto configurator = createConfigurator(proto);
+            protocolConfig = configurator->processConfigWithLocalSettings(dns, isApiConfig, protocolConfig);
 
-        QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
-        if (container == DockerContainer::Awg || container == DockerContainer::WireGuard) {
-            // add mtu for old configs
-            if (vpnConfigData[config_key::mtu].toString().isEmpty()) {
-                vpnConfigData[config_key::mtu] =
-                        container == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+            QJsonObject protocolJson = protocolConfig->toJson();
+            QString protocolConfigString = protocolJson.value(config_key::last_config).toString();
+            QJsonObject vpnConfigData = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
+
+            if (containerType == DockerContainer::Awg || containerType == DockerContainer::WireGuard) {
+                // add mtu for old configs
+                if (vpnConfigData[config_key::mtu].toString().isEmpty()) {
+                    vpnConfigData[config_key::mtu] =
+                            containerType == DockerContainer::Awg ? protocols::awg::defaultMtu : protocols::wireguard::defaultMtu;
+                }
             }
-        }
 
-        vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
+            vpnConfiguration.insert(ProtocolProps::key_proto_config_data(proto), vpnConfigData);
+        }
     }
 
-    Proto proto = ContainerProps::defaultProtocol(container);
+    Proto proto = ContainerProps::defaultProtocol(containerType);
     vpnConfiguration[config_key::vpnproto] = ProtocolProps::protoToString(proto);
 
     vpnConfiguration[config_key::dns1] = dns.first;
     vpnConfiguration[config_key::dns2] = dns.second;
 
-    vpnConfiguration[config_key::hostName] = serverConfig.value(config_key::hostName).toString();
-    vpnConfiguration[config_key::description] = serverConfig.value(config_key::description).toString();
+    vpnConfiguration[config_key::hostName] = hostName;
+    vpnConfiguration[config_key::description] = hostName; // TODO: might need description field in ServerConfig
 
-    vpnConfiguration[config_key::configVersion] = serverConfig.value(config_key::configVersion).toInt();
+    vpnConfiguration[config_key::configVersion] = configVersion;
     // TODO: try to get hostName, port, description for 3rd party configs
     // vpnConfiguration[config_key::port] = ...;
 
     return vpnConfiguration;
 }
 
-void VpnConfigurationsController::updateContainerConfigAfterInstallation(const DockerContainer container, QJsonObject &containerConfig,
+void VpnConfigurationsController::updateContainerConfigAfterInstallation(const DockerContainer container, ContainerConfig &containerConfig,
                                                                          const QString &stdOut)
 {
-    Proto mainProto = ContainerProps::defaultProtocol(container);
-
     if (container == DockerContainer::TorWebSite) {
-        QJsonObject protocol = containerConfig.value(ProtocolProps::protoToString(mainProto)).toObject();
+        Proto mainProto = ContainerProps::defaultProtocol(container);
+        QString protocolName = ProtocolProps::protoToString(mainProto);
+        auto protocolConfig = containerConfig.protocolConfigs.value(protocolName);
 
-        qDebug() << "amnezia-tor onions" << stdOut;
+        if (protocolConfig) {
+            qDebug() << "amnezia-tor onions" << stdOut;
 
-        QString onion = stdOut;
-        onion.replace("\n", "");
-        protocol.insert(config_key::site, onion);
+            QString onion = stdOut;
+            onion.replace("\n", "");
 
-        containerConfig.insert(ProtocolProps::protoToString(mainProto), protocol);
+            auto torConfig = qSharedPointerCast<TorProtocolConfig>(protocolConfig);
+            if (torConfig) {
+                torConfig->serverProtocolConfig.site = onion;
+            }
+        }
     }
 }

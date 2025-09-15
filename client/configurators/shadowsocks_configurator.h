@@ -10,10 +10,11 @@ class ShadowSocksConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    ShadowSocksConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent = nullptr);
+    ShadowSocksConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
+                            QObject *parent = nullptr);
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode &errorCode);
+    QSharedPointer<ProtocolConfig> createConfig(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig,
+                                                ErrorCode &errorCode) override;
 };
 
 #endif // SHADOWSOCKS_CONFIGURATOR_H

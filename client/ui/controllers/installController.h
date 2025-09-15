@@ -6,6 +6,7 @@
 
 #include "containers/containers_defs.h"
 #include "core/defs.h"
+#include "core/models/containers/containerConfig.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/protocols_model.h"
@@ -28,7 +29,7 @@ public slots:
 
     void scanServerForInstalledContainers();
 
-    void updateContainer(QJsonObject config);
+    void updateContainer();
 
     void removeProcessedServer();
     void rebootProcessedServer();
@@ -86,17 +87,19 @@ signals:
     void profileCleared(const QJsonObject &config);
 
 private:
-    void installServer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
+    void installServer(const DockerContainer container, QMap<QString, ContainerConfig> installedContainers,
                        const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
                        QString &finishMessage);
-    void installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
+    void installContainer(const DockerContainer container, QMap<QString, ContainerConfig> installedContainers,
                           const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
                           QString &finishMessage);
     bool isServerAlreadyExists();
 
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController,
-                                            QMap<DockerContainer, QJsonObject> &installedContainers);
-    bool isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
+                                            QMap<QString, ContainerConfig> &containerConfigs);
+    bool isUpdateDockerContainerRequired(const DockerContainer container,
+                                         const QMap<QString, QSharedPointer<ProtocolConfig>> &oldProtocolConfigs,
+                                         const QMap<QString, QSharedPointer<ProtocolConfig>> &newProtocolConfigs);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;

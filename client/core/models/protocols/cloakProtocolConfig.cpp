@@ -1,0 +1,85 @@
+#include "cloakProtocolConfig.h"
+
+#include <QJsonArray>
+#include <QJsonDocument>
+#include "protocols/protocols_defs.h"
+
+using namespace amnezia;
+
+CloakProtocolConfig::CloakProtocolConfig(const QString &protocolName, int port) : ProtocolConfig(protocolName)
+{
+    serverProtocolConfig.port = QString::number(port);
+    serverProtocolConfig.cipher = protocols::cloak::defaultCipher;
+    serverProtocolConfig.site = protocols::cloak::defaultRedirSite;
+}
+
+CloakProtocolConfig::CloakProtocolConfig(const QJsonObject &protocolConfigObject, const QString &protocolName) : ProtocolConfig(protocolName)
+{
+    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString();
+    serverProtocolConfig.cipher = protocolConfigObject.value(config_key::cipher).toString();
+    serverProtocolConfig.site = protocolConfigObject.value(config_key::site).toString();
+
+    auto clientProtocolString = protocolConfigObject.value(config_key::last_config).toString();
+    if (!clientProtocolString.isEmpty()) {
+        clientProtocolConfig.isEmpty = false;
+
+        QJsonObject clientProtocolConfigObject = QJsonDocument::fromJson(clientProtocolString.toUtf8()).object();
+    }
+}
+
+CloakProtocolConfig::CloakProtocolConfig(const CloakProtocolConfig &other) : ProtocolConfig(other.protocolName)
+{
+    serverProtocolConfig = other.serverProtocolConfig;
+    clientProtocolConfig = other.clientProtocolConfig;
+}
+
+QJsonObject CloakProtocolConfig::toJson() const
+{
+    QJsonObject json;
+
+    if (!serverProtocolConfig.port.isEmpty()) {
+        json[config_key::port] = serverProtocolConfig.port;
+    }
+    if (!serverProtocolConfig.cipher.isEmpty()) {
+        json[config_key::cipher] = serverProtocolConfig.cipher;
+    }
+    if (!serverProtocolConfig.site.isEmpty()) {
+        json[config_key::site] = serverProtocolConfig.site;
+    }
+
+    if (!clientProtocolConfig.isEmpty) {
+        QJsonObject clientConfigJson;
+        json[config_key::last_config] = QString(QJsonDocument(clientConfigJson).toJson());
+    }
+
+    return json;
+}
+
+bool CloakProtocolConfig::hasEqualServerSettings(const CloakProtocolConfig &other) const
+{
+    if (serverProtocolConfig.port != other.serverProtocolConfig.port || 
+        serverProtocolConfig.cipher != other.serverProtocolConfig.cipher ||
+        serverProtocolConfig.site != other.serverProtocolConfig.site) {
+        return false;
+    }
+    return true;
+}
+
+ScriptVars CloakProtocolConfig::getScriptVars() const
+{
+    ScriptVars vars;
+
+    if (!serverProtocolConfig.port.isEmpty()) {
+        vars.append({ "$CLOAK_SERVER_PORT", serverProtocolConfig.port });
+    }
+    if (!serverProtocolConfig.site.isEmpty()) {
+        vars.append({ "$FAKE_WEB_SITE_ADDRESS", serverProtocolConfig.site });
+    }
+
+    return vars;
+}
+
+void CloakProtocolConfig::clearClientSettings()
+{
+    clientProtocolConfig = cloak::ClientProtocolConfig();
+} 

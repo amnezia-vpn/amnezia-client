@@ -13,8 +13,17 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/qrCodeUtils.h
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.h
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/importController.h
     ${CLIENT_ROOT_DIR}/core/controllers/serverController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/appSettingsController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/splitTunnelingController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/systemController.h
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiConfigController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiPremV1MigrationController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiSettingsController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installController.h
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.h
     ${CLIENT_ROOT_DIR}/protocols/qml_register_protocols.h
     ${CLIENT_ROOT_DIR}/ui/pages.h
@@ -61,8 +70,17 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/qrCodeUtils.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/importController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/serverController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/appSettingsController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/splitTunnelingController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/systemController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiConfigController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiPremV1MigrationController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/api/apiSettingsController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installController.cpp
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.cpp
     ${CLIENT_ROOT_DIR}/ui/qautostart.cpp
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.cpp
@@ -130,6 +148,7 @@ file(GLOB UI_MODELS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/models/services/*.h
     ${CLIENT_ROOT_DIR}/ui/models/api/*.h
 )
+
 file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/models/*.cpp
     ${CLIENT_ROOT_DIR}/ui/models/protocols/*.cpp
@@ -141,9 +160,24 @@ file(GLOB UI_CONTROLLERS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.h
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.h
 )
+
 file(GLOB UI_CONTROLLERS_CPP CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/controllers/*.cpp
     ${CLIENT_ROOT_DIR}/ui/controllers/api/*.cpp
+)
+
+file(GLOB CORE_MODELS_H CONFIGURE_DEPENDS
+    ${CLIENT_ROOT_DIR}/core/models/*.h
+    ${CLIENT_ROOT_DIR}/core/models/containers/*.h
+    ${CLIENT_ROOT_DIR}/core/models/protocols/*.h
+    ${CLIENT_ROOT_DIR}/core/models/servers/*.h
+)
+
+file(GLOB CORE_MODELS_CPP CONFIGURE_DEPENDS
+    ${CLIENT_ROOT_DIR}/core/models/*.cpp
+    ${CLIENT_ROOT_DIR}/core/models/containers/*.cpp
+    ${CLIENT_ROOT_DIR}/core/models/protocols/*.cpp
+    ${CLIENT_ROOT_DIR}/core/models/servers/*.cpp
 )
 
 set(HEADERS ${HEADERS}
@@ -152,6 +186,7 @@ set(HEADERS ${HEADERS}
     ${CONFIGURATORS_H}
     ${UI_MODELS_H}
     ${UI_CONTROLLERS_H}
+    ${CORE_MODELS_H}
 )
 set(SOURCES ${SOURCES}
     ${COMMON_FILES_CPP}
@@ -159,6 +194,7 @@ set(SOURCES ${SOURCES}
     ${CONFIGURATORS_CPP}
     ${UI_MODELS_CPP}
     ${UI_CONTROLLERS_CPP}
+    ${CORE_MODELS_CPP}
 )
 
 if(WIN32)

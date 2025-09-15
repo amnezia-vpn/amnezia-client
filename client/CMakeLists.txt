@@ -51,7 +51,8 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
 endif()
 
 qt_standard_project_setup()
-qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
+qt_add_executable(${PROJECT} MANUAL_FINALIZATION
+    core/controllers/serverConfigController.h core/controllers/serverConfigController.cpp)
 target_include_directories(${PROJECT} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )

@@ -16,7 +16,7 @@ namespace apiUtils
     bool isPremiumServer(const QJsonObject &serverConfigObject);
 
     apiDefs::ConfigType getConfigType(const QJsonObject &serverConfigObject);
-    apiDefs::ConfigSource getConfigSource(const QJsonObject &serverConfigObject);
+    amnezia::ServerConfigType getConfigSource(const QJsonObject &serverConfigObject);
 
     amnezia::ErrorCode checkNetworkReplyErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply);
 

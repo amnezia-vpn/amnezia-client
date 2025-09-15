@@ -2,21 +2,21 @@
 #define VPNCONNECTION_H
 
 #include <QObject>
-#include <QString>
-#include <QScopedPointer>
 #include <QRemoteObjectNode>
+#include <QScopedPointer>
+#include <QString>
 #include <QTimer>
 
-#include "protocols/vpnprotocol.h"
 #include "core/defs.h"
+#include "protocols/vpnprotocol.h"
 #include "settings.h"
 
 #ifdef AMNEZIA_DESKTOP
-#include "core/ipcclient.h"
+    #include "core/ipcclient.h"
 #endif
 
 #ifdef Q_OS_ANDROID
-#include "protocols/android_vpnprotocol.h"
+    #include "protocols/android_vpnprotocol.h"
 #endif
 
 using namespace amnezia;
@@ -26,7 +26,7 @@ class VpnConnection : public QObject
     Q_OBJECT
 
 public:
-    explicit VpnConnection(std::shared_ptr<Settings> settings, QObject* parent = nullptr);
+    explicit VpnConnection(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
     ~VpnConnection() override;
 
     static QString bytesPerSecToText(quint64 bytes);
@@ -47,8 +47,7 @@ public:
 #endif
 
 public slots:
-    void connectToVpn(int serverIndex,
-    const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void connectToVpn(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration);
 
     void disconnectFromVpn();
 
@@ -81,20 +80,20 @@ private:
     QTimer m_checkTimer;
 
 #ifdef AMNEZIA_DESKTOP
-    IpcClient *m_IpcClient {nullptr};
+    IpcClient *m_IpcClient { nullptr };
 #endif
 
 #ifdef Q_OS_ANDROID
-   AndroidVpnProtocol* androidVpnProtocol = nullptr;
+    AndroidVpnProtocol *androidVpnProtocol = nullptr;
 
-   AndroidVpnProtocol* createDefaultAndroidVpnProtocol();
-   void createAndroidConnections();
+    AndroidVpnProtocol *createDefaultAndroidVpnProtocol();
+    void createAndroidConnections();
 #endif
 
-   void createProtocolConnections();
+    void createProtocolConnections();
 
-   void appendSplitTunnelingConfig();
-   void appendKillSwitchConfig();
+    void appendSplitTunnelingConfig();
+    void appendKillSwitchConfig();
 };
 
 #endif // VPNCONNECTION_H

@@ -2,7 +2,10 @@
 
 #include "protocols/protocols_defs.h"
 
-XrayConfigModel::XrayConfigModel(QObject *parent) : QAbstractListModel(parent)
+XrayConfigModel::XrayConfigModel(QObject *parent)
+    : QAbstractListModel(parent),
+      m_newXrayProtocolConfig(QJsonObject(), ProtocolProps::protoToString(Proto::Xray)),
+      m_oldXrayProtocolConfig(QJsonObject(), ProtocolProps::protoToString(Proto::Xray))
 {
 }
 
@@ -19,8 +22,8 @@ bool XrayConfigModel::setData(const QModelIndex &index, const QVariant &value, i
     }
 
     switch (role) {
-    case Roles::SiteRole: m_protocolConfig.insert(config_key::site, value.toString()); break;
-    case Roles::PortRole: m_protocolConfig.insert(config_key::port, value.toString()); break;
+    case Roles::SiteRole: m_newXrayProtocolConfig.serverProtocolConfig.site = value.toString(); break;
+    case Roles::PortRole: m_newXrayProtocolConfig.serverProtocolConfig.port = value.toString(); break;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -34,34 +37,32 @@ QVariant XrayConfigModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
-    case Roles::SiteRole: return m_protocolConfig.value(config_key::site).toString(protocols::xray::defaultSite);
-    case Roles::PortRole: return m_protocolConfig.value(config_key::port).toString(protocols::xray::defaultPort);
+    case Roles::SiteRole: return m_newXrayProtocolConfig.serverProtocolConfig.site;
+    case Roles::PortRole: return m_newXrayProtocolConfig.serverProtocolConfig.port;
     }
 
     return QVariant();
 }
 
-void XrayConfigModel::updateModel(const QJsonObject &config)
+void XrayConfigModel::updateModel(const XrayProtocolConfig xrayProtocolConfig)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
-
-    m_fullConfig = config;
-    QJsonObject protocolConfig = config.value(config_key::xray).toObject();
-
-    auto defaultTransportProto = ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::Xray), Proto::Xray);
-    m_protocolConfig.insert(config_key::transport_proto,
-                            protocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
-    m_protocolConfig.insert(config_key::port, protocolConfig.value(config_key::port).toString(protocols::xray::defaultPort));
-    m_protocolConfig.insert(config_key::site, protocolConfig.value(config_key::site).toString(protocols::xray::defaultSite));
-
+    m_newXrayProtocolConfig = xrayProtocolConfig;
+    m_oldXrayProtocolConfig = xrayProtocolConfig;
     endResetModel();
 }
 
-QJsonObject XrayConfigModel::getConfig()
+QSharedPointer<ProtocolConfig> XrayConfigModel::getConfig()
 {
-    m_fullConfig.insert(config_key::xray, m_protocolConfig);
-    return m_fullConfig;
+    if (m_oldXrayProtocolConfig.hasEqualServerSettings(m_newXrayProtocolConfig)) {
+        m_newXrayProtocolConfig.clearClientSettings();
+    }
+    return QSharedPointer<XrayProtocolConfig>::create(m_newXrayProtocolConfig);
+}
+
+bool XrayConfigModel::isServerSettingsEqual()
+{
+    return m_oldXrayProtocolConfig.hasEqualServerSettings(m_newXrayProtocolConfig);
 }
 
 QHash<int, QByteArray> XrayConfigModel::roleNames() const
@@ -73,3 +74,4 @@ QHash<int, QByteArray> XrayConfigModel::roleNames() const
 
     return roles;
 }
+

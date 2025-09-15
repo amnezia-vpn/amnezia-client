@@ -6,6 +6,9 @@
 #include "configurators/configurator_base.h"
 #include "containers/containers_defs.h"
 #include "core/defs.h"
+#include "core/models/containers/containerConfig.h"
+#include "core/models/servers/selfHostedServerConfig.h"
+#include "core/models/servers/serverConfig.h"
 #include "settings.h"
 
 class VpnConfigurationsController : public QObject
@@ -16,15 +19,15 @@ public:
                                          QObject *parent = nullptr);
 
 public slots:
-    ErrorCode createProtocolConfigForContainer(const ServerCredentials &credentials, const DockerContainer container,
-                                               QJsonObject &containerConfig);
-    ErrorCode createProtocolConfigString(const bool isApiConfig, const QPair<QString, QString> &dns, const ServerCredentials &credentials,
-                                         const DockerContainer container, const QJsonObject &containerConfig, const Proto protocol,
-                                         QString &protocolConfigString);
-    QJsonObject createVpnConfiguration(const QPair<QString, QString> &dns, const QJsonObject &serverConfig,
-                                       const QJsonObject &containerConfig, const DockerContainer container);
+    ErrorCode createClientProtocolConfigs(const ServerCredentials &serverCredentials, ContainerConfig &containerConfig);
+    ErrorCode createClientProtocolConfig(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig,
+                                         const Proto protocol, QSharedPointer<ProtocolConfig> &protocolConfig);
+    void processNativeConfigForExport(const QPair<QString, QString> &dns, QSharedPointer<ProtocolConfig> &protocolConfig);
+    QJsonObject createVpnConfiguration(const QPair<QString, QString> &dns, const ContainerConfig &containerConfig,
+                                       const DockerContainer containerType, const int configVersion, const QString &hostName);
 
-    static void updateContainerConfigAfterInstallation(const DockerContainer container, QJsonObject &containerConfig, const QString &stdOut);
+    static void updateContainerConfigAfterInstallation(const DockerContainer container, ContainerConfig &containerConfig,
+                                                       const QString &stdOut);
 signals:
 
 private:

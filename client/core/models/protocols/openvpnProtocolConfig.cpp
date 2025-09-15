@@ -1,0 +1,156 @@
+#include "openvpnProtocolConfig.h"
+
+#include "protocols/protocols_defs.h"
+#include <QJsonDocument>
+
+using namespace amnezia;
+
+OpenVpnProtocolConfig::OpenVpnProtocolConfig(const QString &protocolName, int port, TransportProto transportProto) : ProtocolConfig(protocolName)
+{
+    serverProtocolConfig.port = QString::number(port);
+    serverProtocolConfig.transportProto = ProtocolProps::transportProtoToString(transportProto, ProtocolProps::protoFromString(protocolName));
+    // Set default values
+    serverProtocolConfig.ncpDisable = protocols::openvpn::defaultNcpDisable;
+    serverProtocolConfig.cipher = protocols::openvpn::defaultCipher;
+    serverProtocolConfig.tlsAuth = protocols::openvpn::defaultTlsAuth;
+    serverProtocolConfig.blockOutsideDns = protocols::openvpn::defaultBlockOutsideDns;
+    // subnetAddress, hash, additionalClientConfig, additionalServerConfig will be set later
+}
+
+OpenVpnProtocolConfig::OpenVpnProtocolConfig(const QJsonObject &protocolConfigObject, const QString &protocolName)
+    : ProtocolConfig(protocolName)
+{
+    serverProtocolConfig.subnetAddress = protocolConfigObject.value(config_key::subnet_address).toString();
+    serverProtocolConfig.transportProto = protocolConfigObject.value(config_key::transport_proto).toString();
+    serverProtocolConfig.port = protocolConfigObject.value(config_key::port).toString();
+    serverProtocolConfig.ncpDisable = protocolConfigObject.value(config_key::ncp_disable).toBool(protocols::openvpn::defaultNcpDisable);
+    serverProtocolConfig.hash = protocolConfigObject.value(config_key::hash).toString();
+    serverProtocolConfig.cipher = protocolConfigObject.value(config_key::cipher).toString();
+    serverProtocolConfig.tlsAuth = protocolConfigObject.value(config_key::tls_auth).toBool(protocols::openvpn::defaultTlsAuth);
+    serverProtocolConfig.blockOutsideDns =
+            protocolConfigObject.value(config_key::block_outside_dns).toBool(protocols::openvpn::defaultBlockOutsideDns);
+    serverProtocolConfig.additionalClientConfig = protocolConfigObject.value(config_key::additional_client_config).toString();
+    serverProtocolConfig.additionalServerConfig = protocolConfigObject.value(config_key::additional_server_config).toString();
+
+    auto clientProtocolString = protocolConfigObject.value(config_key::last_config).toString();
+    if (!clientProtocolString.isEmpty()) {
+        clientProtocolConfig.isEmpty = false;
+
+        QJsonObject clientProtocolConfigObject = QJsonDocument::fromJson(clientProtocolString.toUtf8()).object();
+
+        clientProtocolConfig.clientId = clientProtocolConfigObject.value(config_key::clientId).toString();
+        clientProtocolConfig.nativeConfig = clientProtocolConfigObject.value(config_key::config).toString();
+    }
+}
+
+OpenVpnProtocolConfig::OpenVpnProtocolConfig(const OpenVpnProtocolConfig &other) : ProtocolConfig(other.protocolName)
+{
+    serverProtocolConfig = other.serverProtocolConfig;
+    clientProtocolConfig = other.clientProtocolConfig;
+}
+
+QJsonObject OpenVpnProtocolConfig::toJson() const
+{
+    QJsonObject json;
+
+    if (!serverProtocolConfig.subnetAddress.isEmpty()) {
+        json[config_key::subnet_address] = serverProtocolConfig.subnetAddress;
+    }
+    if (!serverProtocolConfig.transportProto.isEmpty()) {
+        json[config_key::transport_proto] = serverProtocolConfig.transportProto;
+    }
+    if (!serverProtocolConfig.port.isEmpty()) {
+        json[config_key::port] = serverProtocolConfig.port;
+    }
+    json[config_key::ncp_disable] = serverProtocolConfig.ncpDisable;
+    if (!serverProtocolConfig.hash.isEmpty()) {
+        json[config_key::hash] = serverProtocolConfig.hash;
+    }
+    if (!serverProtocolConfig.cipher.isEmpty()) {
+        json[config_key::cipher] = serverProtocolConfig.cipher;
+    }
+    json[config_key::tls_auth] = serverProtocolConfig.tlsAuth;
+    json[config_key::block_outside_dns] = serverProtocolConfig.blockOutsideDns;
+    if (!serverProtocolConfig.additionalClientConfig.isEmpty()) {
+        json[config_key::additional_client_config] = serverProtocolConfig.additionalClientConfig;
+    }
+    if (!serverProtocolConfig.additionalServerConfig.isEmpty()) {
+        json[config_key::additional_server_config] = serverProtocolConfig.additionalServerConfig;
+    }
+
+    if (!clientProtocolConfig.isEmpty) {
+        QJsonObject clientConfigJson;
+
+        if (!clientProtocolConfig.clientId.isEmpty()) {
+            clientConfigJson[config_key::clientId] = clientProtocolConfig.clientId;
+        }
+        if (!clientProtocolConfig.nativeConfig.isEmpty()) {
+            clientConfigJson[config_key::config] = clientProtocolConfig.nativeConfig;
+        }
+
+        if (!clientConfigJson.isEmpty()) {
+            json[config_key::last_config] = QString(QJsonDocument(clientConfigJson).toJson());
+        }
+    }
+
+    return json;
+}
+
+bool OpenVpnProtocolConfig::hasEqualServerSettings(const OpenVpnProtocolConfig &other) const
+{
+    if (serverProtocolConfig.subnetAddress != other.serverProtocolConfig.subnetAddress
+        || serverProtocolConfig.transportProto != other.serverProtocolConfig.transportProto
+        || serverProtocolConfig.port != other.serverProtocolConfig.port
+        || serverProtocolConfig.ncpDisable != other.serverProtocolConfig.ncpDisable
+        || serverProtocolConfig.hash != other.serverProtocolConfig.hash || serverProtocolConfig.cipher != other.serverProtocolConfig.cipher
+        || serverProtocolConfig.tlsAuth != other.serverProtocolConfig.tlsAuth
+        || serverProtocolConfig.blockOutsideDns != other.serverProtocolConfig.blockOutsideDns
+        || serverProtocolConfig.additionalClientConfig != other.serverProtocolConfig.additionalClientConfig
+        || serverProtocolConfig.additionalServerConfig != other.serverProtocolConfig.additionalServerConfig) {
+        return false;
+    }
+    return true;
+}
+
+ScriptVars OpenVpnProtocolConfig::getScriptVars() const
+{
+    ScriptVars vars;
+
+    if (!serverProtocolConfig.subnetAddress.isEmpty()) {
+        vars.append({ "$OPENVPN_SUBNET_IP", serverProtocolConfig.subnetAddress });
+    }
+    if (!serverProtocolConfig.transportProto.isEmpty()) {
+        vars.append({ "$OPENVPN_TRANSPORT_PROTO", serverProtocolConfig.transportProto });
+    }
+    if (!serverProtocolConfig.port.isEmpty()) {
+        vars.append({ "$OPENVPN_PORT", serverProtocolConfig.port });
+    }
+    
+    vars.append({ "$OPENVPN_NCP_DISABLE", serverProtocolConfig.ncpDisable ? protocols::openvpn::ncpDisableString : QString("") });
+    
+    if (!serverProtocolConfig.hash.isEmpty()) {
+        vars.append({ "$OPENVPN_HASH", serverProtocolConfig.hash });
+    }
+    if (!serverProtocolConfig.cipher.isEmpty()) {
+        vars.append({ "$OPENVPN_CIPHER", serverProtocolConfig.cipher });
+    }
+    
+    vars.append({ "$OPENVPN_TLS_AUTH", serverProtocolConfig.tlsAuth ? protocols::openvpn::tlsAuthString : QString("") });
+    if (!serverProtocolConfig.tlsAuth) {
+        vars.append({ "$OPENVPN_TA_KEY", QString("") });
+    }
+    
+    if (!serverProtocolConfig.additionalClientConfig.isEmpty()) {
+        vars.append({ "$OPENVPN_ADDITIONAL_CLIENT_CONFIG", serverProtocolConfig.additionalClientConfig });
+    }
+    if (!serverProtocolConfig.additionalServerConfig.isEmpty()) {
+        vars.append({ "$OPENVPN_ADDITIONAL_SERVER_CONFIG", serverProtocolConfig.additionalServerConfig });
+    }
+
+    return vars;
+}
+
+void OpenVpnProtocolConfig::clearClientSettings()
+{
+    clientProtocolConfig = openvpn::ClientProtocolConfig();
+}

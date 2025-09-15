@@ -3,6 +3,10 @@
 
 #include <QObject>
 
+#include "core/defs.h"
+#include "core/models/containers/containerConfig.h"
+#include "core/models/servers/selfHostedServerConfig.h"
+#include "core/models/servers/serverConfig.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
@@ -36,9 +40,9 @@ public slots:
 
     void exportConfig(const QString &fileName);
 
-    void updateClientManagementModel(const DockerContainer container, ServerCredentials credentials);
-    void revokeConfig(const int row, const DockerContainer container, ServerCredentials credentials);
-    void renameClient(const int row, const QString &clientName, const DockerContainer container, ServerCredentials credentials);
+    void updateClientManagementModel(const DockerContainer container, amnezia::ServerCredentials credentials);
+    void revokeConfig(const int row, const DockerContainer container, amnezia::ServerCredentials credentials);
+    void renameClient(const int row, const QString &clientName, const DockerContainer container, amnezia::ServerCredentials credentials);
 
 signals:
     void generateConfig(int type);
@@ -55,8 +59,7 @@ private:
 
     void clearPreviousConfig();
 
-    ErrorCode generateNativeConfig(const DockerContainer container, const QString &clientName, const Proto &protocol,
-                                   QJsonObject &jsonNativeConfig);
+    ErrorCode generateNativeConfig(const DockerContainer container, const QString &clientName, const Proto &protocol, QString &nativeConfig);
 
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;

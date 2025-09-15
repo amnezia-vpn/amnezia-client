@@ -29,7 +29,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void updateModel(const QJsonObject &accountInfoObject, const QJsonObject &serverConfig);
+    void updateModel(const QJsonObject &accountInfoObject, const apiDefs::ConfigType &configType);
     QVariant data(const QString &roleString);
 
     QJsonArray getAvailableCountries();

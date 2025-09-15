@@ -1,14 +1,46 @@
 #include "protocols_model.h"
 
-ProtocolsModel::ProtocolsModel(std::shared_ptr<Settings> settings, QObject *parent)
-    : m_settings(settings), QAbstractListModel(parent)
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/models/protocols/cloakProtocolConfig.h"
+#include "core/models/protocols/ipsecProtocolConfig.h"
+#include "core/models/protocols/openvpnProtocolConfig.h"
+#include "core/models/protocols/shadowsocksProtocolConfig.h"
+#include "core/models/protocols/wireguardProtocolConfig.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
+
+ProtocolsModel::ProtocolsModel(QObject *parent) : QAbstractListModel(parent)
+{
+}
+
+ProtocolsModel::ProtocolsModel(const QSharedPointer<OpenVpnConfigModel> &openVpnConfigModel,
+                               const QSharedPointer<ShadowSocksConfigModel> &shadowSocksConfigModel,
+                               const QSharedPointer<CloakConfigModel> &cloakConfigModel,
+                               const QSharedPointer<WireGuardConfigModel> &wireGuardConfigModel,
+                               const QSharedPointer<AwgConfigModel> &awgConfigModel, const QSharedPointer<XrayConfigModel> &xrayConfigModel,
+#ifdef Q_OS_WINDOWS
+                               const QSharedPointer<Ikev2ConfigModel> &ikev2ConfigModel,
+#endif
+                               const QSharedPointer<SftpConfigModel> &sftpConfigModel,
+                               const QSharedPointer<Socks5ProxyConfigModel> &socks5ProxyConfigModel, QObject *parent)
+    : QAbstractListModel(parent),
+      m_openVpnConfigModel(openVpnConfigModel),
+      m_shadowSocksConfigModel(shadowSocksConfigModel),
+      m_cloakConfigModel(cloakConfigModel),
+      m_wireGuardConfigModel(wireGuardConfigModel),
+      m_awgConfigModel(awgConfigModel),
+      m_xrayConfigModel(xrayConfigModel),
+#ifdef Q_OS_WINDOWS
+      m_ikev2ConfigModel(ikev2ConfigModel),
+#endif
+      m_sftpConfigModel(sftpConfigModel),
+      m_socks5ProxyConfigModel(socks5ProxyConfigModel)
 {
 }
 
 int ProtocolsModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    return m_content.size();
+    return m_protocolConfigs.size();
 }
 
 QHash<int, QByteArray> ProtocolsModel::roleNames() const
@@ -27,60 +59,112 @@ QHash<int, QByteArray> ProtocolsModel::roleNames() const
 
 QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= m_content.size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_protocolConfigs.size()) {
         return QVariant();
     }
 
+    auto protocolConfig = m_protocolConfigs.at(index.row());
+    amnezia::Proto protocol = ProtocolProps::protoFromString(protocolConfig->protocolName);
+
     switch (role) {
     case ProtocolNameRole: {
-        amnezia::Proto proto = ProtocolProps::protoFromString(m_content.keys().at(index.row()));
-        return ProtocolProps::protocolHumanNames().value(proto);
+        return ProtocolProps::protocolHumanNames().value(protocol);
     }
-    case ServerProtocolPageRole:
-        return static_cast<int>(serverProtocolPage(ProtocolProps::protoFromString(m_content.keys().at(index.row()))));
-    case ClientProtocolPageRole:
-        return static_cast<int>(clientProtocolPage(ProtocolProps::protoFromString(m_content.keys().at(index.row()))));
-    case ProtocolIndexRole: return ProtocolProps::protoFromString(m_content.keys().at(index.row()));
-    case RawConfigRole: {
-        auto protocolConfig = m_content.value(ContainerProps::containerTypeToString(m_container)).toObject();
-        auto lastConfigJsonDoc =
-                QJsonDocument::fromJson(protocolConfig.value(config_key::last_config).toString().toUtf8());
-        auto lastConfigJson = lastConfigJsonDoc.object();
+    case ServerProtocolPageRole: return static_cast<int>(serverProtocolPage(protocol));
+    case ClientProtocolPageRole: return static_cast<int>(clientProtocolPage(protocol));
+    case ProtocolIndexRole: return protocol;
+    // case RawConfigRole: {
+    //     auto protocolConfig = m_content.value(ContainerProps::containerTypeToString(m_container)).toObject();
+    //     auto lastConfigJsonDoc = QJsonDocument::fromJson(protocolConfig.value(config_key::last_config).toString().toUtf8());
+    //     auto lastConfigJson = lastConfigJsonDoc.object();
 
-        QString rawConfig;
-        QStringList lines = lastConfigJson.value(config_key::config).toString().replace("\r", "").split("\n");
-        for (const QString &l : lines) {
-            rawConfig.append(l + "\n");
-        }
-        return rawConfig;
-    }
+    //     QString rawConfig;
+    //     QStringList lines = lastConfigJson.value(config_key::config).toString().replace("\r", "").split("\n");
+    //     for (const QString &l : lines) {
+    //         rawConfig.append(l + "\n");
+    //     }
+    //     return rawConfig;
+    // }
     case IsClientProtocolExistsRole: {
-        auto protocolConfig = m_content.value(ContainerProps::containerTypeToString(m_container)).toObject();
-        auto lastConfigJsonDoc =
-                QJsonDocument::fromJson(protocolConfig.value(config_key::last_config).toString().toUtf8());
-        auto lastConfigJson = lastConfigJsonDoc.object();
-
-        auto configString = lastConfigJson.value(config_key::config).toString();
-        return !configString.isEmpty();
+        auto protocolVariant = ProtocolConfig::getProtocolConfigVariant(protocolConfig);
+        return std::visit(
+                [](const auto &ptr) -> bool {
+                    if constexpr (ProtocolConfig::isVpnProtocol<decltype(*ptr)>()) {
+                        return ptr->clientProtocolConfig.isEmpty;
+                    } else {
+                        return false;
+                    }
+                },
+                protocolVariant);
     }
     }
 
     return QVariant();
 }
 
-void ProtocolsModel::updateModel(const QJsonObject &content)
+void ProtocolsModel::updateModel(const QMap<QString, QSharedPointer<ProtocolConfig>> &protocolConfigs)
 {
-    m_container = ContainerProps::containerFromString(content.value(config_key::container).toString());
-
-    m_content = content;
-    m_content.remove(config_key::container);
+    beginResetModel();
+    m_protocolConfigs.clear();
+    for (const auto &protocolConfig : protocolConfigs) {
+        m_protocolConfigs.push_back(protocolConfig);
+    }
+    endResetModel();
 }
 
-QJsonObject ProtocolsModel::getConfig()
+void ProtocolsModel::updateProtocolModel(amnezia::Proto protocol)
 {
-    QJsonObject config = m_content;
-    config.insert(config_key::container, ContainerProps::containerToString(m_container));
-    return config;
+    QSharedPointer<ProtocolConfig> protocolConfig;
+
+    for (const auto &config : m_protocolConfigs) {
+        if (ProtocolProps::protoFromString(config->protocolName) == protocol) {
+            protocolConfig = config;
+            break;
+        }
+    }
+
+    switch (protocol) {
+    case Proto::OpenVpn: m_openVpnConfigModel->updateModel(*qSharedPointerCast<OpenVpnProtocolConfig>(protocolConfig).data()); break;
+    case Proto::ShadowSocks:
+        m_shadowSocksConfigModel->updateModel(*qSharedPointerCast<ShadowsocksProtocolConfig>(protocolConfig).data());
+        break;
+    case Proto::Cloak: m_cloakConfigModel->updateModel(*qSharedPointerCast<CloakProtocolConfig>(protocolConfig).data()); break;
+    case Proto::WireGuard: m_wireGuardConfigModel->updateModel(*qSharedPointerCast<WireGuardProtocolConfig>(protocolConfig).data()); break;
+    case Proto::Awg: m_awgConfigModel->updateModel(*qSharedPointerCast<AwgProtocolConfig>(protocolConfig).data()); break;
+    case Proto::Xray: m_xrayConfigModel->updateModel(*qSharedPointerCast<XrayProtocolConfig>(protocolConfig).data()); break;
+#ifdef Q_OS_WINDOWS
+    case Proto::Ikev2:
+    case Proto::L2tp: m_ikev2ConfigModel->updateModel(*qSharedPointerCast<AwgProtocolConfig>(protocolConfig).data()); break;
+#endif
+    // case Proto::Sftp: m_sftpConfigModel->updateModel(*qSharedPointerCast<SftpConfigModel>(protocolConfig).data()); break;
+    // case Proto::Socks5Proxy: m_socks5ProxyConfigModel->updateModel(*qSharedPointerCast<Socks>(protocolConfig).data()); break;
+    default: break;
+    }
+}
+
+QMap<QString, QSharedPointer<ProtocolConfig>> ProtocolsModel::getProtocolConfigs()
+{
+    QMap<QString, QSharedPointer<ProtocolConfig>> protocolConfigs;
+
+    for (const auto &config : m_protocolConfigs) {
+        switch (ProtocolProps::protoFromString(config->protocolName)) {
+        case Proto::OpenVpn: protocolConfigs.insert(config->protocolName, m_openVpnConfigModel->getConfig()); break;
+        case Proto::ShadowSocks: protocolConfigs.insert(config->protocolName, m_shadowSocksConfigModel->getConfig()); break;
+        case Proto::Cloak: protocolConfigs.insert(config->protocolName, m_cloakConfigModel->getConfig()); break;
+        case Proto::WireGuard: protocolConfigs.insert(config->protocolName, m_wireGuardConfigModel->getConfig()); break;
+        case Proto::Awg: protocolConfigs.insert(config->protocolName, m_awgConfigModel->getConfig()); break;
+        case Proto::Xray: protocolConfigs.insert(config->protocolName, m_xrayConfigModel->getConfig()); break;
+#ifdef Q_OS_WINDOWS
+        case Proto::Ikev2:
+        case Proto::L2tp: protocolConfigs.insert(config->protocolName, m_awgConfigModel->getConfig()); break;
+#endif
+        // case Proto::Sftp: protocolConfigs.insert(config->protocolName, m_awgConfigModel->getConfig()); break;
+        // case Proto::Socks5Proxy: protocolConfigs.insert(config->protocolName, m_awgConfigModel->getConfig()); break;
+        default: break;
+        }
+    }
+
+    return protocolConfigs;
 }
 
 PageLoader::PageEnum ProtocolsModel::serverProtocolPage(Proto protocol) const
@@ -94,7 +178,7 @@ PageLoader::PageEnum ProtocolsModel::serverProtocolPage(Proto protocol) const
     case Proto::Ikev2: return PageLoader::PageEnum::PageProtocolIKev2Settings;
     case Proto::L2tp: return PageLoader::PageEnum::PageProtocolIKev2Settings;
     case Proto::Xray: return PageLoader::PageEnum::PageProtocolXraySettings;
-    
+
     // non-vpn
     case Proto::TorWebSite: return PageLoader::PageEnum::PageServiceTorWebsiteSettings;
     case Proto::Dns: return PageLoader::PageEnum::PageServiceDnsSettings;

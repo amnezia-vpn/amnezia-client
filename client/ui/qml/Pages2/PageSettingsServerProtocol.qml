@@ -78,10 +78,7 @@ PageType {
 
                 clickedFunction: function() {
                     if (isClientProtocolExists) {
-                        switch (protocolIndex) {
-                        case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                        case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                        }
+                        ProtocolsModel.updateProtocolModel(protocolIndex)
                         PageController.goToPage(clientProtocolPage);
                     } else {
                         PageController.showNotificationMessage(qsTr("Click the \"connect\" button to create a connection configuration"))
@@ -109,17 +106,7 @@ PageType {
                 visible: delegateContent.isServerSettingsVisible
 
                 clickedFunction: function() {
-                    switch (protocolIndex) {
-                    case ProtocolEnum.OpenVpn: OpenVpnConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.ShadowSocks: ShadowSocksConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Cloak: CloakConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Sftp: SftpConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Socks5Proxy: Socks5ProxyConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    }
+                    ProtocolsModel.updateProtocolModel(protocolIndex)
                     PageController.goToPage(serverProtocolPage);
                 }
 

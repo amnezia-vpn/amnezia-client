@@ -1,34 +1,37 @@
 #include "xray_configurator.h"
 
+#include "logger.h"
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUuid>
-#include "logger.h"
 
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
 #include "core/scripts_registry.h"
 
-namespace {
-Logger logger("XrayConfigurator");
+namespace
+{
+    Logger logger("XrayConfigurator");
 }
 
-XrayConfigurator::XrayConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
+XrayConfigurator::XrayConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
+                                   QObject *parent)
     : ConfiguratorBase(settings, serverController, parent)
 {
 }
 
-QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentials, DockerContainer container,
-                                               const QJsonObject &containerConfig, ErrorCode &errorCode)
+QString XrayConfigurator::prepareServerConfig(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig,
+                                              ErrorCode &errorCode)
 {
     // Generate new UUID for client
     QString clientId = QUuid::createUuid().toString(QUuid::WithoutBraces);
-    
+
     // Get current server config
-    QString currentConfig = m_serverController->getTextFileFromContainer(
-        container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
-    
+    QString currentConfig = m_serverController->getTextFileFromContainer(containerConfig.containerType, serverCredentials,
+                                                                         amnezia::protocols::xray::serverConfigPath, errorCode);
+
     if (errorCode != ErrorCode::NoError) {
         logger.error() << "Failed to get server config file";
         return "";
@@ -43,7 +46,7 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     }
 
     QJsonObject serverConfig = doc.object();
-    
+
     // Validate server config structure
     if (!serverConfig.contains("inbounds")) {
         logger.error() << "Server config missing 'inbounds' field";
@@ -57,7 +60,7 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
         errorCode = ErrorCode::InternalError;
         return "";
     }
-    
+
     QJsonObject inbound = inbounds[0].toObject();
     if (!inbound.contains("settings")) {
         logger.error() << "Inbound missing 'settings' field";
@@ -73,30 +76,23 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     }
 
     QJsonArray clients = settings["clients"].toArray();
-    
+
     // Create configuration for new client
-    QJsonObject clientConfig {
-        {"id", clientId},
-        {"flow", "xtls-rprx-vision"}
-    };
-    
+    QJsonObject clientConfig { { "id", clientId }, { "flow", "xtls-rprx-vision" } };
+
     clients.append(clientConfig);
-    
+
     // Update config
     settings["clients"] = clients;
     inbound["settings"] = settings;
     inbounds[0] = inbound;
     serverConfig["inbounds"] = inbounds;
-    
+
     // Save updated config to server
     QString updatedConfig = QJsonDocument(serverConfig).toJson();
-    errorCode = m_serverController->uploadTextFileToContainer(
-        container, 
-        credentials, 
-        updatedConfig,
-        amnezia::protocols::xray::serverConfigPath,
-        libssh::ScpOverwriteMode::ScpOverwriteExisting
-    );
+    errorCode = m_serverController->uploadTextFileToContainer(containerConfig.containerType, serverCredentials, updatedConfig,
+                                                              amnezia::protocols::xray::serverConfigPath,
+                                                              libssh::ScpOverwriteMode::ScpOverwriteExisting);
     if (errorCode != ErrorCode::NoError) {
         logger.error() << "Failed to upload updated config";
         return "";
@@ -105,9 +101,8 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     // Restart container
     QString restartScript = QString("sudo docker restart $CONTAINER_NAME");
     errorCode = m_serverController->runScript(
-        credentials, 
-        m_serverController->replaceVars(restartScript, m_serverController->genVarsForScript(credentials, container))
-    );
+            serverCredentials,
+            m_serverController->replaceVars(restartScript, m_serverController->genVarsForScript(containerConfig, serverCredentials)));
 
     if (errorCode != ErrorCode::NoError) {
         logger.error() << "Failed to restart container";
@@ -117,57 +112,64 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     return clientId;
 }
 
-QString XrayConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                       const QJsonObject &containerConfig, ErrorCode &errorCode)
+QSharedPointer<ProtocolConfig> XrayConfigurator::createConfig(const ServerCredentials &serverCredentials,
+                                                              const ContainerConfig &containerConfig, ErrorCode &errorCode)
 {
     // Get client ID from prepareServerConfig
-    QString xrayClientId = prepareServerConfig(credentials, container, containerConfig, errorCode);
+    QString xrayClientId = prepareServerConfig(serverCredentials, containerConfig, errorCode);
     if (errorCode != ErrorCode::NoError || xrayClientId.isEmpty()) {
         logger.error() << "Failed to prepare server config";
         errorCode = ErrorCode::InternalError;
-        return "";
+        return nullptr;
     }
 
-    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, container),
-                                                     m_serverController->genVarsForScript(credentials, container, containerConfig));
-    
+    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::xray_template, containerConfig.containerType),
+                                                     m_serverController->genVarsForScript(containerConfig, serverCredentials));
+
     if (config.isEmpty()) {
         logger.error() << "Failed to get config template";
         errorCode = ErrorCode::InternalError;
-        return "";
+        return nullptr;
     }
 
-    QString xrayPublicKey =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::PublicKeyPath, errorCode);
+    QString xrayPublicKey = m_serverController->getTextFileFromContainer(containerConfig.containerType, serverCredentials,
+                                                                         amnezia::protocols::xray::PublicKeyPath, errorCode);
     if (errorCode != ErrorCode::NoError || xrayPublicKey.isEmpty()) {
         logger.error() << "Failed to get public key";
         errorCode = ErrorCode::InternalError;
-        return "";
+        return nullptr;
     }
     xrayPublicKey.replace("\n", "");
-    
-    QString xrayShortId =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::xray::shortidPath, errorCode);
+
+    QString xrayShortId = m_serverController->getTextFileFromContainer(containerConfig.containerType, serverCredentials,
+                                                                       amnezia::protocols::xray::shortidPath, errorCode);
     if (errorCode != ErrorCode::NoError || xrayShortId.isEmpty()) {
         logger.error() << "Failed to get short ID";
         errorCode = ErrorCode::InternalError;
-        return "";
+        return nullptr;
     }
     xrayShortId.replace("\n", "");
 
     // Validate all required variables are present
     if (!config.contains("$XRAY_CLIENT_ID") || !config.contains("$XRAY_PUBLIC_KEY") || !config.contains("$XRAY_SHORT_ID")) {
         logger.error() << "Config template missing required variables:"
-                      << "XRAY_CLIENT_ID:" << !config.contains("$XRAY_CLIENT_ID")
-                      << "XRAY_PUBLIC_KEY:" << !config.contains("$XRAY_PUBLIC_KEY")
-                      << "XRAY_SHORT_ID:" << !config.contains("$XRAY_SHORT_ID");
+                       << "XRAY_CLIENT_ID:" << !config.contains("$XRAY_CLIENT_ID")
+                       << "XRAY_PUBLIC_KEY:" << !config.contains("$XRAY_PUBLIC_KEY")
+                       << "XRAY_SHORT_ID:" << !config.contains("$XRAY_SHORT_ID");
         errorCode = ErrorCode::InternalError;
-        return "";
+        return nullptr;
     }
 
     config.replace("$XRAY_CLIENT_ID", xrayClientId);
     config.replace("$XRAY_PUBLIC_KEY", xrayPublicKey);
     config.replace("$XRAY_SHORT_ID", xrayShortId);
 
-    return config;
+    auto baseProtocolConfig = qSharedPointerCast<XrayProtocolConfig>(
+            containerConfig.protocolConfigs.value(ProtocolProps::protoToString(Proto::Xray)));
+    auto xrayConfig = QSharedPointer<XrayProtocolConfig>::create(*baseProtocolConfig);
+    xrayConfig->clientProtocolConfig.isEmpty = false;
+    xrayConfig->clientProtocolConfig.clientId = xrayClientId;
+    xrayConfig->clientProtocolConfig.nativeConfig = config;
+
+    return xrayConfig;
 }

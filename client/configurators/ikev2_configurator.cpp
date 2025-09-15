@@ -10,20 +10,22 @@
 
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
+#include "core/models/protocols/ipsecProtocolConfig.h"
 #include "core/scripts_registry.h"
 #include "core/server_defs.h"
 #include "utilities.h"
 
-Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
+Ikev2Configurator::Ikev2Configurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
+                                     QObject *parent)
     : ConfiguratorBase(settings, serverController, parent)
 {
 }
 
-Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const ServerCredentials &credentials, DockerContainer container,
-                                                                        ErrorCode &errorCode)
+Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const ServerCredentials &serverCredentials,
+                                                                        const ContainerConfig &containerConfig, ErrorCode &errorCode)
 {
     Ikev2Configurator::ConnectionData connData;
-    connData.host = credentials.hostName;
+    connData.host = serverCredentials.hostName;
     connData.clientId = Utils::getRandomString(16);
     connData.password = Utils::getRandomString(16);
     connData.password = "";
@@ -39,14 +41,16 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
                                        "--extKeyUsage serverAuth,clientAuth -8 \"%1\"")
                                        .arg(connData.clientId);
 
-    errorCode = m_serverController->runContainerScript(credentials, container, scriptCreateCert);
+    errorCode = m_serverController->runContainerScript(containerConfig, serverCredentials, scriptCreateCert);
 
     QString scriptExportCert =
             QString("pk12util -W \"%1\" -d sql:/etc/ipsec.d -n \"%2\" -o \"%3\"").arg(connData.password).arg(connData.clientId).arg(certFileName);
-    errorCode = m_serverController->runContainerScript(credentials, container, scriptExportCert);
+    errorCode = m_serverController->runContainerScript(containerConfig, serverCredentials, scriptExportCert);
 
-    connData.clientCert = m_serverController->getTextFileFromContainer(container, credentials, certFileName, errorCode);
-    connData.caCert = m_serverController->getTextFileFromContainer(container, credentials, "/etc/ipsec.d/ca_cert_base64.p12", errorCode);
+    connData.clientCert =
+            m_serverController->getTextFileFromContainer(containerConfig.containerType, serverCredentials, certFileName, errorCode);
+    connData.caCert = m_serverController->getTextFileFromContainer(containerConfig.containerType, serverCredentials,
+                                                                   "/etc/ipsec.d/ca_cert_base64.p12", errorCode);
 
     qDebug() << "Ikev2Configurator::ConnectionData client cert size:" << connData.clientCert.size();
     qDebug() << "Ikev2Configurator::ConnectionData ca cert size:" << connData.caCert.size();
@@ -54,28 +58,28 @@ Ikev2Configurator::ConnectionData Ikev2Configurator::prepareIkev2Config(const Se
     return connData;
 }
 
-QString Ikev2Configurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                                        ErrorCode &errorCode)
+QSharedPointer<ProtocolConfig> Ikev2Configurator::createConfig(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig,
+                                                               ErrorCode &errorCode)
 {
-    Q_UNUSED(containerConfig)
-
-    ConnectionData connData = prepareIkev2Config(credentials, container, errorCode);
+    ConnectionData connData = prepareIkev2Config(serverCredentials, containerConfig, errorCode);
     if (errorCode != ErrorCode::NoError) {
-        return "";
+        return nullptr;
     }
 
-    return genIkev2Config(connData);
-}
+    auto baseProtocolConfig = qSharedPointerCast<IpsecProtocolConfig>(
+            containerConfig.protocolConfigs.value(ProtocolProps::protoToString(Proto::Ikev2)));
+    auto ipsecConfig = QSharedPointer<IpsecProtocolConfig>::create(*baseProtocolConfig);
 
-QString Ikev2Configurator::genIkev2Config(const ConnectionData &connData)
-{
-    QJsonObject config;
-    config[config_key::hostName] = connData.host;
-    config[config_key::userName] = connData.clientId;
-    config[config_key::cert] = QString(connData.clientCert.toBase64());
-    config[config_key::password] = connData.password;
+    ipsecConfig->clientProtocolConfig.isEmpty = false;
 
-    return QJsonDocument(config).toJson();
+    QJsonObject clientConfig;
+    clientConfig[config_key::hostName] = connData.host;
+    clientConfig[config_key::userName] = connData.clientId;
+    clientConfig[config_key::cert] = QString(connData.clientCert.toBase64());
+    clientConfig[config_key::password] = connData.password;
+
+    ipsecConfig->clientProtocolConfig.nativeConfig = QJsonDocument(clientConfig).toJson();
+    return ipsecConfig;
 }
 
 QString Ikev2Configurator::genMobileConfig(const ConnectionData &connData)

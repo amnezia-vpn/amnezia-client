@@ -41,7 +41,7 @@ public slots:
     void onTranslationsUpdated();
 
 signals:
-    void connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void connectToVpn(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration);
     void disconnectFromVpn();
     void connectionStateChanged();
 

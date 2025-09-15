@@ -6,6 +6,7 @@
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
 #include "version.h"
+#include "core/models/servers/apiV2ServerConfig.h"
 
 namespace
 {
@@ -53,14 +54,14 @@ bool ApiSettingsController::getAccountInfo(bool reload)
                                         m_settings->isStrictKillSwitchEnabled());
 
     auto processedIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfig = m_serversModel->getServerConfig(processedIndex);
-    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
-    auto authData = serverConfig.value(configKey::authData).toObject();
+    auto serverConfig = qSharedPointerCast<ApiV2ServerConfig>(m_serversModel->getServerConfig(processedIndex));
+    auto apiConfig = serverConfig->apiConfig;
+    auto authData = apiConfig.authData;
 
     QJsonObject apiPayload;
-    apiPayload[configKey::userCountryCode] = apiConfig.value(configKey::userCountryCode).toString();
-    apiPayload[configKey::serviceType] = apiConfig.value(configKey::serviceType).toString();
-    apiPayload[configKey::authData] = authData;
+    apiPayload[configKey::userCountryCode] = apiConfig.userCountryCode;
+    apiPayload[configKey::serviceType] = apiConfig.serviceType;
+    apiPayload[configKey::authData] = authData.toJson();
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
 
     QByteArray responseBody;
@@ -72,7 +73,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     }
 
     QJsonObject accountInfo = QJsonDocument::fromJson(responseBody).object();
-    m_apiAccountInfoModel->updateModel(accountInfo, serverConfig);
+    m_apiAccountInfoModel->updateModel(accountInfo, apiUtils::getConfigType(serverConfig->toJson()));
 
     if (reload) {
         updateApiCountryModel();

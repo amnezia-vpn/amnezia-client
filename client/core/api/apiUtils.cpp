@@ -32,8 +32,8 @@ bool apiUtils::isServerFromApi(const QJsonObject &serverConfigObject)
 {
     auto configVersion = serverConfigObject.value(apiDefs::key::configVersion).toInt();
     switch (configVersion) {
-    case apiDefs::ConfigSource::Telegram: return true;
-    case apiDefs::ConfigSource::AmneziaGateway: return true;
+    case amnezia::ServerConfigType::ApiV1: return true;
+    case amnezia::ServerConfigType::ApiV2: return true;
     default: return false;
     }
 }
@@ -43,7 +43,7 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
     auto configVersion = serverConfigObject.value(apiDefs::key::configVersion).toInt();
 
     switch (configVersion) {
-    case apiDefs::ConfigSource::Telegram: {
+    case amnezia::ServerConfigType::ApiV1: {
         constexpr QLatin1String freeV2Endpoint(FREE_V2_ENDPOINT);
         constexpr QLatin1String premiumV1Endpoint(PREM_V1_ENDPOINT);
 
@@ -55,7 +55,7 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
             return apiDefs::ConfigType::AmneziaFreeV2;
         }
     };
-    case apiDefs::ConfigSource::AmneziaGateway: {
+    case amnezia::ServerConfigType::ApiV2: {
         constexpr QLatin1String servicePremium("amnezia-premium");
         constexpr QLatin1String serviceFree("amnezia-free");
         constexpr QLatin1String serviceExternalPremium("external-premium");
@@ -77,9 +77,9 @@ apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObjec
     };
 }
 
-apiDefs::ConfigSource apiUtils::getConfigSource(const QJsonObject &serverConfigObject)
+amnezia::ServerConfigType apiUtils::getConfigSource(const QJsonObject &serverConfigObject)
 {
-    return static_cast<apiDefs::ConfigSource>(serverConfigObject.value(apiDefs::key::configVersion).toInt());
+    return static_cast<amnezia::ServerConfigType>(serverConfigObject.value(apiDefs::key::configVersion).toInt());
 }
 
 amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply)

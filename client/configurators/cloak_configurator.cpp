@@ -6,29 +6,31 @@
 
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
+#include "core/models/protocols/cloakProtocolConfig.h"
 
-CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent)
+CloakConfigurator::CloakConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
+                                     QObject *parent)
     : ConfiguratorBase(settings, serverController, parent)
 {
 }
 
-QString CloakConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                                        ErrorCode &errorCode)
+QSharedPointer<ProtocolConfig> CloakConfigurator::createConfig(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig,
+                                                               ErrorCode &errorCode)
 {
-    QString cloakPublicKey =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::cloak::ckPublicKeyPath, errorCode);
+    QString cloakPublicKey = m_serverController->getTextFileFromContainer(containerConfig.containerType, serverCredentials,
+                                                                          amnezia::protocols::cloak::ckPublicKeyPath, errorCode);
     cloakPublicKey.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {
-        return "";
+        return nullptr;
     }
 
-    QString cloakBypassUid =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::cloak::ckBypassUidKeyPath, errorCode);
+    QString cloakBypassUid = m_serverController->getTextFileFromContainer(containerConfig.containerType, serverCredentials,
+                                                                          amnezia::protocols::cloak::ckBypassUidKeyPath, errorCode);
     cloakBypassUid.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {
-        return "";
+        return nullptr;
     }
 
     QJsonObject config;
@@ -41,11 +43,15 @@ QString CloakConfigurator::createConfig(const ServerCredentials &credentials, Do
     config.insert("NumConn", 1);
     config.insert("BrowserSig", "chrome");
     config.insert("StreamTimeout", 300);
-    config.insert("RemoteHost", credentials.hostName);
+    config.insert("RemoteHost", serverCredentials.hostName);
     config.insert("RemotePort", "$CLOAK_SERVER_PORT");
 
     QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(),
-                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));
+                                                      m_serverController->genVarsForScript(containerConfig, serverCredentials));
 
-    return textCfg;
+    auto cloakConfig = QSharedPointer<CloakProtocolConfig>::create(QJsonObject(), config_key::cloak);
+    cloakConfig->clientProtocolConfig.isEmpty = false;
+    cloakConfig->clientProtocolConfig.nativeConfig = textCfg;
+
+    return cloakConfig;
 }

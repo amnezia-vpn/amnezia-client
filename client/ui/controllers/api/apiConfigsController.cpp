@@ -8,6 +8,8 @@
 #include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "core/models/servers/apiV1ServerConfig.h"
+#include "core/models/servers/apiV2ServerConfig.h"
 #include "core/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"
 #include "version.h"
@@ -132,7 +134,7 @@ namespace
     }
 
     ErrorCode fillServerConfig(const QString &protocol, const ProtocolData &apiPayloadData, const QByteArray &apiResponseBody,
-                               QJsonObject &serverConfig)
+                               QSharedPointer<ServerConfig> &serverConfig)
     {
         QString data = QJsonDocument::fromJson(apiResponseBody).object().value(config_key::config).toString();
 
@@ -199,31 +201,31 @@ namespace
             configStr = QString(QJsonDocument(newServerConfig).toJson());
         }
 
-        QJsonObject newServerConfig = QJsonDocument::fromJson(configStr.toUtf8()).object();
-        serverConfig[config_key::dns1] = newServerConfig.value(config_key::dns1);
-        serverConfig[config_key::dns2] = newServerConfig.value(config_key::dns2);
-        serverConfig[config_key::containers] = newServerConfig.value(config_key::containers);
-        serverConfig[config_key::hostName] = newServerConfig.value(config_key::hostName);
+        auto newServerConfig = ServerConfig::createServerConfig(QJsonDocument::fromJson(configStr.toUtf8()).object());
 
-        if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
-            serverConfig[config_key::configVersion] = newServerConfig.value(config_key::configVersion);
-            serverConfig[config_key::description] = newServerConfig.value(config_key::description);
-            serverConfig[config_key::name] = newServerConfig.value(config_key::name);
-        }
+        ServerConfigVariant variant = ServerConfig::getServerConfigVariant(serverConfig);
 
-        auto defaultContainer = newServerConfig.value(config_key::defaultContainer).toString();
-        serverConfig[config_key::defaultContainer] = defaultContainer;
+        std::visit(
+                [&newServerConfig](const auto &ptr) -> void {
+                    ptr->dns1 = newServerConfig->dns1;
+                    ptr->dns2 = newServerConfig->dns2;
+                    ptr->containerConfigs = newServerConfig->containerConfigs;
+                    ptr->hostName = newServerConfig->hostName;
+                    ptr->defaultContainerType = newServerConfig->defaultContainerType;
+                    ptr->defaultContainerName = newServerConfig->defaultContainerName;
 
-        QVariantMap map = serverConfig.value(configKey::apiConfig).toObject().toVariantMap();
-        map.insert(newServerConfig.value(configKey::apiConfig).toObject().toVariantMap());
-        auto apiConfig = QJsonObject::fromVariantMap(map);
+                    using T = std::decay_t<decltype(ptr)>;
 
-        if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
-            apiConfig.insert(apiDefs::key::supportedProtocols,
-                             QJsonDocument::fromJson(apiResponseBody).object().value(apiDefs::key::supportedProtocols).toArray());
-        }
-
-        serverConfig[configKey::apiConfig] = apiConfig;
+                    if constexpr (std::is_same_v<T, ApiV1ServerConfig>) {
+                    } else if constexpr (std::is_same_v<T, ApiV2ServerConfig>) {
+                        QSharedPointer<ApiV2ServerConfig> serverConfig = qSharedPointerCast<ApiV2ServerConfig>(newServerConfig);
+                        ptr->type = newServerConfig->type;
+                        ptr->description = serverConfig->description;
+                        ptr->name = serverConfig->name;
+                        ptr->apiConfig.supportedProtocols = serverConfig->apiConfig.supportedProtocols;
+                    }
+                },
+                variant);
 
         return ErrorCode::NoError;
     }
@@ -256,22 +258,22 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
         return false;
     }
 
-    auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
-    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+    auto serverConfig = qSharedPointerCast<ApiV2ServerConfig>(m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex()));
+    auto apiConfig = serverConfig->apiConfig;
 
-    if (isSubscriptionExpired(apiConfigObject)) {
-        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
-        return false;
-    }
+    // if (isSubscriptionExpired(apiConfigObject)) {
+    //     emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+    //     return false;
+    // }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_settings->getInstallationUuid(true),
-                                            apiConfigObject.value(configKey::userCountryCode).toString(),
+                                            apiConfig.userCountryCode,
                                             serverCountryCode,
-                                            apiConfigObject.value(configKey::serviceType).toString(),
+                                            apiConfig.serviceType,
                                             configKey::awg, // apiConfigObject.value(configKey::serviceProtocol).toString(),
-                                            serverConfigObject.value(configKey::authData).toObject() };
+                                            apiConfig.authData.toJson() };
 
     QString protocol = gatewayRequestData.serviceProtocol;
     ProtocolData protocolData = generateProtocolData(protocol);
@@ -296,22 +298,22 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
 
 bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 {
-    auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
-    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+    auto serverConfig = qSharedPointerCast<ApiV2ServerConfig>(m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex()));
+    auto apiConfig = serverConfig->apiConfig;
 
-    if (isSubscriptionExpired(apiConfigObject)) {
-        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
-        return false;
-    }
+    // if (isSubscriptionExpired(apiConfigObject)) {
+    //     emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+    //     return false;
+    // }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_settings->getInstallationUuid(true),
-                                            apiConfigObject.value(configKey::userCountryCode).toString(),
+                                            apiConfig.userCountryCode,
                                             serverCountryCode,
-                                            apiConfigObject.value(configKey::serviceType).toString(),
+                                            apiConfig.serviceType,
                                             configKey::awg, // apiConfigObject.value(configKey::serviceProtocol).toString(),
-                                            serverConfigObject.value(configKey::authData).toObject() };
+                                            apiConfig.authData.toJson() };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
 
@@ -326,10 +328,10 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 
 void ApiConfigsController::prepareVpnKeyExport()
 {
-    auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
-    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+    auto serverConfig = qSharedPointerCast<ApiV2ServerConfig>(m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex()));
+    auto apiConfig = serverConfig->apiConfig;
 
-    auto vpnKey = apiConfigObject.value(apiDefs::key::vpnKey).toString();
+    auto vpnKey = apiConfig.vpnKey;
     m_vpnKey = vpnKey;
 
     vpnKey.replace("vpn://", "");
@@ -394,7 +396,7 @@ bool ApiConfigsController::importServiceFromGateway()
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
 
-    QJsonObject serverConfig;
+    QSharedPointer<ServerConfig> serverConfig;
     if (errorCode == ErrorCode::NoError) {
         errorCode = fillServerConfig(gatewayRequestData.serviceProtocol, protocolData, responseBody, serverConfig);
         if (errorCode != ErrorCode::NoError) {
@@ -402,12 +404,10 @@ bool ApiConfigsController::importServiceFromGateway()
             return false;
         }
 
-        QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
-        apiConfig.insert(configKey::userCountryCode, m_apiServicesModel->getCountryCode());
-        apiConfig.insert(configKey::serviceType, m_apiServicesModel->getSelectedServiceType());
-        apiConfig.insert(configKey::serviceProtocol, m_apiServicesModel->getSelectedServiceProtocol());
-
-        serverConfig.insert(configKey::apiConfig, apiConfig);
+        QSharedPointer<ApiV2ServerConfig> apiV2ServerConfig = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
+        apiV2ServerConfig->apiConfig.userCountryCode = m_apiServicesModel->getCountryCode();
+        apiV2ServerConfig->apiConfig.serviceType = m_apiServicesModel->getSelectedServiceType();
+        apiV2ServerConfig->apiConfig.serviceProtocol = m_apiServicesModel->getSelectedServiceProtocol();
 
         m_serversModel->addServer(serverConfig);
         emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
@@ -422,21 +422,21 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
                                                     bool reloadServiceConfig)
 {
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
-    auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
+    QSharedPointer<ApiV2ServerConfig> apiV2ServerConfig = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
 
-    if (isSubscriptionExpired(apiConfig)) {
-        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
-        return false;
-    }
+    // if (isSubscriptionExpired(apiConfig)) {
+    //     emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+    //     return false;
+    // }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_settings->getInstallationUuid(true),
-                                            apiConfig.value(configKey::userCountryCode).toString(),
+                                            apiV2ServerConfig->apiConfig.userCountryCode,
                                             newCountryCode,
-                                            apiConfig.value(configKey::serviceType).toString(),
-                                            apiConfig.value(configKey::serviceProtocol).toString(),
-                                            serverConfig.value(configKey::authData).toObject() };
+                                            apiV2ServerConfig->apiConfig.serviceType,
+                                            apiV2ServerConfig->apiConfig.serviceProtocol,
+                                            apiV2ServerConfig->apiConfig.authData.toJson() };
 
     ProtocolData protocolData = generateProtocolData(gatewayRequestData.serviceProtocol);
 
@@ -446,7 +446,7 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
 
-    QJsonObject newServerConfig;
+    QSharedPointer<ServerConfig> newServerConfig;
     if (errorCode == ErrorCode::NoError) {
         errorCode = fillServerConfig(gatewayRequestData.serviceProtocol, protocolData, responseBody, newServerConfig);
         if (errorCode != ErrorCode::NoError) {
@@ -454,20 +454,21 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
             return false;
         }
 
-        QJsonObject newApiConfig = newServerConfig.value(configKey::apiConfig).toObject();
-        newApiConfig.insert(configKey::userCountryCode, apiConfig.value(configKey::userCountryCode));
-        newApiConfig.insert(configKey::serviceType, apiConfig.value(configKey::serviceType));
-        newApiConfig.insert(configKey::serviceProtocol, apiConfig.value(configKey::serviceProtocol));
-        newApiConfig.insert(apiDefs::key::vpnKey, apiConfig.value(apiDefs::key::vpnKey));
+        QSharedPointer<ApiV2ServerConfig> newApiV2ServerConfig = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
+        newApiV2ServerConfig->apiConfig.userCountryCode = apiV2ServerConfig->apiConfig.userCountryCode;
+        newApiV2ServerConfig->apiConfig.serviceType = apiV2ServerConfig->apiConfig.serviceType;
+        newApiV2ServerConfig->apiConfig.serviceProtocol = apiV2ServerConfig->apiConfig.serviceProtocol;
+        newApiV2ServerConfig->apiConfig.vpnKey = apiV2ServerConfig->apiConfig.vpnKey;
 
-        newServerConfig.insert(configKey::apiConfig, newApiConfig);
-        newServerConfig.insert(configKey::authData, gatewayRequestData.authData);
-        newServerConfig.insert(config_key::crc, serverConfig.value(config_key::crc));
+        // newServerConfig.insert(configKey::apiConfig, newApiConfig);
+        // newServerConfig.insert(configKey::authData, gatewayRequestData.authData);
+        // newServerConfig.insert(config_key::crc, serverConfig.value(config_key::crc));
 
-        if (serverConfig.value(config_key::nameOverriddenByUser).toBool()) {
-            newServerConfig.insert(config_key::name, serverConfig.value(config_key::name));
-            newServerConfig.insert(config_key::nameOverriddenByUser, true);
+        if (apiV2ServerConfig->nameOverriddenByUser) {
+            newApiV2ServerConfig->name = apiV2ServerConfig->name;
+            newApiV2ServerConfig->nameOverriddenByUser = true;
         }
+
         m_serversModel->editServer(newServerConfig, serverIndex);
         if (reloadServiceConfig) {
             emit reloadServerFromApiFinished(tr("API config reloaded"));
@@ -494,9 +495,10 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
                                         m_settings->isStrictKillSwitchEnabled());
 
     auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+    QSharedPointer<ApiV1ServerConfig> apiV1ServerConfig = qSharedPointerCast<ApiV1ServerConfig>(serverConfig);
     auto installationUuid = m_settings->getInstallationUuid(true);
 
-    QString serviceProtocol = serverConfig.value(configKey::protocol).toString();
+    QString serviceProtocol = apiV1ServerConfig->serviceProtocol;
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
 
     QJsonObject apiPayload;
@@ -504,8 +506,8 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     apiPayload[configKey::uuid] = installationUuid;
     apiPayload[configKey::osVersion] = QSysInfo::productType();
     apiPayload[configKey::appVersion] = QString(APP_VERSION);
-    apiPayload[configKey::accessToken] = serverConfig.value(configKey::accessToken).toString();
-    apiPayload[configKey::apiEndpoint] = serverConfig.value(configKey::apiEndpoint).toString();
+    apiPayload[configKey::accessToken] = apiV1ServerConfig->accessToken;
+    apiPayload[configKey::apiEndpoint] = apiV1ServerConfig->endpoint;
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.post(QString("%1v1/proxy_config"), apiPayload, responseBody);
@@ -529,26 +531,26 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
 bool ApiConfigsController::deactivateDevice()
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
-    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+    QSharedPointer<ApiV2ServerConfig> apiV2ServerConfig = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
 
-    if (!apiUtils::isPremiumServer(serverConfigObject)) {
+    if (!apiV2ServerConfig->isPremium()) {
         return true;
     }
 
-    if (isSubscriptionExpired(apiConfigObject)) {
-        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
-        return false;
-    }
+    // if (isSubscriptionExpired(apiConfigObject)) {
+    //     emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+    //     return false;
+    // }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             m_settings->getInstallationUuid(true),
-                                            apiConfigObject.value(configKey::userCountryCode).toString(),
-                                            apiConfigObject.value(configKey::serverCountryCode).toString(),
-                                            apiConfigObject.value(configKey::serviceType).toString(),
+                                            apiV2ServerConfig->apiConfig.userCountryCode,
+                                            apiV2ServerConfig->apiConfig.serverCountryCode,
+                                            apiV2ServerConfig->apiConfig.serviceType,
                                             "",
-                                            serverConfigObject.value(configKey::authData).toObject() };
+                                            apiV2ServerConfig->apiConfig.authData.toJson() };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
 
@@ -559,8 +561,8 @@ bool ApiConfigsController::deactivateDevice()
         return false;
     }
 
-    serverConfigObject.remove(config_key::containers);
-    m_serversModel->editServer(serverConfigObject, serverIndex);
+    apiV2ServerConfig->containerConfigs.clear();
+    m_serversModel->editServer(apiV2ServerConfig, serverIndex);
 
     return true;
 }
@@ -568,26 +570,26 @@ bool ApiConfigsController::deactivateDevice()
 bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
-    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+    QSharedPointer<ApiV2ServerConfig> apiV2ServerConfig = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
 
-    if (!apiUtils::isPremiumServer(serverConfigObject)) {
+    if (!apiV2ServerConfig->isPremium()) {
         return true;
     }
 
-    if (isSubscriptionExpired(apiConfigObject)) {
-        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
-        return false;
-    }
+    // if (isSubscriptionExpired(apiConfigObject)) {
+    //     emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+    //     return false;
+    // }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
                                             uuid,
-                                            apiConfigObject.value(configKey::userCountryCode).toString(),
+                                            apiV2ServerConfig->apiConfig.userCountryCode,
                                             serverCountryCode,
-                                            apiConfigObject.value(configKey::serviceType).toString(),
+                                            apiV2ServerConfig->apiConfig.serviceType,
                                             "",
-                                            serverConfigObject.value(configKey::authData).toObject() };
+                                            apiV2ServerConfig->apiConfig.authData.toJson() };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
 
@@ -599,8 +601,8 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
     }
 
     if (uuid == m_settings->getInstallationUuid(true)) {
-        serverConfigObject.remove(config_key::containers);
-        m_serversModel->editServer(serverConfigObject, serverIndex);
+        apiV2ServerConfig->containerConfigs.clear();
+        m_serversModel->editServer(apiV2ServerConfig, serverIndex);
     }
 
     return true;
@@ -609,23 +611,19 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
 bool ApiConfigsController::isConfigValid()
 {
     int serverIndex = m_serversModel->getDefaultServerIndex();
-    QJsonObject serverConfigObject = m_serversModel->getServerConfig(serverIndex);
-    auto configSource = apiUtils::getConfigSource(serverConfigObject);
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
 
-    if (configSource == apiDefs::ConfigSource::Telegram
-        && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        m_serversModel->removeApiConfig(serverIndex);
-        return updateServiceFromTelegram(serverIndex);
-    } else if (configSource == apiDefs::ConfigSource::AmneziaGateway
-               && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        return updateServiceFromGateway(serverIndex, "", "");
-    } else if (configSource && m_serversModel->isApiKeyExpired(serverIndex)) {
-        qDebug() << "attempt to update api config by expires_at event";
-        if (configSource == apiDefs::ConfigSource::AmneziaGateway) {
-            return updateServiceFromGateway(serverIndex, "", "");
-        } else {
+    if (serverConfig->type == ServerConfigType::ApiV1) {
+        QSharedPointer<ApiV1ServerConfig> apiV1ServerConfig = qSharedPointerCast<ApiV1ServerConfig>(serverConfig);
+        if (apiV1ServerConfig->containerConfigs.isEmpty() || m_serversModel->isApiKeyExpired(serverIndex)) {
             m_serversModel->removeApiConfig(serverIndex);
             return updateServiceFromTelegram(serverIndex);
+        }
+
+    } else if (serverConfig->type == ServerConfigType::ApiV1) {
+        QSharedPointer<ApiV2ServerConfig> apiV2ServerConfig = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
+        if (apiV2ServerConfig->containerConfigs.isEmpty() || m_serversModel->isApiKeyExpired(serverIndex)) {
+            return updateServiceFromGateway(serverIndex, "", "");
         }
     }
     return true;
@@ -634,23 +632,20 @@ bool ApiConfigsController::isConfigValid()
 void ApiConfigsController::setCurrentProtocol(const QString &protocolName)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
-    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+    QSharedPointer<ApiV2ServerConfig> apiV2ServerConfig = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
 
-    apiConfigObject[configKey::serviceProtocol] = protocolName;
-
-    serverConfigObject.insert(configKey::apiConfig, apiConfigObject);
-
-    m_serversModel->editServer(serverConfigObject, serverIndex);
+    apiV2ServerConfig->apiConfig.serviceProtocol = protocolName;
+    m_serversModel->editServer(apiV2ServerConfig, serverIndex);
 }
 
 bool ApiConfigsController::isVlessProtocol()
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
-    auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+    QSharedPointer<ApiV2ServerConfig> apiV2ServerConfig = qSharedPointerCast<ApiV2ServerConfig>(serverConfig);
 
-    if (apiConfigObject[configKey::serviceProtocol].toString() == "vless") {
+    if (apiV2ServerConfig->apiConfig.serviceProtocol == "vless") {
         return true;
     }
     return false;

@@ -6,35 +6,42 @@
 
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
+#include "core/models/protocols/shadowsocksProtocolConfig.h"
 
-ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
-                                                 QObject *parent)
+ShadowSocksConfigurator::ShadowSocksConfigurator(std::shared_ptr<Settings> settings,
+                                                 const QSharedPointer<ServerController> &serverController, QObject *parent)
     : ConfiguratorBase(settings, serverController, parent)
 {
 }
 
-QString ShadowSocksConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                              const QJsonObject &containerConfig, ErrorCode &errorCode)
+QSharedPointer<ProtocolConfig> ShadowSocksConfigurator::createConfig(const ServerCredentials &serverCredentials,
+                                                                     const ContainerConfig &containerConfig, ErrorCode &errorCode)
 {
-    QString ssKey =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::shadowsocks::ssKeyPath, errorCode);
+    QString ssKey = m_serverController->getTextFileFromContainer(containerConfig.containerType, serverCredentials,
+                                                                 amnezia::protocols::shadowsocks::ssKeyPath, errorCode);
     ssKey.replace("\n", "");
 
     if (errorCode != ErrorCode::NoError) {
-        return "";
+        return nullptr;
     }
 
     QJsonObject config;
-    config.insert("server", credentials.hostName);
+    config.insert("server", serverCredentials.hostName);
     config.insert("server_port", "$SHADOWSOCKS_SERVER_PORT");
-    config.insert("local_port", "$SHADOWSOCKS_LOCAL_PORT");
+    config.insert("local_port", protocols::shadowsocks::defaultLocalProxyPort);
     config.insert("password", ssKey);
     config.insert("timeout", 60);
     config.insert("method", "$SHADOWSOCKS_CIPHER");
 
     QString textCfg = m_serverController->replaceVars(QJsonDocument(config).toJson(),
-                                                      m_serverController->genVarsForScript(credentials, container, containerConfig));
+                                                      m_serverController->genVarsForScript(containerConfig, serverCredentials));
 
-    // qDebug().noquote() << textCfg;
-    return textCfg;
+    auto baseProtocolConfig = qSharedPointerCast<ShadowsocksProtocolConfig>(
+            containerConfig.protocolConfigs.value(ProtocolProps::protoToString(Proto::ShadowSocks)));
+    auto protocolConfig = QSharedPointer<ShadowsocksProtocolConfig>::create(*baseProtocolConfig);
+
+    protocolConfig->clientProtocolConfig.isEmpty = false;
+    protocolConfig->clientProtocolConfig.nativeConfig = textCfg;
+
+    return protocolConfig;
 }

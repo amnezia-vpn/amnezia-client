@@ -86,7 +86,7 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, const QJsonObject &serverConfig)
+void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, const apiDefs::ConfigType &configType)
 {
     beginResetModel();
 
@@ -99,7 +99,7 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
     accountInfoData.maxDeviceCount = accountInfoObject.value(apiDefs::key::maxDeviceCount).toInt();
     accountInfoData.subscriptionEndDate = accountInfoObject.value(apiDefs::key::subscriptionEndDate).toString();
 
-    accountInfoData.configType = apiUtils::getConfigType(serverConfig);
+    accountInfoData.configType = configType;
 
     for (const auto &protocol : accountInfoObject.value(apiDefs::key::supportedProtocols).toArray()) {
         accountInfoData.supportedProtocols.push_back(protocol.toString());

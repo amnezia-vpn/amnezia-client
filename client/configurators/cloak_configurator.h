@@ -11,10 +11,11 @@ class CloakConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    CloakConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent = nullptr);
+    CloakConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
+                      QObject *parent = nullptr);
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode &errorCode);
+    QSharedPointer<ProtocolConfig> createConfig(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig,
+                                                ErrorCode &errorCode) override;
 };
 
 #endif // CLOAK_CONFIGURATOR_H

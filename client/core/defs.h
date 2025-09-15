@@ -19,6 +19,13 @@ namespace amnezia
         }
     };
 
+    enum ServerConfigType
+    {
+        SelfHosted,
+        ApiV1,
+        ApiV2
+    };
+
     struct InstalledAppInfo {
         QString appName;
         QString packageName;

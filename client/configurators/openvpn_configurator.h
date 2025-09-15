@@ -11,7 +11,8 @@ class OpenVpnConfigurator : public ConfiguratorBase
 {
     Q_OBJECT
 public:
-    OpenVpnConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent = nullptr);
+    OpenVpnConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
+                        QObject *parent = nullptr);
 
     struct ConnectionData
     {
@@ -24,20 +25,20 @@ public:
         QString host;       // host ip
     };
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container,
-                         const QJsonObject &containerConfig, ErrorCode &errorCode);
+    QSharedPointer<ProtocolConfig> createConfig(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig,
+                                                ErrorCode &errorCode) override;
 
-    QString processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                           QString &protocolConfigString);
-    QString processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                            QString &protocolConfigString);
+    QSharedPointer<ProtocolConfig> processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                                  QSharedPointer<ProtocolConfig> protocolConfig) override;
+    QSharedPointer<ProtocolConfig> processConfigWithExportSettings(const QPair<QString, QString> &dns,
+                                                                   QSharedPointer<ProtocolConfig> protocolConfig) override;
 
     static ConnectionData createCertRequest();
 
 private:
-    ConnectionData prepareOpenVpnConfig(const ServerCredentials &credentials, DockerContainer container,
+    ConnectionData prepareOpenVpnConfig(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig,
                                         ErrorCode &errorCode);
-    ErrorCode signCert(DockerContainer container, const ServerCredentials &credentials, QString clientId);
+    ErrorCode signCert(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig, QString clientId);
 };
 
 #endif // OPENVPN_CONFIGURATOR_H

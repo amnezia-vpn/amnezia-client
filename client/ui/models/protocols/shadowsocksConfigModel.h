@@ -5,6 +5,7 @@
 #include <QJsonObject>
 
 #include "containers/containers_defs.h"
+#include "core/models/protocols/shadowsocksProtocolConfig.h"
 
 class ShadowSocksConfigModel : public QAbstractListModel
 {
@@ -26,16 +27,17 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void updateModel(const QJsonObject &config);
-    QJsonObject getConfig();
+    void updateModel(const ShadowsocksProtocolConfig shadowsocksProtocolConfig);
+    QSharedPointer<ProtocolConfig> getConfig();
+
+    bool isServerSettingsEqual();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    DockerContainer m_container;
-    QJsonObject m_protocolConfig;
-    QJsonObject m_fullConfig;
+    ShadowsocksProtocolConfig m_newShadowsocksProtocolConfig;
+    ShadowsocksProtocolConfig m_oldShadowsocksProtocolConfig;
 };
 
 #endif // SHADOWSOCKSCONFIGMODEL_H

@@ -13,9 +13,10 @@
     #include <QApplication>
 #endif
 
-#include "core/networkUtilities.h"
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
+#include "core/models/protocols/openvpnProtocolConfig.h"
+#include "core/networkUtilities.h"
 #include "core/scripts_registry.h"
 #include "settings.h"
 #include "utilities.h"
@@ -24,18 +25,17 @@
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
 
-
 OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
                                          QObject *parent)
     : ConfiguratorBase(settings, serverController, parent)
 {
 }
 
-OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
-                                                                              DockerContainer container, ErrorCode &errorCode)
+OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &serverCredentials,
+                                                                              const ContainerConfig &containerConfig, ErrorCode &errorCode)
 {
     OpenVpnConfigurator::ConnectionData connData = OpenVpnConfigurator::createCertRequest();
-    connData.host = credentials.hostName;
+    connData.host = serverCredentials.hostName;
 
     if (connData.privKey.isEmpty() || connData.request.isEmpty()) {
         errorCode = ErrorCode::OpenSslFailed;
@@ -44,26 +44,29 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
 
     QString reqFileName = QString("%1/%2.req").arg(amnezia::protocols::openvpn::clientsDirPath).arg(connData.clientId);
 
-    errorCode = m_serverController->uploadTextFileToContainer(container, credentials, connData.request, reqFileName);
+    errorCode =
+            m_serverController->uploadTextFileToContainer(containerConfig.containerType, serverCredentials, connData.request, reqFileName);
     if (errorCode != ErrorCode::NoError) {
         return connData;
     }
 
-    errorCode = signCert(container, credentials, connData.clientId);
+    errorCode = signCert(serverCredentials, containerConfig, connData.clientId);
     if (errorCode != ErrorCode::NoError) {
         return connData;
     }
 
-    connData.caCert =
-            m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::caCertPath, errorCode);
+    connData.caCert = m_serverController->getTextFileFromContainer(containerConfig.containerType, serverCredentials,
+                                                                   amnezia::protocols::openvpn::caCertPath, errorCode);
     connData.clientCert = m_serverController->getTextFileFromContainer(
-            container, credentials, QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath).arg(connData.clientId), errorCode);
+            containerConfig.containerType, serverCredentials,
+            QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath).arg(connData.clientId), errorCode);
 
     if (errorCode != ErrorCode::NoError) {
         return connData;
     }
 
-    connData.taKey = m_serverController->getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::taKeyPath, errorCode);
+    connData.taKey = m_serverController->getTextFileFromContainer(containerConfig.containerType, serverCredentials,
+                                                                  amnezia::protocols::openvpn::taKeyPath, errorCode);
 
     if (connData.caCert.isEmpty() || connData.clientCert.isEmpty() || connData.taKey.isEmpty()) {
         errorCode = ErrorCode::SshScpFailureError;
@@ -72,15 +75,15 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     return connData;
 }
 
-QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
-                                          const QJsonObject &containerConfig, ErrorCode &errorCode)
+QSharedPointer<ProtocolConfig> OpenVpnConfigurator::createConfig(const ServerCredentials &serverCredentials,
+                                                                 const ContainerConfig &containerConfig, ErrorCode &errorCode)
 {
-    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::openvpn_template, container),
-                                                     m_serverController->genVarsForScript(credentials, container, containerConfig));
+    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::openvpn_template, containerConfig.containerType),
+                                                     m_serverController->genVarsForScript(containerConfig, serverCredentials));
 
-    ConnectionData connData = prepareOpenVpnConfig(credentials, container, errorCode);
+    ConnectionData connData = prepareOpenVpnConfig(serverCredentials, containerConfig, errorCode);
     if (errorCode != ErrorCode::NoError) {
-        return "";
+        return nullptr;
     }
 
     config.replace("$OPENVPN_CA_CERT", connData.caCert);
@@ -98,26 +101,38 @@ QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, 
     config.replace("block-outside-dns", "");
 #endif
 
-    QJsonObject jConfig;
-    jConfig[config_key::config] = config;
+    auto baseProtocolConfig = qSharedPointerCast<OpenVpnProtocolConfig>(
+            containerConfig.protocolConfigs.value(ProtocolProps::protoToString(Proto::OpenVpn)));
+    auto openVpnConfig = QSharedPointer<OpenVpnProtocolConfig>::create(*baseProtocolConfig);
 
-    jConfig[config_key::clientId] = connData.clientId;
+    openVpnConfig->clientProtocolConfig.isEmpty = false;
+    openVpnConfig->clientProtocolConfig.clientId = connData.clientId;
+    openVpnConfig->clientProtocolConfig.nativeConfig = config;
 
-    return QJsonDocument(jConfig).toJson();
+    return openVpnConfig;
 }
 
-QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                                            QString &protocolConfigString)
+QSharedPointer<ProtocolConfig> OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                                                   QSharedPointer<ProtocolConfig> protocolConfig)
 {
-    processConfigWithDnsSettings(dns, protocolConfigString);
+    if (!protocolConfig) {
+        return nullptr;
+    }
 
-    QJsonObject json = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
-    QString config = json[config_key::config].toString();
+    auto openVpnConfig = qSharedPointerCast<OpenVpnProtocolConfig>(protocolConfig);
+    if (!openVpnConfig) {
+        return protocolConfig;
+    }
+
+    QString config = openVpnConfig->clientProtocolConfig.nativeConfig;
+
+    config.replace("$PRIMARY_DNS", dns.first);
+    config.replace("$SECONDARY_DNS", dns.second);
 
     if (!isApiConfig) {
         QRegularExpression regex("redirect-gateway.*");
         config.replace(regex, "");
-        
+
         // We don't use secondary DNS if primary DNS is AmneziaDNS
         if (dns.first.contains(protocols::dns::amneziaDnsIp)) {
             QRegularExpression dnsRegex("dhcp-option DNS " + dns.second);
@@ -129,7 +144,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
             config.append("block-ipv6\n");
         } else if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
 
-               // no redirect-gateway
+            // no redirect-gateway
         } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
             config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
@@ -152,17 +167,26 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
     config.append(dnsConf);
 #endif
 
-    json[config_key::config] = config;
-    return QJsonDocument(json).toJson();
+    openVpnConfig->clientProtocolConfig.nativeConfig = config;
+    return openVpnConfig;
 }
 
-QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
-                                                             QString &protocolConfigString)
+QSharedPointer<ProtocolConfig> OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString, QString> &dns,
+                                                                                    QSharedPointer<ProtocolConfig> protocolConfig)
 {
-    processConfigWithDnsSettings(dns, protocolConfigString);
+    if (!protocolConfig) {
+        return nullptr;
+    }
 
-    QJsonObject json = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
-    QString config = json[config_key::config].toString();
+    auto openVpnConfig = qSharedPointerCast<OpenVpnProtocolConfig>(protocolConfig);
+    if (!openVpnConfig) {
+        return protocolConfig;
+    }
+
+    QString config = openVpnConfig->clientProtocolConfig.nativeConfig;
+
+    config.replace("$PRIMARY_DNS", dns.first);
+    config.replace("$SECONDARY_DNS", dns.second);
 
     QRegularExpression regex("redirect-gateway.*");
     config.replace(regex, "");
@@ -181,27 +205,28 @@ QString OpenVpnConfigurator::processConfigWithExportSettings(const QPair<QString
     // remove block-outside-dns for all exported configs
     config.replace("block-outside-dns", "");
 
-    json[config_key::config] = config;
-    return QJsonDocument(json).toJson();
+    openVpnConfig->clientProtocolConfig.nativeConfig = config;
+    return openVpnConfig;
 }
 
-ErrorCode OpenVpnConfigurator::signCert(DockerContainer container, const ServerCredentials &credentials, QString clientId)
+ErrorCode OpenVpnConfigurator::signCert(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig, QString clientId)
 {
     QString script_import = QString("sudo docker exec -i %1 bash -c \"cd /opt/amnezia/openvpn && "
                                     "easyrsa import-req %2/%3.req %3\"")
-                                    .arg(ContainerProps::containerToString(container))
+                                    .arg(containerConfig.containerName)
                                     .arg(amnezia::protocols::openvpn::clientsDirPath)
                                     .arg(clientId);
 
     QString script_sign = QString("sudo docker exec -i %1 bash -c \"export EASYRSA_BATCH=1; cd /opt/amnezia/openvpn && "
                                   "easyrsa sign-req client %2\"")
-                                  .arg(ContainerProps::containerToString(container))
+                                  .arg(containerConfig.containerName)
                                   .arg(clientId);
 
     QStringList scriptList { script_import, script_sign };
-    QString script = m_serverController->replaceVars(scriptList.join("\n"), m_serverController->genVarsForScript(credentials, container));
+    QString script =
+            m_serverController->replaceVars(scriptList.join("\n"), m_serverController->genVarsForScript(containerConfig, serverCredentials));
 
-    return m_serverController->runScript(credentials, script);
+    return m_serverController->runScript(serverCredentials, script);
 }
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()

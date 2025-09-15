@@ -19,13 +19,13 @@ bool ApiPremV1MigrationController::hasConfigsToMigration()
 
     auto serversCount = m_serversModel->getServersCount();
     for (size_t i = 0; i < serversCount; i++) {
-        auto serverConfigObject = m_serversModel->getServerConfig(i);
+        auto serverConfig = m_serversModel->getServerConfig(i);
 
-        if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV1) {
+        if (serverConfig->type != ServerConfigType::ApiV1) {
             continue;
         }
 
-        QString vpnKey = apiUtils::getPremiumV1VpnKey(serverConfigObject);
+        QString vpnKey = apiUtils::getPremiumV1VpnKey(serverConfig->toJson());
         vpnKeys.append(vpnKey);
     }
 

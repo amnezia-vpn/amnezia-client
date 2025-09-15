@@ -233,8 +233,7 @@ ErrorCode VpnConnection::lastError() const
     return m_vpnProtocol.data()->lastError();
 }
 
-void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &credentials, DockerContainer container,
-                                 const QJsonObject &vpnConfiguration)
+void VpnConnection::connectToVpn(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration)
 {
     qDebug() << QString("ConnectToVpn, Server index is %1, container is %2, route mode is")
                         .arg(serverIndex)
@@ -255,7 +254,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     }
 #endif
 
-    m_remoteAddress = NetworkUtilities::getIPAddress(credentials.hostName);
+    m_remoteAddress = NetworkUtilities::getIPAddress(vpnConfiguration.value(config_key::hostName).toString());
     emit connectionStateChanged(Vpn::ConnectionState::Connecting);
 
     m_vpnConfiguration = vpnConfiguration;

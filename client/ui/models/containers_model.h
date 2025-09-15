@@ -3,10 +3,9 @@
 
 #include <QAbstractListModel>
 #include <QJsonObject>
-#include <utility>
-#include <vector>
 
 #include "containers/containers_defs.h"
+#include "core/models/containers/containerConfig.h"
 
 class ContainersModel : public QAbstractListModel
 {
@@ -19,7 +18,6 @@ public:
         DescriptionRole,
         DetailedDescriptionRole,
         ServiceTypeRole,
-        ConfigRole,
         DockerContainerRole,
 
         IsEasySetupContainerRole,
@@ -42,14 +40,12 @@ public:
     QVariant data(const int index, int role) const;
 
 public slots:
-    void updateModel(const QJsonArray &containers);
+    void updateModel(const QMap<QString, ContainerConfig> &containerConfigs);
 
     void setProcessedContainerIndex(int containerIndex);
     int getProcessedContainerIndex();
 
     QString getProcessedContainerName();
-
-    QJsonObject getContainerConfig(const int containerIndex);
 
     bool isSupportedByCurrentPlatform(const int containerIndex);
     bool isServiceContainer(const int containerIndex);
@@ -64,7 +60,7 @@ signals:
     void containersModelUpdated();
 
 private:
-    QMap<DockerContainer, QJsonObject> m_containers;
+    QMap<QString, ContainerConfig> m_containerConfigs;
 
     int m_processedContainerIndex;
 };

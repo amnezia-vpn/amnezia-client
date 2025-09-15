@@ -134,17 +134,17 @@ private:
     QSharedPointer<ApiAccountInfoModel> m_apiAccountInfoModel;
     QSharedPointer<ApiDevicesModel> m_apiDevicesModel;
 
-    QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
-    QScopedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;
-    QScopedPointer<CloakConfigModel> m_cloakConfigModel;
-    QScopedPointer<XrayConfigModel> m_xrayConfigModel;
-    QScopedPointer<WireGuardConfigModel> m_wireGuardConfigModel;
-    QScopedPointer<AwgConfigModel> m_awgConfigModel;
+    QSharedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
+    QSharedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;
+    QSharedPointer<CloakConfigModel> m_cloakConfigModel;
+    QSharedPointer<XrayConfigModel> m_xrayConfigModel;
+    QSharedPointer<WireGuardConfigModel> m_wireGuardConfigModel;
+    QSharedPointer<AwgConfigModel> m_awgConfigModel;
 #ifdef Q_OS_WINDOWS
-    QScopedPointer<Ikev2ConfigModel> m_ikev2ConfigModel;
+    QSharedPointer<Ikev2ConfigModel> m_ikev2ConfigModel;
 #endif
-    QScopedPointer<SftpConfigModel> m_sftpConfigModel;
-    QScopedPointer<Socks5ProxyConfigModel> m_socks5ConfigModel;
+    QSharedPointer<SftpConfigModel> m_sftpConfigModel;
+    QSharedPointer<Socks5ProxyConfigModel> m_socks5ConfigModel;
 };
 
 #endif // CORECONTROLLER_H

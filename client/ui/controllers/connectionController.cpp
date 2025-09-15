@@ -33,19 +33,18 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &s
 void ConnectionController::openConnection()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true))
-    {
+    if (!Utils::processIsRunning(Utils::executable(SERVICE_NAME, false), true)) {
         emit connectionErrorOccurred(ErrorCode::AmneziaServiceNotRunning);
         return;
     }
 #endif
 
     int serverIndex = m_serversModel->getDefaultServerIndex();
-    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
+    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
 
-    DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
+    DockerContainer containerType = serverConfig->defaultContainerType;
 
-    if (!m_containersModel->isSupportedByCurrentPlatform(container)) {
+    if (!m_containersModel->isSupportedByCurrentPlatform(containerType)) {
         emit connectionErrorOccurred(ErrorCode::NotSupportedOnThisPlatform);
         return;
     }
@@ -53,13 +52,13 @@ void ConnectionController::openConnection()
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
     VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
 
-    QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
-    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+    auto containerConfig = serverConfig->containerConfigs.value(serverConfig->defaultContainerName);
 
     auto dns = m_serversModel->getDnsPair(serverIndex);
 
-    auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container);
-    emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);
+    auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, containerConfig, containerType,
+                                                                              static_cast<int>(serverConfig->type), serverConfig->hostName);
+    emit connectToVpn(serverIndex, containerType, vpnConfiguration);
 }
 
 void ConnectionController::closeConnection()

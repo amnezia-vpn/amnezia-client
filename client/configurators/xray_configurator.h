@@ -12,12 +12,11 @@ class XrayConfigurator : public ConfiguratorBase
 public:
     XrayConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController, QObject *parent = nullptr);
 
-    QString createConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                         ErrorCode &errorCode);
+    QSharedPointer<ProtocolConfig> createConfig(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig,
+                                                ErrorCode &errorCode) override;
 
 private:
-    QString prepareServerConfig(const ServerCredentials &credentials, DockerContainer container, const QJsonObject &containerConfig,
-                                ErrorCode &errorCode);
+    QString prepareServerConfig(const ServerCredentials &serverCredentials, const ContainerConfig &containerConfig, ErrorCode &errorCode);
 };
 
 #endif // XRAY_CONFIGURATOR_H

@@ -318,7 +318,8 @@ void ImportController::importConfig()
     credentials.secretData = m_config.value(config_key::password).toString();
 
     if (credentials.isValid() || m_config.contains(config_key::containers)) {
-        m_serversModel->addServer(m_config);
+        auto serverConfig = QSharedPointer<ServerConfig>::create(m_config);
+        m_serversModel->addServer(serverConfig);
         emit importFinished();
     } else if (m_config.contains(config_key::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(m_config).toJson());
@@ -326,8 +327,8 @@ void ImportController::importConfig()
             emit importErrorOccurred(ErrorCode::ApiConfigAlreadyAdded, true);
         } else {
             m_config.insert(config_key::crc, crc);
-
-            m_serversModel->addServer(m_config);
+            auto serverConfig = QSharedPointer<ServerConfig>::create(m_config);
+            m_serversModel->addServer(serverConfig);
             emit importFinished();
         }
     } else {

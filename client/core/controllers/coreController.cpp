@@ -54,37 +54,42 @@ void CoreController::initModels()
     m_appSplitTunnelingModel.reset(new AppSplitTunnelingModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("AppSplitTunnelingModel", m_appSplitTunnelingModel.get());
 
-    m_protocolsModel.reset(new ProtocolsModel(m_settings, this));
-    m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
-
-    m_openVpnConfigModel.reset(new OpenVpnConfigModel(this));
+    m_openVpnConfigModel = QSharedPointer<OpenVpnConfigModel>::create(this);
     m_engine->rootContext()->setContextProperty("OpenVpnConfigModel", m_openVpnConfigModel.get());
 
-    m_shadowSocksConfigModel.reset(new ShadowSocksConfigModel(this));
+    m_shadowSocksConfigModel = QSharedPointer<ShadowSocksConfigModel>::create(this);
     m_engine->rootContext()->setContextProperty("ShadowSocksConfigModel", m_shadowSocksConfigModel.get());
 
-    m_cloakConfigModel.reset(new CloakConfigModel(this));
+    m_cloakConfigModel = QSharedPointer<CloakConfigModel>::create(this);
     m_engine->rootContext()->setContextProperty("CloakConfigModel", m_cloakConfigModel.get());
 
-    m_wireGuardConfigModel.reset(new WireGuardConfigModel(this));
+    m_wireGuardConfigModel = QSharedPointer<WireGuardConfigModel>::create(this);
     m_engine->rootContext()->setContextProperty("WireGuardConfigModel", m_wireGuardConfigModel.get());
 
-    m_awgConfigModel.reset(new AwgConfigModel(this));
+    m_awgConfigModel = QSharedPointer<AwgConfigModel>::create(this);
     m_engine->rootContext()->setContextProperty("AwgConfigModel", m_awgConfigModel.get());
 
-    m_xrayConfigModel.reset(new XrayConfigModel(this));
+    m_xrayConfigModel = QSharedPointer<XrayConfigModel>::create(this);
     m_engine->rootContext()->setContextProperty("XrayConfigModel", m_xrayConfigModel.get());
 
 #ifdef Q_OS_WINDOWS
-    m_ikev2ConfigModel.reset(new Ikev2ConfigModel(this));
+    m_ikev2ConfigModel = QSharedPointer<Ikev2ConfigModel>::create(this);
     m_engine->rootContext()->setContextProperty("Ikev2ConfigModel", m_ikev2ConfigModel.get());
 #endif
 
-    m_sftpConfigModel.reset(new SftpConfigModel(this));
+    m_sftpConfigModel = QSharedPointer<SftpConfigModel>::create(this);
     m_engine->rootContext()->setContextProperty("SftpConfigModel", m_sftpConfigModel.get());
 
-    m_socks5ConfigModel.reset(new Socks5ProxyConfigModel(this));
+    m_socks5ConfigModel = QSharedPointer<Socks5ProxyConfigModel>::create(this);
     m_engine->rootContext()->setContextProperty("Socks5ProxyConfigModel", m_socks5ConfigModel.get());
+
+    m_protocolsModel.reset(new ProtocolsModel(m_openVpnConfigModel, m_shadowSocksConfigModel, m_cloakConfigModel, m_wireGuardConfigModel,
+                                              m_awgConfigModel, m_xrayConfigModel,
+#ifdef Q_OS_WINDOWS
+                                              m_ikev2ConfigModel,
+#endif
+                                              m_sftpConfigModel, m_socks5ConfigModel, this));
+    m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
 
     m_clientManagementModel.reset(new ClientManagementModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
@@ -120,8 +125,8 @@ void CoreController::initControllers()
     connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
             &ConnectionController::onCurrentContainerUpdated); // TODO remove this
 
-    connect(m_installController.get(), &InstallController::profileCleared,
-            m_protocolsModel.get(), &ProtocolsModel::updateModel);
+    // connect(m_installController.get(), &InstallController::profileCleared,
+    //         m_protocolsModel.get(), &ProtocolsModel::updateModel);
 
     m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
