@@ -328,28 +328,22 @@ bool ApiConfigsController::fillAvailableServices()
     // iOS: only fetch and log available IAP products (no purchase here)
 #ifdef Q_OS_IOS
     {
-        const QStringList productIds = {
-            QStringLiteral("com.amnezia.amneziavpn.1_month"),
-            QStringLiteral("com.amnezia.AmneziaVPN.6_month")
-        };
-        IosController::Instance()->fetchProducts(productIds,
-            [](const QList<QVariantMap> &products,
-               const QStringList &invalidIds,
-               const QString &errorString) {
-                if (!errorString.isEmpty()) {
-                    qDebug() << "IAP fetch error:" << errorString;
-                    return;
-                }
-                for (const auto &p : products) {
-                    qDebug().nospace() << "IAP product id=" << p.value("productId").toString()
-                                       << ", title=" << p.value("title").toString()
-                                       << ", price=" << p.value("price").toString()
-                                       << " " << p.value("currencyCode").toString();
-                }
-                if (!invalidIds.isEmpty()) {
-                    qDebug() << "Invalid IAP IDs:" << invalidIds;
-                }
-            });
+        const QStringList productIds = { QStringLiteral("com.amnezia.amneziavpn.1_month"), QStringLiteral("com.amnezia.AmneziaVPN.6_month") };
+        IosController::Instance()->fetchProducts(
+                productIds, [](const QList<QVariantMap> &products, const QStringList &invalidIds, const QString &errorString) {
+                    if (!errorString.isEmpty()) {
+                        qDebug() << "IAP fetch error:" << errorString;
+                        return;
+                    }
+                    for (const auto &p : products) {
+                        qDebug().nospace() << "IAP product id=" << p.value("productId").toString()
+                                           << ", title=" << p.value("title").toString() << ", price=" << p.value("price").toString() << " "
+                                           << p.value("currencyCode").toString();
+                    }
+                    if (!invalidIds.isEmpty()) {
+                        qDebug() << "Invalid IAP IDs:" << invalidIds;
+                    }
+                });
     }
 #endif
 
@@ -371,6 +365,87 @@ bool ApiConfigsController::fillAvailableServices()
 
     QJsonObject data = QJsonDocument::fromJson(responseBody).object();
     m_apiServicesModel->updateModel(data);
+    return true;
+}
+
+bool ApiConfigsController::importSerivceFromAppStore()
+{
+    // On iOS (and macOS NE builds), perform purchase now (decoupled from product fetch),
+    // then send the Base64 receipt to the gateway via app_store_config.
+    // QString chosenProductId;
+    // {
+    //     // Try to select the first valid product id from a known list to be resilient.
+    //     const QStringList productIds = { QStringLiteral("com.amnezia.amneziavpn.1_month"), QStringLiteral("com.amnezia.AmneziaVPN.6_month") };
+
+    //     // Fetch products synchronously to pick a valid id.
+    //     QList<QVariantMap> products;
+    //     QStringList invalidIds;
+    //     QString fetchError;
+    //     QEventLoop waitFetch;
+    //     IosController::Instance()->fetchProducts(productIds,
+    //                                              [&](const QList<QVariantMap> &prods, const QStringList &invalid, const QString &err) {
+    //                                                  products = prods;
+    //                                                  invalidIds = invalid;
+    //                                                  fetchError = err;
+    //                                                  waitFetch.quit();
+    //                                              });
+    //     waitFetch.exec();
+
+    //     if (fetchError.isEmpty()) {
+    //         for (const auto &candidate : productIds) {
+    //             if (invalidIds.contains(candidate))
+    //                 continue;
+    //             const bool found = std::any_of(products.begin(), products.end(),
+    //                                            [&](const QVariantMap &p) { return p.value("productId").toString() == candidate; });
+    //             if (found) {
+    //                 chosenProductId = candidate;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //     if (chosenProductId.isEmpty() && !productIds.isEmpty()) {
+    //         chosenProductId = productIds.first();
+    //     }
+    // }
+
+    // bool purchaseOk = false;
+    // QString receiptBase64;
+    // QString purchaseError;
+    // QEventLoop waitPurchase;
+    // IosController::Instance()->purchaseProduct(chosenProductId,
+    //                                            [&](bool success, const QString &transactionId, const QString &purchasedProductId,
+    //                                                const QString &receipt, const QString &errorString) {
+    //                                                Q_UNUSED(transactionId)
+    //                                                Q_UNUSED(purchasedProductId)
+    //                                                purchaseOk = success;
+    //                                                receiptBase64 = receipt;
+    //                                                purchaseError = errorString;
+    //                                                waitPurchase.quit();
+    //                                            });
+    // waitPurchase.exec();
+
+    // if (!purchaseOk || receiptBase64.isEmpty()) {
+    //     qDebug() << "IAP purchase failed:" << purchaseError;
+    //     emit errorOccurred(ErrorCode::InternalError);
+    //     return false;
+    // }
+
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_settings->getInstallationUuid(true),
+                                            m_apiServicesModel->getCountryCode(),
+                                            "",
+                                            m_apiServicesModel->getSelectedServiceType(),
+                                            m_apiServicesModel->getSelectedServiceProtocol(),
+                                            QJsonObject() };
+
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    apiPayload[apiDefs::key::transactionId] = "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";
+
+    ErrorCode errorCode;
+    QByteArray responseBody;
+    errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody);
+    qDebug() << responseBody;
     return true;
 }
 
@@ -399,81 +474,7 @@ bool ApiConfigsController::importServiceFromGateway()
     ErrorCode errorCode;
     QByteArray responseBody;
 
-#ifdef Q_OS_IOS
-    // On iOS (and macOS NE builds), perform purchase now (decoupled from product fetch),
-    // then send the Base64 receipt to the gateway via app_store_config.
-    QString chosenProductId;
-    {
-        // Try to select the first valid product id from a known list to be resilient.
-        const QStringList productIds = {
-            QStringLiteral("com.amnezia.amneziavpn.1_month"),
-            QStringLiteral("com.amnezia.AmneziaVPN.6_month")
-        };
-
-        // Fetch products synchronously to pick a valid id.
-        QList<QVariantMap> products;
-        QStringList invalidIds;
-        QString fetchError;
-        QEventLoop waitFetch;
-        IosController::Instance()->fetchProducts(productIds,
-            [&](const QList<QVariantMap> &prods, const QStringList &invalid, const QString &err) {
-                products = prods;
-                invalidIds = invalid;
-                fetchError = err;
-                waitFetch.quit();
-            });
-        waitFetch.exec();
-
-        if (fetchError.isEmpty()) {
-            for (const auto &candidate : productIds) {
-                if (invalidIds.contains(candidate)) continue;
-                const bool found = std::any_of(products.begin(), products.end(), [&](const QVariantMap &p) {
-                    return p.value("productId").toString() == candidate;
-                });
-                if (found) { chosenProductId = candidate; break; }
-            }
-        }
-        if (chosenProductId.isEmpty() && !productIds.isEmpty()) {
-            chosenProductId = productIds.first();
-        }
-    }
-
-    bool purchaseOk = false;
-    QString receiptBase64;
-    QString purchaseError;
-    QEventLoop waitPurchase;
-    IosController::Instance()->purchaseProduct(
-        chosenProductId,
-        [&](bool success,
-            const QString &transactionId,
-            const QString &purchasedProductId,
-            const QString &receipt,
-            const QString &errorString) {
-            Q_UNUSED(transactionId)
-            Q_UNUSED(purchasedProductId)
-            purchaseOk = success;
-            receiptBase64 = receipt;
-            purchaseError = errorString;
-            waitPurchase.quit();
-        });
-    waitPurchase.exec();
-
-    if (!purchaseOk || receiptBase64.isEmpty()) {
-        qDebug() << "IAP purchase failed:" << purchaseError;
-        emit errorOccurred(ErrorCode::InternalError);
-        return false;
-    }
-
-    {
-        QJsonObject authData;
-        authData[apiDefs::key::apiKey] = receiptBase64;
-        apiPayload[configKey::authData] = authData;
-    }
-
-    errorCode = executeRequest(QString("%1v1/app_store_config"), apiPayload, responseBody);
-#else
     errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
-#endif
 
     QJsonObject serverConfig;
     if (errorCode == ErrorCode::NoError) {

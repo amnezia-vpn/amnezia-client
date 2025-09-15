@@ -26,6 +26,7 @@ public slots:
     void copyVpnKeyToClipboard();
 
     bool fillAvailableServices();
+    bool importSerivceFromAppStore();
     bool importServiceFromGateway();
     bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);

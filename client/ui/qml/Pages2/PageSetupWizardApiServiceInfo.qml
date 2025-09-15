@@ -136,6 +136,10 @@ PageType {
                 Qt.openUrlExternally(endpoint)
                 PageController.closePage()
                 PageController.closePage()
+            } else if (Qt.platform.os === "ios") {
+                PageController.showBusyIndicator(true)
+                ApiConfigsController.importSerivceFromAppStore()
+                PageController.showBusyIndicator(false)
             } else {
                 PageController.showBusyIndicator(true)
                 ApiConfigsController.importServiceFromGateway()
