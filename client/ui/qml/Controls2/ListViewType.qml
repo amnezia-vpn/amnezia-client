@@ -6,7 +6,9 @@ ListView {
 
     property bool isFocusable: true
 
-    ScrollBar.vertical: ScrollBarType {}
+    ScrollBar.vertical: ScrollBarType {
+        policy: ScrollBar.AlwaysOn
+    }
 
     clip: true
     reuseItems: true
