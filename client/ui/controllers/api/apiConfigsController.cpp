@@ -396,6 +396,7 @@ bool ApiConfigsController::fillAvailableServices()
 
 bool ApiConfigsController::importSerivceFromAppStore()
 {
+#ifdef Q_OS_IOS
     QString chosenProductId;
     {
         const QStringList productIds = { QStringLiteral("com.amnezia.amneziavpn.1_month"), QStringLiteral("com.amnezia.AmneziaVPN.6_month") };
@@ -491,6 +492,7 @@ bool ApiConfigsController::importSerivceFromAppStore()
 
     qDebug() << configJson;
     emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+#endif
     return true;
 }
 
