@@ -6,6 +6,8 @@ import Qt.labs.platform 1.1
 
 import QtCore
 
+import SortFilterProxyModel 0.2
+
 import PageEnum 1.0
 import Style 1.0
 
