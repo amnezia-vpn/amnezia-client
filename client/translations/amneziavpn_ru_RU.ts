@@ -1360,44 +1360,44 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="23"/>
         <source>Settings updated successfully</source>
-        <translation type="unfinished">Настройки успешно обновлены</translation>
+        <translation>Настройки успешно обновлены</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="68"/>
         <source>CryptPad settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Настройки CryptPad</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="79"/>
         <source>Host</source>
-        <translation type="unfinished">Хост</translation>
+        <translation>Хост</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="89"/>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="110"/>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="131"/>
         <source>Copied</source>
-        <translation type="unfinished">Скопировано</translation>
+        <translation>Скопировано</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="100"/>
         <source>Port</source>
-        <translation type="unfinished">Порт</translation>
+        <translation>Порт</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="121"/>
         <source>URL</source>
-        <translation type="unfinished"></translation>
+        <translation>URL</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="151"/>
         <source>Open CryptPad in browser</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть CryptPad в браузере</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="163"/>
         <source>CryptPad is a private-by-design alternative to popular office tools and cloud services. All the content stored on CryptPad is end-to-end encrypted. This means that documents, chats, and files are unreadable outside of the session in which they are created.</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad — это приватная альтернатива популярным офисным инструментам и облачным сервисам. Все содержимое, хранящееся в CryptPad, зашифровано от начала до конца. Это означает, что документы, чаты и файлы нечитаемы за пределами сессии, в которой они были созданы.</translation>
     </message>
 </context>
 <context>
@@ -4536,7 +4536,7 @@ subscription key</source>
     <message>
         <location filename="../containers/containers_defs.cpp" line="141"/>
         <source>A private-by-design, end-to-end encrypted and open-source collaboration suite.</source>
-        <translation type="unfinished"></translation>
+        <translation>Приватная, с end-to-end шифрованием и открытым исходным кодом система для совместной работы.</translation>
     </message>
     <message>
         <location filename="../containers/containers_defs.cpp" line="148"/>
@@ -4713,7 +4713,7 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
     <message>
         <location filename="../containers/containers_defs.cpp" line="234"/>
         <source>CryptPad is a private-by-design alternative to popular office tools and cloud services. All the content stored on CryptPad is end-to-end encrypted. This means that documents, chats, and files are unreadable outside of the session in which they are created.</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad — это приватная альтернатива популярным офисным инструментам и облачным сервисам. Все содержимое, хранящееся в CryptPad, зашифровано от начала до конца. Это означает, что документы, чаты и файлы нечитаемы за пределами сессии, в которой они были созданы.</translation>
     </message>
     <message>
         <source>
@@ -4829,7 +4829,7 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <location filename="../containers/containers_defs.cpp" line="107"/>
         <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <source>CryptPad</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad</translation>
     </message>
     <message>
         <location filename="../core/serialization/vmess_new.cpp" line="57"/>
