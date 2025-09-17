@@ -268,10 +268,10 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="70"/>
         <location filename="../ui/controllers/connectionController.cpp" line="99"/>
         <location filename="../ui/controllers/connectionController.cpp" line="114"/>
         <location filename="../ui/controllers/connectionController.cpp" line="120"/>
+        <location filename="../ui/controllers/connectionController.h" line="70"/>
         <source>Connect</source>
         <translation>连接</translation>
     </message>
@@ -4453,8 +4453,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>无法确定数据类型: %1； %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="393"/>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="52"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="393"/>
         <source>Entry not found</source>
         <translation>未找到记录</translation>
     </message>
@@ -4571,15 +4571,15 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>SFTP 服务</translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="81"/>
         <location filename="../containers/containers_defs.cpp" line="106"/>
         <location filename="../containers/containers_defs.cpp" line="233"/>
+        <location filename="../protocols/protocols_defs.cpp" line="81"/>
         <source>SOCKS5 proxy server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <location filename="../containers/containers_defs.cpp" line="107"/>
+        <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <source>CryptPad</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4589,8 +4589,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>没有错误</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="12"/>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="276"/>
+        <location filename="../core/errorstrings.cpp" line="12"/>
         <source>Unknown error</source>
         <translation>未知错误</translation>
     </message>

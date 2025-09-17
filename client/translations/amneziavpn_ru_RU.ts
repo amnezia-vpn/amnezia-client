@@ -298,10 +298,10 @@
         <translation>Переподключение...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="70"/>
         <location filename="../ui/controllers/connectionController.cpp" line="99"/>
         <location filename="../ui/controllers/connectionController.cpp" line="114"/>
         <location filename="../ui/controllers/connectionController.cpp" line="120"/>
+        <location filename="../ui/controllers/connectionController.h" line="70"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
@@ -4048,8 +4048,8 @@ subscription key</source>
         <translation>Не удалось определить тип данных: %1; %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="393"/>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="52"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="393"/>
         <source>Entry not found</source>
         <translation>Запись не найдена</translation>
     </message>
@@ -4803,8 +4803,8 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <translation>Нет совпадений</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="12"/>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="276"/>
+        <location filename="../core/errorstrings.cpp" line="12"/>
         <source>Unknown error</source>
         <translation>Неизвестная ошибка</translation>
     </message>
@@ -4819,15 +4819,15 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <translation>SFTP-сервис</translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="81"/>
         <location filename="../containers/containers_defs.cpp" line="106"/>
         <location filename="../containers/containers_defs.cpp" line="233"/>
+        <location filename="../protocols/protocols_defs.cpp" line="81"/>
         <source>SOCKS5 proxy server</source>
         <translation>Прокси-сервер SOCKS5</translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <location filename="../containers/containers_defs.cpp" line="107"/>
+        <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <source>CryptPad</source>
         <translation type="unfinished"></translation>
     </message>

@@ -268,10 +268,10 @@
 <context>
     <name>ConnectionController</name>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="70"/>
         <location filename="../ui/controllers/connectionController.cpp" line="99"/>
         <location filename="../ui/controllers/connectionController.cpp" line="114"/>
         <location filename="../ui/controllers/connectionController.cpp" line="120"/>
+        <location filename="../ui/controllers/connectionController.h" line="70"/>
         <source>Connect</source>
         <translation>جوڑنا</translation>
     </message>
@@ -4234,8 +4234,8 @@ subscription key</source>
         <translation>ڈیٹا کی قسم تعین نہیں کی جا سکی: %1؛ %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="393"/>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="52"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="393"/>
         <source>Entry not found</source>
         <translation>اندراج نہیں ملا</translation>
     </message>
@@ -4352,15 +4352,15 @@ subscription key</source>
         <translation>ایس ایف ٹی پی سروس</translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="81"/>
         <location filename="../containers/containers_defs.cpp" line="106"/>
         <location filename="../containers/containers_defs.cpp" line="233"/>
+        <location filename="../protocols/protocols_defs.cpp" line="81"/>
         <source>SOCKS5 proxy server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <location filename="../containers/containers_defs.cpp" line="107"/>
+        <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <source>CryptPad</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4370,8 +4370,8 @@ subscription key</source>
         <translation>کوئی غلطی نہیں</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="12"/>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="276"/>
+        <location filename="../core/errorstrings.cpp" line="12"/>
         <source>Unknown error</source>
         <translation>نامعلوم خامی</translation>
     </message>

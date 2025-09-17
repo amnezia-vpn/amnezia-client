@@ -1,3 +1,4 @@
+
 #!/bin/bash
 # CryptPad start script
 # This script starts the CryptPad container

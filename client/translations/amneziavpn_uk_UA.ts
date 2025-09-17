@@ -355,10 +355,10 @@
         <translation>Перепідключення...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/connectionController.h" line="70"/>
         <location filename="../ui/controllers/connectionController.cpp" line="99"/>
         <location filename="../ui/controllers/connectionController.cpp" line="114"/>
         <location filename="../ui/controllers/connectionController.cpp" line="120"/>
+        <location filename="../ui/controllers/connectionController.h" line="70"/>
         <source>Connect</source>
         <translation>Підключитись</translation>
     </message>
@@ -4566,8 +4566,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>Could not determine data type: %1; %2</translation>
     </message>
     <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="393"/>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_android.cpp" line="52"/>
+        <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="393"/>
         <source>Entry not found</source>
         <translation>Entry not found</translation>
     </message>
@@ -4684,8 +4684,8 @@ and will not be shared or disclosed to the Amnezia or any third parties</source>
         <translation>No error</translation>
     </message>
     <message>
-        <location filename="../core/errorstrings.cpp" line="12"/>
         <location filename="../3rd/qtkeychain/qtkeychain/keychain_unix.cpp" line="276"/>
+        <location filename="../core/errorstrings.cpp" line="12"/>
         <source>Unknown error</source>
         <translation>Unknown error</translation>
     </message>
@@ -5478,15 +5478,15 @@ This means that AmneziaWG keeps the fast performance of the original while addin
         <translation>Сервіс SFTP</translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="81"/>
         <location filename="../containers/containers_defs.cpp" line="106"/>
         <location filename="../containers/containers_defs.cpp" line="233"/>
+        <location filename="../protocols/protocols_defs.cpp" line="81"/>
         <source>SOCKS5 proxy server</source>
         <translation>SOCKS5 proxy server</translation>
     </message>
     <message>
-        <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <location filename="../containers/containers_defs.cpp" line="107"/>
+        <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <source>CryptPad</source>
         <translation type="unfinished"></translation>
     </message>
