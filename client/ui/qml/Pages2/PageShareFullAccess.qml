@@ -15,6 +15,7 @@ import "../Controls2/TextTypes"
 import "../Components"
 import "../Config"
 
+
 PageType {
     id: root
 
@@ -25,27 +26,32 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    FlickableType {
+    ListViewType {
+        id: listView
+
+        property string headerText: ""
+        property string configContentHeaderText: ""
+
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        contentHeight: content.height
+        anchors.right: parent.right
+        anchors.left: parent.left
 
-        ColumnLayout {
-            id: content
-
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
-
-            spacing: 0
+        header: ColumnLayout {
+            width: listView.width
 
             BaseHeaderType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 Layout.topMargin: 24
 
                 headerText: qsTr("Full access to the server and VPN")
@@ -53,6 +59,8 @@ PageType {
 
             ParagraphTextType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 Layout.topMargin: 24
                 Layout.bottomMargin: 24
 
@@ -63,11 +71,14 @@ PageType {
 
             DropDownType {
                 id: serverSelector
+                objectName: "serverSelector"
 
                 signal severSelectorIndexChanged
                 property int currentIndex: 0
 
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
@@ -96,12 +107,13 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        if (serverSelector.currentIndex !== serverSelectorListView.currentIndex) {
-                            serverSelector.currentIndex = serverSelectorListView.currentIndex
+                        if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
+                            serverSelector.currentIndex = serverSelectorListView.selectedIndex
+                            serverSelector.severSelectorIndexChanged()
                         }
 
-                        shareConnectionDrawer.headerText = qsTr("Accessing ") + serverSelector.text
-                        shareConnectionDrawer.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
+                        listView.headerText = qsTr("Accessing ") + serverSelector.text
+                        listView.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
                         serverSelector.closeTriggered()
                     }
 
@@ -113,15 +125,24 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.processedIndex = proxyServersModel.mapToSource(currentIndex)
+                        ServersModel.processedIndex = proxyServersModel.mapToSource(selectedIndex)
                     }
                 }
             }
+        }
+
+        model: 1 // fake model to force the ListView to be created without a model
+        spacing: 0
+
+        delegate: ColumnLayout {
+            width: listView.width
 
             BasicButtonType {
                 id: shareButton
                 Layout.fillWidth: true
-                Layout.topMargin: 40
+                Layout.topMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: qsTr("Share")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
@@ -137,20 +158,11 @@ PageType {
                         ExportController.generateFullAccessConfig()
                     }
 
-                    shareConnectionDrawer.headerText = qsTr("Connection to ") + serverSelector.text
-                    shareConnectionDrawer.configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
-
-                    shareConnectionDrawer.openTriggered()
-
                     PageController.showBusyIndicator(false)
+                    
+                    PageController.goToShareConnectionPage(listView.headerText, listView.configContentHeaderText, "", ".vpn", "amnezia_config")
                 }
             }
         }
-    }
-
-    ShareConnectionDrawer {
-        id: shareConnectionDrawer
-
-        anchors.fill: parent
     }
 }

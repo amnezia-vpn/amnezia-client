@@ -29,6 +29,7 @@ PageType {
         readonly property string title: qsTr("Subscription Status")
         readonly property string contentKey: "subscriptionStatus"
         readonly property string objectImageSource: "qrc:/images/controls/info.svg"
+        readonly property bool isRichText: true
     }
 
     QtObject {
@@ -37,6 +38,7 @@ PageType {
         readonly property string title: qsTr("Valid Until")
         readonly property string contentKey: "endDate"
         readonly property string objectImageSource: "qrc:/images/controls/history.svg"
+        readonly property bool isRichText: false
     }
 
     QtObject {
@@ -45,6 +47,7 @@ PageType {
         readonly property string title: qsTr("Active Connections")
         readonly property string contentKey: "connectedDevices"
         readonly property string objectImageSource: "qrc:/images/controls/monitor.svg"
+        readonly property bool isRichText: false
     }
 
     property var processedServer
@@ -111,17 +114,6 @@ PageType {
                     serverNameEditDrawer.openTriggered()
                 }
             }
-
-            RenameServerDrawer {
-                id: serverNameEditDrawer
-
-                parent: root
-
-                anchors.fill: parent
-                expandedHeight: root.height * 0.35
-
-                serverNameText: root.processedServer.name
-            }
         }
 
         delegate: ColumnLayout {
@@ -145,6 +137,7 @@ PageType {
                 imageSource: objectImageSource
                 leftText: title
                 rightText: ApiAccountInfoModel.data(contentKey)
+                rightTextFormat: isRichText ? Text.RichText : Text.PlainText
 
                 visible: rightText !== ""
             }
@@ -198,7 +191,13 @@ PageType {
 
                 iconPath: "qrc:/images/controls/alert-circle.svg"
 
-                visible: ApiAccountInfoModel.data("hasExpiredWorker")
+                visible: {
+                    for (let i = 0; i < ApiCountryModel.count; ++i) {
+                        if (ApiCountryModel.get(i).isWorkerExpired)
+                            return true;
+                    }
+                    return false;
+                }
             }
 
             LabelWithButtonType {
@@ -207,20 +206,13 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: warning.visible ? 16 : 32
 
-                visible: false //footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForAmneziaFree
 
                 text: qsTr("Subscription Key")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    shareConnectionDrawer.headerText = qsTr("Amnezia Premium subscription key")
-
-                    shareConnectionDrawer.openTriggered()
-                    shareConnectionDrawer.isSelfHostedConfig = false;
-                    shareConnectionDrawer.shareButtonText = qsTr("Save VPN key as a file")
-                    shareConnectionDrawer.copyButtonText = qsTr("Copy VPN key")
-
-
+                    PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
                     PageController.showBusyIndicator(true)
 
                     ApiConfigsController.prepareVpnKeyExport()
@@ -230,12 +222,11 @@ PageType {
             }
 
             DividerType {
-                visible: false //footer.isVisibleForAmneziaFree
+                visible: footer.isVisibleForAmneziaFree
             }
 
             LabelWithButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: warning.visible ? 16 : 32
 
                 visible: footer.isVisibleForAmneziaFree
 
@@ -420,9 +411,12 @@ PageType {
         }
     }
 
-    ShareConnectionDrawer {
-        id: shareConnectionDrawer
+    RenameServerDrawer {
+        id: serverNameEditDrawer
 
         anchors.fill: parent
+        expandedHeight: parent.height * 0.35
+
+        serverNameText: root.processedServer.name
     }
 }

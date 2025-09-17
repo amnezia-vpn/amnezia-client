@@ -25,23 +25,17 @@ PageType {
         anchors.topMargin: 20
     }
 
-    ListView {
+    ListViewType {
         id: listView
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         anchors.left: parent.left
 
-        property bool isFocusable: true
-
-        ScrollBar.vertical: ScrollBarType {}
-
         header: ColumnLayout {
             width: listView.width
 
             BaseHeaderType {
-                id: header
-
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
@@ -50,16 +44,14 @@ PageType {
             }
         }
         
-        model: 1
-        clip: true
+        model: 1 // fake model to force the ListView to be created without a model
+
         spacing: 16
 
         delegate: ColumnLayout {
             width: listView.width
 
             TextFieldWithHeaderType {
-                id: passwordTextField
-
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.rightMargin: 16
@@ -87,8 +79,6 @@ PageType {
             width: listView.width
 
             SwitcherType {
-                id: switcher
-
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.rightMargin: 16

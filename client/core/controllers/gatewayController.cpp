@@ -62,8 +62,9 @@ ErrorCode GatewayController::get(const QString &endpoint, QByteArray &responseBo
     QNetworkRequest request;
     request.setTransferTimeout(m_requestTimeoutMsecs);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setRawHeader(QString("X-Client-Request-ID").toUtf8(), QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8());
 
-    request.setUrl(QString(endpoint).arg(m_gatewayEndpoint));
+    request.setUrl(QString(endpoint).arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
 
     // bypass killSwitch exceptions for API-gateway
 #ifdef AMNEZIA_DESKTOP
@@ -124,8 +125,9 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     QNetworkRequest request;
     request.setTransferTimeout(m_requestTimeoutMsecs);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setRawHeader(QString("X-Client-Request-ID").toUtf8(), QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8());
 
-    request.setUrl(endpoint.arg(m_gatewayEndpoint));
+    request.setUrl(endpoint.arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
 
     // bypass killSwitch exceptions for API-gateway
 #ifdef AMNEZIA_DESKTOP
@@ -352,11 +354,14 @@ void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *repl
     std::mt19937 generator(randomDevice());
     std::shuffle(proxyUrls.begin(), proxyUrls.end(), generator);
 
-    QEventLoop wait;
-    QList<QSslError> sslErrors;
     QByteArray responseBody;
 
-    for (const QString &proxyUrl : proxyUrls) {
+    auto bypassFunction = [this](const QString &endpoint, const QString &proxyUrl, QNetworkReply *reply,
+                                 std::function<QNetworkReply *(const QString &url)> requestFunction,
+                                 std::function<bool(QNetworkReply * reply, const QList<QSslError> &sslErrors)> replyProcessingFunction) {
+        QEventLoop wait;
+        QList<QSslError> sslErrors;
+
         qDebug() << "go to the next proxy endpoint";
         reply->deleteLater(); // delete the previous reply
         reply = requestFunction(endpoint.arg(proxyUrl));
@@ -366,6 +371,50 @@ void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *repl
         wait.exec();
 
         if (replyProcessingFunction(reply, sslErrors)) {
+            return true;
+        }
+        return false;
+    };
+
+    if (m_proxyUrl.isEmpty()) {
+        QNetworkRequest request;
+        request.setTransferTimeout(1000);
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+        QEventLoop wait;
+        QList<QSslError> sslErrors;
+        QNetworkReply *reply;
+
+        for (const QString &proxyUrl : proxyUrls) {
+            request.setUrl(proxyUrl + "lmbd-health");
+            reply = amnApp->networkManager()->get(request);
+
+            connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
+            connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
+            wait.exec();
+
+            if (reply->error() == QNetworkReply::NetworkError::NoError) {
+                reply->deleteLater();
+
+                m_proxyUrl = proxyUrl;
+                if (!m_proxyUrl.isEmpty()) {
+                    break;
+                }
+            } else {
+                reply->deleteLater();
+            }
+        }
+    }
+
+    if (!m_proxyUrl.isEmpty()) {
+        if (bypassFunction(endpoint, m_proxyUrl, reply, requestFunction, replyProcessingFunction)) {
+            return;
+        }
+    }
+
+    for (const QString &proxyUrl : proxyUrls) {
+        if (bypassFunction(endpoint, proxyUrl, reply, requestFunction, replyProcessingFunction)) {
+            m_proxyUrl = proxyUrl;
             break;
         }
     }

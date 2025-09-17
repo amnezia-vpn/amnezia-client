@@ -32,6 +32,7 @@ public:
     Q_PROPERTY(bool isDevGatewayEnv READ isDevGatewayEnv WRITE toggleDevGatewayEnv NOTIFY devGatewayEnvChanged)
 
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
+    Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -125,6 +126,7 @@ signals:
     void devGatewayEnvChanged(bool enabled);
 
     void isHomeAdLabelVisibleChanged(bool visible);
+    void startMinimizedChanged();
 
 private:
     QSharedPointer<ServersModel> m_serversModel;
@@ -135,6 +137,8 @@ private:
     std::shared_ptr<Settings> m_settings;
 
     QString m_appVersion;
+
+    QString getPlatform();
 
     QDateTime m_loggingDisableDate;
 

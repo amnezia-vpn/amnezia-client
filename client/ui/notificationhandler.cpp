@@ -11,18 +11,12 @@
 #  include "systemtray_notificationhandler.h"
 #endif
 
+
 // static
 NotificationHandler* NotificationHandler::create(QObject* parent) {
 #if defined(Q_OS_IOS)
     return new IOSNotificationHandler(parent);
 #else
-
-#  if defined(Q_OS_LINUX)
-    //if (LinuxSystemTrayNotificationHandler::requiredCustomImpl()) {
-    //    return new LinuxSystemTrayNotificationHandler(parent);
-    //}
-#  endif
-
     return new SystemTrayNotificationHandler(parent);
 #endif
 }

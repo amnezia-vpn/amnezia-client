@@ -120,7 +120,8 @@ namespace amnezia
         ApiNotFoundError = 1109,
         ApiMigrationError = 1110,
         ApiUpdateRequestError = 1111,
-        ApiPurchaseError = 1112,
+        ApiSubscriptionExpiredError = 1112,
+        ApiPurchaseError = 1113,
 
         // QFile errors
         OpenError = 1200,

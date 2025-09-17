@@ -28,6 +28,7 @@ const char* MessageKey::isOnDemand = "is-on-demand";
 const char* MessageKey::SplitTunnelType = "SplitTunnelType";
 const char* MessageKey::SplitTunnelSites = "SplitTunnelSites";
 
+#if !MACOS_NE
 static UIViewController* getViewController() {
     NSArray *windows = [[UIApplication sharedApplication]windows];
     for (UIWindow *window in windows) {
@@ -37,6 +38,7 @@ static UIViewController* getViewController() {
     }
     return nil;
 }
+#endif
 
 Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
   switch (status) {
@@ -253,6 +255,21 @@ void IosController::checkStatus()
     sendVpnExtensionMessage(message, [&](NSDictionary* response){
         uint64_t txBytes = [response[@"tx_bytes"] intValue];
         uint64_t rxBytes = [response[@"rx_bytes"] intValue];
+        
+        uint64_t last_handshake_time_sec = 0;
+#if !MACOS_NE
+        if (response[@"last_handshake_time_sec"] && ![response[@"last_handshake_time_sec"] isKindOfClass:[NSNull class]]) {
+            last_handshake_time_sec = [response[@"last_handshake_time_sec"] intValue];
+        } else {
+            qDebug() << "Key last_handshake_time_sec is missing or null";
+        }
+
+        if (last_handshake_time_sec < 0) {
+            disconnectVpn();
+            qDebug() << "Invalid handshake time, disconnecting VPN.";
+        }
+#endif
+
         emit bytesChanged(rxBytes - m_rxBytes, txBytes - m_txBytes);
         m_rxBytes = rxBytes;
         m_txBytes = txBytes;
@@ -807,14 +824,14 @@ bool IosController::shareText(const QStringList& filesToSend) {
         NSURL *logFileUrl = [[NSURL alloc] initFileURLWithPath:filesToSend[i].toNSString()];
         [sharingItems addObject:logFileUrl];
     }
-
+#if !MACOS_NE
     UIViewController *qtController = getViewController();
     if (!qtController) return;
 
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
-
+#endif
     __block bool isAccepted = false;
-
+#if !MACOS_NE
     [activityController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
         isAccepted = completed;
         emit finished();
@@ -827,6 +844,7 @@ bool IosController::shareText(const QStringList& filesToSend) {
         popController.sourceRect = CGRectMake(100, 100, 100, 100);
     }
 
+#endif
     QEventLoop wait;
     QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
     wait.exec();
@@ -835,6 +853,7 @@ bool IosController::shareText(const QStringList& filesToSend) {
 }
 
 QString IosController::openFile() {
+#if !MACOS_NE
     UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.item"] inMode:UIDocumentPickerModeOpen];
 
     DocumentPickerDelegate *documentPickerDelegate = [[DocumentPickerDelegate alloc] init];
@@ -845,8 +864,9 @@ QString IosController::openFile() {
 
     [qtController presentViewController:documentPicker animated:YES completion:nil];
 
+#endif
     __block QString filePath;
-
+#if !MACOS_NE
     documentPickerDelegate.documentPickerClosedCallback = ^(NSString *path) {
         if (path) {
             filePath = QString::fromUtf8(path.UTF8String);
@@ -855,7 +875,7 @@ QString IosController::openFile() {
         }
         emit finished();
     };
-
+#endif
     QEventLoop wait;
     QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
     wait.exec();

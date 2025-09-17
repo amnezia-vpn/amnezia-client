@@ -78,6 +78,13 @@ void SitesController::removeSite(int index)
     emit finished(tr("Site removed: %1").arg(hostname));
 }
 
+void SitesController::removeSites()
+{
+    m_sitesModel->removeSites();
+
+    emit finished(tr("Site list cleared!"));
+}
+
 void SitesController::importSites(const QString &fileName, bool replaceExisting)
 {
     QByteArray jsonData;

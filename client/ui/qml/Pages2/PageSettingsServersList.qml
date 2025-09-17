@@ -40,24 +40,19 @@ PageType {
         }
     }
 
-    ListView {
+    ListViewType {
         id: servers
         objectName: "servers"
 
         width: parent.width
         anchors.top: header.bottom
         anchors.topMargin: 16
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
 
-        height: 500
-
-        property bool isFocusable: true
 
         model: ServersModel
-
-        clip: true
-        reuseItems: true
 
         delegate: Item {
             implicitWidth: servers.width

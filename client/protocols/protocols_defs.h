@@ -192,7 +192,7 @@ namespace amnezia
 
             constexpr char defaultPort[] = "51820";
 
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
             constexpr char defaultMtu[] = "1280";
 #else
             constexpr char defaultMtu[] = "1376";
@@ -212,7 +212,7 @@ namespace amnezia
         namespace awg
         {
             constexpr char defaultPort[] = "55424";
-#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
             constexpr char defaultMtu[] = "1280";
 #else
             constexpr char defaultMtu[] = "1376";

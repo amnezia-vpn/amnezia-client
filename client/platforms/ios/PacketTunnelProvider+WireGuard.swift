@@ -112,9 +112,19 @@ extension PacketTunnelProvider {
                 }
             }
 
+            let lastHandshakeString = settingsDictionary["last_handshake_time_sec"]
+            let lastHandshake: Int64
+
+            if let lastHandshakeValue = lastHandshakeString, let handshakeValue = Int64(lastHandshakeValue) {
+                lastHandshake = handshakeValue
+            } else {
+                lastHandshake = -2  // Return an error if there is no value for `last_handshake_time_sec`
+            }
+
             let response: [String: Any] = [
                 "rx_bytes": settingsDictionary["rx_bytes"] ?? "0",
-                "tx_bytes": settingsDictionary["tx_bytes"] ?? "0"
+                "tx_bytes": settingsDictionary["tx_bytes"] ?? "0",
+                "last_handshake_time_sec": lastHandshake
             ]
 
             completionHandler(try? JSONSerialization.data(withJSONObject: response, options: []))

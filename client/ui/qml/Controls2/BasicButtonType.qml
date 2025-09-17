@@ -29,8 +29,6 @@ Button {
 
     property bool squareLeftSide: false
 
-    property FlickableType parentFlickable
-
     property var clickedFunc
 
     property alias buttonTextLabel: buttonText
@@ -64,14 +62,6 @@ Button {
     implicitHeight: 56
 
     hoverEnabled: true
-
-    onFocusChanged: {
-        if (root.activeFocus) {
-            if (root.parentFlickable) {
-                root.parentFlickable.ensureVisible(this)
-            }
-        }
-    }
 
     background: Rectangle {
         id: focusBorder

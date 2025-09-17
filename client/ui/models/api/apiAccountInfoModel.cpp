@@ -31,7 +31,7 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
             return tr("Active");
         }
 
-        return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate) ? tr("Inactive") : tr("Active");
+        return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate) ? tr("<p><a style=\"color: #EB5757;\">Inactive</a>") : tr("Active");
     }
     case EndDateRole: {
         if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {

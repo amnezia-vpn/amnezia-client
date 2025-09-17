@@ -497,7 +497,8 @@ ErrorCode ClientManagementModel::appendClient(const QString &clientId, const QSt
     return error;
 }
 
-ErrorCode ClientManagementModel::renameClient(const int row, const QString &clientName, const DockerContainer container,
+ErrorCode ClientManagementModel::renameClient(const int row, const QString &clientName,
+                                              const DockerContainer container,
                                               const ServerCredentials &credentials,
                                               const QSharedPointer<ServerController> &serverController, bool addTimeStamp)
 {
@@ -529,7 +530,8 @@ ErrorCode ClientManagementModel::renameClient(const int row, const QString &clie
     return error;
 }
 
-ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContainer container, const ServerCredentials &credentials,
+ErrorCode ClientManagementModel::revokeClient(const int row, const DockerContainer container,
+                                              const ServerCredentials &credentials,
                                               const int serverIndex, const QSharedPointer<ServerController> &serverController)
 {
     ErrorCode errorCode = ErrorCode::NoError;

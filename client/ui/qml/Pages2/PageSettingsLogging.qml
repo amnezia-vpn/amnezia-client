@@ -23,19 +23,21 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20
+
+        onFocusChanged: {
+            if (this.activeFocus) {
+                listView.positionViewAtBeginning()
+            }
+        }
     }
 
-    ListView {
+    ListViewType {
         id: listView
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         anchors.left: parent.left
-
-        property bool isFocusable: true
-
-        ScrollBar.vertical: ScrollBarType {}
 
         header: ColumnLayout {
             width: listView.width
@@ -62,7 +64,7 @@ PageType {
 
                 checked: SettingsController.isLoggingEnabled
                 
-                onCheckedChanged: {
+                onToggled: function() {
                     if (checked !== SettingsController.isLoggingEnabled) {
                         SettingsController.isLoggingEnabled = checked
                     }
@@ -101,8 +103,7 @@ PageType {
         }
 
         model: logTypes
-        clip: true
-        reuseItems: true
+
         snapMode: ListView.SnapOneItem
 
         delegate: ColumnLayout {
@@ -164,7 +165,12 @@ PageType {
         }
     }
 
-    property list<QtObject> logTypes: [
+    // Show service logs only if this is NOT a macOS build with
+    // Network-Extension (IsMacOsNeBuild is injected from C++ at run-time)
+    // or if this is NOT a mobile build
+    property list<QtObject> logTypes: (IsMacOsNeBuild || GC.isMobile()) ? [
+        clientLogs
+    ] : [
         clientLogs,
         serviceLogs
     ]
@@ -203,21 +209,17 @@ PageType {
 
         readonly property string title: qsTr("Service logs")
         readonly property string description: qsTr("AmneziaVPN-service logs")
-        readonly property bool isVisible: !GC.isMobile()
+        readonly property bool isVisible: !GC.isMobile() && !IsMacOsNeBuild
         readonly property var openLogsHandler: function() {
             SettingsController.openServiceLogsFolder()
         }
         readonly property var exportLogsHandler: function() {
             var fileName = ""
-            if (GC.isMobile()) {
-                fileName = "AmneziaVPN-service.log"
-            } else {
-                fileName = SystemController.getFileName(qsTr("Save"),
-                                                        qsTr("Logs files (*.log)"),
-                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN-service",
-                                                        true,
-                                                        ".log")
-            }
+            fileName = SystemController.getFileName(qsTr("Save"),
+                                                    qsTr("Logs files (*.log)"),
+                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN-service",
+                                                    true,
+                                                    ".log")
             if (fileName !== "") {
                 PageController.showBusyIndicator(true)
                 SettingsController.exportServiceLogsFile(fileName)

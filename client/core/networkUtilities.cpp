@@ -23,7 +23,7 @@
     #include <sys/socket.h>
     #include <unistd.h>
 #endif
-#if defined(Q_OS_MAC) && !defined(Q_OS_IOS)
+#if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     #include <sys/param.h>
     #include <sys/sysctl.h>
     #include <sys/socket.h>
@@ -390,7 +390,7 @@ QString NetworkUtilities::getGatewayAndIface()
     close(sock);
     return gateway_address;
 #endif
-#if defined(Q_OS_MAC) && !defined(Q_OS_IOS)
+#if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     QString gateway;
     int mib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_FLAGS, RTF_GATEWAY};
     int afinet_type[] = {AF_INET, AF_INET6};
