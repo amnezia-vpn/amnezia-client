@@ -17,6 +17,8 @@ import "../Components"
 PageType {
     id: root
 
+    property var processedServer
+
     Connections {
         target: ServersModel
 
