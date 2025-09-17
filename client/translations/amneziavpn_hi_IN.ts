@@ -1392,44 +1392,44 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="23"/>
         <source>Settings updated successfully</source>
-        <translation type="unfinished">सेटिंग्स सफलतापूर्वक अपडेट हो गईं</translation>
+        <translation>सेटिंग्स सफलतापूर्वक अपडेट हो गईं</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="68"/>
         <source>CryptPad settings</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad सेटिंग्स</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="79"/>
         <source>Host</source>
-        <translation type="unfinished">मेज़बान</translation>
+        <translation>मेज़बान</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="89"/>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="110"/>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="131"/>
         <source>Copied</source>
-        <translation type="unfinished">कॉपी किया गया</translation>
+        <translation>कॉपी किया गया</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="100"/>
         <source>Port</source>
-        <translation type="unfinished"></translation>
+        <translation>पोर्ट</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="121"/>
         <source>URL</source>
-        <translation type="unfinished"></translation>
+        <translation>यूआरएल</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="151"/>
         <source>Open CryptPad in browser</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad को ब्राउज़र में खोलें</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="163"/>
         <source>CryptPad is a private-by-design alternative to popular office tools and cloud services. All the content stored on CryptPad is end-to-end encrypted. This means that documents, chats, and files are unreadable outside of the session in which they are created.</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad लोकप्रिय कार्यालय उपकरणों और क्लाउड सेवाओं के लिए एक निजी-द्वारा-डिजाइन विकल्प है। CryptPad में संग्रहित सभी सामग्री एन्ड-टू-एन्ड एन्क्रिप्टेड है। इसका मतलब यह है कि दस्तावेज़, चैट और फाइलें उस सत्र के बाहर पढ़ने योग्य नहीं हैं जिसमें वे बनाई गई हैं।</translation>
     </message>
 </context>
 <context>
@@ -4372,7 +4372,7 @@ subscription key</source>
         <location filename="../containers/containers_defs.cpp" line="107"/>
         <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <source>CryptPad</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="11"/>
@@ -4836,7 +4836,7 @@ Features:
     <message>
         <location filename="../containers/containers_defs.cpp" line="234"/>
         <source>CryptPad is a private-by-design alternative to popular office tools and cloud services. All the content stored on CryptPad is end-to-end encrypted. This means that documents, chats, and files are unreadable outside of the session in which they are created.</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad लोकप्रिय कार्यालय उपकरणों और क्लाउड सेवाओं के लिए एक निजी-द्वारा-डिजाइन विकल्प है। CryptPad में संग्रहित सभी सामग्री एन्ड-टू-एन्ड एन्क्रिप्टेड है। इसका मतलब यह है कि दस्तावेज़, चैट और फाइलें उस सत्र के बाहर पढ़ने योग्य नहीं हैं जिसमें वे बनाई गई हैं।</translation>
     </message>
     <message>
         <source>Shadowsocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>

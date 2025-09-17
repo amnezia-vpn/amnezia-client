@@ -1455,44 +1455,44 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="23"/>
         <source>Settings updated successfully</source>
-        <translation type="unfinished"></translation>
+        <translation>تنظیمات با موفقیت به‌روزرسانی شد</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="68"/>
         <source>CryptPad settings</source>
-        <translation type="unfinished"></translation>
+        <translation>تنظیمات CryptPad</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="79"/>
         <source>Host</source>
-        <translation type="unfinished"></translation>
+        <translation>هاست</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="89"/>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="110"/>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="131"/>
         <source>Copied</source>
-        <translation type="unfinished">کپی شد</translation>
+        <translation>کپی شد</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="100"/>
         <source>Port</source>
-        <translation type="unfinished">پورت</translation>
+        <translation>پورت</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="121"/>
         <source>URL</source>
-        <translation type="unfinished"></translation>
+        <translation>آدرس</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="151"/>
         <source>Open CryptPad in browser</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad را در مرورگر باز کنید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="163"/>
         <source>CryptPad is a private-by-design alternative to popular office tools and cloud services. All the content stored on CryptPad is end-to-end encrypted. This means that documents, chats, and files are unreadable outside of the session in which they are created.</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad جایگزین محرمانه‌محور برای ابزارهای اداری محبوب و خدمات ابری است. تمام محتوای ذخیره‌شده در CryptPad از انتها تا انتها رمزگذاری شده است. این بدان معناست که اسناد، گفتگوها و فایل‌ها خارج از جلسه‌ای که در آن ایجاد شده‌اند، خواندنی نیستند.</translation>
     </message>
 </context>
 <context>
@@ -5077,7 +5077,7 @@ Features:
     <message>
         <location filename="../containers/containers_defs.cpp" line="234"/>
         <source>CryptPad is a private-by-design alternative to popular office tools and cloud services. All the content stored on CryptPad is end-to-end encrypted. This means that documents, chats, and files are unreadable outside of the session in which they are created.</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad جایگزین محرمانه‌محور برای ابزارهای اداری محبوب و خدمات ابری است. تمام محتوای ذخیره‌شده در CryptPad از انتها تا انتها رمزگذاری شده است. این بدان معناست که اسناد، گفتگوها و فایل‌ها خارج از جلسه‌ای که در آن ایجاد شده‌اند، خواندنی نیستند.</translation>
     </message>
     <message>
         <source>WireGuard - New popular VPN protocol with high performance, high speed and low power consumption. Recommended for regions with low levels of censorship.</source>
@@ -5192,7 +5192,7 @@ For more detailed information, you can
         <location filename="../containers/containers_defs.cpp" line="107"/>
         <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <source>CryptPad</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad</translation>
     </message>
     <message>
         <location filename="../3rd/qtkeychain/qtkeychain/libsecret.cpp" line="119"/>

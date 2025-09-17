@@ -1420,44 +1420,44 @@ Thank you for staying with us!</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="23"/>
         <source>Settings updated successfully</source>
-        <translation type="unfinished"></translation>
+        <translation>تم تحديث الإعدادات بنجاح</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="68"/>
         <source>CryptPad settings</source>
-        <translation type="unfinished"></translation>
+        <translation>إعدادات CryptPad</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="79"/>
         <source>Host</source>
-        <translation type="unfinished">استضافة</translation>
+        <translation>استضافة</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="89"/>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="110"/>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="131"/>
         <source>Copied</source>
-        <translation type="unfinished"></translation>
+        <translation>تم النسخ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="100"/>
         <source>Port</source>
-        <translation type="unfinished">منفذ</translation>
+        <translation>منفذ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="121"/>
         <source>URL</source>
-        <translation type="unfinished"></translation>
+        <translation>رابط</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="151"/>
         <source>Open CryptPad in browser</source>
-        <translation type="unfinished"></translation>
+        <translation>افتح CryptPad في المتصفح</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceCryptpadSettings.qml" line="163"/>
         <source>CryptPad is a private-by-design alternative to popular office tools and cloud services. All the content stored on CryptPad is end-to-end encrypted. This means that documents, chats, and files are unreadable outside of the session in which they are created.</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad هو بديل مصمم للخصوصية لأدوات المكاتب الشائعة والخدمات السحابية. جميع المحتويات المخزنة في CryptPad مشفرة من النهاية إلى النهاية. هذا يعني أن المستندات والمحادثات والملفات غير قابلة للقراءة خارج الجلسة التي تم إنشاؤها فيها.</translation>
     </message>
 </context>
 <context>
@@ -4325,7 +4325,7 @@ subscription key</source>
         <location filename="../containers/containers_defs.cpp" line="107"/>
         <location filename="../protocols/protocols_defs.cpp" line="82"/>
         <source>CryptPad</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad</translation>
     </message>
     <message>
         <location filename="../core/errorstrings.cpp" line="11"/>
@@ -4788,7 +4788,7 @@ Features:
     <message>
         <location filename="../containers/containers_defs.cpp" line="234"/>
         <source>CryptPad is a private-by-design alternative to popular office tools and cloud services. All the content stored on CryptPad is end-to-end encrypted. This means that documents, chats, and files are unreadable outside of the session in which they are created.</source>
-        <translation type="unfinished"></translation>
+        <translation>CryptPad هو بديل مصمم للخصوصية لأدوات المكاتب الشائعة والخدمات السحابية. جميع المحتويات المخزنة في CryptPad مشفرة من النهاية إلى النهاية. هذا يعني أن المستندات والمحادثات والملفات غير قابلة للقراءة خارج الجلسة التي تم إنشاؤها فيها.</translation>
     </message>
     <message>
         <source>Shadowsocks - masks VPN traffic, making it similar to normal web traffic, but it may be recognized by analysis systems in some highly censored regions.</source>
