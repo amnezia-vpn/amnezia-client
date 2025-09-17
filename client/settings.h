@@ -174,7 +174,7 @@ public:
 
     QLocale getAppLanguage()
     {
-        QString localeStr = m_settings.value("Conf/appLanguage").toString();
+        QString localeStr = m_settings.value("Conf/appLanguage", QLocale::system().name()).toString();
         return QLocale(localeStr);
     };
     void setAppLanguage(QLocale locale)
