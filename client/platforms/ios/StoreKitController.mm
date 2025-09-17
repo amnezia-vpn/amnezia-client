@@ -17,7 +17,6 @@ API_AVAILABLE(ios(15.0), macos(12.0))
                                                             NSArray<NSString *> *invalidIdentifiers,
                                                             NSError *_Nullable error);
 @property (nonatomic, strong) SKProductsRequest *productsRequest;
-@property (nonatomic, strong) id transactionObserverTask;
 @end
 
 @implementation StoreKitController
@@ -39,7 +38,6 @@ API_AVAILABLE(ios(15.0), macos(12.0))
     self = [super init];
     if (self) {
         [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
-        [self startTransactionObserver];
     }
     return self;
 }
@@ -47,15 +45,6 @@ API_AVAILABLE(ios(15.0), macos(12.0))
 - (void)dealloc
 {
     [[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
-    if (self.transactionObserverTask) {
-        [self.transactionObserverTask cancel];
-        self.transactionObserverTask = nil;
-    }
-}
-
-- (void)startTransactionObserver API_AVAILABLE(ios(15.0), macos(12.0))
-{
-    NSLog(@"StoreKit 2 transaction observer initialized");
 }
 
 - (void)purchaseProduct:(NSString *)productIdentifier

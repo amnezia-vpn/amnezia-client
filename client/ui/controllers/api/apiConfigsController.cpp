@@ -2,8 +2,6 @@
 
 #include <QClipboard>
 #include <QEventLoop>
-#include <algorithm>
-
 #include "amnezia_application.h"
 #include "configurators/wireguard_configurator.h"
 #include "core/api/apiDefs.h"
@@ -350,28 +348,6 @@ void ApiConfigsController::copyVpnKeyToClipboard()
 
 bool ApiConfigsController::fillAvailableServices()
 {
-    // iOS: only fetch and log available IAP products (no purchase here)
-#ifdef Q_OS_IOS
-    {
-        const QStringList productIds = { QStringLiteral("com.amnezia.amneziavpn.1_month"), QStringLiteral("com.amnezia.AmneziaVPN.6_month") };
-        IosController::Instance()->fetchProducts(
-                productIds, [](const QList<QVariantMap> &products, const QStringList &invalidIds, const QString &errorString) {
-                    if (!errorString.isEmpty()) {
-                        qDebug() << "IAP fetch error:" << errorString;
-                        return;
-                    }
-                    for (const auto &p : products) {
-                        qDebug().nospace() << "IAP product id=" << p.value("productId").toString()
-                                           << ", title=" << p.value("title").toString() << ", price=" << p.value("price").toString() << " "
-                                           << p.value("currencyCode").toString();
-                    }
-                    if (!invalidIds.isEmpty()) {
-                        qDebug() << "Invalid IAP IDs:" << invalidIds;
-                    }
-                });
-    }
-#endif
-
     QJsonObject apiPayload;
     apiPayload[configKey::osVersion] = QSysInfo::productType();
     apiPayload[configKey::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
@@ -402,29 +378,19 @@ bool ApiConfigsController::importSerivceFromAppStore()
         const QStringList productIds = { QStringLiteral("com.amnezia.amneziavpn.1_month"), QStringLiteral("com.amnezia.AmneziaVPN.6_month") };
 
         QList<QVariantMap> products;
-        QStringList invalidIds;
         QString fetchError;
         QEventLoop waitFetch;
         IosController::Instance()->fetchProducts(productIds,
                                                  [&](const QList<QVariantMap> &prods, const QStringList &invalid, const QString &err) {
+                                                     Q_UNUSED(invalid)
                                                      products = prods;
-                                                     invalidIds = invalid;
                                                      fetchError = err;
                                                      waitFetch.quit();
                                                  });
         waitFetch.exec();
 
-        if (fetchError.isEmpty()) {
-            for (const auto &candidate : productIds) {
-                if (invalidIds.contains(candidate))
-                    continue;
-                const bool found = std::any_of(products.begin(), products.end(),
-                                               [&](const QVariantMap &p) { return p.value("productId").toString() == candidate; });
-                if (found) {
-                    chosenProductId = candidate;
-                    break;
-                }
-            }
+        if (fetchError.isEmpty() && !products.isEmpty()) {
+            chosenProductId = products.first().value("productId").toString();
         }
         if (chosenProductId.isEmpty() && !productIds.isEmpty()) {
             chosenProductId = productIds.first();
