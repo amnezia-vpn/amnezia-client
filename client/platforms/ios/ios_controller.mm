@@ -867,40 +867,52 @@ void IosController::purchaseProduct(const QString &productId,
                                    std::function<void(bool success,
                                                       const QString &transactionId,
                                                       const QString &purchasedProductId,
-                                                      const QString &receiptBase64,
+                                                      const QString &originalTransactionId,
                                                       const QString &errorString)> &&callback)
 {
-    StoreKitController *controller = [StoreKitController sharedInstance];
-    __block auto cb = std::move(callback);
-    [controller purchaseProduct:productId.toNSString() completion:^(BOOL s,
-                                                                    NSString * _Nullable transactionId,
-                                                                    NSString * _Nullable prodId,
-                                                                    NSString * _Nullable receipt,
-                                                                    NSError * _Nullable error) {
-        const QString txId = QString::fromUtf8((transactionId ?: @"").UTF8String);
-        const QString pId  = QString::fromUtf8((prodId        ?: @"").UTF8String);
-        const QString rcpt = QString::fromUtf8(((receipt)     ?: @"").UTF8String);
-        const QString err  = QString::fromUtf8((error.localizedDescription ?: @"").UTF8String);
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        StoreKitController *controller = [StoreKitController sharedInstance];
+        __block auto cb = std::move(callback);
+        [controller purchaseProduct:productId.toNSString() completion:^(BOOL s,
+                                                                        NSString * _Nullable transactionId,
+                                                                        NSString * _Nullable prodId,
+                                                                        NSString * _Nullable originalTxId,
+                                                                        NSError * _Nullable error) {
+            const QString txId = QString::fromUtf8((transactionId ?: @"").UTF8String);
+            const QString pId  = QString::fromUtf8((prodId        ?: @"").UTF8String);
+            const QString origTxId = QString::fromUtf8((originalTxId ?: @"").UTF8String);
+            const QString err  = QString::fromUtf8((error.localizedDescription ?: @"").UTF8String);
 
-        if (cb) {
-            cb(s, txId, pId, rcpt, err);
+            if (cb) {
+                cb(s, txId, pId, origTxId, err);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(false, QString(), QString(), QString(), "StoreKit 2 requires iOS 15.0 or later");
         }
-    }];
+    }
 }
 
 void IosController::restorePurchases(std::function<void(bool success,
                                                        const QString &errorString)> &&callback)
 {
-    StoreKitController *controller = [StoreKitController sharedInstance];
-    [controller restorePurchasesWithCompletion:^(BOOL s, NSError * _Nullable error) {
-        QString err;
-        if (error) {
-            err = QString::fromUtf8(error.localizedDescription.UTF8String);
-        }
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        StoreKitController *controller = [StoreKitController sharedInstance];
+        [controller restorePurchasesWithCompletion:^(BOOL s, NSError * _Nullable error) {
+            QString err;
+            if (error) {
+                err = QString::fromUtf8(error.localizedDescription.UTF8String);
+            }
+            if (callback) {
+                callback(s, err);
+            }
+        }];
+    } else {
         if (callback) {
-            callback(s, err);
+            callback(false, "StoreKit 2 requires iOS 15.0 or later");
         }
-    }];
+    }
 }
 
 void IosController::fetchProducts(const QStringList &productIds,
@@ -908,45 +920,48 @@ void IosController::fetchProducts(const QStringList &productIds,
                                                      const QStringList &invalidIds,
                                                      const QString &errorString)> &&callback)
 {
-    StoreKitController *controller = [StoreKitController sharedInstance];
-    NSMutableSet<NSString *> *ids = [NSMutableSet setWithCapacity:productIds.size()];
-    for (const auto &pid : productIds) {
-        [ids addObject:pid.toNSString()];
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        StoreKitController *controller = [StoreKitController sharedInstance];
+        NSMutableSet<NSString *> *ids = [NSMutableSet setWithCapacity:productIds.size()];
+        for (const auto &pid : productIds) {
+            [ids addObject:pid.toNSString()];
+        }
+        __block auto cb = std::move(callback);
+
+        [controller fetchProductsWithIdentifiers:ids
+                                      completion:^(NSArray<NSDictionary *> * _Nonnull products,
+                                                   NSArray<NSString *> * _Nonnull invalidIdentifiers,
+                                                   NSError * _Nullable error) {
+            QList<QVariantMap> outProducts;
+            for (NSDictionary *p in products) {
+                QVariantMap m;
+                m["productId"] = QString::fromUtf8([p[@"productId"] UTF8String]);
+                m["title"] = QString::fromUtf8([p[@"title"] UTF8String]);
+                m["description"] = QString::fromUtf8([p[@"description"] UTF8String]);
+                m["price"] = QString::fromUtf8([p[@"price"] UTF8String]);
+                m["currencyCode"] = QString::fromUtf8([p[@"currencyCode"] UTF8String]);
+                outProducts.push_back(m);
+            }
+
+            QStringList invalid;
+            for (NSString *inv in invalidIdentifiers) {
+                invalid.push_back(QString::fromUtf8(inv.UTF8String));
+            }
+
+            QString err;
+            if (error) {
+                err = QString::fromUtf8(error.localizedDescription.UTF8String);
+            }
+
+            if (cb) {
+                cb(outProducts, invalid, err);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(QList<QVariantMap>(), QStringList(), "StoreKit 2 requires iOS 15.0 or later");
+        }
     }
-    __block auto cb = std::move(callback);
-
-    [controller fetchProductsWithIdentifiers:ids
-                                  completion:^(NSArray<SKProduct *> * _Nonnull products,
-                                               NSArray<NSString *> * _Nonnull invalidIdentifiers,
-                                               NSError * _Nullable error) {
-        QList<QVariantMap> outProducts;
-        for (SKProduct *p in products) {
-            QVariantMap m;
-            m["productId"] = QString::fromUtf8(p.productIdentifier.UTF8String);
-            m["title"] = QString::fromUtf8(p.localizedTitle.UTF8String);
-            m["description"] = QString::fromUtf8(p.localizedDescription.UTF8String);
-            // Price and currency
-            QString price = QString::fromUtf8(p.price.stringValue.UTF8String);
-            NSString *currencyCode = [p.priceLocale objectForKey:NSLocaleCurrencyCode];
-            m["price"] = price;
-            m["currencyCode"] = currencyCode ? QString::fromUtf8(currencyCode.UTF8String) : QString();
-            outProducts.push_back(m);
-        }
-
-        QStringList invalid;
-        for (NSString *inv in invalidIdentifiers) {
-            invalid.push_back(QString::fromUtf8(inv.UTF8String));
-        }
-
-        QString err;
-        if (error) {
-            err = QString::fromUtf8(error.localizedDescription.UTF8String);
-        }
-
-        if (cb) {
-            cb(outProducts, invalid, err);
-        }
-    }];
 }
 
 void IosController::requestInetAccess() {

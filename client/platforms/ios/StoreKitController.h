@@ -8,6 +8,11 @@
 #import <Foundation/Foundation.h>
 #import <StoreKit/StoreKit.h>
 
+@class Product;
+@class Transaction;
+@class VerificationResult;
+
+API_AVAILABLE(ios(15.0), macos(12.0))
 @interface StoreKitController : NSObject
 
 + (instancetype)sharedInstance;
@@ -16,14 +21,14 @@
              completion:(void (^)(BOOL success,
                                   NSString *_Nullable transactionId,
                                   NSString *_Nullable productId,
-                                  NSString *_Nullable receiptBase64,
+                                  NSString *_Nullable originalTransactionId,
                                   NSError *_Nullable error))completion;
 
 - (void)restorePurchasesWithCompletion:(void (^)(BOOL success, NSError *_Nullable error))completion;
 
 // Fetch product information for a set of identifiers without initiating a purchase
 - (void)fetchProductsWithIdentifiers:(NSSet<NSString *> *)productIdentifiers
-                          completion:(void (^)(NSArray<SKProduct *> *products,
+                          completion:(void (^)(NSArray<NSDictionary *> *products,
                                                NSArray<NSString *> *invalidIdentifiers,
                                                NSError *_Nullable error))completion;
 
