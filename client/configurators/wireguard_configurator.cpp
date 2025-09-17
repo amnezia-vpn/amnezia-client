@@ -8,12 +8,10 @@
 #include <QTemporaryDir>
 #include <QTemporaryFile>
 
-#ifndef IOS_SIM
 #include <openssl/pem.h>
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
-#endif
 
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
@@ -41,9 +39,6 @@ WireguardConfigurator::WireguardConfigurator(std::shared_ptr<Settings> settings,
 
 WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
 {
-#ifdef IOS_SIM
-    return {};
-#else
     // TODO review
     constexpr size_t EDDSA_KEY_LENGTH = 32;
 
@@ -71,7 +66,6 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
     connData.clientPubKey = QByteArray::fromRawData((char *)pub, keySize).toBase64();
 
     return connData;
-#endif
 }
 
 QList<QHostAddress> WireguardConfigurator::getIpsFromConf(const QString &input)
@@ -100,10 +94,6 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
                                                                                     const QJsonObject &containerConfig,
                                                                                     ErrorCode &errorCode)
 {
-#ifdef IOS_SIM
-    errorCode = ErrorCode::NotSupportedOnThisPlatform;
-    return {};
-#else
     WireguardConfigurator::ConnectionData connData = WireguardConfigurator::genClientKeys();
     connData.host = credentials.hostName;
     connData.port = containerConfig.value(m_protocolName).toObject().value(config_key::port).toString(m_defaultPort);
@@ -186,7 +176,6 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
             m_serverController->replaceVars(script, m_serverController->genVarsForScript(credentials, container)));
 
     return connData;
-#endif
 }
 
 QString WireguardConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,

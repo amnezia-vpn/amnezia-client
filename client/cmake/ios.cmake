@@ -45,6 +45,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/StoreKitController.mm
 )
@@ -76,7 +77,7 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON
     XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks"
-    # Embed app extension only for device builds; simulator cannot run NE extensions
+    XCODE_EMBED_APP_EXTENSIONS networkextension
 )
 
 if(DEFINED DEPLOY)
@@ -133,70 +134,13 @@ set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 
-## Detect if building for iOS Simulator (sysroot contains 'iphonesimulator')
-set(MZ_IOS_SIMULATOR OFF)
-if(CMAKE_OSX_SYSROOT MATCHES "iphonesimulator")
-    set(MZ_IOS_SIMULATOR ON)
-endif()
+add_subdirectory(ios/networkextension)
+add_dependencies(${PROJECT} networkextension)
 
-# On simulator, avoid linking AVFoundation to prevent camera permission plugin linkage
-if(MZ_IOS_SIMULATOR)
-    list(REMOVE_ITEM LIBS ${FW_AVFOUNDATION})
-endif()
+set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework"
+)
 
-if(NOT MZ_IOS_SIMULATOR)
-    # Device build: include Network Extension target and OpenVPNAdapter device framework
-    # Include camera QR reader only on device
-    target_sources(${PROJECT} PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
-    )
-    add_subdirectory(ios/networkextension)
-    add_dependencies(${PROJECT} networkextension)
+set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/)
+target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework")
 
-    # Embed the extension into the app
-    set_target_properties(${PROJECT} PROPERTIES
-        XCODE_EMBED_APP_EXTENSIONS networkextension
-    )
-
-    # Link and embed OpenVPNAdapter device framework for the extension
-    set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
-        "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework"
-    )
-    set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/)
-    target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework")
-else()
-    message(STATUS "Building for iOS Simulator: skipping Network Extension and device-only OpenVPNAdapter.framework")
-    # For simulator builds, define a macro if app code needs to conditionally exclude NE features at runtime
-    target_compile_definitions(${PROJECT} PRIVATE MZ_IOS_SIMULATOR IOS_SIM)
-    # Ensure simulator architecture matches host (arm64 on Apple Silicon, x86_64 on Intel)
-    if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
-        set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "" FORCE)
-    else()
-        set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "" FORCE)
-    endif()
-
-    # Prevent generation of auto plugin import sources entirely on simulator
-    set_target_properties(${PROJECT} PROPERTIES QT_SKIP_AUTO_PLUGIN_IMPORT ON)
-    target_compile_definitions(${PROJECT} PRIVATE QT_NO_PLUGIN)
-
-    # Exclude camera permission plugin on simulator to avoid linking iOS-only object files
-    # 1) Try to exclude via qt_import_plugins (by plugin and by type)
-    if(COMMAND qt_import_plugins)
-        # Whitelist only essential plugin types for simulator. Do not import 'permissions' plugins at all.
-        qt_import_plugins(${PROJECT}
-            INCLUDE_BY_TYPE platforms imageformats iconengines styles
-            EXCLUDE_BY_TYPE permissions
-            EXCLUDE QDarwinCameraPermissionPlugin QDarwinMicrophonePermissionPlugin QDarwinBluetoothPermissionPlugin
-        )
-    endif()
-    # 2) Additionally, define guard macros the generated import file checks for
-    target_compile_definitions(${PROJECT} PRIVATE 
-        QT_PLUGIN_DISABLED_QDarwinCameraPermissionPlugin
-        QT_PLUGIN_DISABLED_QDarwinMicrophonePermissionPlugin
-        QT_PLUGIN_DISABLED_QDarwinBluetoothPermissionPlugin
-        QT_NO_QDarwinCameraPermissionPlugin
-    )
-
-    # Disable default plugin auto-import to ensure no iOS-only permissions plugins get pulled in
-    set_property(TARGET ${PROJECT} PROPERTY QT_DEFAULT_PLUGINS OFF)
-endif()

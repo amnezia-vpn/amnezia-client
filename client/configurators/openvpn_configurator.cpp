@@ -20,11 +20,9 @@
 #include "settings.h"
 #include "utilities.h"
 
-#ifndef IOS_SIM
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
-#endif
 
 
 OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings, const QSharedPointer<ServerController> &serverController,
@@ -36,10 +34,6 @@ OpenVpnConfigurator::OpenVpnConfigurator(std::shared_ptr<Settings> settings, con
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(const ServerCredentials &credentials,
                                                                               DockerContainer container, ErrorCode &errorCode)
 {
-#ifdef IOS_SIM
-    errorCode = ErrorCode::NotSupportedOnThisPlatform;
-    return {};
-#else
     OpenVpnConfigurator::ConnectionData connData = OpenVpnConfigurator::createCertRequest();
     connData.host = credentials.hostName;
 
@@ -76,7 +70,6 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
     }
 
     return connData;
-#endif
 }
 
 QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,
@@ -213,9 +206,6 @@ ErrorCode OpenVpnConfigurator::signCert(DockerContainer container, const ServerC
 
 OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
 {
-#ifdef IOS_SIM
-    return {};
-#else
     ConnectionData connData;
     connData.clientId = Utils::getRandomString(32);
 
@@ -302,5 +292,4 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::createCertRequest()
     EVP_PKEY_free(pKey); // this will also free the rsa key
 
     return connData;
-#endif
 }

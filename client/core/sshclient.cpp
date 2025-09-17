@@ -10,7 +10,6 @@ const uint32_t S_IRWXU = 0644;
 #endif
 
 namespace libssh {
-#ifndef IOS_SIM
     constexpr auto libsshTimeoutError{"Timeout connecting to"};
 
     std::function<QString()> Client::m_passphraseCallback;
@@ -363,23 +362,3 @@ namespace libssh {
         return errorCode;
     }
 }
-#else // IOS_SIM
-
-    std::function<QString()> Client::m_passphraseCallback;
-
-    int Client::callback(const char *, char *, size_t, int, int, void *) { return 0; }
-
-    ErrorCode Client::connectToHost(const ServerCredentials &) { return ErrorCode::NotSupportedOnThisPlatform; }
-    void Client::disconnectFromHost() {}
-    ErrorCode Client::executeCommand(const QString &, const std::function<ErrorCode (const QString &, Client &)> &, const std::function<ErrorCode (const QString &, Client &)> &)
-    { return ErrorCode::NotSupportedOnThisPlatform; }
-    ErrorCode Client::writeResponse(const QString &) { return ErrorCode::NotSupportedOnThisPlatform; }
-    ErrorCode Client::closeChannel() { return ErrorCode::NotSupportedOnThisPlatform; }
-    void Client::closeScpSession() {}
-    ErrorCode Client::fromLibsshErrorCode() { return ErrorCode::NotSupportedOnThisPlatform; }
-    ErrorCode Client::fromFileErrorCode(QFileDevice::FileError) { return ErrorCode::NotSupportedOnThisPlatform; }
-    ErrorCode Client::scpFileCopy(const ScpOverwriteMode, const QString&, const QString&, const QString&) { return ErrorCode::NotSupportedOnThisPlatform; }
-    ErrorCode Client::getDecryptedPrivateKey(const ServerCredentials &, QString &, const std::function<QString()> &) { return ErrorCode::NotSupportedOnThisPlatform; }
-
-}
-#endif // IOS_SIM

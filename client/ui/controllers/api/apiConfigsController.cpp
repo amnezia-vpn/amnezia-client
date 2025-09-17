@@ -170,7 +170,7 @@ namespace
             auto clientProtocolConfig =
                     QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
 
-            // TODO looks like this block can be removed after v1 configs EOL
+            //TODO looks like this block can be removed after v1 configs EOL
 
             serverProtocolConfig[config_key::junkPacketCount] = clientProtocolConfig.value(config_key::junkPacketCount);
             serverProtocolConfig[config_key::junkPacketMinSize] = clientProtocolConfig.value(config_key::junkPacketMinSize);
