@@ -17,6 +17,31 @@ import "../Components"
 PageType {
     id: root
 
+    Connections {
+        target: ServersModel
+
+        function onProcessedServerChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    SortFilterProxyModel {
+        id: proxyServersModel
+        objectName: "proxyServersModel"
+
+        sourceModel: ServersModel
+        filters: [
+            ValueFilter {
+                roleName: "isCurrentlyProcessed"
+                value: true
+            }
+        ]
+
+        Component.onCompleted: {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
     Component.onCompleted: {
         PageController.showBusyIndicator(true)
         ApiConfigsController.prepareVpnKeyExport()
@@ -40,7 +65,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
-                text: qsTr(processedServer.name + "\nsubscription key")
+                text: qsTr(root.processedServer.name + "\nsubscription key")
                 font.pixelSize: 32
                 font.bold: true
                 color: AmneziaStyle.color.paleGray
@@ -177,7 +202,7 @@ PageType {
 
                 Header2Type {
                     Layout.fillWidth: true
-                    headerText: qsTr(processedServer.name + " Subscription key")
+                    headerText: qsTr(root.processedServer.name + " Subscription key")
                 }
 
                 TextArea {
