@@ -40,7 +40,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
-                text: qsTr("Amnezia Premium\nsubscription key")
+                text: qsTr(processedServer.name + "\nsubscription key")
                 font.pixelSize: 32
                 font.bold: true
                 color: AmneziaStyle.color.paleGray
@@ -177,7 +177,7 @@ PageType {
 
                 Header2Type {
                     Layout.fillWidth: true
-                    headerText: qsTr("Amnezia Premium Subscription key")
+                    headerText: qsTr(processedServer.name + " Subscription key")
                 }
 
                 TextArea {
