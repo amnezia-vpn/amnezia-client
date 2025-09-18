@@ -1,8 +1,8 @@
 #include "apiNewsController.h"
 
+#include "core/api/apiUtils.h"
 #include <QJsonDocument>
 #include <QJsonObject>
-#include "core/api/apiUtils.h"
 
 namespace
 {
@@ -13,10 +13,8 @@ namespace
     }
 }
 
-ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel,
-                                     const std::shared_ptr<Settings> &settings,
-                                     const QSharedPointer<ServersModel> &serversModel,
-                                     QObject *parent)
+ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel, const std::shared_ptr<Settings> &settings,
+                                     const QSharedPointer<ServersModel> &serversModel, QObject *parent)
     : QObject(parent), m_newsModel(newsModel), m_settings(settings), m_serversModel(serversModel)
 {
 }
@@ -32,8 +30,8 @@ void ApiNewsController::fetchNews()
         qDebug() << "No Gateway stacks, skip fetchNews";
         return;
     }
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),
-                                        apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
+    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_settings->isStrictKillSwitchEnabled());
     QByteArray responseBody;
     QJsonObject payload;
     payload.insert("locale", m_settings->getAppLanguage().name().split("_").first());
@@ -64,4 +62,4 @@ void ApiNewsController::fetchNews()
     }
 
     m_newsModel->updateModel(newsArray);
-} 
+}

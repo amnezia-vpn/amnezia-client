@@ -1,16 +1,17 @@
 #ifndef NEWSMODEL_H
 #define NEWSMODEL_H
 
+#include "settings.h"
 #include <QAbstractListModel>
 #include <QDateTime>
-#include <QVector>
-#include <QString>
 #include <QJsonArray>
 #include <QSet>
+#include <QString>
+#include <QVector>
 #include <memory>
-#include "settings.h"
 
-struct NewsItem {
+struct NewsItem
+{
     QString id;
     QString title;
     QString content;
@@ -32,7 +33,7 @@ public:
     };
     explicit NewsModel(const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
     Q_INVOKABLE void markAsRead(int index);
-    
+
     Q_PROPERTY(int processedIndex READ processedIndex WRITE setProcessedIndex NOTIFY processedIndexChanged)
     Q_PROPERTY(bool hasUnread READ hasUnread NOTIFY hasUnreadChanged)
     int processedIndex() const;
@@ -58,4 +59,4 @@ private:
     void saveReadIds() const;
 };
 
-#endif // NEWSMODEL_H 
+#endif // NEWSMODEL_H

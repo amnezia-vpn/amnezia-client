@@ -54,27 +54,27 @@ PageType {
             implicitWidth: newsList.width
             implicitHeight: content.implicitHeight
 
-        ColumnLayout {
-            id: content
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
+            ColumnLayout {
+                id: content
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
 
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                leftImageSource: read ? "" : "qrc:/images/controls/unread-dot.svg"
-                isSmallLeftImage: !read
-                text: title
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                LabelWithButtonType {
+                    Layout.fillWidth: true
+                    leftImageSource: read ? "" : "qrc:/images/controls/unread-dot.svg"
+                    isSmallLeftImage: !read
+                    text: title
+                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                clickedFunction: function() {
-                        NewsModel.markAsRead(index)
-                        NewsModel.processedIndex = index
-                    PageController.goToPage(PageEnum.PageSettingsNewsDetail)
+                    clickedFunction: function() {
+                            NewsModel.markAsRead(index)
+                            NewsModel.processedIndex = index
+                        PageController.goToPage(PageEnum.PageSettingsNewsDetail)
+                    }
                 }
-            }
-                
-            DividerType {}
+
+                DividerType {}
             }
         }
     }

@@ -1,17 +1,15 @@
 #include "ui/models/newsModel.h"
+#include <QDir>
+#include <QFile>
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QQmlEngine>
-#include <QFile>
-#include <QDir>
 #include <QStandardPaths>
-#include <QJsonDocument>
 #include <algorithm>
 
-NewsModel::NewsModel(const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QAbstractListModel(parent)
-    , m_settings(settings)
+NewsModel::NewsModel(const std::shared_ptr<Settings> &settings, QObject *parent) : QAbstractListModel(parent), m_settings(settings)
 {
     loadReadIds();
 }
@@ -29,20 +27,13 @@ QVariant NewsModel::data(const QModelIndex &index, int role) const
 
     const NewsItem &item = m_items.at(index.row());
     switch (role) {
-    case IdRole:
-        return item.id;
-    case TitleRole:
-        return item.title;
-    case ContentRole:
-        return item.content;
-    case TimestampRole:
-        return item.timestamp.toString(Qt::ISODate);
-    case IsReadRole:
-        return item.read;
-    case IsProcessedRole:
-        return index.row() == m_processedIndex;
-    default:
-        return QVariant();
+    case IdRole: return item.id;
+    case TitleRole: return item.title;
+    case ContentRole: return item.content;
+    case TimestampRole: return item.timestamp.toString(Qt::ISODate);
+    case IsReadRole: return item.read;
+    case IsProcessedRole: return index.row() == m_processedIndex;
+    default: return QVariant();
     }
 }
 
@@ -67,7 +58,7 @@ void NewsModel::markAsRead(int index)
         m_readIds.insert(m_items[index].id);
         saveReadIds();
         QModelIndex idx = createIndex(index, 0);
-        emit dataChanged(idx, idx, {IsReadRole});
+        emit dataChanged(idx, idx, { IsReadRole });
         emit hasUnreadChanged();
     }
 }
@@ -94,7 +85,8 @@ void NewsModel::updateModel(const QJsonArray &serverItems)
 
     QList<NewsItem> newItems;
     for (const QJsonValue &value : serverItems) {
-        if (!value.isObject()) continue;
+        if (!value.isObject())
+            continue;
         const QJsonObject obj = value.toObject();
         QString id = obj.value("id").toString();
 
@@ -112,9 +104,7 @@ void NewsModel::updateModel(const QJsonArray &serverItems)
 
     beginResetModel();
     m_items.append(newItems);
-    std::sort(m_items.begin(), m_items.end(), [](const NewsItem &a, const NewsItem &b) {
-        return a.timestamp > b.timestamp;
-    });
+    std::sort(m_items.begin(), m_items.end(), [](const NewsItem &a, const NewsItem &b) { return a.timestamp > b.timestamp; });
     endResetModel();
     emit hasUnreadChanged();
 }

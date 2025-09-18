@@ -21,6 +21,7 @@ PageType {
         filters: [ ValueFilter { roleName: "isProcessed"; value: true } ]
         Component.onCompleted: root.newsItem = proxyNews.get(0)
     }
+
     Connections {
         target: NewsModel
         function onProcessedIndexChanged() {
