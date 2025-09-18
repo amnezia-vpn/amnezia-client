@@ -108,11 +108,11 @@ PageType {
 
                 onClicked: {
                     var fileName = GC.isMobile()
-                        ? "amnezia_vpn_key.vpn"
+                        ? root.processedServer.name.toLowerCase().replace(/\s+/g, "_") + "_key.vpn"
                         : SystemController.getFileName(
                             qsTr("Save AmneziaVPN config"),
                             qsTr("Config files (*.vpn)"),
-                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/amnezia_vpn_key",
+                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + root.processedServer.name.toLowerCase().replace(/\s+/g, "_") + "_key",
                             true,
                             ".vpn"
                         )
