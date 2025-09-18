@@ -127,7 +127,12 @@ bool apiUtils::isPremiumServer(const QJsonObject &serverConfigObject)
 
 QString apiUtils::getPremiumV1VpnKey(const QJsonObject &serverConfigObject)
 {
-    if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV1) {
+    bool isCurrentPremV1 = (apiUtils::getConfigType(serverConfigObject) == apiDefs::ConfigType::AmneziaPremiumV1);
+    bool isLegacyPremV1 = (apiUtils::getConfigSource(serverConfigObject) == apiDefs::ConfigSource::Telegram)
+                          && !serverConfigObject.value(apiDefs::key::apiEndpoint).toString().isEmpty()
+                          && !serverConfigObject.value(apiDefs::key::apiKey).toString().isEmpty();
+
+    if (!isCurrentPremV1 && !isLegacyPremV1) {
         return {};
     }
 

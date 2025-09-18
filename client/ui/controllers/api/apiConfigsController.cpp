@@ -11,6 +11,7 @@
 #include "core/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"
 #include "version.h"
+#include "protocols/protocols_defs.h"
 
 namespace
 {
@@ -326,10 +327,49 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 
 void ApiConfigsController::prepareVpnKeyExport()
 {
-    auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
+    auto processedIndex = m_serversModel->getProcessedServerIndex();
+    auto serverConfigObject = m_serversModel->getServerConfig(processedIndex);
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     auto vpnKey = apiConfigObject.value(apiDefs::key::vpnKey).toString();
+
+    if (vpnKey.isEmpty()) {
+        QString generatedVpnKey = apiUtils::getPremiumV1VpnKey(serverConfigObject);
+
+        if (generatedVpnKey.isEmpty()) {
+            QJsonObject cfg = serverConfigObject;
+            QJsonArray containers = cfg.value(config_key::containers).toArray();
+            for (int i = 0; i < containers.size(); ++i) {
+                QJsonObject container = containers.at(i).toObject();
+                const auto protocols = ContainerProps::protocolsForContainer(
+                             ContainerProps::containerFromString(container.value(config_key::container).toString()));
+                for (const auto &proto : protocols) {
+                    const QString protoKey = ProtocolProps::protoToString(proto);
+                    if (!container.contains(protoKey)) {
+                        continue;
+                    }
+                    QJsonObject protoCfg = container.value(protoKey).toObject();
+                    protoCfg.remove(config_key::last_config);
+                    container[protoKey] = protoCfg;
+                }
+                containers.replace(i, container);
+            }
+            cfg[config_key::containers] = containers;
+
+            QByteArray compressed = QJsonDocument(cfg).toJson();
+            compressed = qCompress(compressed, 8);
+            generatedVpnKey = QString("vpn://%1").arg(
+                    QString(compressed.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)));
+        }
+
+        if (!generatedVpnKey.isEmpty()) {
+            vpnKey = generatedVpnKey;
+            apiConfigObject.insert(apiDefs::key::vpnKey, vpnKey);
+            serverConfigObject.insert(configKey::apiConfig, apiConfigObject);
+            m_serversModel->editServer(serverConfigObject, processedIndex);
+        }
+    }
+
     m_vpnKey = vpnKey;
 
     vpnKey.replace("vpn://", "");
@@ -458,7 +498,9 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
         newApiConfig.insert(configKey::userCountryCode, apiConfig.value(configKey::userCountryCode));
         newApiConfig.insert(configKey::serviceType, apiConfig.value(configKey::serviceType));
         newApiConfig.insert(configKey::serviceProtocol, apiConfig.value(configKey::serviceProtocol));
-        newApiConfig.insert(apiDefs::key::vpnKey, apiConfig.value(apiDefs::key::vpnKey));
+        if (newApiConfig.value(apiDefs::key::vpnKey).toString().isEmpty()) {
+            newApiConfig.insert(apiDefs::key::vpnKey, apiConfig.value(apiDefs::key::vpnKey));
+        }
 
         newServerConfig.insert(configKey::apiConfig, newApiConfig);
         newServerConfig.insert(configKey::authData, gatewayRequestData.authData);
