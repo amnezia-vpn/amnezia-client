@@ -94,12 +94,20 @@
         <translation>%1 успешно установлен.</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/controllers/api/apiConfigsController.cpp" line="472"/>
+=======
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="266"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>API config reloaded</source>
         <translation>Конфигурация API перезагружена</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/controllers/api/apiConfigsController.cpp" line="476"/>
+=======
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="270"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>Successfully changed the country of connection to %1</source>
         <translation>Страна подключения изменена на %1</translation>
     </message>
@@ -332,7 +340,7 @@
 <context>
     <name>ContextMenuType</name>
     <message>
-        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="9"/>
+        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="10"/>
         <source>C&amp;ut</source>
         <translation>Вырезать</translation>
     </message>
@@ -342,12 +350,12 @@
         <translation>Копировать</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="21"/>
+        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="20"/>
         <source>&amp;Paste</source>
         <translation>Вставить</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="29"/>
+        <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="27"/>
         <source>&amp;SelectAll</source>
         <translation>Выбрать всё</translation>
     </message>
@@ -2558,42 +2566,74 @@ subscription key</source>
         <translation>Доступ в интернет блокируется при разрыве VPN-соединения</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
+=======
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="88"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>Strict KillSwitch</source>
         <translation>Strict KillSwitch</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
+=======
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="89"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>Internet connection is blocked even when VPN is turned off manually or hasn&apos;t started</source>
         <translation>Доступ в интернет блокируется, даже если VPN отключен вручную или не был запущен</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="96"/>
+=======
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>Just a little heads-up</source>
         <translation>Небольшое предупреждение</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="97"/>
+=======
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.</source>
         <translation>Если VPN отключится или соединение прервётся при включённом Strict KillSwitch, доступ в интернет будет заблокирован. Чтобы восстановить доступ, снова подключитесь к VPN или отключите (измените) режим KillSwitch.</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="98"/>
+=======
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="94"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>Continue</source>
         <translation>Продолжить</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="99"/>
+=======
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="95"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>Cancel</source>
         <translation>Отменить</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="123"/>
+=======
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="116"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>DNS Exceptions</source>
         <translation>Исключения для DNS</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="124"/>
+=======
+        <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="117"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>DNS servers listed here will remain accessible when KillSwitch is active.</source>
         <translation>DNS-серверы из этого списка останутся доступными при активном KillSwitch.</translation>
     </message>
@@ -4442,6 +4482,58 @@ subscription key</source>
         <translation>Создайте на сервере файловое хранилище для безопасного хранения и передачи файлов.</translation>
     </message>
     <message>
+<<<<<<< HEAD
+=======
+        <location filename="../containers/containers_defs.cpp" line="186"/>
+        <source>AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
+
+AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
+
+Features:
+* Available on all AmneziaVPN platforms
+* Low battery consumption on mobile devices
+* Minimal settings required
+* Undetectable by traffic analysis systems (DPI)
+* Operates over UDP protocol</source>
+        <translation>AmneziaWG — современный VPN-протокол на основе WireGuard, сочетающий простую архитектуру и высокую производительность на всех устройствах. Он устраняет основной недостаток WireGuard (лёгкое обнаружение трафика системами DPI) за счёт эффективного маскирования VPN-трафика под обычный интернет-трафик.
+
+Таким образом, AmneziaWG идеально подойдёт тем, кто ищет быстрое и незаметное VPN-соединение.
+
+Особенности:
+* Доступен во всех версиях AmneziaVPN
+* Низкое энергопотребление на мобильных устройствах
+* Минимум настроек
+* Незаметен для систем анализа трафика (DPI)
+* Работает по протоколу UDP
+		</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="198"/>
+        <source>REALITY is an innovative protocol developed by the creators of XRay, designed specifically to combat high levels of internet censorship. REALITY identifies censorship systems during the TLS handshake, redirecting suspicious traffic seamlessly to legitimate websites like google.com while providing genuine TLS certificates. This allows VPN traffic to blend indistinguishably with regular web traffic without special configuration.
+Unlike older protocols such as VMess, VLESS, and XTLS-Vision, REALITY incorporates an advanced built-in &quot;friend-or-foe&quot; detection mechanism, effectively protecting against DPI and other traffic analysis methods.
+
+Features:
+* Resistant to active probing and DPI detection
+* No special configuration required to disguise traffic
+* Highly effective in heavily censored regions
+* Minimal battery consumption on devices
+* Operates over TCP protocol</source>
+        <translation>REALITY — это инновационный протокол от разработчиков XRay, специально созданный для эффективного противодействия жесткой интернет-цензуре.
+
+REALITY распознаёт системы блокировки во время TLS-рукопожатия и незаметно перенаправляет подозрительные запросы на реальные сайты, такие как google.com, предъявляя подлинные TLS-сертификаты. Это позволяет маскировать VPN-трафик под обычный веб-трафик без дополнительных настроек.
+
+В отличие от протоколов старого поколения (VMess, VLESS и XTLS-Vision), REALITY использует встроенную технологию распознавания «свой-чужой», надёжно защищая от DPI и других методов сетевого анализа.
+
+Особенности:
+* Устойчив к активному зондированию и DPI-системам
+* Не требует специальной настройки для маскировки трафика
+* Эффективен в регионах с жесткой цензурой
+* Минимальное энергопотребление на устройствах
+* Работает по протоколу TCP
+		</translation>
+    </message>
+    <message>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <location filename="../containers/containers_defs.cpp" line="222"/>
         <source>DNS Service</source>
         <translation>Сервис DNS</translation>
@@ -4585,6 +4677,7 @@ Features:
 * Работает по протоколу UDP</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../containers/containers_defs.cpp" line="186"/>
         <source>AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
 
@@ -4632,6 +4725,8 @@ REALITY распознаёт системы блокировки во время
 * Работает по протоколу TCP</translation>
     </message>
     <message>
+=======
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <location filename="../containers/containers_defs.cpp" line="211"/>
         <source>IKEv2, combined with IPSec encryption, is a modern and reliable VPN protocol. It reconnects quickly when switching networks or devices, making it ideal for dynamic network environments. While it provides good security and speed, it&apos;s easily recognized by DPI systems and susceptible to blocking.
 
@@ -4651,6 +4746,44 @@ Features:
 * Работает по UDP (порты 500 и 4500)</translation>
     </message>
     <message>
+<<<<<<< HEAD
+=======
+        <source>
+			AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard’s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
+
+			AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
+
+			Features:
+
+			* Available on all AmneziaVPN platforms
+			* Low battery consumption on mobile devices
+			* Minimal settings required
+			* Undetectable by traffic analysis systems (DPI)
+			* Operates over UDP protocol
+		</source>
+        <translation type="obsolete">AmneziaWG — современный VPN-протокол на основе WireGuard, сочетающий простую архитектуру и высокую производительность на всех устройствах. Он устраняет основной недостаток WireGuard (лёгкое обнаружение трафика системами DPI) за счёт эффективного маскирования VPN-трафика под обычный интернет-трафик.
+
+Таким образом, AmneziaWG идеально подойдёт тем, кто ищет быстрое и незаметное VPN-соединение.
+
+Особенности:
+* Доступен во всех версиях AmneziaVPN
+* Низкое энергопотребление на мобильных устройствах
+* Минимум настроек
+* Незаметен для систем анализа трафика (DPI)
+* Работает по протоколу UDP</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="130"/>
+        <source>Deploy a WordPress site on the Tor network in two clicks.</source>
+        <translation>Разверните сайт на WordPress в сети Tor в два клика.</translation>
+    </message>
+    <message>
+        <location filename="../containers/containers_defs.cpp" line="132"/>
+        <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
+        <translation>Замените текущий DNS-сервер на свой собственный. Это повысит уровень вашей конфиденциальности.</translation>
+    </message>
+    <message>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <location filename="../containers/containers_defs.cpp" line="224"/>
         <source>After installation, Amnezia will create a
 
@@ -4957,12 +5090,20 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>SettingsController</name>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/controllers/settingsController.cpp" line="242"/>
+=======
+        <location filename="../ui/controllers/settingsController.cpp" line="170"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>All settings have been reset to default values</source>
         <translation>Все настройки сброшены до значений по умолчанию</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../ui/controllers/settingsController.cpp" line="219"/>
+=======
+        <location filename="../ui/controllers/settingsController.cpp" line="148"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>Backup file is corrupted</source>
         <translation>Файл резервной копии поврежден</translation>
     </message>
@@ -5059,7 +5200,11 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>VpnConnection</name>
     <message>
+<<<<<<< HEAD
         <location filename="../vpnconnection.cpp" line="437"/>
+=======
+        <location filename="../vpnconnection.cpp" line="444"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>Mbps</source>
         <translation>Мбит/с</translation>
     </message>
@@ -5110,12 +5255,20 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>amnezia::ContainerProps</name>
     <message>
+<<<<<<< HEAD
         <location filename="../containers/containers_defs.cpp" line="340"/>
+=======
+        <location filename="../containers/containers_defs.cpp" line="323"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>Automatic</source>
         <translation>Автоматическая</translation>
     </message>
     <message>
+<<<<<<< HEAD
         <location filename="../containers/containers_defs.cpp" line="348"/>
+=======
+        <location filename="../containers/containers_defs.cpp" line="331"/>
+>>>>>>> bfafde84 (Remove CryptPad translations from language files)
         <source>AmneziaWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation>Будет установлен протокол AmneziaWG. Он обеспечивает высокую скорость соединения и гарантирует стабильную работу даже в самых сложных условиях.</translation>
     </message>
