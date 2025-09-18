@@ -56,7 +56,7 @@ PageType {
                 text: qsTr("Copy key")
                 leftImageSource: "qrc:/images/controls/copy.svg"
 
-                onClicked: {
+                clickedFunc: function() {
                     ApiConfigsController.copyVpnKeyToClipboard()
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
@@ -77,7 +77,7 @@ PageType {
                 text: qsTr("Save key as a file")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
 
-                onClicked: {
+                clickedFunc: function() {
                     var fileName = GC.isMobile()
                         ? "amnezia_vpn_key.vpn"
                         : SystemController.getFileName(
@@ -110,7 +110,7 @@ PageType {
                 text: qsTr("Show key text")
                 leftImageSource: "qrc:/images/controls/eye.svg"
 
-                onClicked: {
+                clickedFunc: function() {
                     PageController.showBusyIndicator(true)
                     ApiConfigsController.prepareVpnKeyExport()
                     PageController.showBusyIndicator(false)
