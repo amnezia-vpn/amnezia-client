@@ -25,6 +25,22 @@ ListViewType {
     width: rootWidth
     height: root.contentItem.height
 
+    Connections {
+        target: root
+
+        function onModelChanged() {
+            root.forceLayout && root.forceLayout();
+            root.contentItem && root.contentItem.forceLayout && root.contentItem.forceLayout();
+            root.positionViewAtIndex(root.currentIndex || 0, ListView.Beginning);
+        }
+    }
+
+    onModelChanged: {
+        root.forceLayout && root.forceLayout();
+        root.contentItem && root.contentItem.forceLayout && root.contentItem.forceLayout();
+        root.positionViewAtIndex(root.currentIndex || 0, ListView.Beginning);
+    }
+
     ButtonGroup {
         id: buttonGroup
     }

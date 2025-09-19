@@ -491,6 +491,15 @@ PageType {
                 descriptionText: qsTr("Connection format")
                 headerText: qsTr("Connection format")
 
+                onOpenTriggered: {
+                    Qt.callLater(function() {
+                        if (exportTypeSelectorListView) {
+                            exportTypeSelectorListView.model = [];
+                            exportTypeSelectorListView.model = root.connectionTypesModel;
+                        }
+                    });
+                }
+
                 listView: ListViewWithRadioButtonType {
                     id: exportTypeSelectorListView
 
@@ -500,7 +509,6 @@ PageType {
                     }
 
                     rootWidth: root.width
-
                     imageSource: "qrc:/images/controls/check.svg"
 
                     model: root.connectionTypesModel
