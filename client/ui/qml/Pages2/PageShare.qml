@@ -482,7 +482,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
-                drawerHeight: 0.4375
+                drawerHeight: 0.5
                 drawerParent: root
 
                 visible: accessTypeSelector.currentIndex === 0
