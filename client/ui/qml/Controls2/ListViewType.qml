@@ -7,7 +7,7 @@ ListView {
     property bool isFocusable: true
 
     ScrollBar.vertical: ScrollBarType {
-        policy: ScrollBar.AlwaysOn
+        policy: size < 1.0 ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
     }
 
     clip: true
