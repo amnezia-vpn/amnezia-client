@@ -4,6 +4,7 @@
 #include <QtConcurrent>
 
 #include <fstream>
+#include <algorithm>
 
 #ifdef Q_OS_WINDOWS
 const uint32_t S_IRWXU = 0644;
@@ -284,6 +285,54 @@ namespace libssh {
 
         QEventLoop wait;
         QObject::connect(this, &Client::scpFileCopyFinished, &wait, &QEventLoop::quit);
+        wait.exec();
+
+        closeScpSession();
+        return watcher.result();
+    }
+
+    ErrorCode Client::scpWriteBuffer(const ScpOverwriteMode overwriteMode, const QByteArray &data, const QString &remotePath, const QString &fileDesc)
+    {
+        m_scpSession = ssh_scp_new(m_session, SSH_SCP_WRITE, remotePath.toStdString().c_str());
+
+        if (m_scpSession == nullptr) {
+            return fromLibsshErrorCode();
+        }
+
+        if (ssh_scp_init(m_scpSession) != SSH_OK) {
+            auto errorCode = fromLibsshErrorCode();
+            closeScpSession();
+            return errorCode;
+        }
+
+        QFutureWatcher<ErrorCode> watcher;
+        connect(&watcher, &QFutureWatcher<ErrorCode>::finished, this, &Client::scpWriteBufferFinished);
+        QFuture<ErrorCode> future = QtConcurrent::run([this, overwriteMode, &data, &remotePath, &fileDesc]() {
+            const int accessType = O_WRONLY | O_CREAT | overwriteMode;
+            const int totalSize = data.size();
+
+            int result = ssh_scp_push_file(m_scpSession, remotePath.toStdString().c_str(), totalSize, accessType);
+            if (result != SSH_OK) {
+                return fromLibsshErrorCode();
+            }
+
+            constexpr int bufferSize = 16384;
+            int transferred = 0;
+            while (transferred < totalSize) {
+                const int chunkSize = std::min(bufferSize, totalSize - transferred);
+                result = ssh_scp_write(m_scpSession, data.constData() + transferred, chunkSize);
+                if (result != SSH_OK) {
+                    return fromLibsshErrorCode();
+                }
+                transferred += chunkSize;
+            }
+
+            return ErrorCode::NoError;
+        });
+        watcher.setFuture(future);
+
+        QEventLoop wait;
+        QObject::connect(this, &Client::scpWriteBufferFinished, &wait, &QEventLoop::quit);
         wait.exec();
 
         closeScpSession();
