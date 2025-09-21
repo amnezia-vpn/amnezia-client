@@ -83,7 +83,9 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
     if (IpcClient::Interface()) {
         if (state == Vpn::ConnectionState::Connected) {
             IpcClient::Interface()->resetIpStack();
-            IpcClient::Interface()->flushDns();
+            if (container != DockerContainer::Ipsec) {
+                IpcClient::Interface()->flushDns();
+            }
 
             if (container != DockerContainer::Awg && container != DockerContainer::WireGuard) {
                 QString dns1 = m_vpnConfiguration.value(config_key::dns1).toString();

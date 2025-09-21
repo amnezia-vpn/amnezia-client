@@ -64,6 +64,26 @@ QString Ikev2Configurator::createConfig(const ServerCredentials &credentials, Do
         return "";
     }
 
+#if defined(Q_OS_LINUX)
+    QString config = m_serverController->replaceVars(amnezia::scriptData(ProtocolScriptType::ipsec_template, container),
+                                                     m_serverController->genVarsForScript(credentials, container, containerConfig));
+
+    config.replace("$CLIENT_NAME", connData.clientId);
+    config.replace("$UUID1", QUuid::createUuid().toString());
+    config.replace("$SERVER_ADDR", connData.host);
+
+    QJsonObject jConfig;
+    jConfig[config_key::config] = config;
+
+    jConfig[config_key::hostName] = connData.host;
+    jConfig[config_key::userName] = connData.clientId;
+    jConfig[config_key::cert] = QString(connData.clientCert.toBase64());
+    jConfig[config_key::cacert] = QString(connData.caCert);
+    jConfig[config_key::password] = connData.password;
+
+    return QJsonDocument(jConfig).toJson();
+#endif
+
     return genIkev2Config(connData);
 }
 
@@ -73,6 +93,7 @@ QString Ikev2Configurator::genIkev2Config(const ConnectionData &connData)
     config[config_key::hostName] = connData.host;
     config[config_key::userName] = connData.clientId;
     config[config_key::cert] = QString(connData.clientCert.toBase64());
+    config[config_key::cacert] = QString(connData.caCert);
     config[config_key::password] = connData.password;
 
     return QJsonDocument(config).toJson();
@@ -114,4 +135,23 @@ QString Ikev2Configurator::genStrongSwanConfig(const ConnectionData &connData)
     config.replace("$P12_BASE64", cert);
 
     return config;
+}
+
+QString Ikev2Configurator::processConfigWithLocalSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                              QString &protocolConfigString)
+{
+    processConfigWithDnsSettings(dns, protocolConfigString);
+
+    QJsonObject json;
+    json[config_key::config] = protocolConfigString;
+    return QJsonDocument(json).toJson();
+}
+
+QString Ikev2Configurator::processConfigWithExportSettings(const QPair<QString, QString> &dns, const bool isApiConfig,
+                                                               QString &protocolConfigString)
+{
+    processConfigWithDnsSettings(dns, protocolConfigString);
+    QJsonObject json;
+    json[config_key::config] = protocolConfigString;
+    return QJsonDocument(json).toJson();
 }

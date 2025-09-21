@@ -257,7 +257,7 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
 
 bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
 {
-#ifdef Q_OS_WINDOWS
+#if defined(Q_OS_WINDOWS) || defined(Q_OS_LINUX)
     return true;
 
 #elif defined(Q_OS_IOS)
@@ -306,13 +306,6 @@ bool ContainerProps::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::SSXray: return true;
     default: return false;
     }
-
-#elif defined(Q_OS_LINUX)
-    switch (c) {
-    case DockerContainer::Ipsec: return false;
-    default: return true;
-    }
-
 #else
     return false;
 #endif
