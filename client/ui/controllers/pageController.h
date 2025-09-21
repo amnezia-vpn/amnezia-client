@@ -73,6 +73,7 @@ namespace PageLoader
 
         PageShareFullAccess,
         PageShareConnection,
+        PageTransferConfigViaQR,
 
         PageDevMenu
     };

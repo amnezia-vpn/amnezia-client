@@ -154,6 +154,9 @@ void CoreController::initControllers()
 
     m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversModel, m_settings, this));
     m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
+
+    m_transferController.reset(new TransferController(m_settings, m_serversModel, m_exportController.get()));
+    m_engine->rootContext()->setContextProperty("TransferController", m_transferController.get());
 }
 
 void CoreController::initAndroidController()

@@ -229,6 +229,7 @@
         <file>ui/qml/Pages2/PageShare.qml</file>
         <file>ui/qml/Pages2/PageShareFullAccess.qml</file>
         <file>ui/qml/Pages2/PageShareConnection.qml</file>
+        <file>ui/qml/Pages2/PageTransferConfigViaQR.qml</file>
         <file>ui/qml/Pages2/PageStart.qml</file>
         <file>ui/qml/Components/RenameServerDrawer.qml</file>
         <file>ui/qml/Controls2/ListViewType.qml</file>
