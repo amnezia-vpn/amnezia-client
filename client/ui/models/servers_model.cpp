@@ -171,24 +171,6 @@ void ServersModel::resetModel()
 {
     beginResetModel();
     m_servers = m_settings->serversArray();
-
-    //Ensure legacy Premium V1 servers have api_config.vpn_key populated
-    for (int i = 0; i < m_servers.count(); ++i) {
-        QJsonObject server = m_servers.at(i).toObject();
-        if (apiUtils::getConfigType(server) == apiDefs::ConfigType::AmneziaPremiumV1) {
-            QJsonObject apiConfig = server.value(configKey::apiConfig).toObject();
-            if (apiConfig.value(apiDefs::key::vpnKey).toString().isEmpty()) {
-                QString generatedVpnKey = apiUtils::getPremiumV1VpnKey(server);
-                if (!generatedVpnKey.isEmpty()) {
-                    apiConfig.insert(apiDefs::key::vpnKey, generatedVpnKey);
-                    server.insert(configKey::apiConfig, apiConfig);
-                    m_settings->editServer(i, server);
-                    m_servers.replace(i, server);
-                }
-            }
-        }
-    }
-
     m_defaultServerIndex = m_settings->defaultServerIndex();
     m_processedServerIndex = m_defaultServerIndex;
     m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
