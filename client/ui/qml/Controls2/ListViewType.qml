@@ -8,6 +8,7 @@ ListView {
 
     ScrollBar.vertical: ScrollBarType {}
 
+    interactive: contentHeight > height
     clip: true
     reuseItems: true
 
@@ -17,9 +18,5 @@ ListView {
                 return items[i];
         }
         return null;
-    }
-
-    Component.onCompleted: {
-        root.forceLayout();
     }
 }
