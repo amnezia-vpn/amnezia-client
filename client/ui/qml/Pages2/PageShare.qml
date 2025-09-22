@@ -500,7 +500,6 @@ PageType {
                     }
 
                     rootWidth: root.width
-                    Layout.fillHeight: true
 
                     imageSource: "qrc:/images/controls/check.svg"
 

@@ -18,4 +18,8 @@ ListView {
         }
         return null;
     }
+
+    Component.onCompleted: {
+        root.forceLayout();
+    }
 }
