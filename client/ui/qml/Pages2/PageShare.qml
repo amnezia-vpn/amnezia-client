@@ -482,7 +482,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
-                drawerHeight: 0.5
+                drawerHeight: 0.4375
                 drawerParent: root
 
                 visible: accessTypeSelector.currentIndex === 0
@@ -500,6 +500,7 @@ PageType {
                     }
 
                     rootWidth: root.width
+                    Layout.fillHeight: true
 
                     imageSource: "qrc:/images/controls/check.svg"
 
