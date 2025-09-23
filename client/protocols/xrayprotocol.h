@@ -17,24 +17,16 @@ public:
     ErrorCode startTun2Sock();
     void stop() override;
 
-protected:
-    void readXrayConfiguration(const QJsonObject &configuration);
-
-protected:
-    QJsonObject m_xrayConfig;
-
 private:
-    int m_localPort;
-    QString m_remoteHost;
-    QString m_remoteAddress;
+    void readXrayConfiguration(const QJsonObject &configuration);
+    
+    QJsonObject m_xrayConfig;
     Settings::RouteMode m_routeMode;
-    QJsonObject m_configData;
     QString m_primaryDNS;
     QString m_secondaryDNS;
 #ifndef Q_OS_IOS
     QSharedPointer<IpcProcessTun2SocksReplica> m_t2sProcess;
 #endif
-    QTemporaryFile m_xrayCfgFile;
 };
 
 #endif // XRAYPROTOCOL_H
