@@ -115,24 +115,6 @@ PageType {
         amneziaConnectionFormat
     ]
 
-    property list<QtObject> testModel: [
-        BasicButtonType {
-            property string name: qsTr("Button 1")
-        },
-        BasicButtonType {
-            property string name: qsTr("Button 2")
-        },
-        BasicButtonType {
-            property string name: qsTr("Button 3")
-        },
-        BasicButtonType {
-            property string name: qsTr("Button 4")
-        },
-        BasicButtonType {
-            property string name: qsTr("Button 5")
-        }
-    ]
-
     QtObject {
         id: amneziaConnectionFormat
         readonly property string name: qsTr("For the AmneziaVPN app")
@@ -518,7 +500,6 @@ PageType {
                     }
 
                     rootWidth: root.width
-
                     imageSource: "qrc:/images/controls/check.svg"
 
                     model: root.connectionTypesModel
@@ -531,32 +512,9 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        exportTypeSelectorListView.forceLayout()
                         exportTypeSelector.text = exportTypeSelectorListView.selectedText
                         exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
                     }
-                }
-            }
-
-            DropDownType {
-                id: test
-
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-
-                drawerHeight: 0.5
-                drawerParent: root
-
-                descriptionText: qsTr("Test Description")
-                headerText: qsTr("Test Header")
-
-                listView: ListViewWithRadioButtonType {
-                    id: testList
-
-                    rootWidth: root.width
-                    imageSource: "qrc:/images/controls/check.svg"
-
-                    model: root.testModel
                 }
             }
 
