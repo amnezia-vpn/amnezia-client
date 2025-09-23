@@ -79,11 +79,6 @@ Item {
 
     onOpenTriggered: {
         menu.openTriggered()
-        Qt.callLater(function() {
-            if (listViewLoader.item && listViewLoader.item.forceLayout) {
-                listViewLoader.item.forceLayout();
-            }
-        })
     }
 
     onCloseTriggered: {
