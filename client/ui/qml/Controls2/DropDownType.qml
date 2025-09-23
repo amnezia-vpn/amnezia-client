@@ -238,7 +238,7 @@ Item {
                     id: listViewLoader
                     sourceComponent: root.listView
 
-                    height: menu.expandedHeight
+                    Layout.fillHeight: true
                     Layout.fillWidth: true
                 }
             }

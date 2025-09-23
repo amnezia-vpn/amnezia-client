@@ -8,7 +8,6 @@ ListView {
 
     ScrollBar.vertical: ScrollBarType {}
 
-    interactive: contentHeight > height
     clip: true
     reuseItems: true
 

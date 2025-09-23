@@ -513,6 +513,7 @@ PageType {
                     }
 
                     Component.onCompleted: {
+                        exportTypeSelectorListView.forceLayout()
                         exportTypeSelector.text = exportTypeSelectorListView.selectedText
                         exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
                     }
