@@ -491,6 +491,15 @@ PageType {
                 descriptionText: qsTr("Connection format")
                 headerText: qsTr("Connection format")
 
+                onOpenTriggered: {
+                    Qt.callLater(function() {
+                        if (exportTypeSelectorListView) {
+                            exportTypeSelectorListView.model = [];
+                            exportTypeSelectorListView.model = root.connectionTypesModel;
+                        }
+                    });
+                }
+
                 listView: ListViewWithRadioButtonType {
                     id: exportTypeSelectorListView
 
