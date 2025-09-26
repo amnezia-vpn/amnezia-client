@@ -1,4 +1,4 @@
-FROM alpine:3.15
+FROM alpine:3.22.1
 
 LABEL maintainer="AmneziaVPN"
 
@@ -6,7 +6,7 @@ LABEL maintainer="AmneziaVPN"
 RUN apk add --no-cache curl openvpn easy-rsa bash netcat-openbsd dumb-init rng-tools
 RUN apk --update upgrade --no-cache
 
-ENV EASYRSA_BATCH 1
+ENV EASYRSA_BATCH=1
 ENV PATH="/usr/share/easy-rsa:${PATH}"
 
 RUN mkdir -p /opt/amnezia

@@ -1,4 +1,4 @@
-FROM alpine:3.15
+FROM alpine:3.22.1
 
 LABEL maintainer="AmneziaVPN"
 
