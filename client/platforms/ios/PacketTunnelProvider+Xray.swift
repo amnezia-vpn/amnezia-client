@@ -132,6 +132,16 @@ extension PacketTunnelProvider {
         LibXrayStopXray()
         completionHandler()
     }
+    
+    func sockCallback(fd: uintptr_t) {
+        if activeIfaceIdx != 0 {
+            withUnsafePointer(to: activeIfaceIdx) { ptr in
+                setsockopt(Int32(fd), IPPROTO_IP, IP_BOUND_IF, ptr, socklen_t(MemoryLayout<UInt32>.size))
+                setsockopt(Int32(fd), IPPROTO_IPV6, IPV6_BOUND_IF, ptr, socklen_t(MemoryLayout<UInt32>.size))
+            }
+            
+        }
+    }
 
     private func setupAndStartXray(configData: Data,
                                    completionHandler: @escaping (Error?) -> Void) {
@@ -141,6 +151,15 @@ extension PacketTunnelProvider {
             completionHandler(XrayErrors.cantSaveXrayConfig)
             return
         }
+        
+       let ctx = Unmanaged.passUnretained(self).toOpaque()
+       let cb : libxray_sockcallback = { (fd, ctx) in
+           guard let ctx = ctx else { return }
+           let instance = Unmanaged<PacketTunnelProvider>.fromOpaque(ctx).takeUnretainedValue()
+           
+           instance.sockCallback(fd: fd)
+       }
+       LibXraySetSockCallback(cb, ctx)
 
         LibXrayRunXray(nil,
                        path,

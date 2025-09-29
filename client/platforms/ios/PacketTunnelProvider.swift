@@ -47,6 +47,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     var startHandler: ((Error?) -> Void)?
     var stopHandler: (() -> Void)?
     var protoType: TunnelProtoType?
+    
+    var activeIfaceIdx = if_nametoindex("en0")
 
   override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
       guard let message = String(data: messageData, encoding: .utf8) else {
