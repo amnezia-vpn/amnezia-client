@@ -330,6 +330,10 @@ void ApiConfigsController::prepareVpnKeyExport()
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     auto vpnKey = apiConfigObject.value(apiDefs::key::vpnKey).toString();
+    if (vpnKey.isEmpty()) {
+        vpnKey = apiUtils::getPremiumV2VpnKey(serverConfigObject);
+    }
+
     m_vpnKey = vpnKey;
 
     vpnKey.replace("vpn://", "");
