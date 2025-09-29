@@ -173,6 +173,7 @@ void ServersModel::resetModel()
     m_servers = m_settings->serversArray();
     m_defaultServerIndex = m_settings->defaultServerIndex();
     m_processedServerIndex = m_defaultServerIndex;
+    m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
     endResetModel();
     emit defaultServerIndexChanged(m_defaultServerIndex);
 }
