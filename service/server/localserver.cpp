@@ -52,6 +52,7 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 
     m_networkWatcher.initialize();
     connect(&m_networkWatcher, &NetworkWatcher::sleepMode, &m_ipcServer, &IpcServer::networkChange);
+    connect(&m_networkWatcher, &NetworkWatcher::networkChange, &m_ipcServer, &IpcServer::networkChange);
     KillSwitch::instance()->init();
 
 #ifdef Q_OS_LINUX

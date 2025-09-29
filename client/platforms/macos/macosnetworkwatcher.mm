@@ -69,6 +69,8 @@ void* powerMonitoringThread(void* arg) {
 
   if (m_watcher) {
     m_watcher->checkInterface();
+    // Emit networkChanged signal when BSSID changes
+    emit m_watcher->networkChanged(QString::fromNSString(interfaceName));
   }
 }
 
