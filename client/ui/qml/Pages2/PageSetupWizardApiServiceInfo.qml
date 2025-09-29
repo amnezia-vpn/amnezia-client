@@ -87,7 +87,7 @@ PageType {
                 textFormat: Text.RichText
                 text: {
                     var text = ApiServicesModel.getSelectedServiceData("features")
-                    return text.replace("%1", LanguageModel.getCurrentSiteUrl("free"))
+                    return text.replace("%1", LanguageModel.getCurrentSiteUrl(""))
                 }
 
                 MouseArea {
