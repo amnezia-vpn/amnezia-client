@@ -6,6 +6,8 @@ import Qt.labs.platform 1.1
 
 import QtCore
 
+import SortFilterProxyModel 0.2
+
 import PageEnum 1.0
 import Style 1.0
 
@@ -16,6 +18,33 @@ import "../Components"
 
 PageType {
     id: root
+
+    property var processedServer
+
+    Connections {
+        target: ServersModel
+
+        function onProcessedServerChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    SortFilterProxyModel {
+        id: proxyServersModel
+        objectName: "proxyServersModel"
+
+        sourceModel: ServersModel
+        filters: [
+            ValueFilter {
+                roleName: "isCurrentlyProcessed"
+                value: true
+            }
+        ]
+
+        Component.onCompleted: {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
 
     Component.onCompleted: {
         PageController.showBusyIndicator(true)
@@ -40,7 +69,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
-                text: qsTr("Amnezia Premium\nsubscription key")
+                text: qsTr(root.processedServer.name + "\nsubscription key")
                 font.pixelSize: 32
                 font.bold: true
                 color: AmneziaStyle.color.paleGray
@@ -56,7 +85,7 @@ PageType {
                 text: qsTr("Copy key")
                 leftImageSource: "qrc:/images/controls/copy.svg"
 
-                onClicked: {
+                clickedFunc: function() {
                     ApiConfigsController.copyVpnKeyToClipboard()
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
@@ -77,13 +106,13 @@ PageType {
                 text: qsTr("Save key as a file")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
 
-                onClicked: {
+                clickedFunc: function() {
                     var fileName = GC.isMobile()
-                        ? "amnezia_vpn_key.vpn"
+                        ? root.processedServer.name.toLowerCase().replace(/\s+/g, "_") + "_key.vpn"
                         : SystemController.getFileName(
                             qsTr("Save AmneziaVPN config"),
                             qsTr("Config files (*.vpn)"),
-                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/amnezia_vpn_key",
+                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + root.processedServer.name.toLowerCase().replace(/\s+/g, "_") + "_key",
                             true,
                             ".vpn"
                         )
@@ -110,7 +139,7 @@ PageType {
                 text: qsTr("Show key text")
                 leftImageSource: "qrc:/images/controls/eye.svg"
 
-                onClicked: {
+                clickedFunc: function() {
                     PageController.showBusyIndicator(true)
                     ApiConfigsController.prepareVpnKeyExport()
                     PageController.showBusyIndicator(false)
@@ -177,7 +206,7 @@ PageType {
 
                 Header2Type {
                     Layout.fillWidth: true
-                    headerText: qsTr("Amnezia Premium Subscription key")
+                    headerText: qsTr(root.processedServer.name + " Subscription key")
                 }
 
                 TextArea {
