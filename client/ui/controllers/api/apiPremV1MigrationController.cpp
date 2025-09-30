@@ -22,10 +22,6 @@ bool ApiPremV1MigrationController::hasConfigsToMigration()
         auto serverConfigObject = m_serversModel->getServerConfig(i);
 
         if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV1) {
-            if (apiUtils::getConfigType(serverConfigObject) == apiDefs::ConfigType::AmneziaPremiumV2) {
-                QString vpnKey = apiUtils::getPremiumV2VpnKey(serverConfigObject);
-                vpnKeys.append(vpnKey);
-            }
             continue;
         }
 

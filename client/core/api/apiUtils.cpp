@@ -207,7 +207,6 @@ QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
 
     QByteArray signedData = AMNEZIA_CONFIG_SIGNATURE + vpnKeyCompressed;
     vpnKeyText = QString("vpn://%1").arg(QString(signedData.toBase64(QByteArray::Base64UrlEncoding)));
-    qDebug() << vpnKeyText;
 
     return vpnKeyText;
 }
