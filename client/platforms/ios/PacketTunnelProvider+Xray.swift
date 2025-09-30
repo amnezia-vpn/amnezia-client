@@ -107,6 +107,10 @@ extension PacketTunnelProvider {
                     return
                 }
 
+                if let strongSelf = self {
+                    strongSelf.updateActiveInterfaceIndex(for: strongSelf.defaultPath)
+                }
+
                 // Launch xray
                 self?.setupAndStartXray(configData: updatedData) { xrayError in
                     if let xrayError {
@@ -152,14 +156,16 @@ extension PacketTunnelProvider {
             return
         }
         
-       let ctx = Unmanaged.passUnretained(self).toOpaque()
-       let cb : libxray_sockcallback = { (fd, ctx) in
-           guard let ctx = ctx else { return }
-           let instance = Unmanaged<PacketTunnelProvider>.fromOpaque(ctx).takeUnretainedValue()
-           
-           instance.sockCallback(fd: fd)
-       }
-       LibXraySetSockCallback(cb, ctx)
+        updateActiveInterfaceIndex(for: defaultPath)
+
+        let ctx = Unmanaged.passUnretained(self).toOpaque()
+        let cb: libxray_sockcallback = { (fd, ctx) in
+            guard let ctx = ctx else { return }
+            let instance = Unmanaged<PacketTunnelProvider>.fromOpaque(ctx).takeUnretainedValue()
+
+            instance.sockCallback(fd: fd)
+        }
+        LibXraySetSockCallback(cb, ctx)
 
         LibXrayRunXray(nil,
                        path,

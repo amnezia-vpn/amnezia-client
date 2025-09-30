@@ -1,5 +1,6 @@
 import Foundation
 import NetworkExtension
+import Network
 import os
 import Darwin
 import OpenVPNAdapter
@@ -48,7 +49,29 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     var stopHandler: (() -> Void)?
     var protoType: TunnelProtoType?
     
-    var activeIfaceIdx = if_nametoindex("en0")
+    var activeIfaceIdx: UInt32 = 0
+
+    func updateActiveInterfaceIndex(for path: NWPath?) {
+        guard let path else {
+            activeIfaceIdx = 0
+            return
+        }
+
+        let preferredTypes: [NWInterface.InterfaceType] = [.wiredEthernet, .wifi, .cellular, .other]
+
+        let nonLoopbackInterfaces = path.availableInterfaces.filter { $0.type != .loopback }
+        let activeInterfaces = nonLoopbackInterfaces.filter { path.usesInterfaceType($0.type) }
+
+        let candidate = preferredTypes.compactMap { type in
+            activeInterfaces.first { $0.type == type }
+        }.first ?? activeInterfaces.first ?? nonLoopbackInterfaces.first
+
+        if let candidate {
+            activeIfaceIdx = UInt32(candidate.index)
+        } else {
+            activeIfaceIdx = 0
+        }
+    }
 
   override func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
       guard let message = String(data: messageData, encoding: .utf8) else {
@@ -105,6 +128,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             completionHandler(error)
             return
         }
+
+        updateActiveInterfaceIndex(for: defaultPath)
 
         switch protoType {
         case .wireguard:
@@ -170,12 +195,14 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.defaultPath != nil else { return }
-            self.handle(networkChange: self.defaultPath!) { _ in }
+            guard let self, let newPath = self.defaultPath else { return }
+            self.updateActiveInterfaceIndex(for: newPath)
+            self.handle(networkChange: newPath) { _ in }
         }
     }
   
     private func handle(networkChange changePath: NWPath, completion: @escaping (Error?) -> Void) {
+        updateActiveInterfaceIndex(for: changePath)
         wg_log(.info, message: "Tunnel restarted.")
         startTunnel(options: nil, completionHandler: completion)
     }
