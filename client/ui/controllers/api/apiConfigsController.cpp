@@ -332,6 +332,9 @@ void ApiConfigsController::prepareVpnKeyExport()
     auto vpnKey = apiConfigObject.value(apiDefs::key::vpnKey).toString();
     if (vpnKey.isEmpty()) {
         vpnKey = apiUtils::getPremiumV2VpnKey(serverConfigObject);
+        apiConfigObject.insert(apiDefs::key::vpnKey, vpnKey);
+        serverConfigObject.insert(configKey::apiConfig, apiConfigObject);
+        m_serversModel->editServer(serverConfigObject, m_serversModel->getProcessedServerIndex());
     }
 
     m_vpnKey = vpnKey;
