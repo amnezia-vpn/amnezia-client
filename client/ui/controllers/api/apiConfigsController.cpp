@@ -47,6 +47,8 @@ namespace
 
         constexpr char subscription[] = "subscription";
         constexpr char endDate[] = "end_date";
+
+        constexpr char isConnectEvent[] = "is_connect_event";
     }
 
     struct ProtocolData
@@ -442,6 +444,10 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
+
+    if (newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig) {
+        apiPayload.insert(configKey::isConnectEvent, true);
+    }
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
