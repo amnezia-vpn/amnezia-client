@@ -27,6 +27,17 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - name: 'Check available Qt architectures'
+      run: |
+        pip3 install aqtinstall
+        python3 -m aqt list-qt linux desktop --arch ${{ env.QT_VERSION }}
+        echo "---"
+        echo "Checking modules for linux_gcc_arm64:"
+        python3 -m aqt list-qt linux desktop --modules ${{ env.QT_VERSION }} linux_gcc_arm64 || true
+        echo "---"
+        echo "Checking modules for gcc_arm64:"
+        python3 -m aqt list-qt linux desktop --modules ${{ env.QT_VERSION }} gcc_arm64 || true
+
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
       with:
