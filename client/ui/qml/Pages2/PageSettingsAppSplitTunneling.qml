@@ -155,7 +155,7 @@ PageType {
             textString: qsTr("Only \"Apps from the list should not have access via VPN\" mode is available on Windows")
             iconPath: "qrc:/images/controls/alert-circle.svg"
 
-            enabled: (Qt.platform.os === "windows") && root.pageEnabled
+            visible: (Qt.platform.os === "windows") && root.pageEnabled
         }
     }
 
