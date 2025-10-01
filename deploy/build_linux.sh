@@ -109,7 +109,8 @@ if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
           continue
         fi
 
-        # Skip ONLY essential glibc components - copy everything else
+        # Skip essential glibc and graphics/windowing system libraries
+        # These should come from the system to avoid version conflicts
         case "$lib_name" in
           libc.so.* | \
           libm.so.* | \
@@ -118,7 +119,13 @@ if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
           librt.so.* | \
           libresolv.so.* | \
           ld-linux-aarch64.so.* | \
-          libnss_*.so.*)
+          libnss_*.so.* | \
+          libwayland-*.so.* | \
+          libxkbcommon*.so.* | \
+          libEGL*.so.* | \
+          libGL*.so.* | \
+          libgbm*.so.* | \
+          libdrm*.so.*)
             continue
             ;;
         esac
