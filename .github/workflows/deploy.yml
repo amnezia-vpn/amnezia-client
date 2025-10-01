@@ -51,6 +51,17 @@ jobs:
     - name: 'Setup ccache'
       uses: hendrikmuhs/ccache-action@v1.2
 
+    - name: 'Debug Qt installation'
+      run: |
+        echo "Checking Qt directory structure:"
+        ls -la ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/ || true
+        echo "---"
+        echo "Checking bin directory:"
+        ls -la ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/linux_gcc_arm64/bin/ || true
+        echo "---"
+        echo "Looking for cmake-related files:"
+        find ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/linux_gcc_arm64/ -name "*cmake*" -type f | head -20 || true
+
     - name: 'Build project'
       run: |
         sudo apt-get install libxkbcommon-x11-0
