@@ -10,6 +10,7 @@
 #include <QString>
 #include <QStringList>
 #include <QTimer>
+#include <QThread>
 
 #include <configurators/cloak_configurator.h>
 #include <configurators/openvpn_configurator.h>
