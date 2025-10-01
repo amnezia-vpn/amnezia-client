@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     unzip \
     p7zip-full \
+    patchelf \
     python3 \
     python3-pip \
     pkg-config \

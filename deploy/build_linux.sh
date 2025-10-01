@@ -60,7 +60,7 @@ echo "Building App..."
 cd $BUILD_DIR
 
 $QT_BIN_DIR/qt-cmake -S $PROJECT_DIR
-cmake --build . -j --config release
+cmake --build . -j$(nproc) --config release
 
 # Build and run tests here
 
@@ -69,22 +69,95 @@ cmake --build . -j --config release
 cp -r $DEPLOY_DATA_DIR/* $APP_DIR
 cp -r $PREBUILT_DEPLOY_DATA_DIR $APP_DIR/client
 
-if [ ! -f $CQTDEPLOYER_DIR/cqtdeployer.sh ]; then
-  wget -O $TOOLS_DIR/CQtDeployer.zip https://github.com/QuasarApp/CQtDeployer/releases/download/v1.5.4.17/CQtDeployer_1.5.4.17_Linux_x86_64.zip
-  unzip -o $TOOLS_DIR/CQtDeployer.zip -d $CQTDEPLOYER_DIR/
-  chmod +x -R $CQTDEPLOYER_DIR
+ARCH=$(uname -m)
+if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+  echo "ARM64 architecture detected - using manual deployment instead of CQtDeployer"
+
+  # Manual deployment for ARM64
+  mkdir -p $APP_DIR/client/bin
+  mkdir -p $APP_DIR/service/bin
+
+  # Copy binaries
+  cp $BUILD_DIR/client/AmneziaVPN $APP_DIR/client/bin/
+  cp $BUILD_DIR/service/server/AmneziaVPN-service $APP_DIR/service/bin/
+
+  # Deploy Qt dependencies using macdeployqt-like approach with patchelf
+  if ! command -v patchelf &> /dev/null; then
+    echo "patchelf not found, installing..."
+    apt-get update && apt-get install -y patchelf
+  fi
+
+  # Copy Qt libraries
+  mkdir -p $APP_DIR/client/lib
+  mkdir -p $APP_DIR/service/lib
+
+  # Get Qt library dependencies
+  QT_LIBS=$(ldd $BUILD_DIR/client/AmneziaVPN | grep "libQt" | awk '{print $3}')
+  for lib in $QT_LIBS; do
+    if [ -f "$lib" ]; then
+      cp "$lib" $APP_DIR/client/lib/
+    fi
+  done
+
+  QT_LIBS_SERVICE=$(ldd $BUILD_DIR/service/server/AmneziaVPN-service | grep "libQt" | awk '{print $3}')
+  for lib in $QT_LIBS_SERVICE; do
+    if [ -f "$lib" ]; then
+      cp "$lib" $APP_DIR/service/lib/
+    fi
+  done
+
+  # Copy Qt plugins
+  mkdir -p $APP_DIR/client/plugins
+  cp -r $QT_BIN_DIR/../plugins/platforms $APP_DIR/client/plugins/ || true
+  cp -r $QT_BIN_DIR/../plugins/imageformats $APP_DIR/client/plugins/ || true
+
+  # Copy QML imports
+  mkdir -p $APP_DIR/client/qml
+  cp -r $QT_BIN_DIR/../qml/* $APP_DIR/client/qml/ || true
+
+  # Create qt.conf files
+  cat > $APP_DIR/client/bin/qt.conf << EOF
+[Paths]
+Prefix = ..
+Libraries = lib
+Plugins = plugins
+Qml2Imports = qml
+EOF
+
+  cat > $APP_DIR/service/bin/qt.conf << EOF
+[Paths]
+Prefix = ..
+Libraries = lib
+Plugins = plugins
+EOF
+
+  # Set RPATH
+  patchelf --set-rpath '$ORIGIN/../lib' $APP_DIR/client/bin/AmneziaVPN || true
+  patchelf --set-rpath '$ORIGIN/../lib' $APP_DIR/service/bin/AmneziaVPN-service || true
+
+else
+  # x86_64 - use CQtDeployer
+  if [ ! -f $CQTDEPLOYER_DIR/cqtdeployer.sh ]; then
+    wget -O $TOOLS_DIR/CQtDeployer.zip https://github.com/QuasarApp/CQtDeployer/releases/download/v1.5.4.17/CQtDeployer_1.5.4.17_Linux_x86_64.zip
+    unzip -o $TOOLS_DIR/CQtDeployer.zip -d $CQTDEPLOYER_DIR/
+    chmod +x -R $CQTDEPLOYER_DIR
+  fi
+
+  $CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/client/AmneziaVPN -qmake $QT_BIN_DIR/qmake -qmlDir $PROJECT_DIR/client/ui/qml/ -targetDir $APP_DIR/client/
+  $CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/service/server/AmneziaVPN-service -qmake $QT_BIN_DIR/qmake -targetDir $APP_DIR/service/
 fi
-
-
-$CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/client/AmneziaVPN -qmake $QT_BIN_DIR/qmake -qmlDir $PROJECT_DIR/client/ui/qml/ -targetDir $APP_DIR/client/
-$CQTDEPLOYER_DIR/cqtdeployer.sh -bin $BUILD_DIR/service/server/AmneziaVPN-service -qmake $QT_BIN_DIR/qmake -targetDir $APP_DIR/service/
 
 rm -f $INSTALLER_DATA_DIR/data.7z
 
 7z a $INSTALLER_DATA_DIR/data.7z $APP_DIR/*
 
-ldd $CQTDEPLOYER_DIR/bin/binarycreator
-
 cp -r $PROJECT_DIR/deploy/installer $BUILD_DIR
 
-$CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer.bin
+# Create installer only for x86_64 (binarycreator not available for ARM64)
+if [ "$ARCH" != "aarch64" ] && [ "$ARCH" != "arm64" ]; then
+  ldd $CQTDEPLOYER_DIR/bin/binarycreator
+  $CQTDEPLOYER_DIR/binarycreator.sh --offline-only -v -c $BUILD_DIR/installer/config/linux.xml -p $BUILD_DIR/installer/packages -f $PROJECT_DIR/deploy/AmneziaVPN_Linux_Installer.bin
+else
+  echo "Skipping installer creation for ARM64 - binarycreator not available"
+  echo "Deployment completed in $APP_DIR"
+fi
