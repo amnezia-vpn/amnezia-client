@@ -91,25 +91,66 @@ if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
   mkdir -p $APP_DIR/client/lib
   mkdir -p $APP_DIR/service/lib
 
-  # Get Qt library dependencies
-  QT_LIBS=$(ldd $BUILD_DIR/client/AmneziaVPN | grep "libQt" | awk '{print $3}')
-  for lib in $QT_LIBS; do
-    if [ -f "$lib" ]; then
-      cp "$lib" $APP_DIR/client/lib/
-    fi
-  done
+  # Function to recursively copy library dependencies
+  copy_deps() {
+    local binary=$1
+    local target_dir=$2
 
-  QT_LIBS_SERVICE=$(ldd $BUILD_DIR/service/server/AmneziaVPN-service | grep "libQt" | awk '{print $3}')
-  for lib in $QT_LIBS_SERVICE; do
-    if [ -f "$lib" ]; then
-      cp "$lib" $APP_DIR/service/lib/
-    fi
-  done
+    # Get all library dependencies (excluding system libraries like libc, libm, etc)
+    local deps=$(ldd "$binary" 2>/dev/null | grep "=>" | awk '{print $3}' | grep -v "^$")
+
+    for dep in $deps; do
+      if [ -f "$dep" ]; then
+        local lib_name=$(basename "$dep")
+        local target_path="$target_dir/$lib_name"
+
+        # Skip if already copied
+        if [ -f "$target_path" ]; then
+          continue
+        fi
+
+        # Skip system libraries
+        if [[ "$dep" =~ ^/lib/aarch64-linux-gnu/(libc|libm|libdl|libpthread|librt|libresolv)\.so ]]; then
+          continue
+        fi
+        if [[ "$dep" =~ ^/lib/aarch64-linux-gnu/ld-linux-aarch64\.so ]]; then
+          continue
+        fi
+
+        # Copy the library
+        cp "$dep" "$target_path"
+
+        # Recursively copy dependencies of this library
+        copy_deps "$dep" "$target_dir"
+      fi
+    done
+  }
+
+  # Copy all dependencies for client
+  echo "Copying dependencies for AmneziaVPN client..."
+  copy_deps "$BUILD_DIR/client/AmneziaVPN" "$APP_DIR/client/lib"
+
+  # Copy all dependencies for service
+  echo "Copying dependencies for AmneziaVPN-service..."
+  copy_deps "$BUILD_DIR/service/server/AmneziaVPN-service" "$APP_DIR/service/lib"
 
   # Copy Qt plugins
   mkdir -p $APP_DIR/client/plugins
   cp -r $QT_BIN_DIR/../plugins/platforms $APP_DIR/client/plugins/ || true
   cp -r $QT_BIN_DIR/../plugins/imageformats $APP_DIR/client/plugins/ || true
+  cp -r $QT_BIN_DIR/../plugins/platformthemes $APP_DIR/client/plugins/ || true
+  cp -r $QT_BIN_DIR/../plugins/xcbglintegrations $APP_DIR/client/plugins/ || true
+  cp -r $QT_BIN_DIR/../plugins/wayland-decoration-client $APP_DIR/client/plugins/ || true
+  cp -r $QT_BIN_DIR/../plugins/wayland-graphics-integration-client $APP_DIR/client/plugins/ || true
+  cp -r $QT_BIN_DIR/../plugins/wayland-shell-integration $APP_DIR/client/plugins/ || true
+
+  # Copy plugin dependencies
+  echo "Copying plugin dependencies..."
+  for plugin in $APP_DIR/client/plugins/*/*.so; do
+    if [ -f "$plugin" ]; then
+      copy_deps "$plugin" "$APP_DIR/client/lib"
+    fi
+  done
 
   # Copy QML imports
   mkdir -p $APP_DIR/client/qml
