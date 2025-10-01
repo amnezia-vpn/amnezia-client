@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
 
     env:
-      QT_VERSION: 6.6.2
+      QT_VERSION: 6.7.3
       QIF_VERSION: 4.7
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
@@ -24,30 +24,19 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
-    - name: 'Check Qt versions with ARM64 support'
-      run: |
-        pip3 install aqtinstall
-        echo "Checking Qt 6.7.x versions:"
-        python3 -m aqt list-qt linux desktop --arch 6.7 || true
-        echo "---"
-        echo "Checking Qt 6.8.x versions:"
-        python3 -m aqt list-qt linux desktop --arch 6.8 || true
-        echo "---"
-        echo "Checking Qt 6.6.2 architectures:"
-        python3 -m aqt list-qt linux desktop --arch 6.6.2
-
     - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
-        host: 'linux'
+        host: 'linux_arm64'
         target: 'desktop'
-        arch: 'gcc_arm64'
+        arch: 'linux_gcc_arm64'
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
         set-env: 'true'
+        aqtversion: '==3.3.*'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Get sources'
@@ -62,7 +51,7 @@ jobs:
     - name: 'Build project'
       run: |
         sudo apt-get install libxkbcommon-x11-0
-        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_arm64/bin
+        export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/linux_gcc_arm64/bin
         export QIF_BIN_DIR=${{ runner.temp }}/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin
         bash deploy/build_linux.sh
 
