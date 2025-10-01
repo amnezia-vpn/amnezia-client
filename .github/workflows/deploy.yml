@@ -27,16 +27,17 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
-    - name: 'Check available Qt architectures'
+    - name: 'Check Qt versions with ARM64 support'
       run: |
         pip3 install aqtinstall
-        python3 -m aqt list-qt linux desktop --arch ${{ env.QT_VERSION }}
+        echo "Checking Qt 6.7.x versions:"
+        python3 -m aqt list-qt linux desktop --arch 6.7 || true
         echo "---"
-        echo "Checking modules for linux_gcc_arm64:"
-        python3 -m aqt list-qt linux desktop --modules ${{ env.QT_VERSION }} linux_gcc_arm64 || true
+        echo "Checking Qt 6.8.x versions:"
+        python3 -m aqt list-qt linux desktop --arch 6.8 || true
         echo "---"
-        echo "Checking modules for gcc_arm64:"
-        python3 -m aqt list-qt linux desktop --modules ${{ env.QT_VERSION }} gcc_arm64 || true
+        echo "Checking Qt 6.6.2 architectures:"
+        python3 -m aqt list-qt linux desktop --arch 6.6.2
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v3
