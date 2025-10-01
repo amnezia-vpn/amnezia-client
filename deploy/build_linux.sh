@@ -111,7 +111,7 @@ if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
 
         # Skip system libraries
         if [[ "$dep" =~ ^/lib/aarch64-linux-gnu/(libc|libm|libdl|libpthread|librt|libresolv)\.so ]]; then
-          continue
+            continue
         fi
         if [[ "$dep" =~ ^/lib/aarch64-linux-gnu/ld-linux-aarch64\.so ]]; then
           continue
@@ -155,6 +155,14 @@ if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
   # Copy QML imports
   mkdir -p $APP_DIR/client/qml
   cp -r $QT_BIN_DIR/../qml/* $APP_DIR/client/qml/ || true
+
+  # Copy QML plugin dependencies
+  echo "Copying QML plugin dependencies..."
+  find $APP_DIR/client/qml -name "*.so" -type f | while read qml_plugin; do
+    if [ -f "$qml_plugin" ]; then
+      copy_deps "$qml_plugin" "$APP_DIR/client/lib"
+    fi
+  done
 
   # Create qt.conf files
   cat > $APP_DIR/client/bin/qt.conf << EOF
