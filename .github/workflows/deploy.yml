@@ -42,7 +42,8 @@ jobs:
         tools: 'tools_ifw'
         set-env: 'true'
         aqtversion: '==3.1.*'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+        py7zrversion: '==0.20.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Get sources'
       uses: actions/checkout@v4
