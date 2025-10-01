@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y \
     libxi-dev \
     libxrender-dev \
     libxcb1-dev \
+    libxcb-cursor0 \
     libxcb-cursor-dev \
     libxcb-glx0-dev \
     libxcb-keysyms1-dev \
