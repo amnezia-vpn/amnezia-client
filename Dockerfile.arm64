@@ -1,0 +1,73 @@
+FROM ubuntu:24.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    python3 \
+    python3-pip \
+    pkg-config \
+    libxkbcommon-x11-0 \
+    libsecret-1-dev \
+    libssl-dev \
+    libssh-dev \
+    zlib1g-dev \
+    libgl1-mesa-dev \
+    libglib2.0-dev \
+    libxcb-*-dev \
+    libfontconfig1-dev \
+    libfreetype6-dev \
+    libx11-dev \
+    libx11-xcb-dev \
+    libxext-dev \
+    libxfixes-dev \
+    libxi-dev \
+    libxrender-dev \
+    libxcb1-dev \
+    libxcb-cursor-dev \
+    libxcb-glx0-dev \
+    libxcb-keysyms1-dev \
+    libxcb-image0-dev \
+    libxcb-shm0-dev \
+    libxcb-icccm4-dev \
+    libxcb-sync-dev \
+    libxcb-xfixes0-dev \
+    libxcb-shape0-dev \
+    libxcb-randr0-dev \
+    libxcb-render-util0-dev \
+    libxcb-util-dev \
+    libxcb-xinerama0-dev \
+    libxcb-xkb-dev \
+    libxkbcommon-dev \
+    libxkbcommon-x11-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install aqtinstall for Qt installation
+RUN pip3 install aqtinstall==3.1.* py7zr==0.20.* --break-system-packages
+
+# Install Qt 6.7.3 for ARM64
+RUN aqt install-qt linux_arm64 desktop 6.7.3 linux_gcc_arm64 \
+    --outputdir /opt/Qt \
+    --modules qtremoteobjects qt5compat qtshadertools \
+    --base https://mirrors.ocf.berkeley.edu/qt/
+
+# Install Qt Installer Framework
+RUN aqt install-tool linux_arm64 desktop tools_ifw \
+    --outputdir /opt/Qt \
+    --base https://mirrors.ocf.berkeley.edu/qt/ || true
+
+# Set Qt environment variables
+ENV QT_VERSION=6.7.3
+ENV Qt6_DIR=/opt/Qt/${QT_VERSION}/gcc_arm64
+ENV PATH=/opt/Qt/${QT_VERSION}/gcc_arm64/bin:$PATH
+ENV LD_LIBRARY_PATH=/opt/Qt/${QT_VERSION}/gcc_arm64/lib:$LD_LIBRARY_PATH
+ENV PKG_CONFIG_PATH=/opt/Qt/${QT_VERSION}/gcc_arm64/lib/pkgconfig:$PKG_CONFIG_PATH
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]
