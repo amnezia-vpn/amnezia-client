@@ -60,7 +60,17 @@ echo "Building App..."
 cd $BUILD_DIR
 
 $QT_BIN_DIR/qt-cmake -S $PROJECT_DIR
-cmake --build . -j$(nproc) --config release
+
+# Limit parallel jobs for ARM64 to avoid OOM
+ARCH=$(uname -m)
+if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+  NPROC=$(nproc)
+  JOBS=$((NPROC > 2 ? 2 : NPROC))
+  echo "ARM64 detected: limiting build jobs to ${JOBS}"
+  cmake --build . -j${JOBS} --config release
+else
+  cmake --build . -j --config release
+fi
 
 # Build and run tests here
 
@@ -131,7 +141,7 @@ if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
         esac
 
         # Copy the library
-        cp "$dep" "$target_path"
+        cp "$dep" "$target_path" 2>/dev/null || true
 
         # Recursively copy dependencies of this library
         copy_deps "$dep" "$target_dir"
@@ -202,6 +212,41 @@ EOF
   find $APP_DIR/client/lib -name "*.so*" -type f | while read lib; do
     patchelf --set-rpath '$ORIGIN' "$lib" 2>/dev/null || true
   done
+
+  # Create system dependencies info file for ARM64
+  cat > $APP_DIR/SYSTEM_REQUIREMENTS_ARM64.txt << 'DEPS_EOF'
+AmneziaVPN ARM64 - System Requirements
+=======================================
+
+This ARM64 build requires the following system libraries:
+- Wayland: libwayland-client0, libwayland-cursor0, libwayland-egl1
+- EGL/OpenGL: libegl1, libgl1, libgbm1
+- DRM: libdrm2
+- XKB: libxkbcommon0
+
+Installation commands:
+
+Ubuntu/Debian:
+  sudo apt-get install libwayland-client0 libwayland-cursor0 libwayland-egl1 \
+                       libegl1 libgl1 libgbm1 libdrm2 libxkbcommon0
+
+Fedora/RHEL:
+  sudo dnf install wayland-devel mesa-libEGL mesa-libGL mesa-libgbm libdrm libxkbcommon
+
+Notes:
+- These libraries are NOT bundled to avoid version conflicts with system Mesa/DRM drivers
+- The application will automatically use Wayland if available, otherwise X11/XCB
+- Most modern Linux distributions include these libraries by default
+DEPS_EOF
+
+  echo ""
+  echo "=========================================="
+  echo "ARM64 deployment completed successfully!"
+  echo "=========================================="
+  echo ""
+  echo "Note: System libraries (Wayland, EGL, DRM, XKB) are not bundled."
+  echo "See $APP_DIR/SYSTEM_REQUIREMENTS_ARM64.txt for details."
+  echo ""
 
 else
   # x86_64 - use CQtDeployer

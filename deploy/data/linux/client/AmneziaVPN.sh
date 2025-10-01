@@ -29,4 +29,6 @@ export CQT_RUN_FILE="$BASE_DIR/AmneziaVPN.sh"
 
 export QT_QPA_PLATFORM_PLUGIN_PATH="$BASE_DIR"/plugins//platforms:$QT_QPA_PLATFORM_PLUGIN_PATH
 
+
+
 "$BASE_DIR/bin/AmneziaVPN" "$@" 
