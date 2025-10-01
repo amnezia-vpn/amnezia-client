@@ -10,7 +10,6 @@
 #include <QString>
 #include <QStringList>
 #include <QTimer>
-#include <QThread>
 
 #include <configurators/cloak_configurator.h>
 #include <configurators/openvpn_configurator.h>
@@ -24,6 +23,8 @@
 
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
+    #include <QThread>
+
 #endif
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
