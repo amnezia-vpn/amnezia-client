@@ -40,7 +40,20 @@ elseif(APPLE AND NOT IOS)
     set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/macos/lib/libcrypto.a")
 elseif(LINUX)
     set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/linux/include")
-    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/x86_64/libcrypto.a")
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+        # For ARM64, check if prebuilt libraries exist, otherwise use system libraries
+        if(EXISTS "${OPENSSL_ROOT_DIR}/linux/aarch64/libcrypto.a")
+            set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/aarch64/libcrypto.a")
+        else()
+            # Use system OpenSSL for ARM64
+            message(STATUS "Using system OpenSSL for ARM64")
+            find_package(OpenSSL REQUIRED)
+            set(OPENSSL_LIB_CRYPTO_PATH ${OPENSSL_CRYPTO_LIBRARY})
+        endif()
+    else()
+        # x86_64
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/linux/x86_64/libcrypto.a")
+    endif()
 endif()
 
 set(OPENSSL_USE_STATIC_LIBS TRUE)
