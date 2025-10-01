@@ -1,0 +1,23 @@
+# Build artifacts
+deploy/build/
+deploy/AppDir/
+deploy/Tools/
+deploy/*.tar
+deploy/*.bin
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Git
+.git/
+.github/
+
+# Other
+*.log
