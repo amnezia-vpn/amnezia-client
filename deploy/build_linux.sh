@@ -96,7 +96,7 @@ if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
     local binary=$1
     local target_dir=$2
 
-    # Get all library dependencies (excluding system libraries like libc, libm, etc)
+    # Get all library dependencies
     local deps=$(ldd "$binary" 2>/dev/null | grep "=>" | awk '{print $3}' | grep -v "^$")
 
     for dep in $deps; do
@@ -109,13 +109,19 @@ if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
           continue
         fi
 
-        # Skip system libraries
-        if [[ "$dep" =~ ^/lib/aarch64-linux-gnu/(libc|libm|libdl|libpthread|librt|libresolv)\.so ]]; then
+        # Skip ONLY essential glibc components - copy everything else
+        case "$lib_name" in
+          libc.so.* | \
+          libm.so.* | \
+          libdl.so.* | \
+          libpthread.so.* | \
+          librt.so.* | \
+          libresolv.so.* | \
+          ld-linux-aarch64.so.* | \
+          libnss_*.so.*)
             continue
-        fi
-        if [[ "$dep" =~ ^/lib/aarch64-linux-gnu/ld-linux-aarch64\.so ]]; then
-          continue
-        fi
+            ;;
+        esac
 
         # Copy the library
         cp "$dep" "$target_path"
@@ -180,9 +186,15 @@ Libraries = lib
 Plugins = plugins
 EOF
 
-  # Set RPATH
-  patchelf --set-rpath '$ORIGIN/../lib' $APP_DIR/client/bin/AmneziaVPN || true
-  patchelf --set-rpath '$ORIGIN/../lib' $APP_DIR/service/bin/AmneziaVPN-service || true
+  # Set RPATH for both binary and all libraries
+  echo "Setting RPATH for binaries and libraries..."
+  patchelf --set-rpath '$ORIGIN/../lib' $APP_DIR/client/bin/AmneziaVPN 2>/dev/null || true
+  patchelf --set-rpath '$ORIGIN/../lib' $APP_DIR/service/bin/AmneziaVPN-service 2>/dev/null || true
+
+  # Set RPATH for all copied libraries so they can find each other
+  find $APP_DIR/client/lib -name "*.so*" -type f | while read lib; do
+    patchelf --set-rpath '$ORIGIN' "$lib" 2>/dev/null || true
+  done
 
 else
   # x86_64 - use CQtDeployer
