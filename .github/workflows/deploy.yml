@@ -27,6 +27,11 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - name: 'Setup Python 3.12'
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v4
       with:
@@ -36,10 +41,10 @@ jobs:
         arch: 'linux_gcc_arm64'
         modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
-        setup-python: 'true'
+        setup-python: 'false'
         tools: 'tools_ifw'
         set-env: 'true'
-        aqtversion: '==3.3.*'
+        aqtversion: '==3.1.*'
         extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Get sources'
