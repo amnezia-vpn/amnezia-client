@@ -57,7 +57,12 @@ jobs:
     - name: 'Install build dependencies'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libxkbcommon-x11-0 libsecret-1-dev
+        sudo apt-get install -y \
+          libxkbcommon-x11-0 \
+          libsecret-1-dev \
+          libssl-dev \
+          libssh-dev \
+          zlib1g-dev
 
     - name: 'Build project'
       run: |
