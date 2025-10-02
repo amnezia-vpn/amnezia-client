@@ -1,6 +1,7 @@
 import Foundation
 import NetworkExtension
 import OpenVPNAdapter
+import CryptoKit
 
 struct OpenVPNConfig: Decodable {
     let config: String
@@ -27,14 +28,38 @@ extension PacketTunnelProvider {
             let ovpnConfiguration = Data(openVPNConfig.config.utf8)
             setupAndlaunchOpenVPN(withConfig: ovpnConfiguration, completionHandler: completionHandler)
         } catch {
-            ovpnLog(.error, message: "Can't parse config: \(error.localizedDescription)")
-
-            if let underlyingError = (error as NSError).userInfo[NSUnderlyingErrorKey] as? NSError {
-                ovpnLog(.error, message: "Can't parse config: \(underlyingError.localizedDescription)")
-            }
-
+            ovpnLog(.error, message: "Can't parse OpenVPN config: \(error.localizedDescription)")
             return
         }
+    }
+
+    private func logOpenVPNError(_ error: NSError) {
+        let fatalFlag = (error.userInfo[OpenVPNAdapterErrorFatalKey] as? Bool) ?? false
+        var lines: [String] = []
+        lines.append("domain=\(error.domain) code=\(error.code) fatal=\(fatalFlag)")
+
+        if let adapterMessage = error.userInfo[OpenVPNAdapterErrorMessageKey] as? String, !adapterMessage.isEmpty {
+            lines.append("message=\(adapterMessage)")
+        }
+
+        let userInfoKeys = error.userInfo.keys.map { String(describing: $0) }.sorted()
+        if !userInfoKeys.isEmpty {
+            lines.append("userInfoKeys=[\(userInfoKeys.joined(separator: ","))]")
+        }
+
+        if let underlying = error.userInfo[NSUnderlyingErrorKey] as? NSError {
+            lines.append("underlying=\(underlying.domain)#\(underlying.code) fatal=\((underlying.userInfo[OpenVPNAdapterErrorFatalKey] as? Bool) ?? false)")
+            if let underlyingMessage = underlying.userInfo[OpenVPNAdapterErrorMessageKey] as? String, !underlyingMessage.isEmpty {
+                lines.append("underlyingMessage=\(underlyingMessage)")
+            } else if !underlying.localizedDescription.isEmpty {
+                lines.append("underlyingLocalized=\(underlying.localizedDescription)")
+            }
+        } else if let underlying = error.userInfo[NSUnderlyingErrorKey] {
+            lines.append("underlyingRaw=\(underlying)")
+        }
+
+        let formatted = lines.joined(separator: "\n  ")
+        ovpnLog(.error, title: "Error", message: formatted)
     }
 
     private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data,
@@ -42,11 +67,44 @@ extension PacketTunnelProvider {
                                        completionHandler: @escaping (Error?) -> Void) {
         ovpnLog(.info, message: "Setup and launch")
 
-        let str = String(decoding: ovpnConfiguration, as: UTF8.self)
+        var configString = String(decoding: ovpnConfiguration, as: UTF8.self)
+
+        let digest = SHA256.hash(data: ovpnConfiguration)
+        let digestString = digest.map { String(format: "%02x", $0) }.joined()
+        ovpnLog(.info, title: "ConfigDigest", message: digestString)
+
+        let hasTlsAuthOpen = configString.contains("<tls-auth>")
+        let hasTlsAuthClose = configString.contains("</tls-auth>")
+        ovpnLog(.info, title: "ConfigFlags", message: "tls-auth open=\(hasTlsAuthOpen) close=\(hasTlsAuthClose)")
+
+        let lines = configString.split(separator: "\n")
+        let head = lines.prefix(10).joined(separator: "\n")
+        let tail = lines.suffix(10).joined(separator: "\n")
+        ovpnLog(.debug, title: "ConfigHead", message: head)
+        ovpnLog(.debug, title: "ConfigTail", message: tail)
+
+        if let start = configString.range(of: "<tls-auth>"),
+           let end = configString.range(of: "</tls-auth>", range: start.upperBound..<configString.endIndex) {
+            let keyBody = String(configString[start.upperBound..<end.lowerBound])
+            ovpnLog(.debug, title: "TLSAuthInline", message: keyBody)
+            let sanitizedLines = keyBody
+                .split(whereSeparator: { $0.isNewline })
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+                .filter { !$0.hasPrefix("#") }
+
+            let sanitizedKey = sanitizedLines.joined(separator: "\n")
+            ovpnLog(.debug, title: "TLSAuthSanitized", message: sanitizedKey)
+            let sanitizedBlock = "<tls-auth>\n\(sanitizedKey)\n</tls-auth>"
+            configString.replaceSubrange(start.lowerBound..<end.upperBound, with: sanitizedBlock)
+        }
+
+        let normalizedConfig = configString.replacingOccurrences(of: "\r\n", with: "\n")
+        let sanitizedData = Data(normalizedConfig.utf8)
 
         let configuration = OpenVPNConfiguration()
-        configuration.fileContent = ovpnConfiguration
-        if str.contains("cloak") {
+        configuration.fileContent = sanitizedData
+        if configString.contains("cloak") {
             configuration.setPTCloak()
         }
 
@@ -57,6 +115,8 @@ extension PacketTunnelProvider {
             evaluation = try ovpnAdapter?.apply(configuration: configuration)
 
         } catch {
+            let nsError = error as NSError
+            ovpnLog(.error, title: "ApplyConfig", message: "domain=\(nsError.domain) code=\(nsError.code) info=\(nsError.userInfo)")
             completionHandler(error)
             return
         }
@@ -208,8 +268,11 @@ extension PacketTunnelProvider: OpenVPNAdapterDelegate {
 
     // Handle errors thrown by the OpenVPN library
     func openVPNAdapter(_ openVPNAdapter: OpenVPNAdapter, handleError error: Error) {
+        let nsError = error as NSError
+        logOpenVPNError(nsError)
+
         // Handle only fatal errors
-        guard let fatal = (error as NSError).userInfo[OpenVPNAdapterErrorFatalKey] as? Bool,
+        guard let fatal = nsError.userInfo[OpenVPNAdapterErrorFatalKey] as? Bool,
               fatal == true else { return }
 
         if vpnReachability.isTracking {
