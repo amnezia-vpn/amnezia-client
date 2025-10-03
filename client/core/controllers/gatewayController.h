@@ -27,7 +27,7 @@ private:
                            const QByteArray &iv = "", const QByteArray &salt = "");
     void bypassProxy(const QString &endpoint, QNetworkReply *reply, std::function<QNetworkReply *(const QString &url)> requestFunction,
                      std::function<bool(QNetworkReply *reply, const QList<QSslError> &sslErrors)> replyProcessingFunction);
-    QString allowKillSwitchForHost(const QUrl &url);
+    QString allowKillSwitchExceptionForUrl(const QUrl &url);
     QString resolveHost(const QString &host);
 #ifdef AMNEZIA_DESKTOP
     bool addKillSwitchException(const QStringList &ranges);

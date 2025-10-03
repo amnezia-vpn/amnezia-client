@@ -77,7 +77,16 @@ ErrorCode GatewayController::get(const QString &endpoint, QByteArray &responseBo
     // bypass killSwitch exceptions for API-gateway
 #ifdef AMNEZIA_DESKTOP
     if (m_isStrictKillSwitchEnabled) {
-        allowKillSwitchForHost(request.url());
+        const QUrl originalUrl = request.url();
+        const QString originalHost = originalUrl.host();
+        const QString resolvedIp = allowKillSwitchExceptionForUrl(originalUrl);
+        if (!resolvedIp.isEmpty() && resolvedIp != originalHost) {
+            QUrl ipUrl = originalUrl;
+            ipUrl.setHost(resolvedIp);
+            request.setUrl(ipUrl);
+            request.setPeerVerifyName(originalHost);
+            request.setRawHeader("Host", originalHost.toUtf8());
+        }
     }
 #endif
 
@@ -139,7 +148,16 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     qDebug() << "endpoint" << endpoint;
 #ifdef AMNEZIA_DESKTOP
     if (m_isStrictKillSwitchEnabled) {
-        allowKillSwitchForHost(request.url());
+        const QUrl originalUrl = request.url();
+        const QString originalHost = originalUrl.host();
+        const QString resolvedIp = allowKillSwitchExceptionForUrl(originalUrl);
+        if (!resolvedIp.isEmpty() && resolvedIp != originalHost) {
+            QUrl ipUrl = originalUrl;
+            ipUrl.setHost(resolvedIp);
+            request.setUrl(ipUrl);
+            request.setPeerVerifyName(originalHost);
+            request.setRawHeader("Host", originalHost.toUtf8());
+        }
     }
 #endif
 
@@ -370,29 +388,29 @@ void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *repl
     }
 }
 
-QString GatewayController::allowKillSwitchForHost(const QUrl &url)
+QString GatewayController::allowKillSwitchExceptionForUrl(const QUrl &url)
 {
 #ifdef AMNEZIA_DESKTOP
-    qDebug() << "allowKillSwitchForHost: processing url" << url;
+    qDebug() << "allowKillSwitchExceptionForUrl: processing url" << url;
     const QString host = url.host();
     if (host.isEmpty()) {
-        qDebug() << "allowKillSwitchForHost: empty host, skipping";
+        qDebug() << "allowKillSwitchExceptionForUrl: empty host, skipping";
         return {};
     }
 
-    qDebug() << "allowKillSwitchForHost: resolving host" << host;
+    qDebug() << "allowKillSwitchExceptionForUrl: resolving host" << host;
     const QString resolvedIp = resolveHost(host);
     if (resolvedIp.isEmpty()) {
         qWarning() << "Failed to resolve host for KillSwitch exception" << host;
         return {};
     }
 
-    qDebug() << "allowKillSwitchForHost: adding KillSwitch exception for" << resolvedIp;
+    qDebug() << "allowKillSwitchExceptionForUrl: adding KillSwitch exception for" << resolvedIp;
     if (!addKillSwitchException(QStringList { resolvedIp })) {
         qWarning() << "Failed to add KillSwitch exception" << resolvedIp;
         return {};
     }
-    qDebug() << "allowKillSwitchForHost: exception added" << resolvedIp;
+    qDebug() << "allowKillSwitchExceptionForUrl: exception added" << resolvedIp;
     return resolvedIp;
 #else
     Q_UNUSED(url);
