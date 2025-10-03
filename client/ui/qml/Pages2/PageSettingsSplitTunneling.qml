@@ -350,7 +350,6 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Clear site list")
-                rightImageSource: "qrc:/images/controls/trash.svg"
 
                 clickedFunction: function() {
                     var headerText = qsTr("Clear site list?")
