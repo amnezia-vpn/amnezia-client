@@ -449,8 +449,8 @@ QString GatewayController::resolveHost(const QString &host)
 bool GatewayController::addKillSwitchException(const QStringList &ranges)
 {
     qDebug() << "addKillSwitchException: requested ranges" << ranges;
-    auto interface = IpcClient::Interface();
-    if (!interface) {
+    auto ipcInterface = IpcClient::Interface();
+    if (!ipcInterface) {
         qWarning() << "IPC interface is null, cannot add KillSwitch exception";
         return false;
     }
@@ -464,16 +464,16 @@ bool GatewayController::addKillSwitchException(const QStringList &ranges)
     };
 
     QRemoteObjectPendingReply<bool> reply;
-    const bool sameThread = interface->thread() == QThread::currentThread();
+    const bool sameThread = ipcInterface->thread() == QThread::currentThread();
     qDebug() << "addKillSwitchException: same thread" << sameThread;
-    if (interface->thread() == QThread::currentThread()) {
+    if (ipcInterface->thread() == QThread::currentThread()) {
         qDebug() << "addKillSwitchException: invoking directly";
-        reply = interface->addKillSwitchAllowedRange(ranges);
+        reply = ipcInterface->addKillSwitchAllowedRange(ranges);
     } else {
         qDebug() << "addKillSwitchException: invoking via Qt::BlockingQueuedConnection";
-        const bool invoked = QMetaObject::invokeMethod(interface.data(),
-                                                       [&reply, interface, ranges]() {
-                                                           reply = interface->addKillSwitchAllowedRange(ranges);
+        const bool invoked = QMetaObject::invokeMethod(ipcInterface.data(),
+                                                       [&reply, ipcInterface, ranges]() {
+                                                           reply = ipcInterface->addKillSwitchAllowedRange(ranges);
                                                        },
                                                        Qt::BlockingQueuedConnection);
 
