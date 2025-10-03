@@ -426,7 +426,7 @@ bool GatewayController::addKillSwitchException(const QStringList &ranges)
         return false;
     }
 
-    auto waitForReply = [](QRemoteObjectPendingReply<bool> &reply) -> bool {
+    const auto waitForReply = [](QRemoteObjectPendingReply<bool> reply) -> bool {
         if (!reply.waitForFinished()) {
             qWarning() << "Timed out waiting for KillSwitch exception reply";
             return false;
@@ -434,21 +434,20 @@ bool GatewayController::addKillSwitchException(const QStringList &ranges)
         return reply.returnValue();
     };
 
-    if (interface->thread() == QThread::currentThread()) {
-        QRemoteObjectPendingReply<bool> reply = interface->addKillSwitchAllowedRange(ranges);
-        return waitForReply(reply);
-    }
-
     QRemoteObjectPendingReply<bool> reply;
-    const bool invoked = QMetaObject::invokeMethod(interface.data(),
-                                                   [&reply, interface, ranges]() {
-                                                       reply = interface->addKillSwitchAllowedRange(ranges);
-                                                   },
-                                                   Qt::BlockingQueuedConnection);
+    if (interface->thread() == QThread::currentThread()) {
+        reply = interface->addKillSwitchAllowedRange(ranges);
+    } else {
+        const bool invoked = QMetaObject::invokeMethod(interface.data(),
+                                                       [&reply, interface, ranges]() {
+                                                           reply = interface->addKillSwitchAllowedRange(ranges);
+                                                       },
+                                                       Qt::BlockingQueuedConnection);
 
-    if (!invoked) {
-        qWarning() << "Failed to invoke KillSwitch exception update via queued connection";
-        return false;
+        if (!invoked) {
+            qWarning() << "Failed to invoke KillSwitch exception update via queued connection";
+            return false;
+        }
     }
 
     return waitForReply(reply);
