@@ -13,6 +13,8 @@
 #include <QRandomGenerator>
 #include <QDataStream>
 #include <QSslConfiguration>
+#include <QSslSocket>
+#include <QRemoteObjectPendingReply>
 #include <QThread>
 #include <QUrl>
 #include <QtEndian>
@@ -424,14 +426,23 @@ bool GatewayController::addKillSwitchException(const QStringList &ranges)
         return false;
     }
 
+    auto waitForReply = [](QRemoteObjectPendingReply<bool> &reply) -> bool {
+        if (!reply.waitForFinished()) {
+            qWarning() << "Timed out waiting for KillSwitch exception reply";
+            return false;
+        }
+        return reply.returnValue();
+    };
+
     if (interface->thread() == QThread::currentThread()) {
-        return interface->addKillSwitchAllowedRange(ranges);
+        QRemoteObjectPendingReply<bool> reply = interface->addKillSwitchAllowedRange(ranges);
+        return waitForReply(reply);
     }
 
-    bool result = false;
+    QRemoteObjectPendingReply<bool> reply;
     const bool invoked = QMetaObject::invokeMethod(interface.data(),
-                                                   [&result, interface, ranges]() {
-                                                       result = interface->addKillSwitchAllowedRange(ranges);
+                                                   [&reply, interface, ranges]() {
+                                                       reply = interface->addKillSwitchAllowedRange(ranges);
                                                    },
                                                    Qt::BlockingQueuedConnection);
 
@@ -440,7 +451,7 @@ bool GatewayController::addKillSwitchException(const QStringList &ranges)
         return false;
     }
 
-    return result;
+    return waitForReply(reply);
 }
 
 QString GatewayController::resolveHostViaOpenDns(const QString &host)
@@ -459,9 +470,7 @@ QString GatewayController::resolveHostViaOpenDns(const QString &host)
     request.setRawHeader("Host", dohHostname.toUtf8());
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
-    QSslConfiguration sslConfig = request.sslConfiguration();
-    sslConfig.setPeerVerifyName(dohHostname);
-    request.setSslConfiguration(sslConfig);
+    request.setPeerVerifyName(dohHostname);
 
     QByteArray payload = buildDnsQuery(host);
 
