@@ -3,11 +3,22 @@
 #include <algorithm>
 #include <random>
 
+#include <QEventLoop>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMetaObject>
 #include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QRandomGenerator>
+#include <QDataStream>
+#include <QSslConfiguration>
+#include <QSslSocket>
+#include <QRemoteObjectPendingReply>
+#include <QThread>
 #include <QUrl>
+#include <QtEndian>
+#include <QDebug>
 
 #include "QBlockCipher.h"
 #include "QRsa.h"
@@ -67,10 +78,15 @@ ErrorCode GatewayController::get(const QString &endpoint, QByteArray &responseBo
     // bypass killSwitch exceptions for API-gateway
 #ifdef AMNEZIA_DESKTOP
     if (m_isStrictKillSwitchEnabled) {
-        QString host = QUrl(request.url()).host();
-        QString ip = NetworkUtilities::getIPAddress(host);
-        if (!ip.isEmpty()) {
-            IpcClient::Interface()->addKillSwitchAllowedRange(QStringList { ip });
+        const QUrl originalUrl = request.url();
+        const QString originalHost = originalUrl.host();
+        const QString resolvedIp = allowKillSwitchExceptionForUrl(originalUrl);
+        if (!resolvedIp.isEmpty() && resolvedIp != originalHost) {
+            QUrl ipUrl = originalUrl;
+            ipUrl.setHost(resolvedIp);
+            request.setUrl(ipUrl);
+            request.setPeerVerifyName(originalHost);
+            request.setRawHeader("Host", originalHost.toUtf8());
         }
     }
 #endif
@@ -115,6 +131,7 @@ ErrorCode GatewayController::get(const QString &endpoint, QByteArray &responseBo
 
 ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
 {
+    qDebug() << "apiPayload" << apiPayload;
 #ifdef Q_OS_IOS
     IosController::Instance()->requestInetAccess();
     QThread::msleep(10);
@@ -128,12 +145,20 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     request.setUrl(endpoint.arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
 
     // bypass killSwitch exceptions for API-gateway
+    qDebug() << "url" << request.url();
+    qDebug() << "host" << QUrl(request.url()).host();
+    qDebug() << "endpoint" << endpoint;
 #ifdef AMNEZIA_DESKTOP
     if (m_isStrictKillSwitchEnabled) {
-        QString host = QUrl(request.url()).host();
-        QString ip = NetworkUtilities::getIPAddress(host);
-        if (!ip.isEmpty()) {
-            IpcClient::Interface()->addKillSwitchAllowedRange(QStringList { ip });
+        const QUrl originalUrl = request.url();
+        const QString originalHost = originalUrl.host();
+        const QString resolvedIp = allowKillSwitchExceptionForUrl(originalUrl);
+        if (!resolvedIp.isEmpty() && resolvedIp != originalHost) {
+            QUrl ipUrl = originalUrl;
+            ipUrl.setHost(resolvedIp);
+            request.setUrl(ipUrl);
+            request.setPeerVerifyName(originalHost);
+            request.setRawHeader("Host", originalHost.toUtf8());
         }
     }
 #endif
@@ -411,3 +436,282 @@ void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *repl
         }
     }
 }
+
+QString GatewayController::allowKillSwitchExceptionForUrl(const QUrl &url)
+{
+#ifdef AMNEZIA_DESKTOP
+    qDebug() << "allowKillSwitchExceptionForUrl: processing url" << url;
+    const QString host = url.host();
+    if (host.isEmpty()) {
+        qDebug() << "allowKillSwitchExceptionForUrl: empty host, skipping";
+        return {};
+    }
+
+    qDebug() << "allowKillSwitchExceptionForUrl: resolving host" << host;
+    const QString resolvedIp = resolveHost(host);
+    if (resolvedIp.isEmpty()) {
+        qWarning() << "Failed to resolve host for KillSwitch exception" << host;
+        return {};
+    }
+
+    qDebug() << "allowKillSwitchExceptionForUrl: adding KillSwitch exception for" << resolvedIp;
+    if (!addKillSwitchException(QStringList { resolvedIp })) {
+        qWarning() << "Failed to add KillSwitch exception" << resolvedIp;
+        return {};
+    }
+    qDebug() << "allowKillSwitchExceptionForUrl: exception added" << resolvedIp;
+    return resolvedIp;
+#else
+    Q_UNUSED(url);
+    return {};
+#endif
+}
+
+QString GatewayController::resolveHost(const QString &host)
+{
+#ifdef AMNEZIA_DESKTOP
+    qDebug() << "resolveHost: start" << host;
+    if (!m_isStrictKillSwitchEnabled) {
+        qDebug() << "resolveHost: strict KillSwitch disabled, using NetworkUtilities directly";
+        return NetworkUtilities::getIPAddress(host);
+    }
+
+    QString resolvedIp = NetworkUtilities::getIPAddress(host);
+    qDebug() << "resolveHost: NetworkUtilities returned" << resolvedIp;
+    if (!resolvedIp.isEmpty()) {
+        return resolvedIp;
+    }
+
+    qDebug() << "resolveHost: falling back to resolveHostViaOpenDns" << host;
+    resolvedIp = resolveHostViaOpenDns(host);
+    if (resolvedIp.isEmpty()) {
+        qWarning() << "OpenDNS fallback failed" << host;
+    }
+    qDebug() << "resolveHost: final result" << resolvedIp;
+    return resolvedIp;
+#else
+    return NetworkUtilities::getIPAddress(host);
+#endif
+}
+
+#ifdef AMNEZIA_DESKTOP
+bool GatewayController::addKillSwitchException(const QStringList &ranges)
+{
+    qDebug() << "addKillSwitchException: requested ranges" << ranges;
+    auto ipcInterface = IpcClient::Interface();
+    if (!ipcInterface) {
+        qWarning() << "IPC interface is null, cannot add KillSwitch exception";
+        return false;
+    }
+
+    const auto waitForReply = [](QRemoteObjectPendingReply<bool> reply) -> bool {
+        if (!reply.waitForFinished()) {
+            qWarning() << "Timed out waiting for KillSwitch exception reply";
+            return false;
+        }
+        return reply.returnValue();
+    };
+
+    QRemoteObjectPendingReply<bool> reply;
+    const bool sameThread = ipcInterface->thread() == QThread::currentThread();
+    qDebug() << "addKillSwitchException: same thread" << sameThread;
+    if (ipcInterface->thread() == QThread::currentThread()) {
+        qDebug() << "addKillSwitchException: invoking directly";
+        reply = ipcInterface->addKillSwitchAllowedRange(ranges);
+    } else {
+        qDebug() << "addKillSwitchException: invoking via Qt::BlockingQueuedConnection";
+        const bool invoked = QMetaObject::invokeMethod(ipcInterface.data(),
+                                                       [&reply, ipcInterface, ranges]() {
+                                                           reply = ipcInterface->addKillSwitchAllowedRange(ranges);
+                                                       },
+                                                       Qt::BlockingQueuedConnection);
+
+        if (!invoked) {
+            qWarning() << "Failed to invoke KillSwitch exception update via queued connection";
+            return false;
+        }
+    }
+
+    qDebug() << "addKillSwitchException: waiting for reply";
+    const bool result = waitForReply(reply);
+    qDebug() << "addKillSwitchException: reply result" << result;
+    return result;
+}
+
+QString GatewayController::resolveHostViaOpenDns(const QString &host)
+{
+    qDebug() << "resolveHostViaOpenDns: start" << host;
+    const QString fallbackIp = QStringLiteral("146.112.41.2");
+    const QString dohHostname = QStringLiteral("doh.opendns.com");
+    const QUrl dohEndpoint(QStringLiteral("https://%1/dns-query").arg(fallbackIp));
+
+    if (!addKillSwitchException(QStringList { fallbackIp })) {
+        qWarning() << "Failed to add fallback KillSwitch exception" << fallbackIp;
+    } else {
+        qDebug() << "resolveHostViaOpenDns: fallback KillSwitch exception added" << fallbackIp;
+    }
+
+    QNetworkRequest request(dohEndpoint);
+    qDebug() << "resolveHostViaOpenDns: DoH endpoint" << dohEndpoint;
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/dns-message"));
+    request.setRawHeader("Accept", "application/dns-message");
+    request.setRawHeader("Host", dohHostname.toUtf8());
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    request.setPeerVerifyName(dohHostname);
+    qDebug() << "resolveHostViaOpenDns: peer verify name set" << dohHostname;
+
+    QByteArray payload = buildDnsQuery(host);
+    qDebug() << "resolveHostViaOpenDns: payload size" << payload.size();
+
+    QNetworkReply *reply = amnApp->networkManager()->post(request, payload);
+    if (!reply) {
+        qWarning() << "Failed to create DoH request" << host;
+        return {};
+    }
+    qDebug() << "resolveHostViaOpenDns: request sent" << host;
+
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+    qDebug() << "resolveHostViaOpenDns: reply finished" << host;
+
+    QByteArray dnsResponse;
+    if (reply->error() == QNetworkReply::NoError) {
+        dnsResponse = reply->readAll();
+        qDebug() << "resolveHostViaOpenDns: received response size" << dnsResponse.size();
+    } else {
+        qWarning() << "DoH request failed" << host << reply->errorString();
+    }
+
+    reply->deleteLater();
+
+    if (dnsResponse.isEmpty()) {
+        return {};
+    }
+
+    const QString resolvedIp = parseDnsResponse(dnsResponse);
+    qDebug() << "resolveHostViaOpenDns: parsed result" << resolvedIp;
+    return resolvedIp;
+}
+
+QByteArray GatewayController::buildDnsQuery(const QString &host) const
+{
+    QByteArray query;
+    QDataStream stream(&query, QIODevice::WriteOnly);
+    stream.setByteOrder(QDataStream::BigEndian);
+
+    quint16 transactionId = QRandomGenerator::system()->generate();
+    stream << transactionId;
+    stream << static_cast<quint16>(0x0100); // standard query with recursion desired
+    stream << static_cast<quint16>(1);      // QDCOUNT
+    stream << static_cast<quint16>(0);      // ANCOUNT
+    stream << static_cast<quint16>(0);      // NSCOUNT
+    stream << static_cast<quint16>(0);      // ARCOUNT
+
+    const QByteArray hostUtf8 = host.toUtf8();
+    const QList<QByteArray> labels = hostUtf8.split('.');
+    for (const QByteArray &label : labels) {
+        stream << static_cast<quint8>(label.size());
+        stream.writeRawData(label.constData(), label.size());
+    }
+    stream << static_cast<quint8>(0); // end of QNAME
+
+    stream << static_cast<quint16>(1); // QTYPE A
+    stream << static_cast<quint16>(1); // QCLASS IN
+
+    return query;
+}
+
+QString GatewayController::parseDnsResponse(const QByteArray &response) const
+{
+    if (response.size() < 12) {
+        qWarning() << "DNS response too short" << response.size();
+        return {};
+    }
+
+    QDataStream stream(response);
+    stream.setByteOrder(QDataStream::BigEndian);
+
+    quint16 transactionId;
+    quint16 flags;
+    quint16 qdCount;
+    quint16 anCount;
+    quint16 nsCount;
+    quint16 arCount;
+
+    stream >> transactionId >> flags >> qdCount >> anCount >> nsCount >> arCount;
+
+    if ((flags & 0x000F) != 0) {
+        qWarning() << "DNS response contains error" << flags;
+        return {};
+    }
+
+    int offset = 12;
+
+    for (int i = 0; i < qdCount; ++i) {
+        offset = skipDnsName(response, offset);
+        if (offset < 0 || offset + 4 > response.size()) {
+            qWarning() << "Invalid DNS question section";
+            return {};
+        }
+        offset += 4;
+    }
+
+    const uchar *data = reinterpret_cast<const uchar *>(response.constData());
+    for (int i = 0; i < anCount; ++i) {
+        int nameOffset = skipDnsName(response, offset);
+        if (nameOffset < 0 || nameOffset + 10 > response.size()) {
+            qWarning() << "Invalid DNS answer section";
+            return {};
+        }
+        offset = nameOffset;
+
+        quint16 type = qFromBigEndian<quint16>(data + offset);
+        quint16 dnsClass = qFromBigEndian<quint16>(data + offset + 2);
+        quint32 ttl = qFromBigEndian<quint32>(data + offset + 4);
+        Q_UNUSED(ttl);
+    quint16 rdLength = qFromBigEndian<quint16>(data + offset + 8);
+        offset += 10;
+
+        if (offset + rdLength > response.size()) {
+            qWarning() << "Invalid RDATA length" << rdLength;
+            return {};
+        }
+
+        if (type == 1 && dnsClass == 1 && rdLength == 4) {
+            const quint8 b1 = data[offset];
+            const quint8 b2 = data[offset + 1];
+            const quint8 b3 = data[offset + 2];
+            const quint8 b4 = data[offset + 3];
+            return QStringLiteral("%1.%2.%3.%4").arg(b1).arg(b2).arg(b3).arg(b4);
+        }
+
+        offset += rdLength;
+    }
+
+    return {};
+}
+
+int GatewayController::skipDnsName(const QByteArray &message, int offset) const
+{
+    while (offset < message.size()) {
+        quint8 length = static_cast<quint8>(message.at(offset));
+        if (length == 0) {
+            return offset + 1;
+        }
+        if ((length & 0xC0) == 0xC0) {
+            if (offset + 2 > message.size()) {
+                return -1;
+            }
+            return offset + 2;
+        }
+        ++offset;
+        offset += length;
+        if (offset > message.size()) {
+            return -1;
+        }
+    }
+    return -1;
+}
+#endif
