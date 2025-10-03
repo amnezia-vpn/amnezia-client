@@ -10,7 +10,8 @@ env:
 
 jobs:
   Build-Linux-Ubuntu-Arm:
-    runs-on: ubuntu-24.04-arm
+    #runs-on: ubuntu-24.04-arm
+    runs-on: self-hosted
 
     env:
       QT_VERSION: 6.7.3
