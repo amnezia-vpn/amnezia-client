@@ -18,6 +18,7 @@
 #include <QThread>
 #include <QUrl>
 #include <QtEndian>
+#include <QDebug>
 
 #include "QBlockCipher.h"
 #include "QRsa.h"
@@ -135,7 +136,6 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     // bypass killSwitch exceptions for API-gateway
     qDebug() << "url" << request.url();
     qDebug() << "host" << QUrl(request.url()).host();
-    qDebug() << "ip" << NetworkUtilities::getIPAddress(request.url().host());
     qDebug() << "endpoint" << endpoint;
 #ifdef AMNEZIA_DESKTOP
     if (m_isStrictKillSwitchEnabled) {
@@ -373,21 +373,26 @@ void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *repl
 QString GatewayController::allowKillSwitchForHost(const QUrl &url)
 {
 #ifdef AMNEZIA_DESKTOP
+    qDebug() << "allowKillSwitchForHost: processing url" << url;
     const QString host = url.host();
     if (host.isEmpty()) {
+        qDebug() << "allowKillSwitchForHost: empty host, skipping";
         return {};
     }
 
+    qDebug() << "allowKillSwitchForHost: resolving host" << host;
     const QString resolvedIp = resolveHost(host);
     if (resolvedIp.isEmpty()) {
         qWarning() << "Failed to resolve host for KillSwitch exception" << host;
         return {};
     }
 
+    qDebug() << "allowKillSwitchForHost: adding KillSwitch exception for" << resolvedIp;
     if (!addKillSwitchException(QStringList { resolvedIp })) {
         qWarning() << "Failed to add KillSwitch exception" << resolvedIp;
         return {};
     }
+    qDebug() << "allowKillSwitchForHost: exception added" << resolvedIp;
     return resolvedIp;
 #else
     Q_UNUSED(url);
@@ -398,19 +403,24 @@ QString GatewayController::allowKillSwitchForHost(const QUrl &url)
 QString GatewayController::resolveHost(const QString &host)
 {
 #ifdef AMNEZIA_DESKTOP
+    qDebug() << "resolveHost: start" << host;
     if (!m_isStrictKillSwitchEnabled) {
+        qDebug() << "resolveHost: strict KillSwitch disabled, using NetworkUtilities directly";
         return NetworkUtilities::getIPAddress(host);
     }
 
     QString resolvedIp = NetworkUtilities::getIPAddress(host);
+    qDebug() << "resolveHost: NetworkUtilities returned" << resolvedIp;
     if (!resolvedIp.isEmpty()) {
         return resolvedIp;
     }
 
+    qDebug() << "resolveHost: falling back to resolveHostViaOpenDns" << host;
     resolvedIp = resolveHostViaOpenDns(host);
     if (resolvedIp.isEmpty()) {
         qWarning() << "OpenDNS fallback failed" << host;
     }
+    qDebug() << "resolveHost: final result" << resolvedIp;
     return resolvedIp;
 #else
     return NetworkUtilities::getIPAddress(host);
@@ -420,6 +430,7 @@ QString GatewayController::resolveHost(const QString &host)
 #ifdef AMNEZIA_DESKTOP
 bool GatewayController::addKillSwitchException(const QStringList &ranges)
 {
+    qDebug() << "addKillSwitchException: requested ranges" << ranges;
     auto interface = IpcClient::Interface();
     if (!interface) {
         qWarning() << "IPC interface is null, cannot add KillSwitch exception";
@@ -435,9 +446,13 @@ bool GatewayController::addKillSwitchException(const QStringList &ranges)
     };
 
     QRemoteObjectPendingReply<bool> reply;
+    const bool sameThread = interface->thread() == QThread::currentThread();
+    qDebug() << "addKillSwitchException: same thread" << sameThread;
     if (interface->thread() == QThread::currentThread()) {
+        qDebug() << "addKillSwitchException: invoking directly";
         reply = interface->addKillSwitchAllowedRange(ranges);
     } else {
+        qDebug() << "addKillSwitchException: invoking via Qt::BlockingQueuedConnection";
         const bool invoked = QMetaObject::invokeMethod(interface.data(),
                                                        [&reply, interface, ranges]() {
                                                            reply = interface->addKillSwitchAllowedRange(ranges);
@@ -450,42 +465,54 @@ bool GatewayController::addKillSwitchException(const QStringList &ranges)
         }
     }
 
-    return waitForReply(reply);
+    qDebug() << "addKillSwitchException: waiting for reply";
+    const bool result = waitForReply(reply);
+    qDebug() << "addKillSwitchException: reply result" << result;
+    return result;
 }
 
 QString GatewayController::resolveHostViaOpenDns(const QString &host)
 {
+    qDebug() << "resolveHostViaOpenDns: start" << host;
     const QString fallbackIp = QStringLiteral("146.112.41.2");
     const QString dohHostname = QStringLiteral("doh.opendns.com");
     const QUrl dohEndpoint(QStringLiteral("https://%1/dns-query").arg(fallbackIp));
 
     if (!addKillSwitchException(QStringList { fallbackIp })) {
         qWarning() << "Failed to add fallback KillSwitch exception" << fallbackIp;
+    } else {
+        qDebug() << "resolveHostViaOpenDns: fallback KillSwitch exception added" << fallbackIp;
     }
 
     QNetworkRequest request(dohEndpoint);
+    qDebug() << "resolveHostViaOpenDns: DoH endpoint" << dohEndpoint;
     request.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/dns-message"));
     request.setRawHeader("Accept", "application/dns-message");
     request.setRawHeader("Host", dohHostname.toUtf8());
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
     request.setPeerVerifyName(dohHostname);
+    qDebug() << "resolveHostViaOpenDns: peer verify name set" << dohHostname;
 
     QByteArray payload = buildDnsQuery(host);
+    qDebug() << "resolveHostViaOpenDns: payload size" << payload.size();
 
     QNetworkReply *reply = amnApp->networkManager()->post(request, payload);
     if (!reply) {
         qWarning() << "Failed to create DoH request" << host;
         return {};
     }
+    qDebug() << "resolveHostViaOpenDns: request sent" << host;
 
     QEventLoop loop;
     QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
     loop.exec();
+    qDebug() << "resolveHostViaOpenDns: reply finished" << host;
 
     QByteArray dnsResponse;
     if (reply->error() == QNetworkReply::NoError) {
         dnsResponse = reply->readAll();
+        qDebug() << "resolveHostViaOpenDns: received response size" << dnsResponse.size();
     } else {
         qWarning() << "DoH request failed" << host << reply->errorString();
     }
@@ -496,7 +523,9 @@ QString GatewayController::resolveHostViaOpenDns(const QString &host)
         return {};
     }
 
-    return parseDnsResponse(dnsResponse);
+    const QString resolvedIp = parseDnsResponse(dnsResponse);
+    qDebug() << "resolveHostViaOpenDns: parsed result" << resolvedIp;
+    return resolvedIp;
 }
 
 QByteArray GatewayController::buildDnsQuery(const QString &host) const
