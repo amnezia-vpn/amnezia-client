@@ -532,7 +532,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     }
 }
 
-bool ApiConfigsController::deactivateDevice()
+bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
@@ -543,8 +543,12 @@ bool ApiConfigsController::deactivateDevice()
     }
 
     if (isSubscriptionExpired(apiConfigObject)) {
-        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
-        return false;
+        if (isRemoveEvent) {
+            return true;
+        } else {
+            emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+            return false;
+        }
     }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
