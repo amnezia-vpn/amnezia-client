@@ -105,9 +105,9 @@ QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, 
     config.replace("$OPENVPN_CLIENT_CERT", connData.clientCert);
     config.replace("$OPENVPN_PRIV_KEY", connData.privKey);
 
-    if (config.contains("$OPENVPN_TA_KEY_SANITIZED")) {
-        config.replace("$OPENVPN_TA_KEY_SANITIZED", sanitizeStaticKey(connData.taKey));
-    } else if (config.contains("$OPENVPN_TA_KEY")) {
+    if (config.contains("$OPENVPN_TA_KEY")) {
+        config.replace("$OPENVPN_TA_KEY", sanitizeStaticKey(connData.taKey));
+    } else {
         config.replace("<tls-auth>", "");
         config.replace("</tls-auth>", "");
     }
