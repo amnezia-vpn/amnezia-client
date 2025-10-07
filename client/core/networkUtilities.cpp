@@ -110,7 +110,6 @@ QStringList NetworkUtilities::summarizeRoutes(const QStringList &ips, const QStr
 
 QString NetworkUtilities::getIPAddress(const QString &host)
 {
-    qDebug() << "getIPAddress" << host;
     QHostAddress address(host);
     if (QAbstractSocket::IPv4Protocol == address.protocol()) {
         return host;
@@ -119,7 +118,6 @@ QString NetworkUtilities::getIPAddress(const QString &host)
     }
 
     QList<QHostAddress> addresses = QHostInfo::fromName(host).addresses();
-    qDebug() << "addresses" << addresses;
     if (!addresses.isEmpty()) {
         return addresses.first().toString();
     }
