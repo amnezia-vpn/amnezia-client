@@ -32,6 +32,7 @@ private:
 #ifdef AMNEZIA_DESKTOP
     bool addKillSwitchException(const QStringList &ranges);
     QString resolveHostViaOpenDns(const QString &host);
+    QString resolveHostViaQuad9(const QString &host);
     QByteArray buildDnsQuery(const QString &host) const;
     QString parseDnsResponse(const QByteArray &response) const;
     int skipDnsName(const QByteArray &message, int offset) const;

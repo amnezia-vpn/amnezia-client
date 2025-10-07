@@ -435,10 +435,19 @@ QString GatewayController::resolveHost(const QString &host)
 
     qDebug() << "resolveHost: falling back to resolveHostViaOpenDns" << host;
     resolvedIp = resolveHostViaOpenDns(host);
-    if (resolvedIp.isEmpty()) {
-        qWarning() << "OpenDNS fallback failed" << host;
+    if (!resolvedIp.isEmpty()) {
+        qDebug() << "resolveHost: final result" << resolvedIp;
+        return resolvedIp;
     }
-    qDebug() << "resolveHost: final result" << resolvedIp;
+    qWarning() << "OpenDNS fallback failed" << host;
+    qDebug() << "resolveHost: falling back to resolveHostViaQuad9" << host;
+    resolvedIp = resolveHostViaQuad9(host);
+    if (!resolvedIp.isEmpty()) {
+        qDebug() << "resolveHost: final result" << resolvedIp;
+    } else {
+        qWarning() << "Quad9 fallback failed" << host;
+        qDebug() << "resolveHost: final result" << resolvedIp;
+    }
     return resolvedIp;
 #else
     return NetworkUtilities::getIPAddress(host);
@@ -543,6 +552,62 @@ QString GatewayController::resolveHostViaOpenDns(const QString &host)
 
     const QString resolvedIp = parseDnsResponse(dnsResponse);
     qDebug() << "resolveHostViaOpenDns: parsed result" << resolvedIp;
+    return resolvedIp;
+}
+
+QString GatewayController::resolveHostViaQuad9(const QString &host)
+{
+    qDebug() << "resolveHostViaQuad9: start" << host;
+    const QString dohHostname = QStringLiteral("dns.quad9.net");
+    const QString fallbackIp = QStringLiteral("149.112.112.112");
+
+    QByteArray payload = buildDnsQuery(host);
+    qDebug() << "resolveHostViaQuad9: payload size" << payload.size();
+
+    const QUrl dohEndpoint(QStringLiteral("https://%1/dns-query").arg(fallbackIp));
+    qDebug() << "resolveHostViaQuad9: using endpoint" << dohEndpoint;
+
+    if (!addKillSwitchException(QStringList { fallbackIp })) {
+        qWarning() << "resolveHostViaQuad9: failed to add KillSwitch exception" << fallbackIp;
+    } else {
+        qDebug() << "resolveHostViaQuad9: KillSwitch exception added" << fallbackIp;
+    }
+
+    QNetworkRequest request(dohEndpoint);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/dns-message"));
+    request.setRawHeader("Accept", "application/dns-message");
+    request.setRawHeader("Host", dohHostname.toUtf8());
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setPeerVerifyName(dohHostname);
+
+    QNetworkReply *reply = amnApp->networkManager()->post(request, payload);
+    if (!reply) {
+        qWarning() << "resolveHostViaQuad9: failed to create DoH request" << host << fallbackIp;
+        return {};
+    }
+    qDebug() << "resolveHostViaQuad9: request sent" << host << fallbackIp;
+
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+    qDebug() << "resolveHostViaQuad9: reply finished" << host << fallbackIp;
+
+    QByteArray dnsResponse;
+    if (reply->error() == QNetworkReply::NoError) {
+        dnsResponse = reply->readAll();
+        qDebug() << "resolveHostViaQuad9: received response size" << dnsResponse.size();
+    } else {
+        qWarning() << "resolveHostViaQuad9: DoH request failed" << host << fallbackIp << reply->errorString();
+    }
+
+    reply->deleteLater();
+
+    if (dnsResponse.isEmpty()) {
+        return {};
+    }
+
+    const QString resolvedIp = parseDnsResponse(dnsResponse);
+    qDebug() << "resolveHostViaQuad9: parsed result" << resolvedIp;
     return resolvedIp;
 }
 
