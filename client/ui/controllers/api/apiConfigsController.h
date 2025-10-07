@@ -21,7 +21,7 @@ public:
 public slots:
     bool exportNativeConfig(const QString &serverCountryCode, const QString &fileName);
     bool revokeNativeConfig(const QString &serverCountryCode);
-    // bool exportVpnKey(const QString &fileName);
+    bool exportVpnKey(const QString &fileName);
     void prepareVpnKeyExport();
     void copyVpnKeyToClipboard();
 

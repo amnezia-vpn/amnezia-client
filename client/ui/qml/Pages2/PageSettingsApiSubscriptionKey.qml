@@ -90,7 +90,7 @@ PageType {
 
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
-                        ExportController.exportConfig(fileName)
+                        ApiConfigsController.exportVpnKey(fileName)
                         PageController.showBusyIndicator(false)
                     }
                 }

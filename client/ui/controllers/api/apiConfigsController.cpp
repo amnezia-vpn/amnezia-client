@@ -249,6 +249,23 @@ ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersModel> &s
 {
 }
 
+bool ApiConfigsController::exportVpnKey(const QString &fileName)
+{
+    if (fileName.isEmpty()) {
+        emit errorOccurred(ErrorCode::PermissionsError);
+        return false;
+    }
+
+    prepareVpnKeyExport();
+    if (m_vpnKey.isEmpty()) {
+        emit errorOccurred(ErrorCode::ApiConfigEmptyError);
+        return false;
+    }
+
+    SystemController::saveFile(fileName, m_vpnKey);
+    return true;
+}
+
 bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, const QString &fileName)
 {
     if (fileName.isEmpty()) {
