@@ -150,7 +150,9 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
             return true;
         };
 
-        bypassProxy(endpoint, requestFunction, replyProcessingFunction);
+        auto serviceType = apiPayload.value(apiDefs::key::serviceType).toString("");
+        auto userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString("");
+        bypassProxy(endpoint, serviceType, userCountryCode, requestFunction, replyProcessingFunction);
     }
 
     auto errorCode = apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, encryptedResponseBody);
@@ -168,7 +170,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     }
 }
 
-QStringList GatewayController::getProxyUrls()
+QStringList GatewayController::getProxyUrls(const QString &serviceType, const QString &userCountryCode)
 {
     QNetworkRequest request;
     request.setTransferTimeout(m_requestTimeoutMsecs);
@@ -178,14 +180,24 @@ QStringList GatewayController::getProxyUrls()
     QList<QSslError> sslErrors;
     QNetworkReply *reply;
 
-    QStringList proxyStorageUrls;
+    QStringList baseUrls;
     if (m_isDevEnvironment) {
-        proxyStorageUrls = QString(DEV_S3_ENDPOINT).split(", ");
+        baseUrls = QString(DEV_S3_ENDPOINT).split(", ");
     } else {
-        proxyStorageUrls = QString(PROD_S3_ENDPOINT).split(", ");
+        baseUrls = QString(PROD_S3_ENDPOINT).split(", ");
     }
 
     QByteArray key = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
+
+    QStringList proxyStorageUrls;
+    if (!serviceType.isEmpty()) {
+        for (const auto &baseUrl : baseUrls) {
+            proxyStorageUrls.push_back(baseUrl + "-" + serviceType + "-" + userCountryCode + ".json");
+        }
+    }
+    for (const auto &baseUrl : baseUrls) {
+        proxyStorageUrls.push_back(baseUrl + ".json");
+    }
 
     for (const auto &proxyStorageUrl : proxyStorageUrls) {
         request.setUrl(proxyStorageUrl);
@@ -231,11 +243,10 @@ QStringList GatewayController::getProxyUrls()
             }
             return endpoints;
         } else {
-            QByteArray responseBody = reply->readAll();
-            QString replyErrorString = reply->errorString();
             auto replyError = reply->error();
             int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, responseBody);
+            qDebug() << replyError;
+            qDebug() << httpStatusCode;
             qDebug() << "go to the next storage endpoint";
 
             reply->deleteLater();
@@ -284,10 +295,11 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
     return false;
 }
 
-void GatewayController::bypassProxy(const QString &endpoint, std::function<QNetworkReply *(const QString &url)> requestFunction,
+void GatewayController::bypassProxy(const QString &endpoint, const QString &serviceType, const QString &userCountryCode,
+                                    std::function<QNetworkReply *(const QString &url)> requestFunction,
                                     std::function<bool(QNetworkReply *reply, const QList<QSslError> &sslErrors)> replyProcessingFunction)
 {
-    QStringList proxyUrls = getProxyUrls();
+    QStringList proxyUrls = getProxyUrls(serviceType, userCountryCode);
     std::random_device randomDevice;
     std::mt19937 generator(randomDevice());
     std::shuffle(proxyUrls.begin(), proxyUrls.end(), generator);

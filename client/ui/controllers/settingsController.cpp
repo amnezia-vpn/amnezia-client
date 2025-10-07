@@ -34,6 +34,9 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this, &SettingsController::onNotificationStateChanged);
 #endif
+
+    m_isDevModeEnabled = m_settings->isDevGatewayEnv();
+    toggleDevGatewayEnv(m_isDevModeEnabled);
 }
 
 QString getPlatformName()
