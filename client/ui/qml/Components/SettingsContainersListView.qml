@@ -15,21 +15,27 @@ import "../Controls2/TextTypes"
 
 ListViewType {
     id: root
-
-    anchors.fill: parent
+    
+    // Вычисляем высоту содержимого на основе количества элементов
+    property int itemHeight: 60 // Примерная высота одного элемента
+    implicitHeight: model ? model.count * itemHeight : 0
 
     delegate: ColumnLayout {
         width: root.width
+        
+        property bool itemInstalled: model ? (isInstalled || false) : false
+        property string itemName: model ? (name || "") : ""
+        property string itemDescription: model ? (description || "") : ""
 
         LabelWithButtonType {
             Layout.fillWidth: true
 
-            text: name
-            descriptionText: description
-            rightImageSource: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
+            text: itemName
+            descriptionText: itemDescription
+            rightImageSource: itemInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
 
             clickedFunction: function() {
-                if (isInstalled) {
+                if (itemInstalled && model) {
                     var containerIndex = root.model.mapToSource(index)
                     ContainersModel.setProcessedContainerIndex(containerIndex)
 
@@ -51,13 +57,29 @@ ListViewType {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
                         break
                     }
+                    case ContainerEnum.Sftp: {
+                        PageController.goToPage(PageEnum.PageServiceSftpSettings)
+                        break
+                    }
+                    case ContainerEnum.Socks5Proxy: {
+                        PageController.goToPage(PageEnum.PageServiceSocksProxySettings)
+                        break
+                    }
+                    case ContainerEnum.TorWebSite: {
+                        PageController.goToPage(PageEnum.PageServiceTorWebsiteSettings)
+                        break
+                    }
+                    case ContainerEnum.CryptPad: {
+                        PageController.goToPage(PageEnum.PageCryptPad)
+                        break
+                    }
                     default: {
                         ProtocolsModel.updateModel(config)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
                     }
                     }
 
-                } else {
+                } else if (model) {
                     ContainersModel.setProcessedContainerIndex(root.model.mapToSource(index))
                     InstallController.setShouldCreateServer(false)
                     PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)

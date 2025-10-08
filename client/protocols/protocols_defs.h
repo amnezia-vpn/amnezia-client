@@ -282,7 +282,8 @@ namespace amnezia
             TorWebSite,
             Dns,
             Sftp,
-            Socks5Proxy
+            Socks5Proxy,
+            CryptPad
         };
         Q_ENUM_NS(Proto)
 

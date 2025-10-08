@@ -70,7 +70,7 @@ QVector<amnezia::Proto> ContainerProps::protocolsForContainer(amnezia::DockerCon
     case DockerContainer::Sftp: return { Proto::Sftp };
 
     case DockerContainer::Socks5Proxy: return { Proto::Socks5Proxy };
-    case DockerContainer::CryptPad: return {}; // CryptPad is a web service, not a VPN protocol
+    case DockerContainer::CryptPad: return { Proto::CryptPad };
 
     default: return { defaultProtocol(container) };
     }
@@ -135,7 +135,7 @@ QMap<DockerContainer, QString> ContainerProps::containerDescriptions()
              { DockerContainer::Sftp,
                QObject::tr("Create a file vault on your server to securely store and transfer files.") },
              { DockerContainer::Socks5Proxy,
-               QObject::tr("") },
+               QObject::tr("Create a SOCKS5 proxy server to route your traffic through an encrypted connection.") },
              { DockerContainer::CryptPad,
                QObject::tr("CryptPad is a collaborative editor that allows you to create and edit documents, spreadsheets, and presentations securely and privately.") } };
 }
@@ -257,7 +257,7 @@ Proto ContainerProps::defaultProtocol(DockerContainer c)
     case DockerContainer::Dns: return Proto::Dns;
     case DockerContainer::Sftp: return Proto::Sftp;
     case DockerContainer::Socks5Proxy: return Proto::Socks5Proxy;
-    case DockerContainer::CryptPad: return Proto::Any; // Not a VPN protocol
+    case DockerContainer::CryptPad: return Proto::CryptPad;
     default: return Proto::Any;
     }
 }
