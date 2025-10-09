@@ -136,21 +136,10 @@ set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
 add_subdirectory(ios/networkextension)
 add_dependencies(${PROJECT} networkextension)
 
-set(OPENVPN_FRAMEWORK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios")
-set(OPENVPN_EMBEDDED_FRAMEWORKS
-    "${OPENVPN_FRAMEWORK_DIR}/OpenVPNAdapter.framework"
-    "${OPENVPN_FRAMEWORK_DIR}/OpenVPNClient.framework"
-    "${OPENVPN_FRAMEWORK_DIR}/mbedTLS.framework"
-    "${OPENVPN_FRAMEWORK_DIR}/LZ4.framework"
+set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS
+    "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework"
 )
 
-set_property(TARGET ${PROJECT} PROPERTY XCODE_EMBED_FRAMEWORKS "${OPENVPN_EMBEDDED_FRAMEWORKS}")
-set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS "$(inherited) ${OPENVPN_FRAMEWORK_DIR}")
+set(CMAKE_XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/)
+target_link_libraries("networkextension" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/apple/OpenVPNAdapter-ios/OpenVPNAdapter.framework")
 
-foreach(_framework ${OPENVPN_EMBEDDED_FRAMEWORKS})
-    target_link_libraries(networkextension PRIVATE "${_framework}")
-endforeach()
-
-set_property(TARGET networkextension PROPERTY XCODE_EMBED_FRAMEWORKS "${OPENVPN_EMBEDDED_FRAMEWORKS}")
-set_property(TARGET networkextension PROPERTY XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
-set_property(TARGET networkextension PROPERTY XCODE_ATTRIBUTE_FRAMEWORK_SEARCH_PATHS "$(inherited) ${OPENVPN_FRAMEWORK_DIR}")
