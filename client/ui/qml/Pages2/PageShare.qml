@@ -566,6 +566,7 @@ PageType {
                     textField.placeholderText: qsTr("Search")
 
                     Keys.onEscapePressed: {
+                        searchTextField.textField.text = ""
                         root.isSearchBarVisible = false
                     }
 
@@ -586,6 +587,7 @@ PageType {
                     imageColor: AmneziaStyle.color.paleGray
 
                     function clickedFunc() {
+                        searchTextField.textField.text = ""
                         root.isSearchBarVisible = false
                     }
 
