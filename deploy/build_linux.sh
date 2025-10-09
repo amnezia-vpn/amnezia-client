@@ -60,7 +60,7 @@ echo "Building App..."
 cd $BUILD_DIR
 
 $QT_BIN_DIR/qt-cmake -S $PROJECT_DIR
-cmake --build . -j --config release
+cmake --build . -j5 --config release
 
 # Build and run tests here
 
