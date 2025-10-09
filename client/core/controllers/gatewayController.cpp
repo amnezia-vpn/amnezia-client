@@ -192,11 +192,12 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
     QStringList proxyStorageUrls;
     if (!serviceType.isEmpty()) {
         for (const auto &baseUrl : baseUrls) {
-            proxyStorageUrls.push_back(baseUrl + "-" + serviceType + "-" + userCountryCode + ".json");
+            QByteArray path = ("endpoints-" + serviceType + "-" + userCountryCode).toUtf8();
+            proxyStorageUrls.push_back(baseUrl + path.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals) + ".json");
         }
     }
     for (const auto &baseUrl : baseUrls) {
-        proxyStorageUrls.push_back(baseUrl + ".json");
+        proxyStorageUrls.push_back(baseUrl + "endpoints.json");
     }
 
     for (const auto &proxyStorageUrl : proxyStorageUrls) {
