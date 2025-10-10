@@ -47,6 +47,8 @@ namespace
 
         constexpr char subscription[] = "subscription";
         constexpr char endDate[] = "end_date";
+
+        constexpr char isConnectEvent[] = "is_connect_event";
     }
 
     struct ProtocolData
@@ -249,6 +251,23 @@ ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersModel> &s
 {
 }
 
+bool ApiConfigsController::exportVpnKey(const QString &fileName)
+{
+    if (fileName.isEmpty()) {
+        emit errorOccurred(ErrorCode::PermissionsError);
+        return false;
+    }
+
+    prepareVpnKeyExport();
+    if (m_vpnKey.isEmpty()) {
+        emit errorOccurred(ErrorCode::ApiConfigEmptyError);
+        return false;
+    }
+
+    SystemController::saveFile(fileName, m_vpnKey);
+    return true;
+}
+
 bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, const QString &fileName)
 {
     if (fileName.isEmpty()) {
@@ -330,6 +349,13 @@ void ApiConfigsController::prepareVpnKeyExport()
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     auto vpnKey = apiConfigObject.value(apiDefs::key::vpnKey).toString();
+    if (vpnKey.isEmpty()) {
+        vpnKey = apiUtils::getPremiumV2VpnKey(serverConfigObject);
+        apiConfigObject.insert(apiDefs::key::vpnKey, vpnKey);
+        serverConfigObject.insert(configKey::apiConfig, apiConfigObject);
+        m_serversModel->editServer(serverConfigObject, m_serversModel->getProcessedServerIndex());
+    }
+
     m_vpnKey = vpnKey;
 
     vpnKey.replace("vpn://", "");
@@ -443,6 +469,10 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
 
+    if (newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig) {
+        apiPayload.insert(configKey::isConnectEvent, true);
+    }
+
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
 
@@ -526,7 +556,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     }
 }
 
-bool ApiConfigsController::deactivateDevice()
+bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
@@ -537,8 +567,12 @@ bool ApiConfigsController::deactivateDevice()
     }
 
     if (isSubscriptionExpired(apiConfigObject)) {
-        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
-        return false;
+        if (isRemoveEvent) {
+            return true;
+        } else {
+            emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+            return false;
+        }
     }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),

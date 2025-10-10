@@ -36,6 +36,7 @@ public:
     void StartRoutingIpv6();
     void StopRoutingIpv6();
     bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
+    bool restoreResolvers();
 public slots:
 
 private:

@@ -90,6 +90,7 @@ PageType {
         servers,
         connection,
         application,
+        news,
         backup,
         about,
         devConsole
@@ -125,6 +126,23 @@ PageType {
         property bool isVisible: true
         readonly property var clickedHandler: function() {
             PageController.goToPage(PageEnum.PageSettingsApplication)
+        }
+    }
+
+    QtObject {
+        id: news
+
+        property string title: qsTr("News & Notifications")
+        readonly property string leftImagePath: NewsModel.hasUnread ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
+        property bool isVisible: ServersModel.hasServersFromGatewayApi
+        readonly property var clickedHandler: function() {
+            if (!ServersModel.hasServersFromGatewayApi) {
+                return;
+            }
+            PageController.showBusyIndicator(true)
+            ApiNewsController.fetchNews();
+            PageController.goToPage(PageEnum.PageSettingsNewsNotifications)
+            PageController.showBusyIndicator(false)
         }
     }
 

@@ -18,14 +18,14 @@ public:
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
-    amnezia::ErrorCode get(const QString &endpoint, QByteArray &responseBody);
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
 
 private:
-    QStringList getProxyUrls();
-    bool shouldBypassProxy(QNetworkReply *reply, const QByteArray &responseBody, bool checkEncryption, const QByteArray &key = "",
-                           const QByteArray &iv = "", const QByteArray &salt = "");
-    void bypassProxy(const QString &endpoint, QNetworkReply *reply, std::function<QNetworkReply *(const QString &url)> requestFunction,
+    QStringList getProxyUrls(const QString &serviceType, const QString &userCountryCode);
+    bool shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &responseBody, bool checkEncryption,
+                           const QByteArray &key = "", const QByteArray &iv = "", const QByteArray &salt = "");
+    void bypassProxy(const QString &endpoint, const QString &serviceType, const QString &userCountryCode,
+                     std::function<QNetworkReply *(const QString &url)> requestFunction,
                      std::function<bool(QNetworkReply *reply, const QList<QSslError> &sslErrors)> replyProcessingFunction);
 
     int m_requestTimeoutMsecs;

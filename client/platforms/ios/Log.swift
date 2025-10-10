@@ -2,7 +2,8 @@ import Foundation
 import os.log
 
 struct Log {
-  static let osLog = Logger()
+  private static let subsystemIdentifier = Bundle.main.bundleIdentifier ?? "org.amnezia.AmneziaVPN"
+  static let osLog = Logger(subsystem: subsystemIdentifier, category: "App")
 
   private static let IsLoggingEnabledKey = "IsLoggingEnabled"
   static var isLoggingEnabled: Bool {
@@ -77,9 +78,40 @@ struct Log {
   static func log(_ type: OSLogType, title: String = "", message: String, url: URL = neLogURL) {
     NSLog("\(title) \(message)")
 
-    guard isLoggingEnabled else { return }
+    switch type {
+    case .debug:
+      if title.isEmpty {
+        osLog.debug("\(message, privacy: .public)")
+      } else {
+        osLog.debug("\(title, privacy: .public) \(message, privacy: .public)")
+      }
+    case .info:
+      if title.isEmpty {
+        osLog.info("\(message, privacy: .public)")
+      } else {
+        osLog.info("\(title, privacy: .public) \(message, privacy: .public)")
+      }
+    case .error:
+      if title.isEmpty {
+        osLog.error("\(message, privacy: .public)")
+      } else {
+        osLog.error("\(title, privacy: .public) \(message, privacy: .public)")
+      }
+    case .fault:
+      if title.isEmpty {
+        osLog.fault("\(message, privacy: .public)")
+      } else {
+        osLog.fault("\(title, privacy: .public) \(message, privacy: .public)")
+      }
+    default:
+      if title.isEmpty {
+        osLog.log("\(message, privacy: .public)")
+      } else {
+        osLog.log("\(title, privacy: .public) \(message, privacy: .public)")
+      }
+    }
 
-    osLog.log(level: type, "\(title) \(message)")
+    guard isLoggingEnabled else { return }
 
     let date = Date()
     let level = Record.Level(from: type)

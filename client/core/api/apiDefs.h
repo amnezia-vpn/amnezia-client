@@ -64,6 +64,10 @@ namespace apiDefs
         constexpr QLatin1String id("id");
         constexpr QLatin1String orderId("order_id");
         constexpr QLatin1String migrationCode("migration_code");
+
+        constexpr QLatin1String transactionId("transaction_id");
+
+        constexpr QLatin1String userCountryCode("user_country_code");
     }
 
     const int requestTimeoutMsecs = 12 * 1000; // 12 secs

@@ -18,9 +18,12 @@ namespace apiUtils
     apiDefs::ConfigType getConfigType(const QJsonObject &serverConfigObject);
     apiDefs::ConfigSource getConfigSource(const QJsonObject &serverConfigObject);
 
-    amnezia::ErrorCode checkNetworkReplyErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply);
+    amnezia::ErrorCode checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
+                                               const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
+                                               const QByteArray &responseBody);
 
     QString getPremiumV1VpnKey(const QJsonObject &serverConfigObject);
+    QString getPremiumV2VpnKey(const QJsonObject &serverConfigObject);
 }
 
 #endif // APIUTILS_H

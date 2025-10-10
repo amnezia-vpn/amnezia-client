@@ -603,12 +603,14 @@ PageType {
                 visible: accessTypeSelector.currentIndex === 1
 
                 property bool isFocusable: true
+                property bool freezeFilter: false
 
                 model: SortFilterProxyModel {
                     id: proxyClientManagementModel
                     sourceModel: ClientManagementModel
                     filters: RegExpFilter {
                         roleName: "clientName"
+                        enabled: !clientsListView.freezeFilter
                         pattern: ".*" + searchTextField.textField.text + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
@@ -791,12 +793,14 @@ PageType {
                                                     }
 
                                                     if (clientNameEditor.textField.text !== clientName) {
+                                                        clientsListView.freezeFilter = true
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(proxyClientManagementModel.mapToSource(index),
                                                                                       clientNameEditor.textField.text,
                                                                                       ContainersModel.getProcessedContainerIndex(),
                                                                                       ServersModel.getProcessedServerCredentials())
                                                         PageController.showBusyIndicator(false)
+                                                        Qt.callLater(function(){ clientsListView.freezeFilter = false })
                                                         clientNameEditDrawer.closeTriggered()
                                                     }
                                                 }
