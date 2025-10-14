@@ -164,6 +164,35 @@ PageType {
                           "All the content stored on CryptPad is end-to-end encrypted. " +
                           "This means that documents, chats, and files are unreadable outside of the session in which they are created.")
             }
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
+                textColor: AmneziaStyle.color.vibrantRed
+
+                clickedFunction: function() {
+                    var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
+                    var yesButtonText = qsTr("Continue")
+                    var noButtonText = qsTr("Cancel")
+
+                    var yesButtonFunction = function() {
+                        PageController.goToPage(PageEnum.PageDeinstalling)
+                        InstallController.removeProcessedContainer()
+                    }
+                    var noButtonFunction = function() {}
+
+                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    enabled: false
+                }
+            }
         }
     }
 }
