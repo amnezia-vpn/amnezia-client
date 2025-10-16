@@ -621,6 +621,8 @@ PageType {
 
                 visible: accessTypeSelector.currentIndex === 1
 
+                function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
+
                 property bool isFocusable: true
                 property bool freezeFilter: false
 
@@ -630,7 +632,7 @@ PageType {
                     filters: RegExpFilter {
                         roleName: "clientName"
                         enabled: !clientsListView.freezeFilter
-                        pattern: ".*" + searchTextField.textField.text + ".*"
+                        pattern: ".*" + clientsListView.escapeRe(searchTextField.textField.text) + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
                 }
