@@ -530,11 +530,6 @@ PageType {
                         exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
                         exportTypeSelector.closeTriggered()
                     }
-
-                    Component.onCompleted: {
-                        exportTypeSelector.text = exportTypeSelectorListView.selectedText
-                        exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
-                    }
                 }
             }
 
