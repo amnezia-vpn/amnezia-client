@@ -7,7 +7,7 @@
 
 #include <QObject>
 
-#include "../client/mozilla/pingsender.h"
+#include "../../mozilla/pingsender.h"
 
 class QSocketNotifier;
 

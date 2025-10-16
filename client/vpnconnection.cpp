@@ -112,7 +112,14 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             }
 
             if (container != DockerContainer::Ipsec) {
-                IpcClient::Interface()->startNetworkCheck(m_vpnProtocol->vpnLocalAddress(), m_vpnProtocol->vpnLocalAddress());
+                const QString gateway = m_vpnProtocol->vpnGateway();
+                const QString localAddress = m_vpnProtocol->vpnLocalAddress();
+                if (!gateway.isEmpty() && !localAddress.isEmpty()) {
+                    IpcClient::Interface()->startNetworkCheck(gateway, localAddress);
+                } else {
+                    qWarning() << "Skipped startNetworkCheck due to missing gateway/local address"
+                               << gateway << localAddress;
+                }
             }
 
         } else if (state == Vpn::ConnectionState::Error) {

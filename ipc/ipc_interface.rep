@@ -37,5 +37,10 @@ class IpcInterface
     SLOT( bool enableKillSwitch( const QJsonObject &excludeAddr, int vpnAdapterIndex) );
     SLOT( bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) );
     SLOT( bool restoreResolvers() );
-};
 
+    SLOT( bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) );
+    SLOT( bool stopNetworkCheck() );
+
+    SIGNAL( connectionLose() );
+    SIGNAL( networkChange() );
+};

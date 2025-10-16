@@ -36,6 +36,11 @@ namespace libssh {
                                const QString &localPath,
                                const QString &remotePath,
                                const QString &fileDesc);
+        // Copy data directly without a temporary local file
+        ErrorCode scpWriteBuffer(const ScpOverwriteMode overwriteMode,
+                                 const QByteArray &data,
+                                 const QString &remotePath,
+                                 const QString &fileDesc);
         ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &passphraseCallback);
     private:
         ErrorCode closeChannel();
@@ -52,6 +57,7 @@ namespace libssh {
     signals:
         void writeToChannelFinished();
         void scpFileCopyFinished();
+        void scpWriteBufferFinished();
     };
 }
 

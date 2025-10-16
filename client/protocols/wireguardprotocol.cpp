@@ -21,6 +21,9 @@ WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *
             [this](const QString& serverIpv4Gateway,
                    const QString& deviceIpv4Address, uint64_t txBytes,
                    uint64_t rxBytes) {
+                if (!serverIpv4Gateway.isEmpty()) {
+                    m_vpnGateway = serverIpv4Gateway;
+                }
                 m_vpnLocalAddress = deviceIpv4Address;
             });
 
@@ -64,4 +67,3 @@ ErrorCode WireguardProtocol::start()
 {
     return startMzImpl();
 }
-
