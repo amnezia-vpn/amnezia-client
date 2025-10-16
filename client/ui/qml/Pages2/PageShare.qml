@@ -498,6 +498,14 @@ PageType {
                         exportTypeSelector.text = exportTypeSelectorListView.selectedText
                     }
 
+                    onModelChanged: {
+                        if (exportTypeSelector.currentIndex >= model.length || exportTypeSelector.currentIndex < 0) {
+                            exportTypeSelector.currentIndex = 0
+                        }
+                        selectedIndex = exportTypeSelector.currentIndex
+                        exportTypeSelector.text = selectedText
+                    }
+
                     rootWidth: root.width
 
                     imageSource: "qrc:/images/controls/check.svg"
