@@ -439,6 +439,7 @@ PageType {
                         if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
                             exportTypeSelector.currentIndex = 0
                             exportTypeSelector.text = root.connectionTypesModel[0].name
+                            exportTypeSelector.exportTypeSelectorListView.currentIndexChanged()
                         }
 
                         if (accessTypeSelector.currentIndex === 1) {
