@@ -30,7 +30,7 @@ public slots:
     bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
     bool updateServiceFromTelegram(const int serverIndex);
-    bool deactivateDevice();
+    bool deactivateDevice(const bool isRemoveEvent);
     bool deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode);
 
     bool isConfigValid();

@@ -26,6 +26,7 @@ public:
     static void StartRoutingIpv6();
     static void StopRoutingIpv6();
     static bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
+    static bool restoreResolvers();
 };
 
 #endif // ROUTER_H

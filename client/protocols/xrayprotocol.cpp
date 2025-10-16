@@ -169,6 +169,7 @@ void XrayProtocol::stop()
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     IpcClient::Interface()->disableKillSwitch();
     IpcClient::Interface()->StartRoutingIpv6();
+    IpcClient::Interface()->restoreResolvers();
 #endif
     qDebug() << "XrayProtocol::stop()";
     m_xrayProcess.disconnect();

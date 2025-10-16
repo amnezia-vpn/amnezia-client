@@ -44,6 +44,8 @@ ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) 
 
     connect(this, &ServersModel::processedServerIndexChanged, this, &ServersModel::processedServerChanged);
     connect(this, &ServersModel::dataChanged, this, &ServersModel::processedServerChanged);
+
+    connect(this, &QAbstractItemModel::modelReset, this, &ServersModel::recomputeGatewayStacks);
 }
 
 int ServersModel::rowCount(const QModelIndex &parent) const
@@ -375,7 +377,6 @@ QHash<int, QByteArray> ServersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
 
-    roles[NameRole] = "serverName";
     roles[NameRole] = "name";
     roles[ServerDescriptionRole] = "serverDescription";
     roles[CollapsedServerDescriptionRole] = "collapsedServerDescription";
@@ -754,6 +755,68 @@ bool ServersModel::isDefaultServerDefaultContainerHasSplitTunneling()
 bool ServersModel::isServerFromApi(const int serverIndex)
 {
     return data(serverIndex, IsServerFromTelegramApiRole).toBool() || data(serverIndex, IsServerFromGatewayApiRole).toBool();
+}
+
+bool ServersModel::hasServersFromGatewayApi()
+{
+    return !m_gatewayStacks.isEmpty();
+}
+
+bool ServersModel::GatewayStacks::operator==(const GatewayStacks &other) const
+{
+    return userCountryCodes == other.userCountryCodes && serviceTypes == other.serviceTypes;
+}
+
+QJsonObject ServersModel::GatewayStacks::toJson() const
+{
+    QJsonObject obj;
+    if (!userCountryCodes.isEmpty()) {
+        obj.insert(configKey::userCountryCode, QJsonArray::fromStringList(userCountryCodes.values()));
+    }
+    if (!serviceTypes.isEmpty()) {
+        obj.insert(configKey::serviceType, QJsonArray::fromStringList(serviceTypes.values()));
+    }
+    return obj;
+}
+
+void ServersModel::recomputeGatewayStacks()
+{
+    const bool wasEmpty = m_gatewayStacks.isEmpty();
+    GatewayStacks computed;
+    bool hasNewTags = false;
+    
+    for (int i = 0; i < m_servers.count(); ++i) {
+        if (data(i, IsServerFromGatewayApiRole).toBool()) {
+            const QJsonObject server = m_servers.at(i).toObject();
+            const QJsonObject apiConfig = server.value(configKey::apiConfig).toObject();
+            
+            const QString userCountryCode = apiConfig.value(configKey::userCountryCode).toString();
+            const QString serviceType = apiConfig.value(configKey::serviceType).toString();
+            
+            if (!userCountryCode.isEmpty()) {
+                if (!m_gatewayStacks.userCountryCodes.contains(userCountryCode)) {
+                    hasNewTags = true;
+                }
+                computed.userCountryCodes.insert(userCountryCode);
+            }
+            
+            if (!serviceType.isEmpty()) {
+                if (!m_gatewayStacks.serviceTypes.contains(serviceType)) {
+                    hasNewTags = true;
+                }
+                computed.serviceTypes.insert(serviceType);
+            }
+        }
+    }
+    
+    m_gatewayStacks = std::move(computed);
+    if (hasNewTags) {
+        emit gatewayStacksExpanded();
+    }
+    
+    if (wasEmpty != m_gatewayStacks.isEmpty()) {
+        emit hasServersFromGatewayApiChanged();
+    }
 }
 
 bool ServersModel::isApiKeyExpired(const int serverIndex)

@@ -82,7 +82,9 @@ apiDefs::ConfigSource apiUtils::getConfigSource(const QJsonObject &serverConfigO
     return static_cast<apiDefs::ConfigSource>(serverConfigObject.value(apiDefs::key::configVersion).toInt());
 }
 
-amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &sslErrors, QNetworkReply *reply)
+amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
+                                                     const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
+                                                     const QByteArray &responseBody)
 {
     const int httpStatusCodeConflict = 409;
     const int httpStatusCodeNotFound = 404;
@@ -90,21 +92,19 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
     if (!sslErrors.empty()) {
         qDebug().noquote() << sslErrors;
         return amnezia::ErrorCode::ApiConfigSslError;
-    } else if (reply->error() == QNetworkReply::NoError) {
+    } else if (replyError == QNetworkReply::NoError) {
         return amnezia::ErrorCode::NoError;
-    } else if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
-               || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
-        qDebug() << reply->error();
+    } else if (replyError == QNetworkReply::NetworkError::OperationCanceledError
+               || replyError == QNetworkReply::NetworkError::TimeoutError) {
+        qDebug() << replyError;
         return amnezia::ErrorCode::ApiConfigTimeoutError;
-    } else if (reply->error() == QNetworkReply::NetworkError::OperationNotImplementedError) {
-        qDebug() << reply->error();
+    } else if (replyError == QNetworkReply::NetworkError::OperationNotImplementedError) {
+        qDebug() << replyError;
         return amnezia::ErrorCode::ApiUpdateRequestError;
     } else {
-        QString err = reply->errorString();
-        int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        qDebug() << QString::fromUtf8(reply->readAll());
-        qDebug() << reply->error();
-        qDebug() << err;
+        qDebug() << QString::fromUtf8(responseBody);
+        qDebug() << replyError;
+        qDebug() << replyErrorString;
         qDebug() << httpStatusCode;
         if (httpStatusCode == httpStatusCodeConflict) {
             return amnezia::ErrorCode::ApiConfigLimitError;

@@ -47,6 +47,8 @@ namespace
 
         constexpr char subscription[] = "subscription";
         constexpr char endDate[] = "end_date";
+
+        constexpr char isConnectEvent[] = "is_connect_event";
     }
 
     struct ProtocolData
@@ -443,6 +445,10 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     appendProtocolDataToApiPayload(gatewayRequestData.serviceProtocol, protocolData, apiPayload);
 
+    if (newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig) {
+        apiPayload.insert(configKey::isConnectEvent, true);
+    }
+
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
 
@@ -526,7 +532,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     }
 }
 
-bool ApiConfigsController::deactivateDevice()
+bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
@@ -537,8 +543,12 @@ bool ApiConfigsController::deactivateDevice()
     }
 
     if (isSubscriptionExpired(apiConfigObject)) {
-        emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
-        return false;
+        if (isRemoveEvent) {
+            return true;
+        } else {
+            emit errorOccurred(ErrorCode::ApiSubscriptionExpiredError);
+            return false;
+        }
     }
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),

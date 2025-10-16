@@ -236,6 +236,9 @@ public:
     QStringList allowedDnsServers() const;
     void setAllowedDnsServers(const QStringList &servers);
 
+    QStringList readNewsIds() const;
+    void setReadNewsIds(const QStringList &ids);
+
 signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);
@@ -251,7 +254,7 @@ private:
     mutable SecureQSettings m_settings;
 
     QString m_gatewayEndpoint;
-    bool m_isDevGatewayEnv = false;
+    bool m_isDevGatewayEnv = true;
 };
 
 #endif // SETTINGS_H

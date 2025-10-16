@@ -10,6 +10,16 @@ class ServersModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
+    struct GatewayStacks
+    {
+        QSet<QString> userCountryCodes;
+        QSet<QString> serviceTypes;
+
+        bool isEmpty() const { return userCountryCodes.isEmpty() && serviceTypes.isEmpty(); }
+        bool operator==(const GatewayStacks &other) const;
+        QJsonObject toJson() const;
+    };
+
     enum Roles {
         NameRole = Qt::UserRole + 1,
         ServerDescriptionRole,
@@ -52,6 +62,8 @@ public:
 
     void resetModel();
 
+    GatewayStacks gatewayStacks() const { return m_gatewayStacks; }
+
     Q_PROPERTY(int defaultIndex READ getDefaultServerIndex WRITE setDefaultServerIndex NOTIFY defaultServerIndexChanged)
     Q_PROPERTY(QString defaultServerName READ getDefaultServerName NOTIFY defaultServerNameChanged)
     Q_PROPERTY(QString defaultServerDefaultContainerName READ getDefaultServerDefaultContainerName NOTIFY defaultServerDefaultContainerChanged)
@@ -61,6 +73,8 @@ public:
     Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ isDefaultServerDefaultContainerHasSplitTunneling NOTIFY
                        defaultServerDefaultContainerChanged)
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIndexChanged)
+
+    Q_PROPERTY(bool hasServersFromGatewayApi READ hasServersFromGatewayApi NOTIFY hasServersFromGatewayApiChanged)
 
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
     Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerChanged)
@@ -81,6 +95,8 @@ public slots:
     bool isProcessedServerHasWriteAccess();
     bool isDefaultServerHasWriteAccess();
     bool hasServerWithWriteAccess();
+
+    bool hasServersFromGatewayApi();
 
     const int getServersCount();
 
@@ -147,6 +163,9 @@ signals:
     void updateApiCountryModel();
     void updateApiServicesModel();
 
+    void hasServersFromGatewayApiChanged();
+    void gatewayStacksExpanded();
+
 private:
     ServerCredentials serverCredentials(int index) const;
 
@@ -167,6 +186,9 @@ private:
     int m_processedServerIndex;
 
     bool m_isAmneziaDnsEnabled = m_settings->useAmneziaDns();
+
+    GatewayStacks m_gatewayStacks;
+    void recomputeGatewayStacks();
 };
 
 #endif // SERVERSMODEL_H
