@@ -375,6 +375,8 @@ PageType {
             DropDownType {
                 id: protocolSelector
 
+                signal protocolSelectorTextChanged
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
 
@@ -436,18 +438,14 @@ PageType {
 
                         fillConnectionTypeModel()
 
-                        if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
-                            exportTypeSelector.currentIndex = 0
-                            exportTypeSelector.text = root.connectionTypesModel[0].name
-                            exportTypeSelector.exportTypeSelectorListView.currentIndexChanged()
-                        }
-
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
                             ExportController.updateClientManagementModel(ContainersModel.getProcessedContainerIndex(),
                                                                          ServersModel.getProcessedServerCredentials())
                             PageController.showBusyIndicator(false)
                         }
+
+                        protocolSelector.protocolSelectorTextChanged()
                     }
 
                     function fillConnectionTypeModel() {
@@ -506,6 +504,18 @@ PageType {
 
                     model: root.connectionTypesModel
                     currentIndex: 0
+
+                    Connections {
+                        target: protocolSelector
+
+                        function onProtocolSelectorTextChanged() {
+                            if (exportTypeSelector.currentIndex >= root.connectionTypesModel.length) {
+                                exportTypeSelectorListView.selectedIndex = 0
+                                exportTypeSelector.currentIndex = 0
+                                exportTypeSelector.text = root.connectionTypesModel[0].name
+                            }
+                        }
+                    }
 
                     clickedFunction: function() {
                         exportTypeSelector.text = exportTypeSelectorListView.selectedText
