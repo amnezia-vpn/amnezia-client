@@ -311,7 +311,7 @@ PageType {
             DropDownType {
                 id: serverSelector
 
-                signal severSelectorIndexChanged
+                signal serverSelectorIndexChanged
                 property int currentIndex: -1
 
                 Layout.fillWidth: true
@@ -348,7 +348,7 @@ PageType {
 
                         if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
                             serverSelector.currentIndex = serverSelectorListView.selectedIndex
-                            serverSelector.severSelectorIndexChanged()
+                            serverSelector.serverSelectorIndexChanged()
                         }
 
                         serverSelector.closeTriggered()
@@ -416,7 +416,7 @@ PageType {
                     Connections {
                         target: serverSelector
 
-                        function onSeverSelectorIndexChanged() {
+                        function onServerSelectorIndexChanged() {
                             var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
                             protocolSelectorListView.selectedIndex = defaultContainer
                             protocolSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
