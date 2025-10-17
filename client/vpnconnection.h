@@ -84,6 +84,7 @@ private:
     
     // Track VPN state before sleep for smart reconnection
     bool m_wasConnectedBeforeSleep = false;
+    bool m_pendingNetworkCheck = false;
 
     // Only for iOS for now, check counters
     QTimer m_checkTimer;
@@ -103,6 +104,7 @@ private:
 
    void appendSplitTunnelingConfig();
    void appendKillSwitchConfig();
+   bool startNetworkCheckIfReady();
 };
 
 #endif // VPNCONNECTION_H

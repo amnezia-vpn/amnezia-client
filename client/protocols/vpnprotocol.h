@@ -72,6 +72,7 @@ signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void timeoutTimerEvent();
     void protocolError(amnezia::ErrorCode e);
+    void tunnelAddressesUpdated(const QString& gateway, const QString& localAddress);
 
 public slots:
     virtual void onTimeout(); // todo: remove?

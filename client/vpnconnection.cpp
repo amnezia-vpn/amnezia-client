@@ -112,17 +112,19 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             }
 
             if (container != DockerContainer::Ipsec) {
-                const QString gateway = m_vpnProtocol->vpnGateway();
-                const QString localAddress = m_vpnProtocol->vpnLocalAddress();
-                if (!gateway.isEmpty() && !localAddress.isEmpty()) {
-                    IpcClient::Interface()->startNetworkCheck(gateway, localAddress);
+                if (startNetworkCheckIfReady()) {
+                    m_pendingNetworkCheck = false;
                 } else {
-                    qWarning() << "Skipped startNetworkCheck due to missing gateway/local address"
-                               << gateway << localAddress;
+                    m_pendingNetworkCheck = true;
+                    qWarning() << "Deferring startNetworkCheck; missing gateway/local address"
+                               << m_vpnProtocol->vpnGateway() << m_vpnProtocol->vpnLocalAddress();
                 }
+            } else {
+                m_pendingNetworkCheck = false;
             }
 
         } else if (state == Vpn::ConnectionState::Error) {
+            m_pendingNetworkCheck = false;
             IpcClient::Interface()->flushDns();
 
             if (m_settings->isSitesSplitTunnelingEnabled()) {
@@ -133,6 +135,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
         } else if (state == Vpn::ConnectionState::Connecting) {
 
         } else if (state == Vpn::ConnectionState::Disconnected) {
+            m_pendingNetworkCheck = false;
             auto result = IpcClient::Interface()->stopNetworkCheck();
             result.waitForFinished(3000);
         }
@@ -279,6 +282,7 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
     m_remoteAddress = NetworkUtilities::getIPAddress(credentials.hostName);
     emit connectionStateChanged(Vpn::ConnectionState::Connecting);
 
+    m_pendingNetworkCheck = false;
     m_vpnConfiguration = vpnConfiguration;
     m_serverIndex = serverIndex;
     m_serverCredentials = credentials;
@@ -365,6 +369,17 @@ void VpnConnection::createProtocolConnections()
                 m_wasConnectedBeforeSleep = isConnected();
                 qDebug() << "VPN was connected before network change:" << m_wasConnectedBeforeSleep;
                 this->restartConnection();
+            });
+    connect(m_vpnProtocol.data(), &VpnProtocol::tunnelAddressesUpdated,
+            this, [this](const QString& gateway, const QString& localAddress) {
+                Q_UNUSED(gateway)
+                Q_UNUSED(localAddress)
+                if (connectionState() != Vpn::ConnectionState::Connected) {
+                    return;
+                }
+                if (startNetworkCheckIfReady()) {
+                    m_pendingNetworkCheck = false;
+                }
             });
 #endif
 }
@@ -468,6 +483,31 @@ void VpnConnection::appendSplitTunnelingConfig()
 
     m_vpnConfiguration.insert(config_key::appSplitTunnelType, appsRouteMode);
     m_vpnConfiguration.insert(config_key::splitTunnelApps, appsJsonArray);
+}
+
+bool VpnConnection::startNetworkCheckIfReady()
+{
+#ifdef AMNEZIA_DESKTOP
+    if (!m_vpnProtocol || m_dockerContainer == DockerContainer::Ipsec) {
+        return false;
+    }
+
+    const QString gateway = m_vpnProtocol->vpnGateway();
+    const QString localAddress = m_vpnProtocol->vpnLocalAddress();
+    if (gateway.isEmpty() || localAddress.isEmpty()) {
+        return false;
+    }
+
+    auto iface = IpcClient::Interface();
+    if (!iface) {
+        return false;
+    }
+
+    iface->startNetworkCheck(gateway, localAddress);
+    return true;
+#else
+    return false;
+#endif
 }
 
 #ifdef Q_OS_ANDROID
