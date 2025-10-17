@@ -2,6 +2,7 @@
 #define VPNCONNECTION_H
 
 #include <QObject>
+#include <QMetaObject>
 #include <QString>
 #include <QScopedPointer>
 #include <QRemoteObjectNode>
@@ -71,6 +72,8 @@ protected slots:
 
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
+    QMetaObject::Connection m_connectionLoseHandle;
+    QMetaObject::Connection m_networkChangeHandle;
 
 private:
     std::shared_ptr<Settings> m_settings;

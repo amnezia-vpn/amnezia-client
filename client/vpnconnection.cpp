@@ -262,7 +262,8 @@ void VpnConnection::connectToVpn(int serverIndex, const ServerCredentials &crede
              << m_settings->routeMode();
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (m_IpcClient) {
-        m_IpcClient->close();
+        m_IpcClient->closeAndResetInstance(true);
+        m_IpcClient->deleteLater();
         m_IpcClient = nullptr;
     }
     if (!m_IpcClient) {
@@ -352,7 +353,14 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
 
 #ifdef AMNEZIA_DESKTOP
-    connect(IpcClient::Interface().data(), &IpcInterfaceReplica::connectionLose,
+    if (m_connectionLoseHandle)
+        disconnect(m_connectionLoseHandle);
+    if (m_networkChangeHandle)
+        disconnect(m_networkChangeHandle);
+    m_connectionLoseHandle = QMetaObject::Connection();
+    m_networkChangeHandle = QMetaObject::Connection();
+
+    m_connectionLoseHandle = connect(IpcClient::Interface().data(), &IpcInterfaceReplica::connectionLose,
             this, [this]() {
                 qDebug() << "Connection Lose";
                 auto result = IpcClient::Interface()->stopNetworkCheck();
@@ -362,7 +370,7 @@ void VpnConnection::createProtocolConnections()
                 qDebug() << "VPN was connected before connection loss:" << m_wasConnectedBeforeSleep;
                 this->restartConnection();
             });
-    connect(IpcClient::Interface().data(), &IpcInterfaceReplica::networkChange,
+    m_networkChangeHandle = connect(IpcClient::Interface().data(), &IpcInterfaceReplica::networkChange,
             this, [this]() {
                 qDebug() << "Network change";
                 // Track VPN state before network change (including sleep/wake)
