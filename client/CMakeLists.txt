@@ -3,20 +3,6 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(PROJECT AmneziaVPN)
 project(${PROJECT})
 
-if(APPLE AND CMAKE_SYSTEM_VERSION VERSION_GREATER_EQUAL 26)
-    # Pretend "WrapOpenGL" was already found
-    set(WrapOpenGL_FOUND TRUE CACHE BOOL "stubbed" FORCE)
-    # Provide the imported target that Qt expects
-    if(NOT TARGET WrapOpenGL::WrapOpenGL)
-        add_library(WrapOpenGL::WrapOpenGL INTERFACE IMPORTED)
-    endif()
-endif()
-
-if(APPLE AND NOT TARGET WrapOpenGL::WrapOpenGL)
-    add_library(WrapOpenGL::WrapOpenGL INTERFACE IMPORTED GLOBAL)
-    set(WrapOpenGL_FOUND TRUE CACHE INTERNAL "stubbed WrapOpenGL")
-endif()
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER "Autogen")
 set_property(GLOBAL PROPERTY AUTOMOC_TARGETS_FOLDER "Autogen")
@@ -52,13 +38,6 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
-
-if(APPLE AND NOT IOS AND CMAKE_SYSTEM_VERSION VERSION_GREATER_EQUAL 26)
-    get_target_property(_qtgui_libs Qt6::Gui INTERFACE_LINK_LIBRARIES)
-    list(REMOVE_ITEM _qtgui_libs "-framework" "OpenGL" "-framework" "AGL")
-    set_target_properties(Qt6::Gui PROPERTIES
-        INTERFACE_LINK_LIBRARIES "${_qtgui_libs}")
-endif()
 
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
