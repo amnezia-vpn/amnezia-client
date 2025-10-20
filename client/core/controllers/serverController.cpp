@@ -197,8 +197,12 @@ ErrorCode ServerController::uploadFileToHost(const ServerCredentials &credential
         return error;
     }
 
-    // Write directly via SCP without creating a temporary local file.
-    error = m_sshClient.scpWriteBuffer(overwriteMode, data, remotePath, "non_desc");
+    QTemporaryFile localFile;
+    localFile.open();
+    localFile.write(data);
+    localFile.close();
+
+    error = m_sshClient.scpFileCopy(overwriteMode, localFile.fileName(), remotePath, "non_desc");
 
     if (error != ErrorCode::NoError) {
         return error;
