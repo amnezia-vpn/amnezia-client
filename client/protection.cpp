@@ -135,13 +135,3 @@ void Protector::decryptFile(const QString &filePath, const QString &password)
         qWarning() << "Decryption failed:" << e.what();
     }
 }
-
-void Protector::resetPassword(const QString &filePath, const QString &password)
-{
-    try {
-        decryptFile(filePath, password);
-        qInfo() << "Password removed from file:" << filePath;
-    } catch (const std::exception &e) {
-        qWarning() << "Reset failed:" << e.what();
-    }
-}
