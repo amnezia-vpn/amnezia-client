@@ -189,6 +189,21 @@ bool KillSwitch::addAllowedRange(const QStringList &ranges) {
     return resetAllowedRange(m_allowedRanges);
 }
 
+bool KillSwitch::removeAllowedRange(const QStringList &ranges) {
+    bool modified = false;
+    for (const QString &range : ranges) {
+        if (!range.isEmpty()) {
+            modified = modified || m_allowedRanges.removeAll(range) > 0;
+        }
+    }
+
+    if (!modified) {
+        return true;
+    }
+
+    return resetAllowedRange(m_allowedRanges);
+}
+
 bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
 #ifdef Q_OS_WIN
     InterfaceConfig config;

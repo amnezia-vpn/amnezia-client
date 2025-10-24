@@ -79,7 +79,7 @@ ErrorCode GatewayController::get(const QString &endpoint, QByteArray &responseBo
     if (m_isStrictKillSwitchEnabled) {
         const QUrl originalUrl = request.url();
         const QString originalHost = originalUrl.host();
-        const QString resolvedIp = allowKillSwitchExceptionForUrl(originalUrl);
+        const QString resolvedIp = addKillSwitchExceptionForUrl(originalUrl);
         if (!resolvedIp.isEmpty() && resolvedIp != originalHost) {
             QUrl ipUrl = originalUrl;
             ipUrl.setHost(resolvedIp);
@@ -146,7 +146,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     if (m_isStrictKillSwitchEnabled) {
         const QUrl originalUrl = request.url();
         const QString originalHost = originalUrl.host();
-        const QString resolvedIp = allowKillSwitchExceptionForUrl(originalUrl);
+        const QString resolvedIp = addKillSwitchExceptionForUrl(originalUrl);
         if (!resolvedIp.isEmpty() && resolvedIp != originalHost) {
             QUrl ipUrl = originalUrl;
             ipUrl.setHost(resolvedIp);
@@ -384,7 +384,7 @@ void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *repl
     }
 }
 
-QString GatewayController::allowKillSwitchExceptionForUrl(const QUrl &url)
+QString GatewayController::addKillSwitchExceptionForUrl(const QUrl &url)
 {
 #ifdef AMNEZIA_DESKTOP
     const QString host = url.host();
@@ -467,6 +467,41 @@ bool GatewayController::addKillSwitchException(const QStringList &ranges)
 
         if (!invoked) {
             qWarning() << "Failed to invoke KillSwitch exception update via queued connection";
+            return false;
+        }
+    }
+
+    const bool result = waitForReply(reply);
+    return result;
+}
+
+bool GatewayController::removeKillSwitchException(const QStringList &ranges)
+{
+    auto ipcInterface = IpcClient::Interface();
+    if (!ipcInterface) {
+        qWarning() << "IPC interface is null, cannot remove KillSwitch exception";
+        return false;
+    }
+
+    const auto waitForReply = [](QRemoteObjectPendingReply<bool> reply) -> bool {
+        if (!reply.waitForFinished()) {
+            qWarning() << "Timed out waiting for KillSwitch removal reply";
+            return false;
+        }
+        return reply.returnValue();
+    };
+
+    QRemoteObjectPendingReply<bool> reply;
+    if (ipcInterface->thread() == QThread::currentThread()) {
+        reply = ipcInterface->removeKillSwitchAllowedRange(ranges);
+    } else {
+        const bool invoked = QMetaObject::invokeMethod(ipcInterface.data(),
+                                                       [&reply, ipcInterface, ranges]() {
+                                                           reply = ipcInterface->removeKillSwitchAllowedRange(ranges);
+                                                       },
+                                                       Qt::BlockingQueuedConnection);
+        if (!invoked) {
+            qWarning() << "Failed to invoke KillSwitch removal via queued connection";
             return false;
         }
     }

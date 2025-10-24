@@ -36,6 +36,7 @@ public:
     virtual void StopRoutingIpv6() override;
     virtual bool disableAllTraffic() override;
     virtual bool addKillSwitchAllowedRange(QStringList ranges) override;
+    virtual bool removeKillSwitchAllowedRange(QStringList ranges) override;
     virtual bool resetKillSwitchAllowedRange(QStringList ranges) override;
     virtual bool enablePeerTraffic(const QJsonObject &configStr) override;
     virtual bool enableKillSwitch(const QJsonObject &excludeAddr, int vpnAdapterIndex) override;

@@ -19,6 +19,7 @@ public:
     bool enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex);
     bool resetAllowedRange(const QStringList &ranges);
     bool addAllowedRange(const QStringList &ranges);
+    bool removeAllowedRange(const QStringList &ranges);
     bool isStrictKillSwitchEnabled();
 
 private:

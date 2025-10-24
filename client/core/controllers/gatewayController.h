@@ -27,10 +27,11 @@ private:
                            const QByteArray &iv = "", const QByteArray &salt = "");
     void bypassProxy(const QString &endpoint, QNetworkReply *reply, std::function<QNetworkReply *(const QString &url)> requestFunction,
                      std::function<bool(QNetworkReply *reply, const QList<QSslError> &sslErrors)> replyProcessingFunction);
-    QString allowKillSwitchExceptionForUrl(const QUrl &url);
+    QString addKillSwitchExceptionForUrl(const QUrl &url);
     QString resolveHost(const QString &host);
 #ifdef AMNEZIA_DESKTOP
     bool addKillSwitchException(const QStringList &ranges);
+    bool removeKillSwitchException(const QStringList &ranges);
     QString resolveHostViaOpenDns(const QString &host);
     QString resolveHostViaQuad9(const QString &host);
     QByteArray buildDnsQuery(const QString &host) const;
