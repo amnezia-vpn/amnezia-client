@@ -83,12 +83,30 @@ QString OpenVpnConfigurator::createConfig(const ServerCredentials &credentials, 
         return "";
     }
 
+    auto sanitizeStaticKey = [](const QString &key) {
+        QStringList lines = key.split('\n');
+        QStringList filtered;
+        filtered.reserve(lines.size());
+        for (const QString &line : lines) {
+            const QString trimmed = line.trimmed();
+            if (trimmed.startsWith('#')) {
+                continue;
+            }
+            filtered.append(line);
+        }
+        QString result = filtered.join('\n');
+        if (!result.endsWith('\n')) {
+            result.append('\n');
+        }
+        return result;
+    };
+
     config.replace("$OPENVPN_CA_CERT", connData.caCert);
     config.replace("$OPENVPN_CLIENT_CERT", connData.clientCert);
     config.replace("$OPENVPN_PRIV_KEY", connData.privKey);
 
     if (config.contains("$OPENVPN_TA_KEY")) {
-        config.replace("$OPENVPN_TA_KEY", connData.taKey);
+        config.replace("$OPENVPN_TA_KEY", sanitizeStaticKey(connData.taKey));
     } else {
         config.replace("<tls-auth>", "");
         config.replace("</tls-auth>", "");
@@ -117,7 +135,7 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
     if (!isApiConfig) {
         QRegularExpression regex("redirect-gateway.*");
         config.replace(regex, "");
-        
+
         // We don't use secondary DNS if primary DNS is AmneziaDNS
         if (dns.first.contains(protocols::dns::amneziaDnsIp)) {
             QRegularExpression dnsRegex("dhcp-option DNS " + dns.second);

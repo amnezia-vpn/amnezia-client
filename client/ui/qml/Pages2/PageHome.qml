@@ -109,6 +109,34 @@ PageType {
                 }
             }
 
+            BasicButtonType {
+                id: devGatewayButton
+                objectName: "devGatewayButton"
+
+                property bool isDevGatewayEnabled: SettingsController.isDevGatewayEnv
+
+                Layout.alignment: Qt.AlignHCenter
+
+                implicitHeight: 36
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.mutedGray
+                borderWidth: 0
+
+                visible: SettingsController.isDevModeEnabled && isDevGatewayEnabled
+                text: qsTr("Dev gateway enabled")
+
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
+
+                onClicked: {
+                    PageController.goToPage(PageEnum.PageDevMenu)
+                }
+            }
+
             ConnectButton {
                 id: connectButton
                 objectName: "connectButton"

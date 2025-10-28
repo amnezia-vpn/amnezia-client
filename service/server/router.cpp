@@ -99,6 +99,17 @@ bool Router::updateResolvers(const QString& ifname, const QList<QHostAddress>& r
 #endif
 }
 
+bool Router::restoreResolvers() {
+#ifdef Q_OS_LINUX
+    return RouterLinux::Instance().restoreResolvers();
+#endif
+#ifdef Q_OS_MACOS
+    return RouterMac::Instance().restoreResolvers();
+#endif
+#ifdef Q_OS_WIN
+    return RouterWin::Instance().restoreResolvers();
+#endif
+}
 
 void Router::StopRoutingIpv6()
 {

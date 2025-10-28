@@ -50,69 +50,6 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
 {
 }
 
-ErrorCode GatewayController::get(const QString &endpoint, QByteArray &responseBody)
-{
-#ifdef Q_OS_IOS
-    IosController::Instance()->requestInetAccess();
-    QThread::msleep(10);
-#endif
-
-    QNetworkRequest request;
-    request.setTransferTimeout(m_requestTimeoutMsecs);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader(QString("X-Client-Request-ID").toUtf8(), QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8());
-
-    request.setUrl(QString(endpoint).arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
-
-    // bypass killSwitch exceptions for API-gateway
-#ifdef AMNEZIA_DESKTOP
-    if (m_isStrictKillSwitchEnabled) {
-        QString host = QUrl(request.url()).host();
-        QString ip = NetworkUtilities::getIPAddress(host);
-        if (!ip.isEmpty()) {
-            IpcClient::Interface()->addKillSwitchAllowedRange(QStringList { ip });
-        }
-    }
-#endif
-
-    QNetworkReply *reply;
-    reply = amnApp->networkManager()->get(request);
-
-    QEventLoop wait;
-    QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
-
-    QList<QSslError> sslErrors;
-    connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
-    wait.exec();
-
-    responseBody = reply->readAll();
-
-    if (sslErrors.isEmpty() && shouldBypassProxy(reply, responseBody, false)) {
-        auto requestFunction = [&request, &responseBody](const QString &url) {
-            request.setUrl(url);
-            return amnApp->networkManager()->get(request);
-        };
-
-        auto replyProcessingFunction = [&responseBody, &reply, &sslErrors, this](QNetworkReply *nestedReply,
-                                                                                 const QList<QSslError> &nestedSslErrors) {
-            responseBody = nestedReply->readAll();
-            if (!sslErrors.isEmpty() || !shouldBypassProxy(nestedReply, responseBody, false)) {
-                sslErrors = nestedSslErrors;
-                reply = nestedReply;
-                return true;
-            }
-            return false;
-        };
-
-        bypassProxy(endpoint, reply, requestFunction, replyProcessingFunction);
-    }
-
-    auto errorCode = apiUtils::checkNetworkReplyErrors(sslErrors, reply);
-    reply->deleteLater();
-
-    return errorCode;
-}
-
 ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
 {
 #ifdef Q_OS_IOS
@@ -188,29 +125,37 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     wait.exec();
 
     QByteArray encryptedResponseBody = reply->readAll();
+    QString replyErrorString = reply->errorString();
+    auto replyError = reply->error();
+    int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
-    if (sslErrors.isEmpty() && shouldBypassProxy(reply, encryptedResponseBody, true, key, iv, salt)) {
+    reply->deleteLater();
+
+    if (sslErrors.isEmpty() && shouldBypassProxy(replyError, encryptedResponseBody, true, key, iv, salt)) {
         auto requestFunction = [&request, &encryptedResponseBody, &requestBody](const QString &url) {
             request.setUrl(url);
             return amnApp->networkManager()->post(request, QJsonDocument(requestBody).toJson());
         };
 
-        auto replyProcessingFunction = [&encryptedResponseBody, &reply, &sslErrors, &key, &iv, &salt,
-                                        this](QNetworkReply *nestedReply, const QList<QSslError> &nestedSslErrors) {
-            encryptedResponseBody = nestedReply->readAll();
-            reply = nestedReply;
-            if (!sslErrors.isEmpty() || shouldBypassProxy(nestedReply, encryptedResponseBody, true, key, iv, salt)) {
+        auto replyProcessingFunction = [&encryptedResponseBody, &replyErrorString, &replyError, &httpStatusCode, &sslErrors, &key, &iv,
+                                        &salt, this](QNetworkReply *reply, const QList<QSslError> &nestedSslErrors) {
+            encryptedResponseBody = reply->readAll();
+            replyErrorString = reply->errorString();
+            replyError = reply->error();
+            httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            if (!sslErrors.isEmpty() || shouldBypassProxy(replyError, encryptedResponseBody, true, key, iv, salt)) {
                 sslErrors = nestedSslErrors;
                 return false;
             }
             return true;
         };
 
-        bypassProxy(endpoint, reply, requestFunction, replyProcessingFunction);
+        auto serviceType = apiPayload.value(apiDefs::key::serviceType).toString("");
+        auto userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString("");
+        bypassProxy(endpoint, serviceType, userCountryCode, requestFunction, replyProcessingFunction);
     }
 
-    auto errorCode = apiUtils::checkNetworkReplyErrors(sslErrors, reply);
-    reply->deleteLater();
+    auto errorCode = apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, encryptedResponseBody);
     if (errorCode) {
         return errorCode;
     }
@@ -225,7 +170,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     }
 }
 
-QStringList GatewayController::getProxyUrls()
+QStringList GatewayController::getProxyUrls(const QString &serviceType, const QString &userCountryCode)
 {
     QNetworkRequest request;
     request.setTransferTimeout(m_requestTimeoutMsecs);
@@ -235,14 +180,25 @@ QStringList GatewayController::getProxyUrls()
     QList<QSslError> sslErrors;
     QNetworkReply *reply;
 
-    QStringList proxyStorageUrls;
+    QStringList baseUrls;
     if (m_isDevEnvironment) {
-        proxyStorageUrls = QString(DEV_S3_ENDPOINT).split(", ");
+        baseUrls = QString(DEV_S3_ENDPOINT).split(", ");
     } else {
-        proxyStorageUrls = QString(PROD_S3_ENDPOINT).split(", ");
+        baseUrls = QString(PROD_S3_ENDPOINT).split(", ");
     }
 
     QByteArray key = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
+
+    QStringList proxyStorageUrls;
+    if (!serviceType.isEmpty()) {
+        for (const auto &baseUrl : baseUrls) {
+            QByteArray path = ("endpoints-" + serviceType + "-" + userCountryCode).toUtf8();
+            proxyStorageUrls.push_back(baseUrl + path.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals) + ".json");
+        }
+    }
+    for (const auto &baseUrl : baseUrls) {
+        proxyStorageUrls.push_back(baseUrl + "endpoints.json");
+    }
 
     for (const auto &proxyStorageUrl : proxyStorageUrls) {
         request.setUrl(proxyStorageUrl);
@@ -288,7 +244,10 @@ QStringList GatewayController::getProxyUrls()
             }
             return endpoints;
         } else {
-            apiUtils::checkNetworkReplyErrors(sslErrors, reply);
+            auto replyError = reply->error();
+            int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            qDebug() << replyError;
+            qDebug() << httpStatusCode;
             qDebug() << "go to the next storage endpoint";
 
             reply->deleteLater();
@@ -297,33 +256,33 @@ QStringList GatewayController::getProxyUrls()
     return {};
 }
 
-bool GatewayController::shouldBypassProxy(QNetworkReply *reply, const QByteArray &responseBody, bool checkEncryption, const QByteArray &key,
-                                          const QByteArray &iv, const QByteArray &salt)
+bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &responseBody,
+                                          bool checkEncryption, const QByteArray &key, const QByteArray &iv, const QByteArray &salt)
 {
-    if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
+    if (replyError == QNetworkReply::NetworkError::OperationCanceledError || replyError == QNetworkReply::NetworkError::TimeoutError) {
         qDebug() << "timeout occurred";
-        qDebug() << reply->error();
+        qDebug() << replyError;
         return true;
     } else if (responseBody.contains("html")) {
         qDebug() << "the response contains an html tag";
         return true;
-    } else if (reply->error() == QNetworkReply::NetworkError::ContentNotFoundError) {
+    } else if (replyError == QNetworkReply::NetworkError::ContentNotFoundError) {
         if (responseBody.contains(errorResponsePattern1) || responseBody.contains(errorResponsePattern2)
             || responseBody.contains(errorResponsePattern3)) {
             return false;
         } else {
-            qDebug() << reply->error();
+            qDebug() << replyError;
             return true;
         }
-    } else if (reply->error() == QNetworkReply::NetworkError::OperationNotImplementedError) {
+    } else if (replyError == QNetworkReply::NetworkError::OperationNotImplementedError) {
         if (responseBody.contains(updateRequestResponsePattern)) {
             return false;
         } else {
-            qDebug() << reply->error();
+            qDebug() << replyError;
             return true;
         }
-    } else if (reply->error() != QNetworkReply::NetworkError::NoError) {
-        qDebug() << reply->error();
+    } else if (replyError != QNetworkReply::NetworkError::NoError) {
+        qDebug() << replyError;
         return true;
     } else if (checkEncryption) {
         try {
@@ -337,35 +296,33 @@ bool GatewayController::shouldBypassProxy(QNetworkReply *reply, const QByteArray
     return false;
 }
 
-void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *reply,
+void GatewayController::bypassProxy(const QString &endpoint, const QString &serviceType, const QString &userCountryCode,
                                     std::function<QNetworkReply *(const QString &url)> requestFunction,
                                     std::function<bool(QNetworkReply *reply, const QList<QSslError> &sslErrors)> replyProcessingFunction)
 {
-    QStringList proxyUrls = getProxyUrls();
+    QStringList proxyUrls = getProxyUrls(serviceType, userCountryCode);
     std::random_device randomDevice;
     std::mt19937 generator(randomDevice());
     std::shuffle(proxyUrls.begin(), proxyUrls.end(), generator);
 
     QByteArray responseBody;
 
-    auto bypassFunction = [this](const QString &endpoint, const QString &proxyUrl, QNetworkReply *reply,
+    auto bypassFunction = [this](const QString &endpoint, const QString &proxyUrl,
                                  std::function<QNetworkReply *(const QString &url)> requestFunction,
                                  std::function<bool(QNetworkReply * reply, const QList<QSslError> &sslErrors)> replyProcessingFunction) {
         QEventLoop wait;
         QList<QSslError> sslErrors;
 
         qDebug() << "go to the next proxy endpoint";
-        reply->deleteLater(); // delete the previous reply
-        reply = requestFunction(endpoint.arg(proxyUrl));
+        QNetworkReply *reply = requestFunction(endpoint.arg(proxyUrl));
 
         QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
         connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
         wait.exec();
 
-        if (replyProcessingFunction(reply, sslErrors)) {
-            return true;
-        }
-        return false;
+        auto result = replyProcessingFunction(reply, sslErrors);
+        reply->deleteLater();
+        return result;
     };
 
     if (m_proxyUrl.isEmpty()) {
@@ -399,13 +356,13 @@ void GatewayController::bypassProxy(const QString &endpoint, QNetworkReply *repl
     }
 
     if (!m_proxyUrl.isEmpty()) {
-        if (bypassFunction(endpoint, m_proxyUrl, reply, requestFunction, replyProcessingFunction)) {
+        if (bypassFunction(endpoint, m_proxyUrl, requestFunction, replyProcessingFunction)) {
             return;
         }
     }
 
     for (const QString &proxyUrl : proxyUrls) {
-        if (bypassFunction(endpoint, proxyUrl, reply, requestFunction, replyProcessingFunction)) {
+        if (bypassFunction(endpoint, proxyUrl, requestFunction, replyProcessingFunction)) {
             m_proxyUrl = proxyUrl;
             break;
         }

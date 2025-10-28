@@ -274,7 +274,7 @@ void ImportController::processNativeWireGuardConfig()
         auto serverProtocolConfig = container.value(ContainerProps::containerTypeToString(DockerContainer::WireGuard)).toObject();
         auto clientProtocolConfig = QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();
 
-        QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(2, 5));
+        QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(4, 7));
         QString junkPacketMinSize = QString::number(10);
         QString junkPacketMaxSize = QString::number(50);
         clientProtocolConfig[config_key::junkPacketCount] = junkPacketCount;

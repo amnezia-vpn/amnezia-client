@@ -20,8 +20,8 @@ Menu {
     MenuItem {
         text: qsTr("&Paste")
         shortcut: StandardKey.Paste
-        // Fix calling paste from clipboard when launching app on android
-        enabled: Qt.platform.os === "android" ? true : textObj.canPaste
+        // Fix calling paste from clipboard when launching app on android/ios
+        enabled: (Qt.platform.os === "android" || Qt.platform.os === "ios") ? true : textObj.canPaste
         onTriggered: textObj.paste()
     }
 

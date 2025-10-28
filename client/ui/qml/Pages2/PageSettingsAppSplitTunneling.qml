@@ -145,10 +145,24 @@ PageType {
                 }
             }
         }
+
+        WarningType {
+            Layout.fillWidth: true
+            Layout.topMargin: 8
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+
+            textString: qsTr("Only \"Apps from the list should not have access via VPN\" mode is available on Windows")
+            iconPath: "qrc:/images/controls/alert-circle.svg"
+
+            visible: (Qt.platform.os === "windows") && root.pageEnabled
+        }
     }
 
     ListViewType {
         id: listView
+
+        ScrollBar.vertical: ScrollBarType { policy: ScrollBar.AlwaysOn }
 
         anchors.top: header.bottom
         anchors.bottom: addAppButton.top
