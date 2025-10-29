@@ -1,8 +1,10 @@
 #ifndef GATEWAYCONTROLLER_H
 #define GATEWAYCONTROLLER_H
 
+#include <QFuture>
 #include <QNetworkReply>
 #include <QObject>
+#include <QPair>
 
 #include "core/defs.h"
 
@@ -19,8 +21,20 @@ public:
                                const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
+    QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
 private:
+    struct EncryptedRequestData {
+        QNetworkRequest request;
+        QByteArray requestBody;
+        QByteArray key;
+        QByteArray iv;
+        QByteArray salt;
+        amnezia::ErrorCode errorCode;
+    };
+
+    EncryptedRequestData prepareRequest(const QString &endpoint, const QJsonObject &apiPayload);
+    
     QStringList getProxyUrls(const QString &serviceType, const QString &userCountryCode);
     bool shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &responseBody, bool checkEncryption,
                            const QByteArray &key = "", const QByteArray &iv = "", const QByteArray &salt = "");
