@@ -2868,6 +2868,11 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="229"/>
+        <source>Restore purchases</source>
+        <translation>ဝယ်ယူထားသည့်များကို ပြန်လည်ရယူမည်</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="251"/>
         <source>VPN by Amnezia</source>
         <translation>Amnezia မှ VPN</translation>

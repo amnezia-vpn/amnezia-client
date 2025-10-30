@@ -1,7 +1,9 @@
 #include "apiConfigsController.h"
 
 #include <QClipboard>
+#include <QDebug>
 #include <QEventLoop>
+#include <QSet>
 #include "amnezia_application.h"
 #include "configurators/wireguard_configurator.h"
 #include "core/api/apiDefs.h"
@@ -367,6 +369,9 @@ bool ApiConfigsController::fillAvailableServices()
 
     QJsonObject data = QJsonDocument::fromJson(responseBody).object();
     m_apiServicesModel->updateModel(data);
+    if (m_apiServicesModel->rowCount() > 0) {
+        m_apiServicesModel->setServiceIndex(0);
+    }
     return true;
 }
 
@@ -376,18 +381,23 @@ bool ApiConfigsController::importSerivceFromAppStore()
     QString chosenProductId;
     {
         const QStringList productIds = { QStringLiteral("com.amnezia.amneziavpn.1_month"), QStringLiteral("com.amnezia.AmneziaVPN.6_month") };
+        qInfo().noquote() << "[IAP] Fetching products" << productIds;
 
         QList<QVariantMap> products;
         QString fetchError;
         QEventLoop waitFetch;
         IosController::Instance()->fetchProducts(productIds,
                                                  [&](const QList<QVariantMap> &prods, const QStringList &invalid, const QString &err) {
-                                                     Q_UNUSED(invalid)
                                                      products = prods;
                                                      fetchError = err;
+                                                     qInfo().noquote() << "[IAP] Fetch callback" << "invalid=" << invalid
+                                                                       << "error=" << err;
                                                      waitFetch.quit();
                                                  });
         waitFetch.exec();
+
+        qInfo().noquote() << "[IAP] Product fetch completed; success =" << fetchError.isEmpty()
+                          << "returned =" << products.size() << "invalid =" << !fetchError.isEmpty();
 
         if (fetchError.isEmpty() && !products.isEmpty()) {
             chosenProductId = products.first().value("productId").toString();
@@ -395,19 +405,22 @@ bool ApiConfigsController::importSerivceFromAppStore()
         if (chosenProductId.isEmpty() && !productIds.isEmpty()) {
             chosenProductId = productIds.first();
         }
+        qInfo().noquote() << "[IAP] Chosen product =" << chosenProductId;
     }
 
     bool purchaseOk = false;
     QString originalTransactionId;
+    QString storeTransactionId;
+    QString storeProductId;
     QString purchaseError;
     QEventLoop waitPurchase;
     IosController::Instance()->purchaseProduct(chosenProductId,
-                                               [&](bool success, const QString &transactionId, const QString &purchasedProductId,
-                                                   const QString &originalTxId, const QString &errorString) {
-                                                   Q_UNUSED(transactionId)
-                                                   Q_UNUSED(purchasedProductId)
+                                                [&](bool success, const QString &txId, const QString &purchasedProductId,
+                                                    const QString &originalTxId, const QString &errorString) {
                                                    purchaseOk = success;
                                                    originalTransactionId = originalTxId;
+                                                   storeTransactionId = txId;
+                                                   storeProductId = purchasedProductId;
                                                    purchaseError = errorString;
                                                    waitPurchase.quit();
                                                });
@@ -418,6 +431,9 @@ bool ApiConfigsController::importSerivceFromAppStore()
         emit errorOccurred(ErrorCode::ApiPurchaseError);
         return false;
     }
+    qInfo().noquote() << "[IAP] Purchase success. transactionId =" << storeTransactionId
+                      << "originalTransactionId =" << originalTransactionId
+                      << "productId =" << storeProductId;
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
@@ -430,6 +446,8 @@ bool ApiConfigsController::importSerivceFromAppStore()
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
     apiPayload[apiDefs::key::transactionId] = originalTransactionId;
+    qInfo().noquote() << "[IAP] Sending subscription request. Payload:"
+                      << QJsonDocument(apiPayload).toJson(QJsonDocument::Compact);
 
     ErrorCode errorCode;
     QByteArray responseBody;
@@ -439,25 +457,159 @@ bool ApiConfigsController::importSerivceFromAppStore()
         return false;
     }
 
-    QString key = QJsonDocument::fromJson(responseBody).object().value("key").toString();
-    key.replace("vpn://", "");
-    QByteArray config = QByteArray::fromBase64(key.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-    QByteArray configUncompressed = qUncompress(config);
-    if (!configUncompressed.isEmpty()) {
-        config = configUncompressed;
+    if (!installServerFromSubscriptionResponse(responseBody)) {
+        emit errorOccurred(ErrorCode::ApiPurchaseError);
+        return false;
     }
 
-    QJsonObject configJson = QJsonDocument::fromJson(config).object();
-
-    quint16 crc = qChecksum(QJsonDocument(configJson).toJson());
-    auto apiConfig = configJson.value(apiDefs::key::apiConfig).toObject();
-    apiConfig[apiDefs::key::vpnKey] = key;
-    configJson.insert(apiDefs::key::apiConfig, apiConfig);
-    configJson.insert(config_key::crc, crc);
-    m_serversModel->addServer(configJson);
-
-    qDebug() << configJson;
+    qInfo().noquote() << "[IAP] Subscription config installed after purchase";
     emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+#endif
+    return true;
+}
+
+bool ApiConfigsController::restoreSerivceFromAppStore()
+{
+#ifdef Q_OS_IOS
+    const QString premiumServiceType = QStringLiteral("amnezia-premium");
+    const QString originalServiceType = m_apiServicesModel->rowCount() > 0 ? m_apiServicesModel->getSelectedServiceType() : QString();
+
+    if (m_apiServicesModel->rowCount() <= 0) {
+        qInfo().noquote() << "[IAP] Services model is empty before restore, requesting available services";
+        if (!fillAvailableServices()) {
+            qWarning().noquote() << "[IAP] Unable to fetch services list before restore";
+            emit errorOccurred(ErrorCode::ApiServicesMissingError);
+            return false;
+        }
+    }
+
+    if (m_apiServicesModel->rowCount() <= 0) {
+        qWarning().noquote() << "[IAP] Restore aborted: services list is still empty";
+        emit errorOccurred(ErrorCode::ApiServicesMissingError);
+        return false;
+    }
+    // Ensure we have a valid premium selection for gateway requests
+    bool premiumSelected = false;
+    for (int i = 0; i < m_apiServicesModel->rowCount(); ++i) {
+        m_apiServicesModel->setServiceIndex(i);
+        if (m_apiServicesModel->getSelectedServiceType() == premiumServiceType) {
+            premiumSelected = true;
+            break;
+        }
+    }
+    if (!premiumSelected) {
+        m_apiServicesModel->setServiceIndex(0);
+    }
+
+    bool restoreSuccess = false;
+    QList<QVariantMap> restoredTransactions;
+    QString restoreError;
+    QEventLoop waitRestore;
+
+    IosController::Instance()->restorePurchases([&](bool success,
+                                                    const QList<QVariantMap> &transactions,
+                                                    const QString &errorString) {
+        restoreSuccess = success;
+        restoredTransactions = transactions;
+        restoreError = errorString;
+        waitRestore.quit();
+    });
+    waitRestore.exec();
+
+    if (!restoreSuccess) {
+        qWarning().noquote() << "[IAP] Restore failed:" << restoreError;
+        emit errorOccurred(ErrorCode::ApiPurchaseError);
+        return false;
+    }
+
+    if (restoredTransactions.isEmpty()) {
+        qInfo().noquote() << "[IAP] Restore completed, but no transactions were returned";
+        emit errorOccurred(ErrorCode::ApiPurchaseError);
+        return false;
+    }
+
+    bool hasInstalledConfig = false;
+    int duplicateCount = 0;
+    QSet<QString> processedTransactions;
+    for (const QVariantMap &transaction : restoredTransactions) {
+        const QString originalTransactionId = transaction.value(QStringLiteral("originalTransactionId")).toString();
+        const QString transactionId = transaction.value(QStringLiteral("transactionId")).toString();
+        const QString productId = transaction.value(QStringLiteral("productId")).toString();
+
+        if (originalTransactionId.isEmpty()) {
+            qWarning().noquote() << "[IAP] Skipping restored transaction without originalTransactionId"
+                                 << transactionId;
+            continue;
+        }
+
+        if (processedTransactions.contains(originalTransactionId)) {
+            duplicateCount++;
+            continue;
+        }
+        processedTransactions.insert(originalTransactionId);
+
+        qInfo().noquote() << "[IAP] Restoring subscription. transactionId =" << transactionId
+                          << "originalTransactionId =" << originalTransactionId
+                          << "productId =" << productId;
+
+        GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                                QString(APP_VERSION),
+                                                m_settings->getInstallationUuid(true),
+                                                m_apiServicesModel->getCountryCode(),
+                                                "",
+                                                m_apiServicesModel->getSelectedServiceType(),
+                                                m_apiServicesModel->getSelectedServiceProtocol(),
+                                                QJsonObject() };
+
+        QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+        apiPayload[apiDefs::key::transactionId] = originalTransactionId;
+
+        QByteArray responseBody;
+        ErrorCode errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody);
+        if (errorCode != ErrorCode::NoError) {
+            qWarning().noquote() << "[IAP] Failed to restore transaction" << originalTransactionId
+                                 << "errorCode =" << static_cast<int>(errorCode);
+            continue;
+        }
+
+        if (!installServerFromSubscriptionResponse(responseBody)) {
+            qWarning().noquote() << "[IAP] Failed to process restored subscription response for transaction"
+                                 << originalTransactionId;
+            continue;
+        }
+
+        hasInstalledConfig = true;
+    }
+
+    if (!hasInstalledConfig) {
+        emit errorOccurred(ErrorCode::ApiPurchaseError);
+        // Restore previous selection so that start page state is unchanged.
+        if (!originalServiceType.isEmpty()) {
+            for (int i = 0; i < m_apiServicesModel->rowCount(); ++i) {
+                m_apiServicesModel->setServiceIndex(i);
+                if (m_apiServicesModel->getSelectedServiceType() == originalServiceType) {
+                    break;
+                }
+            }
+        }
+        return false;
+    }
+
+    emit installServerFromApiFinished(tr("Subscription restored successfully."));
+    if (duplicateCount > 0) {
+        qInfo().noquote() << "[IAP] Skipped" << duplicateCount
+                          << "duplicate restored transactions for original transaction IDs already processed";
+    }
+
+    // Restore previous selection if it differs from premium
+    if (!originalServiceType.isEmpty() && originalServiceType != premiumServiceType) {
+        for (int i = 0; i < m_apiServicesModel->rowCount(); ++i) {
+            m_apiServicesModel->setServiceIndex(i);
+            if (m_apiServicesModel->getSelectedServiceType() == originalServiceType) {
+                break;
+            }
+        }
+    }
 #endif
     return true;
 }
@@ -758,12 +910,73 @@ QList<QString> ApiConfigsController::getQrCodes()
 
 int ApiConfigsController::getQrCodesCount()
 {
-    return m_qrCodes.size();
+    return static_cast<int>(m_qrCodes.size());
 }
 
 QString ApiConfigsController::getVpnKey()
 {
     return m_vpnKey;
+}
+
+bool ApiConfigsController::installServerFromSubscriptionResponse(const QByteArray &responseBody)
+{
+#ifdef Q_OS_IOS
+    QJsonParseError parseError {};
+    QJsonDocument responseDoc = QJsonDocument::fromJson(responseBody, &parseError);
+    if (parseError.error == QJsonParseError::NoError) {
+        qInfo().noquote() << "[IAP] Subscription raw response" << responseDoc.toJson(QJsonDocument::Compact);
+    } else {
+        qWarning().noquote() << "[IAP] Subscription raw response parse error:" << parseError.errorString()
+                             << "raw=" << QString::fromUtf8(responseBody);
+    }
+
+    const QJsonObject responseObject = responseDoc.object();
+    QString key = responseObject.value(QStringLiteral("key")).toString();
+    if (key.isEmpty()) {
+        qWarning().noquote() << "[IAP] Subscription response does not contain a key field";
+        return false;
+    }
+    key.replace(QStringLiteral("vpn://"), QString());
+
+    QByteArray config = QByteArray::fromBase64(key.toUtf8(),
+                                               QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    QByteArray configUncompressed = qUncompress(config);
+    if (!configUncompressed.isEmpty()) {
+        config = configUncompressed;
+    }
+    if (config.isEmpty()) {
+        qWarning().noquote() << "[IAP] Subscription response config payload is empty";
+        return false;
+    }
+
+    QJsonParseError configParseError {};
+    QJsonDocument configDoc = QJsonDocument::fromJson(config, &configParseError);
+    if (configParseError.error != QJsonParseError::NoError) {
+        qWarning().noquote() << "[IAP] Failed to parse subscription config:" << configParseError.errorString();
+        return false;
+    }
+
+    QJsonObject configJson = configDoc.object();
+
+    quint16 crc = qChecksum(QJsonDocument(configJson).toJson());
+    auto apiConfig = configJson.value(apiDefs::key::apiConfig).toObject();
+    apiConfig[apiDefs::key::vpnKey] = key;
+    auto subscriptionObject = apiConfig.value(configKey::subscription).toObject();
+    qInfo().noquote() << "[IAP] Subscription payload details" << "serviceType="
+                      << apiConfig.value(configKey::serviceType).toString()
+                      << "serviceProtocol=" << apiConfig.value(configKey::serviceProtocol).toString()
+                      << "subscriptionEnd=" << subscriptionObject.value(apiDefs::key::subscriptionEndDate).toString()
+                      << "subscriptionType=" << subscriptionObject.value(QStringLiteral("type")).toString();
+    configJson.insert(apiDefs::key::apiConfig, apiConfig);
+    configJson.insert(config_key::crc, crc);
+    m_serversModel->addServer(configJson);
+
+    qDebug() << configJson;
+    return true;
+#else
+    Q_UNUSED(responseBody)
+    return false;
+#endif
 }
 
 ErrorCode ApiConfigsController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody)

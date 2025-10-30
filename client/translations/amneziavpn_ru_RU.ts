@@ -3237,6 +3237,11 @@ subscription key</source>
         <translation>Сайт Amnezia</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="254"/>
+        <source>Restore purchases</source>
+        <translation>Восстановить покупки</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="276"/>
         <source>VPN by Amnezia</source>
         <translation>VPN от Amnezia</translation>

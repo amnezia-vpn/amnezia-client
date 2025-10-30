@@ -4,6 +4,7 @@
 #include "protocols/vpnprotocol.h"
 #include <functional>
 #include <QVariant>
+#include <QVariantMap>
 #include <QStringList>
 #include <QList>
 
@@ -66,6 +67,7 @@ public:
                                             const QString &originalTransactionId,
                                             const QString &errorString)> &&callback);
     void restorePurchases(std::function<void(bool success,
+                                             const QList<QVariantMap> &transactions,
                                              const QString &errorString)> &&callback);
 
     // Fetch product info for given product identifiers and return basic fields for logging

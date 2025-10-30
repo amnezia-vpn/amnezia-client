@@ -24,7 +24,9 @@ API_AVAILABLE(ios(15.0), macos(12.0))
                                   NSString *_Nullable originalTransactionId,
                                   NSError *_Nullable error))completion;
 
-- (void)restorePurchasesWithCompletion:(void (^)(BOOL success, NSError *_Nullable error))completion;
+- (void)restorePurchasesWithCompletion:(void (^)(BOOL success,
+                                                 NSArray<NSDictionary *> *_Nullable restoredTransactions,
+                                                 NSError *_Nullable error))completion;
 
 // Fetch product information for a set of identifiers without initiating a purchase
 - (void)fetchProductsWithIdentifiers:(NSSet<NSString *> *)productIdentifiers

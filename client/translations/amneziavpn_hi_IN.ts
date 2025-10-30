@@ -2866,6 +2866,11 @@ Already installed containers were found on the server. All installed containers 
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="229"/>
+        <source>Restore purchases</source>
+        <translation>खरीदारी पुनर्स्थापित करें</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="251"/>
         <source>VPN by Amnezia</source>
         <translation type="unfinished"></translation>

@@ -5,6 +5,9 @@
 #import "StoreKitController.h"
 #import <StoreKit/StoreKit.h>
 
+#include <QtCore/QDebug>
+#include <QtCore/QString>
+
 API_AVAILABLE(ios(15.0), macos(12.0))
 @interface StoreKitController () <SKProductsRequestDelegate, SKPaymentTransactionObserver>
 @property (nonatomic, copy) void (^purchaseCompletion)(BOOL success,
@@ -12,11 +15,14 @@ API_AVAILABLE(ios(15.0), macos(12.0))
                                                        NSString *_Nullable productId,
                                                        NSString *_Nullable originalTransactionId,
                                                        NSError *_Nullable error);
-@property (nonatomic, copy) void (^restoreCompletion)(BOOL success, NSError *_Nullable error);
+@property (nonatomic, copy) void (^restoreCompletion)(BOOL success,
+                                                      NSArray<NSDictionary *> *_Nullable restoredTransactions,
+                                                      NSError *_Nullable error);
 @property (nonatomic, copy) void (^productsFetchCompletion)(NSArray<NSDictionary *> *products,
                                                             NSArray<NSString *> *invalidIdentifiers,
                                                             NSError *_Nullable error);
 @property (nonatomic, strong) SKProductsRequest *productsRequest;
+@property (nonatomic, strong) NSMutableArray<NSDictionary *> *restoredTransactions;
 @end
 
 @implementation StoreKitController
@@ -56,6 +62,7 @@ API_AVAILABLE(ios(15.0), macos(12.0))
 {
     self.purchaseCompletion = completion;
     
+    qInfo().noquote() << "[IAP][StoreKit] Starting purchase for" << QString::fromUtf8(productIdentifier.UTF8String);
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [self performPurchaseAsync:productIdentifier];
     });
@@ -81,9 +88,12 @@ API_AVAILABLE(ios(15.0), macos(12.0))
     });
 }
 
-- (void)restorePurchasesWithCompletion:(void (^)(BOOL success, NSError *_Nullable error))completion API_AVAILABLE(ios(15.0), macos(12.0))
+- (void)restorePurchasesWithCompletion:(void (^)(BOOL success,
+                                                 NSArray<NSDictionary *> *_Nullable restoredTransactions,
+                                                 NSError *_Nullable error))completion API_AVAILABLE(ios(15.0), macos(12.0))
 {
     self.restoreCompletion = completion;
+    self.restoredTransactions = [NSMutableArray array];
     [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
 }
 
@@ -113,6 +123,11 @@ API_AVAILABLE(ios(15.0), macos(12.0))
             self.productsRequest = nil;
             return;
         }
+        NSString *currencyCode = [product.priceLocale objectForKey:NSLocaleCurrencyCode] ?: @"";
+        NSString *priceString = [product.price stringValue] ?: @"";
+        qInfo().noquote() << "[IAP][StoreKit] Received product" << QString::fromUtf8(product.productIdentifier.UTF8String)
+                          << "price=" << QString::fromUtf8(priceString.UTF8String)
+                          << "currency=" << QString::fromUtf8(currencyCode.UTF8String);
         SKPayment *payment = [SKPayment paymentWithProduct:product];
         [[SKPaymentQueue defaultQueue] addPayment:payment];
         self.productsRequest = nil;
@@ -130,6 +145,11 @@ API_AVAILABLE(ios(15.0), macos(12.0))
                 @"currencyCode": [p.priceLocale objectForKey:NSLocaleCurrencyCode] ?: @""
             };
             [productDicts addObject:productDict];
+            NSString *productCurrency = [p.priceLocale objectForKey:NSLocaleCurrencyCode] ?: @"";
+            NSString *productPrice = [p.price stringValue] ?: @"";
+            qInfo().noquote() << "[IAP][StoreKit] Fetched product info" << QString::fromUtf8(p.productIdentifier.UTF8String)
+                              << "price=" << QString::fromUtf8(productPrice.UTF8String)
+                              << "currency=" << QString::fromUtf8(productCurrency.UTF8String);
         }
         
         self.productsFetchCompletion(productDicts, response.invalidProductIdentifiers, nil);
@@ -160,6 +180,9 @@ API_AVAILABLE(ios(15.0), macos(12.0))
         switch (transaction.transactionState) {
         case SKPaymentTransactionStatePurchased: {
             NSString *originalTransactionId = transaction.originalTransaction.transactionIdentifier ?: transaction.transactionIdentifier;
+            qInfo().noquote() << "[IAP][StoreKit] Transaction purchased" << QString::fromUtf8(transaction.transactionIdentifier.UTF8String)
+                              << "original=" << QString::fromUtf8((originalTransactionId ?: @"").UTF8String)
+                              << "product=" << QString::fromUtf8(transaction.payment.productIdentifier.UTF8String);
             
             if (self.purchaseCompletion) {
                 self.purchaseCompletion(YES,
@@ -173,6 +196,9 @@ API_AVAILABLE(ios(15.0), macos(12.0))
             break;
         }
         case SKPaymentTransactionStateFailed:
+            qInfo().noquote() << "[IAP][StoreKit] Transaction failed" << QString::fromUtf8(transaction.transactionIdentifier.UTF8String)
+                              << "product=" << QString::fromUtf8(transaction.payment.productIdentifier.UTF8String)
+                              << "error=" << QString::fromUtf8(transaction.error.localizedDescription.UTF8String);
             if (self.purchaseCompletion) {
                 self.purchaseCompletion(NO,
                                        transaction.transactionIdentifier,
@@ -183,9 +209,32 @@ API_AVAILABLE(ios(15.0), macos(12.0))
             }
             [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
             break;
-        case SKPaymentTransactionStateRestored: 
-            [[SKPaymentQueue defaultQueue] finishTransaction:transaction]; 
+        case SKPaymentTransactionStateRestored: {
+            if (self.restoreCompletion) {
+                NSString *transactionId = transaction.transactionIdentifier ?: @"";
+                NSString *originalTransactionId = transaction.originalTransaction.transactionIdentifier ?: transactionId;
+                NSString *productId = transaction.payment.productIdentifier ?: @"";
+
+                qInfo().noquote() << "[IAP][StoreKit] Transaction restored"
+                                  << QString::fromUtf8(transactionId.UTF8String)
+                                  << "original="
+                                  << QString::fromUtf8((originalTransactionId ?: @"").UTF8String)
+                                  << "product="
+                                  << QString::fromUtf8((productId ?: @"").UTF8String);
+
+                NSDictionary *info = @{
+                    @"transactionId": transactionId,
+                    @"originalTransactionId": originalTransactionId ?: @"",
+                    @"productId": productId ?: @""
+                };
+                if (!self.restoredTransactions) {
+                    self.restoredTransactions = [NSMutableArray array];
+                }
+                [self.restoredTransactions addObject:info];
+            }
+            [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
             break;
+        }
         case SKPaymentTransactionStatePurchasing:
         case SKPaymentTransactionStateDeferred: 
             break;
@@ -196,16 +245,19 @@ API_AVAILABLE(ios(15.0), macos(12.0))
 - (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue
 {
     if (self.restoreCompletion) {
-        self.restoreCompletion(YES, nil);
+        NSArray<NSDictionary *> *transactions = [self.restoredTransactions copy];
+        self.restoreCompletion(YES, transactions, nil);
         self.restoreCompletion = nil;
+        self.restoredTransactions = nil;
     }
 }
 
 - (void)paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error
 {
     if (self.restoreCompletion) {
-        self.restoreCompletion(NO, error);
+        self.restoreCompletion(NO, nil, error);
         self.restoreCompletion = nil;
+        self.restoredTransactions = nil;
     }
 }
 
