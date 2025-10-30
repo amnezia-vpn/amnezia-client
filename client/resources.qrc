@@ -238,6 +238,7 @@
         <file>ui/qml/Pages2/PageSettingsApiNativeConfigs.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiDevices.qml</file>
         <file>images/controls/monitor.svg</file>
+        <file>images/controls/monitor-with-phone.svg</file>
         <file>ui/qml/Components/ApiPremV1MigrationDrawer.qml</file>
         <file>ui/qml/Components/ApiPremV1SubListDrawer.qml</file>
         <file>ui/qml/Components/OtpCodeDrawer.qml</file>

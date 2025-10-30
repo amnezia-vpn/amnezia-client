@@ -265,9 +265,9 @@ PageType {
         amneziaVpn,
         selfHostVpn,
         backupRestore,
-        fileOpen,
-        qrScan,
         shareViaDevice,
+        fileOpen,
+        qrScan,        
         siteLink
     ]
     
@@ -319,6 +319,18 @@ PageType {
     }
 
     QtObject {
+        id: shareViaDevice
+
+        property string title: qsTr("Set up your Amnezia Premium VPN using your phone")
+        property string description: qsTr("Which already has a premium subscription")
+        property string imageSource: "qrc:/images/controls/monitor-with-phone.svg"
+        property bool isVisible: true
+        property var handler: function() {
+            PageController.goToPage(PageEnum.PageTransferConfigViaQR)
+        }
+    }
+
+    QtObject {
         id: fileOpen
 
         property string title: qsTr("File with connection settings")
@@ -335,7 +347,7 @@ PageType {
                 }
             }
         }
-    }
+    }    
 
     QtObject {
         id: qrScan
@@ -350,18 +362,8 @@ PageType {
                 PageController.goToPage(PageEnum.PageSetupWizardQrReader)
             }
         }
-    }
-    QtObject {
-        id: shareViaDevice
+    }    
 
-        property string title: qsTr("Get connection via your device")
-        property string description: qsTr("")
-        property string imageSource: "qrc:/images/controls/share-2.svg"
-        property bool isVisible: true
-        property var handler: function() {
-            PageController.goToPage(PageEnum.PageTransferConfigViaQR)
-        }
-    }
     QtObject {
         id: siteLink
 
