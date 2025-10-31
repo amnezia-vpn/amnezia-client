@@ -65,6 +65,7 @@ namespace
     {
         QString osVersion;
         QString appVersion;
+        QString appLanguage;
 
         QString installationUuid;
 
@@ -83,6 +84,9 @@ namespace
             }
             if (!appVersion.isEmpty()) {
                 obj[configKey::appVersion] = appVersion;
+            }
+            if (!appLanguage.isEmpty()) {
+                obj[configKey::appLanguage] = appLanguage;
             }
             if (!installationUuid.isEmpty()) {
                 obj[configKey::uuid] = installationUuid;
@@ -223,6 +227,9 @@ namespace
         if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
             apiConfig.insert(apiDefs::key::supportedProtocols,
                              QJsonDocument::fromJson(apiResponseBody).object().value(apiDefs::key::supportedProtocols).toArray());
+
+            apiConfig.insert(apiDefs::key::serviceInfo,
+                             QJsonDocument::fromJson(apiResponseBody).object().value(apiDefs::key::serviceInfo).toObject());
         }
 
         serverConfig[configKey::apiConfig] = apiConfig;
@@ -285,6 +292,7 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             m_settings->getInstallationUuid(true),
                                             apiConfigObject.value(configKey::userCountryCode).toString(),
                                             serverCountryCode,
@@ -325,6 +333,7 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             m_settings->getInstallationUuid(true),
                                             apiConfigObject.value(configKey::userCountryCode).toString(),
                                             serverCountryCode,
@@ -399,6 +408,7 @@ bool ApiConfigsController::importServiceFromGateway()
 {
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             m_settings->getInstallationUuid(true),
                                             m_apiServicesModel->getCountryCode(),
                                             "",
@@ -457,6 +467,7 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             m_settings->getInstallationUuid(true),
                                             apiConfig.value(configKey::userCountryCode).toString(),
                                             newCountryCode,
@@ -577,6 +588,7 @@ bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             m_settings->getInstallationUuid(true),
                                             apiConfigObject.value(configKey::userCountryCode).toString(),
                                             apiConfigObject.value(configKey::serverCountryCode).toString(),
@@ -616,6 +628,7 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
+                                            m_settings->getAppLanguage().name().split("_").first(),
                                             uuid,
                                             apiConfigObject.value(configKey::userCountryCode).toString(),
                                             serverCountryCode,

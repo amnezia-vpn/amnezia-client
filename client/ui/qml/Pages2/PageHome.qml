@@ -71,16 +71,6 @@ PageType {
             anchors.topMargin: 12
             anchors.bottomMargin: 16
 
-            AdLabel {
-                id: adLabel
-
-                Layout.fillWidth: true
-                Layout.preferredHeight: adLabel.contentHeight
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 22
-            }
-
             BasicButtonType {
                 id: loggingButton
                 objectName: "loggingButton"
@@ -188,6 +178,16 @@ PageType {
 
                     parent: root
                 }
+            }
+
+            AdLabel {
+                id: adLabel
+
+                Layout.fillWidth: true
+                Layout.preferredHeight: adLabel.contentHeight
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 22
             }
         }
     }

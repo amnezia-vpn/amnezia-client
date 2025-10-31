@@ -13,21 +13,119 @@ Rectangle {
     id: root
 
     property real contentHeight: content.implicitHeight + content.anchors.topMargin + content.anchors.bottomMargin
+    property bool isFocusable: true
 
     gradient: Gradient {
         orientation: Gradient.Horizontal
-        GradientStop { position: 0.0; color: Qt.rgba(85/255, 86/255, 92/255, 0.13) }
-        GradientStop { position: 1.0; color: Qt.rgba(28/255, 29/255, 33/255, 0.13) }
+        GradientStop { position: 0.0; color: AmneziaStyle.color.translucentSlateGray }
+        GradientStop { position: 1.0; color: AmneziaStyle.color.translucentOnyxBlack }
     }
     border.width: 1
-    border.color: "#1C1D21"
+    border.color: AmneziaStyle.color.onyxBlack
     radius: 13
 
-    visible: true
-    // visible: GC.isDesktop() && ServersModel.isDefaultServerFromApi
-    //          && ServersModel.isDefaultServerDefaultContainerHasSplitTunneling && SettingsController.isHomeAdLabelVisible
+    visible: ServersModel.isAdVisible
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+
+    Keys.onUpPressed: {
+        FocusController.nextKeyUpItem()
+    }
+
+    Keys.onDownPressed: {
+        FocusController.nextKeyDownItem()
+    }
+
+    Keys.onLeftPressed: {
+        FocusController.nextKeyLeftItem()
+    }
+
+    Keys.onRightPressed: {
+        FocusController.nextKeyRightItem()
+    }
+
+    Keys.onEnterPressed: {
+        Qt.openUrlExternally(ServersModel.getDefaultServerData("adEndpoint"))
+    }
+
+    Keys.onReturnPressed: {
+        Qt.openUrlExternally(ServersModel.getDefaultServerData("adEndpoint"))
+    }
+
+    RowLayout {
+        id: content
+        anchors.fill: parent
+        anchors.leftMargin: 16
+        anchors.rightMargin: 12
+        anchors.topMargin: 12
+        anchors.bottomMargin: 12
+        spacing: 20
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 4
+
+            CaptionTextType {
+                Layout.fillWidth: true
+                text: ServersModel.adHeader
+                color: AmneziaStyle.color.paleGray
+                font.pixelSize: 14
+                font.weight: 700
+
+                textFormat: Text.RichText
+            }
+
+            CaptionTextType {
+                Layout.fillWidth: true
+                text: ServersModel.adDescription
+                color: AmneziaStyle.color.mutedGray
+                wrapMode: Text.WordWrap
+                lineHeight: 18
+                lineHeightMode: Text.FixedHeight
+                font.pixelSize: 14
+
+                visible: text !== ""
+            }
+        }
+
+        Item {
+            implicitWidth: 40
+            implicitHeight: 40
+            Layout.alignment: Qt.AlignVCenter
+
+            Rectangle {
+                id: chevronBackground
+                anchors.fill: parent
+                radius: 12
+                color: AmneziaStyle.color.transparent
+                border.width: root.activeFocus ? 1 : 0
+                border.color: AmneziaStyle.color.paleGray
+
+                Behavior on color {
+                    PropertyAnimation { duration: 200 }
+                }
+
+                Behavior on border.width {
+                    PropertyAnimation { duration: 200 }
+                }
+            }
+
+            Image {
+                anchors.centerIn: parent
+                source: "qrc:/images/controls/chevron-right.svg"
+                sourceSize: Qt.size(24, 24)
+            }
+        }
+    }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: true
@@ -45,73 +143,8 @@ Rectangle {
         }
 
         onClicked: function() {
-            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl("premium"))
-        }
-    }
-
-    RowLayout {
-        id: content
-        anchors.fill: parent
-        anchors.leftMargin: 16
-        anchors.rightMargin: 12
-        anchors.topMargin: 12
-        anchors.bottomMargin: 12
-        spacing: 20
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 4
-
-            RowLayout {
-                spacing: 4
-
-                CaptionTextType {
-                    text: qsTr("Try Amnezia")
-                    color: AmneziaStyle.color.paleGray
-                    font.pixelSize: 14
-                    font.weight: 700
-                }
-
-                CaptionTextType {
-                    text: "Premium"
-                    color: "#950051"
-                    font.pixelSize: 14
-                    font.weight: 700
-                }
-            }
-
-            CaptionTextType {
-                Layout.fillWidth: true
-                text: qsTr("High speed and 20 countries to connect. 7 days free")
-                color: AmneziaStyle.color.mutedGray
-                wrapMode: Text.WordWrap
-                lineHeight: 18
-                lineHeightMode: Text.FixedHeight
-                font.pixelSize: 14
-            }
-        }
-
-        Item {
-            implicitWidth: 40
-            implicitHeight: 40
-            Layout.alignment: Qt.AlignVCenter
-
-            Rectangle {
-                id: chevronBackground
-                anchors.fill: parent
-                radius: 12
-                color: AmneziaStyle.color.transparent
-
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
-                }
-            }
-
-            Image {
-                anchors.centerIn: parent
-                source: "qrc:/images/controls/chevron-right.svg"
-                sourceSize: Qt.size(24, 24)
-            }
+            root.forceActiveFocus()
+            Qt.openUrlExternally(ServersModel.getDefaultServerData("adEndpoint"))
         }
     }
 }

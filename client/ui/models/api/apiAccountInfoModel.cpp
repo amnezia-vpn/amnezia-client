@@ -31,7 +31,8 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
             return tr("Active");
         }
 
-        return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate) ? tr("<p><a style=\"color: #EB5757;\">Inactive</a>") : tr("Active");
+        return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate) ? tr("<p><a style=\"color: #EB5757;\">Inactive</a>")
+                                                                                      : tr("Active");
     }
     case EndDateRole: {
         if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
@@ -47,16 +48,7 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
         return tr("%1 out of %2").arg(m_accountInfoData.activeDeviceCount).arg(m_accountInfoData.maxDeviceCount);
     }
     case ServiceDescriptionRole: {
-        if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2) {
-            return tr("Classic VPN for seamless work, downloading large files, and watching videos. Access all websites and online "
-                      "resources. "
-                      "Speeds up to 200 Mbps");
-        } else if (m_accountInfoData.configType == apiDefs::ConfigType::AmneziaFreeV3) {
-            return tr("Free unlimited access to a basic set of websites such as Facebook, Instagram, Twitter (X), Discord, Telegram and "
-                      "more. YouTube is not included in the free plan.");
-        } else {
-            return "";
-        }
+        return m_accountInfoData.subscriptionDescription;
     }
     case IsComponentVisibleRole: {
         return m_accountInfoData.configType == apiDefs::ConfigType::AmneziaPremiumV2
@@ -100,6 +92,8 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
     accountInfoData.subscriptionEndDate = accountInfoObject.value(apiDefs::key::subscriptionEndDate).toString();
 
     accountInfoData.configType = apiUtils::getConfigType(serverConfig);
+
+    accountInfoData.subscriptionDescription = accountInfoObject.value(apiDefs::key::subscriptionDescription).toString();
 
     for (const auto &protocol : accountInfoObject.value(apiDefs::key::supportedProtocols).toArray()) {
         accountInfoData.supportedProtocols.push_back(protocol.toString());
