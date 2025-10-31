@@ -411,3 +411,28 @@ QSharedPointer<PageController> CoreController::pageController() const
 {
     return m_pageController;
 }
+
+void CoreController::openConnectionDefault()
+{
+    if (m_connectionController) {
+        m_connectionController->openConnection();
+    }
+}
+
+void CoreController::openConnectionByIndex(int serverIndex)
+{
+    if (m_serversModel) {
+        m_serversModel->setDefaultServerIndex(serverIndex);
+    }
+    openConnectionDefault();
+}
+
+void CoreController::importConfigFromData(const QString &data)
+{
+    if (!m_importController)
+        return;
+
+    if (m_importController->extractConfigFromData(data)) {
+        m_importController->importConfig();
+    }
+}
