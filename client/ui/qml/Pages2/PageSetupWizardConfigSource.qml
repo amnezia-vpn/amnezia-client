@@ -236,31 +236,6 @@ PageType {
             width: listView.width
 
             BasicButtonType {
-                id: restorePurchasesButton
-
-                Layout.topMargin: 24
-                Layout.bottomMargin: 16
-                Layout.alignment: Qt.AlignHCenter
-                implicitHeight: 32
-
-                visible: Qt.platform.os === "ios"
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
-
-                text: qsTr("Restore purchases")
-
-                clickedFunc: function() {
-                    PageController.showBusyIndicator(true)
-                    ApiConfigsController.restoreSerivceFromAppStore()
-                    PageController.showBusyIndicator(false)
-                }
-            }
-
-            BasicButtonType {
                 id: siteLink2
                 Layout.topMargin: 24
                 Layout.bottomMargin: 16
@@ -292,6 +267,7 @@ PageType {
         backupRestore,
         fileOpen,
         qrScan,
+        restorePurchases,
         siteLink
     ]
     
@@ -373,6 +349,20 @@ PageType {
             if (Qt.platform.os === "ios") {
                 PageController.goToPage(PageEnum.PageSetupWizardQrReader)
             }
+        }
+    }
+
+    QtObject {
+        id: restorePurchases
+
+        property string title: qsTr("Restore purchases")
+        property string description: qsTr("")
+        property string imageSource: "qrc:/images/controls/refresh-cw.svg"
+        property bool isVisible: Qt.platform.os === "ios"
+        property var handler: function() {
+            PageController.showBusyIndicator(true)
+            ApiConfigsController.restoreSerivceFromAppStore()
+            PageController.showBusyIndicator(false)
         }
     }
 
