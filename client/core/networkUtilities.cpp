@@ -23,6 +23,8 @@
     #include <sys/ioctl.h>
     #include <sys/socket.h>
     #include <unistd.h>
+#endif
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     #include <QDBusConnection>
     #include <QDBusInterface>
     #include <QDBusMessage>
@@ -31,7 +33,6 @@
     #include <QVariant>
     #include <QFile>
     #include <QTextStream>
-    #include <QRegularExpression>
     #include "platforms/linux/daemon/dbustypeslinux.h"
 
     constexpr const char* DBUS_RESOLVE_SERVICE = "org.freedesktop.resolve1";
@@ -300,7 +301,7 @@ QString NetworkUtilities::getGatewayAndIface()
     free(pAdapterAddresses);
     return result;
 #endif
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     constexpr int BUFFER_SIZE = 100;
     int     received_bytes = 0, msg_len = 0, route_attribute_len = 0;
     int     sock = -1, msgseq = 0;
@@ -503,7 +504,7 @@ QPair<QString, QString> NetworkUtilities::getSystemDnsAddress()
 {
     QPair<QString, QString> result;
     
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     // Try systemd-resolved via D-Bus first
     QDBusConnection bus = QDBusConnection::systemBus();
     if (bus.isConnected()) {
