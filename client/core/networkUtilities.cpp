@@ -30,9 +30,15 @@
     #include <QDBusMessage>
     #include <QDBusReply>
     #include <QDBusArgument>
+    #include <QDBusObjectPath>
     #include <QVariant>
+    #include <QVariantMap>
     #include <QFile>
     #include <QTextStream>
+    #include <QNetworkInterface>
+    #include <algorithm>
+    #include <climits>
+    #include <limits>
     #include "platforms/linux/daemon/dbustypeslinux.h"
 
     constexpr const char* DBUS_RESOLVE_SERVICE = "org.freedesktop.resolve1";
@@ -500,6 +506,117 @@ QString NetworkUtilities::getGatewayAndIface()
 #endif
 }
 
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+namespace {
+    struct LinkInfo {
+        int ifindex;
+        bool defaultRoute;
+        quint32 routeMetric;
+        QStringList dnsServers;
+        
+        bool operator<(const LinkInfo& other) const {
+            // Sort by defaultRoute first (true comes first), then by routeMetric (lower is better)
+            if (defaultRoute != other.defaultRoute) {
+                return defaultRoute > other.defaultRoute;
+            }
+            return routeMetric < other.routeMetric;
+        }
+    };
+    
+    QStringList extractDnsFromDbusArgument(const QDBusArgument& arg) {
+        QStringList dnsServers;
+        QDBusArgument dnsArg = arg;
+        QList<DnsResolver> resolverList = qdbus_cast<QList<DnsResolver>>(dnsArg);
+
+        for (const auto& resolver : resolverList) {
+            if (resolver.protocol() == QAbstractSocket::IPv4Protocol) {
+                const QString dnsStr = resolver.toString();
+                if (NetworkUtilities::checkIPv4Format(dnsStr) && !dnsServers.contains(dnsStr)) {
+                    dnsServers.append(dnsStr);
+                }
+            }
+        }
+        return dnsServers;
+    }
+    
+    QList<LinkInfo> getDnsFromInterfaces(const QDBusConnection& bus) {
+        QList<LinkInfo> links;
+        
+        // Get all network interfaces
+        QList<QNetworkInterface> interfaces = QNetworkInterface::allInterfaces();
+        
+        for (const QNetworkInterface& iface : interfaces) {
+            int ifindex = iface.index();
+            if (ifindex <= 0) {
+                continue;
+            }
+            
+            // Call GetLink to get the link object path
+            QDBusMessage getLinkMsg = QDBusMessage::createMethodCall(
+                DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_RESOLVE_MANAGER, "GetLink");
+            getLinkMsg << ifindex;
+            
+            QDBusReply<QDBusObjectPath> linkReply = bus.call(getLinkMsg);
+            if (!linkReply.isValid()) {
+                continue;
+            }
+            
+            QString linkPath = linkReply.value().path();
+            
+            // Get properties from the link object
+            QDBusMessage getPropMsg = QDBusMessage::createMethodCall(
+                DBUS_RESOLVE_SERVICE, linkPath, DBUS_PROPERTY_INTERFACE, "GetAll");
+            getPropMsg << QString("org.freedesktop.resolve1.Link");
+            
+            QDBusReply<QVariantMap> propReply = bus.call(getPropMsg);
+            if (!propReply.isValid()) {
+                continue;
+            }
+            
+            QVariantMap properties = propReply.value();
+            
+            // Check if DefaultRoute is true
+            bool defaultRoute = properties.value("DefaultRoute").toBool();
+            
+            // Get RouteMetric (default to maximum if not available)
+            quint32 routeMetric = std::numeric_limits<quint32>::max();
+            if (properties.contains("RouteMetric")) {
+                routeMetric = properties.value("RouteMetric").toUInt();
+            }
+            
+            // Get DNS servers - use Get method directly for DNS property
+            QDBusMessage getDnsMsg = QDBusMessage::createMethodCall(
+                DBUS_RESOLVE_SERVICE, linkPath, DBUS_PROPERTY_INTERFACE, "Get");
+            getDnsMsg << QString("org.freedesktop.resolve1.Link");
+            getDnsMsg << QString("DNS");
+            
+            QDBusReply<QVariant> dnsReply = bus.call(getDnsMsg);
+            if (!dnsReply.isValid()) {
+                continue;
+            }
+            
+            QVariant dnsVariant = dnsReply.value();
+            QStringList dnsServers;
+            if (dnsVariant.canConvert<QDBusArgument>()) {
+                QDBusArgument dnsArg = qvariant_cast<QDBusArgument>(dnsVariant);
+                dnsServers = extractDnsFromDbusArgument(dnsArg);
+            }
+            
+            if (!dnsServers.isEmpty()) {
+                LinkInfo info;
+                info.ifindex = ifindex;
+                info.defaultRoute = defaultRoute;
+                info.routeMetric = routeMetric;
+                info.dnsServers = dnsServers;
+                links.append(info);
+            }
+        }
+        
+        return links;
+    }
+}
+#endif
+
 QPair<QString, QString> NetworkUtilities::getSystemDnsAddress()
 {
     QPair<QString, QString> result;
@@ -509,7 +626,6 @@ QPair<QString, QString> NetworkUtilities::getSystemDnsAddress()
     QDBusConnection bus = QDBusConnection::systemBus();
     if (bus.isConnected()) {
         // Try to get DNS from Resolve DNS property using org.freedesktop.DBus.Properties
-        // Use the same approach as in dnsutilslinux.cpp
         QDBusMessage message = QDBusMessage::createMethodCall(
             DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_PROPERTY_INTERFACE, "Get");
         message << QString(DBUS_RESOLVE_MANAGER);
@@ -538,6 +654,24 @@ QPair<QString, QString> NetworkUtilities::getSystemDnsAddress()
                 }
                 return result;
             }
+        }
+        
+        // If no global DNS, try to get DNS from interfaces
+        QList<LinkInfo> links = getDnsFromInterfaces(bus);
+        if (!links.isEmpty()) {
+            // Sort by priority: DefaultRoute first, then by RouteMetric
+            std::sort(links.begin(), links.end());
+            
+            // Get DNS from the highest priority interface
+            const LinkInfo& bestLink = links.first();
+            result.first = bestLink.dnsServers.first();
+            if (bestLink.dnsServers.size() > 1) {
+                result.second = bestLink.dnsServers.at(1);
+            }
+            qDebug() << "Got DNS from interface" << bestLink.ifindex 
+                     << "DefaultRoute:" << bestLink.defaultRoute 
+                     << "RouteMetric:" << bestLink.routeMetric;
+            return result;
         }
     }
     
