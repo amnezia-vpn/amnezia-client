@@ -11,6 +11,7 @@
 #include <QDBusArgument>
 #include <QHostAddress>
 #include <QtDBus/QtDBus>
+#include <QtEndian>
 
 /* D-Bus metatype for marshalling arguments to the SetLinkDNS method */
 class DnsResolver : public QHostAddress {
@@ -25,12 +26,8 @@ class DnsResolver : public QHostAddress {
       args << AF_INET6;
       args << QByteArray::fromRawData((const char*)&addrv6, sizeof(addrv6));
     } else {
-      quint32 addrv4 = ip.toIPv4Address();
-      QByteArray data(4, 0);
-      data[0] = (addrv4 >> 24) & 0xff;
-      data[1] = (addrv4 >> 16) & 0xff;
-      data[2] = (addrv4 >> 8) & 0xff;
-      data[3] = (addrv4 >> 0) & 0xff;
+      quint32 addrv4 = qToBigEndian(ip.toIPv4Address());
+      QByteArray data = QByteArray::fromRawData((const char*)&addrv4, sizeof(addrv4));
       args << AF_INET;
       args << data;
     }
@@ -46,12 +43,8 @@ class DnsResolver : public QHostAddress {
     args.endStructure();
     if (family == AF_INET6) {
       ip.setAddress(data.constData());
-    } else if (data.count() >= 4) {
-      quint32 addrv4 = 0;
-      addrv4 |= (data[0] << 24);
-      addrv4 |= (data[1] << 16);
-      addrv4 |= (data[2] << 8);
-      addrv4 |= (data[3] << 0);
+    } else if (data.size() >= 4) {
+      const quint32 addrv4 = qFromBigEndian<quint32>(data.constData());
       ip.setAddress(addrv4);
     }
     return args;
