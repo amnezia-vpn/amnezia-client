@@ -75,6 +75,29 @@ PageType {
 
             DividerType {}
 
+            SwitcherType {
+                id: useSystemDnsSwitch
+
+                visible: ServersModel.processedServerIsPremium
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("Use system DNS")
+                descriptionText: qsTr("Use system DNS servers")
+
+                checked: SettingsController.useSystemDnsAddressEnabled
+                onToggled: function() {
+                    if (checked !== SettingsController.useSystemDnsAddressEnabled) {
+                        SettingsController.setUseSystemDnsAddress(checked)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: ServersModel.processedServerIsPremium
+            }
+
             LabelWithButtonType {
                 id: dnsServersButton
 

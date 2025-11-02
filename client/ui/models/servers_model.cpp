@@ -603,6 +603,26 @@ QPair<QString, QString> ServersModel::getDnsPair(int serverIndex)
         }
     }
 
+    // Check if system DNS should be used
+    if (m_settings->useSystemDnsAddress() && apiUtils::isPremiumServer(server)) {
+        auto systemDns = NetworkUtilities::getSystemDnsAddress();
+        bool hasPrimary = !systemDns.first.isEmpty() && NetworkUtilities::checkIPv4Format(systemDns.first);
+        bool hasSecondary = !systemDns.second.isEmpty() && NetworkUtilities::checkIPv4Format(systemDns.second);
+        
+        if (hasPrimary || hasSecondary) {
+            if (hasPrimary) {
+                dns.first = systemDns.first;
+            }
+            if (hasSecondary) {
+                dns.second = systemDns.second;
+            }
+            qDebug() << "VpnConfigurator::getDnsForConfig using system DNS:" << dns.first << dns.second;
+        } else {
+            qWarning() << "Failed to get system DNS for premium config, connection will fail";
+        }
+        return dns;
+    }
+
     dns.first = server.value(config_key::dns1).toString();
     dns.second = server.value(config_key::dns2).toString();
 

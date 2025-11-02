@@ -67,6 +67,17 @@ bool SettingsController::isAmneziaDnsEnabled()
     return m_settings->useAmneziaDns();
 }
 
+bool SettingsController::isUseSystemDnsAddressEnabled()
+{
+    return m_settings->useSystemDnsAddress();
+}
+
+void SettingsController::setUseSystemDnsAddress(bool enable)
+{
+    m_settings->setUseSystemDnsAddress(enable);
+    emit useSystemDnsAddressChanged(enable);
+}
+
 QString SettingsController::getPrimaryDns()
 {
     return m_settings->primaryDns();

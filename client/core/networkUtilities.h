@@ -6,6 +6,7 @@
 #include <QString>
 #include <QHostAddress>
 #include <QNetworkReply>
+#include <QPair>
 
 
 class NetworkUtilities : public QObject
@@ -31,6 +32,9 @@ public:
     static QString netMaskFromIpWithSubnet(const QString ip);
     static QString ipAddressFromIpWithSubnet(const QString ip);
     static QStringList summarizeRoutes(const QStringList &ips, const QString cidr);
+    
+    // Returns pair of (primary DNS, secondary DNS) or empty strings on error
+    static QPair<QString, QString> getSystemDnsAddress();
 };
 
 #endif // NETWORKUTILITIES_H
