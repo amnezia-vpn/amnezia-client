@@ -268,9 +268,22 @@ class AmneziaActivity : QtActivity() {
     override fun onResume() {
         super.onResume()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            window.decorView.postDelayed({
-                sendTouch(1f, 1f)
-            }, 100)
+            window.decorView.apply {
+                invalidate()
+
+                postDelayed({
+                    sendTouch(1f, 1f)
+                }, 100)
+                
+                postDelayed({
+                    sendTouch(2f, 2f)
+                }, 200)
+                
+                postDelayed({
+                    requestLayout()
+                    invalidate()
+                }, 250)
+            }
         }
     }
 
