@@ -47,6 +47,7 @@ namespace apiDefs
         constexpr QLatin1String serverCountryName("server_country_name");
 
         constexpr QLatin1String osVersion("os_version");
+        constexpr QLatin1String appLanguage("app_language");
 
         constexpr QLatin1String availableCountries("available_countries");
         constexpr QLatin1String activeDeviceCount("active_device_count");

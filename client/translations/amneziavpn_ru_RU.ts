@@ -86,17 +86,17 @@
 <context>
     <name>ApiConfigsController</name>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="449"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="448"/>
         <source>%1 installed successfully.</source>
         <translation>%1 успешно установлен.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="514"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="513"/>
         <source>API config reloaded</source>
         <translation>Конфигурация API перезагружена</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="518"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="517"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>Страна подключения изменена на %1</translation>
     </message>
