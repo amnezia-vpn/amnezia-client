@@ -306,7 +306,7 @@ PageType {
         anchors.bottom: parent.bottom
 
         topPadding: 8
-        bottomPadding: 8
+        bottomPadding: 8 + SettingsController.safeAreaBottomMargin
         leftPadding: 96
         rightPadding: 96
 

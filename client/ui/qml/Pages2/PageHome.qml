@@ -68,7 +68,7 @@ PageType {
             objectName: "homeColumnLayout"
 
             anchors.fill: parent
-            anchors.topMargin: 12
+            anchors.topMargin: 12 + SettingsController.safeAreaTopMargin
             anchors.bottomMargin: 16
 
             AdLabel {

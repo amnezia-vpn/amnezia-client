@@ -39,6 +39,9 @@ public:
     QString getFileName(const QString &uri);
     bool isCameraPresent();
     bool isOnTv();
+    bool isEdgeToEdgeEnabled();
+    int getStatusBarHeight();
+    int getNavigationBarHeight();
     void startQrReaderActivity();
     void setSaveLogs(bool enabled);
     void exportLogsFile(const QString &fileName);

@@ -81,18 +81,18 @@ PageType {
         }
     }
 
-    ColumnLayout {
-        id: header
+        ColumnLayout {
+            id: header
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        anchors.topMargin: 20
+            anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
-        BackButtonType {
-            id: backButton
-        }
+            BackButtonType {
+                id: backButton
+            }
 
         HeaderTypeWithSwitcher {
             Layout.fillWidth: true

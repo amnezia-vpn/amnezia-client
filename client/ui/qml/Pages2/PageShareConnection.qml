@@ -47,7 +47,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
     }
 
     Text {
@@ -55,7 +55,7 @@ PageType {
         anchors.top: backButton.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 
