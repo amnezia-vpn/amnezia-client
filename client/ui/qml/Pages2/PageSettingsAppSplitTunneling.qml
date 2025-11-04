@@ -74,7 +74,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         BackButtonType {
             id: backButton
@@ -216,7 +216,7 @@ PageType {
 
     Rectangle {
         anchors.fill: addAppButton
-        anchors.bottomMargin: -24
+        anchors.bottomMargin: -24 - SettingsController.safeAreaBottomMargin
         color: AmneziaStyle.color.midnightBlack
         opacity: 0.8
     }
@@ -232,7 +232,7 @@ PageType {
         anchors.topMargin: 24
         anchors.rightMargin: 16
         anchors.leftMargin: 16
-        anchors.bottomMargin: 24
+        anchors.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
 
         TextFieldWithHeaderType {
             id: searchField

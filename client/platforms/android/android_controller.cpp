@@ -202,6 +202,21 @@ bool AndroidController::isOnTv()
     return callActivityMethod<jboolean>("isOnTv", "()Z");
 }
 
+bool AndroidController::isEdgeToEdgeEnabled()
+{
+    return callActivityMethod<jboolean>("isEdgeToEdgeEnabled", "()Z");
+}
+
+int AndroidController::getStatusBarHeight()
+{
+    return callActivityMethod<jint>("getStatusBarHeight", "()I");
+}
+
+int AndroidController::getNavigationBarHeight()
+{
+    return callActivityMethod<jint>("getNavigationBarHeight", "()I");
+}
+
 void AndroidController::startQrReaderActivity()
 {
     callActivityMethod("startQrCodeReader", "()V");

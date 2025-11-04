@@ -431,6 +431,63 @@ bool SettingsController::isOnTv()
 #endif
 }
 
+bool SettingsController::isEdgeToEdgeEnabled()
+{
+#ifdef Q_OS_ANDROID
+    return AndroidController::instance()->isEdgeToEdgeEnabled();
+#else
+    return false;
+#endif
+}
+
+int SettingsController::getStatusBarHeight()
+{
+#ifdef Q_OS_ANDROID
+    if (m_cachedStatusBarHeight < 0) {
+        m_cachedStatusBarHeight = AndroidController::instance()->getStatusBarHeight();
+    }
+    return m_cachedStatusBarHeight;
+#else
+    return 0;
+#endif
+}
+
+int SettingsController::getNavigationBarHeight()
+{
+#ifdef Q_OS_ANDROID
+    if (m_cachedNavigationBarHeight < 0) {
+        m_cachedNavigationBarHeight = AndroidController::instance()->getNavigationBarHeight();
+    }
+    return m_cachedNavigationBarHeight;
+#else
+    return 0;
+#endif
+}
+
+int SettingsController::getSafeAreaTopMargin()
+{
+#ifdef Q_OS_ANDROID
+    if (isEdgeToEdgeEnabled()) {
+        int height = getStatusBarHeight();
+        int result = height > 0 ? height : 40; // fallback to 40 if system returns 0
+        return result;
+    }
+#endif
+    return 0;
+}
+
+int SettingsController::getSafeAreaBottomMargin()
+{
+#ifdef Q_OS_ANDROID
+    if (isEdgeToEdgeEnabled()) {
+        int height = getNavigationBarHeight();
+        int result = height > 0 ? height : 56; // fallback to 56 if system returns 0
+        return result;
+    }
+#endif
+    return 0;
+}
+
 bool SettingsController::isHomeAdLabelVisible()
 {
     return m_settings->isHomeAdLabelVisible();

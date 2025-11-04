@@ -16,6 +16,26 @@ Window  {
     id: root
     objectName: "mainWindow"
 
+    Connections {
+        target: Qt.application
+        function onStateChanged() {
+            if (Qt.platform.os === "android" && Qt.application.state === Qt.ApplicationActive) {
+                refreshTimer.restart()
+            }
+        }
+    }
+
+    Timer {
+        id: refreshTimer
+        interval: 150
+        repeat: false
+        onTriggered: {
+            if (Qt.platform.os === "android" && SettingsController.isEdgeToEdgeEnabled()) {
+                console.log("QML: Application resumed with edge-to-edge")
+            }
+        }
+    }
+
     visible: true
     width: GC.screenWidth
     height: GC.screenHeight
@@ -111,7 +131,6 @@ Window  {
 
     PageStart {
         objectName: "pageStart"
-
         width: root.width
         height: root.height
     }
@@ -164,7 +183,7 @@ Window  {
             id: privateKeyPassphraseDrawer
 
             anchors.fill: parent
-            expandedHeight: root.height * 0.35
+            expandedHeight: root.height * 0.35 + SettingsController.safeAreaBottomMargin
 
             expandedStateContent: ColumnLayout {
                 anchors.top: parent.top

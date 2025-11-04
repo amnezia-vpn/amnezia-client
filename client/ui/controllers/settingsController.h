@@ -33,6 +33,8 @@ public:
 
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
+    Q_PROPERTY(int safeAreaTopMargin READ getSafeAreaTopMargin CONSTANT)
+    Q_PROPERTY(int safeAreaBottomMargin READ getSafeAreaBottomMargin CONSTANT)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -96,6 +98,11 @@ public slots:
     void toggleDevGatewayEnv(bool enabled);
 
     bool isOnTv();
+    bool isEdgeToEdgeEnabled();
+    int getStatusBarHeight();
+    int getNavigationBarHeight();
+    int getSafeAreaTopMargin();
+    int getSafeAreaBottomMargin();
 
     bool isHomeAdLabelVisible();
     void disableHomeAdLabel();
@@ -134,6 +141,9 @@ private:
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<SitesModel> m_sitesModel;
     QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
+    
+    mutable int m_cachedStatusBarHeight = -1;
+    mutable int m_cachedNavigationBarHeight = -1;
     std::shared_ptr<Settings> m_settings;
 
     QString m_appVersion;

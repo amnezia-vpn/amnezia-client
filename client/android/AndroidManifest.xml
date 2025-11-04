@@ -46,6 +46,7 @@
                 |fontScale|layoutDirection|locale|keyboard|keyboardHidden|navigation|mcc|mnc"
             android:launchMode="singleInstance"
             android:windowSoftInputMode="stateUnchanged|adjustResize"
+            android:enableOnBackInvokedCallback="false"
             android:exported="true">
 
             <intent-filter>

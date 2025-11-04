@@ -35,6 +35,7 @@ import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.CoroutineContext
@@ -170,10 +171,9 @@ class AmneziaActivity : QtActivity() {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "Create Amnezia activity")
         loadLibs()
-        window.apply {
-            addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            statusBarColor = getColor(R.color.black)
-        }
+
+        // Configure window for edge-to-edge display
+        configureWindowForEdgeToEdge()
         mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         val proto = mainScope.async(Dispatchers.IO) {
             VpnStateStore.getVpnState().vpnProto
@@ -263,6 +263,36 @@ class AmneziaActivity : QtActivity() {
             QtAndroidController.onServiceDisconnected()
         }
         super.onStop()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            window.decorView.postDelayed({
+                sendTouch(1f, 1f)
+            }, 100)
+        }
+    }
+
+    private fun configureWindowForEdgeToEdge() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            window.apply {
+                addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                addFlags(LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+                statusBarColor = android.graphics.Color.TRANSPARENT
+                navigationBarColor = android.graphics.Color.TRANSPARENT
+            }
+
+            WindowInsetsControllerCompat(window, window.decorView).apply {
+                isAppearanceLightStatusBars = false
+                isAppearanceLightNavigationBars = false
+            }
+        } else {
+            window.apply {
+                addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+                statusBarColor = getColor(R.color.black)
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -665,6 +695,43 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun isOnTv(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+
+    @Suppress("unused")
+    fun isEdgeToEdgeEnabled(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+
+    @Suppress("unused")
+    fun getStatusBarHeight(): Int {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return 0
+
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        val heightPx = if (resourceId > 0) {
+            resources.getDimensionPixelSize(resourceId)
+        } else {
+            0
+        }
+
+        // Convert physical pixels to device-independent pixels for QML
+        val density = resources.displayMetrics.density
+        val heightDp = (heightPx / density).toInt()
+        return heightDp
+    }
+
+    @Suppress("unused")
+    fun getNavigationBarHeight(): Int {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return 0
+
+        val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        val heightPx = if (resourceId > 0) {
+            resources.getDimensionPixelSize(resourceId)
+        } else {
+            0
+        }
+
+        // Convert physical pixels to device-independent pixels for QML
+        val density = resources.displayMetrics.density
+        val heightDp = (heightPx / density).toInt()
+        return heightDp
+    }
 
     @Suppress("unused")
     fun startQrCodeReader() {
