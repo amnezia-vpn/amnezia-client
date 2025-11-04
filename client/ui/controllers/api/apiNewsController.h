@@ -23,6 +23,7 @@ public:
 
 signals:
     void errorOccurred(ErrorCode errorCode);
+    void fetchNewsFinished();
 
 private:
     QSharedPointer<NewsModel> m_newsModel;

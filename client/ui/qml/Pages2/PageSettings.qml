@@ -14,6 +14,19 @@ import "../Config"
 PageType {
     id: root
 
+    Connections {
+        target: ApiNewsController
+        function onFetchNewsFinished() {
+            PageController.showBusyIndicator(false)
+        }
+        
+        function onErrorOccurred(errorCode) {
+            PageController.showErrorMessage(errorCode)
+            PageController.closePage()
+            PageController.showBusyIndicator(false)
+        }
+    }
+
     ListViewType {
         id: listView
 
@@ -140,9 +153,8 @@ PageType {
                 return;
             }
             PageController.showBusyIndicator(true)
-            ApiNewsController.fetchNews();
+            ApiNewsController.fetchNews()
             PageController.goToPage(PageEnum.PageSettingsNewsNotifications)
-            PageController.showBusyIndicator(false)
         }
     }
 
