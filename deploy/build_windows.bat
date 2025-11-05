@@ -8,6 +8,19 @@ set PATH=%QT_BIN_DIR:"=%;%PATH%
 
 echo "Using Qt in %QT_BIN_DIR%"
 echo "Using QIF in %QIF_BIN_DIR%"
+echo "Using WiX in %WIX_BIN_DIR%"
+
+if "%WIX_BIN_DIR%"=="" (
+    echo "WIX_BIN_DIR is not set"
+    exit /b 1
+)
+
+set WIX_BIN_DIR_UNQUOTED=%WIX_BIN_DIR:"=%
+
+if not exist "%WIX_BIN_DIR_UNQUOTED%\heat.exe" (
+    echo "WiX Toolset binaries were not found in %WIX_BIN_DIR%"
+    exit /b 1
+)
 
 REM Hold on to current directory
 set PROJECT_DIR=%cd%
@@ -22,6 +35,22 @@ set PREBILT_DEPLOY_DATA_DIR=%PROJECT_DIR:"=%\client\3rd-prebuilt\deploy-prebuilt
 set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%
 set INSTALLER_DATA_DIR=%WORK_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\data
 set TARGET_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%_x%BUILD_ARCH:"=%.exe
+set TARGET_MSI_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%_x%BUILD_ARCH:"=%.msi
+
+set APP_VERSION=
+for /f "tokens=2 delims= " %%i in ('findstr /R /C:"^set(AMNEZIAVPN_VERSION" "%PROJECT_DIR%\CMakeLists.txt"') do set APP_VERSION=%%i
+set APP_VERSION=%APP_VERSION:)=%
+set APP_VERSION=%APP_VERSION:"=%
+
+if "%APP_VERSION%"=="" (
+    set APP_VERSION=1.0.0
+)
+
+if "%BUILD_ARCH%"=="32" (
+    set WIX_PLATFORM=x86
+) else (
+    set WIX_PLATFORM=x64
+)
 
 echo "Environment:"
 echo "WORK_DIR:             %WORK_DIR%"
@@ -32,10 +61,14 @@ echo "OUT_APP_DIR:          %OUT_APP_DIR%"
 echo "DEPLOY_DATA_DIR:      %DEPLOY_DATA_DIR%"
 echo "INSTALLER_DATA_DIR:   %INSTALLER_DATA_DIR%"
 echo "TARGET_FILENAME:      %TARGET_FILENAME%"
+echo "TARGET_MSI_FILENAME:  %TARGET_MSI_FILENAME%"
+echo "APP_VERSION:          %APP_VERSION%"
+echo "WIX_PLATFORM:         %WIX_PLATFORM%"
 
 echo "Cleanup..."
 rmdir /Q /S %WORK_DIR%
 del %TARGET_FILENAME%
+del %TARGET_MSI_FILENAME%
 
 mkdir %WORK_DIR%
 
@@ -55,6 +88,8 @@ echo "Deploying..."
 mkdir "%OUT_APP_DIR%"
 copy "%WORK_DIR%\service\server\release\%APP_NAME%-service.exe" "%OUT_APP_DIR%"
 rem copy "%WORK_DIR%\client\%APP_FILENAME%" "%OUT_APP_DIR%"
+
+copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\AmneziaVPN.ico" >nul
 
 
 echo "Signing exe"
@@ -89,5 +124,31 @@ timeout 5
 cd %PROJECT_DIR%
 signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_FILENAME%"
 
-echo "Finished, see %TARGET_FILENAME%"
+echo "Building MSI installer..."
+set MSI_SOURCE_DIR=%WORK_DIR%\installer\wix
+set MSI_HARVEST_FILE=%MSI_SOURCE_DIR%\HarvestedFiles.wxs
+
+if not exist "%MSI_SOURCE_DIR%" (
+    echo "WiX source directory not found: %MSI_SOURCE_DIR%"
+    exit /b 1
+)
+
+echo "  Harvesting files for MSI..."
+"%WIX_BIN_DIR_UNQUOTED%\heat.exe" dir "%OUT_APP_DIR%" -nologo -cg AppFiles -dr INSTALLFOLDER -sfrag -srd -var var.SourceDir -out "%MSI_HARVEST_FILE%"
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+cd "%MSI_SOURCE_DIR%"
+
+echo "  Compiling WiX sources..."
+"%WIX_BIN_DIR_UNQUOTED%\candle.exe" -nologo -ext WixUtilExtension -arch %WIX_PLATFORM% -dPlatform=%WIX_PLATFORM% -dProductVersion=%APP_VERSION% -dSourceDir="%OUT_APP_DIR%" "-dWixToolPath=%WIX_BIN_DIR_UNQUOTED%" Product.wxs HarvestedFiles.wxs
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+echo "  Linking MSI..."
+"%WIX_BIN_DIR_UNQUOTED%\light.exe" -nologo -ext WixUtilExtension -spdb Product.wixobj HarvestedFiles.wixobj -out "%TARGET_MSI_FILENAME%"
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+cd %PROJECT_DIR%
+signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_MSI_FILENAME%"
+
+echo "Finished, see %TARGET_FILENAME% and %TARGET_MSI_FILENAME%"
 exit 0
