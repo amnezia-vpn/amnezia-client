@@ -17,8 +17,10 @@ if "%WIX_BIN_DIR%"=="" (
 
 set WIX_BIN_DIR_UNQUOTED=%WIX_BIN_DIR:"=%
 
-if not exist "%WIX_BIN_DIR_UNQUOTED%\heat.exe" (
-    echo "WiX Toolset binaries were not found in %WIX_BIN_DIR%"
+set WIX_CLI=%WIX_BIN_DIR_UNQUOTED%\wix.exe
+
+if not exist "%WIX_CLI%" (
+    echo "WiX CLI (wix.exe) was not found in %WIX_BIN_DIR%"
     exit /b 1
 )
 
@@ -134,17 +136,13 @@ if not exist "%MSI_SOURCE_DIR%" (
 )
 
 echo "  Harvesting files for MSI..."
-"%WIX_BIN_DIR_UNQUOTED%\heat.exe" dir "%OUT_APP_DIR%" -nologo -cg AppFiles -dr INSTALLFOLDER -sfrag -srd -var var.SourceDir -out "%MSI_HARVEST_FILE%"
+"%WIX_CLI%" heat dir "%OUT_APP_DIR%" -nologo -cg AppFiles -dr INSTALLFOLDER -sfrag -srd -var var.SourceDir -out "%MSI_HARVEST_FILE%"
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 cd "%MSI_SOURCE_DIR%"
 
-echo "  Compiling WiX sources..."
-"%WIX_BIN_DIR_UNQUOTED%\candle.exe" -nologo -ext WixUtilExtension -arch %WIX_PLATFORM% -dPlatform=%WIX_PLATFORM% -dProductVersion=%APP_VERSION% -dSourceDir="%OUT_APP_DIR%" "-dWixToolPath=%WIX_BIN_DIR_UNQUOTED%" Product.wxs HarvestedFiles.wxs
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-echo "  Linking MSI..."
-"%WIX_BIN_DIR_UNQUOTED%\light.exe" -nologo -ext WixUtilExtension -spdb Product.wixobj HarvestedFiles.wixobj -out "%TARGET_MSI_FILENAME%"
+echo "  Building MSI..."
+"%WIX_CLI%" build Product.wxs HarvestedFiles.wxs -nologo -ext WixToolset.Util.wixext -arch %WIX_PLATFORM% -dPlatform=%WIX_PLATFORM% -dProductVersion=%APP_VERSION% -dSourceDir="%OUT_APP_DIR%" -out "%TARGET_MSI_FILENAME%"
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 cd %PROJECT_DIR%

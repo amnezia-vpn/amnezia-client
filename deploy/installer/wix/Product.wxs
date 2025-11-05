@@ -2,24 +2,18 @@
 <?ifndef Platform?>
 <?define Platform = x64?>
 <?endif?>
-<?if $(var.Platform) = x64 ?>
-<?define WixQuietExecEntry = WixQuietExec64?>
-<?else?>
-<?define WixQuietExecEntry = WixQuietExec?>
-<?endif?>
 
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*"
-           Name="AmneziaVPN"
-           Language="1033"
-           Version="$(var.ProductVersion)"
-           Manufacturer="AmneziaVPN"
-           UpgradeCode="{2D55AC62-96D6-4692-8C05-0D85BBF95485}">
-
-    <Package InstallerVersion="500"
-             Compressed="yes"
-             InstallScope="perMachine"
-             InstallPrivileges="elevated" />
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+  <Package InstallerVersion="500"
+           Compressed="yes"
+           InstallScope="perMachine">
+    <Product Id="*"
+             Name="AmneziaVPN"
+             Language="1033"
+             Version="$(var.ProductVersion)"
+             Manufacturer="AmneziaVPN"
+             UpgradeCode="{2D55AC62-96D6-4692-8C05-0D85BBF95485}">
 
     <MajorUpgrade AllowDowngrades="yes"
                   Schedule="afterInstallInitialize" />
@@ -35,29 +29,24 @@
     <Property Id="REBOOT" Value="ReallySuppress" />
 
     <Icon Id="AppIcon.ico" SourceFile="$(var.SourceDir)\AmneziaVPN.ico" />
-    <Binary Id="WixCA" SourceFile="$(var.WixToolPath)\WixCA.dll" />
 
     <Feature Id="MainFeature" Title="AmneziaVPN" Level="1">
       <ComponentGroupRef Id="AppFiles" />
     </Feature>
 
-    <CustomAction Id="SetKillAmneziaVPNCommand"
-                  Property="WixQuietExecCmdLine"
-                  Value="&quot;taskkill&quot; /F /IM AmneziaVPN.exe /T"
-                  Return="check" />
-
-    <CustomAction Id="KillAmneziaVPN"
-                  BinaryKey="WixCA"
-                  DllEntry="$(var.WixQuietExecEntry)"
-                  Execute="deferred"
-                  Return="ignore"
-                  Impersonate="no" />
+    <util:CloseApplication Id="CloseAmneziaVPN"
+                          Target="AmneziaVPN.exe"
+                          Description="Closing AmneziaVPN before installation"
+                          CloseMessage="yes"
+                          RebootPrompt="no"
+                          Timeout="5"
+                          TerminateOnTimeout="yes" />
 
     <InstallExecuteSequence>
-      <Custom Action="SetKillAmneziaVPNCommand" Before="InstallInitialize">NOT Installed OR REINSTALL OR REMOVE~="ALL"</Custom>
-      <Custom Action="KillAmneziaVPN" After="SetKillAmneziaVPNCommand">NOT Installed OR REINSTALL OR REMOVE~="ALL"</Custom>
+      <Custom Action="CloseAmneziaVPN" Before="InstallInitialize">NOT Installed OR REINSTALL OR REMOVE~="ALL"</Custom>
     </InstallExecuteSequence>
   </Product>
+  </Package>
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
