@@ -252,6 +252,7 @@ void ExportController::generateCloakConfig()
 
 void ExportController::generateXrayConfig(const QString &clientName)
 {
+    //Xray data
     QJsonObject nativeConfig;
     ErrorCode errorCode = generateNativeConfig(DockerContainer::Xray, clientName, Proto::Xray, nativeConfig);
     if (errorCode) {
@@ -261,27 +262,11 @@ void ExportController::generateXrayConfig(const QString &clientName)
 
     QStringList lines = QString(QJsonDocument(nativeConfig).toJson()).replace("\r", "").split("\n");
     for (const QString &line : std::as_const(lines)) {
-        m_config.append(line + "\n");
-    }
-
-    emit exportConfigChanged();
-}
-
-void ExportController::generateVlessConfig()
-{
-    QJsonObject nativeConfig;
-    ErrorCode errorCode = generateNativeConfig(DockerContainer::Xray, "", Proto::Xray, nativeConfig);
-    if (errorCode) {
-        emit exportErrorOccurred(errorCode);
-        return;
-    }
-
-    QStringList lines = QString(QJsonDocument(nativeConfig).toJson()).replace("\r", "").split("\n");
-    for (const QString &line : std::as_const(lines)) {
         m_config.append(line+ "\n");
     }
+    //Xray data
 
-    // Parse the Xray config to extract VLESS parameters
+    // Parse the Xray data to extract VLESS parameters and generate string
     QString configString = QString(QJsonDocument(nativeConfig).toJson(QJsonDocument::Compact));
     
     QJsonDocument doc = QJsonDocument::fromJson(configString.toUtf8());
@@ -330,6 +315,7 @@ void ExportController::generateVlessConfig()
 
     vlessServer.network = streamSettings.value("network").toString("tcp");
     vlessServer.security = streamSettings.value("security").toString("reality");
+
 
     if (vlessServer.security == "reality") {
         QJsonObject realitySettings = streamSettings.value("realitySettings").toObject();

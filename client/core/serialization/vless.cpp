@@ -33,7 +33,6 @@
 
 #include "3rd/QJsonStruct/QJsonIO.hpp"
 #include <QUrlQuery>
-#include <QDebug>
 #include "serialization.h"
 
 namespace amnezia::serialization::vless
@@ -255,7 +254,8 @@ QJsonObject Deserialize(const QString &str, QString *alias, QString *errMessage)
 }
 
 const QString Serialize(const VlessServerObject &server, const QString &alias)
-{   
+{
+    
     QUrl url;
     
     // Set basic URL components
@@ -263,9 +263,9 @@ const QString Serialize(const VlessServerObject &server, const QString &alias)
     url.setUserInfo(server.id);
     url.setHost(server.address);
     url.setPort(server.port);
-    
+
     QUrlQuery query;
-    
+
     if (!server.network.isEmpty() && server.network != "tcp") {
         query.addQueryItem("type", server.network);
     }
@@ -309,7 +309,7 @@ const QString Serialize(const VlessServerObject &server, const QString &alias)
     if (!alias.isEmpty()) {
         url.setFragment(alias);
     }
-
+    
     return url.toString(QUrl::ComponentFormattingOption::FullyEncoded);
 }
 }

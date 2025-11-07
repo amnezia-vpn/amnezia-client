@@ -171,27 +171,6 @@ PageType {
                 }
             }
 
-            BasicButtonType {
-                id: generateVlessButton
-                Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                visible: pageShareConnection.isSelfHostedConfig
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.paleGray
-                borderWidth: 1
-                text: qsTr("Generate vless and copy")
-                clickedFunc: function() {
-                    ExportController.generateVlessConfig()
-                    GC.copyToClipBoard(ExportController.nativeConfigString)
-                    PageController.showNotificationMessage(qsTr("Copied"))
-                }
-            }
-
             DrawerType2 {
                 id: configContentDrawer
                 parent: pageShareConnection.parent
