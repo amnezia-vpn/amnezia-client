@@ -34,7 +34,7 @@ PageType {
     //     configExtension = ".vpn"
     //     configCaption = qsTr("Save AmneziaVPN config")
     //     configFileName = "amnezia_config"
-        
+
     //     if (visible) {
     //         var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
     //         headerText = qsTr("Connection to ") + serverName
@@ -168,6 +168,27 @@ PageType {
                 text: qsTr("Show connection settings")
                 clickedFunc: function() {
                     configContentDrawer.openTriggered()
+                }
+            }
+
+            BasicButtonType {
+                id: generateVlessButton
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                visible: pageShareConnection.isSelfHostedConfig
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.paleGray
+                borderWidth: 1
+                text: qsTr("Generate vless and copy")
+                clickedFunc: function() {
+                    ExportController.generateVlessConfig()
+                    GC.copyToClipBoard(ExportController.nativeConfigString)
+                    PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
 

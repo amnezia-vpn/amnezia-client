@@ -29,6 +29,7 @@ public slots:
     void generateShadowSocksConfig();
     void generateCloakConfig();
     void generateXrayConfig(const QString &clientName);
+    void generateVlessConfig();
 
     QString getConfig();
     QString getNativeConfigString();

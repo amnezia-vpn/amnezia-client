@@ -10,7 +10,10 @@
 
 #include "core/controllers/vpnConfigurationController.h"
 #include "core/qrCodeUtils.h"
+#include "core/serialization/serialization.h"
+#include "core/serialization/transfer.h"
 #include "systemController.h"
+#include <QDebug>
 
 ExportController::ExportController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                    const QSharedPointer<ClientManagementModel> &clientManagementModel,
@@ -260,6 +263,85 @@ void ExportController::generateXrayConfig(const QString &clientName)
     for (const QString &line : std::as_const(lines)) {
         m_config.append(line + "\n");
     }
+
+    emit exportConfigChanged();
+}
+
+void ExportController::generateVlessConfig()
+{
+    QJsonObject nativeConfig;
+    ErrorCode errorCode = generateNativeConfig(DockerContainer::Xray, "", Proto::Xray, nativeConfig);
+    if (errorCode) {
+        emit exportErrorOccurred(errorCode);
+        return;
+    }
+
+    QStringList lines = QString(QJsonDocument(nativeConfig).toJson()).replace("\r", "").split("\n");
+    for (const QString &line : std::as_const(lines)) {
+        m_config.append(line+ "\n");
+    }
+
+    // Parse the Xray config to extract VLESS parameters
+    QString configString = QString(QJsonDocument(nativeConfig).toJson(QJsonDocument::Compact));
+    
+    QJsonDocument doc = QJsonDocument::fromJson(configString.toUtf8());
+    if (doc.isNull() || !doc.isObject()) {
+        qDebug() << "ERROR: Failed to parse config JSON";
+        emit exportErrorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    QJsonObject xrayConfig = doc.object();
+    QJsonArray outbounds = xrayConfig.value("outbounds").toArray();
+    
+    if (outbounds.isEmpty()) {
+        qDebug() << "ERROR: Outbounds array is empty";
+        emit exportErrorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    QJsonObject outbound = outbounds[0].toObject();
+    QJsonObject settings = outbound.value("settings").toObject();
+    QJsonObject streamSettings = outbound.value("streamSettings").toObject();
+
+    QJsonArray vnext = settings.value("vnext").toArray();
+    if (vnext.isEmpty()) {
+        qDebug() << "ERROR: vnext array is empty";
+        emit exportErrorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    QJsonObject server = vnext[0].toObject();
+    QJsonArray users = server.value("users").toArray();
+    if (users.isEmpty()) {
+        qDebug() << "ERROR: users array is empty";
+        emit exportErrorOccurred(ErrorCode::InternalError);
+        return;
+    }
+
+    QJsonObject user = users[0].toObject();
+
+    amnezia::serialization::VlessServerObject vlessServer;
+    vlessServer.address = server.value("address").toString();
+    vlessServer.port = server.value("port").toInt();
+    vlessServer.id = user.value("id").toString();
+    vlessServer.flow = user.value("flow").toString("xtls-rprx-vision");
+    vlessServer.encryption = user.value("encryption").toString("none");
+
+    vlessServer.network = streamSettings.value("network").toString("tcp");
+    vlessServer.security = streamSettings.value("security").toString("reality");
+
+    if (vlessServer.security == "reality") {
+        QJsonObject realitySettings = streamSettings.value("realitySettings").toObject();
+        vlessServer.serverName = realitySettings.value("serverName").toString();
+        vlessServer.publicKey = realitySettings.value("publicKey").toString();
+        vlessServer.shortId = realitySettings.value("shortId").toString();
+        vlessServer.fingerprint = realitySettings.value("fingerprint").toString("chrome");
+        vlessServer.spiderX = realitySettings.value("spiderX").toString("");
+    }
+
+    m_nativeConfigString = amnezia::serialization::vless::Serialize(vlessServer, "AmneziaVPN");
+
 
     emit exportConfigChanged();
 }
