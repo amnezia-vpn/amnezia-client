@@ -1,0 +1,126 @@
+name: "Windows 7 build (Qt5)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref (branch/tag) to build. Use a Qt5-based tag/commit for Win7."
+        required: false
+        default: ""
+      arch:
+        description: "Architecture"
+        required: true
+        default: "x64"
+        type: choice
+        options: ["x64", "x86"]
+
+env:
+  # Secrets used by CMake add_definitions in client/CMakeLists.txt
+  PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+  PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+  DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+  DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+  DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+  FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+  PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+
+jobs:
+  build-win7:
+    runs-on: windows-latest
+    name: Build Win7 (${{ inputs.arch }})
+
+    env:
+      QT_VERSION: 5.15.2
+      QIF_VERSION: 4.7
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          submodules: true
+          fetch-depth: 0
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+
+      - name: Install Qt 5.15.2
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: ${{ inputs.arch == 'x64' && 'win64_msvc2019_64' || 'win32_msvc2019' }}
+          modules: "qtremoteobjects qtimageformats"
+          tools: tools_ifw
+          dir: ${{ runner.temp }}
+          setup-python: true
+          set-env: true
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ inputs.arch == 'x64' && 'x64' || 'x86' }}
+
+      - name: Configure (CMake)
+        shell: cmd
+        run: |
+          setlocal enableextensions enabledelayedexpansion
+          if "${{ inputs.arch }}"=="x64" (
+            set QT_DIR=%TEMP%\Qt\${{ env.QT_VERSION }}\msvc2019_64
+            set GENERATOR_ARCH=x64
+          ) else (
+            set QT_DIR=%TEMP%\Qt\${{ env.QT_VERSION }}\msvc2019
+            set GENERATOR_ARCH=Win32
+          )
+          set BUILD_DIR=build-win7-${{ inputs.arch }}
+          set PATH=%QT_DIR%\bin;%PATH%
+          cmake -S . -B %BUILD_DIR% -G "Visual Studio 16 2019" -A !GENERATOR_ARCH! -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="%QT_DIR%"
+
+      - name: Build (CMake)
+        shell: cmd
+        run: |
+          set BUILD_DIR=build-win7-${{ inputs.arch }}
+          cmake --build %BUILD_DIR% --config Release -- /m
+
+      - name: Deploy Qt runtime (windeployqt)
+        shell: cmd
+        run: |
+          setlocal enableextensions enabledelayedexpansion
+          if "${{ inputs.arch }}"=="x64" (
+            set QT_DIR=%TEMP%\Qt\${{ env.QT_VERSION }}\msvc2019_64
+            set DEPLOY_PLATFORM_PATH=windows\x64
+          ) else (
+            set QT_DIR=%TEMP%\Qt\${{ env.QT_VERSION }}\msvc2019
+            set DEPLOY_PLATFORM_PATH=windows\x32
+          )
+          set BUILD_DIR=build-win7-${{ inputs.arch }}
+          set OUT_DIR=%BUILD_DIR%\client\Release
+          set EXE=%OUT_DIR%\AmneziaVPN.exe
+          "%QT_DIR%\bin\windeployqt.exe" --release --qmldir "%CD%\client" --force --no-translations "%EXE%"
+          rem Copy prebuilt deploy data (includes tap/windows_7, openvpn, wintun, etc.)
+          xcopy /s /e /y /i "%CD%\client\3rd-prebuilt\deploy-prebuilt\%DEPLOY_PLATFORM_PATH%" "%OUT_DIR%\"
+          xcopy /s /e /y /i "%CD%\deploy\data\%DEPLOY_PLATFORM_PATH%" "%OUT_DIR%\"
+          rem Copy service exe if present
+          if exist "%BUILD_DIR%\service\server\Release\AmneziaVPN-service.exe" copy "%BUILD_DIR%\service\server\Release\AmneziaVPN-service.exe" "%OUT_DIR%\"
+
+      - name: Package (zip)
+        uses: thedoctor0/zip-release@0.7.6
+        with:
+          type: zip
+          filename: AmneziaVPN-Win7-${{ inputs.arch }}.zip
+          path: build-win7-${{ inputs.arch }}/client/Release
+
+      - name: Upload artifact (packed)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AmneziaVPN-Win7-${{ inputs.arch }}
+          path: AmneziaVPN-Win7-${{ inputs.arch }}.zip
+          retention-days: 7
+
+      - name: Upload artifact (unpacked folder)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AmneziaVPN-Win7-${{ inputs.arch }}-unpacked
+          path: build-win7-${{ inputs.arch }}/client/Release
+          retention-days: 7

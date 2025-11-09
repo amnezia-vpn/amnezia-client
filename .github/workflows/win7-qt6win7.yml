@@ -1,0 +1,133 @@
+name: "Windows 7 build (Qt6Win7 patched)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      arch:
+        description: "Architecture"
+        required: true
+        default: "x64"
+        type: choice
+        options: ["x64"]
+
+env:
+  QT_VERSION: 6.6.2
+  QIF_VERSION: 4.7
+
+  # Secrets used by CMake add_definitions in client/CMakeLists.txt
+  PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+  PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+  DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+  DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+  DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+  FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+  PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+
+jobs:
+  build-win7-qt6patched:
+    runs-on: windows-latest
+    name: Build Win7 (Qt6 patched, ${{ inputs.arch }})
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+
+      - name: Install Qt ${{ env.QT_VERSION }}
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+          modules: "qtremoteobjects qt5compat qtshadertools qtimageformats"
+          tools: tools_ifw
+          dir: ${{ runner.temp }}
+          setup-python: true
+          set-env: true
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Build (CMake via existing script)
+        shell: cmd
+        run: |
+          set BUILD_ARCH=64
+          set QT_BIN_DIR=%TEMP%\Qt\${{ env.QT_VERSION }}\msvc2019_64\bin
+          set QIF_BIN_DIR=%TEMP%\Qt\Tools\QtInstallerFramework\${{ env.QIF_VERSION }}\bin
+          call deploy\build_windows.bat
+
+      - name: Define output dir
+        id: outdir
+        shell: pwsh
+        run: |
+          $OutDir = Join-Path -Path "${{ github.workspace }}" -ChildPath "deploy/build_64/client/Release"
+          echo "OUT_DIR=$OutDir" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Download Qt6Win7 patched runtime (tag v${{ env.QT_VERSION }})
+        uses: robinraju/release-downloader@v1.10
+        with:
+          repository: crystalidea/qt6windows7
+          tag: v${{ env.QT_VERSION }}
+          fileName: "*"
+          out-file-path: qt6win7
+
+      - name: Apply Qt6Win7 patched files
+        shell: pwsh
+        run: |
+          $OutDir = "${{ steps.outdir.outputs.OUT_DIR }}"
+          Write-Host "OutDir: $OutDir"
+
+          # Extract all downloaded archives
+          Get-ChildItem -Path qt6win7 -Filter *.zip | ForEach-Object {
+            Write-Host "Extracting $($_.FullName)"
+            Expand-Archive -Path $_.FullName -DestinationPath qt6win7\extracted -Force
+          }
+
+          # Copy DLLs from any 'bin' folders
+          $BinDirs = Get-ChildItem -Path qt6win7\extracted -Recurse -Directory | Where-Object { $_.Name -ieq 'bin' }
+          foreach ($bin in $BinDirs) {
+            Write-Host "Copying DLLs from $($bin.FullName)"
+            Get-ChildItem -Path $bin.FullName -Filter *.dll | ForEach-Object {
+              Copy-Item -Path $_.FullName -Destination $OutDir -Force
+            }
+          }
+
+          # Copy plugins (qml, plugins, styles, etc.) if present
+          $PluginDirs = Get-ChildItem -Path qt6win7\extracted -Recurse -Directory | Where-Object { $_.Name -in @('plugins','qml','styles') }
+          foreach ($p in $PluginDirs) {
+            $dest = Join-Path $OutDir $p.Name
+            Write-Host "Sync $($p.FullName) -> $dest"
+            New-Item -ItemType Directory -Path $dest -Force | Out-Null
+            robocopy $p.FullName $dest /E /NFL /NDL /NJH /NJS /NP | Out-Null
+          }
+
+          Write-Host "Patched Qt6 files applied."
+
+      - name: Package (zip)
+        uses: thedoctor0/zip-release@0.7.6
+        with:
+          type: zip
+          filename: AmneziaVPN-Win7-x64-qt6patched.zip
+          path: deploy/build_64/client/Release
+
+      - name: Upload artifact (packed)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AmneziaVPN-Win7-x64-qt6patched
+          path: AmneziaVPN-Win7-x64-qt6patched.zip
+          retention-days: 7
+
+      - name: Upload artifact (unpacked folder)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AmneziaVPN-Win7-x64-qt6patched-unpacked
+          path: deploy/build_64/client/Release
+          retention-days: 7
