@@ -62,13 +62,14 @@ jobs:
           set BUILD_ARCH=64
           set QT_BIN_DIR=%TEMP%\Qt\${{ env.QT_VERSION }}\msvc2019_64\bin
           set QIF_BIN_DIR=%TEMP%\Qt\Tools\QtInstallerFramework\${{ env.QIF_VERSION }}\bin
+          set NO_SIGN=1
           call deploy\build_windows.bat
 
       - name: Define output dir
         id: outdir
         shell: pwsh
         run: |
-          $OutDir = Join-Path -Path "${{ github.workspace }}" -ChildPath "deploy/build_64/client/Release"
+          $OutDir = Join-Path -Path "${{ github.workspace }}" -ChildPath "deploy/build_64/client/release"
           echo "OUT_DIR=$OutDir" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       - name: Download Qt6Win7 patched runtime (tag v${{ env.QT_VERSION }})
@@ -111,12 +112,32 @@ jobs:
 
           Write-Host "Patched Qt6 files applied."
 
+      - name: Ensure Qt6RemoteObjects present
+        shell: pwsh
+        run: |
+          $OutDir = "${{ steps.outdir.outputs.OUT_DIR }}"
+          $QtDir = Join-Path $env:TEMP "Qt/${{ env.QT_VERSION }}/msvc2019_64"
+          $dll = Join-Path $QtDir "bin/Qt6RemoteObjects.dll"
+          if (Test-Path $dll) {
+            Write-Host "Copying $dll -> $OutDir"
+            Copy-Item -Path $dll -Destination $OutDir -Force
+          } else {
+            Write-Warning "Qt6RemoteObjects.dll not found at $dll"
+          }
+          # Copy QML module if exists
+          $qmlSrc = Join-Path $QtDir "qml/QtRemoteObjects"
+          if (Test-Path $qmlSrc) {
+            $qmlDst = Join-Path $OutDir "qml/QtRemoteObjects"
+            New-Item -ItemType Directory -Path $qmlDst -Force | Out-Null
+            robocopy $qmlSrc $qmlDst /E /NFL /NDL /NJH /NJS /NP | Out-Null
+          }
+
       - name: Package (zip)
         uses: thedoctor0/zip-release@0.7.6
         with:
           type: zip
           filename: AmneziaVPN-Win7-x64-qt6patched.zip
-          path: deploy/build_64/client/Release
+          path: deploy/build_64/client/release
 
       - name: Upload artifact (packed)
         uses: actions/upload-artifact@v4
@@ -129,5 +150,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: AmneziaVPN-Win7-x64-qt6patched-unpacked
-          path: deploy/build_64/client/Release
+          path: deploy/build_64/client/release
+          retention-days: 7
+
+      - name: Upload installer EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: AmneziaVPN-Win7-x64-qt6patched-installer
+          path: AmneziaVPN_x64.exe
           retention-days: 7
