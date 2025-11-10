@@ -1,6 +1,7 @@
 #include "settingsController.h"
 
 #include <QStandardPaths>
+#include <QOperatingSystemVersion>
 
 #include "logger.h"
 #include "systemController.h"
@@ -33,6 +34,11 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
     checkIfNeedDisableLogs();
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this, &SettingsController::onNotificationStateChanged);
+    connect(AndroidController::instance(), &AndroidController::imeInsetsChanged, this, [this](int heightDp) {
+        m_imeHeight = heightDp;
+        emit imeHeightChanged(heightDp);
+        emit safeAreaBottomMarginChanged();
+    });
 #endif
 
     m_isDevModeEnabled = m_settings->isDevGatewayEnv();
@@ -480,12 +486,21 @@ int SettingsController::getSafeAreaBottomMargin()
 {
 #ifdef Q_OS_ANDROID
     if (isEdgeToEdgeEnabled()) {
+        if (m_imeHeight > 0) {
+            return 0;
+        }
+        
         int height = getNavigationBarHeight();
         int result = height > 0 ? height : 56; // fallback to 56 if system returns 0
         return result;
     }
 #endif
     return 0;
+}
+
+int SettingsController::getImeHeight()
+{
+    return m_imeHeight;
 }
 
 bool SettingsController::isHomeAdLabelVisible()

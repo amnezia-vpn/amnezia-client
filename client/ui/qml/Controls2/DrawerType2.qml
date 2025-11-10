@@ -50,6 +50,22 @@ Item {
     }
 
     Connections {
+        target: Qt.application
+
+        function onStateChanged() {
+            if (Qt.application.state !== Qt.ApplicationActive) {
+                if (dragArea.drag.active) {
+                    dragArea.drag.target = null
+                    dragArea.drag.target = drawerContent
+                }
+                if (isOpened && !isCollapsedStateActive()) {
+                    root.closeTriggered()
+                }
+            }
+        }
+    }
+
+    Connections {
         target: PageController
 
         function onCloseTopDrawer() {

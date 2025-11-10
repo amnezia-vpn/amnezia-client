@@ -66,7 +66,7 @@ PageType {
                 id: backButton
                 objectName: "backButton"
 
-                Layout.topMargin: 20
+                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
             }
 
             HeaderTypeWithButton {

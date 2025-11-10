@@ -21,6 +21,21 @@ PageType {
     id: root
 
     Connections {
+        target: Qt.application
+
+        function onStateChanged() {
+            if (Qt.application.state !== Qt.ApplicationActive) {
+                if (drawer.isOpened) {
+                    drawer.closeTriggered()
+                }
+                if (homeSplitTunnelingDrawer.isOpened) {
+                    homeSplitTunnelingDrawer.closeTriggered()
+                }
+            }
+        }
+    }
+
+    Connections {
         objectName: "pageControllerConnections"
 
         target: PageController

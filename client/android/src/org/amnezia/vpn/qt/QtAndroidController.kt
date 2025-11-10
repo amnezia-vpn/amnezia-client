@@ -28,4 +28,6 @@ object QtAndroidController {
     external fun onAuthResult(result: Boolean)
 
     external fun decodeQrCode(data: String): Boolean
+
+    external fun onImeInsetsChanged(heightDp: Int)
 }
