@@ -170,11 +170,11 @@ int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
 #ifdef Q_OS_WIN
     qDebug() << "Getting Current Internet Adapter that routes to"
              << dst.toString();
-    quint32_be ipBigEndian;
     quint32 ip = dst.toIPv4Address();
-    qToBigEndian(ip, &ipBigEndian);
+    quint32 ipBigEndian = qToBigEndian(ip);
+    DWORD dwDestAddr = static_cast<DWORD>(ipBigEndian);
     _MIB_IPFORWARDROW routeInfo;
-    auto result = GetBestRoute(ipBigEndian, 0, &routeInfo);
+    auto result = GetBestRoute(dwDestAddr, 0, &routeInfo);
     if (result != NO_ERROR) {
         return -1;
     }
