@@ -132,6 +132,23 @@ jobs:
             robocopy $qmlSrc $qmlDst /E /NFL /NDL /NJH /NJS /NP | Out-Null
           }
 
+      - name: Verify required runtime files
+        shell: pwsh
+        run: |
+          $OutDir = "${{ steps.outdir.outputs.OUT_DIR }}"
+          $dllPath = Join-Path $OutDir 'Qt6RemoteObjects.dll'
+          if (!(Test-Path $dllPath)) {
+            Write-Host 'Qt6RemoteObjects.dll missing in output. Attempting extra copy from installed Qt...'
+            $QtDir = Join-Path $env:TEMP "Qt/${{ env.QT_VERSION }}/msvc2019_64"
+            $src = Join-Path $QtDir 'bin/Qt6RemoteObjects.dll'
+            if (Test-Path $src) { Copy-Item $src $OutDir -Force }
+          }
+          if (!(Test-Path $dllPath)) {
+            Write-Error 'FATAL: Qt6RemoteObjects.dll is still missing after attempts.'
+          } else {
+            Write-Host 'OK: Qt6RemoteObjects.dll present.'
+          }
+
       - name: Package (zip)
         uses: thedoctor0/zip-release@0.7.6
         with:
@@ -146,16 +163,16 @@ jobs:
           path: AmneziaVPN-Win7-x64-qt6patched.zip
           retention-days: 7
 
+      - name: Upload installer (.exe)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AmneziaVPN-Win7-x64-qt6patched-installer
+          path: AmneziaVPN_x64.exe
+          retention-days: 7
+
       - name: Upload artifact (unpacked folder)
         uses: actions/upload-artifact@v4
         with:
           name: AmneziaVPN-Win7-x64-qt6patched-unpacked
           path: deploy/build_64/client/release
-          retention-days: 7
-
-      - name: Upload installer EXE
-        uses: actions/upload-artifact@v4
-        with:
-          name: AmneziaVPN-Win7-x64-qt6patched-installer
-          path: AmneziaVPN_x64.exe
           retention-days: 7

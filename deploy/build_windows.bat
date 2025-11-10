@@ -17,7 +17,7 @@ set WORK_DIR=%SCRIPT_DIR:"=%\build_%BUILD_ARCH:"=%
 set APP_NAME=AmneziaVPN
 set APP_FILENAME=%APP_NAME:"=%.exe
 set APP_DOMAIN=org.amneziavpn.package
-set OUT_APP_DIR=%WORK_DIR:"=%\client\release
+set OUT_APP_DIR=%WORK_DIR:"=%\client\Release
 set PREBILT_DEPLOY_DATA_DIR=%PROJECT_DIR:"=%\client\3rd-prebuilt\deploy-prebuilt\windows\x%BUILD_ARCH:"=%
 set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%
 set INSTALLER_DATA_DIR=%WORK_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\data
@@ -44,18 +44,23 @@ call "%QT_BIN_DIR:"=%\qt-cmake" --version
 cmake --version
 
 cd %PROJECT_DIR%
-call cmake . -B %WORK_DIR%  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_BIN_DIR%"
+rem Derive QT_ROOT from QT_BIN_DIR (which points to the bin directory)
+for %%I in ("%QT_BIN_DIR:"=%\..") do set QT_ROOT=%%~fI
+call cmake . -B %WORK_DIR%  "-DCMAKE_BUILD_TYPE:STRING=Release" "-DCMAKE_PREFIX_PATH:PATH=%QT_ROOT%"
 
 cd %WORK_DIR%
-cmake --build . --config release -- /p:UseMultiToolTask=true /m
+cmake --build . --config Release -- /p:UseMultiToolTask=true /m
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 echo "Deploying..."
 
 mkdir "%OUT_APP_DIR%"
-copy "%WORK_DIR%\service\server\release\%APP_NAME%-service.exe" "%OUT_APP_DIR%"
-rem copy "%WORK_DIR%\client\%APP_FILENAME%" "%OUT_APP_DIR%"
-
+if exist "%WORK_DIR%\service\server\Release\%APP_NAME%-service.exe" copy "%WORK_DIR%\service\server\Release\%APP_NAME%-service.exe" "%OUT_APP_DIR%"
+if exist "%WORK_DIR%\client\Release\%APP_FILENAME%" (
+  rem EXE already in OUT_APP_DIR; ensure target exists for windeployqt
+) else if exist "%WORK_DIR%\client\%APP_FILENAME%" (
+  copy "%WORK_DIR%\client\%APP_FILENAME%" "%OUT_APP_DIR%"
+)
 
 echo "Signing exe"
 cd %OUT_APP_DIR%
@@ -65,13 +70,29 @@ if defined NO_SIGN (
   signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe
 )
 
-"%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations --compiler-runtime "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
+"%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client" --force --no-translations --compiler-runtime "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
 
-if exist "%QT_BIN_DIR:"=%\qml\Qt\RemoteObjects\*.qml" (
-    xcopy "%QT_BIN_DIR:"=%\qml\Qt\RemoteObjects "%OUT_APP_DIR:"=%\qml\Qt\RemoteObjects /s /e /y /i /f
+if exist "%QT_ROOT%\qml\Qt\RemoteObjects\*.qml" (
+    xcopy "%QT_ROOT%\qml\Qt\RemoteObjects" "%OUT_APP_DIR:"=%\qml\Qt\RemoteObjects" /s /e /y /i /f
 )
 
-copy "%QT_BIN_DIR:"=%\bin\Qt6RemoteObjects.dll "%OUT_APP_DIR:"=%
+rem Ensure Qt6RemoteObjects.dll is present
+if not exist "%OUT_APP_DIR:"=%\Qt6RemoteObjects.dll" (
+  echo "Qt6RemoteObjects.dll not found in OUT_APP_DIR, attempting to copy from Qt bin..."
+  if exist "%QT_ROOT%\bin\Qt6RemoteObjects.dll" (
+    copy "%QT_ROOT%\bin\Qt6RemoteObjects.dll" "%OUT_APP_DIR:"=%"
+  ) else (
+    echo "ERROR: %QT_ROOT%\bin\Qt6RemoteObjects.dll not found"
+  )
+) else (
+  echo "Qt6RemoteObjects.dll already present in OUT_APP_DIR"
+)
+
+if not exist "%OUT_APP_DIR:"=%\Qt6RemoteObjects.dll" (
+  echo "FATAL: Qt6RemoteObjects.dll is missing after copy attempts"
+  dir "%OUT_APP_DIR:"=%"
+  exit /b 1
+)
 
 if defined NO_SIGN (
   echo "NO_SIGN is set, skipping signing of DLL files"
