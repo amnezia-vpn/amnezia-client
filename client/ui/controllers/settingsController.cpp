@@ -39,6 +39,12 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
         emit imeHeightChanged(heightDp);
         emit safeAreaBottomMarginChanged();
     });
+    connect(AndroidController::instance(), &AndroidController::systemBarsInsetsChanged, this, [this](int navBarHeightDp, int statusBarHeightDp) {
+        m_cachedNavigationBarHeight = navBarHeightDp;
+        m_cachedStatusBarHeight = statusBarHeightDp;
+        emit safeAreaBottomMarginChanged();
+        emit safeAreaTopMarginChanged();
+    });
 #endif
 
     m_isDevModeEnabled = m_settings->isDevGatewayEnv();

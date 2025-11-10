@@ -100,7 +100,8 @@ bool AndroidController::initialize()
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
         {"onAuthResult", "(Z)V", reinterpret_cast<void *>(onAuthResult)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)},
-        {"onImeInsetsChanged", "(I)V", reinterpret_cast<void *>(onImeInsetsChanged)}
+        {"onImeInsetsChanged", "(I)V", reinterpret_cast<void *>(onImeInsetsChanged)},
+        {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)}
     };
 
     QJniEnvironment env;
@@ -545,5 +546,15 @@ void AndroidController::onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heigh
 
     qDebug() << "Android IME insets changed: height =" << heightDp << "dp";
     emit AndroidController::instance()->imeInsetsChanged(heightDp);
+}
+
+// static
+void AndroidController::onSystemBarsInsetsChanged(JNIEnv *env, jobject thiz, jint navBarHeightDp, jint statusBarHeightDp)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    qDebug() << "Android system bars insets changed: nav bar =" << navBarHeightDp << "dp, status bar =" << statusBarHeightDp << "dp";
+    emit AndroidController::instance()->systemBarsInsetsChanged(navBarHeightDp, statusBarHeightDp);
 }
 

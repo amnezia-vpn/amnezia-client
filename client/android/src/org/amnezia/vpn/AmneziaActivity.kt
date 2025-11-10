@@ -327,12 +327,21 @@ class AmneziaActivity : QtActivity() {
             val density = resources.displayMetrics.density
             val imeHeightDp = (imeHeight / density).toInt()
             
+            // Also track system bars (navigation bar, status bar) changes
+            val systemBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val navBarHeight = systemBarsInsets.bottom
+            val navBarHeightDp = (navBarHeight / density).toInt()
+            val statusBarHeight = systemBarsInsets.top
+            val statusBarHeightDp = (statusBarHeight / density).toInt()
+            
             mainScope.launch {
                 qtInitialized.await()
                 QtAndroidController.onImeInsetsChanged(imeHeightDp)
+                QtAndroidController.onSystemBarsInsetsChanged(navBarHeightDp, statusBarHeightDp)
             }
             
-            WindowInsetsCompat.CONSUMED
+            // Return windowInsets instead of CONSUMED to allow proper handling
+            windowInsets
         }
     }
 

@@ -33,7 +33,7 @@ public:
 
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
-    Q_PROPERTY(int safeAreaTopMargin READ getSafeAreaTopMargin CONSTANT)
+    Q_PROPERTY(int safeAreaTopMargin READ getSafeAreaTopMargin NOTIFY safeAreaTopMarginChanged)
     Q_PROPERTY(int safeAreaBottomMargin READ getSafeAreaBottomMargin NOTIFY safeAreaBottomMarginChanged)
     Q_PROPERTY(int imeHeight READ getImeHeight NOTIFY imeHeightChanged)
 
@@ -135,6 +135,7 @@ signals:
     void devGatewayEnvChanged(bool enabled);
     
     void imeHeightChanged(int height);
+    void safeAreaTopMarginChanged();
     void safeAreaBottomMarginChanged();
 
     void isHomeAdLabelVisibleChanged(bool visible);
