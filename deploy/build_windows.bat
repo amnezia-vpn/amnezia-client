@@ -38,21 +38,7 @@ set DEPLOY_DATA_DIR=%SCRIPT_DIR:"=%\data\windows\x%BUILD_ARCH:"=%
 set INSTALLER_DATA_DIR=%WORK_DIR:"=%\installer\packages\%APP_DOMAIN:"=%\data
 set TARGET_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%_x%BUILD_ARCH:"=%.exe
 set TARGET_MSI_FILENAME=%PROJECT_DIR:"=%\%APP_NAME:"=%_x%BUILD_ARCH:"=%.msi
-
-set APP_VERSION=
-for /f "tokens=2 delims= " %%i in ('findstr /R /C:"^set(AMNEZIAVPN_VERSION" "%PROJECT_DIR%\CMakeLists.txt"') do set APP_VERSION=%%i
-set APP_VERSION=%APP_VERSION:)=%
-set APP_VERSION=%APP_VERSION:"=%
-
-if "%APP_VERSION%"=="" (
-    set APP_VERSION=1.0.0
-)
-
-if "%BUILD_ARCH%"=="32" (
-    set WIX_PLATFORM=x86
-) else (
-    set WIX_PLATFORM=x64
-)
+set STAGE_DIR=%WORK_DIR:"=%\stage
 
 echo "Environment:"
 echo "WORK_DIR:             %WORK_DIR%"
@@ -64,13 +50,13 @@ echo "DEPLOY_DATA_DIR:      %DEPLOY_DATA_DIR%"
 echo "INSTALLER_DATA_DIR:   %INSTALLER_DATA_DIR%"
 echo "TARGET_FILENAME:      %TARGET_FILENAME%"
 echo "TARGET_MSI_FILENAME:  %TARGET_MSI_FILENAME%"
-echo "APP_VERSION:          %APP_VERSION%"
-echo "WIX_PLATFORM:         %WIX_PLATFORM%"
+echo "STAGE_DIR:            %STAGE_DIR%"
 
 echo "Cleanup..."
 rmdir /Q /S %WORK_DIR%
 del %TARGET_FILENAME%
 del %TARGET_MSI_FILENAME%
+rmdir /Q /S "%STAGE_DIR%"
 
 mkdir %WORK_DIR%
 
@@ -92,7 +78,6 @@ copy "%WORK_DIR%\service\server\release\%APP_NAME%-service.exe" "%OUT_APP_DIR%"
 rem copy "%WORK_DIR%\client\%APP_FILENAME%" "%OUT_APP_DIR%"
 
 copy /Y "%PROJECT_DIR%\client\images\app.ico" "%OUT_APP_DIR%\AmneziaVPN.ico" >nul
-
 
 echo "Signing exe"
 cd %OUT_APP_DIR%
@@ -126,23 +111,28 @@ timeout 5
 cd %PROJECT_DIR%
 signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 "%TARGET_FILENAME%"
 
-echo "Building MSI installer..."
-set MSI_SOURCE_DIR=%WORK_DIR%\installer\wix
-set MSI_HARVEST_FILE=%MSI_SOURCE_DIR%\HarvestedFiles.wxs
+echo "Preparing staging directory for MSI..."
+rmdir /Q /S "%STAGE_DIR%"
+mkdir "%STAGE_DIR%"
+xcopy "%OUT_APP_DIR%" "%STAGE_DIR%" /s /e /y /i /f >nul
 
-if not exist "%MSI_SOURCE_DIR%" (
-    echo "WiX source directory not found: %MSI_SOURCE_DIR%"
+echo "Building MSI via CPack..."
+rmdir /Q /S "%WORK_DIR%\_CPack_Packages"
+cd %WORK_DIR%
+cpack -G WIX -C Release --config "%WORK_DIR%\CPackConfig.cmake"
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+set GENERATED_MSI=
+for /f "delims=" %%i in ('dir /b /a:-d /o:-d "%WORK_DIR%\*.msi"') do (
+    if not defined GENERATED_MSI set GENERATED_MSI=%WORK_DIR%\%%i
+)
+
+if "%GENERATED_MSI%"=="" (
+    echo "Failed to locate generated MSI package"
     exit /b 1
 )
 
-echo "  Harvesting files for MSI..."
-"%WIX_CLI%" heat dir "%OUT_APP_DIR%" -nologo -cg AppFiles -dr INSTALLFOLDER -sfrag -srd -var var.SourceDir -out "%MSI_HARVEST_FILE%"
-if %errorlevel% neq 0 exit /b %errorlevel%
-
-cd "%MSI_SOURCE_DIR%"
-
-echo "  Building MSI..."
-"%WIX_CLI%" build Product.wxs HarvestedFiles.wxs -nologo -ext WixToolset.Util.wixext -arch %WIX_PLATFORM% -dPlatform=%WIX_PLATFORM% -dProductVersion=%APP_VERSION% -dSourceDir="%OUT_APP_DIR%" -out "%TARGET_MSI_FILENAME%"
+copy /Y "%GENERATED_MSI%" "%TARGET_MSI_FILENAME%"
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 cd %PROJECT_DIR%

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Fragment>
+    <!-- Set properties with full paths for deferred custom actions -->
+    <SetProperty Id="SERVICE_EXE_PATH" Value="[INSTALLFOLDER]AmneziaVPN-service.exe" Before="RegisterService" />
+    <SetProperty Id="SERVICE_EXE_PATH_UNREG" Value="[INSTALLFOLDER]AmneziaVPN-service.exe" Before="UnregisterService" />
+    
+    <CustomAction Id="RegisterService"
+                  Property="SERVICE_EXE_PATH"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="check"
+                  ExeCommand="&quot;[SERVICE_EXE_PATH]&quot; --register" />
+    
+    <CustomAction Id="StartService"
+                  Directory="SystemFolder"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="check"
+                  ExeCommand="sc.exe start AmneziaVPN" />
+    
+    <CustomAction Id="StopService"
+                  Directory="SystemFolder"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="ignore"
+                  ExeCommand="sc.exe stop AmneziaVPN" />
+    
+    <CustomAction Id="UnregisterService"
+                  Property="SERVICE_EXE_PATH_UNREG"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="check"
+                  ExeCommand="&quot;[SERVICE_EXE_PATH_UNREG]&quot; --unregister" />
+  </Fragment>
+
+  <Fragment>
+    <InstallExecuteSequence>
+      <Custom Action="RegisterService" After="InstallFinalize" Condition="NOT Installed" />
+      <Custom Action="StartService" After="RegisterService" Condition="NOT Installed" />
+      <Custom Action="StopService" Before="RemoveFiles" Condition="REMOVE='ALL'" />
+      <Custom Action="UnregisterService" After="StopService" Condition="REMOVE='ALL'" />
+    </InstallExecuteSequence>
+  </Fragment>
+</Wix>
