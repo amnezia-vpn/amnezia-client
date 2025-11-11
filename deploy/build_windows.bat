@@ -120,6 +120,12 @@ echo "Building MSI via CPack..."
 rmdir /Q /S "%WORK_DIR%\_CPack_Packages"
 cd %WORK_DIR%
 cpack -G WIX -C Release --config "%WORK_DIR%\CPackConfig.cmake"
+if exist "%WORK_DIR%\_CPack_Packages\win64\WIX\wix.log" (
+    echo ---------------------------------------------
+    echo Contents of wix.log:
+    type "%WORK_DIR%\_CPack_Packages\win64\WIX\wix.log"
+    echo ---------------------------------------------
+)
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 set GENERATED_MSI=
