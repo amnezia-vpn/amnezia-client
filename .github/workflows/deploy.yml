@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       os:
-        description: 'OS to build (all, linux, windows, macos, android, ios)'
+        description: 'OS to build (all, linux, windows, windows7, macos, android, ios)'
         required: false
         default: 'all'
         type: choice
-        options: [all, linux, windows, macos, android, ios]
+        options: [all, linux, windows, windows7, macos, android, ios]
       publish_release:
         description: 'Publish a GitHub Release with installers'
         required: false
@@ -173,6 +173,94 @@ jobs:
         retention-days: 7
 
 # ------------------------------------------------------
+
+  Build-Windows7:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.os == 'all' || inputs.os == 'windows7' }}
+    runs-on: windows-latest
+
+    env:
+      QT_VERSION: 6.8.3
+      QIF_VERSION: 4.7
+      BUILD_ARCH: 64
+
+    steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Setup ccache'
+      uses: hendrikmuhs/ccache-action@v1.2
+
+    - name: 'Install Qt 6 (for Win7 patched)'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        tools: 'tools_ifw'
+        set-env: 'true'
+        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
+
+    - name: 'Setup msvc'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: 'x64'
+
+    - name: 'Patch Qt with Windows 7 backports (qt6windows7)'
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell: pwsh
+      run: |
+        $tag = "v${{ env.QT_VERSION }}"
+        $api = "https://api.github.com/repos/crystalidea/qt6windows7/releases/tags/$tag"
+        $resp = Invoke-RestMethod -Uri $api -Headers @{ Authorization = "token $env:GH_TOKEN"; 'User-Agent' = 'gh-actions' }
+        $asset = $resp.assets | Where-Object { $_.name -match 'x64.*\.7z$' } | Select-Object -First 1
+        if (-not $asset) { Write-Error "qt6windows7 asset for x64 not found"; exit 1 }
+        $zipPath = "$env:RUNNER_TEMP\qt6win7.7z"
+        Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zipPath -Headers @{ Authorization = "token $env:GH_TOKEN" }
+        & 7z x $zipPath -o"$env:RUNNER_TEMP\qt6win7" -y | Out-Null
+        $qtBin = "${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2019_64\bin"
+        $qtPlugins = "${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2019_64\plugins"
+        $patchedRoot = Get-ChildItem -Recurse -Directory "$env:RUNNER_TEMP\qt6win7" | Where-Object { Test-Path (Join-Path $_.FullName 'qt6core.dll') } | Select-Object -First 1
+        if (-not $patchedRoot) { $patchedRoot = Get-ChildItem -Recurse -Directory "$env:RUNNER_TEMP\qt6win7" | Select-Object -First 1 }
+        Write-Host "Patched root: $($patchedRoot.FullName)"
+        Get-ChildItem "$($patchedRoot.FullName)" -Filter 'qt6*.dll' | ForEach-Object { Copy-Item $_.FullName $qtBin -Force }
+        $patchedPlatforms = Join-Path $patchedRoot.FullName 'platforms'
+        if (Test-Path (Join-Path $patchedPlatforms 'qwindows.dll')) {
+          Copy-Item (Join-Path $patchedPlatforms 'qwindows.dll') (Join-Path $qtPlugins 'platforms') -Force
+        }
+        if (Test-Path (Join-Path $patchedRoot.FullName 'opengl32sw.dll')) {
+          Copy-Item (Join-Path $patchedRoot.FullName 'opengl32sw.dll') $qtBin -Force
+        }
+
+    - name: 'Build project (Qt6 patched / Win7)'
+      shell: cmd
+      run: |
+        set BUILD_ARCH=${{ env.BUILD_ARCH }}
+        set QT_BIN_DIR="${{ runner.temp }}\Qt\${{ env.QT_VERSION }}\msvc2019_64\bin"
+        set QIF_BIN_DIR="${{ runner.temp }}\Qt\Tools\QtInstallerFramework\${{ env.QIF_VERSION }}\bin"
+        set NO_SIGN=1
+        call deploy\build_windows.bat
+
+    - name: 'Upload installer artifact (Win7 Qt6)'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_Windows7_Qt6_installer
+        path: AmneziaVPN_x${{ env.BUILD_ARCH }}.exe
+        retention-days: 7
+
+    - name: 'Upload unpacked artifact (Win7 Qt6)'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_Windows7_Qt6_unpacked
+        path: deploy\build_${{ env.BUILD_ARCH }}\client\Release
+        retention-days: 7
 
   Build-iOS:
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.os == 'all' || inputs.os == 'ios' }}
@@ -679,6 +767,7 @@ jobs:
     needs:
       - Build-Linux-Ubuntu
       - Build-Windows
+      - Build-Windows7
       - Build-MacOS-old
       - Build-MacOS
       - Build-MacOS-NE
