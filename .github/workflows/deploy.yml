@@ -1,6 +1,27 @@
 name: 'Deploy workflow'
 
 on:
+  workflow_dispatch:
+    inputs:
+      os:
+        description: 'OS to build (all, linux, windows, macos, android, ios)'
+        required: false
+        default: 'all'
+        type: choice
+        options: [all, linux, windows, macos, android, ios]
+      publish_release:
+        description: 'Publish a GitHub Release with installers'
+        required: false
+        type: boolean
+        default: false
+      release_tag:
+        description: 'Release tag (defaults to current ref name)'
+        required: false
+        type: string
+      release_name:
+        description: 'Release name (optional)'
+        required: false
+        type: string
   push:
     branches:
       - '**'
@@ -8,8 +29,12 @@ on:
 env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
 
+permissions:
+  contents: write
+
 jobs:
   Build-Linux-Ubuntu:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.os == 'all' || inputs.os == 'linux' }}
     runs-on: ubuntu-22.04
 
     env:
@@ -81,6 +106,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Windows:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.os == 'all' || inputs.os == 'windows' }}
     runs-on: windows-latest
 
     env:
@@ -149,6 +175,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-iOS:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.os == 'all' || inputs.os == 'ios' }}
     runs-on: macos-13
 
     env:
@@ -250,6 +277,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS-old:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.os == 'all' || inputs.os == 'macos' }}
     runs-on: macos-latest
 
     env:
@@ -328,6 +356,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.os == 'all' || inputs.os == 'macos' }}
     runs-on: macos-latest
 
     env:
@@ -403,6 +432,7 @@ jobs:
         retention-days: 7
 
   Build-MacOS-NE:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.os == 'all' || inputs.os == 'macos' }}
     runs-on: macos-latest
 
     env:
@@ -466,6 +496,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Android:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.os == 'all' || inputs.os == 'android' }}
     runs-on: ubuntu-latest
 
     env:
@@ -625,6 +656,7 @@ jobs:
         retention-days: 7
 
   Extra:
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
       - name: Search a corresponding PR
@@ -635,6 +667,47 @@ jobs:
           head: ${{ github.repository_owner }}:${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add PR link to build summary
+        if: ${{ fromJSON(steps.pull_request.outputs.data)[0].number != '' }}
+        run: | 
+          echo "Pull request:" >> $GITHUB_STEP_SUMMARY
+          echo "[[#${{ fromJSON(steps.pull_request.outputs.data)[0].number }}] ${{ fromJSON(steps.pull_request.outputs.data)[0].title }}](${{ fromJSON(steps.pull_request.outputs.data)[0].html_url }})" >> $GITHUB_STEP_SUMMARY
+
+  Release:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release == true && inputs.os == 'all' }}
+    needs:
+      - Build-Linux-Ubuntu
+      - Build-Windows
+      - Build-MacOS-old
+      - Build-MacOS
+      - Build-MacOS-NE
+      - Build-Android
+      - Build-iOS
+      - Extra
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*'
+          merge-multiple: true
+          path: dist
+
+      - name: List files to release
+        run: |
+          echo "Files to upload:" >> $GITHUB_STEP_SUMMARY
+          ls -alh dist | sed 's/^/- /' >> $GITHUB_STEP_SUMMARY
+
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ inputs.release_tag != '' && inputs.release_tag || github.ref_name }}
+          name: ${{ inputs.release_name != '' && inputs.release_name || (inputs.release_tag != '' && inputs.release_tag || github.ref_name) }}
+          draft: false
+          prerelease: false
+          files: |
+            dist/**
 
       - name: Add PR link to build summary
         if: ${{ fromJSON(steps.pull_request.outputs.data)[0].number != '' }}
