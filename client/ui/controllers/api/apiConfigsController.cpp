@@ -457,8 +457,10 @@ bool ApiConfigsController::importSerivceFromAppStore()
         return false;
     }
 
-    if (!installServerFromSubscriptionResponse(responseBody)) {
-        emit errorOccurred(ErrorCode::ApiPurchaseError);
+    ErrorCode installError = ErrorCode::NoError;
+    if (!installServerFromSubscriptionResponse(responseBody, &installError)) {
+        const ErrorCode errorToEmit = installError == ErrorCode::NoError ? ErrorCode::ApiPurchaseError : installError;
+        emit errorOccurred(errorToEmit);
         return false;
     }
 
@@ -529,6 +531,7 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
     }
 
     bool hasInstalledConfig = false;
+    bool duplicateConfigAlreadyPresent = false;
     int duplicateCount = 0;
     QSet<QString> processedTransactions;
     for (const QVariantMap &transaction : restoredTransactions) {
@@ -572,9 +575,16 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
             continue;
         }
 
-        if (!installServerFromSubscriptionResponse(responseBody)) {
-            qWarning().noquote() << "[IAP] Failed to process restored subscription response for transaction"
-                                 << originalTransactionId;
+        ErrorCode installError = ErrorCode::NoError;
+        if (!installServerFromSubscriptionResponse(responseBody, &installError)) {
+            if (installError == ErrorCode::ApiConfigAlreadyAdded) {
+                duplicateConfigAlreadyPresent = true;
+                qInfo().noquote() << "[IAP] Skipping restored transaction" << originalTransactionId
+                                  << "because subscription config with the same vpn_key already exists";
+            } else {
+                qWarning().noquote() << "[IAP] Failed to process restored subscription response for transaction"
+                                     << originalTransactionId;
+            }
             continue;
         }
 
@@ -582,7 +592,8 @@ bool ApiConfigsController::restoreSerivceFromAppStore()
     }
 
     if (!hasInstalledConfig) {
-        emit errorOccurred(ErrorCode::ApiPurchaseError);
+        const ErrorCode restoreError = duplicateConfigAlreadyPresent ? ErrorCode::ApiConfigAlreadyAdded : ErrorCode::ApiPurchaseError;
+        emit errorOccurred(restoreError);
         // Restore previous selection so that start page state is unchanged.
         if (!originalServiceType.isEmpty()) {
             for (int i = 0; i < m_apiServicesModel->rowCount(); ++i) {
@@ -918,9 +929,12 @@ QString ApiConfigsController::getVpnKey()
     return m_vpnKey;
 }
 
-bool ApiConfigsController::installServerFromSubscriptionResponse(const QByteArray &responseBody)
+bool ApiConfigsController::installServerFromSubscriptionResponse(const QByteArray &responseBody, ErrorCode *errorOut)
 {
 #ifdef Q_OS_IOS
+    if (errorOut) {
+        *errorOut = ErrorCode::NoError;
+    }
     QJsonParseError parseError {};
     QJsonDocument responseDoc = QJsonDocument::fromJson(responseBody, &parseError);
     if (parseError.error == QJsonParseError::NoError) {
@@ -934,11 +948,24 @@ bool ApiConfigsController::installServerFromSubscriptionResponse(const QByteArra
     QString key = responseObject.value(QStringLiteral("key")).toString();
     if (key.isEmpty()) {
         qWarning().noquote() << "[IAP] Subscription response does not contain a key field";
+        if (errorOut) {
+            *errorOut = ErrorCode::ApiPurchaseError;
+        }
         return false;
     }
-    key.replace(QStringLiteral("vpn://"), QString());
 
-    QByteArray config = QByteArray::fromBase64(key.toUtf8(),
+    if (m_serversModel->hasServerWithVpnKey(key)) {
+        qInfo().noquote() << "[IAP] Subscription config with the same vpn_key already exists";
+        if (errorOut) {
+            *errorOut = ErrorCode::ApiConfigAlreadyAdded;
+        }
+        return false;
+    }
+
+    QString normalizedKey = key;
+    normalizedKey.replace(QStringLiteral("vpn://"), QString());
+
+    QByteArray config = QByteArray::fromBase64(normalizedKey.toUtf8(),
                                                QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
     QByteArray configUncompressed = qUncompress(config);
     if (!configUncompressed.isEmpty()) {
@@ -946,6 +973,9 @@ bool ApiConfigsController::installServerFromSubscriptionResponse(const QByteArra
     }
     if (config.isEmpty()) {
         qWarning().noquote() << "[IAP] Subscription response config payload is empty";
+        if (errorOut) {
+            *errorOut = ErrorCode::ApiPurchaseError;
+        }
         return false;
     }
 
@@ -953,6 +983,9 @@ bool ApiConfigsController::installServerFromSubscriptionResponse(const QByteArra
     QJsonDocument configDoc = QJsonDocument::fromJson(config, &configParseError);
     if (configParseError.error != QJsonParseError::NoError) {
         qWarning().noquote() << "[IAP] Failed to parse subscription config:" << configParseError.errorString();
+        if (errorOut) {
+            *errorOut = ErrorCode::ApiPurchaseError;
+        }
         return false;
     }
 
@@ -960,7 +993,7 @@ bool ApiConfigsController::installServerFromSubscriptionResponse(const QByteArra
 
     quint16 crc = qChecksum(QJsonDocument(configJson).toJson());
     auto apiConfig = configJson.value(apiDefs::key::apiConfig).toObject();
-    apiConfig[apiDefs::key::vpnKey] = key;
+    apiConfig[apiDefs::key::vpnKey] = normalizedKey;
     auto subscriptionObject = apiConfig.value(configKey::subscription).toObject();
     qInfo().noquote() << "[IAP] Subscription payload details" << "serviceType="
                       << apiConfig.value(configKey::serviceType).toString()
@@ -975,6 +1008,9 @@ bool ApiConfigsController::installServerFromSubscriptionResponse(const QByteArra
     return true;
 #else
     Q_UNUSED(responseBody)
+    if (errorOut) {
+        *errorOut = ErrorCode::ApiPurchaseError;
+    }
     return false;
 #endif
 }

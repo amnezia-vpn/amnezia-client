@@ -26,6 +26,15 @@ namespace
         constexpr char publicKeyInfo[] = "public_key";
         constexpr char expiresAt[] = "expires_at";
     }
+
+    QString normalizeVpnKey(const QString &vpnKey)
+    {
+        QString normalized = vpnKey.trimmed();
+        if (normalized.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
+            normalized = normalized.mid(QStringLiteral("vpn://").size());
+        }
+        return normalized;
+    }
 }
 
 ServersModel::ServersModel(std::shared_ptr<Settings> settings, QObject *parent) : m_settings(settings), QAbstractListModel(parent)
@@ -665,6 +674,23 @@ bool ServersModel::isServerFromApiAlreadyExists(const QString &userCountryCode, 
         if (apiConfig.value(configKey::userCountryCode).toString() == userCountryCode
             && apiConfig.value(configKey::serviceType).toString() == serviceType
             && apiConfig.value(configKey::serviceProtocol).toString() == serviceProtocol) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ServersModel::hasServerWithVpnKey(const QString &vpnKey) const
+{
+    const QString normalizedInput = normalizeVpnKey(vpnKey);
+    if (normalizedInput.isEmpty()) {
+        return false;
+    }
+
+    for (const auto &server : std::as_const(m_servers)) {
+        const auto apiConfig = server.toObject().value(configKey::apiConfig).toObject();
+        const QString existingKey = normalizeVpnKey(apiConfig.value(apiDefs::key::vpnKey).toString());
+        if (!existingKey.isEmpty() && existingKey == normalizedInput) {
             return true;
         }
     }
