@@ -134,6 +134,7 @@ jobs:
       run: |
         dotnet tool install --global wix --version 4.0.6
         wix extension add -g WixToolset.UI.wixext/4.0.6
+        wix extension list -g
         $wixBinDir = Join-Path $env:USERPROFILE ".dotnet\tools"
         echo "WIX_BIN_DIR=$wixBinDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
