@@ -179,7 +179,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      QT_VERSION: 6.8.0
+      QT_VERSION: 6.6.2
       QIF_VERSION: 4.7
       BUILD_ARCH: 64
 
@@ -200,7 +200,7 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2019_64'
-        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
         dir: ${{ runner.temp }}
         set-env: 'true'
 
