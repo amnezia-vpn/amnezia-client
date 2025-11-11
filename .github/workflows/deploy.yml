@@ -179,7 +179,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      QT_VERSION: 6.8.3
+      QT_VERSION: 6.8.0
       QIF_VERSION: 4.7
       BUILD_ARCH: 64
 
@@ -194,7 +194,7 @@ jobs:
       uses: hendrikmuhs/ccache-action@v1.2
 
     - name: 'Install Qt 6 (for Win7 patched)'
-      uses: jurplel/install-qt-action@v3
+      uses: jurplel/install-qt-action@v4
       with:
         version: ${{ env.QT_VERSION }}
         host: 'windows'
@@ -202,10 +202,7 @@ jobs:
         arch: 'win64_msvc2019_64'
         modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
         dir: ${{ runner.temp }}
-        setup-python: 'true'
-        tools: 'tools_ifw'
         set-env: 'true'
-        extra: '--external 7z --base ${{ env.QT_MIRROR }}'
 
     - name: 'Setup msvc'
       uses: ilammy/msvc-dev-cmd@v1
