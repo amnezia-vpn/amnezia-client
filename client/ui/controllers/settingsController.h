@@ -150,6 +150,8 @@ private:
     
     mutable int m_cachedStatusBarHeight = -1;
     mutable int m_cachedNavigationBarHeight = -1;
+    mutable bool m_cachedEdgeToEdgeEnabled = false;
+    mutable bool m_edgeToEdgeCached = false;
     int m_imeHeight = 0;
     std::shared_ptr<Settings> m_settings;
 

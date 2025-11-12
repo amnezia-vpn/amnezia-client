@@ -31,6 +31,11 @@ PageType {
         }
     }
 
+    SmartScroll {
+        id: smartScroll
+        listView: listView
+    }
+
     ListViewType {
         id: listView
 
@@ -80,6 +85,13 @@ PageType {
                         clientMtu = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(mtuTextField)
+                    }
+                }
+
                 checkEmptyText: true
             }
 
@@ -95,6 +107,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== clientJunkPacketCount) {
                         clientJunkPacketCount = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketCountTextField)
                     }
                 }
             }
@@ -113,6 +131,12 @@ PageType {
                         clientJunkPacketMinSize = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketMinSizeTextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -127,6 +151,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== clientJunkPacketMaxSize) {
                         clientJunkPacketMaxSize = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketMaxSizeTextField)
                     }
                 }
             }
@@ -147,6 +177,12 @@ PageType {
                         clientSpecialJunk1 = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk1TextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -163,6 +199,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== clientSpecialJunk2) {
                         clientSpecialJunk2 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk2TextField)
                     }
                 }
             }
@@ -183,6 +225,12 @@ PageType {
                         clientSpecialJunk3 = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk3TextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -199,6 +247,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== clientSpecialJunk4) {
                         clientSpecialJunk4 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk4TextField)
                     }
                 }
             }
@@ -219,6 +273,12 @@ PageType {
                         clientSpecialJunk5 = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk5TextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -235,6 +295,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== clientControlledJunk1) {
                         clientControlledJunk1 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(controlledJunk1TextField)
                     }
                 }
             }
@@ -255,6 +321,12 @@ PageType {
                         clientControlledJunk2 = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(controlledJunk2TextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -273,6 +345,12 @@ PageType {
                         clientControlledJunk3 = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(controlledJunk3TextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -288,6 +366,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== clientSpecialHandshakeTimeout) {
                         clientSpecialHandshakeTimeout = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(iTimeTextField)
                     }
                 }
             }

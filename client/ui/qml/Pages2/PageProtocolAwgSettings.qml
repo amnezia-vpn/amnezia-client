@@ -34,6 +34,11 @@ PageType {
         }
     }
 
+    SmartScroll {
+        id: smartScroll
+        listView: listView
+    }
+
     ListViewType {
         id: listView
 
@@ -81,6 +86,12 @@ PageType {
                     }
                 }
 
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(vpnAddressSubnetTextField)
+                    }
+                }
+
                 checkEmptyText: true
             }
 
@@ -104,6 +115,12 @@ PageType {
                     }
                 }
 
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(portTextField)
+                    }
+                }
+
                 checkEmptyText: true
             }
 
@@ -119,6 +136,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== serverJunkPacketCount) {
                         serverJunkPacketCount = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketCountTextField)
                     }
                 }
             }
@@ -137,6 +160,12 @@ PageType {
                         serverJunkPacketMinSize = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketMinSizeTextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -151,6 +180,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== serverJunkPacketMaxSize) {
                         serverJunkPacketMaxSize = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketMaxSizeTextField)
                     }
                 }
             }
@@ -169,6 +204,12 @@ PageType {
                         serverInitPacketJunkSize = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(initPacketJunkSizeTextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -183,6 +224,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== serverResponsePacketJunkSize) {
                         serverResponsePacketJunkSize = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(responsePacketJunkSizeTextField)
                     }
                 }
             }
@@ -233,6 +280,12 @@ PageType {
                         serverInitPacketMagicHeader = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(initPacketMagicHeaderTextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -247,6 +300,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== serverResponsePacketMagicHeader) {
                         serverResponsePacketMagicHeader = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(responsePacketMagicHeaderTextField)
                     }
                 }
             }
@@ -265,6 +324,12 @@ PageType {
                         serverUnderloadPacketMagicHeader = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(underloadPacketMagicHeaderTextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -279,6 +344,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== serverTransportPacketMagicHeader) {
                         serverTransportPacketMagicHeader = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(transportPacketMagicHeaderTextField)
                     }
                 }
             }

@@ -168,11 +168,13 @@ PageType {
 
         anchors.top: header.bottom
         anchors.topMargin: 16
-        anchors.bottom: addSiteButton.top
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: addSiteButton.implicitHeight + 48 + (searchField.textField.activeFocus ? 0 : SettingsController.imeHeight)
 
         width: parent.width
 
         enabled: root.pageEnabled
+        clip: true
 
         model: SortFilterProxyModel {
             id: proxySitesModel
@@ -231,56 +233,60 @@ PageType {
     }
 
     Rectangle {
-        anchors.fill: addSiteButton
-        anchors.bottomMargin: -24
-        color: AmneziaStyle.color.midnightBlack
-        opacity: 0.8
-    }
-
-    RowLayout {
-        id: addSiteButton
-
-        enabled: root.pageEnabled
-
-        anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 24
-        anchors.rightMargin: 16
-        anchors.leftMargin: 16
-        anchors.bottomMargin: 24
+        anchors.bottom: parent.bottom
+        
+        height: addSiteButton.implicitHeight + 48
+        
+        color: AmneziaStyle.color.midnightBlack
+        opacity: 0.8
+        
+        RowLayout {
+            id: addSiteButton
 
-        TextFieldWithHeaderType {
-            id: searchField
+            enabled: root.pageEnabled
 
-            Layout.fillWidth: true
-            rightButtonClickedOnEnter: true
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 24
+            anchors.rightMargin: 16
+            anchors.leftMargin: 16
+            anchors.bottomMargin: 24
 
-            textField.placeholderText: qsTr("website or IP")
-            buttonImageSource: "qrc:/images/controls/plus.svg"
+            TextFieldWithHeaderType {
+                id: searchField
 
-            clickedFunc: function() {
-                PageController.showBusyIndicator(true)
-                SitesController.addSite(textField.text)
-                textField.text = ""
-                PageController.showBusyIndicator(false)
+                Layout.fillWidth: true
+                rightButtonClickedOnEnter: true
+
+                textField.placeholderText: qsTr("website or IP")
+                buttonImageSource: "qrc:/images/controls/plus.svg"
+
+                clickedFunc: function() {
+                    PageController.showBusyIndicator(true)
+                    SitesController.addSite(textField.text)
+                    textField.text = ""
+                    PageController.showBusyIndicator(false)
+                }
             }
-        }
 
-        ImageButtonType {
-            id: addSiteButtonImage
-            implicitWidth: 56
-            implicitHeight: 56
+            ImageButtonType {
+                id: addSiteButtonImage
+                implicitWidth: 56
+                implicitHeight: 56
 
-            image: "qrc:/images/controls/more-vertical.svg"
-            imageColor: AmneziaStyle.color.paleGray
+                image: "qrc:/images/controls/more-vertical.svg"
+                imageColor: AmneziaStyle.color.paleGray
 
-            onClicked: function () {
-                moreActionsDrawer.openTriggered()
+                onClicked: function () {
+                    moreActionsDrawer.openTriggered()
+                }
+
+                Keys.onReturnPressed: addSiteButtonImage.clicked()
+                Keys.onEnterPressed: addSiteButtonImage.clicked()
             }
-
-            Keys.onReturnPressed: addSiteButtonImage.clicked()
-            Keys.onEnterPressed: addSiteButtonImage.clicked()
         }
     }
 

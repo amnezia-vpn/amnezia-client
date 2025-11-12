@@ -446,7 +446,11 @@ bool SettingsController::isOnTv()
 bool SettingsController::isEdgeToEdgeEnabled()
 {
 #ifdef Q_OS_ANDROID
-    return AndroidController::instance()->isEdgeToEdgeEnabled();
+    if (!m_edgeToEdgeCached) {
+        m_cachedEdgeToEdgeEnabled = AndroidController::instance()->isEdgeToEdgeEnabled();
+        m_edgeToEdgeCached = true;
+    }
+    return m_cachedEdgeToEdgeEnabled;
 #else
     return false;
 #endif
