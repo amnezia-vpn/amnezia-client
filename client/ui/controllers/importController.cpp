@@ -341,6 +341,11 @@ void ImportController::importConfig()
     m_maliciousWarningText.clear();
 }
 
+void ImportController::clearConfigFileName()
+{
+    m_configFileName.clear();
+}
+
 QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
 {
     QJsonObject openVpnConfig;

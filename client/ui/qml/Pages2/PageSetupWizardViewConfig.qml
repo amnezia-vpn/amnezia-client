@@ -23,6 +23,11 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+
+        backButtonFunction: {
+            ImportController.clearConfigFileName()
+            PageController.closePage()
+        }
         
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
