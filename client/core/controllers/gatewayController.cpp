@@ -137,7 +137,7 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
 
     QList<QSslError> sslErrors;
     connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
-    wait.exec();
+    wait.exec(QEventLoop::ExcludeUserInputEvents);
 
     QByteArray encryptedResponseBody = reply->readAll();
     QString replyErrorString = reply->errorString();
@@ -273,7 +273,7 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
 
         connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
         connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
-        wait.exec();
+        wait.exec(QEventLoop::ExcludeUserInputEvents);
 
         if (reply->error() == QNetworkReply::NetworkError::NoError) {
             auto encryptedResponseBody = reply->readAll();
@@ -385,7 +385,7 @@ void GatewayController::bypassProxy(const QString &endpoint, const QString &serv
 
         QObject::connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
         connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
-        wait.exec();
+        wait.exec(QEventLoop::ExcludeUserInputEvents);
 
         auto result = replyProcessingFunction(reply, sslErrors);
         reply->deleteLater();
@@ -407,7 +407,7 @@ void GatewayController::bypassProxy(const QString &endpoint, const QString &serv
 
             connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
             connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });
-            wait.exec();
+            wait.exec(QEventLoop::ExcludeUserInputEvents);
 
             if (reply->error() == QNetworkReply::NetworkError::NoError) {
                 reply->deleteLater();
