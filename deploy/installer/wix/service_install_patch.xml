@@ -6,7 +6,6 @@
                 Name="AmneziaVPN-service"
                 DisplayName="AmneziaVPN Service"
                 Description="Service for AmneziaVPN"
-                Executable="[#CM_FP_AmneziaVPN_service.exe]"
                 Start="auto"
                 Type="ownProcess"
                 ErrorControl="normal"
