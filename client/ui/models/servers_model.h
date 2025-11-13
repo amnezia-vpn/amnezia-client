@@ -47,6 +47,10 @@ public:
         IsCountrySelectionAvailableRole,
         ApiAvailableCountriesRole,
         ApiServerCountryCodeRole,
+        IsAdVisibleRole,
+        AdHeaderRole,
+        AdDescriptionRole,
+        AdEndpointRole,
 
         HasAmneziaDns
     };
@@ -78,6 +82,10 @@ public:
 
     Q_PROPERTY(int processedIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
     Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerChanged)
+
+    Q_PROPERTY(bool isAdVisible READ isAdVisible NOTIFY defaultServerIndexChanged)
+    Q_PROPERTY(QString adHeader READ adHeader NOTIFY defaultServerIndexChanged)
+    Q_PROPERTY(QString adDescription READ adDescription NOTIFY defaultServerIndexChanged)
 
     bool processedServerIsPremium() const;
 
@@ -144,6 +152,10 @@ public slots:
     bool isApiKeyExpired(const int serverIndex);
     void removeApiConfig(const int serverIndex);
 
+    bool isAdVisible();
+    QString adHeader();
+    QString adDescription();
+    
 protected:
     QHash<int, QByteArray> roleNames() const override;
 

@@ -1,6 +1,7 @@
 #include "settingsController.h"
 
 #include <QStandardPaths>
+#include <QOperatingSystemVersion>
 
 #include "logger.h"
 #include "systemController.h"
@@ -33,6 +34,17 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
     checkIfNeedDisableLogs();
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this, &SettingsController::onNotificationStateChanged);
+    connect(AndroidController::instance(), &AndroidController::imeInsetsChanged, this, [this](int heightDp) {
+        m_imeHeight = heightDp;
+        emit imeHeightChanged(heightDp);
+        emit safeAreaBottomMarginChanged();
+    });
+    connect(AndroidController::instance(), &AndroidController::systemBarsInsetsChanged, this, [this](int navBarHeightDp, int statusBarHeightDp) {
+        m_cachedNavigationBarHeight = navBarHeightDp;
+        m_cachedStatusBarHeight = statusBarHeightDp;
+        emit safeAreaBottomMarginChanged();
+        emit safeAreaTopMarginChanged();
+    });
 #endif
 
     m_isDevModeEnabled = m_settings->isDevGatewayEnv();
@@ -440,6 +452,76 @@ bool SettingsController::isOnTv()
 #else
     return false;
 #endif
+}
+
+bool SettingsController::isEdgeToEdgeEnabled()
+{
+#ifdef Q_OS_ANDROID
+    if (!m_edgeToEdgeCached) {
+        m_cachedEdgeToEdgeEnabled = AndroidController::instance()->isEdgeToEdgeEnabled();
+        m_edgeToEdgeCached = true;
+    }
+    return m_cachedEdgeToEdgeEnabled;
+#else
+    return false;
+#endif
+}
+
+int SettingsController::getStatusBarHeight()
+{
+#ifdef Q_OS_ANDROID
+    if (m_cachedStatusBarHeight < 0) {
+        m_cachedStatusBarHeight = AndroidController::instance()->getStatusBarHeight();
+    }
+    return m_cachedStatusBarHeight;
+#else
+    return 0;
+#endif
+}
+
+int SettingsController::getNavigationBarHeight()
+{
+#ifdef Q_OS_ANDROID
+    if (m_cachedNavigationBarHeight < 0) {
+        m_cachedNavigationBarHeight = AndroidController::instance()->getNavigationBarHeight();
+    }
+    return m_cachedNavigationBarHeight;
+#else
+    return 0;
+#endif
+}
+
+int SettingsController::getSafeAreaTopMargin()
+{
+#ifdef Q_OS_ANDROID
+    if (isEdgeToEdgeEnabled()) {
+        int height = getStatusBarHeight();
+        int result = height > 0 ? height : 40; // fallback to 40 if system returns 0
+        return result;
+    }
+#endif
+    return 0;
+}
+
+int SettingsController::getSafeAreaBottomMargin()
+{
+#ifdef Q_OS_ANDROID
+    if (isEdgeToEdgeEnabled()) {
+        if (m_imeHeight > 0) {
+            return 0;
+        }
+        
+        int height = getNavigationBarHeight();
+        int result = height > 0 ? height : 56; // fallback to 56 if system returns 0
+        return result;
+    }
+#endif
+    return 0;
+}
+
+int SettingsController::getImeHeight()
+{
+    return m_imeHeight;
 }
 
 bool SettingsController::isHomeAdLabelVisible()

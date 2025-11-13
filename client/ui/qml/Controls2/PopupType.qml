@@ -15,7 +15,7 @@ Popup {
 
     leftMargin: 25
     rightMargin: 25
-    bottomMargin: 70
+    bottomMargin: 70 + SettingsController.safeAreaBottomMargin
 
     width: parent.width - leftMargin - rightMargin
 

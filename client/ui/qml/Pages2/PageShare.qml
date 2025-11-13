@@ -173,7 +173,7 @@ PageType {
             HeaderTypeWithButton {
                 id: header
                 Layout.fillWidth: true
-                Layout.topMargin: 24
+                Layout.topMargin: 24 + SettingsController.safeAreaTopMargin
 
                 headerText: qsTr("Share VPN Access")
 
