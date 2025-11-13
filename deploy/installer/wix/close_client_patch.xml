@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CPackWiXPatch>
+    <CPackWiXFragment Id="#PRODUCT">
+        <!-- Требует расширение WixToolset.Util.wixext и xmlns util -->
+        <util:CloseApplication
+                Id="CloseAmneziaClient"
+                Target="AmneziaVPN.exe"
+                Description="Closing AmneziaVPN client"
+                TerminateProcess="1"
+                RebootPrompt="no" />
+    </CPackWiXFragment>
+</CPackWiXPatch>
+
