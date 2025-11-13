@@ -67,8 +67,10 @@ if(WIN32 AND NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     set(CPACK_WIX_UPGRADE_GUID "{2D55AC62-96D6-4692-8C05-0D85BBF95485}")
     set(CPACK_WIX_PRODUCT_ICON "${CMAKE_SOURCE_DIR}/client/images/app.ico")
 
+    set(_AMNEZIA_WIX_PATCH "${CMAKE_SOURCE_DIR}/deploy/installer/wix/service_install_patch.xml")
+    file(TO_CMAKE_PATH "${_AMNEZIA_WIX_PATCH}" CPACK_WIX_PATCH_FILE)
+
     set(CPACK_INSTALLED_DIRECTORIES "${AMNEZIA_STAGE_DIR_CMAKE};/")
-    set(CPACK_WIX_EXTRA_SOURCES "${CMAKE_SOURCE_DIR}/deploy/installer/wix/ProductFragment.wxs")
 
     include(CPack)
 endif()
