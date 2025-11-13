@@ -75,7 +75,7 @@ if(WIN32 AND NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     set(CPACK_WIX_PATCH_FILE "${_AMNEZIA_WIX_PATCH_SERVICE_CMAKE};${_AMNEZIA_WIX_PATCH_CLOSE_APP_CMAKE}")
 
     # WiX v4 Util extension for CloseApplication + namespace for util
-    set(CPACK_WIX_BUILD_EXTENSIONS "${CPACK_WIX_BUILD_EXTENSIONS};WixToolset.Util.wixext")
+    set(CPACK_WIX_EXTENSIONS "${CPACK_WIX_EXTENSIONS};WixToolset.Util.wixext")
     set(CPACK_WIX_CUSTOM_XMLNS "util=http://wixtoolset.org/schemas/v4/wxs/util")
 
     set(CPACK_INSTALLED_DIRECTORIES "${AMNEZIA_STAGE_DIR_CMAKE};/")
