@@ -19,7 +19,7 @@ ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel,
 {
 }
 
-void ApiNewsController::fetchNews()
+void ApiNewsController::fetchNews(bool showError)
 {
     if (m_serversModel.isNull()) {
         qWarning() << "ServersModel is null, skip fetchNews";
@@ -44,10 +44,10 @@ void ApiNewsController::fetchNews()
     }
 
     auto future = gatewayController.postAsync(QString("%1v1/news"), payload);
-    future.then(this, [this](QPair<ErrorCode, QByteArray> result) {
+    future.then(this, [this, showError](QPair<ErrorCode, QByteArray> result) {
         auto [errorCode, responseBody] = result;
         if (errorCode != ErrorCode::NoError) {
-            emit errorOccurred(errorCode);
+            emit errorOccurred(errorCode, showError);
             return;
         }
 
