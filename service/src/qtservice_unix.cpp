@@ -303,8 +303,7 @@ QtServiceSysPrivate::QtServiceSysPrivate()
 
 QtServiceSysPrivate::~QtServiceSysPrivate()
 {
-    if (ident)
-	delete[] ident;
+    delete[] ident;
 }
 
 #if QT_VERSION >= 0x050000

@@ -70,10 +70,8 @@ void PingHelper::start(const QString& serverIpv4Gateway,
 void PingHelper::stop() {
   logger.debug() << "PingHelper deactivated";
 
-  if (m_pingSender) {
-    delete m_pingSender;
-    m_pingSender = nullptr;
-  }
+  delete m_pingSender;
+  m_pingSender = nullptr;
 
   m_pingTimer.stop();
 }

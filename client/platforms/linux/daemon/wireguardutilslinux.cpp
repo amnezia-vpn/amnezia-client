@@ -182,10 +182,8 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
 }
 
 bool WireguardUtilsLinux::deleteInterface() {
-    if (m_rtmonitor) {
-        delete m_rtmonitor;
-        m_rtmonitor = nullptr;
-    }
+    delete m_rtmonitor;
+    m_rtmonitor = nullptr;
 
     if (m_tunnel.state() == QProcess::NotRunning) {
         return false;
