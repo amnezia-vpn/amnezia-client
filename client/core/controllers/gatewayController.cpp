@@ -1,8 +1,10 @@
 #include "gatewayController.h"
 
 #include <algorithm>
+#include <functional>
 #include <random>
 
+#include <QCryptographicHash>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -107,7 +109,8 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
         encryptedKeyPayload = rsa.encrypt(QJsonDocument(keyPayload).toJson(), publicKey, RSA_PKCS1_PADDING);
         EVP_PKEY_free(publicKey);
 
-        encryptedApiPayload = blockCipher.encryptAesBlockCipher(QJsonDocument(apiPayload).toJson(), encRequestData.key, encRequestData.iv, "", encRequestData.salt);
+        encryptedApiPayload = blockCipher.encryptAesBlockCipher(QJsonDocument(apiPayload).toJson(), encRequestData.key, encRequestData.iv,
+                                                                "", encRequestData.salt);
     } catch (...) {
         Utils::logException();
         qCritical() << "error when encrypting the request body";
@@ -146,19 +149,21 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
 
     reply->deleteLater();
 
-    if (sslErrors.isEmpty() && shouldBypassProxy(replyError, encryptedResponseBody, true, encRequestData.key, encRequestData.iv, encRequestData.salt)) {
+    if (sslErrors.isEmpty()
+        && shouldBypassProxy(replyError, encryptedResponseBody, true, encRequestData.key, encRequestData.iv, encRequestData.salt)) {
         auto requestFunction = [&encRequestData, &encryptedResponseBody](const QString &url) {
             encRequestData.request.setUrl(url);
             return amnApp->networkManager()->post(encRequestData.request, encRequestData.requestBody);
         };
 
-        auto replyProcessingFunction = [&encryptedResponseBody, &replyErrorString, &replyError, &httpStatusCode, &sslErrors, &encRequestData,
-                                        this](QNetworkReply *reply, const QList<QSslError> &nestedSslErrors) {
+        auto replyProcessingFunction = [&encryptedResponseBody, &replyErrorString, &replyError, &httpStatusCode, &sslErrors,
+                                        &encRequestData, this](QNetworkReply *reply, const QList<QSslError> &nestedSslErrors) {
             encryptedResponseBody = reply->readAll();
             replyErrorString = reply->errorString();
             replyError = reply->error();
             httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            if (!sslErrors.isEmpty() || shouldBypassProxy(replyError, encryptedResponseBody, true, encRequestData.key, encRequestData.iv, encRequestData.salt)) {
+            if (!sslErrors.isEmpty()
+                || shouldBypassProxy(replyError, encryptedResponseBody, true, encRequestData.key, encRequestData.iv, encRequestData.salt)) {
                 sslErrors = nestedSslErrors;
                 return false;
             }
@@ -177,7 +182,8 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
 
     try {
         QSimpleCrypto::QBlockCipher blockCipher;
-        responseBody = blockCipher.decryptAesBlockCipher(encryptedResponseBody, encRequestData.key, encRequestData.iv, "", encRequestData.salt);
+        responseBody =
+                blockCipher.decryptAesBlockCipher(encryptedResponseBody, encRequestData.key, encRequestData.iv, "", encRequestData.salt);
         return ErrorCode::NoError;
     } catch (...) { // todo change error handling in QSimpleCrypto?
         Utils::logException();
@@ -202,11 +208,9 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
 
     auto sslErrors = QSharedPointer<QList<QSslError>>::create();
 
-    connect(reply, &QNetworkReply::sslErrors, [sslErrors](const QList<QSslError> &errors) {
-        *sslErrors = errors;
-    });
+    connect(reply, &QNetworkReply::sslErrors, [sslErrors](const QList<QSslError> &errors) { *sslErrors = errors; });
 
-    connect(reply, &QNetworkReply::finished, reply, [=]() {
+    connect(reply, &QNetworkReply::finished, reply, [promise, sslErrors, encRequestData, endpoint, apiPayload, reply, this]() mutable {
         QByteArray encryptedResponseBody = reply->readAll();
         QString replyErrorString = reply->errorString();
         auto replyError = reply->error();
@@ -214,23 +218,61 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
 
         reply->deleteLater();
 
-        auto errorCode = apiUtils::checkNetworkReplyErrors(*sslErrors, replyErrorString, replyError, httpStatusCode, encryptedResponseBody);
-        if (errorCode) {
-            promise->addResult(qMakePair(errorCode, QByteArray()));
-            promise->finish();
-            return;
-        }
+        auto processResponse = [promise, encRequestData](const QByteArray &ecryptedResponseBody, const QList<QSslError> &sslErrors,
+                                                         QNetworkReply::NetworkError replyError, const QString &replyErrorString,
+                                                         int httpStatusCode) {
+            auto errorCode = apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, ecryptedResponseBody);
+            if (errorCode) {
+                promise->addResult(qMakePair(errorCode, QByteArray()));
+                promise->finish();
+                return;
+            }
 
-        QSimpleCrypto::QBlockCipher blockCipher;
-        try {
-            QByteArray responseBody = blockCipher.decryptAesBlockCipher(encryptedResponseBody, encRequestData.key, encRequestData.iv, "", encRequestData.salt);
-            promise->addResult(qMakePair(ErrorCode::NoError, responseBody));
-            promise->finish();
-        } catch (...) {
-            Utils::logException();
-            qCritical() << "error when decrypting the request body";
-            promise->addResult(qMakePair(ErrorCode::ApiConfigDecryptionError, QByteArray()));
-            promise->finish();
+            QSimpleCrypto::QBlockCipher blockCipher;
+            try {
+                QByteArray responseBody = blockCipher.decryptAesBlockCipher(ecryptedResponseBody, encRequestData.key, encRequestData.iv, "",
+                                                                            encRequestData.salt);
+                promise->addResult(qMakePair(ErrorCode::NoError, responseBody));
+                promise->finish();
+            } catch (...) {
+                Utils::logException();
+                qCritical() << "error when decrypting the request body";
+                promise->addResult(qMakePair(ErrorCode::ApiConfigDecryptionError, QByteArray()));
+                promise->finish();
+            }
+        };
+
+        if (sslErrors->isEmpty()
+            && shouldBypassProxy(replyError, encryptedResponseBody, true, encRequestData.key, encRequestData.iv, encRequestData.salt)) {
+            auto serviceType = apiPayload.value(apiDefs::key::serviceType).toString("");
+            auto userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString("");
+
+            QStringList baseUrls;
+            if (m_isDevEnvironment) {
+                baseUrls = QString(DEV_S3_ENDPOINT).split(", ");
+            } else {
+                baseUrls = QString(PROD_S3_ENDPOINT).split(", ");
+            }
+
+            QStringList proxyStorageUrls;
+            if (!serviceType.isEmpty()) {
+                for (const auto &baseUrl : baseUrls) {
+                    QByteArray path = ("endpoints-" + serviceType + "-" + userCountryCode).toUtf8();
+                    proxyStorageUrls.push_back(baseUrl + path.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals)
+                                               + ".json");
+                }
+            }
+            for (const auto &baseUrl : baseUrls)
+                proxyStorageUrls.push_back(baseUrl + "endpoints.json");
+
+            getProxyUrlsAsync(proxyStorageUrls, 0, [this, encRequestData, endpoint, processResponse](const QStringList &proxyUrls) {
+                getProxyUrlAsync(proxyUrls, 0, [this, encRequestData, endpoint, processResponse](const QString &proxyUrls) {
+                    bypassProxyAsync(endpoint, proxyUrls, encRequestData, processResponse);
+                });
+            });
+
+        } else {
+            processResponse(encryptedResponseBody, *sslErrors, replyError, replyErrorString, httpStatusCode);
         }
     });
 
@@ -434,4 +476,135 @@ void GatewayController::bypassProxy(const QString &endpoint, const QString &serv
             break;
         }
     }
+}
+
+void GatewayController::getProxyUrlsAsync(const QStringList proxyStorageUrls, const int currentProxyStorageIndex,
+                                          std::function<void(const QStringList &)> onComplete)
+{
+    if (currentProxyStorageIndex >= proxyStorageUrls.size()) {
+        onComplete({});
+        return;
+    }
+
+    QNetworkRequest request;
+    request.setTransferTimeout(m_requestTimeoutMsecs);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setUrl(proxyStorageUrls[currentProxyStorageIndex]);
+
+    QNetworkReply *reply = amnApp->networkManager()->get(request);
+
+    // connect(reply, &QNetworkReply::sslErrors, this, [state](const QList<QSslError> &e) { *(state->sslErrors) = e; });
+
+    connect(reply, &QNetworkReply::finished, this, [this, proxyStorageUrls, currentProxyStorageIndex, onComplete, reply]() {
+        if (reply->error() == QNetworkReply::NoError) {
+            QByteArray encrypted = reply->readAll();
+            reply->deleteLater();
+
+            QByteArray responseBody;
+            try {
+                QByteArray key = m_isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
+                if (!m_isDevEnvironment) {
+                    QCryptographicHash hash(QCryptographicHash::Sha512);
+                    hash.addData(key);
+                    QByteArray h = hash.result().toHex();
+
+                    QByteArray decKey = QByteArray::fromHex(h.left(64));
+                    QByteArray iv = QByteArray::fromHex(h.mid(64, 32));
+                    QByteArray ba = QByteArray::fromBase64(encrypted);
+
+                    QSimpleCrypto::QBlockCipher cipher;
+                    responseBody = cipher.decryptAesBlockCipher(ba, decKey, iv);
+                } else {
+                    responseBody = encrypted;
+                }
+            } catch (...) {
+                Utils::logException();
+                qCritical() << "error decrypting payload";
+                QMetaObject::invokeMethod(
+                        this, [=]() { getProxyUrlsAsync(proxyStorageUrls, currentProxyStorageIndex + 1, onComplete); }, Qt::QueuedConnection);
+                return;
+            }
+
+            QJsonArray endpointsArray = QJsonDocument::fromJson(responseBody).array();
+            QStringList endpoints;
+            for (const QJsonValue &endpoint : endpointsArray)
+                endpoints.push_back(endpoint.toString());
+
+            QStringList shuffled = endpoints;
+            std::random_device randomDevice;
+            std::mt19937 generator(randomDevice());
+            std::shuffle(shuffled.begin(), shuffled.end(), generator);
+
+            onComplete(shuffled);
+            return;
+        }
+
+        int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        qDebug() << httpStatusCode;
+        qDebug() << "go to the next storage endpoint";
+        reply->deleteLater();
+        QMetaObject::invokeMethod(
+                this, [=]() { getProxyUrlsAsync(proxyStorageUrls, currentProxyStorageIndex + 1, onComplete); }, Qt::QueuedConnection);
+    });
+}
+
+void GatewayController::getProxyUrlAsync(const QStringList proxyUrls, const int currentProxyIndex, std::function<void(const QString &)> onComplete)
+{
+    if (currentProxyIndex >= proxyUrls.size()) {
+        onComplete("");
+        return;
+    }
+
+    QNetworkRequest request;
+    request.setTransferTimeout(1000);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setUrl(proxyUrls[currentProxyIndex] + "lmbd-health");
+
+    QNetworkReply *reply = amnApp->networkManager()->get(request);
+
+    // connect(reply, &QNetworkReply::sslErrors, this, [state](const QList<QSslError> &e) {
+    //     *(state->sslErrors) = e;
+    // });
+
+    connect(reply, &QNetworkReply::finished, this, [this, proxyUrls, currentProxyIndex, onComplete, reply]() {
+        reply->deleteLater();
+
+        if (reply->error() == QNetworkReply::NoError) {
+            m_proxyUrl = proxyUrls[currentProxyIndex];
+            onComplete(m_proxyUrl);
+            return;
+        }
+
+        qDebug() << "go to the next proxy endpoint";
+        QMetaObject::invokeMethod(this, [=]() { getProxyUrlAsync(proxyUrls, currentProxyIndex + 1, onComplete); }, Qt::QueuedConnection);
+    });
+}
+
+void GatewayController::bypassProxyAsync(
+        const QString &endpoint, const QString &proxyUrl, EncryptedRequestData encRequestData,
+        std::function<void(const QByteArray &, const QList<QSslError> &, QNetworkReply::NetworkError, const QString &, int)> onComplete)
+{
+    auto sslErrors = QSharedPointer<QList<QSslError>>::create();
+    if (proxyUrl.isEmpty()) {
+        onComplete(QByteArray(), *sslErrors, QNetworkReply::InternalServerError, "empty proxy url", 0);
+        return;
+    }
+
+    QNetworkRequest request = encRequestData.request;
+    request.setUrl(endpoint.arg(proxyUrl));
+
+    QNetworkReply *reply = amnApp->networkManager()->post(request, encRequestData.requestBody);
+
+    connect(reply, &QNetworkReply::sslErrors, this, [sslErrors](const QList<QSslError> &errors) { *sslErrors = errors; });
+
+    connect(reply, &QNetworkReply::finished, this, [sslErrors, onComplete, reply]() {
+        QByteArray encryptedResponseBody = reply->readAll();
+        QString replyErrorString = reply->errorString();
+        auto replyError = reply->error();
+        int httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+        reply->deleteLater();
+
+        onComplete(encryptedResponseBody, *sslErrors, replyError, replyErrorString, httpStatusCode);
+    });
 }

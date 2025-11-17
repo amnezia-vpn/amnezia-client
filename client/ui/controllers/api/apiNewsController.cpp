@@ -30,8 +30,9 @@ void ApiNewsController::fetchNews(bool showError)
         qDebug() << "No Gateway stacks, skip fetchNews";
         return;
     }
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+
+    auto gatewayController = QSharedPointer<GatewayController>::create(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),
+                                                                       apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
     QJsonObject payload;
     payload.insert("locale", m_settings->getAppLanguage().name().split("_").first());
 
@@ -43,8 +44,8 @@ void ApiNewsController::fetchNews(bool showError)
         payload.insert(configKey::serviceType, stacksJson.value(configKey::serviceType));
     }
 
-    auto future = gatewayController.postAsync(QString("%1v1/news"), payload);
-    future.then(this, [this, showError](QPair<ErrorCode, QByteArray> result) {
+    auto future = gatewayController->postAsync(QString("%1v1/news"), payload);
+    future.then(this, [this, showError, gatewayController](QPair<ErrorCode, QByteArray> result) {
         auto [errorCode, responseBody] = result;
         if (errorCode != ErrorCode::NoError) {
             emit errorOccurred(errorCode, showError);
