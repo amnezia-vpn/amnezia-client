@@ -48,8 +48,14 @@ PageType {
                 anchors.right: parent.right
                 anchors.top: qrHeader.bottom
                 anchors.topMargin: 8
-                anchors.horizontalCenter: parent.horizontalCenter
-                height: Math.min(qrContainer.width, parent.height - (qrHeader.height + 8) - (bottomHint.implicitHeight + 8))
+                // anchors.horizontalCenter: parent.horizontalCenter  // УБРАТЬ
+
+                // Высота – квадрат по ширине, но ограниченный высотой колонки
+                height: Math.min(width,
+                                 parent.height
+                                 - (qrHeader.height + 8)
+                                 - (bottomHint.implicitHeight + 8))
+
                 color: AmneziaStyle.color.transparent
                 border.color: AmneziaStyle.color.paleGray
                 border.width: 1

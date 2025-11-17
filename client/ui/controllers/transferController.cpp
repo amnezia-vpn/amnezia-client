@@ -125,7 +125,10 @@ void TransferController::onTransferQrScanned(const QString &code)
         QUrlQuery q;
         q.addQueryItem(QStringLiteral("uuid"), uuid);
         q.addQueryItem(QStringLiteral("api_key"), apiKey);
-        const QString endpoint = QString("%1sendConfig?%2").arg(gw, q.query(QUrl::FullyEncoded));
+        //const QString endpoint = QString("%1sendConfig?%2").arg(gw, q.query(QUrl::FullyEncoded));
+        const QString endpoint = QStringLiteral("%1waitConfig?%2")
+                                        .arg(gw)
+                                        .arg(q.query(QUrl::FullyEncoded));
 
         auto errorCode = gatewayController.post(endpoint, payload, responseBody);
 
@@ -161,8 +164,12 @@ void TransferController::startWaitForConfig(ImportController *importController)
     m_importController = importController;
     m_stopWaiting.storeRelease(0);
 
+    qDebug() << "GW endpoint" << m_settings->getGatewayEndpoint();
+
     QString gw = m_settings->getGatewayEndpoint();
-    if (!gw.endsWith('/')) gw.append('/');
+    if (!gw.endsWith('/')) {
+        gw.append('/');
+    }
     const QString uuid = m_currentUuid;
     const QString apiKey = getCurrentApiKey();
     const int generation = m_waitGeneration.loadAcquire();
@@ -185,7 +192,11 @@ void TransferController::startWaitForConfig(ImportController *importController)
             QUrlQuery q;
             q.addQueryItem(QStringLiteral("uuid"), uuid);
             q.addQueryItem(QStringLiteral("api_key"), apiKey);
-            const QString endpoint = QString("%1waitConfig?%2").arg(gw, q.query(QUrl::FullyEncoded));
+            //const QString endpoint = QString("%1waitConfig?%2").arg(gw, q.query(QUrl::FullyEncoded));
+            const QString endpoint = QStringLiteral("%1waitConfig?%2")
+                                            .arg(gw)
+                                            .arg(q.query(QUrl::FullyEncoded));
+
 
             auto errorCode = gatewayController.get(endpoint, responseBody);
 
@@ -222,8 +233,6 @@ void TransferController::startWaitForConfig(ImportController *importController)
             QThread::msleep(static_cast<unsigned long>(backoffMs));
             backoffMs = qMin(backoffMs * 2, maxBackoffMs);
         }
-
-
     });
 }
 

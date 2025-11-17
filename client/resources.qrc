@@ -237,6 +237,9 @@
         <file>ui/qml/Pages2/PageSettingsApiInstructions.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiNativeConfigs.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiDevices.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApiDevicesLimit.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApiAddDeviceScan.qml</file>
+        <file>ui/qml/Pages2/PageSettingsApiAddDeviceConfirm.qml</file>
         <file>images/controls/monitor.svg</file>
         <file>images/controls/monitor-with-phone.svg</file>
         <file>ui/qml/Components/ApiPremV1MigrationDrawer.qml</file>

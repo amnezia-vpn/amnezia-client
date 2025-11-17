@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 
 import QtCore
+import QRCodeReader 1.0
 
 import SortFilterProxyModel 0.2
 
@@ -18,6 +19,11 @@ import "../Components"
 
 PageType {
     id: root
+
+    function isAtDeviceLimit() {
+        var maxDeviceCount = ApiAccountInfoModel.data("maxDeviceCount")
+        return listView.count >= maxDeviceCount
+    }
 
     ListViewType {
         id: listView
@@ -44,6 +50,34 @@ PageType {
 
                 headerText: qsTr("Active Devices")
                 descriptionText: qsTr("Manage currently connected devices")
+            }
+
+            BasicButtonType {
+                id: addDeviceQrButton
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 16
+
+                visible: GC.isMobile()
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                textColor: AmneziaStyle.color.paleGray
+                borderColor: AmneziaStyle.color.paleGray
+                borderWidth: 1
+
+                text: qsTr("Add device by QR code")
+
+                clickedFunc: function() {
+                    if (root.isAtDeviceLimit()) {
+                        PageController.goToPage(PageEnum.PageSettingsApiDevicesLimit)
+                    } else {
+                        PageController.goToPage(PageEnum.PageSettingsApiAddDeviceScan)
+                    }
+                }
             }
 
             WarningType {
@@ -92,6 +126,27 @@ PageType {
             }
 
             DividerType {}
+        }
+
+        Connections {
+            target: TransferController
+
+            function onPostStarted() {
+                PageController.showBusyIndicator(true)
+            }
+
+            function onPostSucceeded() {
+                PageController.showBusyIndicator(false)
+                ApiSettingsController.getAccountInfo(true)
+                PageController.showNotificationMessage(qsTr("New device added to subscription"))
+            }
+
+            function onPostFailed(message) {
+                PageController.showBusyIndicator(false)
+                PageController.showErrorMessage(message)
+            }
+
+            function onScannerShouldStop() {}
         }
     }
 

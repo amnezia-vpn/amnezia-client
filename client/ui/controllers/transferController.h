@@ -21,6 +21,7 @@ class TransferController : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QString qrCodeUrl READ qrCodeUrl NOTIFY qrCodeUpdated)
+    Q_PROPERTY(QString pendingQrCode READ pendingQrCode WRITE setPendingQrCode NOTIFY pendingQrCodeChanged)
 
 public:
     explicit TransferController(const std::shared_ptr<Settings> &settings,
@@ -33,6 +34,9 @@ public:
     Q_INVOKABLE void stopScanner();
     Q_INVOKABLE void onTransferQrScanned(const QString &code);
 
+    Q_INVOKABLE void setPendingQrCode(const QString &code) { m_pendingQrCode = code; emit pendingQrCodeChanged(); }
+    QString pendingQrCode() const { return m_pendingQrCode; }
+
     // Waiting for config on receiver device
     Q_INVOKABLE void startWaitForConfig(ImportController *importController);
     Q_INVOKABLE void stopWaitForConfig();
@@ -42,6 +46,7 @@ public:
 signals:
     void qrCodeUpdated();
     void scannerShouldStop();
+    void pendingQrCodeChanged();
 
     void waitError(const QString &message);
     void configApplied();
@@ -53,6 +58,7 @@ signals:
 private:
     QString buildQrPayloadJson(const QString &gatewayUrl, const QString &uuid, int version) const;
     QString getPremiumConfigToSend() const;
+    QString m_pendingQrCode;
     QString getCurrentApiKey() const;
 
 private:
