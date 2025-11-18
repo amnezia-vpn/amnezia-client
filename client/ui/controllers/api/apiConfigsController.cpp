@@ -377,7 +377,7 @@ bool ApiConfigsController::fillAvailableServices()
 
 bool ApiConfigsController::importSerivceFromAppStore()
 {
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     QString chosenProductId;
     {
         const QStringList productIds = { QStringLiteral("com.amnezia.amneziavpn.1_month"), QStringLiteral("com.amnezia.AmneziaVPN.6_month") };
@@ -472,7 +472,7 @@ bool ApiConfigsController::importSerivceFromAppStore()
 
 bool ApiConfigsController::restoreSerivceFromAppStore()
 {
-#ifdef Q_OS_IOS
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     const QString premiumServiceType = QStringLiteral("amnezia-premium");
     const QString originalServiceType = m_apiServicesModel->rowCount() > 0 ? m_apiServicesModel->getSelectedServiceType() : QString();
 
