@@ -27,7 +27,9 @@
 
 AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv),
       m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
-      m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs"))
+      m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs")),
+      m_optConnect  ({QStringLiteral("connect")}, QStringLiteral("Connect to server by index on startup"), QStringLiteral("index")),
+      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string"), QStringLiteral("data"))
 {
     setQuitOnLastWindowClosed(false);
 
@@ -135,6 +137,29 @@ void AmneziaApplication::init()
         }
     });
 #endif
+
+    if (m_parser.isSet(m_optImport)) {
+        const QString data = m_parser.value(m_optImport);
+        if (!data.isEmpty()) {
+            QTimer::singleShot(0, this, [this, data]() {
+                if (m_coreController) {
+                    m_coreController->importConfigFromData(data);
+                }
+            });
+        }
+    }
+
+    if (m_parser.isSet(m_optConnect)) {
+        bool ok = false;
+        int idx = m_parser.value(m_optConnect).toInt(&ok);
+        if (ok) {
+            QTimer::singleShot(0, this, [this, idx]() {
+                if (m_coreController) {
+                    m_coreController->openConnectionByIndex(idx);
+                }
+            });
+        }
+    }
 }
 
 void AmneziaApplication::registerTypes()
@@ -181,6 +206,8 @@ bool AmneziaApplication::parseCommands()
 
     m_parser.addOption(m_optAutostart);
     m_parser.addOption(m_optCleanup);
+    m_parser.addOption(m_optConnect);
+    m_parser.addOption(m_optImport);
     
     m_parser.process(*this);
 
