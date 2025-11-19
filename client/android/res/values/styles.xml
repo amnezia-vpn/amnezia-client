@@ -6,6 +6,9 @@
         <item name="android:colorBackground">@color/black</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
     </style>
     <style name="Translucent" parent="NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>

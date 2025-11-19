@@ -22,13 +22,18 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
                 listView.positionViewAtBeginning()
             }
         }
+    }
+
+    SmartScroll {
+        id: smartScroll
+        listView: listView
     }
 
     ListViewType {
@@ -80,6 +85,13 @@ PageType {
                         clientMtu = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(mtuTextField)
+                    }
+                }
+
                 checkEmptyText: true
             }
 
@@ -95,6 +107,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== clientJunkPacketCount) {
                         clientJunkPacketCount = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketCountTextField)
                     }
                 }
             }
@@ -113,6 +131,12 @@ PageType {
                         clientJunkPacketMinSize = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketMinSizeTextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -127,6 +151,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== clientJunkPacketMaxSize) {
                         clientJunkPacketMaxSize = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(junkPacketMaxSizeTextField)
                     }
                 }
             }
@@ -147,6 +177,12 @@ PageType {
                         clientSpecialJunk1 = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk1TextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -163,6 +199,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== clientSpecialJunk2) {
                         clientSpecialJunk2 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk2TextField)
                     }
                 }
             }
@@ -183,6 +225,12 @@ PageType {
                         clientSpecialJunk3 = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk3TextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -201,6 +249,12 @@ PageType {
                         clientSpecialJunk4 = textField.text
                     }
                 }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk4TextField)
+                    }
+                }
             }
 
             AwgTextField {
@@ -217,6 +271,12 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== clientSpecialJunk5 ) {
                         clientSpecialJunk5 = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(specialJunk5TextField)
                     }
                 }
             }

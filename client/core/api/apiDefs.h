@@ -47,12 +47,14 @@ namespace apiDefs
         constexpr QLatin1String serverCountryName("server_country_name");
 
         constexpr QLatin1String osVersion("os_version");
+        constexpr QLatin1String appLanguage("app_language");
 
         constexpr QLatin1String availableCountries("available_countries");
         constexpr QLatin1String activeDeviceCount("active_device_count");
         constexpr QLatin1String maxDeviceCount("max_device_count");
         constexpr QLatin1String subscriptionEndDate("subscription_end_date");
         constexpr QLatin1String issuedConfigs("issued_configs");
+        constexpr QLatin1String subscriptionDescription("subscription_description");
 
         constexpr QLatin1String supportInfo("support_info");
         constexpr QLatin1String email("email");
@@ -68,6 +70,12 @@ namespace apiDefs
         constexpr QLatin1String transactionId("transaction_id");
 
         constexpr QLatin1String userCountryCode("user_country_code");
+
+        constexpr QLatin1String serviceInfo("service_info");
+        constexpr QLatin1String isAdVisible("is_ad_visible");
+        constexpr QLatin1String adHeader("ad_header");
+        constexpr QLatin1String adDescription("ad_description");
+        constexpr QLatin1String adEndpoint("ad_endpoint");
     }
 
     const int requestTimeoutMsecs = 12 * 1000; // 12 secs

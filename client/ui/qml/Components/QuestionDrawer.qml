@@ -32,7 +32,7 @@ DrawerType2 {
         spacing: 8
 
         onImplicitHeightChanged: {
-            root.expandedHeight = content.implicitHeight + 32
+            root.expandedHeight = content.implicitHeight + 32 + SettingsController.safeAreaBottomMargin
         }
 
         Header2TextType {

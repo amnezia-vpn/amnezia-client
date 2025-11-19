@@ -14,6 +14,21 @@ import "../Config"
 PageType {
     id: root
 
+    Connections {
+        target: ApiNewsController
+        function onFetchNewsFinished() {
+            PageController.showBusyIndicator(false)
+        }
+        
+        function onErrorOccurred(errorCode, showError) {
+            if (showError) {
+                PageController.showErrorMessage(errorCode)
+                PageController.closePage()
+                PageController.showBusyIndicator(false)
+            }
+        }
+    }
+
     ListViewType {
         id: listView
 
@@ -25,7 +40,7 @@ PageType {
             BaseHeaderType {
                 id: header
                 Layout.fillWidth: true
-                Layout.topMargin: 24
+                Layout.topMargin: 24 + SettingsController.safeAreaTopMargin
                 Layout.bottomMargin: 16
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
@@ -140,9 +155,8 @@ PageType {
                 return;
             }
             PageController.showBusyIndicator(true)
-            ApiNewsController.fetchNews();
+            ApiNewsController.fetchNews(true)
             PageController.goToPage(PageEnum.PageSettingsNewsNotifications)
-            PageController.showBusyIndicator(false)
         }
     }
 

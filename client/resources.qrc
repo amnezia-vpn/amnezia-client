@@ -131,7 +131,6 @@
         <file>ui/qml/Components/SelectLanguageDrawer.qml</file>
         <file>ui/qml/Components/ServersListView.qml</file>
         <file>ui/qml/Components/SettingsContainersListView.qml</file>
-
         <file>ui/qml/Components/TransportProtoSelector.qml</file>
         <file>ui/qml/Components/AddSitePanel.qml</file>
         <file>ui/qml/Config/GlobalConfig.qml</file>
@@ -248,6 +247,7 @@
         <file>ui/qml/Components/OtpCodeDrawer.qml</file>
         <file>ui/qml/Components/AwgTextField.qml</file>
         <file>ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml</file>
+        <file>ui/qml/Components/SmartScroll.qml</file>
     </qresource>
     <qresource prefix="/countriesFlags">
         <file>images/flagKit/ZW.svg</file>

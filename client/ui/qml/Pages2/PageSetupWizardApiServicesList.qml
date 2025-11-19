@@ -22,7 +22,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        Layout.topMargin: 20
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {

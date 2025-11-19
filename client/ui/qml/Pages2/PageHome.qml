@@ -21,6 +21,21 @@ PageType {
     id: root
 
     Connections {
+        target: Qt.application
+
+        function onStateChanged() {
+            if (Qt.application.state !== Qt.ApplicationActive) {
+                if (drawer.isOpened) {
+                    drawer.closeTriggered()
+                }
+                if (homeSplitTunnelingDrawer.isOpened) {
+                    homeSplitTunnelingDrawer.closeTriggered()
+                }
+            }
+        }
+    }
+
+    Connections {
         objectName: "pageControllerConnections"
 
         target: PageController
@@ -68,18 +83,8 @@ PageType {
             objectName: "homeColumnLayout"
 
             anchors.fill: parent
-            anchors.topMargin: 12
+            anchors.topMargin: 12 + SettingsController.safeAreaTopMargin
             anchors.bottomMargin: 16
-
-            AdLabel {
-                id: adLabel
-
-                Layout.fillWidth: true
-                Layout.preferredHeight: adLabel.contentHeight
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 22
-            }
 
             BasicButtonType {
                 id: loggingButton
@@ -188,6 +193,16 @@ PageType {
 
                     parent: root
                 }
+            }
+
+            AdLabel {
+                id: adLabel
+
+                Layout.fillWidth: true
+                Layout.preferredHeight: adLabel.contentHeight
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 22
             }
         }
     }
