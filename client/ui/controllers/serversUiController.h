@@ -8,6 +8,7 @@
 
 #include "core/controllers/serversController.h"
 #include "ui/models/servers_model.h"
+#include "ui/models/containers_model.h"
 
 class ServersUiController : public QObject
 {
@@ -34,6 +35,8 @@ class ServersUiController : public QObject
 public:
     explicit ServersUiController(const QSharedPointer<ServersController> &serversController,
                                  const QSharedPointer<ServersModel> &serversModel,
+                                 const QSharedPointer<ContainersModel> &containersModel,
+                                 const QSharedPointer<ContainersModel> &defaultServerContainersModel,
                                  QObject *parent = nullptr);
 
 public slots:
@@ -74,13 +77,20 @@ signals:
     void processedServerIndexChanged(int index);
     void hasServersFromGatewayApiChanged();
 
-private:
+public:
     void updateModel();
+    
+private:
     QString getDefaultServerDescription(const QJsonObject &server, int index) const;
     bool isAmneziaDnsContainerInstalled(int serverIndex) const;
 
+    void updateContainersModel();
+    void updateDefaultServerContainersModel();
+    
     QSharedPointer<ServersController> m_serversController;
     QSharedPointer<ServersModel> m_serversModel;
+    QSharedPointer<ContainersModel> m_containersModel;
+    QSharedPointer<ContainersModel> m_defaultServerContainersModel;
     
     int m_processedServerIndex = 0;
 };

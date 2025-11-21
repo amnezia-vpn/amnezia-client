@@ -87,8 +87,6 @@ signals:
     void defaultServerNameChanged();
     void defaultServerDescriptionChanged();
 
-    void containersUpdated(const QJsonArray &containers);
-    void defaultServerContainersUpdated(const QJsonArray &containers);
     void defaultServerDefaultContainerChanged(const int containerIndex);
 
     void updateApiCountryModel();
@@ -96,9 +94,6 @@ signals:
 
 private:
     ServerCredentials serverCredentials(int index) const;
-
-    void updateContainersModel();
-    void updateDefaultServerContainersModel();
 
     QString getServerDescription(const QJsonObject &server, const int index) const;
 

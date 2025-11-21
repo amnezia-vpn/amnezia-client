@@ -6,6 +6,7 @@
 #include "core/server_defs.h"
 #include "protocols/protocols_defs.h"
 #include <QJsonDocument>
+#include <QJsonArray>
 
 namespace
 {
@@ -21,12 +22,17 @@ namespace
 
 ServersUiController::ServersUiController(const QSharedPointer<ServersController> &serversController,
                                          const QSharedPointer<ServersModel> &serversModel,
+                                         const QSharedPointer<ContainersModel> &containersModel,
+                                         const QSharedPointer<ContainersModel> &defaultServerContainersModel,
                                          QObject *parent)
     : QObject(parent),
       m_serversController(serversController),
       m_serversModel(serversModel),
+      m_containersModel(containersModel),
+      m_defaultServerContainersModel(defaultServerContainersModel),
       m_processedServerIndex(serversController->getDefaultServerIndex())
 {
+    updateModel();
 }
 
 void ServersUiController::removeServer(int index)
@@ -97,6 +103,7 @@ void ServersUiController::onDefaultServerChanged(int index)
         emit processedServerIndexChanged(m_processedServerIndex);
     }
     updateModel();
+    updateDefaultServerContainersModel();
     emit defaultServerIndexChanged(index);
 }
 
@@ -111,6 +118,9 @@ void ServersUiController::updateModel()
         m_processedServerIndex = defaultIndex;
         emit processedServerIndexChanged(m_processedServerIndex);
     }
+    
+    updateContainersModel();
+    updateDefaultServerContainersModel();
     
     bool isEmpty = !hasServersFromGatewayApi();
     if (wasEmpty != isEmpty) {
@@ -230,6 +240,7 @@ void ServersUiController::setProcessedServerIndex(int index)
     if (m_processedServerIndex != index) {
         m_processedServerIndex = index;
         m_serversModel->setProcessedServerIndex(index);
+        updateContainersModel();
         emit processedServerIndexChanged(m_processedServerIndex);
     }
 }
@@ -325,5 +336,26 @@ QString ServersUiController::adDescription() const
     QJsonObject apiConfig = server.value(configKey::apiConfig).toObject();
     QJsonObject serviceInfo = apiConfig.value(apiDefs::key::serviceInfo).toObject();
     return serviceInfo.value(apiDefs::key::adDescription).toString();
+}
+
+void ServersUiController::updateContainersModel()
+{
+    if (m_processedServerIndex < 0 || m_processedServerIndex >= m_serversController->getServersCount()) {
+        return;
+    }
+    QJsonObject server = m_serversController->getServerConfig(m_processedServerIndex);
+    QJsonArray containers = server.value(config_key::containers).toArray();
+    m_containersModel->updateModel(containers);
+}
+
+void ServersUiController::updateDefaultServerContainersModel()
+{
+    int defaultIndex = m_serversController->getDefaultServerIndex();
+    if (defaultIndex < 0 || defaultIndex >= m_serversController->getServersCount()) {
+        return;
+    }
+    QJsonObject server = m_serversController->getServerConfig(defaultIndex);
+    QJsonArray containers = server.value(config_key::containers).toArray();
+    m_defaultServerContainersModel->updateModel(containers);
 }
 

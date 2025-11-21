@@ -44,7 +44,6 @@ ServersModel::ServersModel(QObject *parent) : QAbstractListModel(parent)
                 ContainerProps::containerFromString(m_servers.at(serverIndex).toObject().value(config_key::defaultContainer).toString());
         emit ServersModel::defaultServerDefaultContainerChanged(defaultContainer);
         emit ServersModel::defaultServerNameChanged();
-        updateDefaultServerContainersModel();
     });
 
     connect(this, &ServersModel::processedServerIndexChanged, this, &ServersModel::processedServerChanged);
@@ -153,8 +152,6 @@ void ServersModel::updateModel(const QJsonArray &servers, int defaultServerIndex
     m_isAmneziaDnsEnabled = isAmneziaDnsEnabled;
     endResetModel();
     emit defaultServerIndexChanged(m_defaultServerIndex);
-    updateContainersModel();
-    updateDefaultServerContainersModel();
 }
 
 const int ServersModel::getDefaultServerIndex()
@@ -213,7 +210,6 @@ bool ServersModel::hasServerWithWriteAccess()
 void ServersModel::setProcessedServerIndex(const int index)
 {
     m_processedServerIndex = index;
-    updateContainersModel();
     if (data(index, IsServerFromGatewayApiRole).toBool()) {
         if (data(index, IsCountrySelectionAvailableRole).toBool()) {
             emit updateApiCountryModel();
@@ -305,19 +301,6 @@ ServerCredentials ServersModel::serverCredentials(int index) const
 
     return credentials;
 }
-
-void ServersModel::updateContainersModel()
-{
-    auto containers = m_servers.at(m_processedServerIndex).toObject().value(config_key::containers).toArray();
-    emit containersUpdated(containers);
-}
-
-void ServersModel::updateDefaultServerContainersModel()
-{
-    auto containers = m_servers.at(m_defaultServerIndex).toObject().value(config_key::containers).toArray();
-    emit defaultServerContainersUpdated(containers);
-}
-
 
 bool ServersModel::isServerFromApi(const int serverIndex)
 {

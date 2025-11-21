@@ -43,8 +43,6 @@ void CoreController::initModels()
     m_serversModel.reset(new ServersModel(this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
 
-    m_serversModel->updateModel(m_settings->serversArray(), m_settings->defaultServerIndex(), m_settings->useAmneziaDns());
-
     m_languageModel.reset(new LanguageModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
 
@@ -139,7 +137,7 @@ void CoreController::initControllers()
             new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 
-    m_serversUiController = QSharedPointer<ServersUiController>::create(m_serversController, m_serversModel);
+    m_serversUiController = QSharedPointer<ServersUiController>::create(m_serversController, m_serversModel, m_containersModel, m_defaultServerContainersModel);
     m_engine->rootContext()->setContextProperty("ServersUiController", m_serversUiController.get());
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
@@ -327,13 +325,9 @@ void CoreController::initApiCountryModelUpdateHandler()
 
 void CoreController::initContainerModelUpdateHandler()
 {
-    connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(), &ContainersModel::updateModel);
-    connect(m_serversModel.get(), &ServersModel::defaultServerContainersUpdated, m_defaultServerContainersModel.get(),
-            &ContainersModel::updateModel);
     connect(m_serversController.get(), &ServersController::gatewayStacksExpanded, this, [this]() {
         m_apiNewsController->fetchNews(false);
     });
-    m_serversModel->updateModel(m_settings->serversArray(), m_settings->defaultServerIndex(), m_settings->useAmneziaDns());
 }
 
 void CoreController::initAdminConfigRevokedHandler()
