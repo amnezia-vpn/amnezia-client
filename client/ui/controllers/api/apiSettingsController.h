@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "core/controllers/serversController.h"
 #include "ui/models/api/apiAccountInfoModel.h"
 #include "ui/models/api/apiCountryModel.h"
 #include "ui/models/api/apiDevicesModel.h"
@@ -12,8 +13,11 @@ class ApiSettingsController : public QObject
 {
     Q_OBJECT
 public:
-    ApiSettingsController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ApiAccountInfoModel> &apiAccountInfoModel,
-                          const QSharedPointer<ApiCountryModel> &apiCountryModel, const QSharedPointer<ApiDevicesModel> &apiDevicesModel,
+    ApiSettingsController(const QSharedPointer<ServersController> &serversController,
+                          const QSharedPointer<ServersModel> &serversModel,
+                          const QSharedPointer<ApiAccountInfoModel> &apiAccountInfoModel,
+                          const QSharedPointer<ApiCountryModel> &apiCountryModel,
+                          const QSharedPointer<ApiDevicesModel> &apiDevicesModel,
                           const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
     ~ApiSettingsController();
 
@@ -26,6 +30,7 @@ signals:
     void errorOccurred(ErrorCode errorCode);
 
 private:
+    QSharedPointer<ServersController> m_serversController;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ApiAccountInfoModel> m_apiAccountInfoModel;
     QSharedPointer<ApiCountryModel> m_apiCountryModel;

@@ -22,8 +22,11 @@
 #include "ui/controllers/installController.h"
 #include "ui/controllers/pageController.h"
 #include "ui/controllers/settingsController.h"
+#include "ui/controllers/serversUiController.h"
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
+
+#include "core/controllers/serversController.h"
 
 #include "ui/models/allowed_dns_model.h"
 #include "ui/models/containers_model.h"
@@ -89,6 +92,7 @@ private:
     void initTranslationsUpdatedHandler();
     void initAutoConnectHandler();
     void initAmneziaDnsToggledHandler();
+    void initServersModelUpdateHandler();
     void initPrepareConfigHandler();
     void initImportPremiumV2VpnKeyHandler();
     void initShowMigrationDrawerHandler();
@@ -112,6 +116,7 @@ private:
     QScopedPointer<ImportController> m_importController;
     QScopedPointer<ExportController> m_exportController;
     QScopedPointer<SettingsController> m_settingsController;
+    QSharedPointer<ServersUiController> m_serversUiController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
     QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
@@ -121,6 +126,8 @@ private:
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
     QScopedPointer<ApiPremV1MigrationController> m_apiPremV1MigrationController;
     QScopedPointer<ApiNewsController> m_apiNewsController;
+
+    QSharedPointer<ServersController> m_serversController;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;

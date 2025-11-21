@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "core/controllers/serversController.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
@@ -11,8 +12,11 @@ class ExportController : public QObject
 {
     Q_OBJECT
 public:
-    explicit ExportController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
-                              const QSharedPointer<ClientManagementModel> &clientManagementModel, const std::shared_ptr<Settings> &settings,
+    explicit ExportController(const QSharedPointer<ServersController> &serversController,
+                              const QSharedPointer<ServersModel> &serversModel,
+                              const QSharedPointer<ContainersModel> &containersModel,
+                              const QSharedPointer<ClientManagementModel> &clientManagementModel,
+                              const std::shared_ptr<Settings> &settings,
                               QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY exportConfigChanged)
@@ -58,6 +62,7 @@ private:
     ErrorCode generateNativeConfig(const DockerContainer container, const QString &clientName, const Proto &protocol,
                                    QJsonObject &jsonNativeConfig);
 
+    QSharedPointer<ServersController> m_serversController;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;

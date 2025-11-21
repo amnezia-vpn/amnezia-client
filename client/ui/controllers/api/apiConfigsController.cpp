@@ -250,10 +250,11 @@ namespace
     }
 }
 
-ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersModel> &serversModel,
+ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersController> &serversController,
+                                           const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ApiServicesModel> &apiServicesModel,
                                            const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_apiServicesModel(apiServicesModel), m_settings(settings)
+    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_apiServicesModel(apiServicesModel), m_settings(settings)
 {
 }
 
@@ -281,7 +282,7 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
         return false;
     }
 
-    auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
+    auto serverConfigObject = m_serversController->getServerConfig(m_serversModel->getProcessedServerIndex());
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     if (isSubscriptionExpired(apiConfigObject)) {
@@ -322,7 +323,7 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
 
 bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 {
-    auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
+    auto serverConfigObject = m_serversController->getServerConfig(m_serversModel->getProcessedServerIndex());
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     if (isSubscriptionExpired(apiConfigObject)) {
@@ -353,7 +354,7 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 
 void ApiConfigsController::prepareVpnKeyExport()
 {
-    auto serverConfigObject = m_serversModel->getServerConfig(m_serversModel->getProcessedServerIndex());
+    auto serverConfigObject = m_serversController->getServerConfig(m_serversModel->getProcessedServerIndex());
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     auto vpnKey = apiConfigObject.value(apiDefs::key::vpnKey).toString();
@@ -361,7 +362,7 @@ void ApiConfigsController::prepareVpnKeyExport()
         vpnKey = apiUtils::getPremiumV2VpnKey(serverConfigObject);
         apiConfigObject.insert(apiDefs::key::vpnKey, vpnKey);
         serverConfigObject.insert(configKey::apiConfig, apiConfigObject);
-        m_serversModel->editServer(serverConfigObject, m_serversModel->getProcessedServerIndex());
+        m_serversController->editServer(m_serversModel->getProcessedServerIndex(), serverConfigObject);
     }
 
     m_vpnKey = vpnKey;
@@ -415,7 +416,7 @@ bool ApiConfigsController::importServiceFromGateway()
                                             m_apiServicesModel->getSelectedServiceProtocol(),
                                             QJsonObject() };
 
-    if (m_serversModel->isServerFromApiAlreadyExists(gatewayRequestData.userCountryCode, gatewayRequestData.serviceType,
+    if (m_serversController->isServerFromApiAlreadyExists(gatewayRequestData.userCountryCode, gatewayRequestData.serviceType,
                                                      gatewayRequestData.serviceProtocol)) {
         emit errorOccurred(ErrorCode::ApiConfigAlreadyAdded);
         return false;
@@ -444,7 +445,7 @@ bool ApiConfigsController::importServiceFromGateway()
 
         serverConfig.insert(configKey::apiConfig, apiConfig);
 
-        m_serversModel->addServer(serverConfig);
+        m_serversController->addServer(serverConfig);
         emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
         return true;
     } else {
@@ -456,7 +457,7 @@ bool ApiConfigsController::importServiceFromGateway()
 bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
                                                     bool reloadServiceConfig)
 {
-    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+    auto serverConfig = m_serversController->getServerConfig(serverIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
     if (isSubscriptionExpired(apiConfig)) {
@@ -508,7 +509,7 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
             newServerConfig.insert(config_key::name, serverConfig.value(config_key::name));
             newServerConfig.insert(config_key::nameOverriddenByUser, true);
         }
-        m_serversModel->editServer(newServerConfig, serverIndex);
+        m_serversController->editServer(serverIndex, newServerConfig);
         if (reloadServiceConfig) {
             emit reloadServerFromApiFinished(tr("API config reloaded"));
         } else if (newCountryName.isEmpty()) {
@@ -533,7 +534,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
     GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                         m_settings->isStrictKillSwitchEnabled());
 
-    auto serverConfig = m_serversModel->getServerConfig(serverIndex);
+    auto serverConfig = m_serversController->getServerConfig(serverIndex);
     auto installationUuid = m_settings->getInstallationUuid(true);
 
     QString serviceProtocol = serverConfig.value(configKey::protocol).toString();
@@ -557,7 +558,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
             return false;
         }
 
-        m_serversModel->editServer(serverConfig, serverIndex);
+        m_serversController->editServer(serverIndex, serverConfig);
         emit updateServerFromApiFinished();
         return true;
     } else {
@@ -569,7 +570,7 @@ bool ApiConfigsController::updateServiceFromTelegram(const int serverIndex)
 bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    auto serverConfigObject = m_serversController->getServerConfig(serverIndex);
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     if (!apiUtils::isPremiumServer(serverConfigObject)) {
@@ -605,7 +606,7 @@ bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
     }
 
     serverConfigObject.remove(config_key::containers);
-    m_serversModel->editServer(serverConfigObject, serverIndex);
+    m_serversController->editServer(serverIndex, serverConfigObject);
 
     return true;
 }
@@ -613,7 +614,7 @@ bool ApiConfigsController::deactivateDevice(const bool isRemoveEvent)
 bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const QString &serverCountryCode)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    auto serverConfigObject = m_serversController->getServerConfig(serverIndex);
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     if (!apiUtils::isPremiumServer(serverConfigObject)) {
@@ -646,7 +647,7 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
 
     if (uuid == m_settings->getInstallationUuid(true)) {
         serverConfigObject.remove(config_key::containers);
-        m_serversModel->editServer(serverConfigObject, serverIndex);
+        m_serversController->editServer(serverIndex, serverConfigObject);
     }
 
     return true;
@@ -654,23 +655,23 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
 
 bool ApiConfigsController::isConfigValid()
 {
-    int serverIndex = m_serversModel->getDefaultServerIndex();
-    QJsonObject serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    int serverIndex = m_settings->defaultServerIndex();
+    QJsonObject serverConfigObject = m_serversController->getServerConfig(serverIndex);
     auto configSource = apiUtils::getConfigSource(serverConfigObject);
 
     if (configSource == apiDefs::ConfigSource::Telegram
         && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
-        m_serversModel->removeApiConfig(serverIndex);
+        m_serversController->removeApiConfig(serverIndex);
         return updateServiceFromTelegram(serverIndex);
     } else if (configSource == apiDefs::ConfigSource::AmneziaGateway
                && !m_serversModel->data(serverIndex, ServersModel::Roles::HasInstalledContainers).toBool()) {
         return updateServiceFromGateway(serverIndex, "", "");
-    } else if (configSource && m_serversModel->isApiKeyExpired(serverIndex)) {
+    } else if (configSource && m_serversController->isApiKeyExpired(serverIndex)) {
         qDebug() << "attempt to update api config by expires_at event";
         if (configSource == apiDefs::ConfigSource::AmneziaGateway) {
             return updateServiceFromGateway(serverIndex, "", "");
         } else {
-            m_serversModel->removeApiConfig(serverIndex);
+            m_serversController->removeApiConfig(serverIndex);
             return updateServiceFromTelegram(serverIndex);
         }
     }
@@ -680,20 +681,20 @@ bool ApiConfigsController::isConfigValid()
 void ApiConfigsController::setCurrentProtocol(const QString &protocolName)
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    auto serverConfigObject = m_serversController->getServerConfig(serverIndex);
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     apiConfigObject[configKey::serviceProtocol] = protocolName;
 
     serverConfigObject.insert(configKey::apiConfig, apiConfigObject);
 
-    m_serversModel->editServer(serverConfigObject, serverIndex);
+    m_serversController->editServer(serverIndex, serverConfigObject);
 }
 
 bool ApiConfigsController::isVlessProtocol()
 {
     auto serverIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    auto serverConfigObject = m_serversController->getServerConfig(serverIndex);
     auto apiConfigObject = serverConfigObject.value(configKey::apiConfig).toObject();
 
     if (apiConfigObject[configKey::serviceProtocol].toString() == "vless") {

@@ -103,12 +103,12 @@ PageType {
                         return
                     }
 
-                    InstallController.setShouldCreateServer(true)
                     var _hostname = listView.itemAtIndex(vars.hostnameIndex).children[0].textField.text
                     var _username = listView.itemAtIndex(vars.usernameIndex).children[0].textField.text
                     var _secretData = listView.itemAtIndex(vars.secretDataIndex).children[0].textField.text
 
                     InstallController.setProcessedServerCredentials(_hostname, _username, _secretData)
+                    ServersUiController.processedIndex = -1
 
                     PageController.showBusyIndicator(true)
                     var isConnectionOpened = InstallController.checkSshConnection()

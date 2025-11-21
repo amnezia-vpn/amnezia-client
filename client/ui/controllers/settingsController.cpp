@@ -201,7 +201,7 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         toggleAutoStart(autoStart);
 #endif
 
-        m_serversModel->resetModel();
+        m_serversModel->updateModel(m_settings->serversArray(), m_settings->defaultServerIndex(), m_settings->useAmneziaDns());
         m_languageModel->changeLanguage(
                 static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
 
@@ -256,7 +256,7 @@ QString SettingsController::getAppVersion()
 void SettingsController::clearSettings()
 {
     m_settings->clearSettings();
-    m_serversModel->resetModel();
+    m_serversModel->updateModel(m_settings->serversArray(), m_settings->defaultServerIndex(), m_settings->useAmneziaDns());
     m_languageModel->changeLanguage(m_languageModel->getSystemLanguageEnum());
 
     m_sitesModel->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);

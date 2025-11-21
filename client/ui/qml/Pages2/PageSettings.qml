@@ -149,9 +149,9 @@ PageType {
 
         property string title: qsTr("News & Notifications")
         readonly property string leftImagePath: NewsModel.hasUnread ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
-        property bool isVisible: ServersModel.hasServersFromGatewayApi
+        property bool isVisible: ServersUiController.hasServersFromGatewayApi
         readonly property var clickedHandler: function() {
-            if (!ServersModel.hasServersFromGatewayApi) {
+            if (!ServersUiController.hasServersFromGatewayApi) {
                 return;
             }
             PageController.showBusyIndicator(true)

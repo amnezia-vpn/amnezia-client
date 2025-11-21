@@ -163,7 +163,8 @@ PageType {
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                         InstallController.install(listView.dockerContainer,
                                                   listView.containerDefaultPort,
-                                                  listView.containerDefaultTransportProto)
+                                                  listView.containerDefaultTransportProto,
+                                                  ServersUiController.processedIndex)
                     } else {
                         PageController.goToPage(PageEnum.PageSetupWizardProtocols)
                     }

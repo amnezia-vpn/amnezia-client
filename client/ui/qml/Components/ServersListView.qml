@@ -18,7 +18,7 @@ import "../Config"
 ListViewType {
     id: root
 
-    property int selectedIndex: ServersModel.defaultIndex
+    property int selectedIndex: ServersUiController.defaultIndex
 
     anchors.top: serversMenuHeader.bottom
     anchors.right: parent.right
@@ -29,7 +29,7 @@ ListViewType {
     model: ServersModel
 
     Connections {
-        target: ServersModel
+        target: ServersUiController
         function onDefaultServerIndexChanged(serverIndex) {
             root.selectedIndex = serverIndex
         }
@@ -82,7 +82,7 @@ ListViewType {
 
                         root.selectedIndex = index
 
-                        ServersModel.defaultIndex = index
+                        ServersUiController.setDefaultServerIndex(index)
                     }
 
                     Keys.onEnterPressed: serverRadioButton.clicked()
@@ -102,7 +102,7 @@ ListViewType {
                     z: 1
 
                     onClicked: function() {
-                        ServersModel.processedIndex = index
+                        ServersUiController.processedIndex = index
 
                         if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
                             if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {

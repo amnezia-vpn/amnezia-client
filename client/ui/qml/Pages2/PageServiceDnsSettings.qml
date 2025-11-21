@@ -78,7 +78,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot remove AmneziaDNS from running server"))
                         } else {
                             PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeProcessedContainer()
+                            InstallController.removeContainer(ServersUiController.processedIndex)
                         }
                     }
                     var noButtonFunction = function() {}

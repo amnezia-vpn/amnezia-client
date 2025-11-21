@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "configurators/openvpn_configurator.h"
+#include "core/controllers/serversController.h"
 #include "ui/models/api/apiServicesModel.h"
 #include "ui/models/servers_model.h"
 
@@ -11,7 +12,8 @@ class ApiConfigsController : public QObject
 {
     Q_OBJECT
 public:
-    ApiConfigsController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ApiServicesModel> &apiServicesModel,
+    ApiConfigsController(const QSharedPointer<ServersController> &serversController,
+                         const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ApiServicesModel> &apiServicesModel,
                          const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
@@ -58,6 +60,7 @@ private:
     QList<QString> m_qrCodes;
     QString m_vpnKey;
 
+    QSharedPointer<ServersController> m_serversController;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ApiServicesModel> m_apiServicesModel;
     std::shared_ptr<Settings> m_settings;

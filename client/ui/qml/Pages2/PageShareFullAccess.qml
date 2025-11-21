@@ -119,13 +119,13 @@ PageType {
 
                     Component.onCompleted: {
                         serverSelectorListView.currentIndex = ServersModel.isDefaultServerHasWriteAccess() ?
-                                    proxyServersModel.mapFromSource(ServersModel.defaultIndex) : 0
+                                    proxyServersModel.mapFromSource(ServersUiController.defaultIndex) : 0
                         serverSelectorListView.triggerCurrentItem()
                     }
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.processedIndex = proxyServersModel.mapToSource(selectedIndex)
+                        ServersUiController.processedIndex = proxyServersModel.mapToSource(selectedIndex)
                     }
                 }
             }

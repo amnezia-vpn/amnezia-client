@@ -1,6 +1,7 @@
 #ifndef CONNECTIONCONTROLLER_H
 #define CONNECTIONCONTROLLER_H
 
+#include "core/controllers/serversController.h"
 #include "protocols/vpnprotocol.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
@@ -16,9 +17,12 @@ public:
     Q_PROPERTY(bool isConnectionInProgress READ isConnectionInProgress NOTIFY connectionStateChanged)
     Q_PROPERTY(QString connectionStateText READ connectionStateText NOTIFY connectionStateChanged)
 
-    explicit ConnectionController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+    explicit ConnectionController(const QSharedPointer<ServersController> &serversController,
+                                  const QSharedPointer<ServersModel> &serversModel,
+                                  const QSharedPointer<ContainersModel> &containersModel,
                                   const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                  const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
+                                  const QSharedPointer<VpnConnection> &vpnConnection,
+                                  const std::shared_ptr<Settings> &settings,
                                   QObject *parent = nullptr);
 
     ~ConnectionController() = default;
@@ -57,6 +61,7 @@ private:
 
     void continueConnection();
 
+    QSharedPointer<ServersController> m_serversController;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ClientManagementModel> m_clientManagementModel;

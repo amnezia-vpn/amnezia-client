@@ -243,7 +243,7 @@ PageType {
                     }
 
                     PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                    InstallController.install(dockerContainer, port.textField.text, transportProtoSelector.currentIndex)
+                    InstallController.install(dockerContainer, port.textField.text, transportProtoSelector.currentIndex, ServersUiController.processedIndex)
                 }
             }
 

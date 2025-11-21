@@ -34,7 +34,7 @@ PageType {
             PageController.showErrorMessage(message)
         }
 
-        function onRebootProcessedServerFinished(finishedMessage) {
+        function onRebootServerFinished(finishedMessage) {
             PageController.showNotificationMessage(finishedMessage)
         }
 
@@ -43,7 +43,7 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onRemoveProcessedContainerFinished(finishedMessage) {
+        function onRemoveContainerFinished(finishedMessage) {
             PageController.closePage() // close deInstalling page
             PageController.closePage() // close page with remove button
             PageController.showNotificationMessage(finishedMessage)
@@ -58,7 +58,7 @@ PageType {
     }
 
     Connections {
-        target: ServersModel
+        target: ServersUiController
 
         function onProcessedServerIndexChanged() {
             root.isServerWithWriteAccess = ServersModel.isProcessedServerHasWriteAccess()
@@ -113,7 +113,7 @@ PageType {
         readonly property var tColor: AmneziaStyle.color.paleGray
         readonly property var clickedHandler: function() {
             PageController.showBusyIndicator(true)
-            InstallController.scanServerForInstalledContainers()
+            InstallController.scanServerForInstalledContainers(ServersUiController.processedIndex)
             PageController.showBusyIndicator(false)
         }
     }
@@ -136,7 +136,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.rebootProcessedServer()
+                    InstallController.rebootServer(ServersUiController.processedIndex)
                     PageController.showBusyIndicator(false)
                 }
             }
@@ -166,7 +166,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.removeProcessedServer()
+                    InstallController.removeServer(ServersUiController.processedIndex)
                     PageController.showBusyIndicator(false)
                 }
             }
@@ -225,7 +225,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.removeApiConfig(ServersModel.processedIndex)
+                    InstallController.removeApiConfig(ServersUiController.processedIndex)
                     PageController.showBusyIndicator(false)
                 }
             }
@@ -240,7 +240,7 @@ PageType {
     QtObject {
         id: switch_to_premium
 
-        property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersModel.processedServerIsPremium
+        property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi") && ServersUiController.processedServerIsPremium
         readonly property string title: qsTr("Switch to the new Amnezia Premium subscription")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed

@@ -162,7 +162,7 @@ PageType {
                         }
 
                         PageController.showBusyIndicator(true)
-                        InstallController.clearCachedProfile()
+                        InstallController.clearCachedProfile(ServersUiController.processedIndex)
                         PageController.showBusyIndicator(false)
                     }
 
@@ -206,7 +206,7 @@ PageType {
                         } else
                         {
                             PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeProcessedContainer()
+                            InstallController.removeContainer(ServersUiController.processedIndex)
                         }
                     }
                     var noButtonFunction = function() {

@@ -87,7 +87,7 @@ PageType {
                     rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                     clickedFunction: function() {
-                        ServersModel.processedIndex = index
+                        ServersUiController.processedIndex = index
 
                         if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
                             PageController.showBusyIndicator(true)

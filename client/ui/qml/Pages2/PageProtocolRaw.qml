@@ -186,7 +186,7 @@ PageType {
 
                     var yesButtonFunction = function() {
                         PageController.goToPage(PageEnum.PageDeinstalling)
-                        InstallController.removeProcessedContainer()
+                        InstallController.removeContainer(ServersUiController.processedIndex)
                     }
                     var noButtonFunction = function() {}
 

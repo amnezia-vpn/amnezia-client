@@ -14,18 +14,18 @@ namespace
 }
 
 ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel, const std::shared_ptr<Settings> &settings,
-                                     const QSharedPointer<ServersModel> &serversModel, QObject *parent)
-    : QObject(parent), m_newsModel(newsModel), m_settings(settings), m_serversModel(serversModel)
+                                     const QSharedPointer<ServersController> &serversController, QObject *parent)
+    : QObject(parent), m_newsModel(newsModel), m_settings(settings), m_serversController(serversController)
 {
 }
 
 void ApiNewsController::fetchNews(bool showError)
 {
-    if (m_serversModel.isNull()) {
-        qWarning() << "ServersModel is null, skip fetchNews";
+    if (m_serversController.isNull()) {
+        qWarning() << "ServersController is null, skip fetchNews";
         return;
     }
-    const auto stacks = m_serversModel->gatewayStacks();
+    const auto stacks = m_serversController->gatewayStacks();
     if (stacks.isEmpty()) {
         qDebug() << "No Gateway stacks, skip fetchNews";
         return;

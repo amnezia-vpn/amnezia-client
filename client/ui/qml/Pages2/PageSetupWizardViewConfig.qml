@@ -46,8 +46,8 @@ PageType {
         function onImportFinished() {
             PageController.showBusyIndicator(false)
             if (!ConnectionController.isConnected) {
-                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                ServersUiController.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                ServersUiController.processedIndex = ServersUiController.defaultIndex
             }
 
             PageController.goToPageHome()

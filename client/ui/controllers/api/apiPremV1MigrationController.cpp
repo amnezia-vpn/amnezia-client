@@ -1,15 +1,20 @@
 #include "apiPremV1MigrationController.h"
 
 #include <QEventLoop>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QTimer>
 
 #include "core/api/apiDefs.h"
 #include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
+#include "settings.h"
 
-ApiPremV1MigrationController::ApiPremV1MigrationController(const QSharedPointer<ServersModel> &serversModel,
-                                                           const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_settings(settings)
+ApiPremV1MigrationController::ApiPremV1MigrationController(const QSharedPointer<ServersController> &serversController,
+                                                           const QSharedPointer<ServersModel> &serversModel,
+                                                           const std::shared_ptr<Settings> &settings,
+                                                           QObject *parent)
+    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_settings(settings)
 {
 }
 
@@ -19,7 +24,7 @@ bool ApiPremV1MigrationController::hasConfigsToMigration()
 
     auto serversCount = m_serversModel->getServersCount();
     for (size_t i = 0; i < serversCount; i++) {
-        auto serverConfigObject = m_serversModel->getServerConfig(i);
+        auto serverConfigObject = m_serversController->getServerConfig(i);
 
         if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV1) {
             continue;

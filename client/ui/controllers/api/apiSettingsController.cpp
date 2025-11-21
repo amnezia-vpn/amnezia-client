@@ -23,12 +23,14 @@ namespace
     const int requestTimeoutMsecs = 12 * 1000; // 12 secs
 }
 
-ApiSettingsController::ApiSettingsController(const QSharedPointer<ServersModel> &serversModel,
+ApiSettingsController::ApiSettingsController(const QSharedPointer<ServersController> &serversController,
+                                             const QSharedPointer<ServersModel> &serversModel,
                                              const QSharedPointer<ApiAccountInfoModel> &apiAccountInfoModel,
                                              const QSharedPointer<ApiCountryModel> &apiCountryModel,
                                              const QSharedPointer<ApiDevicesModel> &apiDevicesModel,
                                              const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
+      m_serversController(serversController),
       m_serversModel(serversModel),
       m_apiAccountInfoModel(apiAccountInfoModel),
       m_apiCountryModel(apiCountryModel),
@@ -53,7 +55,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
                                         m_settings->isStrictKillSwitchEnabled());
 
     auto processedIndex = m_serversModel->getProcessedServerIndex();
-    auto serverConfig = m_serversModel->getServerConfig(processedIndex);
+    auto serverConfig = m_serversController->getServerConfig(processedIndex);
     auto apiConfig = serverConfig.value(configKey::apiConfig).toObject();
     auto authData = serverConfig.value(configKey::authData).toObject();
 

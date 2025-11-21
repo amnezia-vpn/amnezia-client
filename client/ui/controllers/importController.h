@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "core/controllers/serversController.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
 
@@ -24,7 +25,8 @@ class ImportController : public QObject
 {
     Q_OBJECT
 public:
-    explicit ImportController(const QSharedPointer<ServersModel> &serversModel,
+    explicit ImportController(const QSharedPointer<ServersController> &serversController,
+                              const QSharedPointer<ServersModel> &serversModel,
                               const QSharedPointer<ContainersModel> &containersModel,
                               const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
@@ -73,6 +75,7 @@ private:
     void stopDecodingQr();
 #endif
 
+    QSharedPointer<ServersController> m_serversController;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     std::shared_ptr<Settings> m_settings;

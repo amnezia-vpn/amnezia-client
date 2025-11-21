@@ -9,12 +9,15 @@
 #include "core/controllers/vpnConfigurationController.h"
 #include "version.h"
 
-ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
+ConnectionController::ConnectionController(const QSharedPointer<ServersController> &serversController,
+                                           const QSharedPointer<ServersModel> &serversModel,
                                            const QSharedPointer<ContainersModel> &containersModel,
                                            const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                           const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
+                                           const QSharedPointer<VpnConnection> &vpnConnection,
+                                           const std::shared_ptr<Settings> &settings,
                                            QObject *parent)
     : QObject(parent),
+      m_serversController(serversController),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_clientManagementModel(clientManagementModel),
@@ -40,8 +43,8 @@ void ConnectionController::openConnection()
     }
 #endif
 
-    int serverIndex = m_serversModel->getDefaultServerIndex();
-    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
+    int serverIndex = m_serversController->getDefaultServerIndex();
+    QJsonObject serverConfig = m_serversController->getServerConfig(serverIndex);
 
     DockerContainer container = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
 
@@ -54,9 +57,9 @@ void ConnectionController::openConnection()
     VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
 
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
-    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+    ServerCredentials credentials = m_serversController->getServerCredentials(serverIndex);
 
-    auto dns = m_serversModel->getDnsPair(serverIndex);
+    auto dns = m_serversController->getDnsPair(serverIndex, m_settings->useAmneziaDns());
 
     auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container);
     emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);

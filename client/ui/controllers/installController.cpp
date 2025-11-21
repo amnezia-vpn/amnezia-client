@@ -37,11 +37,13 @@ namespace
     }
 }
 
-InstallController::InstallController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+InstallController::InstallController(const QSharedPointer<ServersController> &serversController,
+                                     const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                      const QSharedPointer<ProtocolsModel> &protocolsModel,
                                      const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                      const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
+      m_serversController(serversController),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_protocolModel(protocolsModel),
@@ -61,7 +63,7 @@ InstallController::~InstallController()
 #endif
 }
 
-void InstallController::install(DockerContainer container, int port, TransportProto transportProto)
+void InstallController::install(DockerContainer container, int port, TransportProto transportProto, int serverIndex)
 {
     QJsonObject config;
     auto mainProto = ContainerProps::defaultProtocol(container);
@@ -161,14 +163,13 @@ void InstallController::install(DockerContainer container, int port, TransportPr
     }
 
     ServerCredentials serverCredentials;
-    if (m_shouldCreateServer) {
+    if (serverIndex < 0) {
         if (isServerAlreadyExists()) {
             return;
         }
         serverCredentials = m_processedServerCredentials;
     } else {
-        int serverIndex = m_serversModel->getProcessedServerIndex();
-        serverCredentials = qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+        serverCredentials = m_serversController->getServerCredentials(serverIndex);
     }
 
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
@@ -202,10 +203,10 @@ void InstallController::install(DockerContainer container, int port, TransportPr
         return;
     }
 
-    if (m_shouldCreateServer) {
+    if (serverIndex < 0) {
         installServer(container, installedContainers, serverCredentials, serverController, finishMessage);
     } else {
-        installContainer(container, installedContainers, serverCredentials, serverController, finishMessage);
+        installContainer(container, installedContainers, serverCredentials, serverController, finishMessage, serverIndex);
     }
 }
 
@@ -222,7 +223,7 @@ void InstallController::installServer(const DockerContainer container, const QMa
     server.insert(config_key::userName, m_processedServerCredentials.userName);
     server.insert(config_key::password, m_processedServerCredentials.secretData);
     server.insert(config_key::port, m_processedServerCredentials.port);
-    server.insert(config_key::description, m_settings->nextAvailableServerName());
+    server.insert(config_key::description, m_serversController->getNextAvailableServerName());
 
     QJsonArray containerConfigs;
     VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
@@ -252,14 +253,13 @@ void InstallController::installServer(const DockerContainer container, const QMa
     server.insert(config_key::containers, containerConfigs);
     server.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
 
-    m_serversModel->addServer(server);
-
+    m_serversController->addServer(server);
     emit installServerFinished(finishMessage);
 }
 
 void InstallController::installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
                                          const ServerCredentials &serverCredentials,
-                                         const QSharedPointer<ServerController> &serverController, QString &finishMessage)
+                                         const QSharedPointer<ServerController> &serverController, QString &finishMessage, int serverIndex)
 {
     bool isInstalledContainerAddedToGui = false;
 
@@ -276,7 +276,7 @@ void InstallController::installContainer(const DockerContainer container, const 
                     emit installationErrorOccurred(errorCode);
                     return;
                 }
-                m_serversModel->addContainerConfig(iterator.key(), containerConfig);
+                m_serversController->addContainerConfig(serverIndex, iterator.key(), containerConfig);
 
                 errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
                                                                   QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
@@ -285,7 +285,7 @@ void InstallController::installContainer(const DockerContainer container, const 
                     return;
                 }
             } else {
-                m_serversModel->addContainerConfig(iterator.key(), containerConfig);
+                m_serversController->addContainerConfig(serverIndex, iterator.key(), containerConfig);
             }
 
             if (container != iterator.key()) { // skip the newly installed container
@@ -303,10 +303,8 @@ void InstallController::installContainer(const DockerContainer container, const 
 
 bool InstallController::isServerAlreadyExists()
 {
-    for (int i = 0; i < m_serversModel->getServersCount(); i++) {
-        auto modelIndex = m_serversModel->index(i);
-        const ServerCredentials credentials =
-                qvariant_cast<ServerCredentials>(m_serversModel->data(modelIndex, ServersModel::Roles::CredentialsRole));
+    for (int i = 0; i < m_serversController->getServersCount(); i++) {
+        const ServerCredentials credentials = m_serversController->getServerCredentials(i);
         if (m_processedServerCredentials.hostName == credentials.hostName && m_processedServerCredentials.port == credentials.port) {
             emit serverAlreadyExists(i);
             return true;
@@ -315,11 +313,9 @@ bool InstallController::isServerAlreadyExists()
     return false;
 }
 
-void InstallController::scanServerForInstalledContainers()
+void InstallController::scanServerForInstalledContainers(int serverIndex)
 {
-    int serverIndex = m_serversModel->getProcessedServerIndex();
-    ServerCredentials serverCredentials =
-            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    ServerCredentials serverCredentials = m_serversController->getServerCredentials(serverIndex);
 
     QMap<DockerContainer, QJsonObject> installedContainers;
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
@@ -342,7 +338,7 @@ void InstallController::scanServerForInstalledContainers()
                         emit installationErrorOccurred(errorCode);
                         return;
                     }
-                    m_serversModel->addContainerConfig(container, containerConfig);
+                    m_serversController->addContainerConfig(serverIndex, container, containerConfig);
 
                     errorCode = m_clientManagementModel->appendClient(container, serverCredentials, containerConfig,
                                                                       QString("Admin [%1]").arg(QSysInfo::prettyProductName()),
@@ -352,7 +348,7 @@ void InstallController::scanServerForInstalledContainers()
                         return;
                     }
                 } else {
-                    m_serversModel->addContainerConfig(container, containerConfig);
+                    m_serversController->addContainerConfig(serverIndex, container, containerConfig);
                 }
 
                 isInstalledContainerAddedToGui = true;
@@ -697,11 +693,9 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
     return ErrorCode::NoError;
 }
 
-void InstallController::updateContainer(QJsonObject config)
+void InstallController::updateContainer(int serverIndex, QJsonObject config)
 {
-    int serverIndex = m_serversModel->getProcessedServerIndex();
-    ServerCredentials serverCredentials =
-            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    ServerCredentials serverCredentials = m_serversController->getServerCredentials(serverIndex);
 
     const DockerContainer container = ContainerProps::containerFromString(config.value(config_key::container).toString());
     QJsonObject oldContainerConfig = m_containersModel->getContainerConfig(container);
@@ -713,15 +707,15 @@ void InstallController::updateContainer(QJsonObject config)
         connect(this, &InstallController::cancelInstallation, serverController.get(), &ServerController::cancelInstallation);
 
         errorCode = serverController->updateContainer(serverCredentials, container, oldContainerConfig, config);
-        clearCachedProfile(serverController);
+        clearCachedProfile(serverIndex, serverController);
     }
 
     if (errorCode == ErrorCode::NoError) {
-        m_serversModel->updateContainerConfig(container, config);
+        m_serversController->updateContainerConfig(serverIndex, container, config);
         m_protocolModel->updateModel(config);
 
         auto defaultContainer = qvariant_cast<DockerContainer>(m_serversModel->data(serverIndex, ServersModel::Roles::DefaultContainerRole));
-        if ((serverIndex == m_serversModel->getDefaultServerIndex()) && (container == defaultContainer)) {
+        if ((serverIndex == m_serversController->getDefaultServerIndex()) && (container == defaultContainer)) {
             emit currentContainerUpdated();
         } else {
             emit updateContainerFinished(tr("Settings updated successfully"));
@@ -733,36 +727,33 @@ void InstallController::updateContainer(QJsonObject config)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallController::rebootProcessedServer()
+void InstallController::rebootServer(int serverIndex)
 {
-    int serverIndex = m_serversModel->getProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    const auto errorCode = m_serversModel->rebootServer(serverController);
+    const auto errorCode = m_serversController->rebootServer(serverController.get(), serverIndex);
     if (errorCode == ErrorCode::NoError) {
-        emit rebootProcessedServerFinished(tr("Server '%1' was rebooted").arg(serverName));
+        emit rebootServerFinished(tr("Server '%1' was rebooted").arg(serverName));
     } else {
         emit installationErrorOccurred(errorCode);
     }
 }
 
-void InstallController::removeProcessedServer()
+void InstallController::removeServer(int serverIndex)
 {
-    int serverIndex = m_serversModel->getProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
-    m_serversModel->removeServer();
-    emit removeProcessedServerFinished(tr("Server '%1' was removed").arg(serverName));
+    m_serversController->removeServer(serverIndex);
+    emit removeServerFinished(tr("Server '%1' was removed").arg(serverName));
 }
 
-void InstallController::removeAllContainers()
+void InstallController::removeAllContainers(int serverIndex)
 {
-    int serverIndex = m_serversModel->getProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    ErrorCode errorCode = m_serversModel->removeAllContainers(serverController);
+    ErrorCode errorCode = m_serversController->removeAllContainers(serverController.get(), serverIndex);
     if (errorCode == ErrorCode::NoError) {
         emit removeAllContainersFinished(tr("All containers from server '%1' have been removed").arg(serverName));
         return;
@@ -770,19 +761,18 @@ void InstallController::removeAllContainers()
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallController::removeProcessedContainer()
+void InstallController::removeContainer(int serverIndex)
 {
-    int serverIndex = m_serversModel->getProcessedServerIndex();
     QString serverName = m_serversModel->data(serverIndex, ServersModel::Roles::NameRole).toString();
 
     int container = m_containersModel->getProcessedContainerIndex();
     QString containerName = m_containersModel->getProcessedContainerName();
 
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    ErrorCode errorCode = m_serversModel->removeContainer(serverController, container);
+    ErrorCode errorCode = m_serversController->removeContainer(serverController.get(), serverIndex, static_cast<DockerContainer>(container));
     if (errorCode == ErrorCode::NoError) {
 
-        emit removeProcessedContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
+        emit removeContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
         return;
     }
     emit installationErrorOccurred(errorCode);
@@ -790,31 +780,29 @@ void InstallController::removeProcessedContainer()
 
 void InstallController::removeApiConfig(const int serverIndex)
 {
-    m_serversModel->removeApiConfig(serverIndex);
+    m_serversController->removeApiConfig(serverIndex);
     emit apiConfigRemoved(tr("Api config removed"));
 }
 
-void InstallController::clearCachedProfile(QSharedPointer<ServerController> serverController)
+void InstallController::clearCachedProfile(int serverIndex, QSharedPointer<ServerController> serverController)
 {
     if (serverController.isNull()) {
         serverController.reset(new ServerController(m_settings));
     }
 
-    int serverIndex = m_serversModel->getProcessedServerIndex();
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());
     if (ContainerProps::containerService(container) == ServiceType::Other) {
         return;
     }
 
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
-    ServerCredentials serverCredentials =
-            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    ServerCredentials serverCredentials = m_serversController->getServerCredentials(serverIndex);
 
-    m_serversModel->clearCachedProfile(container);
+    m_serversController->clearCachedProfile(serverIndex, container);
     m_clientManagementModel->revokeClient(containerConfig, container, serverCredentials, serverIndex, serverController);
 
     emit cachedProfileCleared(tr("%1 cached profile cleared").arg(ContainerProps::containerHumanNames().value(container)));
-    QJsonObject updatedConfig = m_settings->containerConfig(serverIndex, container);
+    QJsonObject updatedConfig = m_serversController->getContainerConfig(serverIndex, container);
     emit profileCleared(updatedConfig);
 }
 
@@ -839,19 +827,13 @@ void InstallController::setProcessedServerCredentials(const QString &hostName, c
     m_processedServerCredentials.secretData = secretData;
 }
 
-void InstallController::setShouldCreateServer(bool shouldCreateServer)
-{
-    m_shouldCreateServer = shouldCreateServer;
-}
 
-void InstallController::mountSftpDrive(const QString &port, const QString &password, const QString &username)
+void InstallController::mountSftpDrive(int serverIndex, const QString &port, const QString &password, const QString &username)
 {
     QString mountPath;
     QString cmd;
 
-    int serverIndex = m_serversModel->getProcessedServerIndex();
-    ServerCredentials serverCredentials =
-            qvariant_cast<ServerCredentials>(m_serversModel->data(serverIndex, ServersModel::Roles::CredentialsRole));
+    ServerCredentials serverCredentials = m_serversController->getServerCredentials(serverIndex);
     QString hostname = serverCredentials.hostName;
 
 #ifdef Q_OS_WINDOWS
@@ -976,19 +958,18 @@ void InstallController::addEmptyServer()
     server.insert(config_key::userName, m_processedServerCredentials.userName);
     server.insert(config_key::password, m_processedServerCredentials.secretData);
     server.insert(config_key::port, m_processedServerCredentials.port);
-    server.insert(config_key::description, m_settings->nextAvailableServerName());
+    server.insert(config_key::description, m_serversController->getNextAvailableServerName());
 
     server.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
 
-    m_serversModel->addServer(server);
-
+    m_serversController->addServer(server);
     emit installServerFinished(tr("Server added successfully"));
 }
 
 bool InstallController::isConfigValid()
 {
-    int serverIndex = m_serversModel->getDefaultServerIndex();
-    QJsonObject serverConfigObject = m_serversModel->getServerConfig(serverIndex);
+    int serverIndex = m_serversController->getDefaultServerIndex();
+    QJsonObject serverConfigObject = m_serversController->getServerConfig(serverIndex);
 
     if (apiUtils::isServerFromApi(serverConfigObject)) {
         return true;
@@ -1010,11 +991,11 @@ bool InstallController::isConfigValid()
     VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
 
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
-    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+    ServerCredentials credentials = m_serversController->getServerCredentials(serverIndex);
 
     QFutureWatcher<ErrorCode> watcher;
 
-    QFuture<ErrorCode> future = QtConcurrent::run([this, container, &credentials, &containerConfig, &serverController]() {
+    QFuture<ErrorCode> future = QtConcurrent::run([this, serverIndex, container, &credentials, &containerConfig, &serverController]() {
         ErrorCode errorCode = ErrorCode::NoError;
 
         auto isProtocolConfigExists = [](const QJsonObject &containerConfig, const DockerContainer container) {
@@ -1035,7 +1016,7 @@ bool InstallController::isConfigValid()
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
             }
-            m_serversModel->updateContainerConfig(container, containerConfig);
+            m_serversController->updateContainerConfig(serverIndex, container, containerConfig);
 
             errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig,
                                                               QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);

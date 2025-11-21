@@ -356,7 +356,7 @@ PageType {
 
                     Component.onCompleted: {
                         if (ServersModel.isDefaultServerHasWriteAccess() && ServersModel.getDefaultServerData("hasInstalledContainers")) {
-                            serverSelectorListView.selectedIndex = proxyServersModel.mapFromSource(ServersModel.defaultIndex)
+                            serverSelectorListView.selectedIndex = proxyServersModel.mapFromSource(ServersUiController.defaultIndex)
                         } else {
                             serverSelectorListView.selectedIndex = 0
                         }
@@ -367,7 +367,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.processedIndex = proxyServersModel.mapToSource(selectedIndex)
+                        ServersUiController.processedIndex = proxyServersModel.mapToSource(selectedIndex)
                     }
                 }
             }

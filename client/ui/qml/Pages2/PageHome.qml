@@ -172,7 +172,7 @@ PageType {
                 buttonTextLabel.font.weight: 500
 
                 property bool isSplitTunnelingEnabled: SitesModel.isTunnelingEnabled || AppSplitTunnelingModel.isTunnelingEnabled ||
-                                                       ServersModel.isDefaultServerDefaultContainerHasSplitTunneling
+                                                       ServersUiController.isDefaultServerDefaultContainerHasSplitTunneling
 
                 text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
 
@@ -292,7 +292,7 @@ PageType {
                         maximumLineCount: 2
                         elide: Qt.ElideRight
 
-                        text: ServersModel.defaultServerName
+                        text: ServersUiController.defaultServerName
                         horizontalAlignment: Qt.AlignHCenter
 
                         Behavior on opacity {
@@ -334,11 +334,11 @@ PageType {
                     objectName: "rowLayoutLabel"
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     Layout.topMargin: 8
-                    Layout.bottomMargin: drawer.isCollapsedStateActive ? 44 : ServersModel.isDefaultServerFromApi ? 61 : 16
+                    Layout.bottomMargin: drawer.isCollapsedStateActive ? 44 : ServersUiController.isDefaultServerFromApi ? 61 : 16
                     spacing: 0
 
                     BasicButtonType {
-                        enabled: (ServersModel.defaultServerImagePathCollapsed !== "") && drawer.isCollapsedStateActive
+                        enabled: (ServersUiController.defaultServerImagePathCollapsed !== "") && drawer.isCollapsedStateActive
                         hoverEnabled: enabled
 
                         implicitHeight: 36
@@ -356,8 +356,8 @@ PageType {
                         buttonTextLabel.font.pixelSize: 13
                         buttonTextLabel.font.weight: 400
 
-                        text: drawer.isCollapsedStateActive ? ServersModel.defaultServerDescriptionCollapsed : ServersModel.defaultServerDescriptionExpanded
-                        leftImageSource: ServersModel.defaultServerImagePathCollapsed
+                        text: drawer.isCollapsedStateActive ? ServersUiController.defaultServerDescriptionCollapsed : ServersUiController.defaultServerDescriptionExpanded
+                        leftImageSource: ServersUiController.defaultServerImagePathCollapsed
                         leftImageColor: ""
                         changeLeftImageSize: false
 
@@ -367,7 +367,7 @@ PageType {
                         Keys.onReturnPressed: this.clicked()
 
                         onClicked: {
-                            ServersModel.processedIndex = ServersModel.defaultIndex
+                            ServersUiController.processedIndex = ServersUiController.defaultIndex
 
                             if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
                                 if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
@@ -402,7 +402,7 @@ PageType {
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     spacing: 8
 
-                    visible: !ServersModel.isDefaultServerFromApi
+                    visible: !ServersUiController.isDefaultServerFromApi
 
                     DropDownType {
                         id: containersDropDown
@@ -419,7 +419,7 @@ PageType {
 
                         enabled: drawer.isOpened
 
-                        text: ServersModel.defaultServerDefaultContainerName
+                        text: ServersUiController.defaultServerDefaultContainerName
                         textColor: AmneziaStyle.color.midnightBlack
                         headerText: qsTr("VPN protocol")
                         headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
@@ -439,7 +439,7 @@ PageType {
                             Connections {
                                 objectName: "rowLayoutConnections"
 
-                                target: ServersModel
+                                target: ServersUiController
 
                                 function onDefaultServerIndexChanged() {
                                     updateContainersModelFilters()

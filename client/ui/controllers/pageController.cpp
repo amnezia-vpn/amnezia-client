@@ -1,4 +1,6 @@
 #include "pageController.h"
+
+#include "settings.h"
 #include "utils/converter.h"
 #include "core/errorstrings.h"
 #if defined(MACOS_NE)

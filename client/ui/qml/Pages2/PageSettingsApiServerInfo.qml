@@ -171,7 +171,7 @@ PageType {
                     } else {
                         PageController.showBusyIndicator(true)
                         ApiConfigsController.setCurrentProtocol(switcher.isVlessProtocol ? "awg" : "vless")
-                        ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
+                        ApiConfigsController.updateServiceFromGateway(ServersUiController.processedIndex, "", "", true)
                         PageController.showBusyIndicator(false)
                     }
                 }
@@ -321,7 +321,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot reload API config during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
+                            ApiConfigsController.updateServiceFromGateway(ServersUiController.processedIndex, "", "", true)
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -397,7 +397,7 @@ PageType {
                         } else {
                             PageController.showBusyIndicator(true)
                             if (ApiConfigsController.deactivateDevice(true)) {
-                                InstallController.removeProcessedServer()
+                                InstallController.removeServer(ServersUiController.processedIndex)
                             }
                             PageController.showBusyIndicator(false)
                         }

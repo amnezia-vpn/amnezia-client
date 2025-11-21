@@ -5,6 +5,7 @@
 #include <QProcess>
 
 #include "containers/containers_defs.h"
+#include "core/controllers/serversController.h"
 #include "core/defs.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
@@ -15,34 +16,34 @@ class InstallController : public QObject
 {
     Q_OBJECT
 public:
-    explicit InstallController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+    explicit InstallController(const QSharedPointer<ServersController> &serversController,
+                               const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                const QSharedPointer<ProtocolsModel> &protocolsModel,
                                const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
     ~InstallController();
 
 public slots:
-    void install(DockerContainer container, int port, TransportProto transportProto);
+    void install(DockerContainer container, int port, TransportProto transportProto, int serverIndex);
     void setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData);
-    void setShouldCreateServer(bool shouldCreateServer);
 
-    void scanServerForInstalledContainers();
+    void scanServerForInstalledContainers(int serverIndex);
 
-    void updateContainer(QJsonObject config);
+    void updateContainer(int serverIndex, QJsonObject config);
 
-    void removeProcessedServer();
-    void rebootProcessedServer();
-    void removeAllContainers();
-    void removeProcessedContainer();
+    void removeServer(int serverIndex);
+    void rebootServer(int serverIndex);
+    void removeAllContainers(int serverIndex);
+    void removeContainer(int serverIndex);
 
-    void removeApiConfig(const int serverIndex);
+    void removeApiConfig(int serverIndex);
 
-    void clearCachedProfile(QSharedPointer<ServerController> serverController = nullptr);
+    void clearCachedProfile(int serverIndex, QSharedPointer<ServerController> serverController = nullptr);
 
     QRegularExpression ipAddressPortRegExp();
     QRegularExpression ipAddressRegExp();
 
-    void mountSftpDrive(const QString &port, const QString &password, const QString &username);
+    void mountSftpDrive(int serverIndex, const QString &port, const QString &password, const QString &username);
 
     bool checkSshConnection(QSharedPointer<ServerController> serverController = nullptr);
 
@@ -60,10 +61,10 @@ signals:
 
     void scanServerFinished(bool isInstalledContainerFound);
 
-    void rebootProcessedServerFinished(const QString &finishedMessage);
-    void removeProcessedServerFinished(const QString &finishedMessage);
+    void rebootServerFinished(const QString &finishedMessage);
+    void removeServerFinished(const QString &finishedMessage);
     void removeAllContainersFinished(const QString &finishedMessage);
-    void removeProcessedContainerFinished(const QString &finishedMessage);
+    void removeContainerFinished(const QString &finishedMessage);
 
     void installationErrorOccurred(ErrorCode errorCode);
     void wrongInstallationUser(const QString &message);
@@ -91,13 +92,14 @@ private:
                        QString &finishMessage);
     void installContainer(const DockerContainer container, const QMap<DockerContainer, QJsonObject> &installedContainers,
                           const ServerCredentials &serverCredentials, const QSharedPointer<ServerController> &serverController,
-                          QString &finishMessage);
+                          QString &finishMessage, int serverIndex);
     bool isServerAlreadyExists();
 
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, const QSharedPointer<ServerController> &serverController,
                                             QMap<DockerContainer, QJsonObject> &installedContainers);
     bool isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
 
+    QSharedPointer<ServersController> m_serversController;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ProtocolsModel> m_protocolModel;
@@ -106,8 +108,6 @@ private:
     std::shared_ptr<Settings> m_settings;
 
     ServerCredentials m_processedServerCredentials;
-
-    bool m_shouldCreateServer;
 
     QString m_privateKeyPassphrase;
 

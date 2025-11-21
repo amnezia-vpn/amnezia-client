@@ -12,10 +12,13 @@
 #include "core/qrCodeUtils.h"
 #include "systemController.h"
 
-ExportController::ExportController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+ExportController::ExportController(const QSharedPointer<ServersController> &serversController,
+                                   const QSharedPointer<ServersModel> &serversModel,
+                                   const QSharedPointer<ContainersModel> &containersModel,
                                    const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                    const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
+      m_serversController(serversController),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_clientManagementModel(clientManagementModel),
@@ -28,7 +31,7 @@ void ExportController::generateFullAccessConfig()
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getProcessedServerIndex();
-    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
+    QJsonObject serverConfig = m_serversController->getServerConfig(serverIndex);
 
     QJsonArray containers = serverConfig.value(config_key::containers).toArray();
     for (auto i = 0; i < containers.size(); i++) {
@@ -59,7 +62,7 @@ void ExportController::generateConnectionConfig(const QString &clientName)
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getProcessedServerIndex();
-    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+    ServerCredentials credentials = m_serversController->getServerCredentials(serverIndex);
 
     DockerContainer container = static_cast<DockerContainer>(m_containersModel->getProcessedContainerIndex());
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
@@ -75,7 +78,7 @@ void ExportController::generateConnectionConfig(const QString &clientName)
         return;
     }
 
-    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIndex);
+    QJsonObject serverConfig = m_serversController->getServerConfig(serverIndex);
     if (!errorCode) {
         serverConfig.remove(config_key::userName);
         serverConfig.remove(config_key::password);
@@ -83,7 +86,7 @@ void ExportController::generateConnectionConfig(const QString &clientName)
         serverConfig.insert(config_key::containers, QJsonArray { containerConfig });
         serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
 
-        auto dns = m_serversModel->getDnsPair(serverIndex);
+        auto dns = m_serversController->getDnsPair(serverIndex, m_settings->useAmneziaDns());
         serverConfig.insert(config_key::dns1, dns.first);
         serverConfig.insert(config_key::dns2, dns.second);
     }
@@ -102,8 +105,8 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
     clearPreviousConfig();
 
     int serverIndex = m_serversModel->getProcessedServerIndex();
-    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
-    auto dns = m_serversModel->getDnsPair(serverIndex);
+    ServerCredentials credentials = m_serversController->getServerCredentials(serverIndex);
+    auto dns = m_serversController->getDnsPair(serverIndex, m_settings->useAmneziaDns());
     bool isApiConfig = qvariant_cast<bool>(m_serversModel->data(serverIndex, ServersModel::IsServerFromTelegramApiRole));
 
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);

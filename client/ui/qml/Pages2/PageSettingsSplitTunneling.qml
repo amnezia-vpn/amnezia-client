@@ -29,7 +29,7 @@ PageType {
         if (ConnectionController.isConnected) {
             PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
             root.pageEnabled = false
-        } else if (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling) {
+        } else if (ServersUiController.isDefaultServerDefaultContainerHasSplitTunneling) {
             PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
             root.pageEnabled = false
         } else {

@@ -68,9 +68,10 @@ namespace
 #endif
 } // namespace
 
-ImportController::ImportController(const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+ImportController::ImportController(const QSharedPointer<ServersController> &serversController,
+                                   const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                    const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
+    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
 {
 #ifdef Q_OS_ANDROID
     mInstance = this;
@@ -199,7 +200,7 @@ bool ImportController::extractConfigFromData(QString data)
         return false;
     }
     case ConfigTypes::Backup: {
-        if (!m_serversModel->getServersCount()) {
+        if (!m_serversController->getServersCount()) {
             emit restoreAppConfig(config.toUtf8());
         } else {
             emit importErrorOccurred(ErrorCode::ImportInvalidConfigError, false);
@@ -318,16 +319,16 @@ void ImportController::importConfig()
     credentials.secretData = m_config.value(config_key::password).toString();
 
     if (credentials.isValid() || m_config.contains(config_key::containers)) {
-        m_serversModel->addServer(m_config);
+        m_serversController->addServer(m_config);
         emit importFinished();
     } else if (m_config.contains(config_key::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(m_config).toJson());
-        if (m_serversModel->isServerFromApiAlreadyExists(crc)) {
+        if (m_serversController->isServerFromApiAlreadyExists(crc)) {
             emit importErrorOccurred(ErrorCode::ApiConfigAlreadyAdded, true);
         } else {
             m_config.insert(config_key::crc, crc);
 
-            m_serversModel->addServer(m_config);
+            m_serversController->addServer(m_config);
             emit importFinished();
         }
     } else {

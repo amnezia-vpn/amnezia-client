@@ -59,7 +59,6 @@ ListViewType {
 
                 } else {
                     ContainersModel.setProcessedContainerIndex(root.model.mapToSource(index))
-                    InstallController.setShouldCreateServer(false)
                     PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 }
             }

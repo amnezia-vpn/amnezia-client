@@ -14,6 +14,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.h
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.h
     ${CLIENT_ROOT_DIR}/core/controllers/serverController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/serversController.h
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.h
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.h
     ${CLIENT_ROOT_DIR}/protocols/qml_register_protocols.h
@@ -62,6 +63,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/coreController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/serverController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/serversController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.cpp
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.cpp
     ${CLIENT_ROOT_DIR}/ui/qautostart.cpp

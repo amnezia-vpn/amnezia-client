@@ -38,8 +38,12 @@ void CoreController::initModels()
     m_defaultServerContainersModel.reset(new ContainersModel(this));
     m_engine->rootContext()->setContextProperty("DefaultServerContainersModel", m_defaultServerContainersModel.get());
 
-    m_serversModel.reset(new ServersModel(m_settings, this));
+    m_serversController = QSharedPointer<ServersController>::create(m_settings, this);
+
+    m_serversModel.reset(new ServersModel(this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
+
+    m_serversModel->updateModel(m_settings->serversArray(), m_settings->defaultServerIndex(), m_settings->useAmneziaDns());
 
     m_languageModel.reset(new LanguageModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
@@ -107,7 +111,7 @@ void CoreController::initModels()
 void CoreController::initControllers()
 {
     m_connectionController.reset(
-            new ConnectionController(m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_settings));
+            new ConnectionController(m_serversController, m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_settings));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
     m_pageController.reset(new PageController(m_serversModel, m_settings));
@@ -116,7 +120,7 @@ void CoreController::initControllers()
     m_focusController.reset(new FocusController(m_engine, this));
     m_engine->rootContext()->setContextProperty("FocusController", m_focusController.get());
 
-    m_installController.reset(new InstallController(m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_settings));
+    m_installController.reset(new InstallController(m_serversController, m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_settings));
     m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
 
     connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
@@ -125,15 +129,18 @@ void CoreController::initControllers()
     connect(m_installController.get(), &InstallController::profileCleared,
             m_protocolsModel.get(), &ProtocolsModel::updateModel);
 
-    m_importController.reset(new ImportController(m_serversModel, m_containersModel, m_settings));
+    m_importController.reset(new ImportController(m_serversController, m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_exportController.reset(new ExportController(m_serversModel, m_containersModel, m_clientManagementModel, m_settings));
+    m_exportController.reset(new ExportController(m_serversController, m_serversModel, m_containersModel, m_clientManagementModel, m_settings));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
     m_settingsController.reset(
             new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
+
+    m_serversUiController = QSharedPointer<ServersUiController>::create(m_serversController, m_serversModel);
+    m_engine->rootContext()->setContextProperty("ServersUiController", m_serversUiController.get());
 
     m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
@@ -148,16 +155,16 @@ void CoreController::initControllers()
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
 
     m_apiSettingsController.reset(
-            new ApiSettingsController(m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settings));
+            new ApiSettingsController(m_serversController, m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiSettingsController", m_apiSettingsController.get());
 
-    m_apiConfigsController.reset(new ApiConfigsController(m_serversModel, m_apiServicesModel, m_settings));
+    m_apiConfigsController.reset(new ApiConfigsController(m_serversController, m_serversModel, m_apiServicesModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigsController.get());
 
-    m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversModel, m_settings, this));
+    m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversController, m_serversModel, m_settings, this));
     m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
 
-    m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversModel, this));
+    m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversController, this));
     m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
 }
 
@@ -230,6 +237,7 @@ void CoreController::initSignalHandlers()
     initTranslationsUpdatedHandler();
     initAutoConnectHandler();
     initAmneziaDnsToggledHandler();
+    initServersModelUpdateHandler();
     initPrepareConfigHandler();
     initImportPremiumV2VpnKeyHandler();
     initShowMigrationDrawerHandler();
@@ -322,18 +330,15 @@ void CoreController::initContainerModelUpdateHandler()
     connect(m_serversModel.get(), &ServersModel::containersUpdated, m_containersModel.get(), &ContainersModel::updateModel);
     connect(m_serversModel.get(), &ServersModel::defaultServerContainersUpdated, m_defaultServerContainersModel.get(),
             &ContainersModel::updateModel);
-    connect(m_serversModel.get(), &ServersModel::gatewayStacksExpanded, this, [this]() {
-        if (m_serversModel->hasServersFromGatewayApi()) {
-            m_apiNewsController->fetchNews(false);
-        }
+    connect(m_serversController.get(), &ServersController::gatewayStacksExpanded, this, [this]() {
+        m_apiNewsController->fetchNews(false);
     });
-    m_serversModel->resetModel();
+    m_serversModel->updateModel(m_settings->serversArray(), m_settings->defaultServerIndex(), m_settings->useAmneziaDns());
 }
 
 void CoreController::initAdminConfigRevokedHandler()
 {
-    connect(m_clientManagementModel.get(), &ClientManagementModel::adminConfigRevoked, m_serversModel.get(),
-            &ServersModel::clearCachedProfile);
+    // Admin config revocation is now handled by InstallController::clearCachedProfile
 }
 
 void CoreController::initPassphraseRequestHandler()
@@ -353,14 +358,26 @@ void CoreController::initTranslationsUpdatedHandler()
 
 void CoreController::initAutoConnectHandler()
 {
-    if (m_settingsController->isAutoConnectEnabled() && m_serversModel->getDefaultServerIndex() >= 0) {
+    if (m_settingsController->isAutoConnectEnabled() && m_serversController->getDefaultServerIndex() >= 0) {
         QTimer::singleShot(1000, this, [this]() { m_connectionController->openConnection(); });
     }
 }
 
 void CoreController::initAmneziaDnsToggledHandler()
 {
-    connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled, m_serversModel.get(), &ServersModel::toggleAmneziaDns);
+    connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled, m_serversUiController.get(), &ServersUiController::toggleAmneziaDns);
+}
+
+void CoreController::initServersModelUpdateHandler()
+{
+    connect(m_serversController.get(), &ServersController::serverAdded,
+            m_serversUiController.get(), &ServersUiController::onAddServer);
+    connect(m_serversController.get(), &ServersController::serverEdited,
+            m_serversUiController.get(), &ServersUiController::onServerEdited);
+    connect(m_serversController.get(), &ServersController::serverRemoved,
+            m_serversUiController.get(), &ServersUiController::onServerRemoved);
+    connect(m_serversController.get(), &ServersController::defaultServerChanged,
+            m_serversUiController.get(), &ServersUiController::onDefaultServerChanged);
 }
 
 void CoreController::initPrepareConfigHandler()

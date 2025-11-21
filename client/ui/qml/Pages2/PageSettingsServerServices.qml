@@ -27,7 +27,7 @@ PageType {
         anchors.fill: parent
 
         Connections {
-            target: ServersModel
+            target: ServersUiController
 
             function onProcessedServerIndexChanged() {
                 settingsContainersListView.updateContainersModelFilters()

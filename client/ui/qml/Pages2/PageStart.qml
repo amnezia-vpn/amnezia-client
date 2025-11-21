@@ -145,7 +145,7 @@ PageType {
             PageController.showNotificationMessage(message)
         }
 
-        function onRemoveProcessedServerFinished(finishedMessage) {
+        function onRemoveServerFinished(finishedMessage) {
             if (!ServersModel.getServersCount()) {
                 PageController.goToPageHome()
             } else {
@@ -158,8 +158,7 @@ PageType {
         function onNoInstalledContainers() {
             PageController.setTriggeredByConnectButton(true)
 
-            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
-            InstallController.setShouldCreateServer(false)
+            ServersUiController.processedIndex = ServersUiController.defaultIndex
             PageController.goToPage(PageEnum.PageSetupWizardEasy)
         }
     }
@@ -227,8 +226,8 @@ PageType {
 
         function onInstallServerFromApiFinished(message) {
             if (!ConnectionController.isConnected) {
-                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                ServersUiController.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                ServersUiController.processedIndex = ServersUiController.defaultIndex
             }
 
             PageController.goToPageHome()
@@ -271,7 +270,7 @@ PageType {
             } else {
                 tabBar.visible = true
                 pagePath = PageController.getPagePath(PageEnum.PageHome)
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                ServersUiController.processedIndex = ServersUiController.defaultIndex
             }
 
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
@@ -346,7 +345,7 @@ PageType {
             image: "qrc:/images/controls/home.svg"
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                ServersUiController.processedIndex = ServersUiController.defaultIndex
                 tabBar.currentIndex = 0
             }
         }
@@ -383,12 +382,12 @@ PageType {
             objectName: "settingsTabButton"
 
             isSelected: tabBar.currentIndex === 2
-            image: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
+            image: (ServersUiController.hasServersFromGatewayApi && NewsModel.hasUnread) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
             Binding {
                 target: settingsTabButton
                 property: "defaultColor"
                 value: "transparent"
-                when: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread)
+                when: (ServersUiController.hasServersFromGatewayApi && NewsModel.hasUnread)
             }
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
