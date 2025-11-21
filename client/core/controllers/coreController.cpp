@@ -55,8 +55,11 @@ void CoreController::initModels()
     m_appSplitTunnelingModel.reset(new AppSplitTunnelingModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("AppSplitTunnelingModel", m_appSplitTunnelingModel.get());
 
-    m_protocolsModel.reset(new ProtocolsModel(m_settings, this));
+    m_protocolsModel.reset(new ProtocolsModel(this));
     m_engine->rootContext()->setContextProperty("ProtocolsModel", m_protocolsModel.get());
+    
+    m_protocolsUiController.reset(new ProtocolsUiController(m_protocolsModel, this));
+    m_engine->rootContext()->setContextProperty("ProtocolsUiController", m_protocolsUiController.get());
 
     m_openVpnConfigModel.reset(new OpenVpnConfigModel(this));
     m_engine->rootContext()->setContextProperty("OpenVpnConfigModel", m_openVpnConfigModel.get());
@@ -125,7 +128,7 @@ void CoreController::initControllers()
             &ConnectionController::onCurrentContainerUpdated); // TODO remove this
 
     connect(m_installController.get(), &InstallController::profileCleared,
-            m_protocolsModel.get(), &ProtocolsModel::updateModel);
+            m_protocolsUiController.get(), &ProtocolsUiController::updateProtocols);
 
     m_importController.reset(new ImportController(m_serversController, m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());

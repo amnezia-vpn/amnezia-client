@@ -530,7 +530,7 @@ PageType {
                 }
 
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                InstallController.updateContainer(AwgConfigModel.getConfig())
+                InstallController.updateContainer(ServersUiController.processedIndex, AwgConfigModel.getConfig())
             }
 
             var noButtonFunction = function() {}

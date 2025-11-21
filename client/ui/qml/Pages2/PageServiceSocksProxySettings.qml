@@ -284,7 +284,7 @@ PageType {
                             }
 
                             PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                            InstallController.updateContainer(Socks5ProxyConfigModel.getConfig())
+                            InstallController.updateContainer(ServersUiController.processedIndex, Socks5ProxyConfigModel.getConfig())
                             tempPort = portTextField.textField.text
                             tempUsername = usernameTextField.textField.text
                             tempPassword = passwordTextField.textField.text

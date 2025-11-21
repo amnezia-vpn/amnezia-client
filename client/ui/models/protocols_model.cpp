@@ -1,7 +1,7 @@
 #include "protocols_model.h"
 
-ProtocolsModel::ProtocolsModel(std::shared_ptr<Settings> settings, QObject *parent)
-    : m_settings(settings), QAbstractListModel(parent)
+ProtocolsModel::ProtocolsModel(QObject *parent)
+    : QAbstractListModel(parent)
 {
 }
 

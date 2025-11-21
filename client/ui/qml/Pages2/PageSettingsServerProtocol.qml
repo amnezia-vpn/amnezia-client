@@ -79,8 +79,8 @@ PageType {
                 clickedFunction: function() {
                     if (isClientProtocolExists) {
                         switch (protocolIndex) {
-                        case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                        case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                        case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
+                        case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
                         }
                         PageController.goToPage(clientProtocolPage);
                     } else {
@@ -110,15 +110,15 @@ PageType {
 
                 clickedFunction: function() {
                     switch (protocolIndex) {
-                    case ProtocolEnum.OpenVpn: OpenVpnConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.ShadowSocks: ShadowSocksConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Cloak: CloakConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Sftp: SftpConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsModel.getConfig()); break;
-                    case ProtocolEnum.Socks5Proxy: Socks5ProxyConfigModel.updateModel(ProtocolsModel.getConfig()); break;
+                    case ProtocolEnum.OpenVpn: OpenVpnConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
+                    case ProtocolEnum.ShadowSocks: ShadowSocksConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
+                    case ProtocolEnum.Cloak: CloakConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
+                    case ProtocolEnum.WireGuard: WireGuardConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
+                    case ProtocolEnum.Awg: AwgConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
+                    case ProtocolEnum.Xray: XrayConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
+                    case ProtocolEnum.Sftp: SftpConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
+                    case ProtocolEnum.Ipsec: Ikev2ConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
+                    case ProtocolEnum.Socks5Proxy: Socks5ProxyConfigModel.updateModel(ProtocolsUiController.getProtocolsConfig()); break;
                     }
                     PageController.goToPage(serverProtocolPage);
                 }

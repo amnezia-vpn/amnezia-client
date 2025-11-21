@@ -35,7 +35,7 @@ ListViewType {
 
                     if (serviceType !== ProtocolEnum.Other) {
                         if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
-                            ProtocolsModel.updateModel(config)
+                            ProtocolsUiController.updateProtocols(config)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
                             return
                         }
@@ -43,7 +43,7 @@ ListViewType {
 
                     switch (containerIndex) {
                     case ContainerEnum.Ipsec: {
-                        ProtocolsModel.updateModel(config)
+                        ProtocolsUiController.updateProtocols(config)
                         PageController.goToPage(PageEnum.PageProtocolRaw)
                         break
                     }
@@ -52,7 +52,7 @@ ListViewType {
                         break
                     }
                     default: {
-                        ProtocolsModel.updateModel(config)
+                        ProtocolsUiController.updateProtocols(config)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
                     }
                     }

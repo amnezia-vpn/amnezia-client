@@ -128,7 +128,7 @@ PageType {
                         }
 
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateContainer(WireGuardConfigModel.getConfig())
+                        InstallController.updateContainer(ServersUiController.processedIndex, WireGuardConfigModel.getConfig())
                     }
                     var noButtonFunction = function() {}
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

@@ -21,6 +21,7 @@
 #include "ui/controllers/importController.h"
 #include "ui/controllers/installController.h"
 #include "ui/controllers/pageController.h"
+#include "ui/controllers/protocolsUiController.h"
 #include "ui/controllers/settingsController.h"
 #include "ui/controllers/serversUiController.h"
 #include "ui/controllers/sitesController.h"
@@ -126,6 +127,8 @@ private:
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
     QScopedPointer<ApiPremV1MigrationController> m_apiPremV1MigrationController;
     QScopedPointer<ApiNewsController> m_apiNewsController;
+    
+    QScopedPointer<ProtocolsUiController> m_protocolsUiController;
 
     QSharedPointer<ServersController> m_serversController;
 

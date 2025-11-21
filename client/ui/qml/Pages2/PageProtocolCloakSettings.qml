@@ -187,7 +187,7 @@ PageType {
                         }
 
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                        InstallController.updateContainer(CloakConfigModel.getConfig())
+                        InstallController.updateContainer(ServersUiController.processedIndex, CloakConfigModel.getConfig())
                     }
 
                     var noButtonFunction = function() {

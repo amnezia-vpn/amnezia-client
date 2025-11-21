@@ -155,7 +155,7 @@ PageType {
                         }
 
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateContainer(ShadowSocksConfigModel.getConfig())
+                        InstallController.updateContainer(ServersUiController.processedIndex, ShadowSocksConfigModel.getConfig())
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {

@@ -412,7 +412,7 @@ PageType {
                         }
 
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateContainer(OpenVpnConfigModel.getConfig())
+                        InstallController.updateContainer(ServersUiController.processedIndex, OpenVpnConfigModel.getConfig())
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {
