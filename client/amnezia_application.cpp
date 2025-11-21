@@ -13,6 +13,8 @@
 #include <QTimer>
 #include <QTranslator>
 #include <QEvent>
+#include <QDir>
+#include <QSettings>
 
 #include "logger.h"
 #include "ui/controllers/pageController.h"
@@ -61,8 +63,35 @@ AmneziaApplication::~AmneziaApplication()
     }
 }
 
+#ifdef Q_OS_ANDROID
+namespace {
+    static void clearQtCachesOnFirstStartApp()
+    {
+
+        QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
+        const QString markerKey = QStringLiteral("android.cache.cleaned.v1");
+        if (settings.value(markerKey).toBool())
+            return;
+
+        qDebug()<<"--------------The cache of the latest Qt version has been cleared-----------";
+
+        const QString cacheRoot = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+        if (!cacheRoot.isEmpty()) {
+            QDir(cacheRoot + "/QtShaderCache").removeRecursively();
+            QDir(cacheRoot + "/qmlcache").removeRecursively();
+        }
+
+        settings.setValue(markerKey, true);
+        settings.sync();
+    }
+}
+#endif
+
 void AmneziaApplication::init()
 {
+#ifdef Q_OS_ANDROID
+    clearQtCachesOnFirstStartApp();
+#endif
     m_engine = new QQmlApplicationEngine;
 
     const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
