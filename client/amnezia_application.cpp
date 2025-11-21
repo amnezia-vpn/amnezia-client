@@ -65,24 +65,13 @@ AmneziaApplication::~AmneziaApplication()
 
 #ifdef Q_OS_ANDROID
 namespace {
-    static void clearQtCachesOnFirstStartApp()
+    static void clearQtCaches()
     {
-
-        QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
-        const QString markerKey = QStringLiteral("android.cache.cleaned.v1");
-        if (settings.value(markerKey).toBool())
-            return;
-
-        qDebug()<<"--------------The cache of the latest Qt version has been cleared-----------";
-
         const QString cacheRoot = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
         if (!cacheRoot.isEmpty()) {
             QDir(cacheRoot + "/QtShaderCache").removeRecursively();
             QDir(cacheRoot + "/qmlcache").removeRecursively();
         }
-
-        settings.setValue(markerKey, true);
-        settings.sync();
     }
 }
 #endif
@@ -90,7 +79,7 @@ namespace {
 void AmneziaApplication::init()
 {
 #ifdef Q_OS_ANDROID
-    clearQtCachesOnFirstStartApp();
+    clearQtCaches();
 #endif
     m_engine = new QQmlApplicationEngine;
 
