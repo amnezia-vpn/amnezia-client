@@ -117,12 +117,13 @@ void NewsModel::updateModel(const QJsonArray &serverItems)
             item.read = m_readIds.contains(objects[i].value("id").toString());
             newItems.append(item);
             existingIds.insert(item.id);
-        } else {
-            if (m_items[i].timestamp != QDateTime::fromString(objects[i].value("timestamp").toString(), Qt::ISODate)) {
+        } 
+        
+        if (existingIds.contains(objects[i].value("id").toString())) {
+            if (m_items[i].title != objects[i].value("title").toString())
                 m_items[i].title = objects[i].value("title").toString();
+            if (m_items[i].content != objects[i].value("content").toString())
                 m_items[i].content = objects[i].value("content").toString();
-                m_items[i].timestamp = QDateTime::fromString(objects[i].value("timestamp").toString(), Qt::ISODate);
-            }
         }
     }
 
