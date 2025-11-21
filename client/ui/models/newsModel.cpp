@@ -108,6 +108,16 @@ void NewsModel::updateModel(const QJsonArray &serverItems)
     }
 
     for (i = 0; i < objects.size(); i++) {
+        if (existingIds.contains(objects[i].value("id").toString())) {
+            if (m_items[i].title != objects[i].value("title").toString()
+                or m_items[i].content != objects[i].value("content").toString()
+                or m_items[i].timestamp != QDateTime::fromString(objects[i].value("timestamp").toString(), Qt::ISODate)) {
+                QString toRemove = m_items[i].id;
+                m_items.erase(m_items.begin() + i);
+                existingIds.remove(toRemove);
+            }
+        }
+
         if (!existingIds.contains(objects[i].value("id").toString())) {
             NewsItem item;
             item.id = objects[i].value("id").toString();
@@ -117,13 +127,6 @@ void NewsModel::updateModel(const QJsonArray &serverItems)
             item.read = m_readIds.contains(objects[i].value("id").toString());
             newItems.append(item);
             existingIds.insert(item.id);
-        } 
-        
-        if (existingIds.contains(objects[i].value("id").toString())) {
-            if (m_items[i].title != objects[i].value("title").toString())
-                m_items[i].title = objects[i].value("title").toString();
-            if (m_items[i].content != objects[i].value("content").toString())
-                m_items[i].content = objects[i].value("content").toString();
         }
     }
 
