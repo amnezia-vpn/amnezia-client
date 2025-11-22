@@ -175,7 +175,7 @@ PageType {
                 id: configContentDrawer
                 parent: pageShareConnection.parent
                 anchors.fill: parent
-                expandedHeight: parent.height * 0.9
+                expandedHeight: (parent ? parent.height : pageShareConnection.height) * 0.9
                 expandedStateContent: Item {
                     id: configContentContainer
                     implicitHeight: configContentDrawer.expandedHeight
@@ -197,7 +197,7 @@ PageType {
                             configText.copy()
                             configText.select(0, 0)
                             PageController.showNotificationMessage(qsTr("Copied"))
-                            header.forceActiveFocus()
+                            shareHeader.forceActiveFocus()
                         }
                     }
 

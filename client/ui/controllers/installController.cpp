@@ -40,14 +40,14 @@ namespace
 InstallController::InstallController(const QSharedPointer<ServersController> &serversController,
                                      const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                      const QSharedPointer<ProtocolsModel> &protocolsModel,
-                                     const QSharedPointer<ClientManagementModel> &clientManagementModel,
+                                     const QSharedPointer<ClientManagementController> &clientManagementController,
                                      const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversController(serversController),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_protocolModel(protocolsModel),
-      m_clientManagementModel(clientManagementModel),
+      m_clientManagementController(clientManagementController),
       m_settings(settings)
 {
 }
@@ -239,7 +239,7 @@ void InstallController::installServer(const DockerContainer container, const QMa
             }
             containerConfigs.append(containerConfig);
 
-            errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
+            errorCode = m_clientManagementController->appendClient(iterator.key(), serverCredentials, containerConfig,
                                                               QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
             if (errorCode) {
                 emit installationErrorOccurred(errorCode);
@@ -278,8 +278,8 @@ void InstallController::installContainer(const DockerContainer container, const 
                 }
                 m_serversController->addContainerConfig(serverIndex, iterator.key(), containerConfig);
 
-                errorCode = m_clientManagementModel->appendClient(iterator.key(), serverCredentials, containerConfig,
-                                                                  QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
+                errorCode = m_clientManagementController->appendClient(iterator.key(), serverCredentials, containerConfig,
+                                                              QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
                 if (errorCode) {
                     emit installationErrorOccurred(errorCode);
                     return;
@@ -340,7 +340,7 @@ void InstallController::scanServerForInstalledContainers(int serverIndex)
                     }
                     m_serversController->addContainerConfig(serverIndex, container, containerConfig);
 
-                    errorCode = m_clientManagementModel->appendClient(container, serverCredentials, containerConfig,
+                    errorCode = m_clientManagementController->appendClient(container, serverCredentials, containerConfig,
                                                                       QString("Admin [%1]").arg(QSysInfo::prettyProductName()),
                                                                       serverController);
                     if (errorCode) {
@@ -799,7 +799,7 @@ void InstallController::clearCachedProfile(int serverIndex, QSharedPointer<Serve
     ServerCredentials serverCredentials = m_serversController->getServerCredentials(serverIndex);
 
     m_serversController->clearCachedProfile(serverIndex, container);
-    m_clientManagementModel->revokeClient(containerConfig, container, serverCredentials, serverIndex, serverController);
+    m_clientManagementController->revokeClient(containerConfig, container, serverCredentials, serverIndex, serverController);
 
     emit cachedProfileCleared(tr("%1 cached profile cleared").arg(ContainerProps::containerHumanNames().value(container)));
     QJsonObject updatedConfig = m_serversController->getContainerConfig(serverIndex, container);
@@ -1018,7 +1018,7 @@ bool InstallController::isConfigValid()
             }
             m_serversController->updateContainerConfig(serverIndex, container, containerConfig);
 
-            errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig,
+            errorCode = m_clientManagementController->appendClient(container, credentials, containerConfig,
                                                               QString("Admin [%1]").arg(QSysInfo::prettyProductName()), serverController);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;

@@ -28,6 +28,7 @@
 #include "ui/controllers/systemController.h"
 
 #include "core/controllers/serversController.h"
+#include "core/controllers/clientManagementController.h"
 
 #include "ui/models/allowed_dns_model.h"
 #include "ui/models/containers_model.h"
@@ -94,6 +95,7 @@ private:
     void initAutoConnectHandler();
     void initAmneziaDnsToggledHandler();
     void initServersModelUpdateHandler();
+    void initClientManagementModelUpdateHandler();
     void initPrepareConfigHandler();
     void initImportPremiumV2VpnKeyHandler();
     void initShowMigrationDrawerHandler();
@@ -131,6 +133,7 @@ private:
     QScopedPointer<ProtocolsUiController> m_protocolsUiController;
 
     QSharedPointer<ServersController> m_serversController;
+    QSharedPointer<ClientManagementController> m_clientManagementController;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;

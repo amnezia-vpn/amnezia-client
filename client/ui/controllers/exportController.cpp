@@ -15,13 +15,13 @@
 ExportController::ExportController(const QSharedPointer<ServersController> &serversController,
                                    const QSharedPointer<ServersModel> &serversModel,
                                    const QSharedPointer<ContainersModel> &containersModel,
-                                   const QSharedPointer<ClientManagementModel> &clientManagementModel,
+                                   const QSharedPointer<ClientManagementController> &clientManagementController,
                                    const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversController(serversController),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
-      m_clientManagementModel(clientManagementModel),
+      m_clientManagementController(clientManagementController),
       m_settings(settings)
 {
 }
@@ -72,7 +72,7 @@ void ExportController::generateConnectionConfig(const QString &clientName)
     VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
     ErrorCode errorCode = vpnConfigurationController.createProtocolConfigForContainer(credentials, container, containerConfig);
 
-    errorCode = m_clientManagementModel->appendClient(container, credentials, containerConfig, clientName, serverController);
+    errorCode = m_clientManagementController->appendClient(container, credentials, containerConfig, clientName, serverController);
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorCode);
         return;
@@ -125,7 +125,7 @@ ErrorCode ExportController::generateNativeConfig(const DockerContainer container
     jsonNativeConfig = QJsonDocument::fromJson(protocolConfigString.toUtf8()).object();
 
     if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg || protocol == Proto::Xray) {
-        errorCode = m_clientManagementModel->appendClient(jsonNativeConfig, clientName, container, credentials, serverController);
+        errorCode = m_clientManagementController->appendClient(jsonNativeConfig, clientName, container, credentials, serverController);
     }
     return errorCode;
 }
@@ -290,7 +290,7 @@ void ExportController::exportConfig(const QString &fileName)
 void ExportController::updateClientManagementModel(const DockerContainer container, ServerCredentials credentials)
 {
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    ErrorCode errorCode = m_clientManagementModel->updateModel(container, credentials, serverController);
+    ErrorCode errorCode = m_clientManagementController->updateClients(container, credentials, serverController);
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorCode);
     }
@@ -300,7 +300,7 @@ void ExportController::revokeConfig(const int row, const DockerContainer contain
 {
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
     ErrorCode errorCode =
-        m_clientManagementModel->revokeClient(row, container, credentials, m_serversModel->getProcessedServerIndex(), serverController);
+        m_clientManagementController->revokeClient(row, container, credentials, m_serversModel->getProcessedServerIndex(), serverController);
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorCode);
     }
@@ -310,7 +310,7 @@ void ExportController::revokeConfig(const int row, const DockerContainer contain
 void ExportController::renameClient(const int row, const QString &clientName, const DockerContainer container, ServerCredentials credentials)
 {
     QSharedPointer<ServerController> serverController(new ServerController(m_settings));
-    ErrorCode errorCode = m_clientManagementModel->renameClient(row, clientName, container, credentials, serverController);
+    ErrorCode errorCode = m_clientManagementController->renameClient(row, clientName, container, credentials, serverController);
     if (errorCode != ErrorCode::NoError) {
         emit exportErrorOccurred(errorCode);
     }

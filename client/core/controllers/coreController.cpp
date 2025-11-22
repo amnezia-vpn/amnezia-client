@@ -90,8 +90,10 @@ void CoreController::initModels()
     m_socks5ConfigModel.reset(new Socks5ProxyConfigModel(this));
     m_engine->rootContext()->setContextProperty("Socks5ProxyConfigModel", m_socks5ConfigModel.get());
 
-    m_clientManagementModel.reset(new ClientManagementModel(m_settings, this));
+    m_clientManagementModel.reset(new ClientManagementModel(this));
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
+    
+    m_clientManagementController.reset(new ClientManagementController(m_settings, this));
 
     m_apiServicesModel.reset(new ApiServicesModel(this));
     m_engine->rootContext()->setContextProperty("ApiServicesModel", m_apiServicesModel.get());
@@ -121,7 +123,7 @@ void CoreController::initControllers()
     m_focusController.reset(new FocusController(m_engine, this));
     m_engine->rootContext()->setContextProperty("FocusController", m_focusController.get());
 
-    m_installController.reset(new InstallController(m_serversController, m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementModel, m_settings));
+    m_installController.reset(new InstallController(m_serversController, m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementController, m_settings));
     m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
 
     connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
@@ -133,7 +135,7 @@ void CoreController::initControllers()
     m_importController.reset(new ImportController(m_serversController, m_serversModel, m_containersModel, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_exportController.reset(new ExportController(m_serversController, m_serversModel, m_containersModel, m_clientManagementModel, m_settings));
+    m_exportController.reset(new ExportController(m_serversController, m_serversModel, m_containersModel, m_clientManagementController, m_settings));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
     m_settingsController.reset(
@@ -239,6 +241,7 @@ void CoreController::initSignalHandlers()
     initAutoConnectHandler();
     initAmneziaDnsToggledHandler();
     initServersModelUpdateHandler();
+    initClientManagementModelUpdateHandler();
     initPrepareConfigHandler();
     initImportPremiumV2VpnKeyHandler();
     initShowMigrationDrawerHandler();
@@ -375,6 +378,12 @@ void CoreController::initServersModelUpdateHandler()
             m_serversUiController.get(), &ServersUiController::onServerRemoved);
     connect(m_serversController.get(), &ServersController::defaultServerChanged,
             m_serversUiController.get(), &ServersUiController::onDefaultServerChanged);
+}
+
+void CoreController::initClientManagementModelUpdateHandler()
+{
+    connect(m_clientManagementController.get(), &ClientManagementController::clientsUpdated,
+            m_clientManagementModel.get(), &ClientManagementModel::updateModel);
 }
 
 void CoreController::initPrepareConfigHandler()

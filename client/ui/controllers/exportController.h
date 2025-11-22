@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "core/controllers/serversController.h"
-#include "ui/models/clientManagementModel.h"
+#include "core/controllers/clientManagementController.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
 
@@ -15,7 +15,7 @@ public:
     explicit ExportController(const QSharedPointer<ServersController> &serversController,
                               const QSharedPointer<ServersModel> &serversModel,
                               const QSharedPointer<ContainersModel> &containersModel,
-                              const QSharedPointer<ClientManagementModel> &clientManagementModel,
+                              const QSharedPointer<ClientManagementController> &clientManagementController,
                               const std::shared_ptr<Settings> &settings,
                               QObject *parent = nullptr);
 
@@ -65,7 +65,7 @@ private:
     QSharedPointer<ServersController> m_serversController;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
-    QSharedPointer<ClientManagementModel> m_clientManagementModel;
+    QSharedPointer<ClientManagementController> m_clientManagementController;
     std::shared_ptr<Settings> m_settings;
 
     QString m_config;
