@@ -62,7 +62,7 @@ DrawerType2 {
             Layout.topMargin: 16
 
             text: qsTr("Site-based split tunneling")
-            descriptionText: enabled && SitesModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+            descriptionText: enabled && SitesController.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {

@@ -1,4 +1,4 @@
-#include "sitesController.h"
+#include "sitesUiController.h"
 
 #include <QFile>
 #include <QHostInfo>
@@ -7,14 +7,18 @@
 #include "systemController.h"
 #include "core/networkUtilities.h"
 
-SitesController::SitesController(const std::shared_ptr<Settings> &settings,
-                                 const QSharedPointer<VpnConnection> &vpnConnection,
-                                 const QSharedPointer<SitesModel> &sitesModel, QObject *parent)
-    : QObject(parent), m_settings(settings), m_vpnConnection(vpnConnection), m_sitesModel(sitesModel)
+SitesUiController::SitesUiController(const QSharedPointer<SitesController> &sitesController,
+                                      const QSharedPointer<VpnConnection> &vpnConnection,
+                                      const QSharedPointer<SitesModel> &sitesModel, QObject *parent)
+    : QObject(parent),
+      m_sitesController(sitesController),
+      m_vpnConnection(vpnConnection),
+      m_sitesModel(sitesModel)
 {
+    m_sitesModel->updateModel(m_sitesController->getCurrentSites());
 }
 
-void SitesController::addSite(QString hostname)
+void SitesUiController::addSite(QString hostname)
 {
     if (hostname.isEmpty()) {
         return;
@@ -35,14 +39,16 @@ void SitesController::addSite(QString hostname)
     }
 
     const auto &processSite = [this](const QString &hostname, const QString &ip) {
-        m_sitesModel->addSite(hostname, ip);
+        if (m_sitesController->addSite(hostname, ip)) {
+            m_sitesModel->updateModel(m_sitesController->getCurrentSites());
 
-        if (!ip.isEmpty()) {
-            QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
-                                      Q_ARG(QStringList, QStringList() << ip));
-        } else if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
-            QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
-                                      Q_ARG(QStringList, QStringList() << hostname));
+            if (!ip.isEmpty()) {
+                QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
+                                          Q_ARG(QStringList, QStringList() << ip));
+            } else if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
+                QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
+                                          Q_ARG(QStringList, QStringList() << hostname));
+            }
         }
     };
 
@@ -66,11 +72,12 @@ void SitesController::addSite(QString hostname)
     emit finished(tr("New site added: %1").arg(hostname));
 }
 
-void SitesController::removeSite(int index)
+void SitesUiController::removeSite(int index)
 {
     auto modelIndex = m_sitesModel->index(index);
     auto hostname = m_sitesModel->data(modelIndex, SitesModel::Roles::UrlRole).toString();
-    m_sitesModel->removeSite(modelIndex);
+    m_sitesController->removeSite(hostname);
+    m_sitesModel->updateModel(m_sitesController->getCurrentSites());
 
     QMetaObject::invokeMethod(m_vpnConnection.get(), "deleteRoutes", Qt::QueuedConnection,
                               Q_ARG(QStringList, QStringList() << hostname));
@@ -78,14 +85,15 @@ void SitesController::removeSite(int index)
     emit finished(tr("Site removed: %1").arg(hostname));
 }
 
-void SitesController::removeSites()
+void SitesUiController::removeSites()
 {
-    m_sitesModel->removeSites();
+    m_sitesController->removeSites();
+    m_sitesModel->updateModel(m_sitesController->getCurrentSites());
 
     emit finished(tr("Site list cleared!"));
 }
 
-void SitesController::importSites(const QString &fileName, bool replaceExisting)
+void SitesUiController::importSites(const QString &fileName, bool replaceExisting)
 {
     QByteArray jsonData;
     if (!SystemController::readFile(fileName, jsonData)) {
@@ -126,16 +134,17 @@ void SitesController::importSites(const QString &fileName, bool replaceExisting)
         sites.insert(hostname, ip);
     }
 
-    m_sitesModel->addSites(sites, replaceExisting);
+    m_sitesController->addSites(sites, replaceExisting);
+    m_sitesModel->updateModel(m_sitesController->getCurrentSites());
 
     QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection, Q_ARG(QStringList, ips));
 
     emit finished(tr("Import completed"));
 }
 
-void SitesController::exportSites(const QString &fileName)
+void SitesUiController::exportSites(const QString &fileName)
 {
-    auto sites = m_sitesModel->getCurrentSites();
+    auto sites = m_sitesController->getCurrentSites();
 
     QJsonArray jsonArray;
 
@@ -150,4 +159,27 @@ void SitesController::exportSites(const QString &fileName)
     SystemController::saveFile(fileName, jsonData);
 
     emit finished(tr("Export completed"));
+}
+
+void SitesUiController::toggleSplitTunneling(bool enabled)
+{
+    m_sitesController->toggleSplitTunneling(enabled);
+    emit isTunnelingEnabledChanged();
+}
+
+void SitesUiController::setRouteMode(int routeMode)
+{
+    m_sitesController->setRouteMode(routeMode);
+    m_sitesModel->updateModel(m_sitesController->getCurrentSites());
+    emit routeModeChanged();
+}
+
+int SitesUiController::getRouteMode() const
+{
+    return m_sitesController->getRouteMode();
+}
+
+bool SitesUiController::isTunnelingEnabled() const
+{
+    return m_sitesController->isSplitTunnelingEnabled();
 }

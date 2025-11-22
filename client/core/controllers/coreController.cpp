@@ -45,7 +45,7 @@ void CoreController::initModels()
     m_languageModel.reset(new LanguageModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
 
-    m_sitesModel.reset(new SitesModel(m_settings, this));
+    m_sitesModel.reset(new SitesModel(this));
     m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
 
     m_allowedDnsModel.reset(new AllowedDnsModel(m_settings, this));
@@ -113,6 +113,7 @@ void CoreController::initCoreControllers()
     m_serversController = QSharedPointer<ServersController>::create(m_settings, this);
     m_appSplitTunnelingController = QSharedPointer<AppSplitTunnelingController>::create(m_settings);
     m_clientManagementController = QSharedPointer<ClientManagementController>::create(m_settings, this);
+    m_sitesController = QSharedPointer<SitesController>::create(m_settings);
 }
 
 void CoreController::initControllers()
@@ -143,14 +144,14 @@ void CoreController::initControllers()
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
     m_settingsController.reset(
-            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingController, m_settings));
+            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesController, m_appSplitTunnelingController, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 
     m_serversUiController = QSharedPointer<ServersUiController>::create(m_serversController, m_serversModel, m_containersModel, m_defaultServerContainersModel);
     m_engine->rootContext()->setContextProperty("ServersUiController", m_serversUiController.get());
 
-    m_sitesController.reset(new SitesController(m_settings, m_vpnConnection, m_sitesModel));
-    m_engine->rootContext()->setContextProperty("SitesController", m_sitesController.get());
+    m_sitesUiController.reset(new SitesUiController(m_sitesController, m_vpnConnection, m_sitesModel, this));
+    m_engine->rootContext()->setContextProperty("SitesController", m_sitesUiController.get());
 
     m_allowedDnsController.reset(new AllowedDnsController(m_settings, m_allowedDnsModel));
     m_engine->rootContext()->setContextProperty("AllowedDnsController", m_allowedDnsController.get());

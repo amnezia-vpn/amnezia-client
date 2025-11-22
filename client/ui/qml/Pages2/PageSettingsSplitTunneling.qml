@@ -73,7 +73,7 @@ PageType {
     }
 
     function getRouteModesModelIndex() {
-        var currentRouteMode = SitesModel.routeMode
+        var currentRouteMode = SitesController.routeMode
         if ((routeMode.onlyForwardSites === currentRouteMode) || (routeMode.allSites === currentRouteMode)) {
             return 0
         } else if (routeMode.allExceptSites === currentRouteMode) {
@@ -104,11 +104,11 @@ PageType {
             enabled: root.pageEnabled
             showSwitcher: true
             switcher {
-                checked: SitesModel.isTunnelingEnabled
+                checked: SitesController.isTunnelingEnabled
                 enabled: root.pageEnabled
             }
             switcherFunction: function(checked) {
-                SitesModel.toggleSplitTunneling(checked)
+                SitesController.toggleSplitTunneling(checked)
                 selector.text = root.routeModesModel[getRouteModesModelIndex()].name
             }
         }
@@ -138,13 +138,13 @@ PageType {
                 clickedFunction: function() {
                     selector.text = selectedText
                     selector.closeTriggered()
-                    if (SitesModel.routeMode !== root.routeModesModel[selectedIndex].type) {
-                        SitesModel.routeMode = root.routeModesModel[selectedIndex].type
+                    if (SitesController.routeMode !== root.routeModesModel[selectedIndex].type) {
+                        SitesController.routeMode = root.routeModesModel[selectedIndex].type
                     }
                 }
 
                 Component.onCompleted: {
-                    if (root.routeModesModel[selectedIndex].type === SitesModel.routeMode) {
+                    if (root.routeModesModel[selectedIndex].type === SitesController.routeMode) {
                         selector.text = selectedText
                     } else {
                         selector.text = root.routeModesModel[0].name
@@ -152,7 +152,7 @@ PageType {
                 }
 
                 Connections {
-                    target: SitesModel
+                    target: SitesController
                     function onRouteModeChanged() {
                         selectedIndex = getRouteModesModelIndex()
                     }

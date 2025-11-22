@@ -27,7 +27,7 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_languageModel(languageModel),
-      m_sitesModel(sitesModel),
+      m_sitesController(sitesController),
       m_appSplitTunnelingController(appSplitTunnelingController),
       m_settings(settings)
 {
@@ -228,8 +228,8 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         int siteSplitTunnelingRouteMode = newConfigData.value("Conf/routeMode").toInt();
         bool siteSplittunnelingEnabled =
                 newConfigData.value("Conf/sitesSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
-        m_sitesModel->setRouteMode(siteSplitTunnelingRouteMode);
-        m_sitesModel->toggleSplitTunneling(siteSplittunnelingEnabled);
+        m_sitesController->setRouteMode(siteSplitTunnelingRouteMode);
+        m_sitesController->toggleSplitTunneling(siteSplittunnelingEnabled);
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
         m_settings->setAutoConnect(false);
@@ -260,8 +260,8 @@ void SettingsController::clearSettings()
     m_serversModel->updateModel(m_settings->serversArray(), m_settings->defaultServerIndex(), m_settings->useAmneziaDns());
     m_languageModel->changeLanguage(m_languageModel->getSystemLanguageEnum());
 
-    m_sitesModel->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
-    m_sitesModel->toggleSplitTunneling(false);
+    m_sitesController->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
+    m_sitesController->toggleSplitTunneling(false);
 
     m_appSplitTunnelingController->setRouteMode(Settings::AppsRouteMode::VpnAllExceptApps);
     m_appSplitTunnelingController->toggleSplitTunneling(false);

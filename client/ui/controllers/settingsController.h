@@ -6,7 +6,7 @@
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/servers_model.h"
-#include "ui/models/sites_model.h"
+#include "core/controllers/sitesController.h"
 #include "core/controllers/appSplitTunnelingController.h"
 
 class SettingsController : public QObject
@@ -16,7 +16,7 @@ public:
     explicit SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                 const QSharedPointer<ContainersModel> &containersModel,
                                 const QSharedPointer<LanguageModel> &languageModel,
-                                const QSharedPointer<SitesModel> &sitesModel,
+                                const QSharedPointer<SitesController> &sitesController,
                                 const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
                                 const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
@@ -145,7 +145,7 @@ private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<LanguageModel> m_languageModel;
-    QSharedPointer<SitesModel> m_sitesModel;
+    QSharedPointer<SitesController> m_sitesController;
     QSharedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
     
     mutable int m_cachedStatusBarHeight = -1;
