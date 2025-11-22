@@ -2,7 +2,7 @@
 #define ALLOWEDDNSMODEL_H
 
 #include <QAbstractListModel>
-#include "settings.h"
+#include <QStringList>
 
 class AllowedDnsModel : public QAbstractListModel
 {
@@ -13,24 +13,18 @@ public:
         IpRole = Qt::UserRole + 1
     };
 
-    explicit AllowedDnsModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit AllowedDnsModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    bool addDns(const QString &ip);
-    void addDnsList(const QStringList &dnsServers, bool replaceExisting);
-    void removeDns(QModelIndex index);
-    QStringList getCurrentDnsServers();
+    void updateModel(const QStringList &dnsServers);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    void fillDnsServers();
-
-    std::shared_ptr<Settings> m_settings;
     QStringList m_dnsServers;
 };
 

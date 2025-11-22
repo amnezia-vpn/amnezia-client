@@ -27,11 +27,13 @@
 #include "ui/controllers/sitesUiController.h"
 #include "ui/controllers/systemController.h"
 #include "ui/controllers/appSplitTunnelingUiController.h"
+#include "ui/controllers/allowedDnsUiController.h"
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/clientManagementController.h"
 #include "core/controllers/appSplitTunnelingController.h"
 #include "core/controllers/sitesController.h"
+#include "core/controllers/allowedDnsController.h"
 
 #include "ui/models/allowed_dns_model.h"
 #include "ui/models/containers_model.h"
@@ -127,7 +129,7 @@ private:
     QScopedPointer<SitesUiController> m_sitesUiController;
     QScopedPointer<SystemController> m_systemController;
     QScopedPointer<AppSplitTunnelingUiController> m_appSplitTunnelingUiController;
-    QScopedPointer<AllowedDnsController> m_allowedDnsController;
+    QScopedPointer<AllowedDnsUiController> m_allowedDnsUiController;
 
     QScopedPointer<ApiSettingsController> m_apiSettingsController;
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
@@ -140,6 +142,7 @@ private:
     QSharedPointer<ClientManagementController> m_clientManagementController;
     QSharedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
     QSharedPointer<SitesController> m_sitesController;
+    QSharedPointer<AllowedDnsController> m_allowedDnsController;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;

@@ -48,7 +48,7 @@ void CoreController::initModels()
     m_sitesModel.reset(new SitesModel(this));
     m_engine->rootContext()->setContextProperty("SitesModel", m_sitesModel.get());
 
-    m_allowedDnsModel.reset(new AllowedDnsModel(m_settings, this));
+    m_allowedDnsModel.reset(new AllowedDnsModel(this));
     m_engine->rootContext()->setContextProperty("AllowedDnsModel", m_allowedDnsModel.get());
 
     m_appSplitTunnelingModel.reset(new AppSplitTunnelingModel(this));
@@ -114,6 +114,7 @@ void CoreController::initCoreControllers()
     m_appSplitTunnelingController = QSharedPointer<AppSplitTunnelingController>::create(m_settings);
     m_clientManagementController = QSharedPointer<ClientManagementController>::create(m_settings, this);
     m_sitesController = QSharedPointer<SitesController>::create(m_settings);
+    m_allowedDnsController = QSharedPointer<AllowedDnsController>::create(m_settings);
 }
 
 void CoreController::initControllers()
@@ -153,8 +154,8 @@ void CoreController::initControllers()
     m_sitesUiController.reset(new SitesUiController(m_sitesController, m_vpnConnection, m_sitesModel, this));
     m_engine->rootContext()->setContextProperty("SitesController", m_sitesUiController.get());
 
-    m_allowedDnsController.reset(new AllowedDnsController(m_settings, m_allowedDnsModel));
-    m_engine->rootContext()->setContextProperty("AllowedDnsController", m_allowedDnsController.get());
+    m_allowedDnsUiController.reset(new AllowedDnsUiController(m_allowedDnsController, m_allowedDnsModel, this));
+    m_engine->rootContext()->setContextProperty("AllowedDnsController", m_allowedDnsUiController.get());
 
     m_appSplitTunnelingUiController.reset(new AppSplitTunnelingUiController(m_appSplitTunnelingController, m_appSplitTunnelingModel, this));
     m_engine->rootContext()->setContextProperty("AppSplitTunnelingController", m_appSplitTunnelingUiController.get());

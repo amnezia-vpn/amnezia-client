@@ -1,4 +1,4 @@
-#include "allowedDnsController.h"
+#include "allowedDnsUiController.h"
 
 #include <QFile>
 #include <QStandardPaths>
@@ -10,14 +10,17 @@
 #include "core/networkUtilities.h"
 #include "core/defs.h"
 
-AllowedDnsController::AllowedDnsController(const std::shared_ptr<Settings> &settings,
-                                           const QSharedPointer<AllowedDnsModel> &allowedDnsModel,
-                                           QObject *parent)
-    : QObject(parent), m_settings(settings), m_allowedDnsModel(allowedDnsModel)
+AllowedDnsUiController::AllowedDnsUiController(const QSharedPointer<AllowedDnsController> &allowedDnsController,
+                                                 const QSharedPointer<AllowedDnsModel> &allowedDnsModel,
+                                                 QObject *parent)
+    : QObject(parent),
+      m_allowedDnsController(allowedDnsController),
+      m_allowedDnsModel(allowedDnsModel)
 {
+    m_allowedDnsModel->updateModel(m_allowedDnsController->getCurrentDnsServers());
 }
 
-void AllowedDnsController::addDns(QString ip)
+void AllowedDnsUiController::addDns(QString ip)
 {
     if (ip.isEmpty()) {
         return;
@@ -28,23 +31,25 @@ void AllowedDnsController::addDns(QString ip)
         return;
     }
 
-    if (m_allowedDnsModel->addDns(ip)) {
+    if (m_allowedDnsController->addDns(ip)) {
+        m_allowedDnsModel->updateModel(m_allowedDnsController->getCurrentDnsServers());
         emit finished(tr("New DNS server added: %1").arg(ip));
     } else {
         emit errorOccurred(tr("DNS server already exists: %1").arg(ip));
     }
 }
 
-void AllowedDnsController::removeDns(int index)
+void AllowedDnsUiController::removeDns(int index)
 {
     auto modelIndex = m_allowedDnsModel->index(index);
     auto ip = m_allowedDnsModel->data(modelIndex, AllowedDnsModel::Roles::IpRole).toString();
-    m_allowedDnsModel->removeDns(modelIndex);
+    m_allowedDnsController->removeDns(index);
+    m_allowedDnsModel->updateModel(m_allowedDnsController->getCurrentDnsServers());
 
     emit finished(tr("DNS server removed: %1").arg(ip));
 }
 
-void AllowedDnsController::importDns(const QString &fileName, bool replaceExisting)
+void AllowedDnsUiController::importDns(const QString &fileName, bool replaceExisting)
 {
     QByteArray jsonData;
     if (!SystemController::readFile(fileName, jsonData)) {
@@ -77,14 +82,15 @@ void AllowedDnsController::importDns(const QString &fileName, bool replaceExisti
         dnsServers.append(ip);
     }
 
-    m_allowedDnsModel->addDnsList(dnsServers, replaceExisting);
+    m_allowedDnsController->addDnsList(dnsServers, replaceExisting);
+    m_allowedDnsModel->updateModel(m_allowedDnsController->getCurrentDnsServers());
 
     emit finished(tr("Import completed"));
 }
 
-void AllowedDnsController::exportDns(const QString &fileName)
+void AllowedDnsUiController::exportDns(const QString &fileName)
 {
-    auto dnsServers = m_allowedDnsModel->getCurrentDnsServers();
+    auto dnsServers = m_allowedDnsController->getCurrentDnsServers();
 
     QJsonArray jsonArray;
 
