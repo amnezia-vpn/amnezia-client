@@ -13,7 +13,7 @@
 #include "ui/controllers/api/apiSettingsController.h"
 #include "ui/controllers/api/apiPremV1MigrationController.h"
 #include "ui/controllers/api/apiNewsController.h"
-#include "ui/controllers/appSplitTunnelingController.h"
+#include "ui/controllers/appSplitTunnelingUiController.h"
 #include "ui/controllers/allowedDnsController.h"
 #include "ui/controllers/connectionController.h"
 #include "ui/controllers/exportController.h"
@@ -26,9 +26,11 @@
 #include "ui/controllers/serversUiController.h"
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
+#include "ui/controllers/appSplitTunnelingUiController.h"
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/clientManagementController.h"
+#include "core/controllers/appSplitTunnelingController.h"
 
 #include "ui/models/allowed_dns_model.h"
 #include "ui/models/containers_model.h"
@@ -75,6 +77,7 @@ signals:
     void websiteUrlChanged(const QString &newUrl);
 
 private:
+    void initCoreControllers();
     void initModels();
     void initControllers();
     void initAndroidController();
@@ -122,7 +125,7 @@ private:
     QSharedPointer<ServersUiController> m_serversUiController;
     QScopedPointer<SitesController> m_sitesController;
     QScopedPointer<SystemController> m_systemController;
-    QScopedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
+    QScopedPointer<AppSplitTunnelingUiController> m_appSplitTunnelingUiController;
     QScopedPointer<AllowedDnsController> m_allowedDnsController;
 
     QScopedPointer<ApiSettingsController> m_apiSettingsController;
@@ -134,6 +137,7 @@ private:
 
     QSharedPointer<ServersController> m_serversController;
     QSharedPointer<ClientManagementController> m_clientManagementController;
+    QSharedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;

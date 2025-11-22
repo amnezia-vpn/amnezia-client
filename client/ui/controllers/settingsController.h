@@ -7,7 +7,7 @@
 #include "ui/models/languageModel.h"
 #include "ui/models/servers_model.h"
 #include "ui/models/sites_model.h"
-#include "ui/models/appSplitTunnelingModel.h"
+#include "core/controllers/appSplitTunnelingController.h"
 
 class SettingsController : public QObject
 {
@@ -17,7 +17,7 @@ public:
                                 const QSharedPointer<ContainersModel> &containersModel,
                                 const QSharedPointer<LanguageModel> &languageModel,
                                 const QSharedPointer<SitesModel> &sitesModel,
-                                const QSharedPointer<AppSplitTunnelingModel> &appSplitTunnelingModel,
+                                const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
                                 const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
@@ -146,7 +146,7 @@ private:
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<LanguageModel> m_languageModel;
     QSharedPointer<SitesModel> m_sitesModel;
-    QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
+    QSharedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
     
     mutable int m_cachedStatusBarHeight = -1;
     mutable int m_cachedNavigationBarHeight = -1;

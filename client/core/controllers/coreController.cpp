@@ -17,6 +17,7 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
                                QQmlApplicationEngine *engine, QObject *parent)
     : QObject(parent), m_vpnConnection(vpnConnection), m_settings(settings), m_engine(engine)
 {
+    initCoreControllers();
     initModels();
     initControllers();
     initSignalHandlers();
@@ -38,8 +39,6 @@ void CoreController::initModels()
     m_defaultServerContainersModel.reset(new ContainersModel(this));
     m_engine->rootContext()->setContextProperty("DefaultServerContainersModel", m_defaultServerContainersModel.get());
 
-    m_serversController = QSharedPointer<ServersController>::create(m_settings, this);
-
     m_serversModel.reset(new ServersModel(this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
 
@@ -52,7 +51,7 @@ void CoreController::initModels()
     m_allowedDnsModel.reset(new AllowedDnsModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("AllowedDnsModel", m_allowedDnsModel.get());
 
-    m_appSplitTunnelingModel.reset(new AppSplitTunnelingModel(m_settings, this));
+    m_appSplitTunnelingModel.reset(new AppSplitTunnelingModel(this));
     m_engine->rootContext()->setContextProperty("AppSplitTunnelingModel", m_appSplitTunnelingModel.get());
 
     m_protocolsModel.reset(new ProtocolsModel(this));
@@ -92,8 +91,6 @@ void CoreController::initModels()
 
     m_clientManagementModel.reset(new ClientManagementModel(this));
     m_engine->rootContext()->setContextProperty("ClientManagementModel", m_clientManagementModel.get());
-    
-    m_clientManagementController.reset(new ClientManagementController(m_settings, this));
 
     m_apiServicesModel.reset(new ApiServicesModel(this));
     m_engine->rootContext()->setContextProperty("ApiServicesModel", m_apiServicesModel.get());
@@ -109,6 +106,13 @@ void CoreController::initModels()
 
     m_newsModel.reset(new NewsModel(m_settings, this));
     m_engine->rootContext()->setContextProperty("NewsModel", m_newsModel.get());
+}
+
+void CoreController::initCoreControllers()
+{
+    m_serversController = QSharedPointer<ServersController>::create(m_settings, this);
+    m_appSplitTunnelingController = QSharedPointer<AppSplitTunnelingController>::create(m_settings);
+    m_clientManagementController = QSharedPointer<ClientManagementController>::create(m_settings, this);
 }
 
 void CoreController::initControllers()
@@ -139,7 +143,7 @@ void CoreController::initControllers()
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
     m_settingsController.reset(
-            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingModel, m_settings));
+            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesModel, m_appSplitTunnelingController, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 
     m_serversUiController = QSharedPointer<ServersUiController>::create(m_serversController, m_serversModel, m_containersModel, m_defaultServerContainersModel);
@@ -151,8 +155,8 @@ void CoreController::initControllers()
     m_allowedDnsController.reset(new AllowedDnsController(m_settings, m_allowedDnsModel));
     m_engine->rootContext()->setContextProperty("AllowedDnsController", m_allowedDnsController.get());
 
-    m_appSplitTunnelingController.reset(new AppSplitTunnelingController(m_settings, m_appSplitTunnelingModel));
-    m_engine->rootContext()->setContextProperty("AppSplitTunnelingController", m_appSplitTunnelingController.get());
+    m_appSplitTunnelingUiController.reset(new AppSplitTunnelingUiController(m_appSplitTunnelingController, m_appSplitTunnelingModel, this));
+    m_engine->rootContext()->setContextProperty("AppSplitTunnelingController", m_appSplitTunnelingUiController.get());
 
     m_systemController.reset(new SystemController(m_settings));
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());

@@ -81,7 +81,7 @@ DrawerType2 {
             Layout.fillWidth: true
 
             text: qsTr("App-based split tunneling")
-            descriptionText: AppSplitTunnelingModel.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+            descriptionText: AppSplitTunnelingController.isTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
             clickedFunction: function() {

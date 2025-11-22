@@ -1,17 +1,8 @@
 #include "appSplitTunnelingModel.h"
 
-#include <QFileInfo>
-
-AppSplitTunnelingModel::AppSplitTunnelingModel(std::shared_ptr<Settings> settings, QObject *parent)
-    : QAbstractListModel(parent), m_settings(settings)
+AppSplitTunnelingModel::AppSplitTunnelingModel(QObject *parent)
+    : QAbstractListModel(parent)
 {
-    m_isSplitTunnelingEnabled = m_settings->isAppsSplitTunnelingEnabled();
-    m_currentRouteMode = m_settings->getAppsRouteMode();
-    if (m_currentRouteMode == Settings::VpnAllApps) { // for old split tunneling configs
-        m_settings->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(Settings::VpnAllExceptApps));
-        m_currentRouteMode = Settings::VpnAllExceptApps;
-    }
-    m_apps = m_settings->getVpnApps(m_currentRouteMode);
 }
 
 int AppSplitTunnelingModel::rowCount(const QModelIndex &parent) const
@@ -37,60 +28,11 @@ QVariant AppSplitTunnelingModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-bool AppSplitTunnelingModel::addApp(const InstalledAppInfo &appInfo)
-{
-    if (m_apps.contains(appInfo)) {
-        return false;
-    }
-
-    beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_apps.append(appInfo);
-    m_settings->setVpnApps(m_currentRouteMode, m_apps);
-    endInsertRows();
-
-    return true;
-}
-
-void AppSplitTunnelingModel::removeApp(QModelIndex index)
-{
-    beginRemoveRows(QModelIndex(), index.row(), index.row());
-    m_apps.removeAt(index.row());
-    m_settings->setVpnApps(m_currentRouteMode, m_apps);
-    endRemoveRows();
-}
-
-void AppSplitTunnelingModel::clearAppsList() {
-    beginResetModel();
-    m_apps.clear();
-    m_settings->setVpnApps(m_currentRouteMode, m_apps);
-    endResetModel();
-}
-
-int AppSplitTunnelingModel::getRouteMode()
-{
-    return m_currentRouteMode;
-}
-
-void AppSplitTunnelingModel::setRouteMode(int routeMode)
+void AppSplitTunnelingModel::updateModel(const QVector<amnezia::InstalledAppInfo> &apps)
 {
     beginResetModel();
-    m_settings->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(routeMode));
-    m_currentRouteMode = m_settings->getAppsRouteMode();
-    m_apps = m_settings->getVpnApps(m_currentRouteMode);
+    m_apps = apps;
     endResetModel();
-    emit routeModeChanged();
-}
-
-bool AppSplitTunnelingModel::isSplitTunnelingEnabled()
-{
-    return m_isSplitTunnelingEnabled;
-}
-
-void AppSplitTunnelingModel::toggleSplitTunneling(bool enabled)
-{
-    m_settings->setAppsSplitTunnelingEnabled(enabled);
-    m_isSplitTunnelingEnabled = enabled;
-    emit splitTunnelingToggled();
 }
 
 QHash<int, QByteArray> AppSplitTunnelingModel::roleNames() const

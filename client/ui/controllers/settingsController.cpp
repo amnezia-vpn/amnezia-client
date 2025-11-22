@@ -8,6 +8,7 @@
 #include "ui/qautostart.h"
 #include "amnezia_application.h"
 #include "version.h"
+#include "core/controllers/appSplitTunnelingController.h"
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
@@ -20,14 +21,14 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
                                        const QSharedPointer<ContainersModel> &containersModel,
                                        const QSharedPointer<LanguageModel> &languageModel,
                                        const QSharedPointer<SitesModel> &sitesModel,
-                                       const QSharedPointer<AppSplitTunnelingModel> &appSplitTunnelingModel,
+                                       const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
                                        const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_languageModel(languageModel),
       m_sitesModel(sitesModel),
-      m_appSplitTunnelingModel(appSplitTunnelingModel),
+      m_appSplitTunnelingController(appSplitTunnelingController),
       m_settings(settings)
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
@@ -209,19 +210,19 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         int appSplitTunnelingRouteMode = newConfigData.value("Conf/appsRouteMode").toInt();
         bool appSplittunnelingEnabled =
                 newConfigData.value("Conf/appsSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
-        m_appSplitTunnelingModel->setRouteMode(appSplitTunnelingRouteMode);
+        m_appSplitTunnelingController->setRouteMode(appSplitTunnelingRouteMode);
 
         #if defined(Q_OS_WINDOWS)
-            m_appSplitTunnelingModel->setRouteMode(static_cast<int>(Settings::AppsRouteMode::VpnAllExceptApps));
+            m_appSplitTunnelingController->setRouteMode(static_cast<int>(Settings::AppsRouteMode::VpnAllExceptApps));
         #endif
 
         if (newConfigData.contains("AppPlatform")) { //if backup is from a new version
                 if (newConfigData.value("AppPlatform").toString() != getPlatformName()) {
-                    m_appSplitTunnelingModel->clearAppsList();
+                    m_appSplitTunnelingController->clearAppsList();
                 }
         }
         
-        m_appSplitTunnelingModel->toggleSplitTunneling(appSplittunnelingEnabled);
+        m_appSplitTunnelingController->toggleSplitTunneling(appSplittunnelingEnabled);
 #endif
 
         int siteSplitTunnelingRouteMode = newConfigData.value("Conf/routeMode").toInt();
@@ -262,8 +263,8 @@ void SettingsController::clearSettings()
     m_sitesModel->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
     m_sitesModel->toggleSplitTunneling(false);
 
-    m_appSplitTunnelingModel->setRouteMode(Settings::AppsRouteMode::VpnAllExceptApps);
-    m_appSplitTunnelingModel->toggleSplitTunneling(false);
+    m_appSplitTunnelingController->setRouteMode(Settings::AppsRouteMode::VpnAllExceptApps);
+    m_appSplitTunnelingController->toggleSplitTunneling(false);
 
     toggleAutoStart(false);
 

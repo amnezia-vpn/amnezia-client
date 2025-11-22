@@ -59,7 +59,7 @@ PageType {
     }
 
     function getRouteModesModelIndex() {
-        var currentRouteMode = AppSplitTunnelingModel.routeMode
+        var currentRouteMode = AppSplitTunnelingController.routeMode
         if ((routeMode.onlyForwardApps === currentRouteMode) || (routeMode.allApps === currentRouteMode)) {
             return 0
         } else if (routeMode.allExceptApps === currentRouteMode) {
@@ -90,11 +90,11 @@ PageType {
             enabled: root.pageEnabled
             showSwitcher: true
             switcher {
-                checked: AppSplitTunnelingModel.isTunnelingEnabled
+                checked: AppSplitTunnelingController.isTunnelingEnabled
                 enabled: root.pageEnabled
             }
             switcherFunction: function(checked) {
-                AppSplitTunnelingModel.toggleSplitTunneling(checked)
+                AppSplitTunnelingController.toggleSplitTunneling(checked)
                 selector.text = root.routeModesModel[getRouteModesModelIndex()].name
             }
         }
@@ -124,13 +124,13 @@ PageType {
                 clickedFunction: function() {
                     selector.text = selectedText
                     selector.closeTriggered()
-                    if (AppSplitTunnelingModel.routeMode !== root.routeModesModel[selectedIndex].type) {
-                        AppSplitTunnelingModel.routeMode = root.routeModesModel[selectedIndex].type
+                    if (AppSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
+                        AppSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
                     }
                 }
 
                 Component.onCompleted: {
-                    if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingModel.routeMode) {
+                    if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingController.routeMode) {
                         selector.text = selectedText
                     } else {
                         selector.text = root.routeModesModel[0].name
@@ -138,7 +138,7 @@ PageType {
                 }
 
                 Connections {
-                    target: AppSplitTunnelingModel
+                    target: AppSplitTunnelingController
                     function onRouteModeChanged() {
                         selectedIndex = getRouteModesModelIndex()
                     }
