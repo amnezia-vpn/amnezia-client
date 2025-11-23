@@ -101,7 +101,7 @@ void CoreController::initModels()
     m_apiAccountInfoModel.reset(new ApiAccountInfoModel(this));
     m_engine->rootContext()->setContextProperty("ApiAccountInfoModel", m_apiAccountInfoModel.get());
 
-    m_apiDevicesModel.reset(new ApiDevicesModel(m_settings, this));
+    m_apiDevicesModel.reset(new ApiDevicesModel(this));
     m_engine->rootContext()->setContextProperty("ApiDevicesModel", m_apiDevicesModel.get());
 
     m_newsModel.reset(new NewsModel(m_settings, this));

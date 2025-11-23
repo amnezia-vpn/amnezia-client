@@ -93,5 +93,5 @@ void ApiSettingsController::updateApiCountryModel()
 
 void ApiSettingsController::updateApiDevicesModel()
 {
-    m_apiDevicesModel->updateModel(m_apiAccountInfoModel->getIssuedConfigsInfo());
+    m_apiDevicesModel->updateModel(m_apiAccountInfoModel->getIssuedConfigsInfo(), m_settings->getInstallationUuid(false));
 }
