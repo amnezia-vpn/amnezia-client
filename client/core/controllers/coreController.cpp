@@ -42,7 +42,7 @@ void CoreController::initModels()
     m_serversModel.reset(new ServersModel(this));
     m_engine->rootContext()->setContextProperty("ServersModel", m_serversModel.get());
 
-    m_languageModel.reset(new LanguageModel(m_settings, this));
+    m_languageModel.reset(new LanguageModel(this));
     m_engine->rootContext()->setContextProperty("LanguageModel", m_languageModel.get());
 
     m_sitesModel.reset(new SitesModel(this));
@@ -144,8 +144,11 @@ void CoreController::initControllers()
     m_exportController.reset(new ExportController(m_serversController, m_serversModel, m_containersModel, m_clientManagementController, m_settings));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
+    m_languageUiController = QSharedPointer<LanguageUiController>::create(m_settings, m_languageModel, this);
+    m_engine->rootContext()->setContextProperty("LanguageUiController", m_languageUiController.get());
+
     m_settingsController.reset(
-            new SettingsController(m_serversModel, m_containersModel, m_languageModel, m_sitesController, m_appSplitTunnelingController, m_settings));
+            new SettingsController(m_serversModel, m_containersModel, m_languageUiController, m_sitesController, m_appSplitTunnelingController, m_settings));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 
     m_serversUiController = QSharedPointer<ServersUiController>::create(m_serversController, m_serversModel, m_containersModel, m_defaultServerContainersModel);
@@ -244,6 +247,7 @@ void CoreController::initSignalHandlers()
     initAdminConfigRevokedHandler();
     initPassphraseRequestHandler();
     initTranslationsUpdatedHandler();
+    initLanguageHandler();
     initAutoConnectHandler();
     initAmneziaDnsToggledHandler();
     initServersModelUpdateHandler();
@@ -308,7 +312,7 @@ void CoreController::updateTranslator(const QLocale &locale)
     m_engine->retranslate();
 
     emit translationsUpdated();
-    emit websiteUrlChanged(m_languageModel->getCurrentSiteUrl());
+    emit websiteUrlChanged(m_languageUiController->getCurrentSiteUrl());
 }
 
 void CoreController::initErrorMessagesHandler()
@@ -357,9 +361,17 @@ void CoreController::initPassphraseRequestHandler()
 
 void CoreController::initTranslationsUpdatedHandler()
 {
-    connect(m_languageModel.get(), &LanguageModel::updateTranslations, this, &CoreController::updateTranslator);
-    connect(this, &CoreController::translationsUpdated, m_languageModel.get(), &LanguageModel::translationsUpdated);
+    connect(m_languageUiController.get(), &LanguageUiController::updateTranslations, this, &CoreController::updateTranslator);
+    connect(this, &CoreController::translationsUpdated, m_languageUiController.get(), &LanguageUiController::translationsUpdated);
     connect(this, &CoreController::translationsUpdated, m_connectionController.get(), &ConnectionController::onTranslationsUpdated);
+}
+
+void CoreController::initLanguageHandler()
+{
+    connect(m_settingsController.get(), &SettingsController::appLanguageChanged, m_languageUiController.get(), &LanguageUiController::changeLanguage);
+    connect(m_settingsController.get(), &SettingsController::resetLanguageToSystem, m_languageUiController.get(), [this]() {
+        m_languageUiController->changeLanguage(m_languageUiController->getSystemLanguageEnum());
+    });
 }
 
 void CoreController::initAutoConnectHandler()

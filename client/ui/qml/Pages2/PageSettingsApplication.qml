@@ -180,7 +180,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Language")
-                descriptionText: LanguageModel.currentLanguageName
+                descriptionText: LanguageUiController.currentLanguageName
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {

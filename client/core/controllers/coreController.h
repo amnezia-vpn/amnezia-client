@@ -14,7 +14,7 @@
 #include "ui/controllers/api/apiPremV1MigrationController.h"
 #include "ui/controllers/api/apiNewsController.h"
 #include "ui/controllers/appSplitTunnelingUiController.h"
-#include "ui/controllers/allowedDnsController.h"
+#include "ui/controllers/allowedDnsUiController.h"
 #include "ui/controllers/connectionController.h"
 #include "ui/controllers/exportController.h"
 #include "ui/controllers/focusController.h"
@@ -28,6 +28,7 @@
 #include "ui/controllers/systemController.h"
 #include "ui/controllers/appSplitTunnelingUiController.h"
 #include "ui/controllers/allowedDnsUiController.h"
+#include "ui/controllers/languageUiController.h"
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/clientManagementController.h"
@@ -98,6 +99,7 @@ private:
     void initAdminConfigRevokedHandler();
     void initPassphraseRequestHandler();
     void initTranslationsUpdatedHandler();
+    void initLanguageHandler();
     void initAutoConnectHandler();
     void initAmneziaDnsToggledHandler();
     void initServersModelUpdateHandler();
@@ -130,6 +132,7 @@ private:
     QScopedPointer<SystemController> m_systemController;
     QScopedPointer<AppSplitTunnelingUiController> m_appSplitTunnelingUiController;
     QScopedPointer<AllowedDnsUiController> m_allowedDnsUiController;
+    QSharedPointer<LanguageUiController> m_languageUiController;
 
     QScopedPointer<ApiSettingsController> m_apiSettingsController;
     QScopedPointer<ApiConfigsController> m_apiConfigsController;

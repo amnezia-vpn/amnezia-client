@@ -18,15 +18,15 @@
 #endif
 
 SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
-                                       const QSharedPointer<ContainersModel> &containersModel,
-                                       const QSharedPointer<LanguageModel> &languageModel,
-                                       const QSharedPointer<SitesModel> &sitesModel,
-                                       const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
-                                       const std::shared_ptr<Settings> &settings, QObject *parent)
+                                      const QSharedPointer<ContainersModel> &containersModel,
+                                      const QSharedPointer<LanguageUiController> &languageUiController,
+                                      const QSharedPointer<SitesController> &sitesController,
+                                      const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
+                                      const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
-      m_languageModel(languageModel),
+      m_languageUiController(languageUiController),
       m_sitesController(sitesController),
       m_appSplitTunnelingController(appSplitTunnelingController),
       m_settings(settings)
@@ -203,8 +203,8 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
 #endif
 
         m_serversModel->updateModel(m_settings->serversArray(), m_settings->defaultServerIndex(), m_settings->useAmneziaDns());
-        m_languageModel->changeLanguage(
-                static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageModel->getCurrentLanguageIndex()));
+        emit appLanguageChanged(
+                static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageUiController->getCurrentLanguageIndex()));
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_ANDROID)
         int appSplitTunnelingRouteMode = newConfigData.value("Conf/appsRouteMode").toInt();
@@ -258,7 +258,7 @@ void SettingsController::clearSettings()
 {
     m_settings->clearSettings();
     m_serversModel->updateModel(m_settings->serversArray(), m_settings->defaultServerIndex(), m_settings->useAmneziaDns());
-    m_languageModel->changeLanguage(m_languageModel->getSystemLanguageEnum());
+    emit resetLanguageToSystem();
 
     m_sitesController->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
     m_sitesController->toggleSplitTunneling(false);

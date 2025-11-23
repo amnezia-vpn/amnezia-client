@@ -255,7 +255,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/external-link.svg"
 
                 clickedFunc: function() {
-                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
+                    Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
                 }
             }
         }
@@ -359,7 +359,7 @@ PageType {
         property string imageSource: "qrc:/images/controls/help-circle.svg"
         property bool isVisible: PageController.isStartPageVisible() && Qt.platform.os !== "ios"
         property var handler: function() {
-            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
+            Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
         }
     }
 }

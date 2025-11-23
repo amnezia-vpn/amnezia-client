@@ -114,7 +114,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/external-link.svg"
 
                 clickedFunction: function() {
-                    Qt.openUrlExternally(LanguageModel.getCurrentDocsUrl(link))
+                    Qt.openUrlExternally(LanguageUiController.getCurrentDocsUrl(link))
                 }
             }
 

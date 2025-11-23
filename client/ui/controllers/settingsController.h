@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "ui/models/containers_model.h"
+#include "ui/controllers/languageUiController.h"
 #include "ui/models/languageModel.h"
 #include "ui/models/servers_model.h"
 #include "core/controllers/sitesController.h"
@@ -15,7 +16,7 @@ class SettingsController : public QObject
 public:
     explicit SettingsController(const QSharedPointer<ServersModel> &serversModel,
                                 const QSharedPointer<ContainersModel> &containersModel,
-                                const QSharedPointer<LanguageModel> &languageModel,
+                                const QSharedPointer<LanguageUiController> &languageUiController,
                                 const QSharedPointer<SitesController> &sitesController,
                                 const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
                                 const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
@@ -128,6 +129,9 @@ signals:
 
     void loggingDisableByWatcher();
 
+    void appLanguageChanged(const LanguageSettings::AvailableLanguageEnum language);
+    void resetLanguageToSystem();
+
     void onNotificationStateChanged();
 
     void devModeEnabled();
@@ -144,7 +148,7 @@ signals:
 private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
-    QSharedPointer<LanguageModel> m_languageModel;
+    QSharedPointer<LanguageUiController> m_languageUiController;
     QSharedPointer<SitesController> m_sitesController;
     QSharedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
     
