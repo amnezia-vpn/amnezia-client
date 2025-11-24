@@ -115,6 +115,8 @@ void CoreController::initCoreControllers()
     m_clientManagementController = QSharedPointer<ClientManagementController>::create(m_settings, this);
     m_sitesController = QSharedPointer<SitesController>::create(m_settings);
     m_allowedDnsController = QSharedPointer<AllowedDnsController>::create(m_settings);
+    m_servicesCatalogController = QSharedPointer<ServicesCatalogController>::create(m_settings);
+    m_subscriptionController = QSharedPointer<SubscriptionController>::create(m_settings);
 }
 
 void CoreController::initControllers()
@@ -170,7 +172,10 @@ void CoreController::initControllers()
             new ApiSettingsController(m_serversController, m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settings));
     m_engine->rootContext()->setContextProperty("ApiSettingsController", m_apiSettingsController.get());
 
-    m_apiConfigsController.reset(new ApiConfigsController(m_serversController, m_serversModel, m_apiServicesModel, m_settings));
+    m_servicesCatalogUiController.reset(new ServicesCatalogUiController(m_servicesCatalogController, m_apiServicesModel, this));
+    m_engine->rootContext()->setContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController.get());
+
+    m_apiConfigsController.reset(new ApiConfigsController(m_serversController, m_serversModel, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController, m_settings));
     m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigsController.get());
 
     m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversController, m_serversModel, m_settings, this));
