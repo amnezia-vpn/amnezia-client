@@ -9,7 +9,7 @@
                 Start="auto"
                 Type="ownProcess"
                 ErrorControl="normal"
-                Vital="yes" />
+                Vital="no" />
         <ServiceControl
                 Id="AmneziaServiceControl"
                 Name="AmneziaVPN-service"
