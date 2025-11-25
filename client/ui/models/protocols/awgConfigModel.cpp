@@ -191,21 +191,16 @@ bool AwgConfigModel::isHeadersEqual(const QString &h1, const QString &h2, const 
     return (h1 == h2) || (h1 == h3) || (h1 == h4) || (h2 == h3) || (h2 == h4) || (h3 == h4);
 }
 
-bool AwgConfigModel::isPacketSizeEqual(const int s1, const int s2)
+bool AwgConfigModel::isPacketSizeEqual(const int s1, const int s2, const int s3, const int s4)
 {
-    return (AwgConstant::messageInitiationSize + s1 == AwgConstant::messageResponseSize + s2);
+    int initSize = AwgConstant::messageInitiationSize + s1;
+    int responseSize = AwgConstant::messageResponseSize + s2;
+    int cookieSize = AwgConstant::messageCookieReplySize + s3;
+    int transportSize = AwgConstant::messageTransportSize + s4;
+
+    return (initSize == responseSize || initSize == cookieSize || initSize == transportSize || responseSize == cookieSize
+            || responseSize == transportSize || cookieSize == transportSize);
 }
-
-// bool AwgConfigModel::isPacketSizeEqual(const int s1, const int s2, const int s3, const int s4)
-// {
-//     int initSize = AwgConstant::messageInitiationSize + s1;
-//     int responseSize = AwgConstant::messageResponseSize + s2;
-//     int cookieSize = AwgConstant::messageCookieReplySize + s3;
-//     int transportSize = AwgConstant::messageTransportSize + s4;
-
-//     return (initSize == responseSize || initSize == cookieSize || initSize == transportSize || responseSize == cookieSize
-//             || responseSize == transportSize || cookieSize == transportSize);
-// }
 
 bool AwgConfigModel::isServerSettingsEqual()
 {

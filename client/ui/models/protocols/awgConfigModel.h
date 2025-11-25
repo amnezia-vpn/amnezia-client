@@ -92,7 +92,7 @@ public slots:
     QJsonObject getConfig();
 
     bool isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4);
-    bool isPacketSizeEqual(const int s1, const int s2/*, const int s3, const int s4*/);
+    bool isPacketSizeEqual(const int s1, const int s2, const int s3, const int s4);
 
     bool isServerSettingsEqual();
 
