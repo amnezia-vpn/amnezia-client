@@ -167,7 +167,7 @@ namespace
                 return ErrorCode::ApiConfigEmptyError;
             }
             auto container = containers.at(0).toObject();
-            QString containerName = ContainerProps::containerTypeToString(DockerContainer::Awg);
+            QString containerName = ContainerProps::containerTypeToProtocolString(DockerContainer::Awg);
             auto serverProtocolConfig = container.value(containerName).toObject();
             auto clientProtocolConfig =
                     QJsonDocument::fromJson(serverProtocolConfig.value(config_key::last_config).toString().toUtf8()).object();

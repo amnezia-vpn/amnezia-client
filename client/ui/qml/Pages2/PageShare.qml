@@ -460,6 +460,8 @@ PageType {
                             root.connectionTypesModel.push(wireGuardConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-awg")) {
                             root.connectionTypesModel.push(awgConnectionFormat)
+                        } else if (index === ContainerProps.containerFromString("amnezia-awg-go")) {
+                            root.connectionTypesModel.push(awgConnectionFormat)
                         } else if (index === ContainerProps.containerFromString("amnezia-shadowsocks")) {
                             root.connectionTypesModel.push(openVpnConnectionFormat)
                             root.connectionTypesModel.push(shadowSocksConnectionFormat)
