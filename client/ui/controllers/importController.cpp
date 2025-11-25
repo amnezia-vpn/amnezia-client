@@ -449,8 +449,8 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
                                              config_key::responsePacketMagicHeader, config_key::underloadPacketMagicHeader,
                                              config_key::transportPacketMagicHeader };
 
-    const QStringList optionalJunkFields = { // config_key::cookieReplyPacketJunkSize,
-                                             // config_key::transportPacketJunkSize,
+    const QStringList optionalJunkFields = { config_key::cookieReplyPacketJunkSize,
+                                             config_key::transportPacketJunkSize,
                                              config_key::specialJunk1,    config_key::specialJunk2,    config_key::specialJunk3,
                                              config_key::specialJunk4,    config_key::specialJunk5
     };
