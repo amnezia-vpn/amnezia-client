@@ -6,6 +6,7 @@
                 Name="AmneziaVPN-service"
                 DisplayName="AmneziaVPN Service"
                 Description="Service for AmneziaVPN"
+                Dependencies="nsi,BFE"
                 Start="auto"
                 Type="ownProcess"
                 ErrorControl="normal"
