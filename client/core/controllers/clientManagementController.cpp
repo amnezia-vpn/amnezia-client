@@ -28,7 +28,7 @@ namespace
     }
 }
 
-ClientManagementController::ClientManagementController(std::shared_ptr<ServersRepository> serversRepository, QObject *parent)
+ClientManagementController::ClientManagementController(ServersRepository* serversRepository, QObject *parent)
     : QObject(parent),
       m_serversRepository(serversRepository)
 {

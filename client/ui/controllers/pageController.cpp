@@ -20,8 +20,8 @@
     #include "ui/macos_util.h"
 #endif
 
-PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
-                               const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+PageController::PageController(ServersModel* serversModel,
+                               QAppSettingsRepository* appSettingsRepository,
                                QObject *parent)
     : QObject(parent), m_serversModel(serversModel), m_appSettingsRepository(appSettingsRepository)
 {

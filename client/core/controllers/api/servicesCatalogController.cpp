@@ -11,7 +11,7 @@ namespace
     constexpr char osVersion[] = "os_version";
 }
 
-ServicesCatalogController::ServicesCatalogController(std::shared_ptr<AppSettingsRepository> appSettingsRepository)
+ServicesCatalogController::ServicesCatalogController(AppSettingsRepository* appSettingsRepository)
     : m_appSettingsRepository(appSettingsRepository)
 {
 }

@@ -26,10 +26,10 @@ class ImportController : public QObject
 {
     Q_OBJECT
 public:
-    explicit ImportController(const QSharedPointer<ServersController> &serversController,
-                              const QSharedPointer<ServersModel> &serversModel,
-                              const QSharedPointer<ContainersModel> &containersModel,
-                              const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+    explicit ImportController(ServersController* serversController,
+                              ServersModel* serversModel,
+                              ContainersModel* containersModel,
+                              QAppSettingsRepository* appSettingsRepository,
                               const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
 public slots:
@@ -77,10 +77,10 @@ private:
     void stopDecodingQr();
 #endif
 
-    QSharedPointer<ServersController> m_serversController;
-    QSharedPointer<ServersModel> m_serversModel;
-    QSharedPointer<ContainersModel> m_containersModel;
-    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
+    ServersController* m_serversController;
+    ServersModel* m_serversModel;
+    ContainersModel* m_containersModel;
+    QAppSettingsRepository* m_appSettingsRepository;
     std::shared_ptr<Settings> m_settings;
 
     QJsonObject m_config;

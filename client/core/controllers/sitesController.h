@@ -13,7 +13,7 @@ using namespace amnezia;
 class SitesController
 {
 public:
-    explicit SitesController(std::shared_ptr<AppSettingsRepository> appSettingsRepository);
+    explicit SitesController(AppSettingsRepository* appSettingsRepository);
 
     bool addSite(const QString &hostname, const QString &ip);
     void addSites(const QMap<QString, QString> &sites, bool replaceExisting);
@@ -29,7 +29,7 @@ public:
 private:
     void fillSites();
 
-    std::shared_ptr<AppSettingsRepository> m_appSettingsRepository;
+    AppSettingsRepository* m_appSettingsRepository;
     RouteMode m_currentRouteMode;
     QVector<QPair<QString, QString>> m_sites;
 };

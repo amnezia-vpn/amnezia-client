@@ -14,8 +14,8 @@ class ServicesCatalogUiController : public QObject
     Q_OBJECT
 
 public:
-    explicit ServicesCatalogUiController(const QSharedPointer<ServicesCatalogController> &servicesCatalogController,
-                                         const QSharedPointer<ApiServicesModel> &apiServicesModel,
+    explicit ServicesCatalogUiController(ServicesCatalogController* servicesCatalogController,
+                                         ApiServicesModel* apiServicesModel,
                                          QObject *parent = nullptr);
 
 public slots:
@@ -34,8 +34,8 @@ signals:
     void errorOccurred(ErrorCode errorCode);
 
 private:
-    QSharedPointer<ServicesCatalogController> m_servicesCatalogController;
-    QSharedPointer<ApiServicesModel> m_apiServicesModel;
+    ServicesCatalogController* m_servicesCatalogController;
+    ApiServicesModel* m_apiServicesModel;
 };
 
 #endif // SERVICESCATALOGUICONTROLLER_H

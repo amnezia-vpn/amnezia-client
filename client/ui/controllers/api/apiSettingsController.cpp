@@ -23,12 +23,12 @@ namespace
     const int requestTimeoutMsecs = 12 * 1000; // 12 secs
 }
 
-ApiSettingsController::ApiSettingsController(const QSharedPointer<ServersController> &serversController,
-                                             const QSharedPointer<ServersModel> &serversModel,
-                                             const QSharedPointer<ApiAccountInfoModel> &apiAccountInfoModel,
-                                             const QSharedPointer<ApiCountryModel> &apiCountryModel,
-                                             const QSharedPointer<ApiDevicesModel> &apiDevicesModel,
-                                             const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+ApiSettingsController::ApiSettingsController(ServersController* serversController,
+                                             ServersModel* serversModel,
+                                             ApiAccountInfoModel* apiAccountInfoModel,
+                                             ApiCountryModel* apiCountryModel,
+                                             ApiDevicesModel* apiDevicesModel,
+                                             QAppSettingsRepository* appSettingsRepository,
                                              QObject *parent)
     : QObject(parent),
       m_serversController(serversController),

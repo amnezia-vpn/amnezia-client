@@ -17,11 +17,11 @@ class InstallController : public QObject
 {
     Q_OBJECT
 public:
-    explicit InstallController(const QSharedPointer<ServersController> &serversController,
-                               const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
-                               const QSharedPointer<ProtocolsModel> &protocolsModel,
-                               const QSharedPointer<ClientManagementController> &clientManagementController,
-                               const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+    explicit InstallController(ServersController* serversController,
+                               ServersModel* serversModel, ContainersModel* containersModel,
+                               ProtocolsModel* protocolsModel,
+                               ClientManagementController* clientManagementController,
+                               QAppSettingsRepository* appSettingsRepository,
                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
     ~InstallController();
 
@@ -101,12 +101,12 @@ private:
                                             QMap<DockerContainer, QJsonObject> &installedContainers);
     bool isUpdateDockerContainerRequired(const DockerContainer container, const QJsonObject &oldConfig, const QJsonObject &newConfig);
 
-    QSharedPointer<ServersController> m_serversController;
-    QSharedPointer<ServersModel> m_serversModel;
-    QSharedPointer<ContainersModel> m_containersModel;
-    QSharedPointer<ProtocolsModel> m_protocolModel;
-    QSharedPointer<ClientManagementController> m_clientManagementController;
-    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
+    ServersController* m_serversController;
+    ServersModel* m_serversModel;
+    ContainersModel* m_containersModel;
+    ProtocolsModel* m_protocolModel;
+    ClientManagementController* m_clientManagementController;
+    QAppSettingsRepository* m_appSettingsRepository;
 
     std::shared_ptr<Settings> m_settings;
 

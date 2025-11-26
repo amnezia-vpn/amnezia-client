@@ -11,9 +11,9 @@ class ApiPremV1MigrationController : public QObject
 {
     Q_OBJECT
 public:
-    ApiPremV1MigrationController(const QSharedPointer<ServersController> &serversController,
-                                 const QSharedPointer<ServersModel> &serversModel,
-                                 const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+    ApiPremV1MigrationController(ServersController* serversController,
+                                 ServersModel* serversModel,
+                                 QAppSettingsRepository* appSettingsRepository,
                                  QObject *parent = nullptr);
 
     Q_PROPERTY(QJsonArray subscriptionsModel READ getSubscriptionModel NOTIFY subscriptionsModelChanged)
@@ -43,9 +43,9 @@ signals:
     void noSubscriptionToMigrate();
 
 private:
-    QSharedPointer<ServersController> m_serversController;
-    QSharedPointer<ServersModel> m_serversModel;
-    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
+    ServersController* m_serversController;
+    ServersModel* m_serversModel;
+    QAppSettingsRepository* m_appSettingsRepository;
 
     QJsonArray m_subscriptionsModel;
     int m_subscriptionIndex;

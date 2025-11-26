@@ -10,9 +10,9 @@
 #include "core/controllers/gatewayController.h"
 #include "settings.h"
 
-ApiPremV1MigrationController::ApiPremV1MigrationController(const QSharedPointer<ServersController> &serversController,
-                                                           const QSharedPointer<ServersModel> &serversModel,
-                                                           const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+ApiPremV1MigrationController::ApiPremV1MigrationController(ServersController* serversController,
+                                                           ServersModel* serversModel,
+                                                           QAppSettingsRepository* appSettingsRepository,
                                                            QObject *parent)
     : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_appSettingsRepository(appSettingsRepository)
 {

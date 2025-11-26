@@ -12,11 +12,11 @@
 #include "core/qrCodeUtils.h"
 #include "systemController.h"
 
-ExportController::ExportController(const QSharedPointer<ServersController> &serversController,
-                                  const QSharedPointer<ServersModel> &serversModel,
-                                  const QSharedPointer<ContainersModel> &containersModel,
-                                  const QSharedPointer<ClientManagementController> &clientManagementController,
-                                  const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+ExportController::ExportController(ServersController* serversController,
+                                  ServersModel* serversModel,
+                                  ContainersModel* containersModel,
+                                  ClientManagementController* clientManagementController,
+                                  QAppSettingsRepository* appSettingsRepository,
                                   const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversController(serversController),

@@ -13,16 +13,16 @@ namespace
     }
 }
 
-ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel,
-                                     const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
-                                     const QSharedPointer<ServersController> &serversController, QObject *parent)
+ApiNewsController::ApiNewsController(NewsModel* newsModel,
+                                     QAppSettingsRepository* appSettingsRepository,
+                                     ServersController* serversController, QObject *parent)
     : QObject(parent), m_newsModel(newsModel), m_appSettingsRepository(appSettingsRepository), m_serversController(serversController)
 {
 }
 
 void ApiNewsController::fetchNews(bool showError)
 {
-    if (m_serversController.isNull()) {
+    if (!m_serversController) {
         qWarning() << "ServersController is null, skip fetchNews";
         return;
     }

@@ -9,12 +9,12 @@
 #include "core/controllers/vpnConfigurationController.h"
 #include "version.h"
 
-ConnectionController::ConnectionController(const QSharedPointer<ServersController> &serversController,
-                                          const QSharedPointer<ServersModel> &serversModel,
-                                          const QSharedPointer<ContainersModel> &containersModel,
-                                          const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                          const QSharedPointer<VpnConnection> &vpnConnection,
-                                          const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+ConnectionController::ConnectionController(ServersController* serversController,
+                                          ServersModel* serversModel,
+                                          ContainersModel* containersModel,
+                                          ClientManagementModel* clientManagementModel,
+                                          VpnConnection* vpnConnection,
+                                          QAppSettingsRepository* appSettingsRepository,
                                           const std::shared_ptr<Settings> &settings,
                                           QObject *parent)
     : QObject(parent),
@@ -26,9 +26,9 @@ ConnectionController::ConnectionController(const QSharedPointer<ServersControlle
       m_appSettingsRepository(appSettingsRepository),
       m_settings(settings)
 {
-    connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this, &ConnectionController::onConnectionStateChanged);
-    connect(this, &ConnectionController::connectToVpn, m_vpnConnection.get(), &VpnConnection::connectToVpn, Qt::QueuedConnection);
-    connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection.get(), &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
+    connect(m_vpnConnection, &VpnConnection::connectionStateChanged, this, &ConnectionController::onConnectionStateChanged);
+    connect(this, &ConnectionController::connectToVpn, m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
+    connect(this, &ConnectionController::disconnectFromVpn, m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
 
     connect(this, &ConnectionController::connectButtonClicked, this, &ConnectionController::toggleConnection, Qt::QueuedConnection);
 

@@ -16,8 +16,8 @@ class AppSplitTunnelingUiController : public QObject
     Q_PROPERTY(bool isTunnelingEnabled READ isTunnelingEnabled NOTIFY isTunnelingEnabledChanged)
 
 public:
-    explicit AppSplitTunnelingUiController(const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
-                                          const QSharedPointer<AppSplitTunnelingModel> &appSplitTunnelingModel,
+    explicit AppSplitTunnelingUiController(AppSplitTunnelingController* appSplitTunnelingController,
+                                          AppSplitTunnelingModel* appSplitTunnelingModel,
                                           QObject *parent = nullptr);
 
 public slots:
@@ -39,8 +39,8 @@ signals:
     void finished(const QString &message);
 
 private:
-    QSharedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
-    QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
+    AppSplitTunnelingController* m_appSplitTunnelingController;
+    AppSplitTunnelingModel* m_appSplitTunnelingModel;
 };
 
 #endif // APPSPLITTUNNELINGUICONTROLLER_H

@@ -8,7 +8,7 @@
 class AllowedDnsController
 {
 public:
-    explicit AllowedDnsController(std::shared_ptr<AppSettingsRepository> appSettingsRepository);
+    explicit AllowedDnsController(AppSettingsRepository* appSettingsRepository);
 
     bool addDns(const QString &ip);
     void addDnsList(const QStringList &dnsServers, bool replaceExisting);
@@ -18,7 +18,7 @@ public:
 private:
     void fillDnsServers();
 
-    std::shared_ptr<AppSettingsRepository> m_appSettingsRepository;
+    AppSettingsRepository* m_appSettingsRepository;
     QStringList m_dnsServers;
 };
 

@@ -38,8 +38,8 @@ public:
     };
     
 public:
-    explicit ServersController(std::shared_ptr<ServersRepository> serversRepository, 
-                              std::shared_ptr<AppSettingsRepository> appSettingsRepository = nullptr,
+    explicit ServersController(ServersRepository* serversRepository, 
+                              AppSettingsRepository* appSettingsRepository = nullptr,
                               QObject *parent = nullptr);
     ~ServersController() = default;
 
@@ -88,8 +88,8 @@ signals:
 private:
     void recomputeGatewayStacks();
     
-    std::shared_ptr<ServersRepository> m_serversRepository;
-    std::shared_ptr<AppSettingsRepository> m_appSettingsRepository;
+    ServersRepository* m_serversRepository;
+    AppSettingsRepository* m_appSettingsRepository;
     GatewayStacks m_gatewayStacks;
 };
 

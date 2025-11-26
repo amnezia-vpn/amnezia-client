@@ -10,8 +10,8 @@
 #include "core/networkUtilities.h"
 #include "core/defs.h"
 
-AllowedDnsUiController::AllowedDnsUiController(const QSharedPointer<AllowedDnsController> &allowedDnsController,
-                                                 const QSharedPointer<AllowedDnsModel> &allowedDnsModel,
+AllowedDnsUiController::AllowedDnsUiController(AllowedDnsController* allowedDnsController,
+                                                 AllowedDnsModel* allowedDnsModel,
                                                  QObject *parent)
     : QObject(parent),
       m_allowedDnsController(allowedDnsController),

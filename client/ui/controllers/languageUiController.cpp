@@ -1,7 +1,7 @@
 #include "languageUiController.h"
 
-LanguageUiController::LanguageUiController(const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
-                                           const QSharedPointer<LanguageModel> &languageModel,
+LanguageUiController::LanguageUiController(QAppSettingsRepository* appSettingsRepository,
+                                           LanguageModel* languageModel,
                                            QObject *parent)
     : QObject(parent),
       m_appSettingsRepository(appSettingsRepository),
@@ -11,28 +11,14 @@ LanguageUiController::LanguageUiController(const QSharedPointer<QAppSettingsRepo
 
 void LanguageUiController::onAppLanguageChanged(const QLocale &locale)
 {
-    LanguageSettings::AvailableLanguageEnum languageEnum = LanguageSettings::AvailableLanguageEnum::English;
-    switch (locale.language()) {
-    case QLocale::English: languageEnum = LanguageSettings::AvailableLanguageEnum::English; break;
-    case QLocale::Russian: languageEnum = LanguageSettings::AvailableLanguageEnum::Russian; break;
-    case QLocale::Chinese: languageEnum = LanguageSettings::AvailableLanguageEnum::China_cn; break;
-    case QLocale::Ukrainian: languageEnum = LanguageSettings::AvailableLanguageEnum::Ukrainian; break;
-    case QLocale::Persian: languageEnum = LanguageSettings::AvailableLanguageEnum::Persian; break;
-    case QLocale::Arabic: languageEnum = LanguageSettings::AvailableLanguageEnum::Arabic; break;
-    case QLocale::Burmese: languageEnum = LanguageSettings::AvailableLanguageEnum::Burmese; break;
-    case QLocale::Urdu: languageEnum = LanguageSettings::AvailableLanguageEnum::Urdu; break;
-    case QLocale::Hindi: languageEnum = LanguageSettings::AvailableLanguageEnum::Hindi; break;
-    default: break;
-    }
-    changeLanguage(languageEnum);
+    emit updateTranslations(locale);
+    emit translationsUpdated();
 }
 
 void LanguageUiController::changeLanguage(const LanguageSettings::AvailableLanguageEnum language)
 {
     QLocale locale = languageEnumToLocale(language);
     m_appSettingsRepository->setAppLanguage(locale);
-    emit updateTranslations(locale);
-    emit translationsUpdated();
 }
 
 int LanguageUiController::getCurrentLanguageIndex() const

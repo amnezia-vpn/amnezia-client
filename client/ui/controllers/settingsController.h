@@ -16,13 +16,13 @@ class SettingsController : public QObject
 {
     Q_OBJECT
 public:
-    explicit SettingsController(const QSharedPointer<ServersModel> &serversModel,
-                                const QSharedPointer<ContainersModel> &containersModel,
-                                const QSharedPointer<LanguageUiController> &languageUiController,
-                                const QSharedPointer<SitesController> &sitesController,
-                                const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
-                                const QSharedPointer<QServersRepository> &serversRepository,
-                                const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+    explicit SettingsController(ServersModel* serversModel,
+                                ContainersModel* containersModel,
+                                LanguageUiController* languageUiController,
+                                SitesController* sitesController,
+                                AppSplitTunnelingController* appSplitTunnelingController,
+                                QServersRepository* serversRepository,
+                                QAppSettingsRepository* appSettingsRepository,
                                 QObject *parent = nullptr);
 
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
@@ -150,13 +150,13 @@ signals:
     void startMinimizedChanged();
 
 private:
-    QSharedPointer<ServersModel> m_serversModel;
-    QSharedPointer<ContainersModel> m_containersModel;
-    QSharedPointer<LanguageUiController> m_languageUiController;
-    QSharedPointer<SitesController> m_sitesController;
-    QSharedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
-    QSharedPointer<QServersRepository> m_serversRepository;
-    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
+    ServersModel* m_serversModel;
+    ContainersModel* m_containersModel;
+    LanguageUiController* m_languageUiController;
+    SitesController* m_sitesController;
+    AppSplitTunnelingController* m_appSplitTunnelingController;
+    QServersRepository* m_serversRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
     
     mutable int m_cachedStatusBarHeight = -1;
     mutable int m_cachedNavigationBarHeight = -1;

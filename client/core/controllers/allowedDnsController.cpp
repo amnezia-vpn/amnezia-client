@@ -1,6 +1,6 @@
 #include "allowedDnsController.h"
 
-AllowedDnsController::AllowedDnsController(std::shared_ptr<AppSettingsRepository> appSettingsRepository)
+AllowedDnsController::AllowedDnsController(AppSettingsRepository* appSettingsRepository)
     : m_appSettingsRepository(appSettingsRepository)
 {
     fillDnsServers();

@@ -20,12 +20,12 @@ namespace
     }
 }
 
-ServersUiController::ServersUiController(const QSharedPointer<ServersController> &serversController,
-                                         const QSharedPointer<QServersRepository> &serversRepository,
-                                         const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
-                                         const QSharedPointer<ServersModel> &serversModel,
-                                         const QSharedPointer<ContainersModel> &containersModel,
-                                         const QSharedPointer<ContainersModel> &defaultServerContainersModel,
+ServersUiController::ServersUiController(ServersController* serversController,
+                                         QServersRepository* serversRepository,
+                                         QAppSettingsRepository* appSettingsRepository,
+                                         ServersModel* serversModel,
+                                         ContainersModel* containersModel,
+                                         ContainersModel* defaultServerContainersModel,
                                          QObject *parent)
     : QObject(parent),
       m_serversController(serversController),

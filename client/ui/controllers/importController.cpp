@@ -68,9 +68,9 @@ namespace
 #endif
 } // namespace
 
-ImportController::ImportController(const QSharedPointer<ServersController> &serversController,
-                                   const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
-                                   const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+ImportController::ImportController(ServersController* serversController,
+                                   ServersModel* serversModel, ContainersModel* containersModel,
+                                   QAppSettingsRepository* appSettingsRepository,
                                    const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_containersModel(containersModel), m_appSettingsRepository(appSettingsRepository), m_settings(settings)
 {

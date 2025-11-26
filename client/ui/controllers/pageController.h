@@ -91,8 +91,8 @@ class PageController : public QObject
 {
     Q_OBJECT
 public:
-    explicit PageController(const QSharedPointer<ServersModel> &serversModel,
-                            const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+    explicit PageController(ServersModel* serversModel,
+                            QAppSettingsRepository* appSettingsRepository,
                             QObject *parent = nullptr);
 
 public slots:
@@ -154,8 +154,8 @@ signals:
     void closeTopDrawer();
 
 private:
-    QSharedPointer<ServersModel> m_serversModel;
-    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
+    ServersModel* m_serversModel;
+    QAppSettingsRepository* m_appSettingsRepository;
 
     bool m_isTriggeredByConnectButton;
 

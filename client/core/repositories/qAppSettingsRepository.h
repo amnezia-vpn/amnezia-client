@@ -8,82 +8,87 @@
 #include <QVariantMap>
 #include <QMap>
 #include <QVector>
+#include <memory>
 
 #include "core/repositories/appSettingsRepository.h"
 #include "settings.h"
 
 using namespace amnezia;
 
-class QAppSettingsRepository : public QObject, public AppSettingsRepository
+class SecureAppSettingsRepository;
+
+class QAppSettingsRepository : public QObject
 {
     Q_OBJECT
 
 public:
     explicit QAppSettingsRepository(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    ~QAppSettingsRepository();
 
-    // AppSettingsRepository interface
-    QLocale getAppLanguage() const override;
-    void setAppLanguage(QLocale locale) override;
+    AppSettingsRepository* repository();
 
-    bool useAmneziaDns() const override;
-    void setUseAmneziaDns(bool enabled) override;
-    QStringList getAllowedDnsServers() const override;
-    void setAllowedDnsServers(const QStringList &servers) override;
-    QString primaryDns() const override;
-    void setPrimaryDns(const QString &dns) override;
-    QString secondaryDns() const override;
-    void setSecondaryDns(const QString &dns) override;
+    QLocale getAppLanguage() const;
+    void setAppLanguage(QLocale locale);
 
-    RouteMode routeMode() const override;
-    void setRouteMode(RouteMode mode) override;
-    bool addVpnSite(RouteMode mode, const QString &site, const QString &ip = "") override;
-    void addVpnSites(RouteMode mode, const QMap<QString, QString> &sites) override;
-    void removeVpnSite(RouteMode mode, const QString &site) override;
-    void removeAllVpnSites(RouteMode mode) override;
-    QVariantMap vpnSites(RouteMode mode) const override;
-    bool isSitesSplitTunnelingEnabled() const override;
-    void setSitesSplitTunnelingEnabled(bool enabled) override;
+    bool useAmneziaDns() const;
+    void setUseAmneziaDns(bool enabled);
+    QStringList getAllowedDnsServers() const;
+    void setAllowedDnsServers(const QStringList &servers);
+    QString primaryDns() const;
+    void setPrimaryDns(const QString &dns);
+    QString secondaryDns() const;
+    void setSecondaryDns(const QString &dns);
 
-    AppsRouteMode appsRouteMode() const override;
-    void setAppsRouteMode(AppsRouteMode mode) override;
-    void setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps) override;
-    QVector<InstalledAppInfo> vpnApps(AppsRouteMode mode) const override;
-    bool isAppsSplitTunnelingEnabled() const override;
-    void setAppsSplitTunnelingEnabled(bool enabled) override;
+    RouteMode routeMode() const;
+    void setRouteMode(RouteMode mode);
+    bool addVpnSite(RouteMode mode, const QString &site, const QString &ip = "");
+    void addVpnSites(RouteMode mode, const QMap<QString, QString> &sites);
+    void removeVpnSite(RouteMode mode, const QString &site);
+    void removeAllVpnSites(RouteMode mode);
+    QVariantMap vpnSites(RouteMode mode) const;
+    bool isSitesSplitTunnelingEnabled() const;
+    void setSitesSplitTunnelingEnabled(bool enabled);
 
-    QString getGatewayEndpoint() const override;
-    void setGatewayEndpoint(const QString &endpoint) override;
-    void resetGatewayEndpoint() override;
-    void setDevGatewayEndpoint() override;
-    bool isDevGatewayEnv() const override;
-    void toggleDevGatewayEnv(bool enabled) override;
+    AppsRouteMode appsRouteMode() const;
+    void setAppsRouteMode(AppsRouteMode mode);
+    void setVpnApps(AppsRouteMode mode, const QVector<InstalledAppInfo> &apps);
+    QVector<InstalledAppInfo> vpnApps(AppsRouteMode mode) const;
+    bool isAppsSplitTunnelingEnabled() const;
+    void setAppsSplitTunnelingEnabled(bool enabled);
+
+    QString getGatewayEndpoint() const;
+    void setGatewayEndpoint(const QString &endpoint);
+    void resetGatewayEndpoint();
+    void setDevGatewayEndpoint();
+    bool isDevGatewayEnv() const;
+    void toggleDevGatewayEnv(bool enabled);
     
-    bool isKillSwitchEnabled() const override;
-    void setKillSwitchEnabled(bool enabled) override;
-    bool isStrictKillSwitchEnabled() const override;
-    void setStrictKillSwitchEnabled(bool enabled) override;
+    bool isKillSwitchEnabled() const;
+    void setKillSwitchEnabled(bool enabled);
+    bool isStrictKillSwitchEnabled() const;
+    void setStrictKillSwitchEnabled(bool enabled);
     
-    bool isAutoConnect() const override;
-    void setAutoConnect(bool enabled) override;
-    bool isStartMinimized() const override;
-    void setStartMinimized(bool enabled) override;
-    bool isScreenshotsEnabled() const override;
-    void setScreenshotsEnabled(bool enabled) override;
-    bool isSaveLogs() const override;
-    void setSaveLogs(bool enabled) override;
-    QDateTime getLogEnableDate() const override;
-    void setLogEnableDate(const QDateTime &date) override;
+    bool isAutoConnect() const;
+    void setAutoConnect(bool enabled);
+    bool isStartMinimized() const;
+    void setStartMinimized(bool enabled);
+    bool isScreenshotsEnabled() const;
+    void setScreenshotsEnabled(bool enabled);
+    bool isSaveLogs() const;
+    void setSaveLogs(bool enabled);
+    QDateTime getLogEnableDate() const;
+    void setLogEnableDate(const QDateTime &date);
     
-    QString getInstallationUuid(bool createIfNotExists) const override;
-    bool isHomeAdLabelVisible() const override;
-    void disableHomeAdLabel() override;
-    bool isPremV1MigrationReminderActive() const override;
-    void disablePremV1MigrationReminder() override;
-    QByteArray backupAppConfig() const override;
-    bool restoreAppConfig(const QByteArray &cfg) override;
-    void clearSettings() override;
+    QString getInstallationUuid(bool createIfNotExists) const;
+    bool isHomeAdLabelVisible() const;
+    void disableHomeAdLabel();
+    bool isPremV1MigrationReminderActive() const;
+    void disablePremV1MigrationReminder();
+    QByteArray backupAppConfig() const;
+    bool restoreAppConfig(const QByteArray &cfg);
+    void clearSettings();
 
-    QString nextAvailableServerName() const override;
+    QString nextAvailableServerName() const;
 
 signals:
     void appLanguageChanged(QLocale locale);
@@ -100,7 +105,7 @@ signals:
     void settingsCleared();
 
 private:
-    std::shared_ptr<Settings> m_settings;
+    std::unique_ptr<SecureAppSettingsRepository> m_secureRepository;
 };
 
 #endif // QAPPSETTINGSREPOSITORY_H

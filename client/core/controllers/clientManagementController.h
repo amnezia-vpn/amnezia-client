@@ -24,7 +24,7 @@ public:
         QString allowedIps;
     };
 
-    explicit ClientManagementController(std::shared_ptr<ServersRepository> serversRepository, QObject *parent = nullptr);
+    explicit ClientManagementController(ServersRepository* serversRepository, QObject *parent = nullptr);
 
 signals:
     void clientsUpdated(const QJsonArray &clients);
@@ -71,7 +71,7 @@ private:
     ErrorCode wgShow(const DockerContainer container, const ServerCredentials &credentials,
                      const QSharedPointer<ServerController> &serverController, std::vector<WgShowData> &data);
 
-    std::shared_ptr<ServersRepository> m_serversRepository;
+    ServersRepository* m_serversRepository;
     QJsonArray m_clientsTable;
 };
 

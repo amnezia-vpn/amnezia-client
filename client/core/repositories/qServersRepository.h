@@ -4,36 +4,41 @@
 #include <QObject>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <memory>
 
 #include "core/repositories/serversRepository.h"
 #include "settings.h"
 
 using namespace amnezia;
 
-class QServersRepository : public QObject, public ServersRepository
+class SecureServersRepository;
+
+class QServersRepository : public QObject
 {
     Q_OBJECT
 
 public:
     explicit QServersRepository(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    ~QServersRepository();
 
-    // ServersRepository interface
-    void addServer(const QJsonObject &server) override;
-    void editServer(int index, const QJsonObject &server) override;
-    void removeServer(int index) override;
-    QJsonObject server(int index) const override;
-    QJsonArray serversArray() const override;
-    int serversCount() const override;
+    ServersRepository* repository();
 
-    int defaultServerIndex() const override;
-    void setDefaultServer(int index) override;
+    void addServer(const QJsonObject &server);
+    void editServer(int index, const QJsonObject &server);
+    void removeServer(int index);
+    QJsonObject server(int index) const;
+    QJsonArray serversArray() const;
+    int serversCount() const;
 
-    void setDefaultContainer(int serverIndex, DockerContainer container) override;
-    QJsonObject containerConfig(int serverIndex, DockerContainer container) const override;
-    void setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config) override;
-    void clearLastConnectionConfig(int serverIndex, DockerContainer container) override;
+    int defaultServerIndex() const;
+    void setDefaultServer(int index);
 
-    ServerCredentials serverCredentials(int index) const override;
+    void setDefaultContainer(int serverIndex, DockerContainer container);
+    QJsonObject containerConfig(int serverIndex, DockerContainer container) const;
+    void setContainerConfig(int serverIndex, DockerContainer container, const QJsonObject &config);
+    void clearLastConnectionConfig(int serverIndex, DockerContainer container);
+
+    ServerCredentials serverCredentials(int index) const;
 
 signals:
     void serverAdded(QJsonObject config);
@@ -42,7 +47,7 @@ signals:
     void defaultServerChanged(int index);
 
 private:
-    std::shared_ptr<Settings> m_settings;
+    std::unique_ptr<SecureServersRepository> m_secureRepository;
 };
 
 #endif // QSERVERSREPOSITORY_H

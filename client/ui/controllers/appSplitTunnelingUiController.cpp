@@ -4,8 +4,8 @@
 
 #include "core/defs.h"
 
-AppSplitTunnelingUiController::AppSplitTunnelingUiController(const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
-                                                              const QSharedPointer<AppSplitTunnelingModel> &appSplitTunnelingModel,
+AppSplitTunnelingUiController::AppSplitTunnelingUiController(AppSplitTunnelingController* appSplitTunnelingController,
+                                                              AppSplitTunnelingModel* appSplitTunnelingModel,
                                                               QObject *parent)
     : QObject(parent),
       m_appSplitTunnelingController(appSplitTunnelingController),

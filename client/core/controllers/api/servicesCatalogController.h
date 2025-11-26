@@ -10,14 +10,14 @@
 class ServicesCatalogController
 {
 public:
-    explicit ServicesCatalogController(std::shared_ptr<AppSettingsRepository> appSettingsRepository);
+    explicit ServicesCatalogController(AppSettingsRepository* appSettingsRepository);
 
     ErrorCode fillAvailableServices(QJsonObject &servicesData);
 
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
 
-    std::shared_ptr<AppSettingsRepository> m_appSettingsRepository;
+    AppSettingsRepository* m_appSettingsRepository;
 };
 
 #endif // SERVICESCATALOGCONTROLLER_H

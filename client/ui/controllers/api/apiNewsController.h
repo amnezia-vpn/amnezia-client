@@ -16,9 +16,9 @@ class ApiNewsController : public QObject
 {
     Q_OBJECT
 public:
-    explicit ApiNewsController(const QSharedPointer<NewsModel> &newsModel,
-                               const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
-                               const QSharedPointer<ServersController> &serversController, QObject *parent = nullptr);
+    explicit ApiNewsController(NewsModel* newsModel,
+                               QAppSettingsRepository* appSettingsRepository,
+                               ServersController* serversController, QObject *parent = nullptr);
 
     Q_INVOKABLE void fetchNews(bool showError);
 
@@ -27,9 +27,9 @@ signals:
     void fetchNewsFinished();
 
 private:
-    QSharedPointer<NewsModel> m_newsModel;
-    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
-    QSharedPointer<ServersController> m_serversController;
+    NewsModel* m_newsModel;
+    QAppSettingsRepository* m_appSettingsRepository;
+    ServersController* m_serversController;
 };
 
 #endif // APINEWSCONTROLLER_H

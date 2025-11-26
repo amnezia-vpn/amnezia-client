@@ -9,7 +9,7 @@
 class AppSplitTunnelingController
 {
 public:
-    explicit AppSplitTunnelingController(std::shared_ptr<AppSettingsRepository> appSettingsRepository);
+    explicit AppSplitTunnelingController(AppSettingsRepository* appSettingsRepository);
 
     bool addApp(const amnezia::InstalledAppInfo &appInfo);
     void removeApp(int index);
@@ -22,7 +22,7 @@ public:
     QVector<amnezia::InstalledAppInfo> getApps() const;
 
 private:
-    std::shared_ptr<AppSettingsRepository> m_appSettingsRepository;
+    AppSettingsRepository* m_appSettingsRepository;
     AppsRouteMode m_currentRouteMode;
     QVector<amnezia::InstalledAppInfo> m_apps;
 };

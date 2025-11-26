@@ -35,12 +35,12 @@ class ServersUiController : public QObject
     Q_PROPERTY(QString adDescription READ adDescription NOTIFY defaultServerIndexChanged)
     
 public:
-    explicit ServersUiController(const QSharedPointer<ServersController> &serversController,
-                                 const QSharedPointer<QServersRepository> &serversRepository,
-                                 const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
-                                 const QSharedPointer<ServersModel> &serversModel,
-                                 const QSharedPointer<ContainersModel> &containersModel,
-                                 const QSharedPointer<ContainersModel> &defaultServerContainersModel,
+    explicit ServersUiController(ServersController* serversController,
+                                 QServersRepository* serversRepository,
+                                 QAppSettingsRepository* appSettingsRepository,
+                                 ServersModel* serversModel,
+                                 ContainersModel* containersModel,
+                                 ContainersModel* defaultServerContainersModel,
                                  QObject *parent = nullptr);
 
 public slots:
@@ -91,12 +91,12 @@ private:
     void updateContainersModel();
     void updateDefaultServerContainersModel();
     
-    QSharedPointer<ServersController> m_serversController;
-    QSharedPointer<QServersRepository> m_serversRepository;
-    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
-    QSharedPointer<ServersModel> m_serversModel;
-    QSharedPointer<ContainersModel> m_containersModel;
-    QSharedPointer<ContainersModel> m_defaultServerContainersModel;
+    ServersController* m_serversController;
+    QServersRepository* m_serversRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
+    ServersModel* m_serversModel;
+    ContainersModel* m_containersModel;
+    ContainersModel* m_defaultServerContainersModel;
     
     int m_processedServerIndex = 0;
 };

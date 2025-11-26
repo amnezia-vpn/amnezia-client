@@ -15,9 +15,9 @@ class SitesUiController : public QObject
     Q_PROPERTY(bool isTunnelingEnabled READ isTunnelingEnabled NOTIFY isTunnelingEnabledChanged)
 
 public:
-    explicit SitesUiController(const QSharedPointer<SitesController> &sitesController,
-                                const QSharedPointer<VpnConnection> &vpnConnection,
-                                const QSharedPointer<SitesModel> &sitesModel, QObject *parent = nullptr);
+    explicit SitesUiController(SitesController* sitesController,
+                                VpnConnection* vpnConnection,
+                                SitesModel* sitesModel, QObject *parent = nullptr);
 
 public slots:
     void addSite(QString hostname);
@@ -41,9 +41,9 @@ signals:
     void saveFile(const QString &fileName, const QString &data);
 
 private:
-    QSharedPointer<SitesController> m_sitesController;
-    QSharedPointer<VpnConnection> m_vpnConnection;
-    QSharedPointer<SitesModel> m_sitesModel;
+    SitesController* m_sitesController;
+    VpnConnection* m_vpnConnection;
+    SitesModel* m_sitesModel;
 };
 
 #endif // SITESUICONTROLLER_H

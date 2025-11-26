@@ -16,8 +16,8 @@ class LanguageUiController : public QObject
     Q_PROPERTY(int lineHeightAppend READ getLineHeightAppend NOTIFY translationsUpdated)
 
 public:
-    explicit LanguageUiController(const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
-                                  const QSharedPointer<LanguageModel> &languageModel,
+    explicit LanguageUiController(QAppSettingsRepository* appSettingsRepository,
+                                  LanguageModel* languageModel,
                                   QObject *parent = nullptr);
 
 public slots:
@@ -38,8 +38,8 @@ private:
     QString getLocalLanguageName(const LanguageSettings::AvailableLanguageEnum language) const;
     QLocale languageEnumToLocale(const LanguageSettings::AvailableLanguageEnum language) const;
 
-    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
-    QSharedPointer<LanguageModel> m_languageModel;
+    QAppSettingsRepository* m_appSettingsRepository;
+    LanguageModel* m_languageModel;
 };
 
 #endif // LANGUAGEUICONTROLLER_H

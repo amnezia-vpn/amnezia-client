@@ -8,9 +8,9 @@
 #include "systemController.h"
 #include "core/networkUtilities.h"
 
-SitesUiController::SitesUiController(const QSharedPointer<SitesController> &sitesController,
-                                      const QSharedPointer<VpnConnection> &vpnConnection,
-                                      const QSharedPointer<SitesModel> &sitesModel, QObject *parent)
+SitesUiController::SitesUiController(SitesController* sitesController,
+                                      VpnConnection* vpnConnection,
+                                      SitesModel* sitesModel, QObject *parent)
     : QObject(parent),
       m_sitesController(sitesController),
       m_vpnConnection(vpnConnection),
@@ -44,10 +44,10 @@ void SitesUiController::addSite(QString hostname)
             m_sitesModel->updateModel(m_sitesController->getCurrentSites());
 
             if (!ip.isEmpty()) {
-                QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
+                QMetaObject::invokeMethod(m_vpnConnection, "addRoutes", Qt::QueuedConnection,
                                           Q_ARG(QStringList, QStringList() << ip));
             } else if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(hostname)) {
-                QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection,
+                QMetaObject::invokeMethod(m_vpnConnection, "addRoutes", Qt::QueuedConnection,
                                           Q_ARG(QStringList, QStringList() << hostname));
             }
         }
@@ -80,7 +80,7 @@ void SitesUiController::removeSite(int index)
     m_sitesController->removeSite(hostname);
     m_sitesModel->updateModel(m_sitesController->getCurrentSites());
 
-    QMetaObject::invokeMethod(m_vpnConnection.get(), "deleteRoutes", Qt::QueuedConnection,
+    QMetaObject::invokeMethod(m_vpnConnection, "deleteRoutes", Qt::QueuedConnection,
                               Q_ARG(QStringList, QStringList() << hostname));
 
     emit finished(tr("Site removed: %1").arg(hostname));
@@ -138,7 +138,7 @@ void SitesUiController::importSites(const QString &fileName, bool replaceExistin
     m_sitesController->addSites(sites, replaceExisting);
     m_sitesModel->updateModel(m_sitesController->getCurrentSites());
 
-    QMetaObject::invokeMethod(m_vpnConnection.get(), "addRoutes", Qt::QueuedConnection, Q_ARG(QStringList, ips));
+    QMetaObject::invokeMethod(m_vpnConnection, "addRoutes", Qt::QueuedConnection, Q_ARG(QStringList, ips));
 
     emit finished(tr("Import completed"));
 }

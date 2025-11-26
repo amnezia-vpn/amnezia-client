@@ -10,8 +10,8 @@ class AllowedDnsUiController : public QObject
 {
     Q_OBJECT
 public:
-    explicit AllowedDnsUiController(const QSharedPointer<AllowedDnsController> &allowedDnsController,
-                                     const QSharedPointer<AllowedDnsModel> &allowedDnsModel,
+    explicit AllowedDnsUiController(AllowedDnsController* allowedDnsController,
+                                     AllowedDnsModel* allowedDnsModel,
                                      QObject *parent = nullptr);
 
 public slots:
@@ -30,8 +30,8 @@ signals:
     void saveFile(const QString &fileName, const QString &data);
 
 private:
-    QSharedPointer<AllowedDnsController> m_allowedDnsController;
-    QSharedPointer<AllowedDnsModel> m_allowedDnsModel;
+    AllowedDnsController* m_allowedDnsController;
+    AllowedDnsModel* m_allowedDnsModel;
 };
 
 #endif // ALLOWEDDNSUICONTROLLER_H 

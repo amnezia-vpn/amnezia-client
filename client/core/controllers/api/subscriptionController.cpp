@@ -46,8 +46,8 @@ namespace
     }
 }
 
-SubscriptionController::SubscriptionController(std::shared_ptr<ServersRepository> serversRepository,
-                                               std::shared_ptr<AppSettingsRepository> appSettingsRepository)
+SubscriptionController::SubscriptionController(ServersRepository* serversRepository,
+                                               AppSettingsRepository* appSettingsRepository)
     : m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository)
 {
 }

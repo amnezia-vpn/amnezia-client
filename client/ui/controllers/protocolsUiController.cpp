@@ -1,6 +1,6 @@
 #include "protocolsUiController.h"
 
-ProtocolsUiController::ProtocolsUiController(const QSharedPointer<ProtocolsModel> &protocolsModel, QObject *parent)
+ProtocolsUiController::ProtocolsUiController(ProtocolsModel* protocolsModel, QObject *parent)
     : QObject(parent),
       m_protocolsModel(protocolsModel)
 {

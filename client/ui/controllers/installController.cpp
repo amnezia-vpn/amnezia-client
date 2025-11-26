@@ -37,11 +37,11 @@ namespace
     }
 }
 
-InstallController::InstallController(const QSharedPointer<ServersController> &serversController,
-                                     const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
-                                     const QSharedPointer<ProtocolsModel> &protocolsModel,
-                                     const QSharedPointer<ClientManagementController> &clientManagementController,
-                                     const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+InstallController::InstallController(ServersController* serversController,
+                                     ServersModel* serversModel, ContainersModel* containersModel,
+                                     ProtocolsModel* protocolsModel,
+                                     ClientManagementController* clientManagementController,
+                                     QAppSettingsRepository* appSettingsRepository,
                                      const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversController(serversController),

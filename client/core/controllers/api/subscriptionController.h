@@ -35,8 +35,8 @@ public:
         QJsonObject toJsonObject() const;
     };
 
-    explicit SubscriptionController(std::shared_ptr<ServersRepository> serversRepository,
-                                     std::shared_ptr<AppSettingsRepository> appSettingsRepository);
+    explicit SubscriptionController(ServersRepository* serversRepository,
+                                     AppSettingsRepository* appSettingsRepository);
 
     bool isSubscriptionExpired(const QJsonObject &apiConfig);
 
@@ -70,8 +70,8 @@ public:
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
 
-    std::shared_ptr<ServersRepository> m_serversRepository;
-    std::shared_ptr<AppSettingsRepository> m_appSettingsRepository;
+    ServersRepository* m_serversRepository;
+    AppSettingsRepository* m_appSettingsRepository;
 };
 
 #endif // SUBSCRIPTIONCONTROLLER_H

@@ -14,10 +14,10 @@ class ApiConfigsController : public QObject
 {
     Q_OBJECT
 public:
-    ApiConfigsController(const QSharedPointer<ServersController> &serversController,
-                         const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ApiServicesModel> &apiServicesModel,
-                         const QSharedPointer<ServicesCatalogController> &servicesCatalogController,
-                         const QSharedPointer<SubscriptionController> &subscriptionController,
+    ApiConfigsController(ServersController* serversController,
+                         ServersModel* serversModel, ApiServicesModel* apiServicesModel,
+                         ServicesCatalogController* servicesCatalogController,
+                         SubscriptionController* subscriptionController,
                          QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
@@ -62,11 +62,11 @@ private:
     QList<QString> m_qrCodes;
     QString m_vpnKey;
 
-    QSharedPointer<ServersController> m_serversController;
-    QSharedPointer<ServersModel> m_serversModel;
-    QSharedPointer<ApiServicesModel> m_apiServicesModel;
-    QSharedPointer<ServicesCatalogController> m_servicesCatalogController;
-    QSharedPointer<SubscriptionController> m_subscriptionController;
+    ServersController* m_serversController;
+    ServersModel* m_serversModel;
+    ApiServicesModel* m_apiServicesModel;
+    ServicesCatalogController* m_servicesCatalogController;
+    SubscriptionController* m_subscriptionController;
 };
 
 #endif // APICONFIGSCONTROLLER_H

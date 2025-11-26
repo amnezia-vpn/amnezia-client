@@ -1,6 +1,6 @@
 #include "sitesController.h"
 
-SitesController::SitesController(std::shared_ptr<AppSettingsRepository> appSettingsRepository)
+SitesController::SitesController(AppSettingsRepository* appSettingsRepository)
     : m_appSettingsRepository(appSettingsRepository)
 {
     m_currentRouteMode = m_appSettingsRepository->routeMode();

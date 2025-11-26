@@ -1,6 +1,6 @@
 #include "appSplitTunnelingController.h"
 
-AppSplitTunnelingController::AppSplitTunnelingController(std::shared_ptr<AppSettingsRepository> appSettingsRepository)
+AppSplitTunnelingController::AppSplitTunnelingController(AppSettingsRepository* appSettingsRepository)
     : m_appSettingsRepository(appSettingsRepository)
 {
     m_currentRouteMode = m_appSettingsRepository->appsRouteMode();

@@ -79,7 +79,7 @@ public:
     explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, const std::shared_ptr<Settings> &settings,
                             QQmlApplicationEngine *engine, QObject *parent = nullptr);
 
-    QSharedPointer<PageController> pageController() const;
+    PageController* pageController() const;
     void setQmlRoot();
 
 signals:
@@ -122,74 +122,74 @@ private:
     QQmlApplicationEngine *m_engine {}; // TODO use parent child system here?
     std::shared_ptr<Settings> m_settings;
     QSharedPointer<VpnConnection> m_vpnConnection;
-    QSharedPointer<QTranslator> m_translator;
+    QTranslator* m_translator;
 
-    QSharedPointer<QServersRepository> m_serversRepository;
-    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
+    QServersRepository* m_serversRepository;
+    QAppSettingsRepository* m_appSettingsRepository;
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    QScopedPointer<NotificationHandler> m_notificationHandler;
+    NotificationHandler* m_notificationHandler;
 #endif
 
     QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 
-    QScopedPointer<ConnectionController> m_connectionController;
-    QScopedPointer<FocusController> m_focusController;
-    QSharedPointer<PageController> m_pageController; // TODO
-    QScopedPointer<InstallController> m_installController;
-    QScopedPointer<ImportController> m_importController;
-    QScopedPointer<ExportController> m_exportController;
-    QScopedPointer<SettingsController> m_settingsController;
-    QSharedPointer<ServersUiController> m_serversUiController;
-    QScopedPointer<SitesUiController> m_sitesUiController;
-    QScopedPointer<SystemController> m_systemController;
-    QScopedPointer<AppSplitTunnelingUiController> m_appSplitTunnelingUiController;
-    QScopedPointer<AllowedDnsUiController> m_allowedDnsUiController;
-    QSharedPointer<LanguageUiController> m_languageUiController;
+    ConnectionController* m_connectionController;
+    FocusController* m_focusController;
+    PageController* m_pageController;
+    InstallController* m_installController;
+    ImportController* m_importController;
+    ExportController* m_exportController;
+    SettingsController* m_settingsController;
+    ServersUiController* m_serversUiController;
+    SitesUiController* m_sitesUiController;
+    SystemController* m_systemController;
+    AppSplitTunnelingUiController* m_appSplitTunnelingUiController;
+    AllowedDnsUiController* m_allowedDnsUiController;
+    LanguageUiController* m_languageUiController;
 
-    QScopedPointer<ApiSettingsController> m_apiSettingsController;
-    QScopedPointer<ApiConfigsController> m_apiConfigsController;
-    QScopedPointer<ApiPremV1MigrationController> m_apiPremV1MigrationController;
-    QScopedPointer<ApiNewsController> m_apiNewsController;
+    ApiSettingsController* m_apiSettingsController;
+    ApiConfigsController* m_apiConfigsController;
+    ApiPremV1MigrationController* m_apiPremV1MigrationController;
+    ApiNewsController* m_apiNewsController;
     
-    QScopedPointer<ProtocolsUiController> m_protocolsUiController;
-    QScopedPointer<ServicesCatalogUiController> m_servicesCatalogUiController;
+    ProtocolsUiController* m_protocolsUiController;
+    ServicesCatalogUiController* m_servicesCatalogUiController;
 
-    QSharedPointer<ServersController> m_serversController;
-    QSharedPointer<ClientManagementController> m_clientManagementController;
-    QSharedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
-    QSharedPointer<SitesController> m_sitesController;
-    QSharedPointer<AllowedDnsController> m_allowedDnsController;
-    QSharedPointer<ServicesCatalogController> m_servicesCatalogController;
-    QSharedPointer<SubscriptionController> m_subscriptionController;
+    ServersController* m_serversController;
+    ClientManagementController* m_clientManagementController;
+    AppSplitTunnelingController* m_appSplitTunnelingController;
+    SitesController* m_sitesController;
+    AllowedDnsController* m_allowedDnsController;
+    ServicesCatalogController* m_servicesCatalogController;
+    SubscriptionController* m_subscriptionController;
 
-    QSharedPointer<ContainersModel> m_containersModel;
-    QSharedPointer<ContainersModel> m_defaultServerContainersModel;
-    QSharedPointer<ServersModel> m_serversModel;
-    QSharedPointer<LanguageModel> m_languageModel;
-    QSharedPointer<ProtocolsModel> m_protocolsModel;
-    QSharedPointer<SitesModel> m_sitesModel;
-    QSharedPointer<NewsModel> m_newsModel;
-    QSharedPointer<AllowedDnsModel> m_allowedDnsModel;
-    QSharedPointer<AppSplitTunnelingModel> m_appSplitTunnelingModel;
-    QSharedPointer<ClientManagementModel> m_clientManagementModel;
+    ContainersModel* m_containersModel;
+    ContainersModel* m_defaultServerContainersModel;
+    ServersModel* m_serversModel;
+    LanguageModel* m_languageModel;
+    ProtocolsModel* m_protocolsModel;
+    SitesModel* m_sitesModel;
+    NewsModel* m_newsModel;
+    AllowedDnsModel* m_allowedDnsModel;
+    AppSplitTunnelingModel* m_appSplitTunnelingModel;
+    ClientManagementModel* m_clientManagementModel;
 
-    QSharedPointer<ApiServicesModel> m_apiServicesModel;
-    QSharedPointer<ApiCountryModel> m_apiCountryModel;
-    QSharedPointer<ApiAccountInfoModel> m_apiAccountInfoModel;
-    QSharedPointer<ApiDevicesModel> m_apiDevicesModel;
+    ApiServicesModel* m_apiServicesModel;
+    ApiCountryModel* m_apiCountryModel;
+    ApiAccountInfoModel* m_apiAccountInfoModel;
+    ApiDevicesModel* m_apiDevicesModel;
 
-    QScopedPointer<OpenVpnConfigModel> m_openVpnConfigModel;
-    QScopedPointer<ShadowSocksConfigModel> m_shadowSocksConfigModel;
-    QScopedPointer<CloakConfigModel> m_cloakConfigModel;
-    QScopedPointer<XrayConfigModel> m_xrayConfigModel;
-    QScopedPointer<WireGuardConfigModel> m_wireGuardConfigModel;
-    QScopedPointer<AwgConfigModel> m_awgConfigModel;
+    OpenVpnConfigModel* m_openVpnConfigModel;
+    ShadowSocksConfigModel* m_shadowSocksConfigModel;
+    CloakConfigModel* m_cloakConfigModel;
+    XrayConfigModel* m_xrayConfigModel;
+    WireGuardConfigModel* m_wireGuardConfigModel;
+    AwgConfigModel* m_awgConfigModel;
 #ifdef Q_OS_WINDOWS
-    QScopedPointer<Ikev2ConfigModel> m_ikev2ConfigModel;
+    Ikev2ConfigModel* m_ikev2ConfigModel;
 #endif
-    QScopedPointer<SftpConfigModel> m_sftpConfigModel;
-    QScopedPointer<Socks5ProxyConfigModel> m_socks5ConfigModel;
+    SftpConfigModel* m_sftpConfigModel;
+    Socks5ProxyConfigModel* m_socks5ConfigModel;
 };
 
 #endif // CORECONTROLLER_H

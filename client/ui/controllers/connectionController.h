@@ -18,12 +18,12 @@ public:
     Q_PROPERTY(bool isConnectionInProgress READ isConnectionInProgress NOTIFY connectionStateChanged)
     Q_PROPERTY(QString connectionStateText READ connectionStateText NOTIFY connectionStateChanged)
 
-    explicit ConnectionController(const QSharedPointer<ServersController> &serversController,
-                                  const QSharedPointer<ServersModel> &serversModel,
-                                  const QSharedPointer<ContainersModel> &containersModel,
-                                  const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                  const QSharedPointer<VpnConnection> &vpnConnection,
-                                  const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+    explicit ConnectionController(ServersController* serversController,
+                                  ServersModel* serversModel,
+                                  ContainersModel* containersModel,
+                                  ClientManagementModel* clientManagementModel,
+                                  VpnConnection* vpnConnection,
+                                  QAppSettingsRepository* appSettingsRepository,
                                   const std::shared_ptr<Settings> &settings,
                                   QObject *parent = nullptr);
 
@@ -63,13 +63,13 @@ private:
 
     void continueConnection();
 
-    QSharedPointer<ServersController> m_serversController;
-    QSharedPointer<ServersModel> m_serversModel;
-    QSharedPointer<ContainersModel> m_containersModel;
-    QSharedPointer<ClientManagementModel> m_clientManagementModel;
+    ServersController* m_serversController;
+    ServersModel* m_serversModel;
+    ContainersModel* m_containersModel;
+    ClientManagementModel* m_clientManagementModel;
 
-    QSharedPointer<VpnConnection> m_vpnConnection;
-    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
+    VpnConnection* m_vpnConnection;
+    QAppSettingsRepository* m_appSettingsRepository;
 
     std::shared_ptr<Settings> m_settings;
 

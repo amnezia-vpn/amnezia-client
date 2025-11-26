@@ -32,11 +32,11 @@ namespace
     }
 }
 
-ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersController> &serversController,
-                                           const QSharedPointer<ServersModel> &serversModel,
-                                           const QSharedPointer<ApiServicesModel> &apiServicesModel,
-                                           const QSharedPointer<ServicesCatalogController> &servicesCatalogController,
-                                           const QSharedPointer<SubscriptionController> &subscriptionController,
+ApiConfigsController::ApiConfigsController(ServersController* serversController,
+                                           ServersModel* serversModel,
+                                           ApiServicesModel* apiServicesModel,
+                                           ServicesCatalogController* servicesCatalogController,
+                                           SubscriptionController* subscriptionController,
                                            QObject *parent)
     : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController)
 {
@@ -80,7 +80,7 @@ bool ApiConfigsController::exportNativeConfig(const QString &serverCountryCode, 
     QString nativeConfig;
     ErrorCode errorCode = m_subscriptionController->exportNativeConfig(apiConfigObject,
                                                                        serverConfigObject.value(configKey::authData).toObject(),
-                                                                       serverCountryCode,
+                                            serverCountryCode,
                                                                        protocol,
                                                                        protocolData,
                                                                        nativeConfig);
@@ -107,7 +107,7 @@ bool ApiConfigsController::revokeNativeConfig(const QString &serverCountryCode)
 
     ErrorCode errorCode = m_subscriptionController->revokeNativeConfig(apiConfigObject,
                                                                         serverConfigObject.value(configKey::authData).toObject(),
-                                                                        serverCountryCode,
+                                            serverCountryCode,
                                                                         configKey::awg); // apiConfigObject.value(configKey::serviceProtocol).toString()
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
@@ -193,7 +193,7 @@ bool ApiConfigsController::updateServiceFromGateway(const int serverIndex, const
     bool isConnectEvent = newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig;
 
     ErrorCode errorCode = m_subscriptionController->updateServiceFromGateway(serverIndex,
-                                                                             newCountryCode,
+                                            newCountryCode,
                                                                              isConnectEvent,
                                                                              protocolData);
 

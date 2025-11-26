@@ -18,13 +18,13 @@
     #include <AmneziaVPN-Swift.h>
 #endif
 
-SettingsController::SettingsController(const QSharedPointer<ServersModel> &serversModel,
-                                      const QSharedPointer<ContainersModel> &containersModel,
-                                      const QSharedPointer<LanguageUiController> &languageUiController,
-                                      const QSharedPointer<SitesController> &sitesController,
-                                      const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
-                                const QSharedPointer<QServersRepository> &serversRepository,
-                                const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+SettingsController::SettingsController(ServersModel* serversModel,
+                                      ContainersModel* containersModel,
+                                      LanguageUiController* languageUiController,
+                                      SitesController* sitesController,
+                                      AppSplitTunnelingController* appSplitTunnelingController,
+                                QServersRepository* serversRepository,
+                                QAppSettingsRepository* appSettingsRepository,
                                 QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),

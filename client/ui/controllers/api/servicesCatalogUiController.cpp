@@ -2,8 +2,8 @@
 
 #include "core/defs.h"
 
-ServicesCatalogUiController::ServicesCatalogUiController(const QSharedPointer<ServicesCatalogController> &servicesCatalogController,
-                                                         const QSharedPointer<ApiServicesModel> &apiServicesModel,
+ServicesCatalogUiController::ServicesCatalogUiController(ServicesCatalogController* servicesCatalogController,
+                                                         ApiServicesModel* apiServicesModel,
                                                          QObject *parent)
     : QObject(parent),
       m_servicesCatalogController(servicesCatalogController),

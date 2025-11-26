@@ -13,11 +13,11 @@ class ExportController : public QObject
 {
     Q_OBJECT
 public:
-    explicit ExportController(const QSharedPointer<ServersController> &serversController,
-                              const QSharedPointer<ServersModel> &serversModel,
-                              const QSharedPointer<ContainersModel> &containersModel,
-                              const QSharedPointer<ClientManagementController> &clientManagementController,
-                              const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+    explicit ExportController(ServersController* serversController,
+                              ServersModel* serversModel,
+                              ContainersModel* containersModel,
+                              ClientManagementController* clientManagementController,
+                              QAppSettingsRepository* appSettingsRepository,
                               const std::shared_ptr<Settings> &settings,
                               QObject *parent = nullptr);
 
@@ -64,11 +64,11 @@ private:
     ErrorCode generateNativeConfig(const DockerContainer container, const QString &clientName, const Proto &protocol,
                                    QJsonObject &jsonNativeConfig);
 
-    QSharedPointer<ServersController> m_serversController;
-    QSharedPointer<ServersModel> m_serversModel;
-    QSharedPointer<ContainersModel> m_containersModel;
-    QSharedPointer<ClientManagementController> m_clientManagementController;
-    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
+    ServersController* m_serversController;
+    ServersModel* m_serversModel;
+    ContainersModel* m_containersModel;
+    ClientManagementController* m_clientManagementController;
+    QAppSettingsRepository* m_appSettingsRepository;
     std::shared_ptr<Settings> m_settings;
 
     QString m_config;

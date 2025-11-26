@@ -20,8 +20,8 @@ namespace
     }
 }
 
-ServersController::ServersController(std::shared_ptr<ServersRepository> serversRepository, 
-                                      std::shared_ptr<AppSettingsRepository> appSettingsRepository,
+ServersController::ServersController(ServersRepository* serversRepository, 
+                                      AppSettingsRepository* appSettingsRepository,
                                       QObject *parent)
     : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository)
 {
