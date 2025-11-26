@@ -19,10 +19,10 @@ public:
     explicit ApiNewsController(const QSharedPointer<NewsModel> &newsModel, const std::shared_ptr<Settings> &settings,
                                const QSharedPointer<ServersModel> &serversModel, QObject *parent = nullptr);
 
-    Q_INVOKABLE void fetchNews();
+    Q_INVOKABLE void fetchNews(bool showError);
 
 signals:
-    void errorOccurred(ErrorCode errorCode);
+    void errorOccurred(ErrorCode errorCode, bool showError);
     void fetchNewsFinished();
 
 private:

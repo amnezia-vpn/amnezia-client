@@ -73,7 +73,7 @@ PageType {
                 id: serverSelector
                 objectName: "serverSelector"
 
-                signal severSelectorIndexChanged
+                signal serverSelectorIndexChanged
                 property int currentIndex: 0
 
                 Layout.fillWidth: true
