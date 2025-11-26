@@ -54,6 +54,7 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
 AmneziaApplication::~AmneziaApplication()
 {
     m_vpnConnectionThread.quit();
+    m_vpnConnectionThread.wait();
 
     if (m_engine) {
         QObject::disconnect(m_engine, 0, 0, 0);
