@@ -3,6 +3,7 @@
 #include <QStandardPaths>
 #include <QOperatingSystemVersion>
 
+#include "core/defs.h"
 #include "logger.h"
 #include "systemController.h"
 #include "ui/qautostart.h"
@@ -22,14 +23,17 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
                                       const QSharedPointer<LanguageUiController> &languageUiController,
                                       const QSharedPointer<SitesController> &sitesController,
                                       const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
-                                      const std::shared_ptr<Settings> &settings, QObject *parent)
+                                const QSharedPointer<QServersRepository> &serversRepository,
+                                const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+                                QObject *parent)
     : QObject(parent),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_languageUiController(languageUiController),
       m_sitesController(sitesController),
       m_appSplitTunnelingController(appSplitTunnelingController),
-      m_settings(settings)
+      m_serversRepository(serversRepository),
+      m_appSettingsRepository(appSettingsRepository)
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
     checkIfNeedDisableLogs();
@@ -48,7 +52,7 @@ SettingsController::SettingsController(const QSharedPointer<ServersModel> &serve
     });
 #endif
 
-    m_isDevModeEnabled = m_settings->isDevGatewayEnv();
+    m_isDevModeEnabled = m_appSettingsRepository->isDevGatewayEnv();
     toggleDevGatewayEnv(m_isDevModeEnabled);
 }
 
@@ -71,45 +75,45 @@ QString getPlatformName()
 
 void SettingsController::toggleAmneziaDns(bool enable)
 {
-    m_settings->setUseAmneziaDns(enable);
+    m_appSettingsRepository->setUseAmneziaDns(enable);
     emit amneziaDnsToggled(enable);
 }
 
 bool SettingsController::isAmneziaDnsEnabled()
 {
-    return m_settings->useAmneziaDns();
+    return m_appSettingsRepository->useAmneziaDns();
 }
 
 QString SettingsController::getPrimaryDns()
 {
-    return m_settings->primaryDns();
+    return m_appSettingsRepository->primaryDns();
 }
 
 void SettingsController::setPrimaryDns(const QString &dns)
 {
-    m_settings->setPrimaryDns(dns);
+    m_appSettingsRepository->setPrimaryDns(dns);
     emit primaryDnsChanged();
 }
 
 QString SettingsController::getSecondaryDns()
 {
-    return m_settings->secondaryDns();
+    return m_appSettingsRepository->secondaryDns();
 }
 
 void SettingsController::setSecondaryDns(const QString &dns)
 {
-    return m_settings->setSecondaryDns(dns);
+    m_appSettingsRepository->setSecondaryDns(dns);
     emit secondaryDnsChanged();
 }
 
 bool SettingsController::isLoggingEnabled()
 {
-    return m_settings->isSaveLogs();
+    return m_appSettingsRepository->isSaveLogs();
 }
 
 void SettingsController::toggleLogging(bool enable)
 {
-    m_settings->setSaveLogs(enable);
+    m_appSettingsRepository->setSaveLogs(enable);
 #if defined(Q_OS_IOS)
     AmneziaVPN::toggleLogging(enable);
 #endif
@@ -164,7 +168,7 @@ void SettingsController::clearLogs()
 
 void SettingsController::backupAppConfig(const QString &fileName)
 {
-    QByteArray data = m_settings->backupAppConfig();
+    QByteArray data = m_appSettingsRepository->backupAppConfig();
     QJsonDocument doc = QJsonDocument::fromJson(data);
     QJsonObject config = doc.object();
 
@@ -190,7 +194,7 @@ void SettingsController::restoreAppConfig(const QString &fileName)
 
 void SettingsController::restoreAppConfigFromData(const QByteArray &data)
 {
-    bool ok = m_settings->restoreAppConfig(data);
+    bool ok = m_appSettingsRepository->restoreAppConfig(data);
     if (ok) {
         QJsonObject newConfigData = QJsonDocument::fromJson(data).object();
 
@@ -202,7 +206,7 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         toggleAutoStart(autoStart);
 #endif
 
-        m_serversModel->updateModel(m_settings->serversArray(), m_settings->defaultServerIndex(), m_settings->useAmneziaDns());
+        m_serversModel->updateModel(m_serversRepository->serversArray(), m_serversRepository->defaultServerIndex(), m_appSettingsRepository->useAmneziaDns());
         emit appLanguageChanged(
                 static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageUiController->getCurrentLanguageIndex()));
 
@@ -210,10 +214,10 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         int appSplitTunnelingRouteMode = newConfigData.value("Conf/appsRouteMode").toInt();
         bool appSplittunnelingEnabled =
                 newConfigData.value("Conf/appsSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
-        m_appSplitTunnelingController->setRouteMode(appSplitTunnelingRouteMode);
+        m_appSplitTunnelingController->setRouteMode(static_cast<amnezia::AppsRouteMode>(appSplitTunnelingRouteMode));
 
         #if defined(Q_OS_WINDOWS)
-            m_appSplitTunnelingController->setRouteMode(static_cast<int>(Settings::AppsRouteMode::VpnAllExceptApps));
+            m_appSplitTunnelingController->setRouteMode(amnezia::AppsRouteMode::VpnAllExceptApps);
         #endif
 
         if (newConfigData.contains("AppPlatform")) { //if backup is from a new version
@@ -228,19 +232,19 @@ void SettingsController::restoreAppConfigFromData(const QByteArray &data)
         int siteSplitTunnelingRouteMode = newConfigData.value("Conf/routeMode").toInt();
         bool siteSplittunnelingEnabled =
                 newConfigData.value("Conf/sitesSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
-        m_sitesController->setRouteMode(siteSplitTunnelingRouteMode);
+        m_sitesController->setRouteMode(static_cast<amnezia::RouteMode>(siteSplitTunnelingRouteMode));
         m_sitesController->toggleSplitTunneling(siteSplittunnelingEnabled);
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
-        m_settings->setAutoConnect(false);
-        m_settings->setStartMinimized(false);
-        m_settings->setKillSwitchEnabled(false);
-        m_settings->setStrictKillSwitchEnabled(false);
+        m_appSettingsRepository->setAutoConnect(false);
+        m_appSettingsRepository->setStartMinimized(false);
+        m_appSettingsRepository->setKillSwitchEnabled(false);
+        m_appSettingsRepository->setStrictKillSwitchEnabled(false);
 #endif
 
         bool amneziaDnsEnabled = newConfigData.contains("Conf/useAmneziaDns")
                                      ? newConfigData.value("Conf/useAmneziaDns").toBool()
-                                     : m_settings->useAmneziaDns();
+                                     : m_appSettingsRepository->useAmneziaDns();
         emit amneziaDnsToggled(amneziaDnsEnabled);
 
         emit restoreBackupFinished();
@@ -256,14 +260,14 @@ QString SettingsController::getAppVersion()
 
 void SettingsController::clearSettings()
 {
-    m_settings->clearSettings();
-    m_serversModel->updateModel(m_settings->serversArray(), m_settings->defaultServerIndex(), m_settings->useAmneziaDns());
+    m_appSettingsRepository->clearSettings();
+    m_serversModel->updateModel(m_serversRepository->serversArray(), m_serversRepository->defaultServerIndex(), m_appSettingsRepository->useAmneziaDns());
     emit resetLanguageToSystem();
 
-    m_sitesController->setRouteMode(Settings::RouteMode::VpnOnlyForwardSites);
+    m_sitesController->setRouteMode(amnezia::RouteMode::VpnOnlyForwardSites);
     m_sitesController->toggleSplitTunneling(false);
 
-    m_appSplitTunnelingController->setRouteMode(Settings::AppsRouteMode::VpnAllExceptApps);
+    m_appSplitTunnelingController->setRouteMode(amnezia::AppsRouteMode::VpnAllExceptApps);
     m_appSplitTunnelingController->toggleSplitTunneling(false);
 
     toggleAutoStart(false);
@@ -277,12 +281,12 @@ void SettingsController::clearSettings()
 
 bool SettingsController::isAutoConnectEnabled()
 {
-    return m_settings->isAutoConnect();
+    return m_appSettingsRepository->isAutoConnect();
 }
 
 void SettingsController::toggleAutoConnect(bool enable)
 {
-    m_settings->setAutoConnect(enable);
+    m_appSettingsRepository->setAutoConnect(enable);
 }
 
 bool SettingsController::isAutoStartEnabled()
@@ -300,23 +304,23 @@ void SettingsController::toggleAutoStart(bool enable)
 
 bool SettingsController::isStartMinimizedEnabled()
 {
-    return m_settings->isStartMinimized();
+    return m_appSettingsRepository->isStartMinimized();
 }
 
 void SettingsController::toggleStartMinimized(bool enable)
 {
-    m_settings->setStartMinimized(enable);
+    m_appSettingsRepository->setStartMinimized(enable);
     emit startMinimizedChanged();
 }
 
 bool SettingsController::isScreenshotsEnabled()
 {
-    return m_settings->isScreenshotsEnabled();
+    return m_appSettingsRepository->isScreenshotsEnabled();
 }
 
 void SettingsController::toggleScreenshotsEnabled(bool enable)
 {
-    m_settings->setScreenshotsEnabled(enable);
+    m_appSettingsRepository->setScreenshotsEnabled(enable);
 }
 
 bool SettingsController::isCameraPresent()
@@ -332,8 +336,8 @@ bool SettingsController::isCameraPresent()
 
 void SettingsController::checkIfNeedDisableLogs()
 {
-    if (m_settings->isSaveLogs()) {
-        m_loggingDisableDate = m_settings->getLogEnableDate().addDays(14);
+    if (m_appSettingsRepository->isSaveLogs()) {
+        m_loggingDisableDate = m_appSettingsRepository->getLogEnableDate().addDays(14);
         if (m_loggingDisableDate <= QDateTime::currentDateTime()) {
             toggleLogging(false);
             clearLogs();
@@ -344,12 +348,12 @@ void SettingsController::checkIfNeedDisableLogs()
 
 bool SettingsController::isKillSwitchEnabled()
 {
-    return m_settings->isKillSwitchEnabled();
+    return m_appSettingsRepository->isKillSwitchEnabled();
 }
 
 void SettingsController::toggleKillSwitch(bool enable)
 {
-    m_settings->setKillSwitchEnabled(enable);
+    m_appSettingsRepository->setKillSwitchEnabled(enable);
     emit killSwitchEnabledChanged();
     if (enable == false) {
         emit strictKillSwitchEnabledChanged(false);
@@ -360,12 +364,12 @@ void SettingsController::toggleKillSwitch(bool enable)
 
 bool SettingsController::isStrictKillSwitchEnabled()
 {
-    return m_settings->isStrictKillSwitchEnabled();
+    return m_appSettingsRepository->isStrictKillSwitchEnabled();
 }
 
 void SettingsController::toggleStrictKillSwitch(bool enable)
 {
-    m_settings->setStrictKillSwitchEnabled(enable);
+    m_appSettingsRepository->setStrictKillSwitchEnabled(enable);
     emit strictKillSwitchEnabledChanged(enable);
 }
 
@@ -387,7 +391,7 @@ void SettingsController::requestNotificationPermission()
 
 QString SettingsController::getInstallationUuid()
 {
-    return m_settings->getInstallationUuid(false);
+    return m_appSettingsRepository->getInstallationUuid(false);
 }
 
 void SettingsController::enableDevMode()
@@ -403,35 +407,35 @@ bool SettingsController::isDevModeEnabled()
 
 void SettingsController::resetGatewayEndpoint()
 {
-    m_settings->resetGatewayEndpoint();
-    emit gatewayEndpointChanged(m_settings->getGatewayEndpoint());
+    m_appSettingsRepository->resetGatewayEndpoint();
+    emit gatewayEndpointChanged(m_appSettingsRepository->getGatewayEndpoint());
 }
 
 void SettingsController::setGatewayEndpoint(const QString &endpoint)
 {
-    m_settings->setGatewayEndpoint(endpoint);
+    m_appSettingsRepository->setGatewayEndpoint(endpoint);
     emit gatewayEndpointChanged(endpoint);
 }
 
 QString SettingsController::getGatewayEndpoint()
 {
-    return m_settings->isDevGatewayEnv() ? "Dev endpoint" : m_settings->getGatewayEndpoint();
+    return m_appSettingsRepository->isDevGatewayEnv() ? "Dev endpoint" : m_appSettingsRepository->getGatewayEndpoint();
 }
 
 bool SettingsController::isDevGatewayEnv()
 {
-    return m_settings->isDevGatewayEnv();
+    return m_appSettingsRepository->isDevGatewayEnv();
 }
 
 void SettingsController::toggleDevGatewayEnv(bool enabled)
 {
-    m_settings->toggleDevGatewayEnv(enabled);
+    m_appSettingsRepository->toggleDevGatewayEnv(enabled);
     if (enabled) {
-        m_settings->setDevGatewayEndpoint();
+        m_appSettingsRepository->setDevGatewayEndpoint();
     } else {
-        m_settings->resetGatewayEndpoint();
+        m_appSettingsRepository->resetGatewayEndpoint();
     }
-    emit gatewayEndpointChanged(m_settings->getGatewayEndpoint());
+    emit gatewayEndpointChanged(m_appSettingsRepository->getGatewayEndpoint());
     emit devGatewayEnvChanged(enabled);
 }
 
@@ -516,11 +520,11 @@ int SettingsController::getImeHeight()
 
 bool SettingsController::isHomeAdLabelVisible()
 {
-    return m_settings->isHomeAdLabelVisible();
+    return m_appSettingsRepository->isHomeAdLabelVisible();
 }
 
 void SettingsController::disableHomeAdLabel()
 {
-    m_settings->disableHomeAdLabel();
+    m_appSettingsRepository->disableHomeAdLabel();
     emit isHomeAdLabelVisibleChanged(false);
 }

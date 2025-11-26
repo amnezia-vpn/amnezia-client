@@ -6,9 +6,12 @@
 #include <QJsonArray>
 #include <QSet>
 
+#include <QPair>
+
 #include "containers/containers_defs.h"
 #include "core/defs.h"
-#include "settings.h"
+#include "core/repositories/serversRepository.h"
+#include "core/repositories/appSettingsRepository.h"
 
 class ServerController;
 
@@ -35,7 +38,9 @@ public:
     };
     
 public:
-    explicit ServersController(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit ServersController(std::shared_ptr<ServersRepository> serversRepository, 
+                              std::shared_ptr<AppSettingsRepository> appSettingsRepository = nullptr,
+                              QObject *parent = nullptr);
     ~ServersController() = default;
 
     // Server management
@@ -62,11 +67,6 @@ public:
     void removeApiConfig(int serverIndex);
     bool isApiKeyExpired(int serverIndex) const;
 
-    // DNS operations
-    QPair<QString, QString> getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const;
-    bool isAmneziaDnsEnabled() const;
-    void setAmneziaDnsEnabled(bool enabled);
-
     // Getters
     QJsonArray getServersArray() const;
     int getDefaultServerIndex() const;
@@ -74,7 +74,7 @@ public:
     QJsonObject getServerConfig(int serverIndex) const;
     ServerCredentials getServerCredentials(int serverIndex) const;
     QJsonObject getContainerConfig(int serverIndex, DockerContainer container) const;
-    QString getNextAvailableServerName() const;
+    QPair<QString, QString> getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const;
     
     GatewayStacks gatewayStacks() const;
 
@@ -83,16 +83,13 @@ public:
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol) const;
 
 signals:
-    void serverAdded(QJsonObject config);
-    void serverEdited(int index, QJsonObject config);
-    void serverRemoved(int index);
-    void defaultServerChanged(int index);
     void gatewayStacksExpanded();
 
 private:
     void recomputeGatewayStacks();
     
-    std::shared_ptr<Settings> m_settings;
+    std::shared_ptr<ServersRepository> m_serversRepository;
+    std::shared_ptr<AppSettingsRepository> m_appSettingsRepository;
     GatewayStacks m_gatewayStacks;
 };
 

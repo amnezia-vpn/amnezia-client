@@ -19,8 +19,8 @@
     #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-SystemController::SystemController(const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_settings(settings)
+SystemController::SystemController(QObject *parent)
+    : QObject(parent)
 {
 }
 

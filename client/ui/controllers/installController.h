@@ -7,6 +7,7 @@
 #include "containers/containers_defs.h"
 #include "core/controllers/serversController.h"
 #include "core/controllers/clientManagementController.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "core/defs.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/protocols_model.h"
@@ -20,6 +21,7 @@ public:
                                const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                const QSharedPointer<ProtocolsModel> &protocolsModel,
                                const QSharedPointer<ClientManagementController> &clientManagementController,
+                               const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
     ~InstallController();
 
@@ -104,6 +106,7 @@ private:
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ProtocolsModel> m_protocolModel;
     QSharedPointer<ClientManagementController> m_clientManagementController;
+    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
 
     std::shared_ptr<Settings> m_settings;
 

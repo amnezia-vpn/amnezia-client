@@ -2,6 +2,7 @@
 #define CONNECTIONCONTROLLER_H
 
 #include "core/controllers/serversController.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "protocols/vpnprotocol.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/models/containers_model.h"
@@ -22,6 +23,7 @@ public:
                                   const QSharedPointer<ContainersModel> &containersModel,
                                   const QSharedPointer<ClientManagementModel> &clientManagementModel,
                                   const QSharedPointer<VpnConnection> &vpnConnection,
+                                  const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                                   const std::shared_ptr<Settings> &settings,
                                   QObject *parent = nullptr);
 
@@ -67,6 +69,7 @@ private:
     QSharedPointer<ClientManagementModel> m_clientManagementModel;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
+    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
 
     std::shared_ptr<Settings> m_settings;
 

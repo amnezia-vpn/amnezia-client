@@ -94,10 +94,10 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                 if (m_settings->isSitesSplitTunnelingEnabled()) {
                     IpcClient::Interface()->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                     // qDebug() << "VpnConnection::onConnectionStateChanged :: adding custom routes, count:" << forwardIps.size();
-                    if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+                    if (m_settings->routeMode() == amnezia::RouteMode::VpnOnlyForwardSites) {
                         QTimer::singleShot(1000, m_vpnProtocol.data(),
                                            [this]() { addSitesRoutes(m_vpnProtocol->vpnGateway(), m_settings->routeMode()); });
-                    } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
+                    } else if (m_settings->routeMode() == amnezia::RouteMode::VpnAllExceptSites) {
                         IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
                         IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
 
@@ -111,7 +111,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             IpcClient::Interface()->flushDns();
 
             if (m_settings->isSitesSplitTunnelingEnabled()) {
-                if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+                if (m_settings->routeMode() == amnezia::RouteMode::VpnOnlyForwardSites) {
                     IpcClient::Interface()->clearSavedRoutes();
                 }
             }
@@ -137,7 +137,7 @@ const QString &VpnConnection::remoteAddress() const
     return m_remoteAddress;
 }
 
-void VpnConnection::addSitesRoutes(const QString &gw, Settings::RouteMode mode)
+void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
 {
 #ifdef AMNEZIA_DESKTOP
     QStringList ips;
@@ -190,9 +190,9 @@ void VpnConnection::addRoutes(const QStringList &ips)
 {
 #ifdef AMNEZIA_DESKTOP
     if (connectionState() == Vpn::ConnectionState::Connected && IpcClient::Interface()) {
-        if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+        if (m_settings->routeMode() == amnezia::RouteMode::VpnOnlyForwardSites) {
             IpcClient::Interface()->routeAddList(m_vpnProtocol->vpnGateway(), ips);
-        } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
+        } else if (m_settings->routeMode() == amnezia::RouteMode::VpnAllExceptSites) {
             IpcClient::Interface()->routeAddList(m_vpnProtocol->routeGateway(), ips);
         }
     }
@@ -203,9 +203,9 @@ void VpnConnection::deleteRoutes(const QStringList &ips)
 {
 #ifdef AMNEZIA_DESKTOP
     if (connectionState() == Vpn::ConnectionState::Connected && IpcClient::Interface()) {
-        if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+        if (m_settings->routeMode() == amnezia::RouteMode::VpnOnlyForwardSites) {
             IpcClient::Interface()->routeDeleteList(vpnProtocol()->vpnGateway(), ips);
-        } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
+        } else if (m_settings->routeMode() == amnezia::RouteMode::VpnAllExceptSites) {
             IpcClient::Interface()->routeDeleteList(m_vpnProtocol->routeGateway(), ips);
         }
     }
@@ -363,7 +363,7 @@ void VpnConnection::appendSplitTunnelingConfig()
         }
     }
 
-    Settings::RouteMode routeMode = Settings::RouteMode::VpnAllSites;
+    amnezia::RouteMode routeMode = amnezia::RouteMode::VpnAllSites;
     QJsonArray sitesJsonArray;
     if (m_settings->isSitesSplitTunnelingEnabled()) {
         routeMode = m_settings->routeMode();
@@ -375,8 +375,8 @@ void VpnConnection::appendSplitTunnelingConfig()
             }
 
             if (sitesJsonArray.isEmpty()) {
-                routeMode = Settings::RouteMode::VpnAllSites;
-            } else if (routeMode == Settings::VpnOnlyForwardSites) {
+                routeMode = amnezia::RouteMode::VpnAllSites;
+            } else if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
                 // Allow traffic to Amnezia DNS
                 sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns1).toString());
                 sitesJsonArray.append(m_vpnConfiguration.value(config_key::dns2).toString());
@@ -387,7 +387,7 @@ void VpnConnection::appendSplitTunnelingConfig()
     m_vpnConfiguration.insert(config_key::splitTunnelType, routeMode);
     m_vpnConfiguration.insert(config_key::splitTunnelSites, sitesJsonArray);
 
-    Settings::AppsRouteMode appsRouteMode = Settings::AppsRouteMode::VpnAllApps;
+    amnezia::AppsRouteMode appsRouteMode = amnezia::AppsRouteMode::VpnAllApps;
     QJsonArray appsJsonArray;
     if (m_settings->isAppsSplitTunnelingEnabled()) {
         appsRouteMode = m_settings->getAppsRouteMode();
@@ -398,7 +398,7 @@ void VpnConnection::appendSplitTunnelingConfig()
         }
 
         if (appsJsonArray.isEmpty()) {
-            appsRouteMode = Settings::AppsRouteMode::VpnAllApps;
+            appsRouteMode = amnezia::AppsRouteMode::VpnAllApps;
         }
     }
 

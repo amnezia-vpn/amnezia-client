@@ -21,8 +21,9 @@
 #endif
 
 PageController::PageController(const QSharedPointer<ServersModel> &serversModel,
-                               const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversModel(serversModel), m_settings(settings)
+                               const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+                               QObject *parent)
+    : QObject(parent), m_serversModel(serversModel), m_appSettingsRepository(appSettingsRepository)
 {
 #ifdef Q_OS_ANDROID
     auto initialPageNavigationBarColor = getInitialPageNavigationBarColor();
@@ -115,7 +116,7 @@ void PageController::updateNavigationBarColor(const int color)
 
 void PageController::showOnStartup()
 {
-    if (!m_settings->isStartMinimized()) {
+    if (!m_appSettingsRepository->isStartMinimized()) {
         emit raiseMainWindow();
     } else {
 #if defined(Q_OS_WIN) || (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID))

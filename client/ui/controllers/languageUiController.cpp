@@ -1,25 +1,43 @@
 #include "languageUiController.h"
 
-LanguageUiController::LanguageUiController(const std::shared_ptr<Settings> &settings,
+LanguageUiController::LanguageUiController(const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                                            const QSharedPointer<LanguageModel> &languageModel,
                                            QObject *parent)
     : QObject(parent),
-      m_settings(settings),
+      m_appSettingsRepository(appSettingsRepository),
       m_languageModel(languageModel)
 {
+}
+
+void LanguageUiController::onAppLanguageChanged(const QLocale &locale)
+{
+    LanguageSettings::AvailableLanguageEnum languageEnum = LanguageSettings::AvailableLanguageEnum::English;
+    switch (locale.language()) {
+    case QLocale::English: languageEnum = LanguageSettings::AvailableLanguageEnum::English; break;
+    case QLocale::Russian: languageEnum = LanguageSettings::AvailableLanguageEnum::Russian; break;
+    case QLocale::Chinese: languageEnum = LanguageSettings::AvailableLanguageEnum::China_cn; break;
+    case QLocale::Ukrainian: languageEnum = LanguageSettings::AvailableLanguageEnum::Ukrainian; break;
+    case QLocale::Persian: languageEnum = LanguageSettings::AvailableLanguageEnum::Persian; break;
+    case QLocale::Arabic: languageEnum = LanguageSettings::AvailableLanguageEnum::Arabic; break;
+    case QLocale::Burmese: languageEnum = LanguageSettings::AvailableLanguageEnum::Burmese; break;
+    case QLocale::Urdu: languageEnum = LanguageSettings::AvailableLanguageEnum::Urdu; break;
+    case QLocale::Hindi: languageEnum = LanguageSettings::AvailableLanguageEnum::Hindi; break;
+    default: break;
+    }
+    changeLanguage(languageEnum);
 }
 
 void LanguageUiController::changeLanguage(const LanguageSettings::AvailableLanguageEnum language)
 {
     QLocale locale = languageEnumToLocale(language);
-    m_settings->setAppLanguage(locale);
+    m_appSettingsRepository->setAppLanguage(locale);
     emit updateTranslations(locale);
     emit translationsUpdated();
 }
 
 int LanguageUiController::getCurrentLanguageIndex() const
 {
-    auto locale = m_settings->getAppLanguage();
+    auto locale = m_appSettingsRepository->getAppLanguage();
     switch (locale.language()) {
     case QLocale::English: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     case QLocale::Russian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Russian); break;
@@ -36,7 +54,7 @@ int LanguageUiController::getCurrentLanguageIndex() const
 
 int LanguageUiController::getLineHeightAppend() const
 {
-    auto locale = m_settings->getAppLanguage();
+    auto locale = m_appSettingsRepository->getAppLanguage();
     switch (locale.language()) {
     case QLocale::Burmese: return 10; break;
     default: return 0; break;
@@ -68,7 +86,7 @@ LanguageSettings::AvailableLanguageEnum LanguageUiController::getSystemLanguageE
 
 QString LanguageUiController::getCurrentSiteUrl(const QString &path) const
 {
-    auto locale = m_settings->getAppLanguage();
+    auto locale = m_appSettingsRepository->getAppLanguage();
     if (locale.language() == QLocale::Russian) {
         return "https://storage.googleapis.com/amnezia/amnezia.org" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
     }
@@ -77,7 +95,7 @@ QString LanguageUiController::getCurrentSiteUrl(const QString &path) const
 
 QString LanguageUiController::getCurrentDocsUrl(const QString &path) const
 {
-    auto locale = m_settings->getAppLanguage();
+    auto locale = m_appSettingsRepository->getAppLanguage();
     if (locale.language() == QLocale::Russian) {
         return "https://storage.googleapis.com/amnezia/docs" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
     }

@@ -28,14 +28,15 @@ ApiSettingsController::ApiSettingsController(const QSharedPointer<ServersControl
                                              const QSharedPointer<ApiAccountInfoModel> &apiAccountInfoModel,
                                              const QSharedPointer<ApiCountryModel> &apiCountryModel,
                                              const QSharedPointer<ApiDevicesModel> &apiDevicesModel,
-                                             const std::shared_ptr<Settings> &settings, QObject *parent)
+                                             const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+                                             QObject *parent)
     : QObject(parent),
       m_serversController(serversController),
       m_serversModel(serversModel),
       m_apiAccountInfoModel(apiAccountInfoModel),
       m_apiCountryModel(apiCountryModel),
       m_apiDevicesModel(apiDevicesModel),
-      m_settings(settings)
+      m_appSettingsRepository(appSettingsRepository)
 {
 }
 
@@ -51,8 +52,8 @@ bool ApiSettingsController::getAccountInfo(bool reload)
         wait.exec(QEventLoop::ExcludeUserInputEvents);
     }
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), requestTimeoutMsecs,
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
 
     auto processedIndex = m_serversModel->getProcessedServerIndex();
     auto serverConfig = m_serversController->getServerConfig(processedIndex);
@@ -64,7 +65,7 @@ bool ApiSettingsController::getAccountInfo(bool reload)
     apiPayload[configKey::serviceType] = apiConfig.value(configKey::serviceType).toString();
     apiPayload[configKey::authData] = authData;
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
+    apiPayload[apiDefs::key::appLanguage] = m_appSettingsRepository->getAppLanguage().name().split("_").first();
 
     QByteArray responseBody;
 
@@ -93,5 +94,5 @@ void ApiSettingsController::updateApiCountryModel()
 
 void ApiSettingsController::updateApiDevicesModel()
 {
-    m_apiDevicesModel->updateModel(m_apiAccountInfoModel->getIssuedConfigsInfo(), m_settings->getInstallationUuid(false));
+    m_apiDevicesModel->updateModel(m_apiAccountInfoModel->getIssuedConfigsInfo(), m_appSettingsRepository->getInstallationUuid(false));
 }

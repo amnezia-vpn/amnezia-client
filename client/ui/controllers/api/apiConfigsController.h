@@ -18,7 +18,7 @@ public:
                          const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ApiServicesModel> &apiServicesModel,
                          const QSharedPointer<ServicesCatalogController> &servicesCatalogController,
                          const QSharedPointer<SubscriptionController> &subscriptionController,
-                         const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+                         QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY vpnKeyExportReady)
@@ -67,7 +67,6 @@ private:
     QSharedPointer<ApiServicesModel> m_apiServicesModel;
     QSharedPointer<ServicesCatalogController> m_servicesCatalogController;
     QSharedPointer<SubscriptionController> m_subscriptionController;
-    std::shared_ptr<Settings> m_settings;
 };
 
 #endif // APICONFIGSCONTROLLER_H

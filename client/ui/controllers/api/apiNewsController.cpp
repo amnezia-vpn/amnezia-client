@@ -13,9 +13,10 @@ namespace
     }
 }
 
-ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel, const std::shared_ptr<Settings> &settings,
+ApiNewsController::ApiNewsController(const QSharedPointer<NewsModel> &newsModel,
+                                     const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                                      const QSharedPointer<ServersController> &serversController, QObject *parent)
-    : QObject(parent), m_newsModel(newsModel), m_settings(settings), m_serversController(serversController)
+    : QObject(parent), m_newsModel(newsModel), m_appSettingsRepository(appSettingsRepository), m_serversController(serversController)
 {
 }
 
@@ -31,10 +32,10 @@ void ApiNewsController::fetchNews(bool showError)
         return;
     }
 
-    auto gatewayController = QSharedPointer<GatewayController>::create(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(),
-                                                                       apiDefs::requestTimeoutMsecs, m_settings->isStrictKillSwitchEnabled());
+    auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(),
+                                                                       apiDefs::requestTimeoutMsecs, m_appSettingsRepository->isStrictKillSwitchEnabled());
     QJsonObject payload;
-    payload.insert("locale", m_settings->getAppLanguage().name().split("_").first());
+    payload.insert("locale", m_appSettingsRepository->getAppLanguage().name().split("_").first());
 
     const QJsonObject stacksJson = stacks.toJson();
     if (stacksJson.contains(configKey::userCountryCode)) {

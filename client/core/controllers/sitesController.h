@@ -5,29 +5,32 @@
 #include <QMap>
 #include <QPair>
 
-#include "settings.h"
+#include "core/defs.h"
+#include "core/repositories/appSettingsRepository.h"
+
+using namespace amnezia;
 
 class SitesController
 {
 public:
-    explicit SitesController(std::shared_ptr<Settings> settings);
+    explicit SitesController(std::shared_ptr<AppSettingsRepository> appSettingsRepository);
 
     bool addSite(const QString &hostname, const QString &ip);
     void addSites(const QMap<QString, QString> &sites, bool replaceExisting);
     void removeSite(const QString &hostname);
     void removeSites();
-    void setRouteMode(int routeMode);
+    void setRouteMode(RouteMode routeMode);
     void toggleSplitTunneling(bool enabled);
 
-    int getRouteMode() const;
+    RouteMode getRouteMode() const;
     bool isSplitTunnelingEnabled() const;
     QVector<QPair<QString, QString>> getCurrentSites() const;
 
 private:
     void fillSites();
 
-    std::shared_ptr<Settings> m_settings;
-    Settings::RouteMode m_currentRouteMode;
+    std::shared_ptr<AppSettingsRepository> m_appSettingsRepository;
+    RouteMode m_currentRouteMode;
     QVector<QPair<QString, QString>> m_sites;
 };
 

@@ -37,8 +37,8 @@ ApiConfigsController::ApiConfigsController(const QSharedPointer<ServersControlle
                                            const QSharedPointer<ApiServicesModel> &apiServicesModel,
                                            const QSharedPointer<ServicesCatalogController> &servicesCatalogController,
                                            const QSharedPointer<SubscriptionController> &subscriptionController,
-                                           const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController), m_settings(settings)
+                                           QObject *parent)
+    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController)
 {
 }
 
@@ -265,7 +265,7 @@ bool ApiConfigsController::deactivateExternalDevice(const QString &uuid, const Q
 
 bool ApiConfigsController::isConfigValid()
 {
-    int serverIndex = m_settings->defaultServerIndex();
+    int serverIndex = m_serversController->getDefaultServerIndex();
     QJsonObject serverConfigObject = m_serversController->getServerConfig(serverIndex);
     auto configSource = apiUtils::getConfigSource(serverConfigObject);
 

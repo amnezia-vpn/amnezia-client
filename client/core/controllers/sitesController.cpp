@@ -1,19 +1,19 @@
 #include "sitesController.h"
 
-SitesController::SitesController(std::shared_ptr<Settings> settings)
-    : m_settings(settings)
+SitesController::SitesController(std::shared_ptr<AppSettingsRepository> appSettingsRepository)
+    : m_appSettingsRepository(appSettingsRepository)
 {
-    m_currentRouteMode = m_settings->routeMode();
-    if (m_currentRouteMode == Settings::VpnAllSites) { // for old split tunneling configs
-        m_settings->setRouteMode(static_cast<Settings::RouteMode>(Settings::VpnOnlyForwardSites));
-        m_currentRouteMode = Settings::VpnOnlyForwardSites;
+    m_currentRouteMode = m_appSettingsRepository->routeMode();
+    if (m_currentRouteMode == RouteMode::VpnAllSites) { // for old split tunneling configs
+        m_appSettingsRepository->setRouteMode(RouteMode::VpnOnlyForwardSites);
+        m_currentRouteMode = RouteMode::VpnOnlyForwardSites;
     }
     fillSites();
 }
 
 bool SitesController::addSite(const QString &hostname, const QString &ip)
 {
-    if (!m_settings->addVpnSite(m_currentRouteMode, hostname, ip)) {
+    if (!m_appSettingsRepository->addVpnSite(m_currentRouteMode, hostname, ip)) {
         return false;
     }
     for (int i = 0; i < m_sites.size(); i++) {
@@ -31,15 +31,15 @@ bool SitesController::addSite(const QString &hostname, const QString &ip)
 void SitesController::addSites(const QMap<QString, QString> &sites, bool replaceExisting)
 {
     if (replaceExisting) {
-        m_settings->removeAllVpnSites(m_currentRouteMode);
+        m_appSettingsRepository->removeAllVpnSites(m_currentRouteMode);
     }
-    m_settings->addVpnSites(m_currentRouteMode, sites);
+    m_appSettingsRepository->addVpnSites(m_currentRouteMode, sites);
     fillSites();
 }
 
 void SitesController::removeSite(const QString &hostname)
 {
-    m_settings->removeVpnSite(m_currentRouteMode, hostname);
+    m_appSettingsRepository->removeVpnSite(m_currentRouteMode, hostname);
     for (int i = 0; i < m_sites.size(); i++) {
         if (m_sites[i].first == hostname) {
             m_sites.removeAt(i);
@@ -50,30 +50,30 @@ void SitesController::removeSite(const QString &hostname)
 
 void SitesController::removeSites()
 {
-    m_settings->removeAllVpnSites(m_currentRouteMode);
+    m_appSettingsRepository->removeAllVpnSites(m_currentRouteMode);
     fillSites();
 }
 
-void SitesController::setRouteMode(int routeMode)
+void SitesController::setRouteMode(RouteMode routeMode)
 {
-    m_settings->setRouteMode(static_cast<Settings::RouteMode>(routeMode));
-    m_currentRouteMode = m_settings->routeMode();
+    m_appSettingsRepository->setRouteMode(routeMode);
+    m_currentRouteMode = m_appSettingsRepository->routeMode();
     fillSites();
 }
 
 void SitesController::toggleSplitTunneling(bool enabled)
 {
-    m_settings->setSitesSplitTunnelingEnabled(enabled);
+    m_appSettingsRepository->setSitesSplitTunnelingEnabled(enabled);
 }
 
-int SitesController::getRouteMode() const
+RouteMode SitesController::getRouteMode() const
 {
-    return static_cast<int>(m_currentRouteMode);
+    return m_currentRouteMode;
 }
 
 bool SitesController::isSplitTunnelingEnabled() const
 {
-    return m_settings->isSitesSplitTunnelingEnabled();
+    return m_appSettingsRepository->isSitesSplitTunnelingEnabled();
 }
 
 QVector<QPair<QString, QString>> SitesController::getCurrentSites() const
@@ -83,12 +83,10 @@ QVector<QPair<QString, QString>> SitesController::getCurrentSites() const
 
 void SitesController::fillSites()
 {
+    QVariantMap sitesMap = m_appSettingsRepository->vpnSites(m_currentRouteMode);
     m_sites.clear();
-    const QVariantMap &sites = m_settings->vpnSites(m_currentRouteMode);
-    auto i = sites.constBegin();
-    while (i != sites.constEnd()) {
-        m_sites.append(qMakePair(i.key(), i.value().toString()));
-        ++i;
+    for (auto it = sitesMap.begin(); it != sitesMap.end(); ++it) {
+        m_sites.append(qMakePair(it.key(), it.value().toString()));
     }
 }
 

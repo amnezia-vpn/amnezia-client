@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "core/controllers/serversController.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "ui/models/servers_model.h"
 
 class ApiPremV1MigrationController : public QObject
@@ -12,7 +13,7 @@ class ApiPremV1MigrationController : public QObject
 public:
     ApiPremV1MigrationController(const QSharedPointer<ServersController> &serversController,
                                  const QSharedPointer<ServersModel> &serversModel,
-                                 const std::shared_ptr<Settings> &settings,
+                                 const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                                  QObject *parent = nullptr);
 
     Q_PROPERTY(QJsonArray subscriptionsModel READ getSubscriptionModel NOTIFY subscriptionsModelChanged)
@@ -44,7 +45,7 @@ signals:
 private:
     QSharedPointer<ServersController> m_serversController;
     QSharedPointer<ServersModel> m_serversModel;
-    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
 
     QJsonArray m_subscriptionsModel;
     int m_subscriptionIndex;

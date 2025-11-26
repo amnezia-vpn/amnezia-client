@@ -11,8 +11,8 @@ namespace
     constexpr char osVersion[] = "os_version";
 }
 
-ServicesCatalogController::ServicesCatalogController(std::shared_ptr<Settings> settings)
-    : m_settings(settings)
+ServicesCatalogController::ServicesCatalogController(std::shared_ptr<AppSettingsRepository> appSettingsRepository)
+    : m_appSettingsRepository(appSettingsRepository)
 {
 }
 
@@ -20,7 +20,7 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
 {
     QJsonObject apiPayload;
     apiPayload[osVersion] = QSysInfo::productType();
-    apiPayload[apiDefs::key::appLanguage] = m_settings->getAppLanguage().name().split("_").first();
+    apiPayload[apiDefs::key::appLanguage] = m_appSettingsRepository->getAppLanguage().name().split("_").first();
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);
@@ -40,8 +40,8 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
 
 ErrorCode ServicesCatalogController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }
 

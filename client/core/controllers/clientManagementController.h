@@ -8,7 +8,7 @@
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
 #include "core/defs.h"
-#include "settings.h"
+#include "core/repositories/serversRepository.h"
 
 class ClientManagementController : public QObject
 {
@@ -24,7 +24,7 @@ public:
         QString allowedIps;
     };
 
-    explicit ClientManagementController(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit ClientManagementController(std::shared_ptr<ServersRepository> serversRepository, QObject *parent = nullptr);
 
 signals:
     void clientsUpdated(const QJsonArray &clients);
@@ -71,7 +71,7 @@ private:
     ErrorCode wgShow(const DockerContainer container, const ServerCredentials &credentials,
                      const QSharedPointer<ServerController> &serverController, std::vector<WgShowData> &data);
 
-    std::shared_ptr<Settings> m_settings;
+    std::shared_ptr<ServersRepository> m_serversRepository;
     QJsonArray m_clientsTable;
 };
 

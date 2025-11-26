@@ -12,9 +12,9 @@
 
 ApiPremV1MigrationController::ApiPremV1MigrationController(const QSharedPointer<ServersController> &serversController,
                                                            const QSharedPointer<ServersModel> &serversModel,
-                                                           const std::shared_ptr<Settings> &settings,
+                                                           const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                                                            QObject *parent)
-    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_settings(settings)
+    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_appSettingsRepository(appSettingsRepository)
 {
 }
 
@@ -35,8 +35,8 @@ bool ApiPremV1MigrationController::hasConfigsToMigration()
     }
 
     if (!vpnKeys.isEmpty()) {
-        GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                            m_settings->isStrictKillSwitchEnabled());
+        GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                            m_appSettingsRepository->isStrictKillSwitchEnabled());
         QJsonObject apiPayload;
 
         apiPayload["configs"] = vpnKeys;
@@ -56,8 +56,8 @@ bool ApiPremV1MigrationController::hasConfigsToMigration()
 
 void ApiPremV1MigrationController::getSubscriptionList(const QString &email)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
     QJsonObject apiPayload;
 
     apiPayload[apiDefs::key::email] = email;
@@ -89,8 +89,8 @@ void ApiPremV1MigrationController::sendMigrationCode(const int subscriptionIndex
     QTimer::singleShot(1000, &wait, &QEventLoop::quit);
     wait.exec(QEventLoop::ExcludeUserInputEvents);
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
     QJsonObject apiPayload;
 
     apiPayload[apiDefs::key::email] = m_email;
@@ -107,8 +107,8 @@ void ApiPremV1MigrationController::sendMigrationCode(const int subscriptionIndex
 
 void ApiPremV1MigrationController::migrate(const QString &migrationCode)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
     QJsonObject apiPayload;
 
     apiPayload[apiDefs::key::email] = m_email;
@@ -129,10 +129,10 @@ void ApiPremV1MigrationController::migrate(const QString &migrationCode)
 
 bool ApiPremV1MigrationController::isPremV1MigrationReminderActive()
 {
-    return m_settings->isPremV1MigrationReminderActive();
+    return m_appSettingsRepository->isPremV1MigrationReminderActive();
 }
 
 void ApiPremV1MigrationController::disablePremV1MigrationReminder()
 {
-    m_settings->disablePremV1MigrationReminder();
+    m_appSettingsRepository->disablePremV1MigrationReminder();
 }

@@ -9,14 +9,15 @@
 #include "core/api/apiDefs.h"
 #include "core/controllers/gatewayController.h"
 #include "core/controllers/serversController.h"
-#include "settings.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "ui/models/newsModel.h"
 
 class ApiNewsController : public QObject
 {
     Q_OBJECT
 public:
-    explicit ApiNewsController(const QSharedPointer<NewsModel> &newsModel, const std::shared_ptr<Settings> &settings,
+    explicit ApiNewsController(const QSharedPointer<NewsModel> &newsModel,
+                               const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                                const QSharedPointer<ServersController> &serversController, QObject *parent = nullptr);
 
     Q_INVOKABLE void fetchNews(bool showError);
@@ -27,7 +28,7 @@ signals:
 
 private:
     QSharedPointer<NewsModel> m_newsModel;
-    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
     QSharedPointer<ServersController> m_serversController;
 };
 

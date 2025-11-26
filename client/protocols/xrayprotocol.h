@@ -4,6 +4,7 @@
 #include "QProcess"
 
 #include "containers/containers_defs.h"
+#include "core/defs.h"
 #include "openvpnprotocol.h"
 #include "settings.h"
 
@@ -31,7 +32,7 @@ private:
     int m_localPort;
     QString m_remoteHost;
     QString m_remoteAddress;
-    Settings::RouteMode m_routeMode;
+    amnezia::RouteMode m_routeMode;
     QJsonObject m_configData;
     QString m_primaryDNS;
     QString m_secondaryDNS;

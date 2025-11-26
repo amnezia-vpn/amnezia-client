@@ -2,6 +2,8 @@
 
 #include <QFileInfo>
 
+#include "core/defs.h"
+
 AppSplitTunnelingUiController::AppSplitTunnelingUiController(const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
                                                               const QSharedPointer<AppSplitTunnelingModel> &appSplitTunnelingModel,
                                                               QObject *parent)
@@ -57,18 +59,23 @@ void AppSplitTunnelingUiController::toggleSplitTunneling(bool enabled)
 
 void AppSplitTunnelingUiController::setRouteMode(int routeMode)
 {
-    m_appSplitTunnelingController->setRouteMode(routeMode);
+    m_appSplitTunnelingController->setRouteMode(static_cast<amnezia::AppsRouteMode>(routeMode));
     m_appSplitTunnelingModel->updateModel(m_appSplitTunnelingController->getApps());
     emit routeModeChanged();
 }
 
 int AppSplitTunnelingUiController::getRouteMode() const
 {
-    return m_appSplitTunnelingController->getRouteMode();
+    return static_cast<int>(m_appSplitTunnelingController->getRouteMode());
 }
 
 bool AppSplitTunnelingUiController::isTunnelingEnabled() const
 {
     return m_appSplitTunnelingController->isSplitTunnelingEnabled();
+}
+
+void AppSplitTunnelingUiController::updateModel()
+{
+    m_appSplitTunnelingModel->updateModel(m_appSplitTunnelingController->getApps());
 }
 

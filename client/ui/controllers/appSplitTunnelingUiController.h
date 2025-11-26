@@ -30,6 +30,8 @@ public slots:
     int getRouteMode() const;
     bool isTunnelingEnabled() const;
 
+    void updateModel();
+
 signals:
     void routeModeChanged();
     void isTunnelingEnabledChanged();

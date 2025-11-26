@@ -9,6 +9,8 @@
 #include "ui/models/servers_model.h"
 #include "core/controllers/sitesController.h"
 #include "core/controllers/appSplitTunnelingController.h"
+#include "core/repositories/qServersRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 
 class SettingsController : public QObject
 {
@@ -19,7 +21,9 @@ public:
                                 const QSharedPointer<LanguageUiController> &languageUiController,
                                 const QSharedPointer<SitesController> &sitesController,
                                 const QSharedPointer<AppSplitTunnelingController> &appSplitTunnelingController,
-                                const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+                                const QSharedPointer<QServersRepository> &serversRepository,
+                                const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+                                QObject *parent = nullptr);
 
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
     Q_PROPERTY(QString secondaryDns READ getSecondaryDns WRITE setSecondaryDns NOTIFY secondaryDnsChanged)
@@ -151,13 +155,14 @@ private:
     QSharedPointer<LanguageUiController> m_languageUiController;
     QSharedPointer<SitesController> m_sitesController;
     QSharedPointer<AppSplitTunnelingController> m_appSplitTunnelingController;
+    QSharedPointer<QServersRepository> m_serversRepository;
+    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
     
     mutable int m_cachedStatusBarHeight = -1;
     mutable int m_cachedNavigationBarHeight = -1;
     mutable bool m_cachedEdgeToEdgeEnabled = false;
     mutable bool m_edgeToEdgeCached = false;
     int m_imeHeight = 0;
-    std::shared_ptr<Settings> m_settings;
 
     QString m_appVersion;
 

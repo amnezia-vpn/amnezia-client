@@ -70,8 +70,9 @@ namespace
 
 ImportController::ImportController(const QSharedPointer<ServersController> &serversController,
                                    const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
+                                   const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                                    const std::shared_ptr<Settings> &settings, QObject *parent)
-    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_containersModel(containersModel), m_settings(settings)
+    : QObject(parent), m_serversController(serversController), m_serversModel(serversModel), m_containersModel(containersModel), m_appSettingsRepository(appSettingsRepository), m_settings(settings)
 {
 #ifdef Q_OS_ANDROID
     mInstance = this;
@@ -368,7 +369,7 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data)
     QJsonObject config;
     config[config_key::containers] = arr;
     config[config_key::defaultContainer] = "amnezia-openvpn";
-    config[config_key::description] = m_settings->nextAvailableServerName();
+    config[config_key::description] = m_appSettingsRepository->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatchIterator dnsMatch = dnsRegExp.globalMatch(data);
@@ -506,7 +507,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data)
     QJsonObject config;
     config[config_key::containers] = arr;
     config[config_key::defaultContainer] = "amnezia-" + protocolName;
-    config[config_key::description] = m_settings->nextAvailableServerName();
+    config[config_key::description] = m_appSettingsRepository->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp(
             "DNS = "
@@ -562,7 +563,7 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, const QStri
         config[config_key::defaultContainer] = "amnezia-xray";
     }
     if (description.isEmpty()) {
-        config[config_key::description] = m_settings->nextAvailableServerName();
+        config[config_key::description] = m_appSettingsRepository->nextAvailableServerName();
     } else {
         config[config_key::description] = description;
     }

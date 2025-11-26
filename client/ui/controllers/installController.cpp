@@ -41,6 +41,7 @@ InstallController::InstallController(const QSharedPointer<ServersController> &se
                                      const QSharedPointer<ServersModel> &serversModel, const QSharedPointer<ContainersModel> &containersModel,
                                      const QSharedPointer<ProtocolsModel> &protocolsModel,
                                      const QSharedPointer<ClientManagementController> &clientManagementController,
+                                     const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                                      const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversController(serversController),
@@ -48,6 +49,7 @@ InstallController::InstallController(const QSharedPointer<ServersController> &se
       m_containersModel(containersModel),
       m_protocolModel(protocolsModel),
       m_clientManagementController(clientManagementController),
+      m_appSettingsRepository(appSettingsRepository),
       m_settings(settings)
 {
 }
@@ -223,7 +225,7 @@ void InstallController::installServer(const DockerContainer container, const QMa
     server.insert(config_key::userName, m_processedServerCredentials.userName);
     server.insert(config_key::password, m_processedServerCredentials.secretData);
     server.insert(config_key::port, m_processedServerCredentials.port);
-    server.insert(config_key::description, m_serversController->getNextAvailableServerName());
+    server.insert(config_key::description, m_appSettingsRepository->nextAvailableServerName());
 
     QJsonArray containerConfigs;
     VpnConfigurationsController vpnConfigurationController(m_settings, serverController);
@@ -958,7 +960,7 @@ void InstallController::addEmptyServer()
     server.insert(config_key::userName, m_processedServerCredentials.userName);
     server.insert(config_key::password, m_processedServerCredentials.secretData);
     server.insert(config_key::port, m_processedServerCredentials.port);
-    server.insert(config_key::description, m_serversController->getNextAvailableServerName());
+    server.insert(config_key::description, m_appSettingsRepository->nextAvailableServerName());
 
     server.insert(config_key::defaultContainer, ContainerProps::containerToString(DockerContainer::None));
 

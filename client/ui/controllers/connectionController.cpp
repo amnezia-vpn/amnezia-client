@@ -10,18 +10,20 @@
 #include "version.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersController> &serversController,
-                                           const QSharedPointer<ServersModel> &serversModel,
-                                           const QSharedPointer<ContainersModel> &containersModel,
-                                           const QSharedPointer<ClientManagementModel> &clientManagementModel,
-                                           const QSharedPointer<VpnConnection> &vpnConnection,
-                                           const std::shared_ptr<Settings> &settings,
-                                           QObject *parent)
+                                          const QSharedPointer<ServersModel> &serversModel,
+                                          const QSharedPointer<ContainersModel> &containersModel,
+                                          const QSharedPointer<ClientManagementModel> &clientManagementModel,
+                                          const QSharedPointer<VpnConnection> &vpnConnection,
+                                          const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+                                          const std::shared_ptr<Settings> &settings,
+                                          QObject *parent)
     : QObject(parent),
       m_serversController(serversController),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_clientManagementModel(clientManagementModel),
       m_vpnConnection(vpnConnection),
+      m_appSettingsRepository(appSettingsRepository),
       m_settings(settings)
 {
     connect(m_vpnConnection.get(), &VpnConnection::connectionStateChanged, this, &ConnectionController::onConnectionStateChanged);
@@ -59,7 +61,7 @@ void ConnectionController::openConnection()
     QJsonObject containerConfig = m_containersModel->getContainerConfig(container);
     ServerCredentials credentials = m_serversController->getServerCredentials(serverIndex);
 
-    auto dns = m_serversController->getDnsPair(serverIndex, m_settings->useAmneziaDns());
+    auto dns = m_serversController->getDnsPair(serverIndex, m_appSettingsRepository->useAmneziaDns());
 
     auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container);
     emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);

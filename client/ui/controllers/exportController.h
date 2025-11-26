@@ -5,6 +5,7 @@
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/clientManagementController.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
 
@@ -16,6 +17,7 @@ public:
                               const QSharedPointer<ServersModel> &serversModel,
                               const QSharedPointer<ContainersModel> &containersModel,
                               const QSharedPointer<ClientManagementController> &clientManagementController,
+                              const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                               const std::shared_ptr<Settings> &settings,
                               QObject *parent = nullptr);
 
@@ -66,6 +68,7 @@ private:
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ClientManagementController> m_clientManagementController;
+    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
     std::shared_ptr<Settings> m_settings;
 
     QString m_config;

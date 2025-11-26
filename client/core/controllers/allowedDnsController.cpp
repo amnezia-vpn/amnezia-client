@@ -1,7 +1,7 @@
 #include "allowedDnsController.h"
 
-AllowedDnsController::AllowedDnsController(std::shared_ptr<Settings> settings)
-    : m_settings(settings)
+AllowedDnsController::AllowedDnsController(std::shared_ptr<AppSettingsRepository> appSettingsRepository)
+    : m_appSettingsRepository(appSettingsRepository)
 {
     fillDnsServers();
 }
@@ -13,7 +13,7 @@ bool AllowedDnsController::addDns(const QString &ip)
     }
 
     m_dnsServers.append(ip);
-    m_settings->setAllowedDnsServers(m_dnsServers);
+    m_appSettingsRepository->setAllowedDnsServers(m_dnsServers);
     return true;
 }
 
@@ -29,7 +29,7 @@ void AllowedDnsController::addDnsList(const QStringList &dnsServers, bool replac
         }
     }
     
-    m_settings->setAllowedDnsServers(m_dnsServers);
+    m_appSettingsRepository->setAllowedDnsServers(m_dnsServers);
 }
 
 void AllowedDnsController::removeDns(int index)
@@ -39,7 +39,7 @@ void AllowedDnsController::removeDns(int index)
     }
 
     m_dnsServers.removeAt(index);
-    m_settings->setAllowedDnsServers(m_dnsServers);
+    m_appSettingsRepository->setAllowedDnsServers(m_dnsServers);
 }
 
 QStringList AllowedDnsController::getCurrentDnsServers() const
@@ -49,6 +49,6 @@ QStringList AllowedDnsController::getCurrentDnsServers() const
 
 void AllowedDnsController::fillDnsServers()
 {
-    m_dnsServers = m_settings->allowedDnsServers();
+    m_dnsServers = m_appSettingsRepository->getAllowedDnsServers();
 }
 

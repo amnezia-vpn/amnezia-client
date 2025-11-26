@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "core/controllers/serversController.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "ui/models/api/apiAccountInfoModel.h"
 #include "ui/models/api/apiCountryModel.h"
 #include "ui/models/api/apiDevicesModel.h"
@@ -18,7 +19,8 @@ public:
                           const QSharedPointer<ApiAccountInfoModel> &apiAccountInfoModel,
                           const QSharedPointer<ApiCountryModel> &apiCountryModel,
                           const QSharedPointer<ApiDevicesModel> &apiDevicesModel,
-                          const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
+                          const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+                          QObject *parent = nullptr);
     ~ApiSettingsController();
 
 public slots:
@@ -35,8 +37,7 @@ private:
     QSharedPointer<ApiAccountInfoModel> m_apiAccountInfoModel;
     QSharedPointer<ApiCountryModel> m_apiCountryModel;
     QSharedPointer<ApiDevicesModel> m_apiDevicesModel;
-
-    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
 };
 
 #endif // APISETTINGSCONTROLLER_H

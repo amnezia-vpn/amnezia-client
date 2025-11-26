@@ -104,4 +104,9 @@ void AllowedDnsUiController::exportDns(const QString &fileName)
     SystemController::saveFile(fileName, jsonData);
 
     emit finished(tr("Export completed"));
+}
+
+void AllowedDnsUiController::updateModel()
+{
+    m_allowedDnsModel->updateModel(m_allowedDnsController->getCurrentDnsServers());
 } 

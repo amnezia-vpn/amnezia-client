@@ -39,6 +39,9 @@
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
 
+#include "core/repositories/qServersRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
+
 #include "ui/models/allowed_dns_model.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/languageModel.h"
@@ -84,6 +87,7 @@ signals:
     void websiteUrlChanged(const QString &newUrl);
 
 private:
+    void initRepositories();
     void initCoreControllers();
     void initModels();
     void initControllers();
@@ -107,6 +111,9 @@ private:
     void initAmneziaDnsToggledHandler();
     void initServersModelUpdateHandler();
     void initClientManagementModelUpdateHandler();
+    void initSitesModelUpdateHandler();
+    void initAllowedDnsModelUpdateHandler();
+    void initAppSplitTunnelingModelUpdateHandler();
     void initPrepareConfigHandler();
     void initImportPremiumV2VpnKeyHandler();
     void initShowMigrationDrawerHandler();
@@ -116,6 +123,9 @@ private:
     std::shared_ptr<Settings> m_settings;
     QSharedPointer<VpnConnection> m_vpnConnection;
     QSharedPointer<QTranslator> m_translator;
+
+    QSharedPointer<QServersRepository> m_serversRepository;
+    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     QScopedPointer<NotificationHandler> m_notificationHandler;

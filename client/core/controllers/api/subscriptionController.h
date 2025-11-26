@@ -5,7 +5,8 @@
 #include <QByteArray>
 
 #include "core/defs.h"
-#include "settings.h"
+#include "core/repositories/serversRepository.h"
+#include "core/repositories/appSettingsRepository.h"
 
 class SubscriptionController
 {
@@ -34,7 +35,8 @@ public:
         QJsonObject toJsonObject() const;
     };
 
-    explicit SubscriptionController(std::shared_ptr<Settings> settings);
+    explicit SubscriptionController(std::shared_ptr<ServersRepository> serversRepository,
+                                     std::shared_ptr<AppSettingsRepository> appSettingsRepository);
 
     bool isSubscriptionExpired(const QJsonObject &apiConfig);
 
@@ -68,7 +70,8 @@ public:
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
 
-    std::shared_ptr<Settings> m_settings;
+    std::shared_ptr<ServersRepository> m_serversRepository;
+    std::shared_ptr<AppSettingsRepository> m_appSettingsRepository;
 };
 
 #endif // SUBSCRIPTIONCONTROLLER_H

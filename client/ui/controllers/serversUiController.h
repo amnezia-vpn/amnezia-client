@@ -7,6 +7,8 @@
 #include <QJsonObject>
 
 #include "core/controllers/serversController.h"
+#include "core/repositories/qServersRepository.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "ui/models/servers_model.h"
 #include "ui/models/containers_model.h"
 
@@ -34,6 +36,8 @@ class ServersUiController : public QObject
     
 public:
     explicit ServersUiController(const QSharedPointer<ServersController> &serversController,
+                                 const QSharedPointer<QServersRepository> &serversRepository,
+                                 const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                                  const QSharedPointer<ServersModel> &serversModel,
                                  const QSharedPointer<ContainersModel> &containersModel,
                                  const QSharedPointer<ContainersModel> &defaultServerContainersModel,
@@ -88,6 +92,8 @@ private:
     void updateDefaultServerContainersModel();
     
     QSharedPointer<ServersController> m_serversController;
+    QSharedPointer<QServersRepository> m_serversRepository;
+    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;

@@ -253,13 +253,13 @@ void Settings::setLogEnableDate(QDateTime date)
 QString Settings::routeModeString(RouteMode mode) const
 {
     switch (mode) {
-    case VpnAllSites: return "AllSites";
-    case VpnOnlyForwardSites: return "ForwardSites";
-    case VpnAllExceptSites: return "ExceptSites";
+    case RouteMode::VpnAllSites: return "AllSites";
+    case RouteMode::VpnOnlyForwardSites: return "ForwardSites";
+    case RouteMode::VpnAllExceptSites: return "ExceptSites";
     }
 }
 
-Settings::RouteMode Settings::routeMode() const
+RouteMode Settings::routeMode() const
 {
     return static_cast<RouteMode>(value("Conf/routeMode", 0).toInt());
 }
@@ -378,13 +378,13 @@ void Settings::clearSettings()
 QString Settings::appsRouteModeString(AppsRouteMode mode) const
 {
     switch (mode) {
-    case VpnAllApps: return "AllApps";
-    case VpnOnlyForwardApps: return "ForwardApps";
-    case VpnAllExceptApps: return "ExceptApps";
+    case AppsRouteMode::VpnAllApps: return "AllApps";
+    case AppsRouteMode::VpnOnlyForwardApps: return "ForwardApps";
+    case AppsRouteMode::VpnAllExceptApps: return "ExceptApps";
     }
 }
 
-Settings::AppsRouteMode Settings::getAppsRouteMode() const
+AppsRouteMode Settings::getAppsRouteMode() const
 {
     return static_cast<AppsRouteMode>(value("Conf/appsRouteMode", 0).toInt());
 }

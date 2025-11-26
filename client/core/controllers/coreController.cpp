@@ -17,6 +17,7 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
                                QQmlApplicationEngine *engine, QObject *parent)
     : QObject(parent), m_vpnConnection(vpnConnection), m_settings(settings), m_engine(engine)
 {
+    initRepositories();
     initCoreControllers();
     initModels();
     initControllers();
@@ -28,7 +29,7 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
     initNotificationHandler();
 
     m_translator.reset(new QTranslator());
-    updateTranslator(m_settings->getAppLanguage());
+    updateTranslator(m_appSettingsRepository->getAppLanguage());
 }
 
 void CoreController::initModels()
@@ -108,30 +109,39 @@ void CoreController::initModels()
     m_engine->rootContext()->setContextProperty("NewsModel", m_newsModel.get());
 }
 
+void CoreController::initRepositories()
+{
+    m_serversRepository = QSharedPointer<QServersRepository>::create(m_settings, this);
+    m_appSettingsRepository = QSharedPointer<QAppSettingsRepository>::create(m_settings, this);
+}
+
 void CoreController::initCoreControllers()
 {
-    m_serversController = QSharedPointer<ServersController>::create(m_settings, this);
-    m_appSplitTunnelingController = QSharedPointer<AppSplitTunnelingController>::create(m_settings);
-    m_clientManagementController = QSharedPointer<ClientManagementController>::create(m_settings, this);
-    m_sitesController = QSharedPointer<SitesController>::create(m_settings);
-    m_allowedDnsController = QSharedPointer<AllowedDnsController>::create(m_settings);
-    m_servicesCatalogController = QSharedPointer<ServicesCatalogController>::create(m_settings);
-    m_subscriptionController = QSharedPointer<SubscriptionController>::create(m_settings);
+    std::shared_ptr<ServersRepository> serversRepo(m_serversRepository.get(), [](ServersRepository*){});
+    std::shared_ptr<AppSettingsRepository> appSettingsRepo(m_appSettingsRepository.get(), [](AppSettingsRepository*){});
+    
+    m_serversController = QSharedPointer<ServersController>::create(serversRepo, appSettingsRepo, this);
+    m_appSplitTunnelingController = QSharedPointer<AppSplitTunnelingController>::create(appSettingsRepo);
+    m_clientManagementController = QSharedPointer<ClientManagementController>::create(serversRepo, this);
+    m_sitesController = QSharedPointer<SitesController>::create(appSettingsRepo);
+    m_allowedDnsController = QSharedPointer<AllowedDnsController>::create(appSettingsRepo);
+    m_servicesCatalogController = QSharedPointer<ServicesCatalogController>::create(appSettingsRepo);
+    m_subscriptionController = QSharedPointer<SubscriptionController>::create(serversRepo, appSettingsRepo);
 }
 
 void CoreController::initControllers()
 {
     m_connectionController.reset(
-            new ConnectionController(m_serversController, m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_settings));
+            new ConnectionController(m_serversController, m_serversModel, m_containersModel, m_clientManagementModel, m_vpnConnection, m_appSettingsRepository, m_settings));
     m_engine->rootContext()->setContextProperty("ConnectionController", m_connectionController.get());
 
-    m_pageController.reset(new PageController(m_serversModel, m_settings));
+    m_pageController.reset(new PageController(m_serversModel, m_appSettingsRepository));
     m_engine->rootContext()->setContextProperty("PageController", m_pageController.get());
 
     m_focusController.reset(new FocusController(m_engine, this));
     m_engine->rootContext()->setContextProperty("FocusController", m_focusController.get());
 
-    m_installController.reset(new InstallController(m_serversController, m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementController, m_settings));
+    m_installController.reset(new InstallController(m_serversController, m_serversModel, m_containersModel, m_protocolsModel, m_clientManagementController, m_appSettingsRepository, m_settings));
     m_engine->rootContext()->setContextProperty("InstallController", m_installController.get());
 
     connect(m_installController.get(), &InstallController::currentContainerUpdated, m_connectionController.get(),
@@ -140,20 +150,20 @@ void CoreController::initControllers()
     connect(m_installController.get(), &InstallController::profileCleared,
             m_protocolsUiController.get(), &ProtocolsUiController::updateProtocols);
 
-    m_importController.reset(new ImportController(m_serversController, m_serversModel, m_containersModel, m_settings));
+    m_importController.reset(new ImportController(m_serversController, m_serversModel, m_containersModel, m_appSettingsRepository, m_settings));
     m_engine->rootContext()->setContextProperty("ImportController", m_importController.get());
 
-    m_exportController.reset(new ExportController(m_serversController, m_serversModel, m_containersModel, m_clientManagementController, m_settings));
+    m_exportController.reset(new ExportController(m_serversController, m_serversModel, m_containersModel, m_clientManagementController, m_appSettingsRepository, m_settings));
     m_engine->rootContext()->setContextProperty("ExportController", m_exportController.get());
 
-    m_languageUiController = QSharedPointer<LanguageUiController>::create(m_settings, m_languageModel, this);
+    m_languageUiController = QSharedPointer<LanguageUiController>::create(m_appSettingsRepository, m_languageModel, this);
     m_engine->rootContext()->setContextProperty("LanguageUiController", m_languageUiController.get());
 
     m_settingsController.reset(
-            new SettingsController(m_serversModel, m_containersModel, m_languageUiController, m_sitesController, m_appSplitTunnelingController, m_settings));
+            new SettingsController(m_serversModel, m_containersModel, m_languageUiController, m_sitesController, m_appSplitTunnelingController, m_serversRepository, m_appSettingsRepository));
     m_engine->rootContext()->setContextProperty("SettingsController", m_settingsController.get());
 
-    m_serversUiController = QSharedPointer<ServersUiController>::create(m_serversController, m_serversModel, m_containersModel, m_defaultServerContainersModel);
+    m_serversUiController = QSharedPointer<ServersUiController>::create(m_serversController, m_serversRepository, m_appSettingsRepository, m_serversModel, m_containersModel, m_defaultServerContainersModel);
     m_engine->rootContext()->setContextProperty("ServersUiController", m_serversUiController.get());
 
     m_sitesUiController.reset(new SitesUiController(m_sitesController, m_vpnConnection, m_sitesModel, this));
@@ -165,23 +175,23 @@ void CoreController::initControllers()
     m_appSplitTunnelingUiController.reset(new AppSplitTunnelingUiController(m_appSplitTunnelingController, m_appSplitTunnelingModel, this));
     m_engine->rootContext()->setContextProperty("AppSplitTunnelingController", m_appSplitTunnelingUiController.get());
 
-    m_systemController.reset(new SystemController(m_settings));
+    m_systemController.reset(new SystemController());
     m_engine->rootContext()->setContextProperty("SystemController", m_systemController.get());
 
     m_apiSettingsController.reset(
-            new ApiSettingsController(m_serversController, m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_settings));
+            new ApiSettingsController(m_serversController, m_serversModel, m_apiAccountInfoModel, m_apiCountryModel, m_apiDevicesModel, m_appSettingsRepository));
     m_engine->rootContext()->setContextProperty("ApiSettingsController", m_apiSettingsController.get());
 
     m_servicesCatalogUiController.reset(new ServicesCatalogUiController(m_servicesCatalogController, m_apiServicesModel, this));
     m_engine->rootContext()->setContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController.get());
 
-    m_apiConfigsController.reset(new ApiConfigsController(m_serversController, m_serversModel, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController, m_settings));
+    m_apiConfigsController.reset(new ApiConfigsController(m_serversController, m_serversModel, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController));
     m_engine->rootContext()->setContextProperty("ApiConfigsController", m_apiConfigsController.get());
 
-    m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversController, m_serversModel, m_settings, this));
+    m_apiPremV1MigrationController.reset(new ApiPremV1MigrationController(m_serversController, m_serversModel, m_appSettingsRepository, this));
     m_engine->rootContext()->setContextProperty("ApiPremV1MigrationController", m_apiPremV1MigrationController.get());
 
-    m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversController, this));
+    m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_appSettingsRepository, m_serversController, this));
     m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
 }
 
@@ -191,15 +201,15 @@ void CoreController::initAndroidController()
     if (!AndroidController::initLogging()) {
         qFatal("Android logging initialization failed");
     }
-    AndroidController::instance()->setSaveLogs(m_settings->isSaveLogs());
-    connect(m_settings.get(), &Settings::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
+    AndroidController::instance()->setSaveLogs(m_appSettingsRepository->isSaveLogs());
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
 
-    AndroidController::instance()->setScreenshotsEnabled(m_settings->isScreenshotsEnabled());
-    connect(m_settings.get(), &Settings::screenshotsEnabledChanged, AndroidController::instance(), &AndroidController::setScreenshotsEnabled);
+    AndroidController::instance()->setScreenshotsEnabled(m_appSettingsRepository->isScreenshotsEnabled());
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::screenshotsEnabledChanged, AndroidController::instance(), &AndroidController::setScreenshotsEnabled);
 
-    connect(m_settings.get(), &Settings::serverRemoved, AndroidController::instance(), &AndroidController::resetLastServer);
+    connect(m_serversRepository.get(), &QServersRepository::serverRemoved, AndroidController::instance(), &AndroidController::resetLastServer);
 
-    connect(m_settings.get(), &Settings::settingsCleared, []() { AndroidController::instance()->resetLastServer(-1); });
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::settingsCleared, []() { AndroidController::instance()->resetLastServer(-1); });
 
     connect(AndroidController::instance(), &AndroidController::initConnectionState, this, [this](Vpn::ConnectionState state) {
         m_connectionController->onConnectionStateChanged(state);
@@ -237,9 +247,9 @@ void CoreController::initAppleController()
         emit m_settingsController->importBackupFromOutside(filePath);
     });
 
-    QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_settings->isScreenshotsEnabled()); });
+    QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_appSettingsRepository->isScreenshotsEnabled()); });
 
-    connect(m_settings.get(), &Settings::screenshotsEnabledChanged, [](bool enabled) { AmneziaVPN::toggleScreenshots(enabled); });
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::screenshotsEnabledChanged, [](bool enabled) { AmneziaVPN::toggleScreenshots(enabled); });
 #endif
 }
 
@@ -257,6 +267,9 @@ void CoreController::initSignalHandlers()
     initAmneziaDnsToggledHandler();
     initServersModelUpdateHandler();
     initClientManagementModelUpdateHandler();
+    initSitesModelUpdateHandler();
+    initAllowedDnsModelUpdateHandler();
+    initAppSplitTunnelingModelUpdateHandler();
     initPrepareConfigHandler();
     initImportPremiumV2VpnKeyHandler();
     initShowMigrationDrawerHandler();
@@ -308,10 +321,10 @@ void CoreController::updateTranslator(const QLocale &locale)
 
     if (m_translator->load(strFileName)) {
         if (QCoreApplication::installTranslator(m_translator.get())) {
-            m_settings->setAppLanguage(locale);
+            m_appSettingsRepository->setAppLanguage(locale);
         }
     } else {
-        m_settings->setAppLanguage(QLocale::English);
+        m_appSettingsRepository->setAppLanguage(QLocale::English);
     }
 
     m_engine->retranslate();
@@ -373,7 +386,7 @@ void CoreController::initTranslationsUpdatedHandler()
 
 void CoreController::initLanguageHandler()
 {
-    connect(m_settingsController.get(), &SettingsController::appLanguageChanged, m_languageUiController.get(), &LanguageUiController::changeLanguage);
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::appLanguageChanged, m_languageUiController.get(), &LanguageUiController::onAppLanguageChanged);
     connect(m_settingsController.get(), &SettingsController::resetLanguageToSystem, m_languageUiController.get(), [this]() {
         m_languageUiController->changeLanguage(m_languageUiController->getSystemLanguageEnum());
     });
@@ -388,18 +401,21 @@ void CoreController::initAutoConnectHandler()
 
 void CoreController::initAmneziaDnsToggledHandler()
 {
-    connect(m_settingsController.get(), &SettingsController::amneziaDnsToggled, m_serversUiController.get(), &ServersUiController::toggleAmneziaDns);
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::useAmneziaDnsChanged, m_serversUiController.get(), [this](bool enabled) {
+        Q_UNUSED(enabled);
+        m_serversUiController->updateModel();
+    });
 }
 
 void CoreController::initServersModelUpdateHandler()
 {
-    connect(m_serversController.get(), &ServersController::serverAdded,
+    connect(m_serversRepository.get(), &QServersRepository::serverAdded,
             m_serversUiController.get(), &ServersUiController::onAddServer);
-    connect(m_serversController.get(), &ServersController::serverEdited,
+    connect(m_serversRepository.get(), &QServersRepository::serverEdited,
             m_serversUiController.get(), &ServersUiController::onServerEdited);
-    connect(m_serversController.get(), &ServersController::serverRemoved,
+    connect(m_serversRepository.get(), &QServersRepository::serverRemoved,
             m_serversUiController.get(), &ServersUiController::onServerRemoved);
-    connect(m_serversController.get(), &ServersController::defaultServerChanged,
+    connect(m_serversRepository.get(), &QServersRepository::defaultServerChanged,
             m_serversUiController.get(), &ServersUiController::onDefaultServerChanged);
 }
 
@@ -407,6 +423,46 @@ void CoreController::initClientManagementModelUpdateHandler()
 {
     connect(m_clientManagementController.get(), &ClientManagementController::clientsUpdated,
             m_clientManagementModel.get(), &ClientManagementModel::updateModel);
+}
+
+void CoreController::initSitesModelUpdateHandler()
+{
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::sitesChanged, m_sitesUiController.get(), [this](amnezia::RouteMode mode) {
+        Q_UNUSED(mode);
+        m_sitesUiController->updateModel();
+    });
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::sitesSplitTunnelingEnabledChanged, m_sitesUiController.get(), [this](bool enabled) {
+        Q_UNUSED(enabled);
+        m_sitesUiController->updateModel();
+    });
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::routeModeChanged, m_sitesUiController.get(), [this](amnezia::RouteMode mode) {
+        Q_UNUSED(mode);
+        m_sitesUiController->updateModel();
+    });
+}
+
+void CoreController::initAllowedDnsModelUpdateHandler()
+{
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::allowedDnsServersChanged, m_allowedDnsUiController.get(), [this](const QStringList &servers) {
+        Q_UNUSED(servers);
+        m_allowedDnsUiController->updateModel();
+    });
+}
+
+void CoreController::initAppSplitTunnelingModelUpdateHandler()
+{
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::appsChanged, m_appSplitTunnelingUiController.get(), [this](amnezia::AppsRouteMode mode) {
+        Q_UNUSED(mode);
+        m_appSplitTunnelingUiController->updateModel();
+    });
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::appsSplitTunnelingEnabledChanged, m_appSplitTunnelingUiController.get(), [this](bool enabled) {
+        Q_UNUSED(enabled);
+        m_appSplitTunnelingUiController->updateModel();
+    });
+    connect(m_appSettingsRepository.get(), &QAppSettingsRepository::appsRouteModeChanged, m_appSplitTunnelingUiController.get(), [this](amnezia::AppsRouteMode mode) {
+        Q_UNUSED(mode);
+        m_appSplitTunnelingUiController->updateModel();
+    });
 }
 
 void CoreController::initPrepareConfigHandler()

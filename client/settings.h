@@ -103,12 +103,6 @@ public:
     QDateTime getLogEnableDate();
     void setLogEnableDate(QDateTime date);
 
-    enum RouteMode {
-        VpnAllSites,
-        VpnOnlyForwardSites,
-        VpnAllExceptSites
-    };
-    Q_ENUM(RouteMode)
 
     QString routeModeString(RouteMode mode) const;
 
@@ -194,12 +188,6 @@ public:
 
     void clearSettings();
 
-    enum AppsRouteMode {
-        VpnAllApps,
-        VpnOnlyForwardApps,
-        VpnAllExceptApps
-    };
-    Q_ENUM(AppsRouteMode)
 
     QString appsRouteModeString(AppsRouteMode mode) const;
 

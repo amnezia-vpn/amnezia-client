@@ -46,6 +46,12 @@ namespace
     }
 }
 
+SubscriptionController::SubscriptionController(std::shared_ptr<ServersRepository> serversRepository,
+                                               std::shared_ptr<AppSettingsRepository> appSettingsRepository)
+    : m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository)
+{
+}
+
 QJsonObject SubscriptionController::GatewayRequestData::toJsonObject() const
 {
     QJsonObject obj;
@@ -77,11 +83,6 @@ QJsonObject SubscriptionController::GatewayRequestData::toJsonObject() const
         obj[configKey::authData] = authData;
     }
     return obj;
-}
-
-SubscriptionController::SubscriptionController(std::shared_ptr<Settings> settings)
-    : m_settings(settings)
-{
 }
 
 SubscriptionController::ProtocolData SubscriptionController::generateProtocolData(const QString &protocol)
@@ -228,8 +229,8 @@ bool SubscriptionController::isSubscriptionExpired(const QJsonObject &apiConfig)
 
 ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody)
 {
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }
 
@@ -239,8 +240,8 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
 {
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
-                                            m_settings->getAppLanguage().name().split("_").first(),
-                                            m_settings->getInstallationUuid(true),
+                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                            m_appSettingsRepository->getInstallationUuid(true),
                                             userCountryCode,
                                             "",
                                             serviceType,
@@ -267,14 +268,14 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
     apiConfig.insert(configKey::serviceProtocol, serviceProtocol);
     serverConfig.insert(configKey::apiConfig, apiConfig);
 
-    m_settings->addServer(serverConfig);
+    m_serversRepository->addServer(serverConfig);
     return ErrorCode::NoError;
 }
 
 ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, const QString &newCountryCode, bool isConnectEvent,
                                                            const ProtocolData &protocolData)
 {
-    QJsonObject serverConfig = m_settings->server(serverIndex);
+    QJsonObject serverConfig = m_serversRepository->server(serverIndex);
     QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
     if (isSubscriptionExpired(apiConfig)) {
@@ -284,8 +285,8 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
     QString serviceProtocol = apiConfig.value(configKey::serviceProtocol).toString();
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
-                                            m_settings->getAppLanguage().name().split("_").first(),
-                                            m_settings->getInstallationUuid(true),
+                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                            m_appSettingsRepository->getInstallationUuid(true),
                                             apiConfig.value(configKey::userCountryCode).toString(),
                                             newCountryCode,
                                             apiConfig.value(configKey::serviceType).toString(),
@@ -326,13 +327,13 @@ ErrorCode SubscriptionController::updateServiceFromGateway(int serverIndex, cons
         newServerConfig.insert(config_key::nameOverriddenByUser, true);
     }
 
-    m_settings->editServer(serverIndex, newServerConfig);
+    m_serversRepository->editServer(serverIndex, newServerConfig);
     return ErrorCode::NoError;
 }
 
 ErrorCode SubscriptionController::revokeServiceFromGateway(int serverIndex, bool isRemoveEvent)
 {
-    QJsonObject serverConfig = m_settings->server(serverIndex);
+    QJsonObject serverConfig = m_serversRepository->server(serverIndex);
     QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
     if (!apiUtils::isPremiumServer(serverConfig)) {
@@ -349,8 +350,8 @@ ErrorCode SubscriptionController::revokeServiceFromGateway(int serverIndex, bool
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
-                                            m_settings->getAppLanguage().name().split("_").first(),
-                                            m_settings->getInstallationUuid(true),
+                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                            m_appSettingsRepository->getInstallationUuid(true),
                                             apiConfig.value(configKey::userCountryCode).toString(),
                                             apiConfig.value(configKey::serverCountryCode).toString(),
                                             apiConfig.value(configKey::serviceType).toString(),
@@ -366,13 +367,13 @@ ErrorCode SubscriptionController::revokeServiceFromGateway(int serverIndex, bool
     }
 
     serverConfig.remove(config_key::containers);
-    m_settings->editServer(serverIndex, serverConfig);
+    m_serversRepository->editServer(serverIndex, serverConfig);
     return ErrorCode::NoError;
 }
 
 ErrorCode SubscriptionController::revokeExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode)
 {
-    QJsonObject serverConfig = m_settings->server(serverIndex);
+    QJsonObject serverConfig = m_serversRepository->server(serverIndex);
     QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
     if (!apiUtils::isPremiumServer(serverConfig)) {
@@ -388,7 +389,7 @@ ErrorCode SubscriptionController::revokeExternalDevice(int serverIndex, const QS
 
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
-                                            m_settings->getAppLanguage().name().split("_").first(),
+                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
                                             uuid,
                                             apiConfigForRevoke.value(configKey::userCountryCode).toString(),
                                             serverCountryCode,
@@ -404,22 +405,22 @@ ErrorCode SubscriptionController::revokeExternalDevice(int serverIndex, const QS
         return errorCode;
     }
 
-    if (uuid == m_settings->getInstallationUuid(true)) {
+    if (uuid == m_appSettingsRepository->getInstallationUuid(true)) {
         serverConfig.remove(config_key::containers);
-        m_settings->editServer(serverIndex, serverConfig);
+        m_serversRepository->editServer(serverIndex, serverConfig);
     }
 
     return ErrorCode::NoError;
 }
 
 ErrorCode SubscriptionController::exportNativeConfig(const QJsonObject &apiConfig, const QJsonObject &authData,
-                                                     const QString &serverCountryCode, const QString &serviceProtocol,
-                                                     const ProtocolData &protocolData, QString &nativeConfig)
+                                                      const QString &serverCountryCode, const QString &serviceProtocol,
+                                                      const ProtocolData &protocolData, QString &nativeConfig)
 {
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
-                                            m_settings->getAppLanguage().name().split("_").first(),
-                                            m_settings->getInstallationUuid(true),
+                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                            m_appSettingsRepository->getInstallationUuid(true),
                                             apiConfig.value(configKey::userCountryCode).toString(),
                                             serverCountryCode,
                                             apiConfig.value(configKey::serviceType).toString(),
@@ -441,12 +442,12 @@ ErrorCode SubscriptionController::exportNativeConfig(const QJsonObject &apiConfi
 }
 
 ErrorCode SubscriptionController::revokeNativeConfig(const QJsonObject &apiConfig, const QJsonObject &authData,
-                                                     const QString &serverCountryCode, const QString &serviceProtocol)
+                                                      const QString &serverCountryCode, const QString &serviceProtocol)
 {
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
-                                            m_settings->getAppLanguage().name().split("_").first(),
-                                            m_settings->getInstallationUuid(true),
+                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                            m_appSettingsRepository->getInstallationUuid(true),
                                             apiConfig.value(configKey::userCountryCode).toString(),
                                             serverCountryCode,
                                             apiConfig.value(configKey::serviceType).toString(),
@@ -466,12 +467,12 @@ ErrorCode SubscriptionController::revokeNativeConfig(const QJsonObject &apiConfi
 
 ErrorCode SubscriptionController::updateServiceFromTelegram(int serverIndex, const ProtocolData &protocolData)
 {
-    QJsonObject serverConfig = m_settings->server(serverIndex);
+    QJsonObject serverConfig = m_serversRepository->server(serverIndex);
     QString serviceProtocol = serverConfig.value(configKey::protocol).toString();
-    QString installationUuid = m_settings->getInstallationUuid(true);
+    QString installationUuid = m_appSettingsRepository->getInstallationUuid(true);
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
 
     QJsonObject apiPayload;
     appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
@@ -496,13 +497,13 @@ ErrorCode SubscriptionController::updateServiceFromTelegram(int serverIndex, con
     newServerConfig.insert(configKey::authData, serverConfig.value(configKey::authData));
     newServerConfig.insert(config_key::crc, serverConfig.value(config_key::crc));
 
-    m_settings->editServer(serverIndex, newServerConfig);
+    m_serversRepository->editServer(serverIndex, newServerConfig);
     return ErrorCode::NoError;
 }
 
 ErrorCode SubscriptionController::prepareVpnKeyExport(int serverIndex, QString &vpnKey)
 {
-    QJsonObject serverConfig = m_settings->server(serverIndex);
+    QJsonObject serverConfig = m_serversRepository->server(serverIndex);
     QJsonObject apiConfig = serverConfig.value(configKey::apiConfig).toObject();
 
     vpnKey = apiConfig.value(apiDefs::key::vpnKey).toString();
@@ -513,7 +514,7 @@ ErrorCode SubscriptionController::prepareVpnKeyExport(int serverIndex, QString &
         }
         apiConfig.insert(apiDefs::key::vpnKey, vpnKey);
         serverConfig.insert(configKey::apiConfig, apiConfig);
-        m_settings->editServer(serverIndex, serverConfig);
+        m_serversRepository->editServer(serverIndex, serverConfig);
     }
 
     return ErrorCode::NoError;

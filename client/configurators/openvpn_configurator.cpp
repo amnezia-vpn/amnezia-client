@@ -13,6 +13,7 @@
     #include <QApplication>
 #endif
 
+#include "core/defs.h"
 #include "core/networkUtilities.h"
 #include "containers/containers_defs.h"
 #include "core/controllers/serverController.h"
@@ -145,10 +146,10 @@ QString OpenVpnConfigurator::processConfigWithLocalSettings(const QPair<QString,
         if (!m_settings->isSitesSplitTunnelingEnabled()) {
             config.append("\nredirect-gateway def1 ipv6 bypass-dhcp\n");
             config.append("block-ipv6\n");
-        } else if (m_settings->routeMode() == Settings::VpnOnlyForwardSites) {
+        } else if (m_settings->routeMode() == amnezia::RouteMode::VpnOnlyForwardSites) {
 
                // no redirect-gateway
-        } else if (m_settings->routeMode() == Settings::VpnAllExceptSites) {
+        } else if (m_settings->routeMode() == amnezia::RouteMode::VpnAllExceptSites) {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
             config.append("\nredirect-gateway ipv6 !ipv4 bypass-dhcp\n");
             // Prevent ipv6 leak

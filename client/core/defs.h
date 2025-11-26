@@ -135,6 +135,32 @@ namespace amnezia
 
     using ErrorCode = error_code_ns::ErrorCode;
 
+    namespace route_mode_ns
+    {
+        Q_NAMESPACE
+        enum RouteMode {
+            VpnAllSites,
+            VpnOnlyForwardSites,
+            VpnAllExceptSites
+        };
+        Q_ENUM_NS(RouteMode)
+    }
+
+    using RouteMode = route_mode_ns::RouteMode;
+
+    namespace apps_route_mode_ns
+    {
+        Q_NAMESPACE
+        enum AppsRouteMode {
+            VpnAllApps,
+            VpnOnlyForwardApps,
+            VpnAllExceptApps
+        };
+        Q_ENUM_NS(AppsRouteMode)
+    }
+
+    using AppsRouteMode = apps_route_mode_ns::AppsRouteMode;
+
 } // namespace amnezia
 
 Q_DECLARE_METATYPE(amnezia::ErrorCode)

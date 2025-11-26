@@ -125,7 +125,7 @@ ErrorCode XrayProtocol::startTun2Sock()
                 IpcClient::Interface()->enableKillSwitch(m_configData, 0);
             }
 #endif
-            if (m_routeMode == Settings::RouteMode::VpnAllSites) {
+            if (m_routeMode == amnezia::RouteMode::VpnAllSites) {
                 IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "0.0.0.0/1");
                 IpcClient::Interface()->routeAddList(m_vpnGateway, QStringList() << "128.0.0.0/1");
                 IpcClient::Interface()->routeAddList(m_routeGateway, QStringList() << m_remoteAddress);
@@ -202,7 +202,7 @@ void XrayProtocol::readXrayConfiguration(const QJsonObject &configuration)
     m_localPort = QString(amnezia::protocols::xray::defaultLocalProxyPort).toInt();
     m_remoteHost = configuration.value(amnezia::config_key::hostName).toString();
     m_remoteAddress = NetworkUtilities::getIPAddress(m_remoteHost);
-    m_routeMode = static_cast<Settings::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
+    m_routeMode = static_cast<amnezia::RouteMode>(configuration.value(amnezia::config_key::splitTunnelType).toInt());
     m_primaryDNS = configuration.value(amnezia::config_key::dns1).toString();
     m_secondaryDNS = configuration.value(amnezia::config_key::dns2).toString();
 }

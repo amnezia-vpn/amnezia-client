@@ -4,6 +4,7 @@
 #include <QHostInfo>
 #include <QStandardPaths>
 
+#include "core/defs.h"
 #include "systemController.h"
 #include "core/networkUtilities.h"
 
@@ -169,17 +170,22 @@ void SitesUiController::toggleSplitTunneling(bool enabled)
 
 void SitesUiController::setRouteMode(int routeMode)
 {
-    m_sitesController->setRouteMode(routeMode);
+    m_sitesController->setRouteMode(static_cast<amnezia::RouteMode>(routeMode));
     m_sitesModel->updateModel(m_sitesController->getCurrentSites());
     emit routeModeChanged();
 }
 
 int SitesUiController::getRouteMode() const
 {
-    return m_sitesController->getRouteMode();
+    return static_cast<int>(m_sitesController->getRouteMode());
 }
 
 bool SitesUiController::isTunnelingEnabled() const
 {
     return m_sitesController->isSplitTunnelingEnabled();
+}
+
+void SitesUiController::updateModel()
+{
+    m_sitesModel->updateModel(m_sitesController->getCurrentSites());
 }

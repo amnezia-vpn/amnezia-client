@@ -22,6 +22,10 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.h
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.h
+    ${CLIENT_ROOT_DIR}/core/repositories/serversRepository.h
+    ${CLIENT_ROOT_DIR}/core/repositories/appSettingsRepository.h
+    ${CLIENT_ROOT_DIR}/core/repositories/qServersRepository.h
+    ${CLIENT_ROOT_DIR}/core/repositories/qAppSettingsRepository.h
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.h
     ${CLIENT_ROOT_DIR}/protocols/qml_register_protocols.h
     ${CLIENT_ROOT_DIR}/ui/pages.h
@@ -77,6 +81,8 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/vpnConfigurationController.cpp
+    ${CLIENT_ROOT_DIR}/core/repositories/qServersRepository.cpp
+    ${CLIENT_ROOT_DIR}/core/repositories/qAppSettingsRepository.cpp
     ${CLIENT_ROOT_DIR}/protocols/protocols_defs.cpp
     ${CLIENT_ROOT_DIR}/ui/qautostart.cpp
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.cpp

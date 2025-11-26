@@ -4,26 +4,26 @@
 #include <QVector>
 
 #include "core/defs.h"
-#include "settings.h"
+#include "core/repositories/appSettingsRepository.h"
 
 class AppSplitTunnelingController
 {
 public:
-    explicit AppSplitTunnelingController(std::shared_ptr<Settings> settings);
+    explicit AppSplitTunnelingController(std::shared_ptr<AppSettingsRepository> appSettingsRepository);
 
     bool addApp(const amnezia::InstalledAppInfo &appInfo);
     void removeApp(int index);
     void clearAppsList();
-    void setRouteMode(int routeMode);
+    void setRouteMode(AppsRouteMode routeMode);
     void toggleSplitTunneling(bool enabled);
 
-    int getRouteMode() const;
+    AppsRouteMode getRouteMode() const;
     bool isSplitTunnelingEnabled() const;
     QVector<amnezia::InstalledAppInfo> getApps() const;
 
 private:
-    std::shared_ptr<Settings> m_settings;
-    Settings::AppsRouteMode m_currentRouteMode;
+    std::shared_ptr<AppSettingsRepository> m_appSettingsRepository;
+    AppsRouteMode m_currentRouteMode;
     QVector<amnezia::InstalledAppInfo> m_apps;
 };
 

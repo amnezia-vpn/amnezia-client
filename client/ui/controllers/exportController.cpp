@@ -13,15 +13,17 @@
 #include "systemController.h"
 
 ExportController::ExportController(const QSharedPointer<ServersController> &serversController,
-                                   const QSharedPointer<ServersModel> &serversModel,
-                                   const QSharedPointer<ContainersModel> &containersModel,
-                                   const QSharedPointer<ClientManagementController> &clientManagementController,
-                                   const std::shared_ptr<Settings> &settings, QObject *parent)
+                                  const QSharedPointer<ServersModel> &serversModel,
+                                  const QSharedPointer<ContainersModel> &containersModel,
+                                  const QSharedPointer<ClientManagementController> &clientManagementController,
+                                  const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
+                                  const std::shared_ptr<Settings> &settings, QObject *parent)
     : QObject(parent),
       m_serversController(serversController),
       m_serversModel(serversModel),
       m_containersModel(containersModel),
       m_clientManagementController(clientManagementController),
+      m_appSettingsRepository(appSettingsRepository),
       m_settings(settings)
 {
 }
@@ -86,7 +88,7 @@ void ExportController::generateConnectionConfig(const QString &clientName)
         serverConfig.insert(config_key::containers, QJsonArray { containerConfig });
         serverConfig.insert(config_key::defaultContainer, ContainerProps::containerToString(container));
 
-        auto dns = m_serversController->getDnsPair(serverIndex, m_settings->useAmneziaDns());
+        auto dns = m_serversController->getDnsPair(serverIndex, m_appSettingsRepository->useAmneziaDns());
         serverConfig.insert(config_key::dns1, dns.first);
         serverConfig.insert(config_key::dns2, dns.second);
     }

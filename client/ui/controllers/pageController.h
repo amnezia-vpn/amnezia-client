@@ -5,6 +5,7 @@
 #include <QQmlEngine>
 
 #include "core/defs.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "ui/models/servers_model.h"
 
 namespace PageLoader
@@ -90,7 +91,8 @@ class PageController : public QObject
 {
     Q_OBJECT
 public:
-    explicit PageController(const QSharedPointer<ServersModel> &serversModel, const std::shared_ptr<Settings> &settings,
+    explicit PageController(const QSharedPointer<ServersModel> &serversModel,
+                            const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                             QObject *parent = nullptr);
 
 public slots:
@@ -153,8 +155,7 @@ signals:
 
 private:
     QSharedPointer<ServersModel> m_serversModel;
-
-    std::shared_ptr<Settings> m_settings;
+    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
 
     bool m_isTriggeredByConnectButton;
 

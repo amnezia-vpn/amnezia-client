@@ -1,14 +1,14 @@
 #include "appSplitTunnelingController.h"
 
-AppSplitTunnelingController::AppSplitTunnelingController(std::shared_ptr<Settings> settings)
-    : m_settings(settings)
+AppSplitTunnelingController::AppSplitTunnelingController(std::shared_ptr<AppSettingsRepository> appSettingsRepository)
+    : m_appSettingsRepository(appSettingsRepository)
 {
-    m_currentRouteMode = m_settings->getAppsRouteMode();
-    if (m_currentRouteMode == Settings::VpnAllApps) { // for old split tunneling configs
-        m_settings->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(Settings::VpnAllExceptApps));
-        m_currentRouteMode = Settings::VpnAllExceptApps;
+    m_currentRouteMode = m_appSettingsRepository->appsRouteMode();
+    if (m_currentRouteMode == AppsRouteMode::VpnAllApps) { // for old split tunneling configs
+        m_appSettingsRepository->setAppsRouteMode(AppsRouteMode::VpnAllExceptApps);
+        m_currentRouteMode = AppsRouteMode::VpnAllExceptApps;
     }
-    m_apps = m_settings->getVpnApps(m_currentRouteMode);
+    m_apps = m_appSettingsRepository->vpnApps(m_currentRouteMode);
 }
 
 bool AppSplitTunnelingController::addApp(const amnezia::InstalledAppInfo &appInfo)
@@ -18,7 +18,7 @@ bool AppSplitTunnelingController::addApp(const amnezia::InstalledAppInfo &appInf
     }
 
     m_apps.append(appInfo);
-    m_settings->setVpnApps(m_currentRouteMode, m_apps);
+    m_appSettingsRepository->setVpnApps(m_currentRouteMode, m_apps);
 
     return true;
 }
@@ -30,35 +30,35 @@ void AppSplitTunnelingController::removeApp(int index)
     }
 
     m_apps.removeAt(index);
-    m_settings->setVpnApps(m_currentRouteMode, m_apps);
+    m_appSettingsRepository->setVpnApps(m_currentRouteMode, m_apps);
 }
 
 void AppSplitTunnelingController::clearAppsList()
 {
     m_apps.clear();
-    m_settings->setVpnApps(m_currentRouteMode, m_apps);
+    m_appSettingsRepository->setVpnApps(m_currentRouteMode, m_apps);
 }
 
-void AppSplitTunnelingController::setRouteMode(int routeMode)
+void AppSplitTunnelingController::setRouteMode(AppsRouteMode routeMode)
 {
-    m_settings->setAppsRouteMode(static_cast<Settings::AppsRouteMode>(routeMode));
-    m_currentRouteMode = m_settings->getAppsRouteMode();
-    m_apps = m_settings->getVpnApps(m_currentRouteMode);
+    m_appSettingsRepository->setAppsRouteMode(routeMode);
+    m_currentRouteMode = m_appSettingsRepository->appsRouteMode();
+    m_apps = m_appSettingsRepository->vpnApps(m_currentRouteMode);
 }
 
 void AppSplitTunnelingController::toggleSplitTunneling(bool enabled)
 {
-    m_settings->setAppsSplitTunnelingEnabled(enabled);
+    m_appSettingsRepository->setAppsSplitTunnelingEnabled(enabled);
 }
 
-int AppSplitTunnelingController::getRouteMode() const
+AppsRouteMode AppSplitTunnelingController::getRouteMode() const
 {
-    return static_cast<int>(m_currentRouteMode);
+    return m_currentRouteMode;
 }
 
 bool AppSplitTunnelingController::isSplitTunnelingEnabled() const
 {
-    return m_settings->isAppsSplitTunnelingEnabled();
+    return m_appSettingsRepository->isAppsSplitTunnelingEnabled();
 }
 
 QVector<amnezia::InstalledAppInfo> AppSplitTunnelingController::getApps() const

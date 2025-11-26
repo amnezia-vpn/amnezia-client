@@ -28,9 +28,9 @@ namespace
     }
 }
 
-ClientManagementController::ClientManagementController(std::shared_ptr<Settings> settings, QObject *parent)
+ClientManagementController::ClientManagementController(std::shared_ptr<ServersRepository> serversRepository, QObject *parent)
     : QObject(parent),
-      m_settings(settings)
+      m_serversRepository(serversRepository)
 {
 }
 
@@ -768,7 +768,7 @@ ErrorCode ClientManagementController::revokeClient(const int index, const Docker
 
     if (errorCode == ErrorCode::NoError) {
 
-        const auto server = m_settings->server(serverIndex);
+        const auto server = m_serversRepository->server(serverIndex);
         QJsonArray containers = server.value(config_key::containers).toArray();
         for (auto i = 0; i < containers.size(); i++) {
             auto containerConfig = containers.at(i).toObject();

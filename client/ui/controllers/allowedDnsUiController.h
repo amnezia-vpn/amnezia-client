@@ -21,6 +21,8 @@ public slots:
     void importDns(const QString &fileName, bool replaceExisting);
     void exportDns(const QString &fileName);
 
+    void updateModel();
+
 signals:
     void errorOccurred(const QString &errorMessage);
     void finished(const QString &message);

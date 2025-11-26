@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "core/controllers/serversController.h"
+#include "core/repositories/qAppSettingsRepository.h"
 #include "ui/models/containers_model.h"
 #include "ui/models/servers_model.h"
 
@@ -28,6 +29,7 @@ public:
     explicit ImportController(const QSharedPointer<ServersController> &serversController,
                               const QSharedPointer<ServersModel> &serversModel,
                               const QSharedPointer<ContainersModel> &containersModel,
+                              const QSharedPointer<QAppSettingsRepository> &appSettingsRepository,
                               const std::shared_ptr<Settings> &settings, QObject *parent = nullptr);
 
 public slots:
@@ -78,6 +80,7 @@ private:
     QSharedPointer<ServersController> m_serversController;
     QSharedPointer<ServersModel> m_serversModel;
     QSharedPointer<ContainersModel> m_containersModel;
+    QSharedPointer<QAppSettingsRepository> m_appSettingsRepository;
     std::shared_ptr<Settings> m_settings;
 
     QJsonObject m_config;
