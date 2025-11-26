@@ -58,25 +58,25 @@ Item {
 
         if (obj.children && obj.children.length > 0) {
             for (var i = 0; i < obj.children.length; i++) {
-                var r = findComponent(obj.children[i], typeCtor)
-                if (r) return r
+                var matchingChildren = findComponent(obj.children[i], typeCtor)
+                if (matchingChildren) return matchingChildren
             }
         }
 
         if (obj.contentItem) {
-            var r2 = findComponent(obj.contentItem, typeCtor)
-            if (r2) return r2
+            var matchingContentItem = findComponent(obj.contentItem, typeCtor)
+            if (matchingContentItem) return matchingContentItem
         }
 
         return null
     }
 
     function setParentInteractive(value) {
-        var fl = findComponent(root.parent, Flickable)
-        var lv = findComponent(root.parent, ListView)
+        var flickableType = findComponent(root.parent, Flickable)
+        var listViewType = findComponent(root.parent, ListView)
 
-        if (fl) fl.interactive = value
-        if (lv) lv.interactive = value
+        if (flickableType) flickableType.interactive = value
+        if (listViewType) listViewType.interactive = value
     }
 
     Connections {
