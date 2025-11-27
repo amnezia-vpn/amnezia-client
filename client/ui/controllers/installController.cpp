@@ -446,14 +446,18 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
                         containerConfig[config_key::transportPacketMagicHeader] =
                                 serverConfigMap.value(config_key::transportPacketMagicHeader);
 
-                        // containerConfig[config_key::cookieReplyPacketJunkSize] = serverConfigMap.value(config_key::cookieReplyPacketJunkSize);
-                        // containerConfig[config_key::transportPacketJunkSize] = serverConfigMap.value(config_key::transportPacketJunkSize);
+                        if (container == DockerContainer::Awg) {
+                            containerConfig[config_key::cookieReplyPacketJunkSize] =
+                                    serverConfigMap.value(config_key::cookieReplyPacketJunkSize);
+                            containerConfig[config_key::transportPacketJunkSize] =
+                                    serverConfigMap.value(config_key::transportPacketJunkSize);
 
-                        // containerConfig[config_key::specialJunk1] = serverConfigMap.value(config_key::specialJunk1);
-                        // containerConfig[config_key::specialJunk2] = serverConfigMap.value(config_key::specialJunk2);
-                        // containerConfig[config_key::specialJunk3] = serverConfigMap.value(config_key::specialJunk3);
-                        // containerConfig[config_key::specialJunk4] = serverConfigMap.value(config_key::specialJunk4);
-                        // containerConfig[config_key::specialJunk5] = serverConfigMap.value(config_key::specialJunk5);
+                            containerConfig[config_key::specialJunk1] = serverConfigMap.value(config_key::specialJunk1);
+                            containerConfig[config_key::specialJunk2] = serverConfigMap.value(config_key::specialJunk2);
+                            containerConfig[config_key::specialJunk3] = serverConfigMap.value(config_key::specialJunk3);
+                            containerConfig[config_key::specialJunk4] = serverConfigMap.value(config_key::specialJunk4);
+                            containerConfig[config_key::specialJunk5] = serverConfigMap.value(config_key::specialJunk5);
+                        }
 
                     } else if (protocol == Proto::WireGuard) {
                         QString serverConfig = serverController->getTextFileFromContainer(container, credentials,
