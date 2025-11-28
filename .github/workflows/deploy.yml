@@ -169,6 +169,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Windows-ARM64:
+    needs: Build-Windows
     runs-on: windows-latest
 
     env:
@@ -215,11 +216,11 @@ jobs:
     - name: 'Setup ccache'
       uses: hendrikmuhs/ccache-action@v1.2
 
-    - name: 'List available Qt architectures'
+    - name: 'Cleanup Qt directory'
       shell: bash
       run: |
-        pip install aqtinstall
-        python -m aqt list-qt windows desktop --arch ${{ env.QT_VERSION }}
+        rm -rf "${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/msvc2022_64"
+        rm -rf "${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/win64_msvc2022_arm64_cross_compiled"
 
     - name: 'Install Qt Desktop (host for cross-compilation)'
       uses: jurplel/install-qt-action@v3
@@ -259,6 +260,7 @@ jobs:
         set BUILD_ARCH=${{ env.BUILD_ARCH }}
         set QT_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\win64_msvc2022_arm64_cross_compiled\\bin"
         set QT_HOST_PATH="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2022_64"
+        set QT_HOST_BIN_DIR="${{ runner.temp }}\\Qt\\${{ env.QT_VERSION }}\\msvc2022_64\\bin"
         set QIF_BIN_DIR="${{ runner.temp }}\\Qt\\Tools\\QtInstallerFramework\\${{ env.QIF_VERSION }}\\bin"
         call deploy\\build_windows.bat
 

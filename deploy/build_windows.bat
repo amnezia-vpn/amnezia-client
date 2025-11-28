@@ -51,7 +51,11 @@ del %TARGET_FILENAME%
 mkdir %WORK_DIR%
 
 call "%QT_BIN_DIR:"=%\qt-cmake" --version
-"%QT_BIN_DIR:"=%\windeployqt" -v
+if defined QT_HOST_BIN_DIR (
+    "%QT_HOST_BIN_DIR:"=%\windeployqt" -v
+) else (
+    "%QT_BIN_DIR:"=%\windeployqt" -v
+)
 cmake --version
 
 cd %PROJECT_DIR%
@@ -76,7 +80,13 @@ echo "Signing exe"
 cd %OUT_APP_DIR%
 signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.exe
 
-"%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
+REM For cross-compiled ARM64, use windeployqt from host Qt
+if defined QT_HOST_BIN_DIR (
+    echo "Using host windeployqt for cross-compilation"
+    "%QT_HOST_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations --compiler-runtime "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
+) else (
+    "%QT_BIN_DIR:"=%\windeployqt" --release --qmldir "%PROJECT_DIR:"=%\client"  --force --no-translations "%OUT_APP_DIR:"=%\%APP_FILENAME:"=%"
+)
 
 signtool sign /v /n "Privacy Technologies OU" /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 *.dll
 

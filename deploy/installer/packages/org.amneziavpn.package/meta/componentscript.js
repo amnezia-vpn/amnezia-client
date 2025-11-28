@@ -73,14 +73,36 @@ Component.prototype.createOperations = function()
                                        "workingDirectory=@TargetDir@", "iconPath=@TargetDir@\\" + appExecutableFileName(), "iconId=0");
 
         if (!vcRuntimeIsInstalled()) {
-			if (systemInfo.currentCpuArchitecture.search("arm64") >= 0) {
+			// Check for vc_redist files in target directory to determine architecture
+			var targetDir = installer.value("TargetDir").replace(/\//g, '\\');
+			var vcRedistArm64 = installer.findPath("vc_redist.arm64.exe", [targetDir]);
+			var vcRedistX86 = installer.findPath("vc_redist.x86.exe", [targetDir]);
+			var vcRedistX64 = installer.findPath("vc_redist.x64.exe", [targetDir]);
+			
+			if (vcRedistArm64.length > 0) {
+				console.log("Found vc_redist.arm64.exe, installing ARM64 redistributable");
 				component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.arm64.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
 			}
-			else if (systemInfo.currentCpuArchitecture.search("64") < 0) {
+			else if (vcRedistX86.length > 0) {
+				console.log("Found vc_redist.x86.exe, installing x86 redistributable");
 				component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x86.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
 			}
-			else {
+			else if (vcRedistX64.length > 0) {
+				console.log("Found vc_redist.x64.exe, installing x64 redistributable");
 				component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x64.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
+			}
+			else {
+				// Fallback to system architecture detection
+				console.log("No vc_redist file found, using system architecture: " + systemInfo.currentCpuArchitecture);
+				if (systemInfo.currentCpuArchitecture.search("arm64") >= 0) {
+					component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.arm64.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
+				}
+				else if (systemInfo.currentCpuArchitecture.search("64") < 0) {
+					component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x86.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
+				}
+				else {
+					component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x64.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
+				}
 			}
 
         } else {
