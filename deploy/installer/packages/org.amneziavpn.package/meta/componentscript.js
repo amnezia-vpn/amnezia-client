@@ -73,7 +73,10 @@ Component.prototype.createOperations = function()
                                        "workingDirectory=@TargetDir@", "iconPath=@TargetDir@\\" + appExecutableFileName(), "iconId=0");
 
         if (!vcRuntimeIsInstalled()) {
-			if (systemInfo.currentCpuArchitecture.search("64") < 0) {
+			if (systemInfo.currentCpuArchitecture.search("arm64") >= 0) {
+				component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.arm64.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
+			}
+			else if (systemInfo.currentCpuArchitecture.search("64") < 0) {
 				component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x86.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
 			}
 			else {

@@ -19,7 +19,10 @@ set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../client/3rd-prebuilt/3rd-pr
 set(OPENSSL_LIBRARIES_DIR "${OPENSSL_ROOT_DIR}/lib")
 
 set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/windows/include")
-if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "ARM64")
+    set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/winarm64/libssl.lib")
+    set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/winarm64/libcrypto.lib")
+elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
     set(OPENSSL_LIB_SSL_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libssl.lib")
     set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
 else()
@@ -30,7 +33,9 @@ endif()
 
 if(WIN32)
     set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/windows/include")
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "ARM64")
+        set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/winarm64/libcrypto.lib")
+    elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win64/libcrypto.lib")
     else()
         set(OPENSSL_LIB_CRYPTO_PATH "${OPENSSL_ROOT_DIR}/windows/win32/libcrypto.lib")
@@ -360,7 +365,9 @@ qt_add_repc_sources(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc_process_t
 
 # copy deploy artifacts required to run the application to the debug build folder
 if(WIN32)
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "ARM64")
+        set(DEPLOY_PLATFORM_PATH "windows/arm64")
+    elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(DEPLOY_PLATFORM_PATH "windows/x64")
     else()
         set(DEPLOY_PLATFORM_PATH "windows/x32")

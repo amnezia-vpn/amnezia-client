@@ -199,7 +199,9 @@ target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAM
 
 # deploy artifacts required to run the application to the debug build folder
 if(WIN32)
-    if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+    if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "ARM64")
+        set(DEPLOY_PLATFORM_PATH "windows/arm64")
+    elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(DEPLOY_PLATFORM_PATH "windows/x64")
     else()
         set(DEPLOY_PLATFORM_PATH "windows/x32")
