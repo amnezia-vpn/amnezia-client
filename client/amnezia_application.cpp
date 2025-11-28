@@ -98,6 +98,16 @@ void AmneziaApplication::init()
     m_coreController.reset(new CoreController(m_vpnConnection, m_settings, m_engine));
 
     m_engine->addImportPath("qrc:/ui/qml/Modules/");
+
+    if (m_parser.isSet(m_optImport)) {
+        const QString data = m_parser.value(m_optImport);
+        if (!data.isEmpty()) {
+            if (m_coreController) {
+                m_coreController->importConfigFromData(data);
+            }
+        }
+    }
+
     m_engine->load(url);
 
     m_coreController->setQmlRoot();
@@ -137,17 +147,6 @@ void AmneziaApplication::init()
         }
     });
 #endif
-
-    if (m_parser.isSet(m_optImport)) {
-        const QString data = m_parser.value(m_optImport);
-        if (!data.isEmpty()) {
-            QTimer::singleShot(0, this, [this, data]() {
-                if (m_coreController) {
-                    m_coreController->importConfigFromData(data);
-                }
-            });
-        }
-    }
 
     if (m_parser.isSet(m_optConnect)) {
         bool ok = false;
