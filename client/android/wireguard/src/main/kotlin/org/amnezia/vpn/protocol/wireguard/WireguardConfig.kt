@@ -22,10 +22,10 @@ open class WireguardConfig protected constructor(
     val s2: Int?,
     val s3: Int?,
     val s4: Int?,
-    val h1: Long?,
-    val h2: Long?,
-    val h3: Long?,
-    val h4: Long?,
+    val h1: String?,
+    val h2: String?,
+    val h3: String?,
+    val h4: String?,
     var i1: String?,
     var i2: String?,
     var i3: String?,
@@ -140,10 +140,10 @@ open class WireguardConfig protected constructor(
         internal var s2: Int? = null
         internal var s3: Int? = null
         internal var s4: Int? = null
-        internal var h1: Long? = null
-        internal var h2: Long? = null
-        internal var h3: Long? = null
-        internal var h4: Long? = null
+        internal var h1: String? = null
+        internal var h2: String? = null
+        internal var h3: String? = null
+        internal var h4: String? = null
         internal var i1: String? = null
         internal var i2: String? = null
         internal var i3: String? = null
@@ -169,10 +169,10 @@ open class WireguardConfig protected constructor(
         fun setS2(s2: Int) = apply { this.s2 = s2 }
         fun setS3(s3: Int) = apply { this.s3 = s3 }
         fun setS4(s4: Int) = apply { this.s4 = s4 }
-        fun setH1(h1: Long) = apply { this.h1 = h1 }
-        fun setH2(h2: Long) = apply { this.h2 = h2 }
-        fun setH3(h3: Long) = apply { this.h3 = h3 }
-        fun setH4(h4: Long) = apply { this.h4 = h4 }
+        fun setH1(h1: String) = apply { this.h1 = h1 }
+        fun setH2(h2: String) = apply { this.h2 = h2 }
+        fun setH3(h3: String) = apply { this.h3 = h3 }
+        fun setH4(h4: String) = apply { this.h4 = h4 }
         fun setI1(i1: String) = apply { this.i1 = i1 }
         fun setI2(i2: String) = apply { this.i2 = i2 }
         fun setI3(i3: String) = apply { this.i3 = i3 }

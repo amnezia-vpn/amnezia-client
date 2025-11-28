@@ -122,10 +122,10 @@ open class Wireguard : Protocol() {
         configData.optStringOrNull("S2")?.let { setS2(it.toInt()) }
         configData.optStringOrNull("S3")?.let { setS3(it.toInt()) }
         configData.optStringOrNull("S4")?.let { setS4(it.toInt()) }
-        configData.optStringOrNull("H1")?.let { setH1(it.toLong()) }
-        configData.optStringOrNull("H2")?.let { setH2(it.toLong()) }
-        configData.optStringOrNull("H3")?.let { setH3(it.toLong()) }
-        configData.optStringOrNull("H4")?.let { setH4(it.toLong()) }
+        configData.optStringOrNull("H1")?.trim()?.let { if (it.isNotEmpty()) setH1(it) }
+        configData.optStringOrNull("H2")?.trim()?.let { if (it.isNotEmpty()) setH2(it) }
+        configData.optStringOrNull("H3")?.trim()?.let { if (it.isNotEmpty()) setH3(it) }
+        configData.optStringOrNull("H4")?.trim()?.let { if (it.isNotEmpty()) setH4(it) }
         configData.optStringOrNull("I1")?.let { setI1(it) }
         configData.optStringOrNull("I2")?.let { setI2(it) }
         configData.optStringOrNull("I3")?.let { setI3(it) }

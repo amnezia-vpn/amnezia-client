@@ -274,6 +274,9 @@ PageType {
 
                 headerText: qsTr("H1 - Init packet magic header")
                 textField.text: serverInitPacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverInitPacketMagicHeader) {
@@ -296,6 +299,9 @@ PageType {
 
                 headerText: qsTr("H2 - Response packet magic header")
                 textField.text: serverResponsePacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverResponsePacketMagicHeader) {
@@ -318,6 +324,9 @@ PageType {
 
                 headerText: qsTr("H3 - Underload packet magic header")
                 textField.text: serverUnderloadPacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverUnderloadPacketMagicHeader) {
@@ -340,6 +349,9 @@ PageType {
 
                 headerText: qsTr("H4 - Transport packet magic header")
                 textField.text: serverTransportPacketMagicHeader
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(\d+)(-\d+)?$/
+                }
 
                 textField.onEditingFinished: {
                     if (textField.text !== serverTransportPacketMagicHeader) {
