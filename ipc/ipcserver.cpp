@@ -83,7 +83,7 @@ bool IpcServer::routeDeleteList(const QString &gw, const QStringList &ips)
     return Router::routeDeleteList(gw, ips);
 }
 
-void IpcServer::flushDns()
+bool IpcServer::flushDns()
 {
 #ifdef MZ_DEBUG
     qDebug() << "IpcServer::flushDns";
@@ -161,13 +161,13 @@ bool IpcServer::restoreResolvers() {
     return Router::restoreResolvers();
 }
 
-void IpcServer::StartRoutingIpv6()
+bool IpcServer::StartRoutingIpv6()
 {
-    Router::StartRoutingIpv6();
+    return Router::StartRoutingIpv6();
 }
-void IpcServer::StopRoutingIpv6()
+bool IpcServer::StopRoutingIpv6()
 {
-    Router::StopRoutingIpv6();
+    return Router::StopRoutingIpv6();
 }
 
 void IpcServer::setLogsEnabled(bool enabled)

@@ -23,7 +23,7 @@ public:
     virtual int routeAddList(const QString &gw, const QStringList &ips) override;
     virtual bool clearSavedRoutes() override;
     virtual bool routeDeleteList(const QString &gw, const QStringList &ips) override;
-    virtual void flushDns() override;
+    virtual bool flushDns() override;
     virtual void resetIpStack() override;
     virtual bool checkAndInstallDriver() override;
     virtual QStringList getTapList() override;
@@ -32,8 +32,8 @@ public:
     virtual void setLogsEnabled(bool enabled) override;
     virtual bool createTun(const QString &dev, const QString &subnet) override;
     virtual bool deleteTun(const QString &dev) override;
-    virtual void StartRoutingIpv6() override;
-    virtual void StopRoutingIpv6() override;
+    virtual bool StartRoutingIpv6() override;
+    virtual bool StopRoutingIpv6() override;
     virtual bool disableAllTraffic() override;
     virtual bool addKillSwitchAllowedRange(QStringList ranges) override;
     virtual bool resetKillSwitchAllowedRange(QStringList ranges) override;
